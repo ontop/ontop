@@ -7,6 +7,9 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -33,7 +36,7 @@ public class OptimizationTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
-    public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
+    public static final IntermediateQueryOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final TermFactory TERM_FACTORY;
@@ -111,7 +114,6 @@ public class OptimizationTestingTools {
         Injector injector = defaultConfiguration.getInjector();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
-        BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
@@ -120,6 +122,14 @@ public class OptimizationTestingTools {
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
+        BINDING_LIFT_OPTIMIZER = new IntermediateQueryOptimizer() {
+            @Override
+            public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+                IQ initialIQ = IQ_CONVERTER.convert(query);
+                IQ liftedIQ = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialIQ);
+                return IQ_CONVERTER.convert(liftedIQ);
+            }
+        };
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);

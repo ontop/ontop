@@ -422,7 +422,7 @@ public class BindingLiftTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(AF1)));
@@ -490,7 +490,7 @@ public class BindingLiftTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(AF1)));
@@ -553,7 +553,7 @@ public class BindingLiftTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(AF1)));
@@ -1839,7 +1839,7 @@ public class BindingLiftTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0,A)));

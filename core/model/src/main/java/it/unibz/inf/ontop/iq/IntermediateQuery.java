@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -17,8 +16,6 @@ import java.util.stream.Stream;
 public interface IntermediateQuery {
 
     QueryNode getRootNode();
-
-    ImmutableList<QueryNode> getNodesInBottomUpOrder();
 
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 
@@ -61,12 +58,6 @@ public interface IntermediateQuery {
     boolean contains(QueryNode node);
 
     /**
-     *
-     * Returns itself if is a ConstructionNode or its first ancestor that is a construction node otherwise.
-     */
-    ConstructionNode getClosestConstructionNode(QueryNode node);
-
-    /**
      * Returns a variable that is not used in the intermediate query.
      */
     Variable generateNewVariable();
@@ -100,22 +91,4 @@ public interface IntermediateQuery {
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
 
     UUID getVersionNumber();
-
-    /**
-     * Creates a uninitialized query builder.
-     */
-    IntermediateQueryBuilder newBuilder();
-
-    IntermediateQueryFactory getFactory();
-
-    /**
-     * Minimal set of variables such that a construction node projecting exactly these variables could be inserted
-     * just above this node without altering the query semantics.
-     *
-     * The assumption is made that the query is consistent.
-     * Therefore this method should not be used for validation.
-     */
-    ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
-
-    IntermediateQuery getSubquery(QueryNode root, DistinctVariableOnlyDataAtom projectionAtom);
 }

@@ -862,7 +862,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
@@ -902,7 +902,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));

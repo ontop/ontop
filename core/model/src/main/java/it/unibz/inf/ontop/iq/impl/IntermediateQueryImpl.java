@@ -114,24 +114,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.getVersionNumber();
     }
 
-    @Override
-    public IntermediateQueryBuilder newBuilder() {
-        return iqFactory.createIQBuilder();
-    }
 
     @Override
     public QueryNode getRootNode() throws InconsistentIntermediateQueryException{
         try {
             return treeComponent.getRootNode();
-        } catch (IllegalTreeException e) {
-            throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws InconsistentIntermediateQueryException {
-        try {
-            return treeComponent.getNodesInBottomUpOrder();
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
@@ -236,21 +223,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     @Override
-    public ConstructionNode getClosestConstructionNode(QueryNode node) {
-        if (node instanceof ConstructionNode) {
-            return (ConstructionNode) node;
-        }
-
-        for (QueryNode ancestor : getAncestors(node)) {
-            if (ancestor instanceof ConstructionNode) {
-                return (ConstructionNode) ancestor;
-            }
-        }
-        throw new InconsistentIntermediateQueryException("The node " + node
-                + " has no ancestor that is a ConstructionNode");
-    }
-
-    @Override
     public Variable generateNewVariable() {
         return treeComponent.generateNewVariable();
     }
@@ -272,49 +244,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public String toString() {
         return PRINTER.stringify(this);
-    }
-
-    @Override
-    public IntermediateQueryFactory getFactory() {
-        return iqFactory;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
-        ImmutableSet.Builder<Variable> requiredVariableBuilder = ImmutableSet.builder();
-
-        // Non-final
-        Optional<QueryNode> optionalAncestor = getParent(queryNode);
-        while (optionalAncestor.isPresent()) {
-            QueryNode ancestor = optionalAncestor.get();
-
-            ancestor.getRequiredVariables(this)
-                    .forEach(requiredVariableBuilder::add);
-
-            if (ancestor instanceof ExplicitVariableProjectionNode)
-                break;
-            optionalAncestor = getParent(ancestor);
-        }
-        // Root reached
-        if (!optionalAncestor.isPresent())
-            requiredVariableBuilder.addAll(getProjectionAtom().getVariables());
-
-        ImmutableSet<Variable> requiredVariables = requiredVariableBuilder.build();
-        /*
-         * Restrict to variables which can actually be provided.
-         * Assumption: variables defined by a node should not appear in its subtree
-         */
-        return getVariables(queryNode).stream()
-                .filter(requiredVariables::contains)
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
-    public IntermediateQuery getSubquery(QueryNode subQueryRoot, DistinctVariableOnlyDataAtom projectionAtom) {
-        IntermediateQueryBuilder builder = iqFactory.createIQBuilder();
-        builder.init(projectionAtom, subQueryRoot);
-        builder.appendSubtree(subQueryRoot, this);
-        return builder.build();
     }
 
     private void validate() throws InvalidIntermediateQueryException {

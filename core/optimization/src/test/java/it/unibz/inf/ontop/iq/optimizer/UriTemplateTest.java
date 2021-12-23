@@ -79,7 +79,7 @@ public class UriTemplateTest {
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(

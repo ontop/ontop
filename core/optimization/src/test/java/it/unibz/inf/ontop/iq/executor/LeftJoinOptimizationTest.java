@@ -276,7 +276,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O, TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(F1, TWO), TWO)));
@@ -386,7 +386,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(F1, TWO), NF0)));
@@ -414,7 +414,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull( 
                         TERM_FACTORY.getConjunction(

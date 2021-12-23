@@ -704,7 +704,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
@@ -748,7 +748,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
