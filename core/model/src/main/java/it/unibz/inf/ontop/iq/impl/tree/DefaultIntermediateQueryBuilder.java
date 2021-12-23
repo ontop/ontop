@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.iq.impl.tree;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
-import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -25,12 +22,6 @@ import java.util.Optional;
  * TODO: explain
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
-
-    private class NodeNotInQueryException extends OntopInternalBugException {
-        private NodeNotInQueryException(String message) {
-            super(message);
-        }
-    }
 
     private final IQConverter iqConverter;
     private final IntermediateQueryFactory iqFactory;
@@ -98,43 +89,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public void addChild(QueryNode parentNode, QueryNode child,
-                         Optional<ArgumentPosition> optionalPosition)
-            throws IntermediateQueryBuilderException {
-        if (optionalPosition.isPresent()) {
-            addChild(parentNode, child, optionalPosition.get());
-        }
-        else {
-            addChild(parentNode, child);
-        }
-    }
-
-    @Override
-    public void appendSubtree(QueryNode subQueryRoot, IntermediateQuery sourceQuery) {
-        if(sourceQuery.contains(subQueryRoot)) {
-            ImmutableList<QueryNode> children = sourceQuery.getChildren(subQueryRoot);
-            addChildren(subQueryRoot, children);
-            children.forEach(n -> appendSubtree(n, sourceQuery));
-        }else {
-            throw new NodeNotInQueryException("Node " + subQueryRoot + " is not in the query");
-        }
-    }
-
-    @Override
-    public void addChildren(QueryNode parent, ImmutableList<QueryNode> children) {
-        if(parent instanceof BinaryOrderedOperatorNode){
-            if(children.size() != 2){
-                throw new IntermediateQueryBuilderException("2 children expected");
-            }
-            addChild(parent, children.get(0), Optional.of(ArgumentPosition.LEFT));
-            addChild(parent, children.get(1), Optional.of(ArgumentPosition.RIGHT));
-        } else {
-            children.forEach(n -> addChild(parent, n));
-        }
-    }
-
-
-    @Override
     public IntermediateQuery build() throws IntermediateQueryBuilderException {
         checkInitialization();
 
@@ -172,19 +126,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public QueryNode getRootNode() throws IntermediateQueryBuilderException {
-        checkInitialization();
-        return tree.getRootNode();
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getChildren(QueryNode node)
-            throws IntermediateQueryBuilderException {
-        checkInitialization();
-        return tree.getChildren(node);
-    }
-
-    @Override
     public boolean contains(QueryNode node) {
         return tree.contains(node);
     }
@@ -192,13 +133,5 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @Override
     public IntermediateQueryFactory getFactory() {
         return iqFactory;
-    }
-
-    protected IntermediateQueryValidator getValidator() {
-        return validator;
-    }
-
-    protected OntopModelSettings getSettings() {
-        return settings;
     }
 }

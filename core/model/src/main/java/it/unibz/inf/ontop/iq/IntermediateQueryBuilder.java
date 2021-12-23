@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.iq;
 
-import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
@@ -32,24 +30,9 @@ public interface IntermediateQueryBuilder {
     void addChild(QueryNode parentNode, QueryNode child, BinaryOrderedOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException;
 
-    void appendSubtree(QueryNode subQueryRoot, IntermediateQuery sourceQuery);
-
-    /**
-     * For commodity
-     */
-    void addChild(QueryNode parentNode, QueryNode child,
-                  Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
-            throws IntermediateQueryBuilderException;
-
-    void addChildren(QueryNode parent, ImmutableList<QueryNode> children);
-
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 
     IQ buildIQ() throws IntermediateQueryBuilderException;
-
-    QueryNode getRootNode() throws IntermediateQueryBuilderException;
-
-    ImmutableList<QueryNode> getChildren(QueryNode node) throws IntermediateQueryBuilderException;
 
     boolean contains(QueryNode node);
 

@@ -11,11 +11,9 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -117,20 +115,12 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(rightNode, DATA_NODE_3);
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
 
         //----------------------------------------------------------------------
         // Construct expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(C), Y, generateInt(D),
@@ -145,12 +135,9 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(expectedJoinNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, C)));
         expectedQueryBuilder.addChild(expectedJoinNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D)));
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
 
@@ -209,21 +196,11 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(subQueryConstructionNode2, DATA_NODE_7);
 
-
-
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
 
         //----------------------------------------------------------------------
         // Construct expected query
-        //Construct unoptimized query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( W, generateString(B), X, generateIRIWithTemplate1(A),
@@ -250,14 +227,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(expectedleftJoinNode,
                 IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(0, A)), RIGHT);
 
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -328,13 +300,7 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(subQuery2UnionNode1, createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(M, N)) );
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         //----------------------------------------------------------------------
         //Construct expected query
@@ -348,7 +314,7 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
-        //constract union Node
+        //construct union Node
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(BF1, F0));
 
         expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode );
@@ -371,17 +337,13 @@ public class BindingLiftTest {
         InnerJoinNode joinNode21 = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expectedSubQuery2UnionNode, joinNode21);
 
-
         expectedQueryBuilder.addChild(joinNode21, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)) );
         expectedQueryBuilder.addChild(joinNode21, IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(1, BF1)) );
         expectedQueryBuilder.addChild(joinNode21, IQ_FACTORY.createExtensionalDataNode(TABLE6_AR2, ImmutableMap.of(0, C)) );
 
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -419,8 +381,7 @@ public class BindingLiftTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  initialQuery);
+        IQ initialQuery = initialQueryBuilder.buildIQ();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
@@ -439,14 +400,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, AF1)));
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Test
@@ -487,8 +443,7 @@ public class BindingLiftTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  initialQuery);
+        IQ initialQuery = initialQueryBuilder.buildIQ();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
@@ -507,14 +462,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, AF1)));
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Test
@@ -550,8 +500,7 @@ public class BindingLiftTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  initialQuery);
+        IQ initialQuery = initialQueryBuilder.buildIQ();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
@@ -570,14 +519,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, AF1)));
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(initialQuery, expectedQuery);
     }
 
 
@@ -665,12 +609,7 @@ public class BindingLiftTest {
 
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         Variable f0f1 = TERM_FACTORY.getVariable("f0f1");
         Variable f2 = TERM_FACTORY.getVariable("f2");
@@ -729,14 +668,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(expSubQuery2UnionNode2, IQ_FACTORY.createExtensionalDataNode(
                 TABLE6_AR2, ImmutableMap.of(0, M)) );
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
-
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     /**
@@ -794,10 +728,9 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(subQueryJoinNode2, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F)) );
 
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
 
         Variable af3 = TERM_FACTORY.getVariable("af3");
         Variable bf4 = TERM_FACTORY.getVariable("bf4");
@@ -852,17 +785,9 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(expectedUnionNode2, createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(af3, bf4)) );
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        //second optimization to lift the bindings of the first union
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -919,10 +844,9 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(subQueryJoinNode2, createExtensionalDataNode(TABLE3_AR2,ImmutableList.of( E, F)) );
 
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
 
         Variable af3 = TERM_FACTORY.getVariable("af3");
         Variable bf4 = TERM_FACTORY.getVariable("bf4");
@@ -959,17 +883,9 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(expectedUnionNode, createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(af3, bf4)) );
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nExpected  query: \n" +  expectedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        //second optimization to lift the bindings of the first union
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1040,18 +956,11 @@ public class BindingLiftTest {
 
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
 
         //----------------------------------------------------------------------
         // Construct expected query
-        //Construct unoptimized query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1111,13 +1020,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(rightInnerJoinNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)));
         expectedQueryBuilder.addChild(rightInnerJoinNode, newDataNode2.clone());
 
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1179,8 +1084,8 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode10 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(E));
         queryBuilder.addChild(lastConstructionNode, dataNode10);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
+
 
         Variable f0f2 = TERM_FACTORY.getVariable("f0f2");
 
@@ -1222,16 +1127,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(joinNode, createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(D)));
         expectedQueryBuilder.addChild(joinNode, createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(D)));
 
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1286,8 +1184,9 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode10 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(B));
         queryBuilder.addChild(joinNode, dataNode10);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
+
+
 
         Variable f0f1 = TERM_FACTORY.getVariable("f0f1");
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -1327,16 +1226,9 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(joinNode, createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(D)));
         expectedQueryBuilder.addChild(joinNode, dataNode10);
 
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1377,9 +1269,8 @@ public class BindingLiftTest {
         queryBuilder.addChild(joinNode, otherNode);
         queryBuilder.addChild(otherNode, IQ_FACTORY.createTrueNode());
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
+
 
         Variable af0 = TERM_FACTORY.getVariable("af0");
 
@@ -1391,14 +1282,10 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(expectedRootNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, af0)));
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1442,9 +1329,8 @@ public class BindingLiftTest {
 
         queryBuilder.addChild(otherNode, DATA_NODE_6 );
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
+
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -1458,14 +1344,10 @@ public class BindingLiftTest {
                 TABLE1_AR2, ImmutableMap.of(0, AF0)));
         expectedQueryBuilder.addChild(expectedJoinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE3_AR2, ImmutableMap.of(1, F)));
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1490,13 +1372,11 @@ public class BindingLiftTest {
         queryBuilder.addChild(leftCn, DATA_NODE_8);
         queryBuilder.addChild(rightCn, DATA_NODE_9);
 
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" + unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ImmutableSubstitution expectedRootNodeSubstitution = SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X,
+        ImmutableSubstitution<ImmutableTerm> expectedRootNodeSubstitution = SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X,
                 generateInt(A), Y, generateInt(B)));
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y), expectedRootNodeSubstitution);
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
@@ -1505,24 +1385,17 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(jn2, DATA_NODE_8);
         expectedQueryBuilder.addChild(jn2, DATA_NODE_9);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        // Optimize and compare
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
-    @Test(expected = EmptyQueryException.class)
+    @Test
     public void testEmptySubstitutionToBeLifted() throws EmptyQueryException {
 
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
-
 
         //construct
         QueryNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -1557,11 +1430,11 @@ public class BindingLiftTest {
         queryBuilder.addChild(node1, DATA_NODE_8);
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nUnexpected optimized query: \n" +  optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        assertTrue(optimizedQuery.getTree().isDeclaredAsEmpty());
     }
 
     @Test
@@ -1599,22 +1472,15 @@ public class BindingLiftTest {
         queryBuilder.addChild(unionNode, constructionNode3);
         queryBuilder.addChild(constructionNode3, DATA_NODE_6);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode3);
         expectedQueryBuilder.addChild(constructionNode3, DATA_NODE_6);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nExpected query: \n" +  expectedQuery);
-
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nOptimized query: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -1655,8 +1521,7 @@ public class BindingLiftTest {
         TrueNode trueNode = IQ_FACTORY.createTrueNode();
         queryBuilder.addChild(constructionNode2, trueNode);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -1672,15 +1537,9 @@ public class BindingLiftTest {
                         1, B));
         expectedQueryBuilder.addChild(newConstructionNode, newLeftDataNode);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        System.out.println("\nExpected query: \n" +  expectedQuery);
-
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-        System.out.println("\nOptimized query: \n" +  optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
 
@@ -1769,15 +1628,7 @@ public class BindingLiftTest {
         originalBuilder.addChild(joinNode1, table4DataNode2);
         originalBuilder.addChild(joinNode1, table4DataNode3);
 
-
-
-        IntermediateQuery originalQuery = originalBuilder.build();
-
-        System.out.println("\n Original query: \n" +  originalQuery);
-
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(originalQuery);
-
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        IQ originalQuery = originalBuilder.buildIQ();
 
         /*
          * Expected Query
@@ -1816,11 +1667,9 @@ public class BindingLiftTest {
         expectedBuilder.addChild(joinNode3, newTable4DataNode.clone());
         expectedBuilder.addChild(joinNode3, newTable4DataNode.clone());
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
+        IQ expectedQuery = expectedBuilder.buildIQ();
 
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        Assert.assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(originalQuery, expectedQuery);
     }
 
     @Test
@@ -1836,23 +1685,17 @@ public class BindingLiftTest {
         queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
         queryBuilder.addChild(joinNode, DATA_NODE_8);
 
-        IntermediateQuery query = queryBuilder.build();
-        System.out.println("\n Original query: \n" +  query);
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0,A)));
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_8);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query);
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
-
-        Assert.assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test

@@ -37,7 +37,6 @@ public class OptimizationTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
-    public static final IntermediateQueryOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final TermFactory TERM_FACTORY;
@@ -125,14 +124,6 @@ public class OptimizationTestingTools {
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         IQ_EQUALITY_CHECK = injector.getInstance(IQEqualityCheck.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
-        BINDING_LIFT_OPTIMIZER = new IntermediateQueryOptimizer() {
-            @Override
-            public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-                IQ initialIQ = IQ_CONVERTER.convert(query);
-                IQ liftedIQ = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialIQ);
-                return IQ_CONVERTER.convert(liftedIQ);
-            }
-        };
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
