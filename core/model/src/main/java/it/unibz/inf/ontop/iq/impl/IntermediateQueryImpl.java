@@ -123,11 +123,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     @Override
-    public Stream<IntensionalDataNode> getIntensionalNodes(){
-        return treeComponent.getIntensionalNodes().stream();
-    }
-
-    @Override
     public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                     QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);

@@ -29,8 +29,6 @@ public interface IntermediateQuery {
      */
     Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
-    Stream<IntensionalDataNode> getIntensionalNodes();
-
     DistinctVariableOnlyDataAtom getProjectionAtom();
 
     /**

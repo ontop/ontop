@@ -93,7 +93,7 @@ public class IQValidationTest {
         queryBuilder.addChild(constructionNode, table1DataNode);
         queryBuilder.addChild(constructionNode, table2DataNode);
 
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -122,7 +122,7 @@ public class IQValidationTest {
         queryBuilder.addChild(joinNode, table4DataNode);
         queryBuilder.addChild(unionNode2, table1DataNode);
 
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -155,7 +155,7 @@ public class IQValidationTest {
         queryBuilder.addChild(unionNode2, table2DataNode);
         queryBuilder.addChild(unionNode2, table3DataNode);
 
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -168,7 +168,7 @@ public class IQValidationTest {
         queryBuilder.addChild(constructionNode, innerJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder.addChild(innerJoinNode, dataNode);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -181,7 +181,7 @@ public class IQValidationTest {
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder.addChild(leftJoinNode, dataNode, LEFT);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -192,7 +192,7 @@ public class IQValidationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, filterNode);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -209,7 +209,7 @@ public class IQValidationTest {
         queryBuilder.addChild(innerJoinNode, dataNode1);
         queryBuilder.addChild(innerJoinNode, dataNode2);
         queryBuilder.addChild(dataNode1, dataNode3);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
 
@@ -228,7 +228,7 @@ public class IQValidationTest {
         queryBuilder.addChild(innerJoinNode, dataNode1);
         queryBuilder.addChild(innerJoinNode, dataNode2);
         queryBuilder.addChild(dataNode1, dataNode3);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
 //    @Test(expected = InvalidIntermediateQueryException.class)
@@ -252,7 +252,7 @@ public class IQValidationTest {
         queryBuilder.addChild(constructionNode, emptyNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder.addChild(emptyNode, dataNode);
-        IntermediateQuery query = queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -267,7 +267,7 @@ public class IQValidationTest {
 
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder.addChild(filterNode, dataNode);
-        queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -284,7 +284,7 @@ public class IQValidationTest {
         queryBuilder.addChild(joinNode, dataNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, A));
         queryBuilder.addChild(joinNode, dataNode2);
-        queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -301,6 +301,6 @@ public class IQValidationTest {
         queryBuilder.addChild(joinNode, dataNode1, LEFT);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, A));
         queryBuilder.addChild(joinNode, dataNode2, RIGHT);
-        queryBuilder.build();
+        queryBuilder.buildIQ();
     }
 }

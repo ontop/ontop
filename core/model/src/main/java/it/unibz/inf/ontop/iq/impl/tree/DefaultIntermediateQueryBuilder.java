@@ -130,8 +130,4 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         return tree.contains(node);
     }
 
-    @Override
-    public IntermediateQueryFactory getFactory() {
-        return iqFactory;
-    }
 }

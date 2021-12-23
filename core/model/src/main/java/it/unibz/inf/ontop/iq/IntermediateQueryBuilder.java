@@ -35,6 +35,4 @@ public interface IntermediateQueryBuilder {
     IQ buildIQ() throws IntermediateQueryBuilderException;
 
     boolean contains(QueryNode node);
-
-    IntermediateQueryFactory getFactory();
 }
