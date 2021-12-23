@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -59,12 +58,11 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(joinNode1, joinNode2);
         queryBuilder1.addChild(joinNode2, dataNode2);
         queryBuilder1.addChild(joinNode2, dataNode3);
-        IntermediateQuery query1 = queryBuilder1.build();
 
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -78,11 +76,11 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(joinNode3, joinNode4);
         queryBuilder2.addChild(joinNode4, dataNode2);
         queryBuilder2.addChild(joinNode4, dataNode3);
-        IntermediateQuery query2 = queryBuilder2.build();
 
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -113,12 +111,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(constructionNode3, dataNode2);
         queryBuilder1.addChild(constructionNode4, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -144,11 +140,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(filterNode1, dataNode2);
         queryBuilder2.addChild(filterNode2, dataNode3);
 
-        IntermediateQuery query2 = queryBuilder2.build();
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -168,18 +163,16 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder1.addChild(leftJoinNode, dataNode2, RIGHT);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-        IntermediateQuery initialQuery = query1.createSnapshot();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        System.out.println("\nExpected: \n" +  initialQuery);
+        IQ query2 = query1;
+        System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, initialQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -205,12 +198,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(leftJoinNode2, dataNode2, LEFT);
         queryBuilder1.addChild(leftJoinNode2, dataNode3, RIGHT);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -229,11 +220,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(leftJoinNode4, dataNode2, LEFT);
         queryBuilder2.addChild(leftJoinNode4, dataNode3, RIGHT);
 
-        IntermediateQuery query2 = queryBuilder2.build();
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -255,17 +245,15 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(leftJoinNode1, dataNode2, LEFT);
         queryBuilder1.addChild(leftJoinNode1, dataNode3, RIGHT);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-        IntermediateQuery initialQuery = query1.createSnapshot();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, initialQuery));
+        IQ query2 = query1;
 
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -287,13 +275,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode1);
         queryBuilder1.addChild(innerJoinNode1, dataNode2);
 
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -310,13 +295,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(innerJoinNode2, dataNode1);
         queryBuilder2.addChild(innerJoinNode2, dataNode2);
 
-
-        IntermediateQuery query2 = queryBuilder2.build();
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -338,13 +320,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode1);
         queryBuilder1.addChild(innerJoinNode1, dataNode3);
 
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -361,13 +340,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(innerJoinNode2, dataNode1);
         queryBuilder2.addChild(innerJoinNode2, dataNode3);
 
-
-        IntermediateQuery query2 = queryBuilder2.build();
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -391,13 +367,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode1);
         queryBuilder1.addChild(innerJoinNode1, dataNode2);
 
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery =optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -414,13 +387,10 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(innerJoinNode2, dataNode1);
         queryBuilder2.addChild(innerJoinNode2, dataNode2);
 
-
-        IntermediateQuery query2 = queryBuilder2.build();
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -444,26 +414,20 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode1);
         queryBuilder1.addChild(innerJoinNode1, dataNode2);
 
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery initialQuery = query1.createSnapshot();
-        IntermediateQuery optimizedQuery = optimizeQuery(query1);
-
+        IQ optimizedQuery = optimizeQuery(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        System.out.println("\nExpected: \n" +  initialQuery);
+        IQ query2 = query1;
+        System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, initialQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
-    private IntermediateQuery optimizeQuery(IntermediateQuery query) throws EmptyQueryException {
-        IQ initialIQ = IQ_CONVERTER.convert(query);
+    private IQ optimizeQuery(IQ initialIQ) {
         IQTree newTree = PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER.transform(initialIQ.getTree());
-        IQ newIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newTree);
-
-        return IQ_CONVERTER.convert(newIQ);
+        return IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newTree);
     }
 }

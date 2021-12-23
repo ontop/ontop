@@ -43,7 +43,7 @@ public class ConstructionNodeCleanerTest {
     private ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
 
     // TODO: choose an implementation
-    private static IntermediateQueryOptimizer constructionNodeCleaner = null;
+    private static IQOptimizer constructionNodeCleaner = null;
 
 
     @Test
