@@ -6,13 +6,11 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
-import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -23,7 +21,7 @@ import java.util.Optional;
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
-    private final IQConverter iqConverter;
+    private final IQConverterImpl iqConverter;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -33,12 +31,11 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(IQConverter iqConverter,
-                                              IntermediateQueryFactory iqFactory,
+    protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory,
                                               IntermediateQueryValidator validator,
                                               CoreUtilsFactory coreUtilsFactory,
                                               OntopModelSettings settings) {
-        this.iqConverter = iqConverter;
+        this.iqConverter = new IQConverterImpl(iqFactory);
         this.iqFactory = iqFactory;
         this.validator = validator;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -89,28 +86,14 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public IntermediateQuery build() throws IntermediateQueryBuilderException {
+    public IQ buildIQ() throws IntermediateQueryBuilderException {
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(projectionAtom, new DefaultQueryTreeComponent(tree, coreUtilsFactory));
-        canEdit = false;
-        return query;
-    }
-
-    @Override
-    public IQ buildIQ() throws IntermediateQueryBuilderException {
-        IntermediateQuery query = build();
-        return iqConverter.convert(query);
-    }
-
-    /**
-     * Can be overwritten to use another constructor
-     */
-    protected IntermediateQuery buildQuery(DistinctVariableOnlyDataAtom projectionAtom,
-                                           QueryTreeComponent treeComponent) {
-
-        return new IntermediateQueryImpl(projectionAtom, treeComponent, validator,
+        IntermediateQuery query = new IntermediateQueryImpl(projectionAtom, new DefaultQueryTreeComponent(tree, coreUtilsFactory), validator,
                 settings, iqFactory);
+
+        canEdit = false;
+        return iqConverter.convert(query);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
@@ -123,11 +106,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
         if (!canEdit)
             throw new IllegalArgumentException("Cannot be edited anymore (the query has already been built).");
-    }
-
-    @Override
-    public boolean contains(QueryNode node) {
-        return tree.contains(node);
     }
 
 }

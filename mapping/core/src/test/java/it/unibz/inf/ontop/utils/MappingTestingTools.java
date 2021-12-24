@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -50,7 +49,6 @@ public class MappingTestingTools {
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
-    public static final IQConverter IQ_CONVERTER;
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
@@ -81,7 +79,6 @@ public class MappingTestingTools {
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
-        IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);

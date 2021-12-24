@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  *

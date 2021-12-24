@@ -1163,12 +1163,6 @@ public class QueryMergingTest {
     }
 
 
-    private static void optimizeAndCompare(IntermediateQuery mainQuery, IntermediateQuery subQuery,
-                                           IntermediateQuery expectedQuery, IntensionalDataNode intensionalNode) {
-        optimizeAndCompare(IQ_CONVERTER.convert(mainQuery), IQ_CONVERTER.convert(subQuery),
-                IQ_CONVERTER.convert(expectedQuery), intensionalNode);
-    }
-
     private static void optimizeAndCompare(IQ mainQuery, IQ subQuery, IQ expectedQuery, IntensionalDataNode intensionalNode) {
 
         System.out.println("\n Original query: \n" + mainQuery);
@@ -1179,10 +1173,6 @@ public class QueryMergingTest {
         System.out.println("\n Optimized query: \n" + mergedQuery);
 
         assertEquals(expectedQuery, mergedQuery);
-    }
-
-    private static IQ merge(IntermediateQuery mainQuery, IntermediateQuery subQuery, IntensionalDataNode intensionalNode) {
-        return merge(IQ_CONVERTER.convert(mainQuery), IQ_CONVERTER.convert(subQuery), intensionalNode);
     }
 
     private static IQ merge(IQ mainQuery, IQ subQuery, IntensionalDataNode intensionalNode) {

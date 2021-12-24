@@ -30,9 +30,5 @@ public interface IntermediateQueryBuilder {
     void addChild(QueryNode parentNode, QueryNode child, BinaryOrderedOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException;
 
-    IntermediateQuery build() throws IntermediateQueryBuilderException;
-
     IQ buildIQ() throws IntermediateQueryBuilderException;
-
-    boolean contains(QueryNode node);
 }
