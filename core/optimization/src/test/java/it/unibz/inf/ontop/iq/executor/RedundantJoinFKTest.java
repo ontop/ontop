@@ -326,11 +326,6 @@ public class RedundantJoinFKTest {
         optimize(initialIQ, expectedIQ);
     }
 
-
-    private void optimize(IntermediateQuery query, IntermediateQuery expectedQuery) {
-        optimize(IQ_CONVERTER.convert(query), IQ_CONVERTER.convert(expectedQuery).normalizeForOptimization());
-    }
-
     private void optimize(IQ initialQuery, IQ expectedQuery) {
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
