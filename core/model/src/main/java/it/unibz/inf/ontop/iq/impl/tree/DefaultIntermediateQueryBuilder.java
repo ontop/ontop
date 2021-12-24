@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.iq.impl.tree;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
-import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -13,15 +14,18 @@ import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * TODO: explain
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
-    private final IQConverterImpl iqConverter;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -35,7 +39,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
                                               IntermediateQueryValidator validator,
                                               CoreUtilsFactory coreUtilsFactory,
                                               OntopModelSettings settings) {
-        this.iqConverter = new IQConverterImpl(iqFactory);
         this.iqFactory = iqFactory;
         this.validator = validator;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -93,8 +96,40 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
                 settings, iqFactory);
 
         canEdit = false;
-        return iqConverter.convert(query);
+        IQTree iqTree = convertTree(query, query.getRootNode());
+        return iqFactory.createIQ(projectionAtom, iqTree);
     }
+
+    /**
+     * Recursive
+     */
+    private IQTree convertTree(IntermediateQuery query, QueryNode rootNode) {
+        if (rootNode instanceof LeafIQTree) {
+            return (LeafIQTree) rootNode;
+        }
+        else if (rootNode instanceof UnaryOperatorNode) {
+            // Recursive
+            IQTree childTree = convertTree(query, query.getFirstChild(rootNode).get());
+            return iqFactory.createUnaryIQTree((UnaryOperatorNode) rootNode, childTree);
+        }
+        else if (rootNode instanceof BinaryNonCommutativeOperatorNode) {
+            IQTree leftChildTree = convertTree(query, query.getChild(rootNode, LEFT).get());
+            IQTree rightChildTree = convertTree(query, query.getChild(rootNode, RIGHT).get());
+
+            return iqFactory.createBinaryNonCommutativeIQTree((BinaryNonCommutativeOperatorNode) rootNode,
+                    leftChildTree, rightChildTree);
+        }
+        else if (rootNode instanceof NaryOperatorNode) {
+            ImmutableList<IQTree> childTrees = query.getChildren(rootNode).stream()
+                    .map(c -> convertTree(query, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree((NaryOperatorNode) rootNode, childTrees);
+        }
+
+        throw new MinorOntopInternalBugException("Unexpected type of query node: " + rootNode);
+    }
+
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
         if (tree == null)
