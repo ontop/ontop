@@ -209,7 +209,7 @@ public class ExpressionEvaluatorTest {
         IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
+        assertEquals(expectedQuery, optimizedQuery);
     }
 
     /**
@@ -269,7 +269,7 @@ public class ExpressionEvaluatorTest {
         IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
+        assertEquals(expectedQuery, optimizedQuery);
     }
 
 

@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,7 +24,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * Optimizations for inner joins based on unique constraints (like PKs).
@@ -50,10 +49,7 @@ public class RedundantSelfJoinTest {
     private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable B = TERM_FACTORY.getVariable("B");
     private final static Variable C = TERM_FACTORY.getVariable("C");
-    private final static Variable D = TERM_FACTORY.getVariable("D");
-    private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
-    private final static Variable P1 = TERM_FACTORY.getVariable("P");
     private final static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
@@ -779,9 +775,6 @@ public class RedundantSelfJoinTest {
         System.out.println("\nBefore optimization: \n" +  query);
 
         optimize(query, expectedQuery);
-        System.out.println("\nAfter optimization: \n" +  query);
-
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
     }
 
     @Test
@@ -1395,7 +1388,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\n After optimization: \n" +  optimizedIQ);
 
-        Assert.assertEquals(expectedQuery, optimizedIQ);
+        assertEquals(expectedQuery, optimizedIQ);
     }
 
 }

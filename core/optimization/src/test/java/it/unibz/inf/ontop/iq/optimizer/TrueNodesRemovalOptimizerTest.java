@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -18,9 +17,9 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static org.junit.Assert.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static org.junit.Assert.assertEquals;
 
 public class TrueNodesRemovalOptimizerTest {
 
@@ -43,7 +42,7 @@ public class TrueNodesRemovalOptimizerTest {
 
 
     @Test
-    public void testSingleTrueNodeRemoval_innerJoinParent1() throws EmptyQueryException {
+    public void testSingleTrueNodeRemoval_innerJoinParent1() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -73,7 +72,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testSingleTrueNodeRemoval_innerJoinParent2() throws EmptyQueryException {
+    public void testSingleTrueNodeRemoval_innerJoinParent2() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -106,7 +105,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testSingleTrueNodeRemoval_innerJoinParent3() throws EmptyQueryException {
+    public void testSingleTrueNodeRemoval_innerJoinParent3() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -137,7 +136,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testSingleTrueNodeRemoval_leftJoinParent() throws EmptyQueryException {
+    public void testSingleTrueNodeRemoval_leftJoinParent() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -166,7 +165,7 @@ public class TrueNodesRemovalOptimizerTest {
 
 
     @Test
-    public void testSingleTrueNodeChainRemoval() throws EmptyQueryException {
+    public void testSingleTrueNodeChainRemoval() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -186,7 +185,7 @@ public class TrueNodesRemovalOptimizerTest {
 
 
     @Test
-    public void testSingleTrueNodeNonRemoval_leftJoinParent() throws EmptyQueryException {
+    public void testSingleTrueNodeNonRemoval_leftJoinParent() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -216,7 +215,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testSingleTrueNodeNonRemoval_UnionParent() throws EmptyQueryException {
+    public void testSingleTrueNodeNonRemoval_UnionParent() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -249,7 +248,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testMultipleTrueNodesRemoval1() throws EmptyQueryException {
+    public void testMultipleTrueNodesRemoval1() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -281,7 +280,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testMultipleTrueNodesRemoval2() throws EmptyQueryException {
+    public void testMultipleTrueNodesRemoval2() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -313,7 +312,7 @@ public class TrueNodesRemovalOptimizerTest {
 
 
     @Test
-    public void testTrueNodesPartialRemoval1() throws EmptyQueryException {
+    public void testTrueNodesPartialRemoval1() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -345,7 +344,7 @@ public class TrueNodesRemovalOptimizerTest {
     }
 
     @Test
-    public void testTrueNodesPartialRemoval2() throws EmptyQueryException {
+    public void testTrueNodesPartialRemoval2() {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -379,8 +378,7 @@ public class TrueNodesRemovalOptimizerTest {
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
-    private static void optimizeAndCompare(IQ unOptimizedQuery, IQ expectedQuery)
-            throws EmptyQueryException {
+    private static void optimizeAndCompare(IQ unOptimizedQuery, IQ expectedQuery) {
 
         System.out.println("\nInitial query: \n" + unOptimizedQuery);
         System.out.println("\nExpected query: \n" + expectedQuery);
@@ -389,7 +387,7 @@ public class TrueNodesRemovalOptimizerTest {
         IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nOptimized query: \n" + optimizedQuery);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
+        assertEquals(expectedQuery, optimizedQuery);
     }
 
 }

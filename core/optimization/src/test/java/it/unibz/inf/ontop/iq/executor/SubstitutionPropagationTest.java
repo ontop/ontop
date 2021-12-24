@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -18,6 +17,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -44,28 +44,18 @@ public class SubstitutionPropagationTest {
     private static final Variable F = TERM_FACTORY.getVariable("f");
     private static final Variable G = TERM_FACTORY.getVariable("g");
     private static final Variable H = TERM_FACTORY.getVariable("h");
-    private static final Variable I = TERM_FACTORY.getVariable("i");
-    private static final Variable L = TERM_FACTORY.getVariable("l");
-    private static final Variable M = TERM_FACTORY.getVariable("m");
-    private static final Variable N = TERM_FACTORY.getVariable("n");
     private static final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static final Constant ONE_STR = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
-    private static final Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static final Constant TWO_STR = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
 
     private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
     private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 =  Template.of("http://example.org/ds2/", 0, "/", 1);
 
     private static final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private static final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, B));
     private static final ExtensionalDataNode DATA_NODE_3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D));
-    private static final ExtensionalDataNode DATA_NODE_4 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private static final ExtensionalDataNode DATA_NODE_5 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, E));
-    private static final ExtensionalDataNode DATA_NODE_6 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F));
-    private static final ExtensionalDataNode DATA_NODE_7 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(G, H));
 
     @Test
-    public void testURI1PropOtherBranch() throws EmptyQueryException {
+    public void testURI1PropOtherBranch() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -171,7 +161,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI2PropOtherBranch() throws EmptyQueryException {
+    public void testURI2PropOtherBranch() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -207,7 +197,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI1PropOtherBranchWithUnion1() throws EmptyQueryException {
+    public void testURI1PropOtherBranchWithUnion1() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -256,7 +246,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI1PropOtherBranchWithUnion2() throws EmptyQueryException {
+    public void testURI1PropOtherBranchWithUnion2()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -350,7 +340,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI1PropOtherBranchWithUnion3() throws EmptyQueryException {
+    public void testURI1PropOtherBranchWithUnion3() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -393,7 +383,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI2PropOtherBranchWithUnion1() throws EmptyQueryException {
+    public void testURI2PropOtherBranchWithUnion1() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -436,7 +426,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI2PropOtherBranchWithUnion1Swapped() throws EmptyQueryException {
+    public void testURI2PropOtherBranchWithUnion1Swapped()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -485,7 +475,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI2PropOtherBranchWithUnion2() throws EmptyQueryException {
+    public void testURI2PropOtherBranchWithUnion2() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -532,7 +522,7 @@ public class SubstitutionPropagationTest {
 
 
     @Test
-    public void testURI2PropOtherBranchWithUnion2Swapped() throws EmptyQueryException {
+    public void testURI2PropOtherBranchWithUnion2Swapped()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -582,7 +572,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testUnsatisfiedFilter() throws EmptyQueryException {
+    public void testUnsatisfiedFilter()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -616,7 +606,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testIncompatibleRightOfLJ() throws EmptyQueryException {
+    public void testIncompatibleRightOfLJ() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -651,7 +641,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testPropagationFromUselessConstructionNode() throws EmptyQueryException {
+    public void testPropagationFromUselessConstructionNode() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -692,7 +682,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testUselessConstructionNodes() throws EmptyQueryException {
+    public void testUselessConstructionNodes()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -717,7 +707,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testURI1PropOtherBranchWithUnion1SecondChild() throws EmptyQueryException {
+    public void testURI1PropOtherBranchWithUnion1SecondChild() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -770,7 +760,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx18() throws EmptyQueryException {
+    public void testEx18() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
@@ -797,7 +787,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx19() throws EmptyQueryException {
+    public void testEx19() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
@@ -829,7 +819,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx19NoRootConstructionNode() throws EmptyQueryException {
+    public void testEx19NoRootConstructionNode() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
@@ -858,7 +848,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx20() throws EmptyQueryException {
+    public void testEx20() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -905,7 +895,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx21() throws EmptyQueryException {
+    public void testEx21() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, A);
 
@@ -950,7 +940,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEx22() throws EmptyQueryException {
+    public void testEx22() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -996,7 +986,7 @@ public class SubstitutionPropagationTest {
      * Opposite direction to ex22
      */
     @Test
-    public void testEx23() throws EmptyQueryException {
+    public void testEx23() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -1043,7 +1033,7 @@ public class SubstitutionPropagationTest {
      * See BindingLiftTest.testEqualityLiftingNonProjected2() to see how this point can be reached.
      */
     @Test
-    public void testEqualityLiftingNonProjected2() throws EmptyQueryException {
+    public void testEqualityLiftingNonProjected2() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
 
@@ -1088,7 +1078,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEqualityLiftingNonProjected3() throws EmptyQueryException {
+    public void testEqualityLiftingNonProjected3() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
 
@@ -1136,7 +1126,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEqualityLiftingNonProjected4() throws EmptyQueryException {
+    public void testEqualityLiftingNonProjected4() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
 
@@ -1184,7 +1174,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testEqualityLiftingNonProjected5() throws EmptyQueryException {
+    public void testEqualityLiftingNonProjected5() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
 
@@ -1234,7 +1224,7 @@ public class SubstitutionPropagationTest {
      * Makes sure the substitution propagation is blocked by the first ancestor construction node.
      */
     @Test
-    public void testEqualityLiftingNonProjected6() throws EmptyQueryException {
+    public void testEqualityLiftingNonProjected6() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, B);
 
@@ -1262,7 +1252,7 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
-    public void testLiftingDefinitionEqualVariables() throws EmptyQueryException {
+    public void testLiftingDefinitionEqualVariables() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -1296,7 +1286,7 @@ public class SubstitutionPropagationTest {
     }
 
 
-    private static void propagateAndCompare(IQ query, IQ expectedQuery) throws EmptyQueryException {
+    private static void propagateAndCompare(IQ query, IQ expectedQuery) {
 
         System.out.println("\n Original query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
@@ -1305,7 +1295,7 @@ public class SubstitutionPropagationTest {
 
         System.out.println("\n Optimized query: \n" +  newQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(newQuery, expectedQuery));
+        assertEquals(expectedQuery, newQuery);
     }
 
 
