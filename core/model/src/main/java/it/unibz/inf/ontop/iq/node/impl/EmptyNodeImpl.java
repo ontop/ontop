@@ -56,14 +56,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getVariables().contains(variable))
-            return true;
-        else
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-    }
-
-    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         if (node instanceof EmptyNode) {
             return projectedVariables.equals(((EmptyNode) node).getVariables());

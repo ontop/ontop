@@ -95,15 +95,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        for(QueryNode child : query.getChildren(this)) {
-            if (child.isVariableNullable(query, variable))
-                return true;
-        }
-        return false;
-    }
-
-    @Override
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children) {
         ImmutableSet<VariableNullability> variableNullabilities = children.stream()
                 .map(IQTree::getVariableNullability)

@@ -57,11 +57,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        throw new IllegalArgumentException("A true node does not project any variable");
-    }
-
-    @Override
     public TrueNode clone() {
         return iqFactory.createTrueNode();
     }

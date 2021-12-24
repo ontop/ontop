@@ -191,16 +191,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getChildVariables().contains(variable))
-            return isChildVariableNullable(query, variable);
-
-        return Optional.ofNullable(substitution.get(variable))
-                .map(t -> isTermNullable(query, t))
-                .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
-    }
-
-    @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
         return !inferUniqueConstraints(child).isEmpty();
     }
@@ -304,32 +294,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
         return getVariables();
-    }
-
-    private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
-        return query.getFirstChild(this)
-                .map(c -> c.isVariableNullable(query, variable))
-                .orElseThrow(() -> new InvalidIntermediateQueryException(
-                        "A construction node with child variables must have a child"));
-    }
-
-    private boolean isTermNullable(IntermediateQuery query, ImmutableTerm substitutionValue) {
-        if (substitutionValue instanceof ImmutableFunctionalTerm) {
-            ImmutableSet<Variable> nullableVariables = substitutionValue.getVariableStream()
-                    .filter(v -> isChildVariableNullable(query, v))
-                    .collect(ImmutableCollectors.toSet());
-            return substitutionValue.isNullable(nullableVariables);
-
-        }
-        else if (substitutionValue instanceof Constant) {
-            return substitutionValue.equals(nullValue);
-        }
-        else if (substitutionValue instanceof Variable) {
-            return isChildVariableNullable(query, (Variable)substitutionValue);
-        }
-        else {
-            throw new IllegalStateException("Unexpected immutable term");
-        }
     }
 
     @Override

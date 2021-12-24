@@ -54,18 +54,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         return transformer.transform(this);
     }
 
-    /**
-     * We assume all the variables are non-null. Ok for triple patterns.
-     * TODO: what about quads and default graphs?
-     */
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getVariables().contains(variable))
-            return false;
-        else
-            throw new IllegalArgumentException("The variable" + variable + " is not projected by " + this);
-    }
-
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformIntensionalData(this);

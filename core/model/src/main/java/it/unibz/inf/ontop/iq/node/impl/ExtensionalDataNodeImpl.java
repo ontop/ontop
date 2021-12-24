@@ -127,19 +127,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (!getVariables().contains(variable))
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-
-        // NB: DB column indexes start at 1.
-        return argumentMap.entrySet().stream()
-                .filter(e -> e.getValue().equals(variable))
-                .map(e -> e.getKey() + 1)
-                .map(relationDefinition::getAttribute)
-                .allMatch(Attribute::isNullable);
-    }
-
-    @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformExtensionalData(this);
     }

@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -250,12 +249,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return Sets.union(getChildVariables(), substitution.getDomain()).immutableCopy();
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        // TODO: implement seriously!
-        return true;
     }
 
     @Override
