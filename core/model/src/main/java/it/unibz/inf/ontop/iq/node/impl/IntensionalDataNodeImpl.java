@@ -120,11 +120,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof IntensionalDataNode)
                 && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());

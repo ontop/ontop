@@ -225,10 +225,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
     }
 
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {

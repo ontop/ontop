@@ -33,20 +33,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                 substitutionFactory, unificationTools, substitutionTools);
     }
 
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        ImmutableMultiset<Variable> childrenVariableBag = query.getChildren(this).stream()
-                .flatMap(c -> query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toMultiset());
-
-        Stream<Variable> cooccuringVariableStream = childrenVariableBag.entrySet().stream()
-                .filter(e -> e.getCount() > 1)
-                .map(Multiset.Entry::getElement);
-
-        return Stream.concat(cooccuringVariableStream, getLocallyRequiredVariables().stream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
 
     /**
      * Checks that non-projected variables are not shared among children

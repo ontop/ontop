@@ -273,10 +273,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         return getChildVariables();
     }
 
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {

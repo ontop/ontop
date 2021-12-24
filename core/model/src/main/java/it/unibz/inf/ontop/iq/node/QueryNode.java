@@ -77,14 +77,6 @@ public interface QueryNode extends Cloneable {
     ImmutableSet<Variable> getLocallyRequiredVariables();
 
     /**
-     * Set of variables which, individually, must be provided by at least one child,
-     * INDEPENDENTLY OF THE REQUIREMENTS OF THIS NODE'S ANCESTORS.
-     * This may extend locally required variables.
-     * For instance, for a join node, this includes variables used in implicit joining conditions
-     */
-    ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query);
-
-    /**
      * Locally defined variables must not appear in the sub-tree
      */
     ImmutableSet<Variable> getLocallyDefinedVariables();
