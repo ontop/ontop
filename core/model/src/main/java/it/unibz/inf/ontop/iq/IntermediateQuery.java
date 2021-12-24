@@ -32,14 +32,6 @@ public interface IntermediateQuery {
     DistinctVariableOnlyDataAtom getProjectionAtom();
 
     /**
-     * Keeps the same query node objects but clones the tree edges
-     * (since the latter are mutable by default).
-     *
-     * TODO: return an immutable Intermediate Query
-     */
-    IntermediateQuery createSnapshot();
-
-    /**
      * Set of variables that are returned by the sub-tree.
      */
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);

@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -77,12 +76,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(projectionAtom, treeComponent.createSnapshot(),
-                validator, settings, iqFactory);
-    }
-
-    @Override
     public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
         return treeComponent.getVariables(subTreeRootNode);
     }
@@ -141,7 +134,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        return createSnapshot();
+        return new IntermediateQueryImpl(projectionAtom, treeComponent.createSnapshot(),
+                validator, settings, iqFactory);
     }
 
     @Override
