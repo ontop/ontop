@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -17,8 +16,8 @@ import org.junit.Test;
 
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class IQSyntacticEquivalenceCheckerTest {
 
@@ -60,7 +59,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
 
     @Test
-    public void testInnerJoinNodeEquivalence() throws EmptyQueryException {
+    public void testInnerJoinNodeEquivalence() {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Z);
@@ -84,11 +83,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode2);
         queryBuilder1.addChild(innerJoinNode1, dataNode3);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testInnerJoinNodeNotEquivalence() throws EmptyQueryException {
+    public void testInnerJoinNodeNotEquivalence() {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Z);
@@ -112,11 +111,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(innerJoinNode1, dataNode2);
         queryBuilder1.addChild(innerJoinNode1, dataNode3);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testLeftJoinNodeEquivalence() throws EmptyQueryException {
+    public void testLeftJoinNodeEquivalence() {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -140,11 +139,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         queryBuilder1.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testLeftJoinNodeNotEquivalence() throws EmptyQueryException {
+    public void testLeftJoinNodeNotEquivalence() {
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
@@ -167,11 +166,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         queryBuilder1.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testUnionNodeEquivalence() throws EmptyQueryException {
+    public void testUnionNodeEquivalence() {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
@@ -217,11 +216,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(leftJoinNode3, dataNode7, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         queryBuilder1.addChild(leftJoinNode3, dataNode8, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testUnionNodeNotEquivalence() throws EmptyQueryException {
+    public void testUnionNodeNotEquivalence() {
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
@@ -265,11 +264,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.addChild(innerJoinNode, dataNode7);
         queryBuilder1.addChild(innerJoinNode, dataNode8);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testFilterNodeEquivalence() throws EmptyQueryException {
+    public void testFilterNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -288,11 +287,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder1.addChild(filterNode1, dataNode1);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testFilterNodeNotEquivalence() throws EmptyQueryException {
+    public void testFilterNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -311,11 +310,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder1.addChild(filterNode1, dataNode1);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testIntensionalDataNodeEquivalence() throws EmptyQueryException {
+    public void testIntensionalDataNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -330,11 +329,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Z));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testIntensionalDataNodeNotEquivalence() throws EmptyQueryException {
+    public void testIntensionalDataNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -349,11 +348,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Y));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testExtensionalDataNodeEquivalence() throws EmptyQueryException {
+    public void testExtensionalDataNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -366,11 +365,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, DATA_NODE_1);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testExtensionalDataNodeNotEquivalence() throws EmptyQueryException {
+    public void testExtensionalDataNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -383,7 +382,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, createExtensionalDataNode(TABLE2, ImmutableList.of(Z, X)));
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
 //    @Test
@@ -449,7 +448,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 //    }
 
     @Test
-    public void testConstructionNodeEquivalence() throws EmptyQueryException {
+    public void testConstructionNodeEquivalence(){
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
@@ -465,11 +464,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testConstructionNodeDifferentSubstitutions() throws EmptyQueryException {
+    public void testConstructionNodeDifferentSubstitutions() {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X,Y),
@@ -489,12 +488,12 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
 
     @Test
-    public void testConstructionNodeNotEquivalence() throws EmptyQueryException {
+    public void testConstructionNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -509,11 +508,11 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Y));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
     @Test
-    public void testConstructionNodeDifferentModifiers() throws EmptyQueryException {
+    public void testConstructionNodeDifferentModifiers()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
@@ -535,13 +534,13 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertFalse(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
 
 
     @Test
-    public void testConstructionSameModifiers() throws EmptyQueryException {
+    public void testConstructionSameModifiers() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
 
@@ -584,7 +583,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(queryBuilder.buildIQ(), queryBuilder1.buildIQ()));
+        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
     }
 
 }

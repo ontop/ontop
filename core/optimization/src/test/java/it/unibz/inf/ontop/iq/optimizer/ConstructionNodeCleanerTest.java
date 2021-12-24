@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -16,7 +15,7 @@ import org.junit.Test;
 
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 @Ignore("TODO: support it (and update it)")
 public class ConstructionNodeCleanerTest {
@@ -45,7 +44,7 @@ public class ConstructionNodeCleanerTest {
 
 
     @Test
-    public void removeConstructionNodeTest1() throws EmptyQueryException {
+    public void removeConstructionNodeTest1()  {
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
@@ -86,11 +85,11 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest2() throws EmptyQueryException {
+    public void removeConstructionNodeTest2() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
@@ -128,13 +127,13 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Ignore("TODO: refactor after moving the query modifiers away from the construction node ")
     @Test
-    public void removeConstructionNodeTest3() throws EmptyQueryException {
+    public void removeConstructionNodeTest3() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
@@ -170,11 +169,11 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest4() throws EmptyQueryException {
+    public void removeConstructionNodeTest4() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
@@ -220,12 +219,12 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void removeConstructionNodeTest5() throws EmptyQueryException {
+    public void removeConstructionNodeTest5() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
@@ -277,12 +276,12 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void removeConstructionNodeTest6() throws EmptyQueryException {
+    public void removeConstructionNodeTest6() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
@@ -335,12 +334,12 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void removeConstructionNodeTest7() throws EmptyQueryException {
+    public void removeConstructionNodeTest7() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
@@ -397,11 +396,11 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest8() throws EmptyQueryException {
+    public void removeConstructionNodeTest8() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
@@ -465,12 +464,12 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void removeConstructionNodeTest9() throws EmptyQueryException {
+    public void removeConstructionNodeTest9() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
@@ -541,11 +540,11 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest10() throws EmptyQueryException {
+    public void removeConstructionNodeTest10() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
@@ -581,11 +580,11 @@ public class ConstructionNodeCleanerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest11() throws EmptyQueryException {
+    public void removeConstructionNodeTest11() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE,
@@ -621,11 +620,11 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void removeConstructionNodeTest12() throws EmptyQueryException {
+    public void removeConstructionNodeTest12() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
@@ -672,7 +671,7 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 

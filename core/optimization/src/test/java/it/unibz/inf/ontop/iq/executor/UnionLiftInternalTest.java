@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
@@ -18,7 +17,7 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 @Ignore("TODO: see if something interesting could be ported to immutable IQs")
 public class UnionLiftInternalTest {
@@ -54,7 +53,7 @@ public class UnionLiftInternalTest {
 
 
     @Test
-    public void unionLiftInternalTest1 () throws EmptyQueryException {
+    public void unionLiftInternalTest1 () {
 
         /*
          * Original Query
@@ -140,8 +139,7 @@ public class UnionLiftInternalTest {
         System.out.println("\n Optimized query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
-
+        assertEquals(expectedQuery, query);
     }
 
     private IQ transform(IQ query, UnionNode unionNode, QueryNode targetNode) {
@@ -149,7 +147,7 @@ public class UnionLiftInternalTest {
     }
 
     @Test
-    public void unionLiftInternalTest2 () throws EmptyQueryException {
+    public void unionLiftInternalTest2 ()  {
 
         /*
          * Original Query
@@ -219,11 +217,11 @@ public class UnionLiftInternalTest {
         IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
+        assertEquals(expectedQuery, query);
     }
 
     @Test
-    public void unionLiftFirstUnion () throws EmptyQueryException {
+    public void unionLiftFirstUnion () {
 
         /*
          * Original Query
@@ -309,11 +307,11 @@ public class UnionLiftInternalTest {
         IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
+        assertEquals(expectedQuery, query);
     }
 
     @Test
-    public void unionLiftSecondUnion () throws EmptyQueryException {
+    public void unionLiftSecondUnion () {
 
         /*
          * Original Query
@@ -393,11 +391,11 @@ public class UnionLiftInternalTest {
         IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
+        assertEquals(expectedQuery, query);
     }
 
     @Test
-    public void unionLiftDoubleLift () throws EmptyQueryException {
+    public void unionLiftDoubleLift () {
 
         /*
          * Original Query
@@ -501,7 +499,7 @@ public class UnionLiftInternalTest {
         IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
+        assertEquals(expectedQuery, query);
 
 
         System.out.println("\n Continue from the expected query: \n" +  expectedQuery);
@@ -572,13 +570,13 @@ public class UnionLiftInternalTest {
         IQ expectedQuery2 = expectedBuilder2.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query2, expectedQuery2));
+        assertEquals(expectedQuery2, query2);
     }
 
     // Was expecting a InvalidQueryOptimizationProposalException
     @Ignore
     @Test
-    public void unionLiftInternalTest3 () throws EmptyQueryException {
+    public void unionLiftInternalTest3 () {
 
         /*
          * Original Query
@@ -623,7 +621,7 @@ public class UnionLiftInternalTest {
     // Was expecting a InvalidQueryOptimizationProposalException
     @Ignore
     @Test
-    public void unionLiftInternalTest4 () throws EmptyQueryException {
+    public void unionLiftInternalTest4 () {
 
         /*
          * Original Query
@@ -670,7 +668,7 @@ public class UnionLiftInternalTest {
     // Was expecting a InvalidQueryOptimizationProposalException
     @Ignore
     @Test
-    public void unionLiftInternalTest5 () throws EmptyQueryException {
+    public void unionLiftInternalTest5 () {
 
         /*
          * Original Query
@@ -715,7 +713,7 @@ public class UnionLiftInternalTest {
     }
 
     @Test
-    public void unionLiftInternalTest6 () throws EmptyQueryException {
+    public void unionLiftInternalTest6 () {
 
         /*
          * Original Query
@@ -781,7 +779,7 @@ public class UnionLiftInternalTest {
         IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
+        assertEquals(expectedQuery, query);
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
