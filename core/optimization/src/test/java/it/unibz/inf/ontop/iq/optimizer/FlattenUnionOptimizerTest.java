@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -17,7 +16,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 public class FlattenUnionOptimizerTest {
 
@@ -28,7 +27,7 @@ public class FlattenUnionOptimizerTest {
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
     @Test
-    public void flattenUnionTest1() throws EmptyQueryException {
+    public void flattenUnionTest1() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -76,11 +75,11 @@ public class FlattenUnionOptimizerTest {
 
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void flattenUnionTest2() throws EmptyQueryException {
+    public void flattenUnionTest2() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -130,12 +129,12 @@ public class FlattenUnionOptimizerTest {
 
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void flattenUnionTest3() throws EmptyQueryException {
+    public void flattenUnionTest3() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -163,15 +162,15 @@ public class FlattenUnionOptimizerTest {
 
 
         IQ query1 = queryBuilder1.buildIQ();
-        IQ snapshot = query1;
+        IQ query2 = query1;
         System.out.println("\nBefore optimization: \n" + query1);
         IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, snapshot));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void flattenUnionTest4() throws EmptyQueryException {
+    public void flattenUnionTest4() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -227,11 +226,11 @@ public class FlattenUnionOptimizerTest {
 
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void flattenUnionTest5() throws EmptyQueryException {
+    public void flattenUnionTest5() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -279,6 +278,6 @@ public class FlattenUnionOptimizerTest {
 
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 }

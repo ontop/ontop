@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -16,7 +15,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
@@ -40,7 +39,7 @@ public class ProjectionShrinkingOptimizerTest {
     }
 
     @Test
-    public void testUnion() throws EmptyQueryException {
+    public void testUnion() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -76,15 +75,15 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
-    private static IQ optimize(IQ initialIQ) throws EmptyQueryException {
+    private static IQ optimize(IQ initialIQ) {
         return initialIQ.normalizeForOptimization();
     }
 
     @Test
-    public void testUnionAndImplicitJoinCondition1() throws EmptyQueryException {
+    public void testUnionAndImplicitJoinCondition1()  {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -113,11 +112,11 @@ public class ProjectionShrinkingOptimizerTest {
 
         IQ query2 = query1;
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testUnionAndImplicitJoinCondition2() throws EmptyQueryException {
+    public void testUnionAndImplicitJoinCondition2() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -169,12 +168,12 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void testUnionAndExplicitJoinCondition1() throws EmptyQueryException {
+    public void testUnionAndExplicitJoinCondition1() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -202,11 +201,11 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = query1;
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testUnionAndExplicitJoinCondition2() throws EmptyQueryException {
+    public void testUnionAndExplicitJoinCondition2() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, Z);
@@ -251,11 +250,11 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testUnionAndFilter() throws EmptyQueryException {
+    public void testUnionAndFilter() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, Z);
@@ -298,11 +297,11 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testConstructionNode() throws EmptyQueryException {
+    public void testConstructionNode() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
@@ -335,11 +334,11 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testConstructionNodeAndImplicitJoinCondition2() throws EmptyQueryException {
+    public void testConstructionNodeAndImplicitJoinCondition2() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, Z);
@@ -386,6 +385,6 @@ public class ProjectionShrinkingOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 }

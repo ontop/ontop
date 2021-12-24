@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
-import it.unibz.inf.ontop.iq.tools.IQEqualityCheck;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -55,7 +54,6 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
-        bindFromSettings(IQEqualityCheck.class);
         bindFromSettings(ConditionSimplifier.class);
         bindFromSettings(ConstructionSubstitutionNormalizer.class);
         bindFromSettings(FilterNormalizer.class);

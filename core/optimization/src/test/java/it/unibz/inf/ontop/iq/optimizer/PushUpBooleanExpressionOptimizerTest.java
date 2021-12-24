@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -20,8 +19,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GTE;
-import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 public class PushUpBooleanExpressionOptimizerTest {
     
@@ -37,11 +35,10 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getDBNonStrictNumericEquality(X, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(Y, Z);
     private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getDBDefaultInequality(GTE, W, Z);
-    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getDBDefaultInequality(LT, V, W);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getStrictNEquality(X, TERM_FACTORY.getDBStringConstant("a"));
 
     @Test
-    public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {
+    public void testPropagationFomInnerJoinProvider() {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
@@ -77,11 +74,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testNoPropagationFomInnerJoinProvider() throws EmptyQueryException {
+    public void testNoPropagationFomInnerJoinProvider() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
@@ -107,11 +104,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = query1;
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testPropagationFomFilterNodeProvider() throws EmptyQueryException {
+    public void testPropagationFomFilterNodeProvider() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
@@ -140,11 +137,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testNoPropagationFomFilterNodeProvider() throws EmptyQueryException {
+    public void testNoPropagationFomFilterNodeProvider() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
@@ -166,11 +163,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = query1;
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testNoPropagationFomLeftJoinProvider() throws EmptyQueryException {
+    public void testNoPropagationFomLeftJoinProvider() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
@@ -194,11 +191,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = query1;
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testPropagationToExistingFilterRecipient() throws EmptyQueryException {
+    public void testPropagationToExistingFilterRecipient() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -232,11 +229,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testRecursivePropagation() throws EmptyQueryException {
+    public void testRecursivePropagation() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -273,12 +270,12 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
     @Test
-    public void testPropagationToLeftJoinRecipient() throws EmptyQueryException {
+    public void testPropagationToLeftJoinRecipient() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -314,11 +311,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testPropagationThroughLeftJoin() throws EmptyQueryException {
+    public void testPropagationThroughLeftJoin() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -355,12 +352,12 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Ignore("TODO: support it")
     @Test
-    public void testCompletePropagationThroughUnion() throws EmptyQueryException {
+    public void testCompletePropagationThroughUnion() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -396,11 +393,11 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Test
-    public void testNoPropagationThroughUnion() throws EmptyQueryException {
+    public void testNoPropagationThroughUnion() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
@@ -430,12 +427,12 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = query1;
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Ignore("Shall we support it?")
     @Test
-    public void testPartialPropagationThroughUnion() throws EmptyQueryException {
+    public void testPartialPropagationThroughUnion() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -480,12 +477,12 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
     @Ignore("TODO: support it")
     @Test
-    public void testMultiplePropagationsThroughUnion() throws EmptyQueryException {
+    public void testMultiplePropagationsThroughUnion() {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -540,7 +537,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
+        assertEquals(query2, optimizedQuery);
     }
 
 
@@ -552,7 +549,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         return TERM_FACTORY.getIRIFunctionalTerm(builder.build(), ImmutableList.copyOf(arguments));
     }
 
-    private IQ optimize(IQ query) throws EmptyQueryException {
+    private IQ optimize(IQ query) {
         IQ newIQ = query.normalizeForOptimization();
         return newIQ;
     }

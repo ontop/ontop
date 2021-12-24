@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.tools.IQEqualityCheck;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -38,7 +37,6 @@ public class OntopModelTestingTools {
     public static final ImmutableUnificationTools UNIFICATION_TOOLS;
     public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
     public static final IQConverter IQ_CONVERTER;
-    public static final IQEqualityCheck IQ_EQUALITY_CHECK;
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
@@ -58,7 +56,6 @@ public class OntopModelTestingTools {
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
-        IQ_EQUALITY_CHECK = injector.getInstance(IQEqualityCheck.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
