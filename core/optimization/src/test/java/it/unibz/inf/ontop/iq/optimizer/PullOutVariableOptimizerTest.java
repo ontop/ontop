@@ -296,7 +296,6 @@ public class PullOutVariableOptimizerTest {
 
     @Test
     public void testLJUnnecessaryConstructionNode1() {
-
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate(3), X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
