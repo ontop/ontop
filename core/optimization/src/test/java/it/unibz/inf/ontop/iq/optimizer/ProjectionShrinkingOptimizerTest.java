@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
@@ -56,12 +55,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode1);
         queryBuilder1.addChild(unionNode1, dataNode2);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -76,16 +73,14 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder2.addChild(unionNode2, newDataNode1);
         queryBuilder2.addChild(unionNode2, newDataNode2);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
-    private static IntermediateQuery optimize(IntermediateQuery initialQuery) throws EmptyQueryException {
-        IQ initialIQ = IQ_CONVERTER.convert(initialQuery);
-        return IQ_CONVERTER.convert(
-                initialIQ.normalizeForOptimization());
+    private static IQ optimize(IQ initialIQ) throws EmptyQueryException {
+        return initialIQ.normalizeForOptimization();
     }
 
     @Test
@@ -110,17 +105,15 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode2);
         queryBuilder1.addChild(unionNode1, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery query2 = query1.createSnapshot();
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        IQ query2 = query1;
+
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -143,12 +136,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode2);
         queryBuilder1.addChild(unionNode1, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -175,10 +166,10 @@ public class ProjectionShrinkingOptimizerTest {
 
         queryBuilder2.addChild(unionNode2, newDataNode3);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -202,18 +193,16 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode2);
         queryBuilder1.addChild(unionNode1, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
-        IntermediateQuery query2 = query1.createSnapshot();
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
+        IQ query2 = query1;
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -236,10 +225,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode2);
         queryBuilder1.addChild(unionNode1, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -259,13 +248,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder2.addChild(unionNode2, newDataNode2);
         queryBuilder2.addChild(unionNode2, newDataNode3);
 
-
-        IntermediateQuery query2 = queryBuilder2.build();
-
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -286,10 +272,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(unionNode1, dataNode4);
         queryBuilder1.addChild(unionNode1, dataNode5);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -309,13 +295,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder2.addChild(unionNode2, newDataNode4);
         queryBuilder2.addChild(unionNode2, newDataNode5);
 
-
-        IntermediateQuery query2 = queryBuilder2.build();
-
-
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -333,12 +316,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(constructionNode1, constructionNode2);
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -351,10 +332,10 @@ public class ProjectionShrinkingOptimizerTest {
                 TABLE1_AR2, ImmutableMap.of(0, A));
         queryBuilder2.addChild(constructionNode3, newDataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -376,12 +357,10 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder1.addChild(innerJoinNode1, constructionNode2);
         queryBuilder1.addChild(constructionNode2, dataNode2);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -404,9 +383,9 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder2.addChild(newInnerJoinNode1, newDataNode1);
         queryBuilder2.addChild(newInnerJoinNode1, newDataNode2);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" +  query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 }

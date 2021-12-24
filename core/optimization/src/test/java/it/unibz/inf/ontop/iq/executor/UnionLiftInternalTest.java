@@ -24,33 +24,33 @@ import static org.junit.Assert.assertTrue;
 @Ignore("TODO: see if something interesting could be ported to immutable IQs")
 public class UnionLiftInternalTest {
 
-    private static ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
-    private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
-    private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
-    private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private static final AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private static final AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private static final AtomPredicate P3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
 
-    private static Variable X = TERM_FACTORY.getVariable("x");
-    private static Variable Y = TERM_FACTORY.getVariable("y");
-    private static Variable Z = TERM_FACTORY.getVariable("z");
-    private static Variable T = TERM_FACTORY.getVariable("t");
-    private static Variable A = TERM_FACTORY.getVariable("a");
-    private static Variable B = TERM_FACTORY.getVariable("b");
-    private static Variable C = TERM_FACTORY.getVariable("c");
-    private static Variable D = TERM_FACTORY.getVariable("d");
-    private static Variable E = TERM_FACTORY.getVariable("e");
-    private static Variable F = TERM_FACTORY.getVariable("f");
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+    private static final Variable Z = TERM_FACTORY.getVariable("z");
+    private static final Variable T = TERM_FACTORY.getVariable("t");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable D = TERM_FACTORY.getVariable("d");
+    private static final Variable E = TERM_FACTORY.getVariable("e");
+    private static final Variable F = TERM_FACTORY.getVariable("f");
 
-    private static DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
+    private static final DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
             ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P3_PREDICATE, ImmutableList.of(X, Y, Z));
 
-    private static DistinctVariableOnlyDataAtom TABLE1_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static final DistinctVariableOnlyDataAtom TABLE1_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_PREDICATE, ImmutableList.of(X));
-    private static DistinctVariableOnlyDataAtom TABLE2_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static final DistinctVariableOnlyDataAtom TABLE2_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_PREDICATE, ImmutableList.of(X));
-    private static DistinctVariableOnlyDataAtom TABLE3_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static final DistinctVariableOnlyDataAtom TABLE3_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P2_PREDICATE, ImmutableList.of(X, Y));
-    private static DistinctVariableOnlyDataAtom TABLE4_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static final DistinctVariableOnlyDataAtom TABLE4_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P2_PREDICATE, ImmutableList.of(Y, Z));
 
 
@@ -101,8 +101,7 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(table2Construction, table2DataNode);
         originalBuilder.addChild(table1Construction, table1DataNode);
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode, leftJoinNode);
@@ -137,16 +136,16 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(table4Construction, table4DataNode);
         expectedBuilder.addChild(table3ConstructionExpected, table3DataNodeExpected);
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
+        IQ expectedQuery = expectedBuilder.buildIQ();
 
         System.out.println("\n Optimized query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
 
     }
 
-    private IntermediateQuery transform(IntermediateQuery query, UnionNode unionNode, QueryNode targetNode) {
+    private IQ transform(IQ query, UnionNode unionNode, QueryNode targetNode) {
         throw new RuntimeException("TODO: see how to do something similar with immutable IQs");
     }
 
@@ -187,12 +186,10 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode2, table3DataNode);
 
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode2, joinNode);
-
         System.out.println("\n Optimized query: \n" +  query);
 
         /*
@@ -220,11 +217,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(joinNode4, table3DataNode);
         expectedBuilder.addChild(joinNode4, table4DataNode.clone());
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
-
+        IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
     }
 
     @Test
@@ -268,12 +264,10 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode22, table5DataNode.clone());
 
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode21, joinNode);
-
         System.out.println("\n Optimized query: \n" +  query);
 
         /*
@@ -313,11 +307,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(unionNode7, table4DataNode.clone());
         expectedBuilder.addChild(unionNode7, table5DataNode.clone());
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
-
+        IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
     }
 
     @Test
@@ -360,13 +353,10 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode22, table4DataNode.clone());
         originalBuilder.addChild(unionNode22, table5DataNode.clone());
 
-
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode22, joinNode);
-
         System.out.println("\n Optimized query: \n" +  query);
 
         /*
@@ -401,11 +391,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(unionNode6, table2DataNode.clone());
         expectedBuilder.addChild(unionNode6, table3DataNode.clone());
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
-
+        IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
     }
 
     @Test
@@ -454,13 +443,10 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(joinNode1, table4DataNode.clone());
 
 
-
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode21, joinNode);
-
         System.out.println("\n Optimized query: \n" +  query);
 
         /*
@@ -513,17 +499,16 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(joinNode7, table4DataNode.clone());
         expectedBuilder.addChild(joinNode4, table4DataNode.clone());
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
-
+        IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
 
 
         System.out.println("\n Continue from the expected query: \n" +  expectedQuery);
 
         query = transform(query, unionNode5, joinNode2);
-        IntermediateQuery query2 = expectedQuery;
+        IQ query2 = expectedQuery;
 
         System.out.println("\n Optimized query: \n" +  query2);
 
@@ -585,14 +570,10 @@ public class UnionLiftInternalTest {
         expectedBuilder2.addChild(joinNode15, table4DataNode.clone());
         expectedBuilder2.addChild(joinNode10, table4DataNode.clone());
 
-
-
-
-        IntermediateQuery expectedQuery2 = expectedBuilder2.build();
-
+        IQ expectedQuery2 = expectedBuilder2.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query2, expectedQuery2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(query2, expectedQuery2));
     }
 
     // Was expecting a InvalidQueryOptimizationProposalException
@@ -634,8 +615,7 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode2, table3DataNode);
 
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode2, unionNode1);
@@ -681,14 +661,11 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode, joinNode1);
-
         System.out.println("\n Optimized query: \n" +  query);
-
     }
 
     // Was expecting a InvalidQueryOptimizationProposalException
@@ -731,15 +708,11 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode, joinNode1);
-
         System.out.println("\n Optimized query: \n" +  query);
-
-
     }
 
     @Test
@@ -776,12 +749,10 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery query = originalBuilder.build();
-
+        IQ query = originalBuilder.buildIQ();
         System.out.println("\n Original query: \n" +  query);
 
         query = transform(query, unionNode, joinNode);
-
         System.out.println("\n Optimized query: \n" +  query);
 
         /*
@@ -808,12 +779,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(leftJoinNode2, table2DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         expectedBuilder.addChild(leftJoinNode2, table4DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        IntermediateQuery expectedQuery = expectedBuilder.build();
-
+        IQ expectedQuery = expectedBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
-
+        assertTrue(IQ_EQUALITY_CHECK.equal(query, expectedQuery));
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
