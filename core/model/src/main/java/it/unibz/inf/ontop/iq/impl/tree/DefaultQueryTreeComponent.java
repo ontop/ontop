@@ -15,11 +15,7 @@ import it.unibz.inf.ontop.iq.tools.VariableCollector;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 
 /**
@@ -68,88 +64,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<TrueNode> getTrueNodes() {
-        return tree.getTrueNodes();
-    }
-
-    @Override
-    public ImmutableSet<IntensionalDataNode> getIntensionalNodes() {
-        return tree.getIntensionalNodes();
-    }
-
-    @Override
-    public boolean contains(QueryNode node) {
-        return tree.contains(node);
-    }
-
-    @Override
-    public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
-        collectPossiblyNewVariables(replacingNode);
-        tree.replaceNode(previousNode, replacingNode);
-    }
-
-    @Override
-    public void removeSubTree(QueryNode subTreeRoot) {
-        tree.removeSubTree(subTreeRoot);
-    }
-
-    @Override
-    public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                                     QueryNode childNode) {
-        return tree.getOptionalPosition(parentNode, childNode);
-    }
-
-    @Override
-    public Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException {
-        return tree.getParent(node);
-    }
-
-    @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
                          Optional<ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(childNode);
         tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
-    }
-
-    @Override
-    public Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException {
-        Optional<QueryNode> optionalParent = tree.getParent(node);
-        if (optionalParent.isPresent()) {
-            ImmutableList<QueryNode> siblings = tree.getChildren(optionalParent.get());
-
-            int index = siblings.indexOf(node);
-
-            if (index == -1) {
-                throw new IllegalTreeException("The node " + node + " does not appear as a child of its parent");
-            }
-            else if (index < (siblings.size() -1)) {
-                return Optional.of(siblings.get(index + 1));
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
-        insertParent(childNode, newParentNode, Optional.empty());
-    }
-
-    @Override
-    public void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<ArgumentPosition> optionalPosition)
-            throws IllegalTreeUpdateException {
-        collectPossiblyNewVariables(newParentNode);
-        tree.insertParent(childNode, newParentNode, optionalPosition);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return variableGenerator.getKnownVariables();
-    }
-
-    @Override
-    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
-        return tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
     }
 
     @Override
@@ -170,30 +89,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
                     .collect(ImmutableCollectors.toSet());
         }
     }
-
-    /**
-     * Recursive
-     */
-    private void insertIQChildren(QueryNode parentNode, ImmutableList<IQTree> childrenTrees) {
-
-        ImmutableList<QueryNode> newChildren = childrenTrees.stream()
-                .map(IQTree::getRootNode)
-                .map(n -> contains(n) ? n.clone() : n)
-                .collect(ImmutableCollectors.toList());
-
-        if (parentNode instanceof BinaryOrderedOperatorNode) {
-            addChild(parentNode, newChildren.get(0), Optional.of(LEFT), false);
-            addChild(parentNode, newChildren.get(1), Optional.of(RIGHT), false);
-        }
-        else {
-            newChildren
-                    .forEach(c -> addChild(parentNode, c, Optional.empty(),false));
-        }
-
-        IntStream.range(0, childrenTrees.size())
-                .forEach(i -> insertIQChildren(newChildren.get(i), childrenTrees.get(i).getChildren()));
-    }
-
 
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {

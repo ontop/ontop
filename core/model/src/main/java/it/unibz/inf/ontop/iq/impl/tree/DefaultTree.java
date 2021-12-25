@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl.tree;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.*;
 
@@ -145,80 +144,11 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder() {
-        return getNodesInTopDownOrder().reverse();
-    }
-
-    @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() {
         Queue<TreeNode> nodesToExplore = new LinkedList<>();
         ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
         nodesToExplore.add(rootNode);
         builder.add(rootNode.getQueryNode());
-
-        while (!nodesToExplore.isEmpty()) {
-            TreeNode node = nodesToExplore.poll();
-            for (TreeNode childNode : accessChildrenRelation(node).getChildren()) {
-                nodesToExplore.add(childNode);
-                builder.add(childNode.getQueryNode());
-            }
-        }
-        return builder.build();
-    }
-
-    @Override
-    public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
-        TreeNode treeNode = accessTreeNode(previousNode);
-        if (treeNode == null) {
-            throw new IllegalArgumentException("The previous query node must be in the tree");
-        }
-        if (contains(replacingNode)) {
-            throw new IllegalArgumentException("The replacing node must not be already in the tree");
-        }
-
-        treeNode.changeQueryNode(replacingNode);
-        removeNodeFromIndex(previousNode);
-        insertNodeIntoIndex(replacingNode, treeNode);
-
-        if ((!(previousNode instanceof BinaryOrderedOperatorNode))
-                && (replacingNode instanceof BinaryOrderedOperatorNode)) {
-            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
-                    .convertToBinaryChildrenRelation();
-            // Overrides the previous entry
-            childrenIndex.put(treeNode, newChildrenRelation);
-        }
-        else if ((previousNode instanceof BinaryOrderedOperatorNode)
-                && (!(replacingNode instanceof BinaryOrderedOperatorNode))) {
-            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
-                    .convertToStandardChildrenRelation();
-            // Overrides the previous entry
-            childrenIndex.put(treeNode, newChildrenRelation);
-        }
-    }
-
-    @Override
-    public void removeSubTree(QueryNode subQueryTreeRoot) {
-        TreeNode subTreeRoot = accessTreeNode(subQueryTreeRoot);
-
-        Queue<TreeNode> nodesToRemove = new LinkedList<>();
-        nodesToRemove.add(subTreeRoot);
-
-        while(!nodesToRemove.isEmpty()) {
-            TreeNode treeNode = nodesToRemove.poll();
-            nodesToRemove.addAll(accessChildrenRelation(treeNode).getChildren());
-
-            removeNode(treeNode);
-        }
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentQueryNode) {
-        TreeNode currentTreeNode = accessTreeNode(currentQueryNode);
-
-        Queue<TreeNode> nodesToExplore = new LinkedList<>();
-        ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
-        nodesToExplore.add(currentTreeNode);
-        // The root is excluded from the list
 
         while (!nodesToExplore.isEmpty()) {
             TreeNode node = nodesToExplore.poll();
@@ -241,150 +171,6 @@ public class DefaultTree implements QueryTree {
         else {
             return Optional.of(parentTreeNode.getQueryNode());
         }
-    }
-
-    @Override
-    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
-        TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
-        removeNodeFromIndex(parentQueryNode);
-        ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
-
-        if (children.size() == 1) {
-            TreeNode childTreeNode = children.get(0);
-            childrenIndex.remove(parentTreeNode);
-            // May be null
-            TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
-            parentIndex.remove(parentTreeNode);
-
-            /*
-             * When the child node becomes the new root
-             */
-            if (grandParentTreeNode == null) {
-                rootNode = childTreeNode;
-                parentIndex.remove(childTreeNode);
-            }
-            else {
-                parentIndex.put(childTreeNode, grandParentTreeNode);
-                ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
-                grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
-            }
-            return childTreeNode.getQueryNode();
-        }
-        else {
-            throw new IllegalTreeUpdateException("The query node " + parentQueryNode + " does not have a unique child");
-        }
-    }
-
-    @Override
-    public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode,
-                                      QueryNode parentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-        if (replacingNode instanceof BinaryOrderedOperatorNode) {
-            throw new RuntimeException("Having a BinaryAsymmetricOperatorNode replacing node is not yet supported");
-        }
-        addChild(parentNode, replacingNode, optionalPosition, true, true);
-
-
-        for(QueryNode nodeToRemove : nodesToRemove) {
-            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof BinaryOrderedOperatorNode);
-
-            TreeNode treeNodeToRemove = accessTreeNode(nodeToRemove);
-
-            for (QueryNode child : accessChildrenRelation(treeNodeToRemove).getChildQueryNodes()) {
-                if (!nodesToRemove.contains(child)) {
-                    if (isParentBinaryAsymmetricOperator) {
-                        throw new RuntimeException("Re-integrating children of a BinaryAsymmetricOperatorNode " +
-                                "is not yet supported");
-                    }
-                    else {
-                        addChild(replacingNode, child, Optional.<BinaryOrderedOperatorNode.ArgumentPosition>empty(), false, true);
-                    }
-                }
-            }
-            removeNode(treeNodeToRemove);
-        }
-    }
-
-    @Override
-    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
-        TreeNode parentTreeNode = accessTreeNode(parentNode);
-        TreeNode childTreeNode = accessTreeNode(childNode);
-
-        ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
-        return childrenRelation.getOptionalPosition(childTreeNode);
-    }
-
-    @Override
-    public void insertParent(QueryNode childNode, QueryNode newParentNode,
-                             Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-        if (contains(newParentNode)) {
-            throw new IllegalTreeUpdateException(newParentNode + " is already present so cannot be inserted again");
-        }
-
-
-        TreeNode childTreeNode = accessTreeNode(childNode);
-
-        TreeNode newParentTreeNode = new TreeNode(newParentNode);
-        insertNodeIntoIndex(newParentNode, newParentTreeNode);
-        childrenIndex.put(newParentTreeNode, createChildrenRelation(newParentTreeNode));
-
-        Optional<QueryNode> optionalFormerParent = getParent(childNode);
-        if (!optionalFormerParent.isPresent()) {
-            rootNode = newParentTreeNode;
-        } else {
-            QueryNode grandParentNode = optionalFormerParent.get();
-            TreeNode grandParentTreeNode = accessTreeNode(grandParentNode);
-            changeChild(grandParentTreeNode, childTreeNode, newParentTreeNode);
-        }
-
-        addChild(newParentNode, childNode, optionalPosition, false, false);
-    }
-
-    public ImmutableSet<TrueNode> getTrueNodes() {
-        return ImmutableSet.copyOf(trueNodes);
-    }
-
-    @Override
-    public ImmutableSet<IntensionalDataNode> getIntensionalNodes(){
-        return ImmutableSet.copyOf(intensionalNodes);
-    }
-
-    @Override
-    public QueryNode replaceNodeByChild(QueryNode parentNode,
-                                        Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
-        TreeNode parentTreeNode = accessTreeNode(parentNode);
-
-        ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
-
-        TreeNode childTreeNode;
-        if (optionalReplacingChildPosition.isPresent()) {
-            childTreeNode = childrenRelation.getChild(optionalReplacingChildPosition.get())
-                    .orElseThrow(() -> new IllegalTreeUpdateException("No child at the position"
-                            + optionalReplacingChildPosition.get()));
-        }
-        else {
-            ImmutableList<TreeNode> children = childrenRelation.getChildren();
-            if (children.isEmpty()) {
-                throw new IllegalTreeUpdateException("The node cannot be replaced by a child " +
-                        "(does not have any)");
-            }
-            childTreeNode = children.get(0);
-        }
-
-        childrenIndex.remove(parentTreeNode);
-        // May be null
-        TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
-        parentIndex.remove(parentTreeNode);
-
-        if (grandParentTreeNode == null) {
-            rootNode = childTreeNode;
-            parentIndex.remove(childTreeNode);
-        }
-        else {
-            parentIndex.put(childTreeNode, grandParentTreeNode);
-            ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
-            grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
-        }
-        return childTreeNode.getQueryNode();
     }
 
     @Override
@@ -414,45 +200,8 @@ public class DefaultTree implements QueryTree {
                 newParentIndex, new HashSet<>(trueNodes), new HashSet<>(intensionalNodes), versionNumber);
     }
 
-    @Override
-    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
-                              Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) {
-
-        TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
-        TreeNode childTreeNode = accessTreeNode(childNode);
-
-        accessChildrenRelation(formerParentTreeNode).removeChild(childTreeNode);
-
-        addChild(newParentNode, childNode, optionalPosition, false, false);
-    }
-
-    @Override
-    public UUID getVersionNumber() {
-        return versionNumber;
-    }
-
     private void updateVersionNumber() {
         versionNumber = UUID.randomUUID();
-    }
-
-    /**
-     * Low-level
-     */
-    private void removeNode(TreeNode treeNode) {
-        removeNodeFromIndex(treeNode.getQueryNode());
-        TreeNode parentNode = getParentTreeNode(treeNode);
-        if (parentNode != null) {
-            accessChildrenRelation(parentNode).removeChild(treeNode);
-        }
-        parentIndex.remove(treeNode);
-
-        /**
-         * Its children have no parent anymore
-         */
-        for (TreeNode childTreeNode : childrenIndex.get(treeNode).getChildren()) {
-            parentIndex.remove(childTreeNode);
-        }
-        childrenIndex.remove(treeNode);
     }
 
     private void removeChild(TreeNode parentNode, TreeNode childNodeToRemove) {
@@ -530,19 +279,4 @@ public class DefaultTree implements QueryTree {
         }
         updateVersionNumber();
     }
-
-    /**
-     * Low-low-level
-     */
-    private void removeNodeFromIndex(QueryNode queryNode) {
-        nodeIndex.remove(queryNode);
-
-        if (queryNode instanceof TrueNode) {
-            trueNodes.remove(queryNode);
-        } else if (queryNode instanceof IntensionalDataNode){
-            intensionalNodes.remove(queryNode);
-        }
-        updateVersionNumber();
-    }
-
 }

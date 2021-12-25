@@ -11,8 +11,6 @@ import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 
-import java.util.Optional;
-
 /**
  * TODO: describe
  *
@@ -97,14 +95,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return treeComponent.getChildren(node);
     }
-
-
-    @Override
-    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                                    QueryNode childNode) {
-        return treeComponent.getOptionalPosition(parentNode, childNode);
-    }
-
 
 
     /**

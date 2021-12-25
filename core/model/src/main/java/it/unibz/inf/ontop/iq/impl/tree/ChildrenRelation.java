@@ -14,8 +14,6 @@ import java.util.stream.Stream;
  */
 public interface ChildrenRelation {
 
-    TreeNode getParent();
-
     ImmutableList<TreeNode> getChildren();
 
     Stream<TreeNode> getChildrenStream();
@@ -35,18 +33,5 @@ public interface ChildrenRelation {
 
     Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
 
-    Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position);
-
     ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
-
-    /**
-     * May return itself (no cloning)
-     */
-    ChildrenRelation convertToBinaryChildrenRelation();
-
-    /**
-     * May return itself (no cloning)
-     */
-    ChildrenRelation convertToStandardChildrenRelation();
-
 }

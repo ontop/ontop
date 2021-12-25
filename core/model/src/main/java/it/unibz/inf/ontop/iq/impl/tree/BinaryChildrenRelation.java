@@ -39,11 +39,6 @@ public class BinaryChildrenRelation implements ChildrenRelation {
 
 
     @Override
-    public TreeNode getParent() {
-        return parent;
-    }
-
-    @Override
     public ImmutableList<TreeNode> getChildren() {
         ImmutableList.Builder<TreeNode> builder = ImmutableList.builder();
         if (optionalLeftChild.isPresent()) {
@@ -147,38 +142,10 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position) {
-        switch (position) {
-            case LEFT:
-                return optionalLeftChild;
-            case RIGHT:
-                return optionalRightChild;
-            default:
-                throw new IllegalStateException("Unknown position: " + position);
-        }
-    }
-
-    @Override
     public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
         return new BinaryChildrenRelation(parent.findNewTreeNode(newNodeIndex),
                 optionalLeftChild.map(n -> n.findNewTreeNode(newNodeIndex)),
                 optionalRightChild.map(n -> n.findNewTreeNode(newNodeIndex))
                 );
-    }
-
-    @Override
-    public ChildrenRelation convertToBinaryChildrenRelation() {
-        return this;
-    }
-
-    @Override
-    public ChildrenRelation convertToStandardChildrenRelation() {
-        StandardChildrenRelation newRelation = new StandardChildrenRelation(parent);
-
-        getChildrenStream()
-                .forEach(c -> newRelation.addChild(c, Optional.empty(), false));
-
-        return newRelation;
-
     }
 }

@@ -19,11 +19,6 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 
-    /**
-     * TODO: explain
-     */
-    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
-
     DistinctVariableOnlyDataAtom getProjectionAtom();
 
     /**

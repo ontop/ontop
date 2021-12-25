@@ -34,11 +34,6 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public TreeNode getParent() {
-        return parent;
-    }
-
-    @Override
     public ImmutableList<TreeNode> getChildren() {
         return ImmutableList.copyOf(children);
     }
@@ -103,29 +98,10 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position) {
-        return Optional.empty();
-    }
-
-    @Override
     public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
         return new StandardChildrenRelation(parent.findNewTreeNode(newNodeIndex),
                 children.stream()
                         .map(c -> c.findNewTreeNode(newNodeIndex))
                         .collect(Collectors.toList()));
-    }
-
-    @Override
-    public ChildrenRelation convertToBinaryChildrenRelation() {
-        if (!children.isEmpty()) {
-            throw new IllegalStateException("Conversion from a standard to binary children relation is not supported " +
-                    "when there are children");
-        }
-        return new BinaryChildrenRelation(parent);
-    }
-
-    @Override
-    public ChildrenRelation convertToStandardChildrenRelation() {
-        return this;
     }
 }
