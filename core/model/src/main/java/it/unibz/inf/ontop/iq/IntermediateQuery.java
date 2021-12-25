@@ -19,10 +19,6 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 
-    Optional<QueryNode> getChild(QueryNode currentNode, BinaryOrderedOperatorNode.ArgumentPosition position);
-
-    Optional<QueryNode> getFirstChild(QueryNode node);
-
     /**
      * TODO: explain
      */

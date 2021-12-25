@@ -63,11 +63,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder() {
-        return tree.getNodesInBottomUpOrder();
-    }
-
-    @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException {
         return tree.getNodesInTopDownOrder();
     }
@@ -94,42 +89,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
-        getChildren(subTreeRootNode).stream()
-                .forEach(this::removeSubTree);
-        replaceNode(subTreeRootNode, replacingNode);
-    }
-
-    @Override
-    public void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
-            throws IllegalTreeUpdateException {
-        Queue<QueryNode> localParents = new LinkedList<>();
-        localParents.add(localTopNode);
-        Map<QueryNode, QueryNode> localToExternalNodeMap = new HashMap<>();
-        localToExternalNodeMap.put(localTopNode, subQueryTopNode);
-
-        while(!localParents.isEmpty()) {
-            QueryNode localParent = localParents.poll();
-            QueryNode externalParent = localToExternalNodeMap.get(localParent);
-
-            for (QueryNode externalChild : subQuery.getChildren(externalParent)) {
-                QueryNode localChild = externalChild.clone();
-                localToExternalNodeMap.put(localChild, externalChild);
-                localParents.add(localChild);
-                addChild(localParent, localChild, subQuery.getOptionalPosition(externalParent, externalChild), false);
-            }
-        }
-
-    }
-
-    @Override
     public void removeSubTree(QueryNode subTreeRoot) {
         tree.removeSubTree(subTreeRoot);
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
-        return tree.getSubTreeNodesInTopDownOrder(currentNode);
     }
 
     @Override
@@ -139,39 +100,9 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException {
-        ImmutableList.Builder<QueryNode> ancestorBuilder = ImmutableList.builder();
-
-        // Non-final
-        Optional<QueryNode> optionalAncestor = getParent(descendantNode);
-
-        while(optionalAncestor.isPresent()) {
-            QueryNode ancestor = optionalAncestor.get();
-            ancestorBuilder.add(ancestor);
-
-            optionalAncestor = getParent(ancestor);
-        }
-        return ancestorBuilder.build();
-    }
-
-    @Override
     public Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException {
         return tree.getParent(node);
     }
-
-    @Override
-    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException {
-        return tree.removeOrReplaceNodeByUniqueChild(node);
-    }
-
-    @Override
-    public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                                      Optional<ArgumentPosition> optionalPosition)
-            throws IllegalTreeUpdateException {
-        collectPossiblyNewVariables(replacingNode);
-        tree.replaceNodesByOneNode(queryNodes, replacingNode, parentNode, optionalPosition);
-    }
-
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
@@ -200,18 +131,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public Optional<QueryNode> getFirstChild(QueryNode node) {
-        ImmutableList<QueryNode> children = tree.getChildren(node);
-
-        switch(children.size()) {
-            case 0:
-                return Optional.empty();
-            default:
-                return Optional.of(children.get(0));
-        }
-    }
-
-    @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
         insertParent(childNode, newParentNode, Optional.empty());
     }
@@ -221,23 +140,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(newParentNode);
         tree.insertParent(childNode, newParentNode, optionalPosition);
-    }
-
-    @Override
-    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
-                              Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-
-        tree.transferChild(childNode, formerParentNode, newParentNode, optionalPosition);
-    }
-
-    @Override
-    public Variable generateNewVariable() {
-        return variableGenerator.generateNewVariable();
-    }
-
-    @Override
-    public Variable generateNewVariable(Variable formerVariable) {
-        return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
 
     @Override
@@ -267,21 +169,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             return getProjectedVariableStream(node)
                     .collect(ImmutableCollectors.toSet());
         }
-    }
-
-    @Override
-    public UUID getVersionNumber() {
-        return tree.getVersionNumber();
-    }
-
-    @Override
-    public QueryNode replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree) {
-        QueryNode iqRoot = replacingSubTree.getRootNode();
-        QueryNode newSubTreeRoot = contains(iqRoot) ? iqRoot.clone() : iqRoot;
-        replaceSubTree(subTreeRoot, newSubTreeRoot);
-
-        insertIQChildren(newSubTreeRoot, replacingSubTree.getChildren());
-        return newSubTreeRoot;
     }
 
     /**

@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
-import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -32,11 +31,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             super(message);
         }
     }
-
-    /**
-     * TODO: use Guice to replace it.
-     */
-    private static final IntermediateQueryPrinter PRINTER = new BasicQueryTreePrinter();
 
 
     /**
@@ -67,7 +61,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.iqFactory = iqFactory;
 
         if (settings.isTestModeEnabled())
-            validate();
+            this.validator.validate(this);
     }
 
     @Override
@@ -106,26 +100,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     @Override
-    public Optional<QueryNode> getChild(QueryNode currentNode, BinaryOrderedOperatorNode.ArgumentPosition position) {
-        return getChildren(currentNode).stream()
-                .filter(c -> getOptionalPosition(currentNode, c)
-                        .filter(position::equals)
-                        .isPresent())
-                .findFirst();
-    }
-
-
-    @Override
     public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                     QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
     }
 
-
-    @Override
-    public Optional<QueryNode> getFirstChild(QueryNode node) {
-        return treeComponent.getFirstChild(node);
-    }
 
 
     /**
@@ -140,10 +119,23 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public String toString() {
-        return PRINTER.stringify(this);
+        return  getProjectionAtom() + "\n"
+                + stringifySubTree(getRootNode(), "");
     }
 
-    private void validate() throws InvalidIntermediateQueryException {
-        validator.validate(this);
+    private static final String TAB_STR = "   ";
+
+    /**
+     * Recursive method.
+     */
+    private String stringifySubTree(QueryNode subTreeRoot, String rootOffsetString) {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(rootOffsetString).append(subTreeRoot).append("\n");
+
+        for (QueryNode child : getChildren(subTreeRoot)) {
+            strBuilder.append(stringifySubTree(child, rootOffsetString + TAB_STR));
+        }
+        return strBuilder.toString();
     }
+
 }

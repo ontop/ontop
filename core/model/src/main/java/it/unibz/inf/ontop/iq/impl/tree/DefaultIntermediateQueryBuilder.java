@@ -18,9 +18,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-
 /**
  * TODO: explain
  */
@@ -109,12 +106,12 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         }
         else if (rootNode instanceof UnaryOperatorNode) {
             // Recursive
-            IQTree childTree = convertTree(query, query.getFirstChild(rootNode).get());
+            IQTree childTree = convertTree(query, query.getChildren(rootNode).get(0));
             return iqFactory.createUnaryIQTree((UnaryOperatorNode) rootNode, childTree);
         }
         else if (rootNode instanceof BinaryNonCommutativeOperatorNode) {
-            IQTree leftChildTree = convertTree(query, query.getChild(rootNode, LEFT).get());
-            IQTree rightChildTree = convertTree(query, query.getChild(rootNode, RIGHT).get());
+            IQTree leftChildTree = convertTree(query, query.getChildren(rootNode).get(0));
+            IQTree rightChildTree = convertTree(query, query.getChildren(rootNode).get(1));
 
             return iqFactory.createBinaryNonCommutativeIQTree((BinaryNonCommutativeOperatorNode) rootNode,
                     leftChildTree, rightChildTree);
