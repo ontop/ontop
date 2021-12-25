@@ -89,8 +89,7 @@ public class MappingTest {
         RDFAtomPredicate rdfAtomPredicate = null;
 
         // Properties
-        for (IRI propertyIri : propertyIris){
-            IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
+        for (IRI propertyIri : propertyIris) {
             ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                     SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                             P, getConstantIRI(propertyIri),
@@ -99,25 +98,21 @@ public class MappingTest {
             DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
             rdfAtomPredicate = (RDFAtomPredicate) mappingProjectionAtom.getPredicate();
 
-            mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
-            mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-            IQ mappingAssertion = mappingBuilder.buildIQ();
+            IQ mappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
             propertyMapBuilder.put(propertyIri, mappingAssertion);
-            LOGGER.info("Mapping assertion:\n" +mappingAssertion);
+            LOGGER.info("Mapping assertion:\n" + mappingAssertion);
         }
 
         // Class
-        IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                 SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
-        mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
+        DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
-        mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-        IQ classMappingAssertion = mappingBuilder.buildIQ();
+        IQ classMappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
         LOGGER.info("Mapping assertion:\n" + classMappingAssertion);
 
@@ -146,7 +141,7 @@ public class MappingTest {
         Set<Variable> variableUnion = new HashSet<>();
 
         // Properties
-        for (IRI propertyIri : propertyIris){
+        for (IRI propertyIri : propertyIris) {
 
             IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
 
@@ -167,7 +162,7 @@ public class MappingTest {
         System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
         if(Stream.of(mappingAssertionVariables)
-                .anyMatch(variableUnion::contains)){
+                .anyMatch(variableUnion::contains)) {
             fail();
         }
         variableUnion.addAll(mappingAssertionVariables);
@@ -187,11 +182,7 @@ public class MappingTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, table1DataNode);
-
-        IQ mappingAssertion = queryBuilder.buildIQ();
+        IQ mappingAssertion = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, table1DataNode));
         LOGGER.info(mappingAssertion.toString());
 
 //        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
