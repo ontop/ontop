@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
@@ -46,11 +45,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return tree.getChildren(node);
-    }
-
-    @Override
-    public Stream<QueryNode> getChildrenStream(QueryNode node) {
-        return tree.getChildrenStream(node);
     }
 
     @Override
@@ -95,7 +89,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             return ((ExplicitVariableProjectionNode) node).getVariables().stream();
         }
         else {
-            return getChildrenStream(node)
+            return getChildren(node).stream()
                     .flatMap(this::getProjectedVariableStream);
         }
     }

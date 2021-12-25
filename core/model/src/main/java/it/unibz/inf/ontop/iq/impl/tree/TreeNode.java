@@ -19,10 +19,7 @@ public class TreeNode {
         return queryNode;
     }
 
-    protected void changeQueryNode(QueryNode newNode) {
-        this.queryNode = newNode;
-    }
-
+    @Override
     public String toString() {
         return "TN(" + queryNode + ")";
     }

@@ -20,8 +20,6 @@ public interface QueryTree {
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 
-    Stream<QueryNode> getChildrenStream(QueryNode node);
-
     boolean contains(QueryNode node);
 
     ImmutableList<QueryNode> getNodesInTopDownOrder();

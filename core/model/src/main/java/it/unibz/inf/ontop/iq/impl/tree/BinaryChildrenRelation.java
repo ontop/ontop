@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -51,13 +50,6 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Stream<TreeNode> getChildrenStream() {
-        return Stream.of(optionalLeftChild, optionalRightChild)
-                .filter(Optional::isPresent)
-                .map(Optional::get);
-    }
-
-    @Override
     public boolean contains(TreeNode node) {
         return getChildren().contains(node);
     }
@@ -90,19 +82,6 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void replaceChild(TreeNode formerChild, TreeNode newChild) {
-        if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == formerChild)) {
-            optionalLeftChild = Optional.of(newChild);
-        }
-        else if (optionalRightChild.isPresent() && (optionalRightChild.get() == formerChild)) {
-            optionalRightChild = Optional.of(newChild);
-        }
-        else {
-            throw new IllegalArgumentException("Unknown former child " + formerChild);
-        }
-    }
-
-    @Override
     public void removeChild(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
             optionalLeftChild = Optional.empty();
@@ -120,25 +99,6 @@ public class BinaryChildrenRelation implements ChildrenRelation {
             builder.add(treeNode.getQueryNode());
         }
         return builder.build();
-    }
-
-    @Override
-    public Stream<QueryNode> getChildQueryNodeStream() {
-        return getChildrenStream()
-                .map(TreeNode::getQueryNode);
-    }
-
-    @Override
-    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childNode) {
-        if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
-            return Optional.of(BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        }
-        else if (optionalRightChild.isPresent() && (optionalRightChild.get() == childNode)) {
-            return Optional.of(BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-        }
-        else {
-            throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
-        }
     }
 
     @Override

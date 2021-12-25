@@ -128,17 +128,6 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public Stream<QueryNode> getChildrenStream(QueryNode node) {
-        ChildrenRelation childrenRelation = accessChildrenRelation(accessTreeNode(node));
-        if (childrenRelation == null) {
-            return Stream.of();
-        }
-        else {
-            return childrenRelation.getChildQueryNodeStream();
-        }
-    }
-
-    @Override
     public boolean contains(QueryNode node) {
         return nodeIndex.containsKey(node);
     }
@@ -211,23 +200,6 @@ public class DefaultTree implements QueryTree {
 
         if (childrenIndex.containsKey(parentNode)) {
             accessChildrenRelation(parentNode).removeChild(childNodeToRemove);
-        }
-    }
-
-    private void changeChild(TreeNode parentNode, TreeNode childNodeToReplace, TreeNode replacingChild) {
-        if (getParentTreeNode(childNodeToReplace) == parentNode) {
-            parentIndex.remove(childNodeToReplace);
-            parentIndex.put(replacingChild, parentNode);
-        }
-        else {
-            throw new IllegalArgumentException(childNodeToReplace + " is not the child of " + parentNode);
-        }
-
-        if (childrenIndex.containsKey(parentNode)) {
-            accessChildrenRelation(parentNode).replaceChild(childNodeToReplace, replacingChild);
-        }
-        else {
-            throw new IllegalTreeUpdateException(parentNode + " has no childrenRelation");
         }
     }
 
