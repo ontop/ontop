@@ -24,13 +24,6 @@ public interface QueryTreeComponent {
     ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
 
     /**
-     * Please consider using an IntermediateQueryBuilder instead of this tree component.
-     */
-    void addChild(QueryNode parentNode, QueryNode childNode,
-                  Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
-                  boolean canReplacePreviousChildren) throws IllegalTreeUpdateException;
-
-    /**
      * Keeps the same query node objects but clones the tree edges
      * (since the latter are mutable by default).
      */

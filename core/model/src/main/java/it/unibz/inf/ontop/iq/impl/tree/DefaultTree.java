@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.node.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
  */
 public class DefaultTree implements QueryTree {
 
-    private TreeNode rootNode;
+    private final TreeNode rootNode;
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
@@ -64,24 +63,11 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
-                         boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException {
+                         boolean canReplace) throws IllegalTreeUpdateException {
         TreeNode parentNode = accessTreeNode(parentQueryNode);
 
-        TreeNode childNode;
         if (nodeIndex.containsKey(childQueryNode)) {
-            if (mustBeNew) {
-                throw new IllegalTreeUpdateException("Node " + childQueryNode + " already in the graph");
-            }
-            else {
-                childNode = accessTreeNode(childQueryNode);
-
-                TreeNode previousParent = getParentTreeNode(childNode);
-                if (previousParent != null) {
-                    removeChild(previousParent, childNode);
-                }
-                parentIndex.put(childNode, parentNode);
-                accessChildrenRelation(parentNode).addChild(childNode, optionalPosition, canReplace);
-            }
+            throw new IllegalTreeUpdateException("Node " + childQueryNode + " already in the graph");
         }
         /**
          * New node
@@ -147,19 +133,6 @@ public class DefaultTree implements QueryTree {
             }
         }
         return builder.build();
-    }
-
-    @Override
-    public Optional<QueryNode> getParent(QueryNode childQueryNode) {
-        TreeNode childTreeNode = accessTreeNode(childQueryNode);
-
-        TreeNode parentTreeNode = getParentTreeNode(childTreeNode);
-        if (parentTreeNode == null) {
-            return Optional.empty();
-        }
-        else {
-            return Optional.of(parentTreeNode.getQueryNode());
-        }
     }
 
     @Override

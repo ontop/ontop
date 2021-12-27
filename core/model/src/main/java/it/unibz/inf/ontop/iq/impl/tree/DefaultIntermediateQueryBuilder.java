@@ -67,7 +67,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public void addChild(QueryNode parentNode, QueryNode childNode) throws IntermediateQueryBuilderException {
         checkEditMode();
         try {
-            tree.addChild(parentNode, childNode, Optional.<ArgumentPosition>empty(), true, false);
+            tree.addChild(parentNode, childNode, Optional.<ArgumentPosition>empty(), false);
         } catch (IllegalTreeUpdateException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }
@@ -79,7 +79,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
             throws IntermediateQueryBuilderException {
         checkEditMode();
         try {
-            tree.addChild(parentNode, childNode, Optional.of(position), true, false);
+            tree.addChild(parentNode, childNode, Optional.of(position), false);
         } catch (IllegalTreeUpdateException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

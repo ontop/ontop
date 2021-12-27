@@ -58,14 +58,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void addChild(QueryNode parentNode, QueryNode childNode,
-                         Optional<ArgumentPosition> optionalPosition, boolean canReplace)
-            throws IllegalTreeUpdateException {
-        collectPossiblyNewVariables(childNode);
-        tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
-    }
-
-    @Override
     public QueryTreeComponent createSnapshot() {
         return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.createSnapshot());
     }

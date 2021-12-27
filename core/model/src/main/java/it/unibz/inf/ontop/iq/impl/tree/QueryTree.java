@@ -16,15 +16,13 @@ public interface QueryTree {
     QueryNode getRootNode();
 
     void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
-                  boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;
+                  boolean canReplace) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 
     boolean contains(QueryNode node);
 
     ImmutableList<QueryNode> getNodesInTopDownOrder();
-
-    Optional<QueryNode> getParent(QueryNode childNode);
 
     /**
      * Keeps the same query node objects but clones the tree edges
