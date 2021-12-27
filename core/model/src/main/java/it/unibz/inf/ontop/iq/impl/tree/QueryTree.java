@@ -15,12 +15,9 @@ import java.util.stream.Stream;
 public interface QueryTree {
     QueryNode getRootNode();
 
-    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
-                  boolean canReplace) throws IllegalTreeUpdateException;
+    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
-
-    boolean contains(QueryNode node);
 
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 

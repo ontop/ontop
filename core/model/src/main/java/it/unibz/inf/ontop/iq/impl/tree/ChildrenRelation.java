@@ -16,14 +16,7 @@ public interface ChildrenRelation {
 
     ImmutableList<TreeNode> getChildren();
 
-    boolean contains(TreeNode node);
-
-    void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
-            throws IllegalTreeUpdateException;
-
-    void removeChild(TreeNode childNode);
-
-    ImmutableList<QueryNode> getChildQueryNodes();
+    void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
 }

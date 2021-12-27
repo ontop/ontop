@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -39,35 +38,13 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public boolean contains(TreeNode node) {
-        return children.contains(node);
-    }
-
-    @Override
-    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
-                         boolean canReplace) {
+    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) {
         if (optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept argument positions");
         }
-        if (!contains(childNode)) {
+        if (!children.contains(childNode)) {
             children.add(childNode);
         }
-    }
-
-    @Override
-    public void removeChild(TreeNode childNode) {
-        if (contains(childNode)) {
-            children.remove(childNode);
-        }
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getChildQueryNodes() {
-        ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
-        for (TreeNode treeNode : children) {
-            builder.add(treeNode.getQueryNode());
-        }
-        return builder.build();
     }
 
     @Override

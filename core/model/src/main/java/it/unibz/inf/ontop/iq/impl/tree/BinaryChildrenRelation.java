@@ -50,12 +50,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public boolean contains(TreeNode node) {
-        return getChildren().contains(node);
-    }
-
-    @Override
-    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The BinaryChildrenRelation requires argument positions");
@@ -63,7 +58,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
 
         switch (optionalPosition.get()) {
             case LEFT:
-                if (optionalLeftChild.isPresent() && (!canReplace) && (optionalLeftChild.get() != childNode)) {
+                if (optionalLeftChild.isPresent() && (optionalLeftChild.get() != childNode)) {
                     throw new IllegalTreeUpdateException("Left child node is already present");
                 }
                 else {
@@ -71,7 +66,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
                 }
                 break;
             case RIGHT:
-                if (optionalRightChild.isPresent() && (!canReplace) && (optionalRightChild.get() != childNode)) {
+                if (optionalRightChild.isPresent() && (optionalRightChild.get() != childNode)) {
                         throw new IllegalTreeUpdateException("Right child node is already present");
                 }
                 else {
@@ -79,26 +74,6 @@ public class BinaryChildrenRelation implements ChildrenRelation {
                 }
                 break;
         }
-    }
-
-    @Override
-    public void removeChild(TreeNode childNode) {
-        if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
-            optionalLeftChild = Optional.empty();
-        }
-        // Compatible with the crazy case where the same node appears on the two sides.
-        if (optionalRightChild.isPresent() && (optionalRightChild.get() == childNode)) {
-            optionalRightChild = Optional.empty();
-        }
-    }
-
-    @Override
-    public ImmutableList<QueryNode> getChildQueryNodes() {
-        ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
-        for (TreeNode treeNode : getChildren()) {
-            builder.add(treeNode.getQueryNode());
-        }
-        return builder.build();
     }
 
     @Override
