@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -97,10 +96,6 @@ public class MappingTestingTools {
         TABLE2_AR3 = builder.createRelationPredicate(5, 3);
         TABLE3_AR3 = builder.createRelationPredicate(6, 3);
         TABLE4_AR3 = builder.createRelationPredicate(7, 3);
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {
