@@ -244,7 +244,6 @@ public class RDB2RDFTest {
 
 		PROPERTIES = new Properties();
 
-		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_NAME, "h2");
 		PROPERTIES.setProperty(OntopSQLCredentialSettings.JDBC_USER, DB_USER);
 		PROPERTIES.setProperty(OntopSQLCredentialSettings.JDBC_PASSWORD, DB_PASSWORD);
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_URL, JDBC_URL);
@@ -304,7 +303,6 @@ public class RDB2RDFTest {
 
 	Builder<? extends Builder<?>> createInMemoryBuilder() {
 		return createStandardConfigurationBuilder()
-				.jdbcName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
 				.jdbcUrl(JDBC_URL)
 				.jdbcDriver(JDBC_DRIVER)
 				.jdbcUser(DB_USER)
