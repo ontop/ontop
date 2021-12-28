@@ -514,96 +514,52 @@ public class BindingLiftTest {
 
     @Test
     public void testCompositeURITemplateDoubleRunYProjectedAway() {
-        //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
-
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        queryBuilder.init(projectionAtom, rootNode);
-
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X,Y));
-        queryBuilder.addChild(rootNode, unionNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(unionNode, joinNode);
-
-        UnionNode unionNode2 =  unionNode.clone();
-        queryBuilder.addChild(unionNode, unionNode2);
-
-        //first child of unionNode2
+        UnionNode unionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X,Y));
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateCompositeURI2(I, L),
-                        Y, NULL)));
-        queryBuilder.addChild(unionNode2, subQuery1UnionNode2);
-
-        queryBuilder.addChild(subQuery1UnionNode2, createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(I, L)) );
-
-        //second child of unionNode2
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(I, L), Y, NULL)));
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateCompositeURI2(M, N),
-                        Y, NULL)));
-        queryBuilder.addChild(unionNode2, subQuery2UnionNode2);
-
-        queryBuilder.addChild(subQuery2UnionNode2, createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(M, N)) );
-
-
-        //first child of JoinNode
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(M, N), Y, NULL)));
         ConstructionNode subQueryJoinNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(A, B), Y, generateIRIWithTemplate1(B))));
-        queryBuilder.addChild(joinNode, subQueryJoinNode);
-
-        queryBuilder.addChild(subQueryJoinNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B)) );
-
-        //second child of JoinNode
         ConstructionNode subQueryJoinNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateIRIWithTemplate1(F))));
-        queryBuilder.addChild(joinNode, subQueryJoinNode2);
 
-        queryBuilder.addChild(subQueryJoinNode2, createExtensionalDataNode(TABLE3_AR2,ImmutableList.of( E, F)) );
-
-        IQ unOptimizedQuery = queryBuilder.buildIQ();
-
-
+        IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(rootNode,
+                        IQ_FACTORY.createNaryIQTree(unionNode, ImmutableList.of(
+                                IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
+                                        IQ_FACTORY.createUnaryIQTree(subQueryJoinNode,
+                                                createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B))),
+                                        IQ_FACTORY.createUnaryIQTree(subQueryJoinNode2,
+                                                createExtensionalDataNode(TABLE3_AR2,ImmutableList.of( E, F))))),
+                                IQ_FACTORY.createNaryIQTree(unionNode2, ImmutableList.of(
+                                        IQ_FACTORY.createUnaryIQTree(subQuery1UnionNode2,
+                                                createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(I, L))),
+                                        IQ_FACTORY.createUnaryIQTree(subQuery2UnionNode2,
+                                                createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(M, N)))))))));
 
         Variable af3 = TERM_FACTORY.getVariable("af3");
         Variable bf4 = TERM_FACTORY.getVariable("bf4");
         Variable f5 = TERM_FACTORY.getVariable("f5");
         Variable f6 = TERM_FACTORY.getVariable("f6");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(af3,bf4))));
-
-
-        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
-
-        UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(bf4, af3));
-        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode);
-
-        //first child of UnionNode
-
+        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(bf4, af3));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(expectedUnionNode, expectedJoinNode);
 
-        expectedQueryBuilder.addChild(expectedJoinNode, createExtensionalDataNode(TABLE1_AR2,ImmutableList.of(af3,bf4)) );
-
-        //second child of JoinNode
-
-        expectedQueryBuilder.addChild(expectedJoinNode, IQ_FACTORY.createExtensionalDataNode(
-                TABLE3_AR2, ImmutableMap.of(1, bf4)) );
-
-        //first child of unionNode2
-
-        expectedQueryBuilder.addChild(expectedUnionNode, createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(af3, bf4)) );
-
-        //second child of unionNode2
-
-        expectedQueryBuilder.addChild(expectedUnionNode, createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(af3, bf4)) );
-
-        IQ expectedQuery = expectedQueryBuilder.buildIQ();
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(expectedRootNode,
+                        IQ_FACTORY.createNaryIQTree(expectedUnionNode, ImmutableList.of(
+                                        IQ_FACTORY.createNaryIQTree(expectedJoinNode, ImmutableList.of(
+                                                createExtensionalDataNode(TABLE1_AR2,ImmutableList.of(af3,bf4)),
+                                                IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(1, bf4)))),
+                                        createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(af3, bf4)),
+                                        createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(af3, bf4))))));
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -619,69 +575,45 @@ public class BindingLiftTest {
     }
 
     private void testLeftJoinAndUnionLiftSubstitution(boolean withTopConstructionNode) {
-        //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, X, Y, Z, W);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        if (withTopConstructionNode) {
-            ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-            queryBuilder.init(projectionAtom, rootNode);
-            queryBuilder.addChild(rootNode, joinNode);
-        }
-        else {
-            queryBuilder.init(projectionAtom, joinNode);
-        }
-
-        //construct left side join (left join)
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(joinNode, leftJoinNode);
 
-        //construct right side join
         ConstructionNode rightNodeJoin = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        W, generateInt(H),
-                        Y, generateInt(G))));
-        queryBuilder.addChild(joinNode, rightNodeJoin);
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateInt(H), Y, generateInt(G))));
 
-        queryBuilder.addChild(rightNodeJoin, createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(G, H)) );
-
-        //construct left side left join (union)
         UnionNode unionNodeOnLeft = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
-        queryBuilder.addChild(leftJoinNode, unionNodeOnLeft, LEFT);
-
         ConstructionNode leftUnionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateIRIWithTemplate1(A),
-                        Y, generateInt(B))));
-        queryBuilder.addChild(unionNodeOnLeft, leftUnionNode);
-
-        queryBuilder.addChild(leftUnionNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B)) );
-
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), Y, generateInt(B))));
         ConstructionNode rightUnionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI2(C),
-                        Y, generateInt(D))));
-        queryBuilder.addChild(unionNodeOnLeft, rightUnionNode);
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), Y, generateInt(D))));
 
-        queryBuilder.addChild(rightUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D)) );
-
-        //construct right side  left join
         ConstructionNode nodeOnRight = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(E), Z, generateInt(F))));
-        queryBuilder.addChild(leftJoinNode, nodeOnRight, RIGHT);
-
-        queryBuilder.addChild(nodeOnRight, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F)) );
 
 
+        IQTree tree = IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
+                        IQ_FACTORY.createNaryIQTree(unionNodeOnLeft, ImmutableList.of(
+                                IQ_FACTORY.createUnaryIQTree(leftUnionNode,
+                                        createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B))),
+                                IQ_FACTORY.createUnaryIQTree(rightUnionNode,
+                                        createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D))))),
+                        IQ_FACTORY.createUnaryIQTree(nodeOnRight,
+                                createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F)))
+                        ),
+                IQ_FACTORY.createUnaryIQTree(rightNodeJoin, createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(G, H)) )
+        ));
 
-        //build unoptimized query
-        IQ unOptimizedQuery = queryBuilder.buildIQ();
+        IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                withTopConstructionNode
+                        ? IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()), tree)
+                        : tree);
 
 
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         W, generateInt(H),
@@ -692,55 +624,32 @@ public class BindingLiftTest {
                                 TERM_FACTORY.getIfElseNull(
                                         TERM_FACTORY.getDBIsNotNull(F),
                                         TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getDatatype(XSD.INTEGER)))))));
-
-        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
-
-
-        //construct union
         UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, BF1, F, H));
-        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode);
 
-
-        //construct union left side
-
-        ConstructionNode expectedNodeOnLeft =IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
+        ConstructionNode expectedNodeOnLeft = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         F0, generateIRIString(URI_TEMPLATE_STR_1, A))));
-
-        expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnLeft);
-
-        //construct left join
         LeftJoinNode expectedLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        expectedQueryBuilder.addChild(expectedNodeOnLeft, expectedLeftJoinNode);
-
         InnerJoinNode leftInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
-        //construct left side left join
-        expectedQueryBuilder.addChild(expectedLeftJoinNode, leftInnerJoinNode, LEFT);
-
-        ExtensionalDataNode newDataNode2 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(BF1, H));
-
-        expectedQueryBuilder.addChild(leftInnerJoinNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, BF1)));
-        expectedQueryBuilder.addChild(leftInnerJoinNode, newDataNode2);
-
-
-        //construct right side left join
-        expectedQueryBuilder.addChild(expectedLeftJoinNode,
-                createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, F)), RIGHT);
-
-        ConstructionNode expectedNodeOnRight =IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
+        ConstructionNode expectedNodeOnRight = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, NULL,
                         F0, generateIRIString(URI_TEMPLATE_STR_2, C))));
-
-        expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
-
         InnerJoinNode rightInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(expectedNodeOnRight, rightInnerJoinNode);
 
-        expectedQueryBuilder.addChild(rightInnerJoinNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)));
-        expectedQueryBuilder.addChild(rightInnerJoinNode, newDataNode2.clone());
-
-        IQ expectedQuery = expectedQueryBuilder.buildIQ();
+        IQ expectedQuery =   IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(expectedRootNode,
+                        IQ_FACTORY.createNaryIQTree(expectedUnionNode, ImmutableList.of(
+                                IQ_FACTORY.createUnaryIQTree(expectedNodeOnLeft,
+                                        IQ_FACTORY.createBinaryNonCommutativeIQTree(expectedLeftJoinNode,
+                                                IQ_FACTORY.createNaryIQTree(leftInnerJoinNode, ImmutableList.of(
+                                                        createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, BF1)),
+                                                        createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(BF1, H)))),
+                                                createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, F)))),
+                                IQ_FACTORY.createUnaryIQTree(expectedNodeOnRight,
+                                        IQ_FACTORY.createNaryIQTree(rightInnerJoinNode, ImmutableList.of(
+                                                createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)),
+                                                createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(BF1, H)))))))));
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
