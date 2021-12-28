@@ -227,7 +227,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: double-check why fails")
     @Test
     public void testNonEliminationTable3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), Y);
@@ -896,7 +895,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: double-check why fails")
     @Test
     public void testSelfJoinEliminationFunctionalGroundTerm1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, N);
@@ -911,7 +909,10 @@ public class RedundantSelfJoinTest {
 
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, groundFunctionalTerm, 1, M, 2, N));
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedDataNode);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(groundFunctionalTerm)),
+                        expectedDataNode));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
