@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
 import it.unibz.inf.ontop.iq.impl.tree.QueryTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -77,20 +76,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public QueryNode getRootNode() throws InconsistentIntermediateQueryException{
-        try {
-            return tree.getRootNode();
-        } catch (IllegalTreeException e) {
-            throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
+        return tree.getRootNode();
     }
 
     @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() {
-        try {
-            return tree.getNodesInTopDownOrder();
-        } catch (IllegalTreeException e) {
-            throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
+        return tree.getNodesInTopDownOrder();
     }
 
     @Override
