@@ -41,7 +41,6 @@ public class OldSyntaxMappingConverter {
     private static final Logger LOG = LoggerFactory.getLogger(OldSyntaxMappingConverter.class);
 
     private static final ImmutableMap<String, String> PARAMETER_MAP = ImmutableMap.of(
-    "sourceUri", OntopSQLCoreSettings.JDBC_NAME,
             "connectionUrl", OntopSQLCoreSettings.JDBC_URL,
             "username", OntopSQLCredentialSettings.JDBC_USER,
             "password", OntopSQLCredentialSettings.JDBC_PASSWORD,
@@ -107,11 +106,14 @@ public class OldSyntaxMappingConverter {
             String parameterName = tokens[0].trim();
             String inputParameter = tokens[1].trim();
 
-            String ontopParameterName = Optional.ofNullable(PARAMETER_MAP.get(parameterName))
-                    .orElseThrow(() -> new IOException(String.format(
-                            "Unknown parameter name \"%s\" at line: %d.", parameterName, reader.getLineNumber())));
+            if (!parameterName.equals("jdbc.name")) {
 
-            dataSourceProperties.put(ontopParameterName, inputParameter);
+                String ontopParameterName = Optional.ofNullable(PARAMETER_MAP.get(parameterName))
+                        .orElseThrow(() -> new IOException(String.format(
+                                "Unknown parameter name \"%s\" at line: %d.", parameterName, reader.getLineNumber())));
+
+                dataSourceProperties.put(ontopParameterName, inputParameter);
+            }
         }
         return dataSourceProperties;
     }

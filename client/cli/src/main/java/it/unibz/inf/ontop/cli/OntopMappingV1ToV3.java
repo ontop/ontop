@@ -207,9 +207,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             final String parameter = tokens[0].trim();
             final String inputParameter = tokens.length > 1 ? tokens[1].trim() : "";
 
-            if (parameter.equals(Label.sourceUri.name())) {
-                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_NAME, inputParameter);
-            } else if (parameter.equals(Label.connectionUrl.name())) {
+            if (parameter.equals(Label.connectionUrl.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_URL, inputParameter);
             } else if (parameter.equals(Label.username.name())) {
                 dataSourceProperties.put(OntopSQLCredentialSettings.JDBC_USER, inputParameter);

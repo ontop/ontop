@@ -240,11 +240,6 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         }
 
         @Override
-        public B jdbcName(String dbName) {
-            return sqlCoreBuilderFragment.jdbcName(dbName);
-        }
-
-        @Override
         public B jdbcUrl(String jdbcUrl) {
             return sqlCoreBuilderFragment.jdbcUrl(jdbcUrl);
         }

@@ -42,7 +42,6 @@ public class OntopEndpointTest {
                 "--db-url=" + DBURL,
                 //"--db-driver="
                 "--db-user=" + DBUSER,
-                "--db-name=" + DBNAME,
                 "--db-password=" + DBPASSWORD,
                 "--port=" + PORT);
     }

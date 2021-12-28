@@ -41,7 +41,6 @@ public class SQLMappingParserUsingOwlTest {
 
     public SQLMappingParserUsingOwlTest() {
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .jdbcName("http://www.example.org/db/dummy/")
                 .jdbcUrl("jdbc:postgresql://www.example.org/dummy")
                 .jdbcUser("dummy")
                 .jdbcPassword("dummy")

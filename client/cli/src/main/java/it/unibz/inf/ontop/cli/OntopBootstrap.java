@@ -62,9 +62,6 @@ public class OntopBootstrap extends AbstractOntopCommand {
             if (dbUser != null)
                 builder.jdbcUser(dbUser);
 
-            if (dbName != null)
-                builder.jdbcName(dbName);
-
             if (dbDriver != null)
                 builder.jdbcDriver(dbDriver);
 

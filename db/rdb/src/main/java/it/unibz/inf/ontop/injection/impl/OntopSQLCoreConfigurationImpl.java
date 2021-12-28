@@ -54,18 +54,11 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
             OntopSQLCoreBuilderFragment<B> {
 
         private final B builder;
-        private Optional<String> jdbcName = Optional.empty();
         private Optional<String> jdbcUrl = Optional.empty();
         private Optional<String> jdbcDriver = Optional.empty();
 
         DefaultOntopSQLCoreBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-        @Override
-        public B jdbcName(String dbName) {
-            this.jdbcName = Optional.of(dbName);
-            return builder;
         }
 
         @Override
@@ -83,7 +76,6 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         Properties generateProperties() {
             Properties properties = new Properties();
 
-            jdbcName.ifPresent(n -> properties.setProperty(OntopSQLCoreSettings.JDBC_NAME, n));
             jdbcUrl.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_URL, s));
             jdbcDriver.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, s));
 
@@ -105,11 +97,6 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         protected OntopSQLCoreBuilderMixin() {
             sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>((B)this);
             modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
-        }
-
-        @Override
-        public B jdbcName(String dbName) {
-            return sqlBuilderFragment.jdbcName(dbName);
         }
 
         @Override
