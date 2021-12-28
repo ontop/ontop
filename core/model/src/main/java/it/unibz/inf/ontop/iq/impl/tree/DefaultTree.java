@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * TODO: explain
@@ -15,55 +14,30 @@ import java.util.stream.Collectors;
  */
 public class DefaultTree implements QueryTree {
 
-    private final TreeNode rootNode;
-    private final Map<QueryNode, TreeNode> nodeIndex;
-    private final Map<TreeNode, ChildrenRelation> childrenIndex;
-    private final Map<TreeNode, TreeNode> parentIndex;
-    private final Set<TrueNode> trueNodes;
-    private final Set<IntensionalDataNode> intensionalNodes;
-    private UUID versionNumber;
-
+    private final QueryNode rootNode;
+    private final Map<QueryNode, QueryNode> nodeIndex;
+    private final Map<QueryNode, ChildrenRelation> childrenIndex;
 
     protected DefaultTree(QueryNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
-        parentIndex = new HashMap<>();
-        trueNodes = new HashSet<>();
-        intensionalNodes = new HashSet<>();
 
         // Adds the root node
-        rootNode = new TreeNode(rootQueryNode);
-        insertNodeIntoIndex(rootQueryNode, rootNode);
+        rootNode = rootQueryNode;
+        nodeIndex.put(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
 
-        versionNumber = UUID.randomUUID();
-    }
-
-    private DefaultTree(TreeNode rootNode,
-                        Map<QueryNode, TreeNode> nodeIndex,
-                        Map<TreeNode, ChildrenRelation> childrenIndex,
-                        Map<TreeNode, TreeNode> parentIndex,
-                        Set<TrueNode> trueNodes,
-                        Set<IntensionalDataNode> intensionalNodes,
-                        UUID versionNumber) {
-        this.rootNode = rootNode;
-        this.nodeIndex = nodeIndex;
-        this.childrenIndex = childrenIndex;
-        this.parentIndex = parentIndex;
-        this.trueNodes = trueNodes;
-        this.intensionalNodes = intensionalNodes;
-        this.versionNumber = versionNumber;
     }
 
     @Override
     public QueryNode getRootNode() {
-        return rootNode.getQueryNode();
+        return rootNode;
     }
 
     @Override
     public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-        TreeNode parentNode = accessTreeNode(parentQueryNode);
+        QueryNode parentNode = accessTreeNode(parentQueryNode);
 
         if (nodeIndex.containsKey(childQueryNode)) {
             throw new IllegalTreeUpdateException("Node " + childQueryNode + " already in the graph");
@@ -79,20 +53,19 @@ public class DefaultTree implements QueryTree {
     /**
      * Low-level
      */
-    private void createNewNode(QueryNode childQueryNode, TreeNode parentNode,
+    private void createNewNode(QueryNode childQueryNode, QueryNode parentNode,
                                Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
-        TreeNode childNode = new TreeNode(childQueryNode);
-        insertNodeIntoIndex(childQueryNode, childNode);
+        QueryNode childNode = childQueryNode;
+        nodeIndex.put(childQueryNode, childNode);
 
         childrenIndex.put(childNode, createChildrenRelation(childNode));
 
-        parentIndex.put(childNode, parentNode);
         accessChildrenRelation(parentNode).addChild(childNode, optionalPosition);
     }
 
-    private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode) {
-        if (parentTreeNode.getQueryNode() instanceof BinaryOrderedOperatorNode) {
+    private static ChildrenRelation createChildrenRelation(QueryNode parentTreeNode) {
+        if (parentTreeNode instanceof BinaryOrderedOperatorNode) {
             return new BinaryChildrenRelation(parentTreeNode);
         }
         else {
@@ -109,8 +82,8 @@ public class DefaultTree implements QueryTree {
         }
         else {
             ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
-            for (TreeNode treeNode : childrenRelation.getChildren()) {
-                builder.add(treeNode.getQueryNode());
+            for (QueryNode treeNode : childrenRelation.getChildren()) {
+                builder.add(treeNode);
             }
             return builder.build();
         }
@@ -118,61 +91,30 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() {
-        Queue<TreeNode> nodesToExplore = new LinkedList<>();
+        Queue<QueryNode> nodesToExplore = new LinkedList<>();
         ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
         nodesToExplore.add(rootNode);
-        builder.add(rootNode.getQueryNode());
+        builder.add(rootNode);
 
         while (!nodesToExplore.isEmpty()) {
-            TreeNode node = nodesToExplore.poll();
-            for (TreeNode childNode : accessChildrenRelation(node).getChildren()) {
+            QueryNode node = nodesToExplore.poll();
+            for (QueryNode childNode : accessChildrenRelation(node).getChildren()) {
                 nodesToExplore.add(childNode);
-                builder.add(childNode.getQueryNode());
+                builder.add(childNode);
             }
         }
         return builder.build();
     }
 
-    @Override
-    public QueryTree createSnapshot() {
-        Map<QueryNode, TreeNode> newNodeIndex = nodeIndex.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().cloneShallowly()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
-        Map<TreeNode, ChildrenRelation> newChildrenIndex = childrenIndex.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(
-                        e.getKey().findNewTreeNode(newNodeIndex),
-                        e.getValue().clone(newNodeIndex)))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
-        Map<TreeNode, TreeNode> newParentIndex = parentIndex.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().findNewTreeNode(newNodeIndex),
-                        e.getValue().findNewTreeNode(newNodeIndex)))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
-        return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
-                newParentIndex, new HashSet<>(trueNodes), new HashSet<>(intensionalNodes), versionNumber);
-    }
-
-    private void updateVersionNumber() {
-        versionNumber = UUID.randomUUID();
-    }
-
-    private TreeNode accessTreeNode(QueryNode node) {
-        TreeNode treeNode = nodeIndex.get(node);
+    private QueryNode accessTreeNode(QueryNode node) {
+        QueryNode treeNode = nodeIndex.get(node);
         if (treeNode == null) {
             throw new IllegalArgumentException("The given query node is not in the tree");
         }
         return treeNode;
     }
 
-    private ChildrenRelation accessChildrenRelation(TreeNode node) {
+    private ChildrenRelation accessChildrenRelation(QueryNode node) {
         ChildrenRelation relation = childrenIndex.get(node);
         if (relation == null) {
             throw new RuntimeException("Internal error: the tree node does not have a children relation.");
@@ -181,17 +123,4 @@ public class DefaultTree implements QueryTree {
     }
 
 
-    /**
-     * Low-low-level
-     */
-    private void insertNodeIntoIndex(QueryNode queryNode, TreeNode treeNode) {
-        nodeIndex.put(queryNode, treeNode);
-        if (queryNode instanceof TrueNode){
-           trueNodes.add((TrueNode) queryNode);
-        }
-        else if (queryNode instanceof IntensionalDataNode){
-            intensionalNodes.add((IntensionalDataNode) queryNode);
-        }
-        updateVersionNumber();
-    }
 }

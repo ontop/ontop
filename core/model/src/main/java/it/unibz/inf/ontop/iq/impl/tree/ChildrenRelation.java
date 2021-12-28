@@ -5,18 +5,14 @@ import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * TODO: explain
  */
 public interface ChildrenRelation {
 
-    ImmutableList<TreeNode> getChildren();
+    ImmutableList<QueryNode> getChildren();
 
-    void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
-
-    ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
+    void addChild(QueryNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 }

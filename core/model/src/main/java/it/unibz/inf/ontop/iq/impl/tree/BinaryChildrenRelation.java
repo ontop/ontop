@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -13,33 +12,24 @@ import java.util.Optional;
  */
 public class BinaryChildrenRelation implements ChildrenRelation {
 
-    private final TreeNode parent;
-    private Optional<TreeNode> optionalLeftChild;
-    private Optional<TreeNode> optionalRightChild;
+    private Optional<QueryNode> optionalLeftChild;
+    private Optional<QueryNode> optionalRightChild;
 
 
-    protected BinaryChildrenRelation(TreeNode parent) {
-        if (!(parent.getQueryNode() instanceof BinaryOrderedOperatorNode)) {
+    protected BinaryChildrenRelation(QueryNode parent) {
+        if (!(parent instanceof BinaryOrderedOperatorNode)) {
             throw new IllegalArgumentException("The StandardChildrenRelation requires " +
                     "BinaryAsymmetricOperatorNode as parents");
         }
 
-        this.parent = parent;
         this.optionalLeftChild = Optional.empty();
         this.optionalRightChild = Optional.empty();
     }
 
-    private BinaryChildrenRelation(TreeNode parent, Optional<TreeNode> optionalLeftChild,
-                                   Optional<TreeNode> optionalRightChild) {
-        this.parent = parent;
-        this.optionalLeftChild = optionalLeftChild;
-        this.optionalRightChild = optionalRightChild;
-    }
-
 
     @Override
-    public ImmutableList<TreeNode> getChildren() {
-        ImmutableList.Builder<TreeNode> builder = ImmutableList.builder();
+    public ImmutableList<QueryNode> getChildren() {
+        ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
         if (optionalLeftChild.isPresent()) {
             builder.add(optionalLeftChild.get());
         }
@@ -50,7 +40,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
+    public void addChild(QueryNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The BinaryChildrenRelation requires argument positions");
@@ -74,13 +64,5 @@ public class BinaryChildrenRelation implements ChildrenRelation {
                 }
                 break;
         }
-    }
-
-    @Override
-    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
-        return new BinaryChildrenRelation(parent.findNewTreeNode(newNodeIndex),
-                optionalLeftChild.map(n -> n.findNewTreeNode(newNodeIndex)),
-                optionalRightChild.map(n -> n.findNewTreeNode(newNodeIndex))
-                );
     }
 }

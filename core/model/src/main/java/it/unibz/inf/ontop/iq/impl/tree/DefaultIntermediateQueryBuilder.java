@@ -25,7 +25,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
-    private final CoreUtilsFactory coreUtilsFactory;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
@@ -34,11 +33,9 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @AssistedInject
     protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory,
                                               IntermediateQueryValidator validator,
-                                              CoreUtilsFactory coreUtilsFactory,
                                               OntopModelSettings settings) {
         this.iqFactory = iqFactory;
         this.validator = validator;
-        this.coreUtilsFactory = coreUtilsFactory;
         this.settings = settings;
         tree = null;
         canEdit = true;
@@ -89,36 +86,36 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IQ buildIQ() throws IntermediateQueryBuilderException {
         checkInitialization();
 
-        IntermediateQuery query = new IntermediateQueryImpl(projectionAtom, new DefaultQueryTreeComponent(tree, coreUtilsFactory), validator,
-                settings, iqFactory);
+        if (settings.isTestModeEnabled())
+            validator.validate(new IntermediateQueryImpl(projectionAtom, tree));
 
         canEdit = false;
-        IQTree iqTree = convertTree(query, query.getRootNode());
+        IQTree iqTree = convertTree(tree.getRootNode());
         return iqFactory.createIQ(projectionAtom, iqTree);
     }
 
     /**
      * Recursive
      */
-    private IQTree convertTree(IntermediateQuery query, QueryNode rootNode) {
+    private IQTree convertTree(QueryNode rootNode) {
         if (rootNode instanceof LeafIQTree) {
             return (LeafIQTree) rootNode;
         }
         else if (rootNode instanceof UnaryOperatorNode) {
             // Recursive
-            IQTree childTree = convertTree(query, query.getChildren(rootNode).get(0));
+            IQTree childTree = convertTree(tree.getChildren(rootNode).get(0));
             return iqFactory.createUnaryIQTree((UnaryOperatorNode) rootNode, childTree);
         }
         else if (rootNode instanceof BinaryNonCommutativeOperatorNode) {
-            IQTree leftChildTree = convertTree(query, query.getChildren(rootNode).get(0));
-            IQTree rightChildTree = convertTree(query, query.getChildren(rootNode).get(1));
+            IQTree leftChildTree = convertTree(tree.getChildren(rootNode).get(0));
+            IQTree rightChildTree = convertTree(tree.getChildren(rootNode).get(1));
 
             return iqFactory.createBinaryNonCommutativeIQTree((BinaryNonCommutativeOperatorNode) rootNode,
                     leftChildTree, rightChildTree);
         }
         else if (rootNode instanceof NaryOperatorNode) {
-            ImmutableList<IQTree> childTrees = query.getChildren(rootNode).stream()
-                    .map(c -> convertTree(query, c))
+            ImmutableList<IQTree> childTrees = tree.getChildren(rootNode).stream()
+                    .map(this::convertTree)
                     .collect(ImmutableCollectors.toList());
 
             return iqFactory.createNaryIQTree((NaryOperatorNode) rootNode, childTrees);

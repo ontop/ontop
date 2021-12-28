@@ -2,14 +2,15 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
+import it.unibz.inf.ontop.iq.impl.tree.QueryTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -34,32 +35,17 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * Highly mutable (low control) so MUST NOT BE SHARED (except with InternalProposalExecutor)!
      */
-    private final QueryTreeComponent treeComponent;
+    private final QueryTree tree;
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
-
-    private final IntermediateQueryValidator validator;
-
-    private final OntopModelSettings settings;
-
-    private final IntermediateQueryFactory iqFactory;
 
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(DistinctVariableOnlyDataAtom projectionAtom,
-                                 QueryTreeComponent treeComponent,
-                                 IntermediateQueryValidator validator, OntopModelSettings settings,
-                                 IntermediateQueryFactory iqFactory) {
+    public IntermediateQueryImpl(DistinctVariableOnlyDataAtom projectionAtom, QueryTree tree) {
         this.projectionAtom = projectionAtom;
-        this.treeComponent = treeComponent;
-        this.validator = validator;
-        this.settings = settings;
-        this.iqFactory = iqFactory;
-
-        if (settings.isTestModeEnabled())
-            this.validator.validate(this);
+        this.tree = tree;
     }
 
     @Override
@@ -68,15 +54,31 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
-        return treeComponent.getVariables(subTreeRootNode);
+    public ImmutableSet<Variable> getVariables(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getVariables();
+        }
+        else {
+            return getProjectedVariableStream(node)
+                    .collect(ImmutableCollectors.toSet());
+        }
+    }
+
+    private Stream<Variable> getProjectedVariableStream(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getVariables().stream();
+        }
+        else {
+            return getChildren(node).stream()
+                    .flatMap(this::getProjectedVariableStream);
+        }
     }
 
 
     @Override
     public QueryNode getRootNode() throws InconsistentIntermediateQueryException{
         try {
-            return treeComponent.getRootNode();
+            return tree.getRootNode();
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
@@ -85,7 +87,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() {
         try {
-            return treeComponent.getNodesInTopDownOrder();
+            return tree.getNodesInTopDownOrder();
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
@@ -93,19 +95,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
-        return treeComponent.getChildren(node);
+        return tree.getChildren(node);
     }
 
-
-    /**
-     * Not appearing in the interface because users do not
-     * have to worry about it.
-     */
-    @Override
-    public IntermediateQuery clone() {
-        return new IntermediateQueryImpl(projectionAtom, treeComponent.createSnapshot(),
-                validator, settings, iqFactory);
-    }
 
     @Override
     public String toString() {
