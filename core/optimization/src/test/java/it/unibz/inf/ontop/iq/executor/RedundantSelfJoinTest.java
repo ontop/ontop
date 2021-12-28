@@ -937,7 +937,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: double-check why fails")
     @Test
     public void testSelfJoinEliminationFunctionalGroundTerm3() {
         GroundFunctionalTerm groundFunctionalTerm1 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
@@ -955,7 +954,9 @@ public class RedundantSelfJoinTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, dataNode2)));
 
-        ImmutableExpression condition = TERM_FACTORY.getStrictEquality(groundFunctionalTerm2, groundFunctionalTerm1);
+        ImmutableExpression condition = TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBIsNotNull(groundFunctionalTerm1),
+                TERM_FACTORY.getStrictEquality(groundFunctionalTerm2, groundFunctionalTerm1));
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(condition), dataNode1));
 
