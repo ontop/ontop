@@ -13,7 +13,6 @@ public interface OntopSQLCoreConfiguration extends OntopModelConfiguration {
     }
 
     interface OntopSQLCoreBuilderFragment<B extends Builder<B>> {
-        B jdbcName(String dbName);
         B jdbcUrl(String jdbcUrl);
         B jdbcDriver(String jdbcDriver);
     }

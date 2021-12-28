@@ -27,11 +27,6 @@ abstract class AbstractOntopCommand implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String dbUrl;
 
-    @Option(type = OptionType.COMMAND, name = {"--db-name"}, title = "DB name",
-            description = "DB name (overrides the properties)")
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String dbName;
-
     @Option(type = OptionType.COMMAND, name = {"--db-driver"}, title = "DB driver",
             description = "DB driver (overrides the properties)")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)

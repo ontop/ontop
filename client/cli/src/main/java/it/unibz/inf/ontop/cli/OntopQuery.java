@@ -94,9 +94,6 @@ public class OntopQuery extends OntopReasoningCommandBase {
         if (dbUser != null)
             configurationBuilder.jdbcUser(dbUser);
 
-        if (dbName != null)
-            configurationBuilder.jdbcName(dbName);
-
         if (dbDriver != null)
             configurationBuilder.jdbcDriver(dbDriver);
 

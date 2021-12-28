@@ -17,7 +17,6 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_DB_USER_FILE` (optional). Loads the DB user from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
 - `ONTOP_DB_URL` (optional). Corresponds to the argument `--db-url`. Added in 4.1.0.
 - `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
-- `ONTOP_DB_NAME` (optional). Corresponds to the argument `--db-name`. Added in 4.2.0.
 - `ONTOP_DB_DRIVER` (optional). Corresponds to the argument `--db-driver`. Added in 4.2.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
