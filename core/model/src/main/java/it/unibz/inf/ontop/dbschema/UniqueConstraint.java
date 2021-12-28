@@ -101,6 +101,6 @@ public interface UniqueConstraint extends FunctionalDependency {
 
 		primaryKeyBuilder(relation, "PK")
 				.addDeterminant(attribute1.getIndex())
-				.addDeterminant(attribute1.getIndex()).build();
+				.addDeterminant(attribute2.getIndex()).build();
 	}
 }
