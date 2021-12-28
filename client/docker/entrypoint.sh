@@ -122,6 +122,10 @@ if [ "${ONTOP_DISABLE_PORTAL_PAGE+x}" ]; then
   args_array+=("--disable-portal-page")
 fi
 
+if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY+x}" ]; then
+  args_array+=("--enable-download-ontology")
+fi
+
 if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then
   ONTOP_JAVA_ARGS="-Xmx512m"
 fi
