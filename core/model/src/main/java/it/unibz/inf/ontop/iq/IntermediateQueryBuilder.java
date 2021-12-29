@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq;
 
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
