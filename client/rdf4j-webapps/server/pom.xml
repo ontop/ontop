@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-rdf4j-webapps</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-rdf4j-server</artifactId>
@@ -14,7 +14,8 @@
 
     <properties>
         <finalName>rdf4j-server</finalName>
-        <!-- disable install and deploy in case war generation is disabled too -->
+        <!-- disable gpg, install and deploy in case war generation is disabled too -->
+        <gpg.skip>${maven.war.skip}</gpg.skip>
         <maven.install.skip>${maven.war.skip}</maven.install.skip>
         <maven.deploy.skip>${maven.war.skip}</maven.deploy.skip>
     </properties>
