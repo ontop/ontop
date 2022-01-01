@@ -81,7 +81,6 @@ public class OntopModelModule extends OntopAbstractModule {
         install(dbTypeFactoryModule);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
-                IntermediateQueryBuilder.class,
                 ConstructionNode.class,
                 UnionNode.class,
                 InnerJoinNode.class,

@@ -30,8 +30,6 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
-    IntermediateQueryBuilder createIQBuilder();
-
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,

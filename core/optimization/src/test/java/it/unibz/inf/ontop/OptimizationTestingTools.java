@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -182,10 +181,6 @@ public class OptimizationTestingTools {
         ANS1_AR3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
         ANS1_AR4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
         ANS1_AR5_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(5);
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {

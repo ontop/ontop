@@ -5,7 +5,6 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -40,12 +39,12 @@ public class MappingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
-    private static Variable A = TERM_FACTORY.getVariable("a");
-    private static Variable B = TERM_FACTORY.getVariable("b");
-    private static Variable C = TERM_FACTORY.getVariable("c");
-    private static Variable S = TERM_FACTORY.getVariable("s");
-    private static Variable P = TERM_FACTORY.getVariable("p");
-    private static Variable O = TERM_FACTORY.getVariable("o");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable S = TERM_FACTORY.getVariable("s");
+    private static final Variable P = TERM_FACTORY.getVariable("p");
+    private static final Variable O = TERM_FACTORY.getVariable("o");
 
     private final static Variable Y = TERM_FACTORY.getVariable("company");
 
