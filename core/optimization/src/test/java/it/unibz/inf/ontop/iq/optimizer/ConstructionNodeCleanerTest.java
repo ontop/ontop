@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -251,55 +250,37 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest7() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
-
         SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
-
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
-                projectionAtom1.getVariables(),
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
-
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1, Y, Z),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1)));
-
         SliceNode limit40 = IQ_FACTORY.createSliceNode(0,40);
-
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1, Y1, Z),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y1, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
-
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
-        queryBuilder1.init(projectionAtom1, limit50);
-        queryBuilder1.addChild(limit50, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, limit40);
-        queryBuilder1.addChild(limit40, constructionNode3);
-        queryBuilder1.addChild(constructionNode3, dataNode1);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit50,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                                IQ_FACTORY.createUnaryIQTree(constructionNode2,
+                                        IQ_FACTORY.createUnaryIQTree(limit40,
+                                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1))))));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
         SliceNode limit90 = IQ_FACTORY.createSliceNode(0,90);
 
-        ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
-                projectionAtom1.getVariables(),
+        ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(X1),
                         Y, generateURI1(Y1),
                         Z, generateURI1(Z1)));
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
-
-        queryBuilder2.init(projectionAtom1, limit90);
-        queryBuilder2.addChild(limit90, constructionNode4);
-        queryBuilder2.addChild(constructionNode4, dataNode1);
-
-        IQ query2 = queryBuilder2.buildIQ();
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit90,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode1)));
         System.out.println("\nExpected: \n" + query2);
 
 
@@ -312,63 +293,45 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest8() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
-
         SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
-
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
-                projectionAtom1.getVariables(),
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
-
         SliceNode limit80 = IQ_FACTORY.createSliceNode(0,80);
-
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1, Y, Z),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1)));
-
         SliceNode limit40 = IQ_FACTORY.createSliceNode(0,40);
-
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1, Y1, Z),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y1, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
-
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(
                 ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
-        queryBuilder1.init(projectionAtom1, limit50);
-        queryBuilder1.addChild(limit50, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, limit80);
-        queryBuilder1.addChild(limit80, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, limit40);
-        queryBuilder1.addChild(limit40, constructionNode3);
-        queryBuilder1.addChild(constructionNode3, dataNode1);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit50,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                                IQ_FACTORY.createUnaryIQTree(limit80,
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode2,
+                                                IQ_FACTORY.createUnaryIQTree(constructionNode2,
+                                                        IQ_FACTORY.createUnaryIQTree(limit40,
+                                                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1))))))));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
         SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
-
-        ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
-                projectionAtom1.getVariables(),
+        ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(X1),
                         Y, generateURI1(Y1),
                         Z, generateURI1(Z1)));
 
-        ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1, Y1, Z1));
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
+        ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y1, Z1));
 
-        queryBuilder2.init(projectionAtom1, limit130);
-        queryBuilder2.addChild(limit130, constructionNode4);
-        queryBuilder2.addChild(constructionNode4, limit40);
-        queryBuilder2.addChild(limit40, constructionNode5);
-        queryBuilder2.addChild(constructionNode5, dataNode1);
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit130,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode4,
+                                IQ_FACTORY.createUnaryIQTree(limit40,
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode5, dataNode1)))));
 
-        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
         IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
@@ -381,70 +344,57 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest9() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
-
         SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables());
-
         SliceNode limit100 = IQ_FACTORY.createSliceNode(0,100);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
-
         DistinctNode distinctNode1 = IQ_FACTORY.createDistinctNode();
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1)));
-
         DistinctNode distinctNode2 = IQ_FACTORY.createDistinctNode();
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y1, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1, Y, Z));
-
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y, Z));
         IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
-        queryBuilder1.init(projectionAtom1, limit130);
-        queryBuilder1.addChild(limit130, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, limit100);
-        queryBuilder1.addChild(limit100, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, unionNode1);
-        queryBuilder1.addChild(unionNode1, dataNode1);
-        queryBuilder1.addChild(unionNode1, distinctNode1);
-        queryBuilder1.addChild(distinctNode1, constructionNode3);
-        queryBuilder1.addChild(constructionNode3, distinctNode2);
-        queryBuilder1.addChild(distinctNode2, constructionNode4);
-        queryBuilder1.addChild(constructionNode4, dataNode2);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit130,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                                IQ_FACTORY.createUnaryIQTree(limit100,
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode2,
+                                                IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                                        dataNode1,
+                                                        IQ_FACTORY.createUnaryIQTree(distinctNode1,
+                                                                IQ_FACTORY.createUnaryIQTree(constructionNode3,
+                                                                        IQ_FACTORY.createUnaryIQTree(distinctNode2,
+                                                                                IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode2)))))))))));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
         SliceNode limit230 = IQ_FACTORY.createSliceNode(0,230);
-
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
 
-
         ConstructionNode constructionNode6 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1), Z, generateURI1(Z1)));
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
-        queryBuilder2.init(projectionAtom1, limit230);
-        queryBuilder2.addChild(limit230, constructionNode5);
-        queryBuilder2.addChild(constructionNode5, unionNode1);
-        queryBuilder2.addChild(unionNode1, dataNode1);
-        queryBuilder2.addChild(unionNode1, distinctNode1);
-        queryBuilder2.addChild(distinctNode1, constructionNode6);
-        queryBuilder2.addChild(constructionNode6, dataNode2);
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(limit230,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode5,
+                                IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                        dataNode1,
+                                        IQ_FACTORY.createUnaryIQTree(distinctNode1,
+                                                IQ_FACTORY.createUnaryIQTree(constructionNode6, dataNode2)))))));
 
-        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
         IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
@@ -456,25 +406,18 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest10() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(Y, Z))
-        );
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(Y, Z)));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Y, Z),
-                SUBSTITUTION_FACTORY.getSubstitution()
-        );
-
+                SUBSTITUTION_FACTORY.getSubstitution());
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(Y, R1_IRI, Z));
 
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, dataNode1);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -483,12 +426,8 @@ public class ConstructionNodeCleanerTest {
         //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
-
-        queryBuilder2.init(projectionAtom1, constructionNode1);
-        queryBuilder2.addChild(constructionNode1, dataNode1);
-
-        IQ query2 = queryBuilder2.buildIQ();
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
         System.out.println("\nExpected: \n" + query2);
 
         assertEquals(query2, optimizedQuery);
@@ -496,35 +435,23 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest11() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE,
-                X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution()
-        );
+                SUBSTITUTION_FACTORY.getSubstitution());
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1), Y, generateURI1(Y1))
-        );
-
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1), Y, generateURI1(Y1)));
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, R1_IRI, Y1));
 
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, dataNode1);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
-
-        queryBuilder2.init(projectionAtom1, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, dataNode1);
-
-        IQ query2 = queryBuilder2.buildIQ();
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1));
         System.out.println("\nExpected: \n" + query2);
 
         IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
@@ -536,18 +463,10 @@ public class ConstructionNodeCleanerTest {
 
     @Test
     public void removeConstructionNodeTest12() {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
-                projectionAtom1.getVariables()
-        );
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1)
-        );
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X1)
-        );
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1));
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1));
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
 
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, R1_IRI, X2));
@@ -556,26 +475,18 @@ public class ConstructionNodeCleanerTest {
         IntensionalDataNode dataNode3 = IQ_FACTORY.createIntensionalDataNode(
                 ATOM_FACTORY.getIntensionalTripleAtom(X1, R3_IRI, X2));
 
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, unionNode1);
-        queryBuilder1.addChild(unionNode1, dataNode1);
-        queryBuilder1.addChild(unionNode1, constructionNode2);
-        queryBuilder1.addChild(unionNode1, constructionNode3);
-        queryBuilder1.addChild(constructionNode2, dataNode2);
-        queryBuilder1.addChild(constructionNode3, dataNode3);
-
-        IQ query1 = queryBuilder1.buildIQ();
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                dataNode1,
+                                IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode2),
+                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode3)))));
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
+        IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(dataNode1, dataNode2, dataNode3)));
 
-        queryBuilder2.init(projectionAtom1, unionNode1);
-        queryBuilder2.addChild(unionNode1, dataNode1);
-        queryBuilder2.addChild(unionNode1, dataNode2);
-        queryBuilder2.addChild(unionNode1, dataNode3);
-
-        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
         IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
