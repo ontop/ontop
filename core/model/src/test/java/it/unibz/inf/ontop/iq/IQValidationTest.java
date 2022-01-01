@@ -15,16 +15,10 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 
 public class IQValidationTest {
 
-    private final static RelationDefinition TABLE1;
-    private final static RelationDefinition TABLE1_1;
-    private final static RelationDefinition TABLE1_2;
-    private final static RelationDefinition TABLE1_3;
     private final static RelationDefinition TABLE2;
     private final static RelationDefinition TABLE2_2;
     private final static RelationDefinition TABLE2_3;
@@ -44,18 +38,6 @@ public class IQValidationTest {
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
-
-        TABLE1 = builder.createDatabaseRelation("TABLE1",
-            "col1", integerDBType, false);
-
-        TABLE1_1 = builder.createDatabaseRelation("TABLE11",
-            "col1", integerDBType, false);
-
-        TABLE1_2 = builder.createDatabaseRelation("TABLE12",
-            "col1", integerDBType, false);
-
-        TABLE1_3 = builder.createDatabaseRelation("TABLE13",
-            "col1", integerDBType, false);
 
         TABLE2 = builder.createDatabaseRelation("TABLE2",
             "col1", integerDBType, false,
@@ -79,30 +61,11 @@ public class IQValidationTest {
             "col3", integerDBType, false);
     }
 
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testConstructionNodeChild() {
-
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A));
-        ExtensionalDataNode table1DataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(A));
-        ExtensionalDataNode table2DataNode = createExtensionalDataNode(TABLE1_1, ImmutableList.of(A));
-
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, table1DataNode);
-        queryBuilder.addChild(constructionNode, table2DataNode);
-
-        queryBuilder.buildIQ();
-    }
-
-    @Test(expected = InvalidIntermediateQueryException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testUnionNodeChild() {
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         ANS1_VAR3_PREDICATE, ImmutableList.of(A, B, C));
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables());
 
@@ -114,15 +77,13 @@ public class IQValidationTest {
         ExtensionalDataNode table4DataNode = createExtensionalDataNode(TABLE2_2, ImmutableList.of(A, C));
         ExtensionalDataNode table5DataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(A, B, C));
 
-        queryBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
-        queryBuilder.addChild(rootConstructionNode, unionNode1);
-        queryBuilder.addChild(unionNode1, joinNode);
-        queryBuilder.addChild(unionNode1, table5DataNode);
-        queryBuilder.addChild(joinNode, unionNode2);
-        queryBuilder.addChild(joinNode, table4DataNode);
-        queryBuilder.addChild(unionNode2, table1DataNode);
-
-        queryBuilder.buildIQ();
+        IQ_FACTORY.createIQ(ROOT_CONSTRUCTION_NODE_ATOM,
+                IQ_FACTORY.createUnaryIQTree(rootConstructionNode,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
+                                        IQ_FACTORY.createNaryIQTree(unionNode2, ImmutableList.of(table1DataNode)),
+                                        table4DataNode)),
+                                table5DataNode))));
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
@@ -130,8 +91,6 @@ public class IQValidationTest {
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         ANS1_VAR3_PREDICATE, ImmutableList.of(A, B, C));
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables());
 
@@ -145,90 +104,25 @@ public class IQValidationTest {
         ExtensionalDataNode table4DataNode = createExtensionalDataNode(TABLE2_4, ImmutableList.of(A, C));
         ExtensionalDataNode table5DataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(A, B, C));
 
-        queryBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
-        queryBuilder.addChild(rootConstructionNode, unionNode1);
-        queryBuilder.addChild(unionNode1, joinNode);
-        queryBuilder.addChild(unionNode1, table5DataNode);
-        queryBuilder.addChild(joinNode, unionNode2);
-        queryBuilder.addChild(joinNode, table4DataNode);
-        queryBuilder.addChild(unionNode2, table1DataNode);
-        queryBuilder.addChild(unionNode2, table2DataNode);
-        queryBuilder.addChild(unionNode2, table3DataNode);
-
-        queryBuilder.buildIQ();
+        IQ_FACTORY.createIQ(ROOT_CONSTRUCTION_NODE_ATOM,
+                IQ_FACTORY.createUnaryIQTree(rootConstructionNode,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
+                                        IQ_FACTORY.createNaryIQTree(unionNode2, ImmutableList.of(table1DataNode, table2DataNode, table3DataNode)),
+                                        table4DataNode)),
+                                table5DataNode))));
     }
 
-    @Test(expected = InvalidIntermediateQueryException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testInnerJoinNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(innerJoinNode, dataNode);
-        queryBuilder.buildIQ();
-    }
 
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testLeftJoinNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(EXPRESSION);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode, LEFT);
-        queryBuilder.buildIQ();
-    }
-
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testFilterNodeChild() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, filterNode);
-        queryBuilder.buildIQ();
-    }
-
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testExtensionalDataNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A));
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
-        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A));
-        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_2, ImmutableList.of(A));
-        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1_3, ImmutableList.of(A));
-        queryBuilder.addChild(innerJoinNode, dataNode1);
-        queryBuilder.addChild(innerJoinNode, dataNode2);
-        queryBuilder.addChild(dataNode1, dataNode3);
-        queryBuilder.buildIQ();
-    }
-
-
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testIntensionalDataNodeChildren() {
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A));
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1.getAtomPredicate(), A));
-        IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_2.getAtomPredicate(), A));
-        IntensionalDataNode dataNode3 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_3.getAtomPredicate(), A));
-        queryBuilder.addChild(innerJoinNode, dataNode1);
-        queryBuilder.addChild(innerJoinNode, dataNode2);
-        queryBuilder.addChild(dataNode1, dataNode3);
-        queryBuilder.buildIQ();
+        IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(dataNode))));
     }
 
 //    @Test(expected = InvalidIntermediateQueryException.class)
@@ -243,64 +137,40 @@ public class IQValidationTest {
 //    }
 
     @Test(expected = InvalidIntermediateQueryException.class)
-    public void testEmptyNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(Z));
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, emptyNode);
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(emptyNode, dataNode);
-        queryBuilder.buildIQ();
-    }
-
-    @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnboundVariableInFilter() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, rootNode);
-
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION);
-        queryBuilder.addChild(rootNode, filterNode);
-
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(filterNode, dataNode);
-        queryBuilder.buildIQ();
+
+        IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(rootNode,
+                        IQ_FACTORY.createUnaryIQTree(filterNode, dataNode)));
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnboundVariableInInnerJoin() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, rootNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
-        queryBuilder.addChild(rootNode, joinNode);
-
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(joinNode, dataNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, A));
-        queryBuilder.addChild(joinNode, dataNode2);
-        queryBuilder.buildIQ();
+
+        IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(rootNode,
+                        IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(dataNode1, dataNode2))));
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnboundVariableInLeftJoin() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, rootNode);
-
         LeftJoinNode joinNode = IQ_FACTORY.createLeftJoinNode(EXPRESSION);
-        queryBuilder.addChild(rootNode, joinNode);
-
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(joinNode, dataNode1, LEFT);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, A));
-        queryBuilder.addChild(joinNode, dataNode2, RIGHT);
-        queryBuilder.buildIQ();
+
+        IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(rootNode,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(joinNode, dataNode1, dataNode2)));
     }
 }
