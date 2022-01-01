@@ -15,6 +15,4 @@ public interface QueryTree {
     void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
-
-    ImmutableList<QueryNode> getNodesInTopDownOrder();
 }

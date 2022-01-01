@@ -4,16 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
-import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -24,19 +20,13 @@ import java.util.Optional;
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final IntermediateQueryFactory iqFactory;
-    private final IntermediateQueryValidator validator;
-    private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory,
-                                              IntermediateQueryValidator validator,
-                                              OntopModelSettings settings) {
+    protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.validator = validator;
-        this.settings = settings;
         tree = null;
         canEdit = true;
     }
@@ -85,9 +75,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @Override
     public IQ buildIQ() throws IntermediateQueryBuilderException {
         checkInitialization();
-
-        if (settings.isTestModeEnabled())
-            validator.validate(new IntermediateQueryImpl(projectionAtom, tree));
 
         canEdit = false;
         IQTree iqTree = convertTree(tree.getRootNode());

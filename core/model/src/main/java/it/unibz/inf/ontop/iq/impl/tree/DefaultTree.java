@@ -89,23 +89,6 @@ public class DefaultTree implements QueryTree {
         }
     }
 
-    @Override
-    public ImmutableList<QueryNode> getNodesInTopDownOrder() {
-        Queue<QueryNode> nodesToExplore = new LinkedList<>();
-        ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
-        nodesToExplore.add(rootNode);
-        builder.add(rootNode);
-
-        while (!nodesToExplore.isEmpty()) {
-            QueryNode node = nodesToExplore.poll();
-            for (QueryNode childNode : accessChildrenRelation(node).getChildren()) {
-                nodesToExplore.add(childNode);
-                builder.add(childNode);
-            }
-        }
-        return builder.build();
-    }
-
     private QueryNode accessTreeNode(QueryNode node) {
         QueryNode treeNode = nodeIndex.get(node);
         if (treeNode == null) {
