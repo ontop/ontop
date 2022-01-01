@@ -160,13 +160,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ValuesNode)
-                && ((ValuesNode) node).getVariables().equals(projectedVariables)
-                && ((ValuesNode) node).getValues().equals(values);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }
@@ -178,7 +171,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ValuesNode) && queryNode.isSyntacticallyEquivalentTo(this);
+        return (queryNode instanceof ValuesNode)
+                && ((ValuesNode) queryNode).getVariables().equals(projectedVariables)
+                && ((ValuesNode) queryNode).getValues().equals(values);
     }
 
     @Override

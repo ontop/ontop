@@ -253,15 +253,10 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ExtensionalDataNode)
-                && ((ExtensionalDataNode) node).getRelationDefinition().equals(relationDefinition)
-                && ((ExtensionalDataNode) node).getArgumentMap().equals(argumentMap);
-    }
-
-    @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+        return (queryNode instanceof ExtensionalDataNode)
+                && ((ExtensionalDataNode) queryNode).getRelationDefinition().equals(relationDefinition)
+                && ((ExtensionalDataNode) queryNode).getArgumentMap().equals(argumentMap);
     }
 
     @Override

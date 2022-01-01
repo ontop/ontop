@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
@@ -21,10 +22,13 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     @Nullable
     private ImmutableSet<Variable> variables;
 
-    protected DataNodeImpl(DataAtom<P> atom, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+    protected final CoreUtilsFactory coreUtilsFactory;
+
+    protected DataNodeImpl(DataAtom<P> atom, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
         super(iqTreeTools, iqFactory);
         this.atom = atom;
         this.variables = null;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     public DataAtom<P> getProjectionAtom() {

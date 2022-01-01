@@ -252,16 +252,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return Optional.of(node)
-                .filter(n -> n instanceof AggregationNode)
-                .map(n -> (AggregationNode) n)
-                .filter(n -> n.getGroupingVariables().equals(groupingVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
     }
@@ -274,7 +264,12 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+        return Optional.of(queryNode)
+                .filter(n -> n instanceof AggregationNode)
+                .map(n -> (AggregationNode) n)
+                .filter(n -> n.getGroupingVariables().equals(groupingVariables))
+                .filter(n -> n.getSubstitution().equals(substitution))
+                .isPresent();
     }
 
     @Override

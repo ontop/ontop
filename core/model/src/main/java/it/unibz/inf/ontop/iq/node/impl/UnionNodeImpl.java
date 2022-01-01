@@ -37,7 +37,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
     private final ConstructionNodeTools constructionTools;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -53,7 +52,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
-        this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -369,14 +367,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof UnionNode) {
-            return projectedVariables.equals(((UnionNode)node).getVariables());
-        }
-        return false;
     }
 
     @Override

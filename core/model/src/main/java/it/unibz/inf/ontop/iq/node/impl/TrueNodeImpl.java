@@ -49,14 +49,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof TrueNode) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public String toString() {
         return PREFIX;
     }

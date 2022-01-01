@@ -44,8 +44,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private final ImmutableSubstitution<ImmutableTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
 
-    private final IntermediateQueryFactory iqFactory;
-
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final Constant nullValue;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
@@ -64,7 +62,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullValue = termFactory.getNullConstant();
-        this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
@@ -118,7 +115,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitutionFactory.getSubstitution();
-        this.iqFactory = iqFactory;
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
         this.substitutionNormalizer = substitutionNormalizer;
@@ -289,16 +285,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return Optional.of(node)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .filter(n -> n.getVariables().equals(projectedVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
     }
@@ -310,7 +296,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+        return Optional.of(queryNode)
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode) n)
+                .filter(n -> n.getVariables().equals(projectedVariables))
+                .filter(n -> n.getSubstitution().equals(substitution))
+                .isPresent();
     }
 
     @Override

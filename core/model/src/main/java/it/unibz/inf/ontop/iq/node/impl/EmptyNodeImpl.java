@@ -56,14 +56,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof EmptyNode) {
-            return projectedVariables.equals(((EmptyNode) node).getVariables());
-        }
-        return false;
-    }
-
-    @Override
     public String toString() {
         return PREFIX + projectedVariables;
     }

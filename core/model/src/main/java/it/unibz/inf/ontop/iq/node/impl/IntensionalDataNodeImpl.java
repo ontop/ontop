@@ -28,14 +28,12 @@ import java.util.Optional;
 public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
-    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(atom, iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
+        super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     @Override
@@ -94,12 +92,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of(getVariables());
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof IntensionalDataNode)
-                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
 
     @Override

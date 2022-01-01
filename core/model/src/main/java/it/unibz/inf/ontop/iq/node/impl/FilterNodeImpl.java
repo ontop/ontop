@@ -204,13 +204,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof FilterNode)
-                && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
-    }
-
-
-    @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof FilterNode)
                 && getFilterCondition().equals(((FilterNode) queryNode).getFilterCondition());

@@ -208,18 +208,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return queryNode instanceof SliceNode
-                && ((SliceNode) queryNode).getOffset() == offset
+                && ((SliceNode) queryNode).getOffset() == getOffset()
                 && ((SliceNode) queryNode).getLimit().equals(getLimit());
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
     }
 
     @Override

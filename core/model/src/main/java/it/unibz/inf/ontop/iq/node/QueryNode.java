@@ -49,11 +49,6 @@ public interface QueryNode {
 
 
     /**
-     * TODO: explain
-     */
-    boolean isSyntacticallyEquivalentTo(QueryNode node);
-
-    /**
      * Set of variables that this node, INDEPENDENTLY OF THE REQUIREMENTS OF ITS ANCESTORS,
      * requires to be defined in the sub-tree.
      *
