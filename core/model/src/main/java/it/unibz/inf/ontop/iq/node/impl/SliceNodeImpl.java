@@ -234,9 +234,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public SliceNode clone() {
-        return getLimit()
-                .map(l -> iqFactory.createSliceNode(offset, l))
-                .orElseGet(() -> iqFactory.createSliceNode(offset));
+        throw new IllegalStateException("SliceNode::clone");
     }
 
     @Override

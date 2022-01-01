@@ -68,8 +68,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public UnionNode clone() {
-        return new UnionNodeImpl(projectedVariables, constructionTools, iqFactory,
-                substitutionFactory, termFactory, coreUtilsFactory, substitutionNormalizer, notRequiredVariableRemover);
+        throw new IllegalStateException("UnionNode::clone");
     }
 
     @Override

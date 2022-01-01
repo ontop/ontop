@@ -155,7 +155,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      */
     @Override
     public ConstructionNode clone() {
-        return iqFactory.createConstructionNode(projectedVariables, substitution);
+        throw new IllegalStateException("ConstructionNode::clone");
     }
 
     @Override

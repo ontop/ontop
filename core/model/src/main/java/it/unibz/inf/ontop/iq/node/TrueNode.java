@@ -10,9 +10,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  */
 public interface TrueNode extends LeafIQTree {
     @Override
-    TrueNode clone();
-
-    @Override
     TrueNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 }

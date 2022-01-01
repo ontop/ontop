@@ -45,7 +45,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IntensionalDataNode clone() {
-        return iqFactory.createIntensionalDataNode(getProjectionAtom());
+        throw new IllegalStateException("IntensionalNode::clone");
     }
 
     @Override

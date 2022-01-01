@@ -201,7 +201,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public OrderByNode clone() {
-        return iqFactory.createOrderByNode(comparators);
+        throw new IllegalStateException("OrderByNode::clone");
     }
 
     @Override

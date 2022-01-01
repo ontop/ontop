@@ -456,7 +456,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode clone() {
-        return iqFactory.createValuesNode(orderedVariables, values);
+        throw new IllegalStateException("ValuesNode::clone");
     }
 
     @Override

@@ -18,7 +18,4 @@ public interface SliceNode extends QueryModifierNode {
      * Length of the slice
      */
     Optional<Long> getLimit();
-
-    @Override
-    SliceNode clone();
 }

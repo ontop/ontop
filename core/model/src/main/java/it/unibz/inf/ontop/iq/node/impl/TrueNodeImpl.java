@@ -58,7 +58,7 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     @Override
     public TrueNode clone() {
-        return iqFactory.createTrueNode();
+        throw new IllegalStateException("TrueNode::clone");
     }
 
     @Override

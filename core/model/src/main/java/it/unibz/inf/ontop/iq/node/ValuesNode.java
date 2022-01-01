@@ -19,10 +19,6 @@ import java.util.stream.Stream;
  */
 public interface ValuesNode extends LeafIQTree {
 
-
-    @Override
-    ValuesNode clone();
-
     ImmutableList<Variable> getOrderedVariables();
 
     ImmutableList<ImmutableList<Constant>> getValues();

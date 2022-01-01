@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  *
  * See IntermediateQueryFactory for creating new instances.
  */
-public interface QueryNode extends Cloneable {
+public interface QueryNode {
 
     /**
      * "Accept" method for the "Visitor" pattern.
@@ -25,13 +25,6 @@ public interface QueryNode extends Cloneable {
      *
      */
     void acceptVisitor(QueryNodeVisitor visitor);
-
-    /**
-     * Cloning is needed for having multiple copies
-     * in the same intermediate query tree.
-     */
-    QueryNode clone();
-
 
     /**
      * "Accept" method for the "Visitor" pattern.

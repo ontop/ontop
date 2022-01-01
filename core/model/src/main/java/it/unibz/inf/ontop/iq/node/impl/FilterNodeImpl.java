@@ -64,7 +64,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode clone() {
-        return iqFactory.createFilterNode(getFilterCondition());
+        throw new IllegalStateException("FilterNode::clone");
     }
 
     @Override

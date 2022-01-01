@@ -65,7 +65,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public EmptyNode clone() {
-        return iqFactory.createEmptyNode(projectedVariables);
+        throw new IllegalStateException("EmptyNode::clone");
     }
 
     @Override

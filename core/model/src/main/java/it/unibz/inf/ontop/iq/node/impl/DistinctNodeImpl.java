@@ -156,6 +156,6 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     @Override
     public DistinctNode clone() {
-        return iqFactory.createDistinctNode();
+        throw new IllegalStateException("DistinctNode::clone");
     }
 }

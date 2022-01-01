@@ -379,7 +379,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public AggregationNode clone() {
-        return iqFactory.createAggregationNode(groupingVariables, substitution);
+        throw new IllegalStateException("AggregationNode::clone");
     }
 
     @Override

@@ -12,10 +12,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  * See IntermediateQueryFactory for creating a new instance.
  */
 public interface EmptyNode extends LeafIQTree {
-
-    @Override
-    EmptyNode clone();
-
     @Override
     EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;

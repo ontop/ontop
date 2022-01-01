@@ -9,9 +9,6 @@ import java.util.Optional;
 public interface InnerJoinLikeNode extends CommutativeJoinNode {
 
     @Override
-    InnerJoinLikeNode clone();
-
-    @Override
     InnerJoinLikeNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 

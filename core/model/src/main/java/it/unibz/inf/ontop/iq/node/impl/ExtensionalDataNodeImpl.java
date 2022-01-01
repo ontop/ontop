@@ -111,7 +111,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public ExtensionalDataNode clone() {
-        return iqFactory.createExtensionalDataNode(relationDefinition, argumentMap);
+        throw new IllegalStateException("ExtensionalDataNode::clone");
     }
 
     @Override

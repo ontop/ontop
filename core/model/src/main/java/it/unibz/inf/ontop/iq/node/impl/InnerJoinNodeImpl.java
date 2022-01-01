@@ -95,7 +95,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode clone() {
-        return iqFactory.createInnerJoinNode(getOptionalFilterCondition());
+        throw new IllegalStateException("InnerJoinNode::clone");
     }
 
     @Override
