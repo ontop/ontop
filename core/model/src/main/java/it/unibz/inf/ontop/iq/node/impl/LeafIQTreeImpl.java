@@ -18,14 +18,16 @@ import java.util.Optional;
 
 public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
 
-    private static final ImmutableList<IQTree> EMPTY_LIST = ImmutableList.of();
     private final IQTreeTools iqTreeTools;
-    protected final IntermediateQueryFactory iqFactory;
 
     protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
-        super();
+        super(iqFactory);
         this.iqTreeTools = iqTreeTools;
-        this.iqFactory = iqFactory;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return true;
     }
 
     @Override
@@ -35,7 +37,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
 
     @Override
     public ImmutableList<IQTree> getChildren() {
-        return EMPTY_LIST;
+        return ImmutableList.of();
     }
 
     @Override

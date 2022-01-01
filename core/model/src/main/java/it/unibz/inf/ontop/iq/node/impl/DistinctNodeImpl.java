@@ -153,9 +153,4 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     public String toString() {
         return DISTINCT_NODE_STR;
     }
-
-    @Override
-    public DistinctNode clone() {
-        throw new IllegalStateException("DistinctNode::clone");
-    }
 }

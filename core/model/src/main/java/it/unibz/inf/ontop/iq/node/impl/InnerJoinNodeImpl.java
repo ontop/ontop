@@ -94,11 +94,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public InnerJoinNode clone() {
-        throw new IllegalStateException("InnerJoinNode::clone");
-    }
-
-    @Override
     public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);

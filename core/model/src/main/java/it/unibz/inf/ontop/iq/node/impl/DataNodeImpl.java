@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
  */
 public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeImpl {
 
-    private DataAtom<P> atom;
+    private final DataAtom<P> atom;
 
     // LAZY
     @Nullable

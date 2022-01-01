@@ -44,11 +44,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IntensionalDataNode clone() {
-        throw new IllegalStateException("IntensionalNode::clone");
-    }
-
-    @Override
     public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);

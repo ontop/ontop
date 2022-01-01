@@ -150,14 +150,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return substitution;
     }
 
-    /**
-     * Immutable fields, can be shared.
-     */
-    @Override
-    public ConstructionNode clone() {
-        throw new IllegalStateException("ConstructionNode::clone");
-    }
-
     @Override
     public ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {

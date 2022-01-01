@@ -202,11 +202,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isLeaf() {
-        return true;
-    }
-
-    @Override
     public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         ImmutableList<Variable> newVariables = orderedVariables.stream()
                 .map(freshRenamingSubstitution::applyToVariable)
@@ -452,11 +447,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public ValuesNode clone() {
-        throw new IllegalStateException("ValuesNode::clone");
     }
 
     @Override

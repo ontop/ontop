@@ -110,11 +110,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public ExtensionalDataNode clone() {
-        throw new IllegalStateException("ExtensionalDataNode::clone");
-    }
-
-    @Override
     public ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }

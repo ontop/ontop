@@ -233,11 +233,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public SliceNode clone() {
-        throw new IllegalStateException("SliceNode::clone");
-    }
-
-    @Override
     public String toString() {
         return SLICE_STR
                 + (offset > 0 ? " offset=" + offset : "")

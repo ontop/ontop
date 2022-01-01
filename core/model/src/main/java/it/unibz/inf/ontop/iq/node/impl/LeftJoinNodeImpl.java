@@ -93,11 +93,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public LeftJoinNode clone() {
-        throw new IllegalStateException("LeftJoinNode::clone");
-    }
-
-    @Override
     public LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }

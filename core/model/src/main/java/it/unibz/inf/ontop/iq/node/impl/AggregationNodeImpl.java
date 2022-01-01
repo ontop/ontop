@@ -378,11 +378,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public AggregationNode clone() {
-        throw new IllegalStateException("AggregationNode::clone");
-    }
-
-    @Override
     public String toString() {
         // TODO: display the query modifiers
         return AGGREGATE_NODE_STR + " " + groupingVariables + " " + "[" + substitution + "]" ;

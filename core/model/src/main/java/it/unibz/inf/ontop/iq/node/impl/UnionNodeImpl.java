@@ -67,11 +67,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public UnionNode clone() {
-        throw new IllegalStateException("UnionNode::clone");
-    }
-
-    @Override
     public UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);

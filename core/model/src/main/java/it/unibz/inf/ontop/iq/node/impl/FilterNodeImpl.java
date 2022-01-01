@@ -63,11 +63,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public FilterNode clone() {
-        throw new IllegalStateException("FilterNode::clone");
-    }
-
-    @Override
     public FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }

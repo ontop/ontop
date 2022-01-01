@@ -5,13 +5,11 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
 
-    final SubstitutionFactory substitutionFactory;
-    final IntermediateQueryFactory iqFactory;
+    protected final SubstitutionFactory substitutionFactory;
 
     protected CompositeQueryNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
-        super();
+        super(iqFactory);
         this.substitutionFactory = substitutionFactory;
-        this.iqFactory = iqFactory;
     }
 
 

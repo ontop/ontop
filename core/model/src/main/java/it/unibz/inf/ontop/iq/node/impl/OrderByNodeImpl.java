@@ -200,11 +200,6 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public OrderByNode clone() {
-        throw new IllegalStateException("OrderByNode::clone");
-    }
-
-    @Override
     public String toString() {
         return ORDER_BY_NODE_STR + " " + comparators;
     }
