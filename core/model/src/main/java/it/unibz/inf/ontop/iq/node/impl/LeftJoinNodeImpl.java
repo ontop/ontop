@@ -32,8 +32,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
 
 

@@ -31,11 +31,9 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
 
-    private final static ImmutableExpression EQ_X_Y = TERM_FACTORY.getStrictEquality(X, Y);
     private final static ImmutableExpression EQ_X_Z = TERM_FACTORY.getStrictEquality(X, Z);
 
     private final static ExtensionalDataNode DATA_NODE_1;
-    private final static ExtensionalDataNode DATA_NODE_2;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -54,335 +52,300 @@ public class IQSyntacticEquivalenceCheckerTest {
             "col3", integerDBType, false);
 
         DATA_NODE_1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        DATA_NODE_2 = createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
     }
 
 
     @Test
     public void testInnerJoinNodeEquivalence() {
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(innerJoinNode, dataNode);
-        queryBuilder.addChild(innerJoinNode, dataNode1);
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(dataNode, dataNode1))));
+
         InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode(EQ_X_Z);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, innerJoinNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(innerJoinNode1, dataNode2);
-        queryBuilder1.addChild(innerJoinNode1, dataNode3);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode1, ImmutableList.of(dataNode2, dataNode3))));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testInnerJoinNodeNotEquivalence() {
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(innerJoinNode, dataNode);
-        queryBuilder.addChild(innerJoinNode, dataNode1);
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(dataNode, dataNode1))));
+
         InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, innerJoinNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(innerJoinNode1, dataNode2);
-        queryBuilder1.addChild(innerJoinNode1, dataNode3);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode1, ImmutableList.of(dataNode2, dataNode3))));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testLeftJoinNodeEquivalence() {
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode, dataNode1)));
+
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, leftJoinNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode1, dataNode2, dataNode3)));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testLeftJoinNodeNotEquivalence() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode, dataNode1)));
+
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode(EQ_X_Z);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, leftJoinNode1);
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode1, dataNode2, dataNode3)));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testUnionNodeEquivalence() {
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
         ConstructionNode constructionNodeMain = IQ_FACTORY.createConstructionNode(projectedVariables);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(projectedVariables);
-        queryBuilder.init(projectionAtom, constructionNodeMain);
-        queryBuilder.addChild(constructionNodeMain, unionNode);
-
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(unionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(unionNode, leftJoinNode1);
         ExtensionalDataNode dataNode3 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode4 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode1, dataNode4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNodeMain,
+                        IQ_FACTORY.createNaryIQTree(unionNode, ImmutableList.of(
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode1, dataNode2),
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode1, dataNode3, dataNode4)))));
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(projectedVariables);
         ConstructionNode constructionNodeMain1 = IQ_FACTORY.createConstructionNode(projectedVariables);
         DistinctVariableOnlyDataAtom projectionAtomMain1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
-        queryBuilder1.init(projectionAtomMain1, constructionNodeMain1);
-        queryBuilder1.addChild(constructionNodeMain1, unionNode1);
-
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder1.addChild(unionNode1, leftJoinNode2);
         ExtensionalDataNode dataNode5 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode6 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder1.addChild(leftJoinNode2, dataNode5, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode2, dataNode6, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-
         LeftJoinNode leftJoinNode3 = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder1.addChild(unionNode1, leftJoinNode3);
         ExtensionalDataNode dataNode7 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode8 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder1.addChild(leftJoinNode3, dataNode7, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode3, dataNode8, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtomMain1,
+                IQ_FACTORY.createUnaryIQTree(constructionNodeMain1,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode2, dataNode5, dataNode6),
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode3, dataNode7, dataNode8)))));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testUnionNodeNotEquivalence() {
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
         UnionNode unionNode = IQ_FACTORY.createUnionNode(projectedVariables);
         ConstructionNode constructionNodeMain = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.init(projectionAtom, constructionNodeMain);
-        queryBuilder.addChild(constructionNodeMain, unionNode);
-
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(unionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(unionNode, leftJoinNode1);
         ExtensionalDataNode dataNode3 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode4 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder.addChild(leftJoinNode1, dataNode4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNodeMain,
+                        IQ_FACTORY.createNaryIQTree(unionNode, ImmutableList.of(
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, dataNode1, dataNode2),
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode1, dataNode3, dataNode4)))));
 
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(projectedVariables);
         ConstructionNode constructionNodeMain1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z));
-        queryBuilder1.init(projectionAtom, constructionNodeMain1);
-        queryBuilder1.addChild(constructionNodeMain1, unionNode1);
-
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder1.addChild(unionNode1, leftJoinNode2);
         ExtensionalDataNode dataNode5 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode6 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder1.addChild(leftJoinNode2, dataNode5, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode2, dataNode6, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder1.addChild(unionNode1, innerJoinNode);
         ExtensionalDataNode dataNode7 =  createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
         ExtensionalDataNode dataNode8 =  createExtensionalDataNode(TABLE2, ImmutableList.of(Y, Z));
-        queryBuilder1.addChild(innerJoinNode, dataNode7);
-        queryBuilder1.addChild(innerJoinNode, dataNode8);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNodeMain1,
+                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode2, dataNode5, dataNode6),
+                                IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(dataNode7, dataNode8))))));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testFilterNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X, Z));
-        queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(filterNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(filterNode, dataNode)));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X, Z));
-        queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(filterNode1, dataNode1);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createUnaryIQTree(filterNode1, dataNode1)));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testFilterNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality( X, Z));
-        queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(filterNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(filterNode, dataNode)));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictNEquality( X, Z));
-        queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(filterNode1, dataNode1);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1,
+                        IQ_FACTORY.createUnaryIQTree(filterNode1, dataNode1)));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testIntensionalDataNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         IntensionalDataNode dataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testIntensionalDataNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         IntensionalDataNode dataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Y));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testExtensionalDataNodeEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, DATA_NODE_1);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, DATA_NODE_1));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, DATA_NODE_1);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, DATA_NODE_1));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testExtensionalDataNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, DATA_NODE_1);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, DATA_NODE_1));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, createExtensionalDataNode(TABLE2, ImmutableList.of(Z, X)));
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, createExtensionalDataNode(TABLE2, ImmutableList.of(Z, X))));
+
+        assertNotEquals(query1, query);
     }
 
 //    @Test
@@ -449,46 +412,42 @@ public class IQSyntacticEquivalenceCheckerTest {
 
     @Test
     public void testConstructionNodeEquivalence(){
-
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertEquals(query1, query);
     }
 
     @Test
     public void testConstructionNodeDifferentSubstitutions() {
-
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X,Y),
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TERM_FACTORY.getNullConstant())));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
 
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X,Y),
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getDBStringConstant("John")));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertNotEquals(query1, query);
     }
 
 
@@ -496,94 +455,78 @@ public class IQSyntacticEquivalenceCheckerTest {
     public void testConstructionNodeNotEquivalence() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(TABLE1.getAtomPredicate(), Y);
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Y));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertNotEquals(query1, query);
     }
 
     @Test
     public void testConstructionNodeDifferentModifiers()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        queryBuilder.init(projectionAtom, distinctNode);
-
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
-        queryBuilder.addChild(distinctNode, topConstructionNode);
-
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
-        queryBuilder.addChild(topConstructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(topConstructionNode, dataNode)));
 
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-        queryBuilder1.init(projectionAtom1, constructionNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertNotEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
+
+        assertNotEquals(query1, query);
     }
 
 
 
     @Test
     public void testConstructionSameModifiers() {
-
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
-
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
-
         SliceNode sliceNode = IQ_FACTORY.createSliceNode(1, 1);
-        queryBuilder.init(projectionAtom, sliceNode);
-
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        queryBuilder.addChild(sliceNode, distinctNode);
-
         OrderByNode orderByNode = IQ_FACTORY.createOrderByNode(ImmutableList.of(
                 IQ_FACTORY.createOrderComparator(X, true)));
-        queryBuilder.addChild(distinctNode, orderByNode);
-
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
-        queryBuilder.addChild(orderByNode, topConstructionNode);
-
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
-        queryBuilder.addChild(topConstructionNode, dataNode);
+
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(sliceNode,
+                        IQ_FACTORY.createUnaryIQTree(distinctNode,
+                                IQ_FACTORY.createUnaryIQTree(orderByNode,
+                                        IQ_FACTORY.createUnaryIQTree(topConstructionNode, dataNode)))));
 
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_VAR3_PREDICATE, X, Y, Z);
-
-        IntermediateQueryBuilder queryBuilder1 = IQ_FACTORY.createIQBuilder();
-
         SliceNode newSliceNode = IQ_FACTORY.createSliceNode(1, 1);
-        queryBuilder1.init(projectionAtom1, newSliceNode);
-
         DistinctNode newDistinctNode = IQ_FACTORY.createDistinctNode();
-        queryBuilder1.addChild(newSliceNode, newDistinctNode);
-
         OrderByNode newOrderByNode = IQ_FACTORY.createOrderByNode(ImmutableList.of(
                 IQ_FACTORY.createOrderComparator(X, true)));
-        queryBuilder1.addChild(newDistinctNode, newOrderByNode);
-
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
-        queryBuilder1.addChild(newOrderByNode, constructionNode1);
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, Y, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
 
-        assertEquals(queryBuilder1.buildIQ(), queryBuilder.buildIQ());
+        IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
+                IQ_FACTORY.createUnaryIQTree(newSliceNode,
+                        IQ_FACTORY.createUnaryIQTree(newDistinctNode,
+                                IQ_FACTORY.createUnaryIQTree(newOrderByNode,
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1)))));
+
+        assertEquals(query1, query);
     }
 
 }
