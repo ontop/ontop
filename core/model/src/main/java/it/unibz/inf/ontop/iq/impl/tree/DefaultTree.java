@@ -36,7 +36,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode) throws IllegalTreeUpdateException {
         QueryNode parentNode = accessTreeNode(parentQueryNode);
 
         if (nodeIndex.containsKey(childQueryNode)) {
@@ -46,31 +46,25 @@ public class DefaultTree implements QueryTree {
          * New node
          */
         else {
-            createNewNode(childQueryNode, parentNode, optionalPosition);
+            createNewNode(childQueryNode, parentNode);
         }
     }
 
     /**
      * Low-level
      */
-    private void createNewNode(QueryNode childQueryNode, QueryNode parentNode,
-                               Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
+    private void createNewNode(QueryNode childQueryNode, QueryNode parentNode)
             throws IllegalTreeUpdateException {
         QueryNode childNode = childQueryNode;
         nodeIndex.put(childQueryNode, childNode);
 
         childrenIndex.put(childNode, createChildrenRelation(childNode));
 
-        accessChildrenRelation(parentNode).addChild(childNode, optionalPosition);
+        accessChildrenRelation(parentNode).addChild(childNode);
     }
 
     private static ChildrenRelation createChildrenRelation(QueryNode parentTreeNode) {
-        if (parentTreeNode instanceof BinaryOrderedOperatorNode) {
-            return new BinaryChildrenRelation(parentTreeNode);
-        }
-        else {
-            return new StandardChildrenRelation(parentTreeNode);
-        }
+        return new StandardChildrenRelation(parentTreeNode);
     }
 
 

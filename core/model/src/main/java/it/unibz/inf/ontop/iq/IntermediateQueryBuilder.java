@@ -23,11 +23,5 @@ public interface IntermediateQueryBuilder {
      */
     void addChild(QueryNode parentNode, QueryNode child) throws IntermediateQueryBuilderException;
 
-    /**
-     * When the parent is a BinaryAsymetricOperatorNode.
-     */
-    void addChild(QueryNode parentNode, QueryNode child, BinaryOrderedOperatorNode.ArgumentPosition position)
-            throws IntermediateQueryBuilderException;
-
     IQ buildIQ() throws IntermediateQueryBuilderException;
 }

@@ -8,11 +8,8 @@ import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
 
 /**
  * TODO: explain
@@ -54,19 +51,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public void addChild(QueryNode parentNode, QueryNode childNode) throws IntermediateQueryBuilderException {
         checkEditMode();
         try {
-            tree.addChild(parentNode, childNode, Optional.empty());
-        } catch (IllegalTreeUpdateException e) {
-            throw new IntermediateQueryBuilderException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void addChild(QueryNode parentNode, QueryNode childNode,
-                         ArgumentPosition position)
-            throws IntermediateQueryBuilderException {
-        checkEditMode();
-        try {
-            tree.addChild(parentNode, childNode, Optional.of(position));
+            tree.addChild(parentNode, childNode);
         } catch (IllegalTreeUpdateException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

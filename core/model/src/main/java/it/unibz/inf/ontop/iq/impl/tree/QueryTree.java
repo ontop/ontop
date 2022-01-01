@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface QueryTree {
     QueryNode getRootNode();
 
-    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 }

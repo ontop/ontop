@@ -29,10 +29,7 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(QueryNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) {
-        if (optionalPosition.isPresent()) {
-            throw new IllegalArgumentException("The StandardChildrenRelation does not accept argument positions");
-        }
+    public void addChild(QueryNode childNode) {
         if (!children.contains(childNode)) {
             children.add(childNode);
         }
