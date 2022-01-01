@@ -60,9 +60,6 @@ public class OntopVirtualRepositoryBean {
         if (dbUrl != null && !dbUrl.isEmpty())
             builder.jdbcUrl(dbUrl);
 
-        if (dbName != null && !dbName.isEmpty())
-            builder.jdbcName(dbName);
-
         //TODO Can this be empty?
         if (dbDriver != null && !dbDriver.isEmpty())
             builder.jdbcDriver(dbDriver);

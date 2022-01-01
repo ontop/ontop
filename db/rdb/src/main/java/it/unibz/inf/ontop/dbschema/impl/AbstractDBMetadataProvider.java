@@ -27,11 +27,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -246,6 +248,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
+            List<String> columnsNotFound = new ArrayList<>();
+            String indexId = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id);
@@ -255,19 +259,17 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 //       tableIndexHashed - this is a hashed index
                 //       tableIndexOther (all are static final int in DatabaseMetaData)
                 if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
-                    if (builder != null)
-                        builder.build();
-
+                    createIndex(id, builder, indexId, columnsNotFound);
                     builder = null;
                     continue;
                 }
                 if (rs.getShort("ORDINAL_POSITION") == 1) {
-                    if (builder != null)
-                        builder.build();
+                    createIndex(id, builder, indexId, columnsNotFound);
 
                     if (!rs.getBoolean("NON_UNIQUE")) {
-                        String name = rs.getString("INDEX_NAME");
-                        builder = UniqueConstraint.builder(relation, name);
+                        indexId = rs.getString("INDEX_NAME");
+                        builder = UniqueConstraint.builder(relation, indexId);
+                        columnsNotFound.clear();
                     }
                     else
                         builder = null;
@@ -292,13 +294,22 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                             builder.addDeterminant(attrId);
                         }
                         catch (AttributeNotFoundException ex) {
-                            throw new MetadataExtractionException(e);
+                            columnsNotFound.add(rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME")).getName());
                         }
                     }
                 }
             }
-            if (builder != null)
+            createIndex(id, builder, indexId, columnsNotFound);
+        }
+    }
+
+    private static void createIndex(RelationID id, UniqueConstraint.Builder builder, String indexId, List<String> columnsNotFound) {
+        if (builder != null) {
+            if (columnsNotFound.isEmpty())
                 builder.build();
+            else
+                LOGGER.error("WARNING: column{} {} not found for the unique index {} (table {}): the constraint will not be used in optimizations.",
+                        columnsNotFound.size() == 1 ? "" : "s", String.join(", ", columnsNotFound), indexId, id);
         }
     }
 

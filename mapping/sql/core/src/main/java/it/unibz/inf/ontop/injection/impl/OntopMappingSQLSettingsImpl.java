@@ -36,11 +36,6 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     @Override
-    public String getJdbcName() {
-        return sqlSettings.getJdbcName();
-    }
-
-    @Override
     public Optional<String> getJdbcUser() {
         return sqlSettings.getJdbcUser();
     }

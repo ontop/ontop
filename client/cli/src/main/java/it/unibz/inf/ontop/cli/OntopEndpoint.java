@@ -117,9 +117,6 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
         if (dbUrl != null)
             argList.add("--db-url=" + this.dbUrl);
 
-        if (dbName != null)
-            argList.add("--db-name=" + this.dbName);
-
         if (dbDriver != null)
             argList.add("--db-driver=" + this.dbDriver);
 

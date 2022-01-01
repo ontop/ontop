@@ -17,7 +17,6 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_DB_USER_FILE` (optional). Loads the DB user from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
 - `ONTOP_DB_URL` (optional). Corresponds to the argument `--db-url`. Added in 4.1.0.
 - `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
-- `ONTOP_DB_NAME` (optional). Corresponds to the argument `--db-name`. Added in 4.2.0.
 - `ONTOP_DB_DRIVER` (optional). Corresponds to the argument `--db-driver`. Added in 4.2.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
@@ -25,6 +24,7 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_VIEW_FILE` (optional). Corresponds to the argument `--ontop-views`. Added in 4.1.0.
 - `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.
 - `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
+- `ONTOP_DISABLE_PORTAL_PAGE` (optional). Corresponds to the argument `--disable-portal-page`. Added in 4.2.0.
 - `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
 - `ONTOP_LAZY_INIT` (optional). Corresponds to the argument `--lazy`.
 - `ONTOP_PREDEFINED_CONFIG` (optional). Corresponds to the argument `--predefined-config`.
@@ -33,6 +33,7 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_DEBUG` (optional). Uses debug for logback.
 - `ONTOP_JAVA_ARGS` (optional). Allows to set arbitrary Java arguments. Added in 4.1.0.
 - `ONTOP_FILE_ENCODING` (optional). File encoding. By default, set to "UTF-8". Added in 4.1.0.
+- `ONTOP_ENABLE_DOWNLOAD_ONTOLOGY` (optional). Corresponds to the argument`--enable-download-ontology`. Added in 4.2.0.
 
 ## Tutorial
 
