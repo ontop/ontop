@@ -252,7 +252,6 @@ public class ConstructionNodeCleanerTest {
                                                         IQ_FACTORY.createUnaryIQTree(limit40,
                                                                 IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1)))))));
 
-        SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(X1),
@@ -335,18 +334,10 @@ public class ConstructionNodeCleanerTest {
                 IQ_FACTORY.createUnaryIQTree(constructionNode1,
                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
-
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
                 IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1));
-        System.out.println("\nExpected: \n" + query2);
 
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
@@ -364,17 +355,9 @@ public class ConstructionNodeCleanerTest {
                 IQ_FACTORY.createUnaryIQTree(constructionNode1,
                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
                 IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1));
-        System.out.println("\nExpected: \n" + query2);
-
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
