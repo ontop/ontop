@@ -9,14 +9,12 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
-@Ignore("TODO: support it (and update it)")
 public class ConstructionNodeCleanerTest {
 
     private final static IRI R1_IRI = RDF_FACTORY.createIRI("http://example.com/voc#r1");
@@ -38,9 +36,6 @@ public class ConstructionNodeCleanerTest {
     private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
     private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
 
-    // TODO: choose an implementation
-    private static IQOptimizer constructionNodeCleaner = null;
-
 
     @Test
     public void removeConstructionNodeTest1()  {
@@ -57,19 +52,13 @@ public class ConstructionNodeCleanerTest {
                         IQ_FACTORY.createUnaryIQTree(distinctNode,
                                 IQ_FACTORY.createUnaryIQTree(constructionNode1,
                                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)))));
-        System.out.println("\nBefore optimization: \n" + query1);
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
                 IQ_FACTORY.createUnaryIQTree(limitNode,
                         IQ_FACTORY.createUnaryIQTree(distinctNode,
                                 IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1))));
-        System.out.println("\nExpected: \n" + query2);
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
@@ -87,25 +76,16 @@ public class ConstructionNodeCleanerTest {
                                 IQ_FACTORY.createUnaryIQTree(distinctNode,
                                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limitNode,
-                        IQ_FACTORY.createUnaryIQTree(distinctNode,
-                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1))));
-        System.out.println("\nExpected: \n" + query2);
+                IQ_FACTORY.createUnaryIQTree(constructionNode3,
+                        IQ_FACTORY.createUnaryIQTree(limitNode, dataNode1)));
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
-    @Ignore("TODO: refactor after moving the query modifiers away from the construction node ")
     @Test
     public void removeConstructionNodeTest3() {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
@@ -117,20 +97,13 @@ public class ConstructionNodeCleanerTest {
                 IQ_FACTORY.createUnaryIQTree(constructionNode1,
                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
                 IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1));
-        System.out.println("\nExpected: \n" + query2);
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
@@ -150,22 +123,15 @@ public class ConstructionNodeCleanerTest {
                                 IQ_FACTORY.createUnaryIQTree(limitNode2,
                                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,generateURI1(Z2), Y, generateURI1(Z)));
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limitNode2,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1)));
-        System.out.println("\nExpected: \n" + query2);
+                IQ_FACTORY.createUnaryIQTree(constructionNode3,
+                        IQ_FACTORY.createUnaryIQTree(limitNode2, dataNode1)));
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
@@ -186,25 +152,14 @@ public class ConstructionNodeCleanerTest {
                                 IQ_FACTORY.createUnaryIQTree(limitNode2,
                                         IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode1)))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(Z2), Y, generateURI1(Z)));
-        ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z, Z2),
-                SUBSTITUTION_FACTORY.getSubstitution());
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limitNode1,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode3,
-                                IQ_FACTORY.createUnaryIQTree(limitNode2,
-                                        IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode1)))));
-        System.out.println("\nExpected: \n" + query2);
+                IQ_FACTORY.createUnaryIQTree(constructionNode3,
+                        IQ_FACTORY.createUnaryIQTree(limitNode2, dataNode1)));
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
@@ -227,8 +182,6 @@ public class ConstructionNodeCleanerTest {
                                 IQ_FACTORY.createUnaryIQTree(limitNode,
                                         IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1)))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(X1),
@@ -236,15 +189,10 @@ public class ConstructionNodeCleanerTest {
                         Z, generateURI1(Z1)));
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limitNode,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode1)));
-        System.out.println("\nExpected: \n" + query2);
+                IQ_FACTORY.createUnaryIQTree(constructionNode4,
+                        IQ_FACTORY.createUnaryIQTree(limitNode, dataNode1)));
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
@@ -268,10 +216,6 @@ public class ConstructionNodeCleanerTest {
                                         IQ_FACTORY.createUnaryIQTree(limit40,
                                                 IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1))))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
-        SliceNode limit90 = IQ_FACTORY.createSliceNode(0,90);
-
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(X1),
@@ -279,16 +223,10 @@ public class ConstructionNodeCleanerTest {
                         Z, generateURI1(Z1)));
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limit90,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode1)));
-        System.out.println("\nExpected: \n" + query2);
+                IQ_FACTORY.createUnaryIQTree(constructionNode4,
+                        IQ_FACTORY.createUnaryIQTree(limit40, dataNode1)));
 
-
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
@@ -310,12 +248,9 @@ public class ConstructionNodeCleanerTest {
                 IQ_FACTORY.createUnaryIQTree(limit50,
                         IQ_FACTORY.createUnaryIQTree(constructionNode1,
                                 IQ_FACTORY.createUnaryIQTree(limit80,
-                                        IQ_FACTORY.createUnaryIQTree(constructionNode2,
                                                 IQ_FACTORY.createUnaryIQTree(constructionNode2,
                                                         IQ_FACTORY.createUnaryIQTree(limit40,
-                                                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1))))))));
-
-        System.out.println("\nBefore optimization: \n" + query1);
+                                                                IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode1)))))));
 
         SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
@@ -324,21 +259,11 @@ public class ConstructionNodeCleanerTest {
                         Y, generateURI1(Y1),
                         Z, generateURI1(Z1)));
 
-        ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X1, Y1, Z1));
-
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limit130,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode4,
-                                IQ_FACTORY.createUnaryIQTree(limit40,
-                                        IQ_FACTORY.createUnaryIQTree(constructionNode5, dataNode1)))));
+                IQ_FACTORY.createUnaryIQTree(constructionNode4,
+                        IQ_FACTORY.createUnaryIQTree(limit40, dataNode1)));
 
-        System.out.println("\nExpected: \n" + query2);
-
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
@@ -376,9 +301,6 @@ public class ConstructionNodeCleanerTest {
                                                                         IQ_FACTORY.createUnaryIQTree(distinctNode2,
                                                                                 IQ_FACTORY.createUnaryIQTree(constructionNode4, dataNode2)))))))))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
-        SliceNode limit230 = IQ_FACTORY.createSliceNode(0,230);
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
@@ -388,20 +310,14 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1), Z, generateURI1(Z1)));
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                IQ_FACTORY.createUnaryIQTree(limit230,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode5,
+                IQ_FACTORY.createUnaryIQTree(constructionNode5,
+                        IQ_FACTORY.createUnaryIQTree(limit100,
                                 IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
                                         dataNode1,
-                                        IQ_FACTORY.createUnaryIQTree(distinctNode1,
-                                                IQ_FACTORY.createUnaryIQTree(constructionNode6, dataNode2)))))));
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode6, dataNode2))))));
 
-        System.out.println("\nExpected: \n" + query2);
 
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
     @Test
@@ -475,25 +391,22 @@ public class ConstructionNodeCleanerTest {
         IntensionalDataNode dataNode3 = IQ_FACTORY.createIntensionalDataNode(
                 ATOM_FACTORY.getIntensionalTripleAtom(X1, R3_IRI, X2));
 
+        ConstructionNode constructionNodeX1 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables());
+
         IQ query1 = IQ_FACTORY.createIQ(projectionAtom1,
                 IQ_FACTORY.createUnaryIQTree(constructionNode1,
                         IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
-                                dataNode1,
+                                IQ_FACTORY.createUnaryIQTree(constructionNodeX1, dataNode1),
                                 IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode2),
                                 IQ_FACTORY.createUnaryIQTree(constructionNode3, dataNode3)))));
 
-        System.out.println("\nBefore optimization: \n" + query1);
-
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom1,
-                        IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(dataNode1, dataNode2, dataNode3)));
+                IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(constructionNodeX1, dataNode1),
+                        IQ_FACTORY.createUnaryIQTree(constructionNodeX1, dataNode2),
+                        IQ_FACTORY.createUnaryIQTree(constructionNodeX1, dataNode3))));
 
-        System.out.println("\nExpected: \n" + query2);
-
-        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
-        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertEquals(query2, optimizedQuery);
+        optimizeAndCompare(query1, query2);
     }
 
 
@@ -503,5 +416,14 @@ public class ConstructionNodeCleanerTest {
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
         return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_2_2, ImmutableList.of(argument1, argument2));
+    }
+
+    private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
+        System.out.println("\nBefore optimization: \n" + initialQuery);
+        System.out.println("\nExpected: \n" + expectedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialQuery)
+                .normalizeForOptimization();
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+        assertEquals(expectedQuery, optimizedQuery);
     }
 }
