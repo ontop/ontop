@@ -371,8 +371,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     && rightChild.isEquivalentTo(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
                     && ancestors.size() == other.ancestors.size()
-                    && IntStream.range(0, ancestors.size())
-                        .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)));
+                    && ancestors.equals(other.ancestors);
         }
 
         private LJNormalizationState optimizeLeftJoinCondition() {

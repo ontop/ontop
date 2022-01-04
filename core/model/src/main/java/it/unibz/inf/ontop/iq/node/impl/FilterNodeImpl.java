@@ -204,9 +204,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof FilterNode)
-                && getFilterCondition().equals(((FilterNode) queryNode).getFilterCondition());
+    public int hashCode() {
+        return getFilterCondition().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return (obj instanceof FilterNode)
+                && getFilterCondition().equals(((FilterNode) obj).getFilterCondition());
     }
 
     @Override

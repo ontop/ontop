@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
+import java.util.Objects;
+
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
@@ -94,10 +96,16 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof NativeNode)
-                && ((NativeNode) queryNode).getVariables().equals(variables)
-                && ((NativeNode) queryNode).getNativeQueryString().equals(nativeQueryString);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NativeNodeImpl that = (NativeNodeImpl) o;
+        return nativeQueryString.equals(that.nativeQueryString) && variables.equals(that.variables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nativeQueryString, variables);
     }
 
     @Override

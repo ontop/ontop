@@ -145,7 +145,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean isEquivalentTo(IQTree tree) {
-        if (!getRootNode().isEquivalentTo(tree.getRootNode()))
+        if (!getRootNode().equals(tree.getRootNode()))
             return false;
 
         ImmutableList<IQTree> otherChildren = tree.getChildren();

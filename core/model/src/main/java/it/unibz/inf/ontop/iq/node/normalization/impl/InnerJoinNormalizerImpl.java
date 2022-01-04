@@ -181,7 +181,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         .allMatch(i -> children.get(i).isEquivalentTo(other.children.get(i)))
                     && ancestors.size() == other.ancestors.size()
                     && IntStream.range(0, ancestors.size())
-                    .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)))
+                    .allMatch(i -> ancestors.get(i).equals(other.ancestors.get(i)))
                     && projectedVariables.equals(other.projectedVariables);
         }
 

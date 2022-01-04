@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -390,10 +391,16 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof UnionNode))
-            return false;
-        return projectedVariables.equals(((UnionNode) queryNode).getVariables());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnionNodeImpl unionNode = (UnionNodeImpl) o;
+        return projectedVariables.equals(unionNode.projectedVariables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables);
     }
 
     /**

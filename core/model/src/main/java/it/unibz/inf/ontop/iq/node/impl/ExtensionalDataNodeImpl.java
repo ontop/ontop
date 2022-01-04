@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -253,10 +254,16 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ExtensionalDataNode)
-                && ((ExtensionalDataNode) queryNode).getRelationDefinition().equals(relationDefinition)
-                && ((ExtensionalDataNode) queryNode).getArgumentMap().equals(argumentMap);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExtensionalDataNodeImpl that = (ExtensionalDataNodeImpl) o;
+        return relationDefinition.equals(that.relationDefinition) && argumentMap.equals(that.argumentMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(relationDefinition, argumentMap);
     }
 
     @Override

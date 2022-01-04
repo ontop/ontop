@@ -27,10 +27,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -263,13 +260,16 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return Optional.of(queryNode)
-                .filter(n -> n instanceof AggregationNode)
-                .map(n -> (AggregationNode) n)
-                .filter(n -> n.getGroupingVariables().equals(groupingVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AggregationNodeImpl that = (AggregationNodeImpl) o;
+        return groupingVariables.equals(that.groupingVariables) && substitution.equals(that.substitution);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupingVariables, substitution);
     }
 
     @Override

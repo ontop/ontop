@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -189,9 +190,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof OrderByNode
-                && ((OrderByNode) queryNode).getComparators().equals(comparators);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderByNodeImpl that = (OrderByNodeImpl) o;
+        return comparators.equals(that.comparators);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(comparators);
     }
 
     @Override

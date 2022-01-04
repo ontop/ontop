@@ -650,6 +650,6 @@ public class SelectQueryParserTest {
     private static void assertMatches(ImmutableList<ExtensionalDataNode> list0, List<ExtensionalDataNode> list) {
         assertEquals(list0.size(), list.size());
         list0.forEach(a -> assertTrue(list.stream()
-                .anyMatch(b -> b.isEquivalentTo((QueryNode) a))));
+                .anyMatch(b -> b.equals(a))));
     }
 }

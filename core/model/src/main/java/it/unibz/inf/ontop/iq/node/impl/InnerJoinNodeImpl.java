@@ -135,9 +135,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof InnerJoinNode)
-                && getOptionalFilterCondition().equals(((InnerJoinNode) queryNode).getOptionalFilterCondition());
+    public int hashCode() {
+        return getOptionalFilterCondition().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return (obj instanceof InnerJoinNode)
+                && getOptionalFilterCondition().equals(((InnerJoinNode) obj).getOptionalFilterCondition());
     }
 
     @Override

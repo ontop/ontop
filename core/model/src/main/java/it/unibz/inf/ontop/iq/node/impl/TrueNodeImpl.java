@@ -64,8 +64,13 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof TrueNode);
+    public int hashCode() {
+        return 12398;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof TrueNode;
     }
 
     @Override

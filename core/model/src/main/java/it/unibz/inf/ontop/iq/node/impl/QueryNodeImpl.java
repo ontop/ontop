@@ -10,4 +10,14 @@ public abstract class QueryNodeImpl implements QueryNode {
     QueryNodeImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
+
+    @Override
+    public int hashCode() {
+        throw new RuntimeException("hashCode() must be overridden");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        throw new RuntimeException("equals() must be overridden");
+    }
 }

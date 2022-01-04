@@ -52,8 +52,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
 
     @Override
     public boolean isEquivalentTo(IQTree tree) {
-        return (tree instanceof LeafIQTree)
-                && isEquivalentTo((QueryNode) tree);
+        return equals(tree);
     }
 
     /**
