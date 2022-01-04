@@ -428,6 +428,38 @@ public class SelfJoinSameTermsTest {
         optimizeAndCompare(initialQuery, initialQuery);
     }
 
+    @Test
+    public void testSelfJoinElimination8() {
+        ExtensionalDataNode dataNode = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode, dataNode));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
+
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode, joinTree));
+
+        IQ expectedQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createFilterNode(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getDBIsNotNull(A),
+                                                TERM_FACTORY.getDBIsNotNull(B),
+                                                TERM_FACTORY.getDBIsNotNull(C))),
+                                dataNode
+                        )));
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
     private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
         IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         assertEquals(expectedQuery, optimizedQuery);
