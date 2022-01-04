@@ -94,11 +94,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public InnerJoinNode clone() {
-        return iqFactory.createInnerJoinNode(getOptionalFilterCondition());
-    }
-
-    @Override
     public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
@@ -137,40 +132,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return iqFactory.createInnerJoinNode(newOptionalFilterCondition);
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-
-        if (isFilteringNullValue(variable))
-            return false;
-
-        // Non-already
-        boolean alsoProjectedByAnotherChild = false;
-
-        for(QueryNode child : query.getChildren(this)) {
-            if (query.getVariables(child).contains(variable)) {
-                // Joining conditions cannot be null
-                if (alsoProjectedByAnotherChild)
-                    return false;
-
-                if (child.isVariableNullable(query, variable))
-                    alsoProjectedByAnotherChild = true;
-                else
-                    return false;
-            }
-        }
-
-        if (!alsoProjectedByAnotherChild)
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-
-        return true;
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof InnerJoinNode) &&
-            this.getOptionalFilterCondition().equals(((InnerJoinNode) node).getOptionalFilterCondition());
     }
 
     @Override

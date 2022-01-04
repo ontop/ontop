@@ -28,14 +28,12 @@ import java.util.Optional;
 public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
-    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(atom, iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
+        super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     @Override
@@ -44,26 +42,9 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IntensionalDataNode clone() {
-        return iqFactory.createIntensionalDataNode(getProjectionAtom());
-    }
-
-    @Override
     public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
-    }
-
-    /**
-     * We assume all the variables are non-null. Ok for triple patterns.
-     * TODO: what about quads and default graphs?
-     */
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getVariables().contains(variable))
-            return false;
-        else
-            throw new IllegalArgumentException("The variable" + variable + " is not projected by " + this);
     }
 
     @Override
@@ -111,17 +92,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of(getVariables());
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof IntensionalDataNode)
-                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
     }
 
     @Override

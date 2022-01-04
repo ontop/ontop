@@ -8,7 +8,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -161,24 +160,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        return getVariableNullability().isPossiblyNullable(variable);
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ValuesNode)
-                && ((ValuesNode) node).getVariables().equals(projectedVariables)
-                && ((ValuesNode) node).getValues().equals(values);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return ImmutableSet.of();
     }
 
@@ -189,7 +171,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ValuesNode) && queryNode.isSyntacticallyEquivalentTo(this);
+        return (queryNode instanceof ValuesNode)
+                && ((ValuesNode) queryNode).getVariables().equals(projectedVariables)
+                && ((ValuesNode) queryNode).getValues().equals(values);
     }
 
     @Override
@@ -210,11 +194,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitValues(this);
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return true;
     }
 
     @Override
@@ -463,11 +442,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public ValuesNode clone() {
-        return iqFactory.createValuesNode(orderedVariables, values);
     }
 
     @Override

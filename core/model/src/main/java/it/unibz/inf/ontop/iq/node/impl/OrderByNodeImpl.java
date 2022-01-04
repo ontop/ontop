@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -180,17 +179,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getLocalVariables();
     }
 
@@ -203,11 +192,6 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     public boolean isEquivalentTo(QueryNode queryNode) {
         return queryNode instanceof OrderByNode
                 && ((OrderByNode) queryNode).getComparators().equals(comparators);
-    }
-
-    @Override
-    public OrderByNode clone() {
-        return iqFactory.createOrderByNode(comparators);
     }
 
     @Override

@@ -49,24 +49,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof TrueNode) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        throw new IllegalArgumentException("A true node does not project any variable");
-    }
-
-    @Override
-    public TrueNode clone() {
-        return iqFactory.createTrueNode();
-    }
-
-    @Override
     public String toString() {
         return PREFIX;
     }
@@ -74,11 +56,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
     }
 
     @Override

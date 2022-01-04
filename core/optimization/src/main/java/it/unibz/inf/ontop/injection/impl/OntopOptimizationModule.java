@@ -33,7 +33,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         // Executors
         bindFromSettings(UnionBasedQueryMerger.class);
         bindFromSettings(JoinLikeOptimizer.class);
-        bindFromSettings(BindingLiftOptimizer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
         bindFromSettings(TermTypeTermLifter.class);

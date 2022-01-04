@@ -59,7 +59,6 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public UnionNode transform(UnionNode unionNode){
         return iqFactory.createUnionNode(renameProjectedVars(unionNode.getVariables()));
-//        return unionNode.clone();
     }
 
     @Override
@@ -92,11 +91,11 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public EmptyNode transform(EmptyNode emptyNode) {
-        return emptyNode.clone();
+        return iqFactory.createEmptyNode(emptyNode.getVariables());
     }
 
     public TrueNode transform(TrueNode trueNode) {
-        return trueNode.clone();
+        return iqFactory.createTrueNode();
     }
 
     @Override
@@ -115,7 +114,9 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public SliceNode transform(SliceNode sliceNode) {
-        return sliceNode.clone();
+        return sliceNode.getLimit()
+                .map(l -> iqFactory.createSliceNode(sliceNode.getOffset(), l))
+                .orElseGet(() -> iqFactory.createSliceNode(sliceNode.getOffset()));
     }
 
     @Override

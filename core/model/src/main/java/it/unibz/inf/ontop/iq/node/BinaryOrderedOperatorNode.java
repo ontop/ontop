@@ -28,11 +28,6 @@ import java.util.Optional;
  */
 public interface BinaryOrderedOperatorNode extends QueryNode {
 
-    enum ArgumentPosition {
-        LEFT,
-        RIGHT
-    }
-
     VariableNullability getVariableNullability(IQTree leftChild, IQTree rightChild);
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);

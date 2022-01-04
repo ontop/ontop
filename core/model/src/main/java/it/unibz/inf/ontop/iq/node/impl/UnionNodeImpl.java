@@ -37,7 +37,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
     private final ConstructionNodeTools constructionTools;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -53,7 +52,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
-        this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -64,12 +62,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public UnionNode clone() {
-        return new UnionNodeImpl(projectedVariables, constructionTools, iqFactory,
-                substitutionFactory, termFactory, coreUtilsFactory, substitutionNormalizer, notRequiredVariableRemover);
     }
 
     @Override
@@ -92,15 +84,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return children.stream()
                 .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)
                         && ((ConstructionNode) c.getRootNode()).getSubstitution().isDefining(variable));
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        for(QueryNode child : query.getChildren(this)) {
-            if (child.isVariableNullable(query, variable))
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -387,14 +370,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof UnionNode) {
-            return projectedVariables.equals(((UnionNode)node).getVariables());
-        }
-        return false;
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return projectedVariables;
     }
@@ -407,11 +382,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
     }
 
     @Override
