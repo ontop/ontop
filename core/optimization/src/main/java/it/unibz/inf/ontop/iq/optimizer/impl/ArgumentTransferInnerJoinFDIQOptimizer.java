@@ -130,6 +130,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             ImmutableMap<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> nodeExternalArgumentMap =
                     dataNodes.stream()
+                            .distinct()
                             .collect(ImmutableCollectors.toMap(
                                     n -> n,
                                     n -> n.getArgumentMap().entrySet().stream()
