@@ -112,7 +112,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        return (obj instanceof LeftJoinNode)
+        return obj != null && getClass() == obj.getClass()
                 && getOptionalFilterCondition().equals(((LeftJoinNode) obj).getOptionalFilterCondition());
     }
 

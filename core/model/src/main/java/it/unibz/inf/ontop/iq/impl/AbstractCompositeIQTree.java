@@ -135,7 +135,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CompositeIQTree)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         IQTree otherTree = (IQTree) o;
         return rootNode.equals(otherTree.getRootNode())

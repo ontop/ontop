@@ -209,10 +209,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        return (obj instanceof FilterNode)
-                && getFilterCondition().equals(((FilterNode) obj).getFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass()
+                && getFilterCondition().equals(((FilterNode) o).getFilterCondition());
     }
 
     @Override

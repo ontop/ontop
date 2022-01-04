@@ -12,12 +12,8 @@ public abstract class QueryNodeImpl implements QueryNode {
     }
 
     @Override
-    public int hashCode() {
-        throw new RuntimeException("hashCode() must be overridden");
-    }
+    public abstract int hashCode();
 
     @Override
-    public boolean equals(Object obj) {
-        throw new RuntimeException("equals() must be overridden");
-    }
+    public abstract boolean equals(Object obj);
 }
