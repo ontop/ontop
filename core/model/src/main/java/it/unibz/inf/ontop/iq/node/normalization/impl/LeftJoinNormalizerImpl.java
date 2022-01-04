@@ -367,8 +367,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return false;
 
             LJNormalizationState other = (LJNormalizationState) o;
-            return leftChild.isEquivalentTo(other.leftChild)
-                    && rightChild.isEquivalentTo(other.rightChild)
+            return leftChild.equals(other.leftChild)
+                    && rightChild.equals(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
                     && ancestors.size() == other.ancestors.size()
                     && ancestors.equals(other.ancestors);

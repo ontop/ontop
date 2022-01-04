@@ -99,7 +99,7 @@ public class IQImpl implements IQ {
 
         return (otherObject instanceof IQ)
                 && projectionAtom.equals(((IQ) otherObject).getProjectionAtom())
-                && tree.isEquivalentTo(((IQ) otherObject).getTree());
+                && tree.equals(((IQ) otherObject).getTree());
     }
 
     @Override

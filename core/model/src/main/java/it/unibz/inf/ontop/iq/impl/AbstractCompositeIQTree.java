@@ -134,24 +134,17 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || ((o instanceof CompositeIQTree)
-                && isEquivalentTo((CompositeIQTree) o));
+        if (this == o) return true;
+        if (!(o instanceof CompositeIQTree)) return false;
+
+        IQTree otherTree = (IQTree) o;
+        return rootNode.equals(otherTree.getRootNode())
+                && children.equals(otherTree.getChildren());
     }
 
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }
-
-    @Override
-    public boolean isEquivalentTo(IQTree tree) {
-        if (!getRootNode().equals(tree.getRootNode()))
-            return false;
-
-        ImmutableList<IQTree> otherChildren = tree.getChildren();
-        return (children.size() == otherChildren.size())
-                && IntStream.range(0, children.size())
-                    .allMatch(i -> children.get(i).isEquivalentTo(otherChildren.get(i)));
     }
 
     protected IQProperties getProperties() {
