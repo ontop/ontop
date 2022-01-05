@@ -66,7 +66,7 @@ public class JsonSQLView extends JsonView {
         int maxParentLevel = extractMaxParentLevel(iq, dbParameters.getCoreSingletons());
 
         if (maxParentLevel > 0)
-            LOGGER.warn("It is dangerous to build JoinViewDefinition above OntopViewDefinitions, " +
+            LOGGER.warn("It is dangerous to build SQLViewDefinitions above OntopViewDefinitions, " +
                     "because the view definition will fail if the SQL query cannot be parsed by Ontop");
 
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
