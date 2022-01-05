@@ -10,4 +10,10 @@ public abstract class QueryNodeImpl implements QueryNode {
     QueryNodeImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
 }

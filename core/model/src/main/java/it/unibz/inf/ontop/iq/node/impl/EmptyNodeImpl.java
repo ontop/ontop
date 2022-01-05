@@ -21,6 +21,8 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
+
 
 public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
@@ -148,9 +150,15 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof EmptyNode))
-            return false;
-        return projectedVariables.equals(((EmptyNode) queryNode).getVariables());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmptyNodeImpl emptyNode = (EmptyNodeImpl) o;
+        return projectedVariables.equals(emptyNode.projectedVariables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables);
     }
 }

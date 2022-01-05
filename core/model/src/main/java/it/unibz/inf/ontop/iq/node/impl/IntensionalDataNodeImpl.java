@@ -95,9 +95,15 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof IntensionalDataNode)
-                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
+    public int hashCode() {
+        return getProjectionAtom().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return obj != null && getClass() == obj.getClass()
+                && getProjectionAtom().equals(((IntensionalDataNode) obj).getProjectionAtom());
     }
 
     @Override

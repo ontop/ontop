@@ -176,12 +176,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             State other = (State) o;
 
             return joiningCondition.equals(other.joiningCondition)
-                    && children.size() == other.children.size()
-                    && IntStream.range(0, children.size())
-                        .allMatch(i -> children.get(i).isEquivalentTo(other.children.get(i)))
-                    && ancestors.size() == other.ancestors.size()
-                    && IntStream.range(0, ancestors.size())
-                    .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)))
+                    && children.equals(other.children)
+                    && ancestors.equals(other.ancestors)
                     && projectedVariables.equals(other.projectedVariables);
         }
 

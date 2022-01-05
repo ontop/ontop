@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -295,13 +296,16 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return Optional.of(queryNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .filter(n -> n.getVariables().equals(projectedVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConstructionNodeImpl that = (ConstructionNodeImpl) o;
+        return projectedVariables.equals(that.projectedVariables) && substitution.equals(that.substitution);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables, substitution);
     }
 
     @Override

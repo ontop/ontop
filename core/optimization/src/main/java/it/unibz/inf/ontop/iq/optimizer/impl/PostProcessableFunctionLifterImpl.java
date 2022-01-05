@@ -99,7 +99,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
 
             // Fix-point before pursing (recursive, potentially dangerous!)
-            if (!normalizedTree.isEquivalentTo(tree)) {
+            if (!normalizedTree.equals(tree)) {
                 return normalizedTree.acceptTransformer(this);
             }
 

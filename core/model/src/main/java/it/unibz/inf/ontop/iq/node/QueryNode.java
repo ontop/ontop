@@ -1,18 +1,12 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * Immutable.
- *
- * However, needs to be cloned to have multiple copies (distinct nodes) in an query tree.
- *
- * Only "QueryNode.equals(this)" returns true since multiple clones of a node
- * may appear in the same IntermediateQuery and they must absolutely be distinguished.
  *
  * See IntermediateQueryFactory for creating new instances.
  */
@@ -61,9 +55,4 @@ public interface QueryNode {
      * Locally defined variables must not appear in the sub-tree
      */
     ImmutableSet<Variable> getLocallyDefinedVariables();
-
-    /**
-     * Is syntactically equivalent
-     */
-    boolean isEquivalentTo(QueryNode queryNode);
 }

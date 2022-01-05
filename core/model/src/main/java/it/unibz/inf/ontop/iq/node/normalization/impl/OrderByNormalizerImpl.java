@@ -95,7 +95,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         }
 
         private State updateChild(IQTree newChild) {
-            if (newChild.isEquivalentTo(child))
+            if (newChild.equals(child))
                 return this;
             else
                 return new State(ancestors, orderByNode, newChild, variableGenerator);
@@ -106,7 +106,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         }
 
         public boolean hasConverged(State previousState) {
-            return child.isEquivalentTo(previousState.child);
+            return child.equals(previousState.child);
         }
 
         /**

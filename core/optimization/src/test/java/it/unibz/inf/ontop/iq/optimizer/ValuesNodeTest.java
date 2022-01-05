@@ -199,7 +199,7 @@ public class ValuesNodeTest {
                 .createVariableGenerator(initialTree.getVariables()));
         System.out.println('\n' + "Normalized tree:");
         System.out.println(normalizedTree);
-        return normalizedTree.isEquivalentTo(expectedTree);
+        return normalizedTree.equals(expectedTree);
     }
 
     private Boolean baseTestApplyDescSubstitution(IQTree initialTree,
@@ -214,7 +214,7 @@ public class ValuesNodeTest {
         IQTree resultingTree = initialTree.applyDescendingSubstitutionWithoutOptimizing(substitution);
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
-        return resultingTree.isEquivalentTo(expectedTree);
+        return resultingTree.equals(expectedTree);
     }
 
     private Boolean baseTestPropagateDownConstraints(IQTree initialTree,
@@ -226,6 +226,6 @@ public class ValuesNodeTest {
         IQTree resultingTree = initialTree.propagateDownConstraint(((FilterNode) initialTree.getRootNode()).getFilterCondition());
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
-        return resultingTree.isEquivalentTo(expectedTree);
+        return resultingTree.equals(expectedTree);
     }
 }

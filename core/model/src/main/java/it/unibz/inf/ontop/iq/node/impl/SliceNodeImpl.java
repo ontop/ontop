@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -206,10 +207,16 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof SliceNode
-                && ((SliceNode) queryNode).getOffset() == getOffset()
-                && ((SliceNode) queryNode).getLimit().equals(getLimit());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SliceNodeImpl sliceNode = (SliceNodeImpl) o;
+        return offset == sliceNode.offset && Objects.equals(limit, sliceNode.limit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(offset, limit);
     }
 
     @Override

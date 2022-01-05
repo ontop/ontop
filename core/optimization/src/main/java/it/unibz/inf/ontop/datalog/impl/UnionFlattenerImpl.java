@@ -104,7 +104,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         do {
             prev = tree;
             tree = tree.acceptTransformer(treeTransformer);
-        } while (!prev.isEquivalentTo(tree));
+        } while (!prev.equals(tree));
         return prev;
     }
 }

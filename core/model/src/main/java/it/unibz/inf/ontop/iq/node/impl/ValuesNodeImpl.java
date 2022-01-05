@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -170,10 +171,16 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ValuesNode)
-                && ((ValuesNode) queryNode).getVariables().equals(projectedVariables)
-                && ((ValuesNode) queryNode).getValues().equals(values);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ValuesNodeImpl that = (ValuesNodeImpl) o;
+        return projectedVariables.equals(that.projectedVariables) && values.equals(that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables, values);
     }
 
     @Override

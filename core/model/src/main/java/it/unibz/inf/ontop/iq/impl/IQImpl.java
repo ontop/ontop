@@ -93,13 +93,11 @@ public class IQImpl implements IQ {
     }
 
     @Override
-    public boolean equals(Object otherObject) {
-        if (otherObject == this)
-            return true;
-
-        return (otherObject instanceof IQ)
-                && projectionAtom.equals(((IQ) otherObject).getProjectionAtom())
-                && tree.isEquivalentTo(((IQ) otherObject).getTree());
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o == null || o.getClass() != getClass()) return false;
+        IQImpl other = (IQImpl)o;
+        return projectionAtom.equals(other.projectionAtom) && tree.equals(other.tree);
     }
 
     @Override

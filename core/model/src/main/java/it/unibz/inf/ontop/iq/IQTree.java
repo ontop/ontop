@@ -103,8 +103,6 @@ public interface IQTree {
 
     VariableNullability getVariableNullability();
 
-    boolean isEquivalentTo(IQTree tree);
-
     /**
      * TODO: explain
      *

@@ -57,7 +57,7 @@ public class DefPushDownRequestImpl implements DefinitionPushDownRequest {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof DefinitionPushDownRequest)) return false;
+        if (!(o instanceof DefinitionPushDownRequest)) return false;
         DefinitionPushDownRequest that = (DefinitionPushDownRequest) o;
         return Objects.equals(newVariable, that.getNewVariable()) &&
                 Objects.equals(definition, that.getDefinitionWhenConditionSatisfied()) &&
