@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://hl7.org/fhir/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+fhir:		http://hl7.org/fhir/
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	fhir:Encounter/{visit_occurrence_id} a :Encounter . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Resource.id> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Resource.id> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Resource.id> <http://hl7.org/fhir/value> "{visit_occurrence_id}"^^<http://www.w3.org/2001/XMLSchema#string> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Encounter.status> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.status> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.status> <http://hl7.org/fhir/value> "finished"^^<http://www.w3.org/2001/XMLSchema#string> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Encounter.type> <http://hl7.org/fhir/CodeableConcept/{visit_concept_id}> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Encounter.class> <http://hl7.org/fhir/CodeableConcept/{visit_type_concept_id}> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Encounter.subject> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.subject> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.subject> <http://hl7.org/fhir/link> <http://hl7.org/fhir/Patient/{person_id}> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}> <http://hl7.org/fhir/Encounter.period> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period> <http://hl7.org/fhir/Period.start> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.start> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.start> <http://hl7.org/fhir/value> "{visit_start_datetime}"^^<http://www.w3.org/2001/XMLSchema#dateTime> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period> <http://hl7.org/fhir/Period.end> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.end> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.end> <http://hl7.org/fhir/value> "{visit_end_datetime}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+source	SELECT * FROM visit_occurrence
+
+mappingId	mapping2
+target	<http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period> <http://hl7.org/fhir/Period.startdate> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.startdate> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.startdate> <http://hl7.org/fhir/value> "{visit_start_date}"^^<http://www.w3.org/2001/XMLSchema#date> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period> <http://hl7.org/fhir/Period.enddate> <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.enddate> . <http://hl7.org/fhir/Encounter/{visit_occurrence_id}/Encounter.period/Period.enddate> <http://hl7.org/fhir/value> "{visit_end_date}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+source	SELECT * FROM visit_occurrence
+]]
