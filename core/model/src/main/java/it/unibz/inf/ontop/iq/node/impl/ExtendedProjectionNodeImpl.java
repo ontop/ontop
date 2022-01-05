@@ -25,19 +25,16 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
     protected final TermFactory termFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                       ImmutableUnificationTools unificationTools,
                                       ConstructionNodeTools constructionNodeTools,
-                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                      CoreUtilsFactory coreUtilsFactory) {
+                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory) {
         super(substitutionFactory, iqFactory);
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
         this.termFactory = termFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override

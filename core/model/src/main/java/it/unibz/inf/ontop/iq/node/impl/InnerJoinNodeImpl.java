@@ -66,12 +66,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-        this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
-        this.normalizer = normalizer;
+        this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
@@ -80,12 +76,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               SubstitutionFactory substitutionFactory, ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-        this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
-        this.normalizer = normalizer;
+        this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override

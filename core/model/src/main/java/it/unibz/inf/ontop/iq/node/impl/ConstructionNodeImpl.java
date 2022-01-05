@@ -38,15 +38,12 @@ import java.util.stream.Stream;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements ConstructionNode {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
-    @SuppressWarnings("FieldCanBeLocal")
+    private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
 
-    private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
-    private final Constant nullValue;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
@@ -58,11 +55,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
+                                 NotRequiredVariableRemover notRequiredVariableRemover) {
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.nullValue = termFactory.getNullConstant();
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
@@ -70,6 +66,22 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (settings.isTestModeEnabled())
             validateNode();
     }
+
+    /**
+     * Without substitution.
+     */
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                 OntopModelSettings settings,
+                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
+                                 NotRequiredVariableRemover notRequiredVariableRemover) {
+        this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools, constructionNodeTools,
+                substitutionTools, substitutionFactory, termFactory, iqFactory, settings, substitutionNormalizer, notRequiredVariableRemover);
+    }
+
 
     /**
      * Validates the node independently of its child
@@ -100,28 +112,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                             "by a non-projected variable is incorrect.\n"
                 + toString());
         }
-    }
-
-    /**
-     * Without substitution.
-     */
-    @AssistedInject
-    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 ImmutableUnificationTools unificationTools,
-                                 ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
-        this.projectedVariables = projectedVariables;
-        this.substitution = substitutionFactory.getSubstitution();
-        this.nullValue = termFactory.getNullConstant();
-        this.childVariables = extractChildVariables(projectedVariables, substitution);
-        this.substitutionNormalizer = substitutionNormalizer;
-        this.notRequiredVariableRemover = notRequiredVariableRemover;
-
-        validateNode();
     }
 
     private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,

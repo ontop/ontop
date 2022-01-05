@@ -24,7 +24,7 @@ import java.util.Optional;
 public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implements JoinOrFilterNode {
 
     private Optional<ImmutableExpression> optionalFilterCondition;
-    private final TermNullabilityEvaluator nullabilityEvaluator;
+    protected final TermNullabilityEvaluator nullabilityEvaluator;
     protected final TermFactory termFactory;
     protected final TypeFactory typeFactory;
     protected final SubstitutionFactory substitutionFactory;
@@ -53,31 +53,22 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     }
 
     protected String getOptionalFilterString() {
-        if (optionalFilterCondition.isPresent()) {
-            return " " + optionalFilterCondition.get().toString();
-        }
-
-        return "";
+        return getOptionalFilterCondition()
+                .map(f -> " " + f)
+                .orElse("");
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        if (optionalFilterCondition.isPresent()) {
-            return optionalFilterCondition.get().getVariables();
-        }
-        else {
-            return ImmutableSet.of();
-        }
+        return getOptionalFilterCondition()
+                .map(ImmutableFunctionalTerm::getVariables)
+                .orElse(ImmutableSet.of());
     }
 
     protected boolean isFilteringNullValue(Variable variable) {
         return getOptionalFilterCondition()
                 .filter(e -> nullabilityEvaluator.isFilteringNullValue(e, variable))
                 .isPresent();
-    }
-
-    protected TermNullabilityEvaluator getNullabilityEvaluator() {
-        return nullabilityEvaluator;
     }
 
     @Override

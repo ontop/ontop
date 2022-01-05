@@ -41,7 +41,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
     @AssistedInject
@@ -49,14 +48,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory,
-                          ConstructionSubstitutionNormalizer substitutionNormalizer, NotRequiredVariableRemover notRequiredVariableRemover) {
+                          NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
 
@@ -698,7 +696,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         // this construction node
         ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
                 substitutionFactory.getSubstitution(
-                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)(ImmutableMap<Variable, ?>)
+                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)
                                 substitutionPair.propagatedSubstitution.getImmutableMap());
 
         IQTree newChild = liftedChildTree.getChild()

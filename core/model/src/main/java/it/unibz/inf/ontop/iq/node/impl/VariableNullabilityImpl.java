@@ -48,7 +48,6 @@ public class VariableNullabilityImpl implements VariableNullability {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.nullableVariables = null;
     }
 
     /**

@@ -71,10 +71,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.relationDefinition = relationDefinition;
-        this.argumentMap = argumentMap;
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     /**
