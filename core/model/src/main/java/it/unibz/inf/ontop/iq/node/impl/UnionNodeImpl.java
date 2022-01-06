@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -32,14 +31,13 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-
 public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
+
     private final ImmutableSet<Variable> projectedVariables;
+
     private final ConstructionNodeTools constructionTools;
-    private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
@@ -49,11 +47,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory,
                           NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory);
+        super(substitutionFactory, termFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }

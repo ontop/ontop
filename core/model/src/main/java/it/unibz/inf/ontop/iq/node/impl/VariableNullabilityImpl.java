@@ -26,8 +26,8 @@ import java.util.stream.Stream;
 public class VariableNullabilityImpl implements VariableNullability {
 
     private final ImmutableSet<ImmutableSet<Variable>> nullableGroups;
-
     private final ImmutableSet<Variable> scope;
+
     private final CoreUtilsFactory coreUtilsFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -97,6 +97,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return (!scope.contains(variable)) || getNullableVariables().contains(variable);
     }
 
+    @Override
     public ImmutableSet<Variable> getNullableVariables() {
         if (nullableVariables == null)
             nullableVariables = nullableGroups.stream()

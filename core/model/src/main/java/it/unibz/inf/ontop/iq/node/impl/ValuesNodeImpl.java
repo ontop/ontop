@@ -41,8 +41,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     // The variables consistent with all interfaces, as unordered set.
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableList<ImmutableList<Constant>> values;
+
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
+
     private boolean isNormalized = false;
     // LAZY
     private VariableNullability variableNullability;

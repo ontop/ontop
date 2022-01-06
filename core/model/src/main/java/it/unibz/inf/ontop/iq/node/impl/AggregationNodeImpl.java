@@ -39,6 +39,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     private final ImmutableSet<Variable> groupingVariables;
     private final ImmutableSubstitution<ImmutableFunctionalTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
+
     private final AggregationNormalizer aggregationNormalizer;
 
     @AssistedInject
@@ -49,8 +50,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                   ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                   ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
                                   OntopModelSettings settings) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools,
-                termFactory);
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;

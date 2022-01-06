@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -33,12 +34,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
-    private static final String JOIN_NODE_STR = "JOIN" ;
+    private static final String JOIN_NODE_STR = "JOIN";
     private final ConstructionNodeTools constructionNodeTools;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
-    private final ConditionSimplifier conditionSimplifier;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -51,10 +51,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
     }
 

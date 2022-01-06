@@ -39,9 +39,7 @@ import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
-    private final ConditionSimplifier conditionSimplifier;
     private final LeftJoinNormalizer ljNormalizer;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
@@ -52,10 +50,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-        this.conditionSimplifier = conditionSimplifier;
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
         this.ljNormalizer = ljNormalizer;
-        this.variableNullabilityTools = variableNullabilityTools;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
