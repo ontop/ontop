@@ -802,42 +802,42 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getAbs(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getAbs(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = absMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
-        absMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> absMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getCeil(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getCeil(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = ceilMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
-        ceilMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> ceilMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getFloor(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getFloor(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = floorMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
-        floorMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> floorMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getRound(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getRound(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = roundMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
-        roundMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> roundMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
@@ -1261,10 +1261,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars);
 
-    protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType);
 
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
         return new SimplifiableTypedNullFunctionSymbol(termType);

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -256,22 +257,22 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

@@ -361,7 +361,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE
+	 * IF THEN, ELSE IF ..., ELSE
 	 *
 	 * whenPairs must not be empty
 	 *
@@ -371,7 +371,7 @@ public interface TermFactory {
 									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE NULL
+	 * IF THEN, ELSE IF ..., ELSE NULL
 	 *
 	 * whenPairs must not be empty
 	 */
@@ -515,11 +515,11 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm,
