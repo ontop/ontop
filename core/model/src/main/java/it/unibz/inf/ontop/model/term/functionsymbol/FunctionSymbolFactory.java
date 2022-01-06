@@ -19,7 +19,6 @@ public interface FunctionSymbolFactory {
 
     RDFTermFunctionSymbol getRDFTermFunctionSymbol();
 
-
     DBFunctionSymbolFactory getDBFunctionSymbolFactory();
 
     BooleanFunctionSymbol getIsARDFTermTypeFunctionSymbol(RDFTermType rdfTermType);
@@ -104,7 +103,7 @@ public interface FunctionSymbolFactory {
     /**
      * Do NOT confuse it with the LANG DATATYPE function
      *
-     * This function symbol takes a RDF type term as input.
+     * This function symbol takes an RDF type term as input.
      * and returns
      *   * NULL if it is not a literal
      *   * the string of the datatype IRI
@@ -120,10 +119,10 @@ public interface FunctionSymbolFactory {
 
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
 
-    FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+    FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                      DBTermType targetType);
 
-    FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+    FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
     FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
                                                       DBTermType targetType);

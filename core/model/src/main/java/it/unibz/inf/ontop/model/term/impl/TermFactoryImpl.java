@@ -445,7 +445,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
 																	 ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-																	 java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+																	 java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getUnaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
 				lexicalTerm, inputRDFTypeTerm);
@@ -454,7 +454,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getUnaryLexicalFunctionSymbol(dbFunctionSymbolFct),
 				lexicalTerm, rdfDatatypeTerm);

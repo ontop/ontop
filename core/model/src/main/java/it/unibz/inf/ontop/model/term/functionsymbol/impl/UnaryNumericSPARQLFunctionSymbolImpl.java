@@ -17,18 +17,18 @@ import java.util.function.Function;
 
 public class UnaryNumericSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
-    private final Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct;
+    private final Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct;
 
     protected UnaryNumericSPARQLFunctionSymbolImpl(String officialName,
                                                    RDFDatatype abstractNumericType,
-                                                   Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                   Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super("SP_" + officialName, officialName, ImmutableList.of(abstractNumericType));
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
     }
 
     protected UnaryNumericSPARQLFunctionSymbolImpl(String functionSymbolName, IRI functionIRI,
                                                    RDFDatatype abstractNumericType,
-                                                   Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                   Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super(functionSymbolName, functionIRI, ImmutableList.of(abstractNumericType));
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
     }
