@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -616,23 +617,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false));
     }
 
     @Override

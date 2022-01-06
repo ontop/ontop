@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 
@@ -17,7 +18,7 @@ import java.util.function.Function;
 public class UnaryLexicalFunctionSymbolImpl extends UnaryLatelyTypedFunctionSymbolImpl {
 
     protected UnaryLexicalFunctionSymbolImpl(DBTermType dbStringType, MetaRDFTermType metaRDFTermType,
-                                             Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                             Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super(dbStringType, metaRDFTermType, dbStringType, dbFunctionSymbolFct);
     }
 

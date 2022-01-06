@@ -224,31 +224,31 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdInteger, false, dbTypeFactory,
                         (DBTermType t) ->  {
                             if (t.isA(dbTimestamp))
-                                return dbFunctionSymbolFactory.getDBYearFromDatetime();
+                                return Optional.of(dbFunctionSymbolFactory.getDBYearFromDatetime());
                             else if (t.isA(dbDate))
-                                return dbFunctionSymbolFactory.getDBYearFromDate();
+                                return Optional.of(dbFunctionSymbolFactory.getDBYearFromDate());
                             else
-                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                                return Optional.empty();
                         }),
                 new MultitypedInputUnarySPARQLFunctionSymbolImpl("SP_MONTH", SPARQL.MONTH,
                         dateOrDatetime, xsdInteger, false, dbTypeFactory,
                         (DBTermType t) ->  {
                             if (t.isA(dbTimestamp))
-                                return dbFunctionSymbolFactory.getDBMonthFromDatetime();
+                                return Optional.of(dbFunctionSymbolFactory.getDBMonthFromDatetime());
                             else if (t.isA(dbDate))
-                                return dbFunctionSymbolFactory.getDBMonthFromDate();
+                                return Optional.of(dbFunctionSymbolFactory.getDBMonthFromDate());
                             else
-                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                                return Optional.empty();
                         }),
                 new MultitypedInputUnarySPARQLFunctionSymbolImpl("SP_DAY", SPARQL.DAY,
                         dateOrDatetime, xsdInteger, false, dbTypeFactory,
                         (DBTermType t) ->  {
                             if (t.isA(dbTimestamp))
-                                return dbFunctionSymbolFactory.getDBDayFromDatetime();
+                                return Optional.of(dbFunctionSymbolFactory.getDBDayFromDatetime());
                             else if (t.isA(dbDate))
-                                return dbFunctionSymbolFactory.getDBDayFromDate();
+                                return Optional.of(dbFunctionSymbolFactory.getDBDayFromDate());
                             else
-                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                                return Optional.empty();
                         }),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_HOURS", XPathFunction.HOURS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBHours),
@@ -590,13 +590,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+    public FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                             DBTermType targetType) {
         return new UnaryLatelyTypedFunctionSymbolImpl(dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
     }
 
     @Override
-    public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+    public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
     }
 
