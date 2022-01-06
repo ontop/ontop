@@ -333,21 +333,21 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         dateOrDatetime, xsdLong, false, dbTypeFactory,
                         (DBTermType t) -> {
                             if (t.isA(dbTimestamp))
-                                return dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime();
+                                return Optional.of(dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime());
                             else if (t.isA(dbDate))
-                                return dbFunctionSymbolFactory.getDBWeeksBetweenFromDate();
+                                return Optional.of(dbFunctionSymbolFactory.getDBWeeksBetweenFromDate());
                             else
-                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                                return Optional.empty();
                         }),
                 new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_DAYS_BETWEEN", OFN.DAYS_BETWEEN,
                         dateOrDatetime, xsdLong, false, dbTypeFactory,
                         (DBTermType t) -> {
                             if (t.isA(dbTimestamp))
-                                return dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime();
+                                return Optional.of(dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime());
                             else if (t.isA(dbDate))
-                                return dbFunctionSymbolFactory.getDBDaysBetweenFromDate();
+                                return Optional.of(dbFunctionSymbolFactory.getDBDaysBetweenFromDate());
                             else
-                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                                return Optional.empty();
                         }),
                 new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_HOURS_BETWEEN", OFN.HOURS_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBHoursBetweenFromDateTime),
@@ -601,7 +601,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+    public FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                              DBTermType targetType) {
         return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
     }

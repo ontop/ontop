@@ -34,11 +34,11 @@ import java.util.function.Function;
 public class BinaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final DBTermType targetType;
-    private final Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct;
+    private final Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct;
 
     protected BinaryLatelyTypedFunctionSymbolImpl(DBTermType dbStringType0, DBTermType dbStringType1,
                                                   MetaRDFTermType metaRDFTermType, DBTermType targetType,
-                                                  Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                  Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super("BINARY_LATELY_TYPE_" + dbFunctionSymbolFct, ImmutableList.of(dbStringType0, dbStringType1, metaRDFTermType));
         this.targetType = targetType;
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
@@ -80,8 +80,15 @@ public class BinaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
             RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
             DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
 
+            Optional<DBFunctionSymbol> subFunctionSymbol = dbFunctionSymbolFct.apply(dbType);
+
+            // Irrelevant datatype -> stops the simplification.
+            // The functional term should be eliminated by other means (otherwise the query will fail).
+            if (!subFunctionSymbol.isPresent())
+                return termFactory.getImmutableFunctionalTerm(this, newTerms);
+
             ImmutableFunctionalTerm dbTerm = termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFct.apply(dbType),
+                    subFunctionSymbol.get(),
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType),
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
 

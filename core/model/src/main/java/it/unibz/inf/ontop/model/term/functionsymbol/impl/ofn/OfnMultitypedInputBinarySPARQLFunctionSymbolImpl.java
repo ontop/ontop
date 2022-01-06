@@ -47,7 +47,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
                                                             DBTypeFactory dbTypeFactory,
-                                                            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                            Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         this(functionSymbolName, functionIRI, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
@@ -71,7 +71,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
                                                             DBTypeFactory dbTypeFactory,
-                                                            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                            Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         this(functionSymbolName, officialName, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
@@ -79,7 +79,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
     private static QuadriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> createLatelyTypedFct(
             RDFTermType targetType,
             DBTypeFactory dbTypeFactory,
-            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+            Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         return (termFactory, lexicalTerm0, lexicalTerm1, rdfTermTypeTerm) ->
                 termFactory.getBinaryLatelyTypedFunctionalTerm(lexicalTerm0, lexicalTerm1, rdfTermTypeTerm,
                         targetType.getClosestDBType(dbTypeFactory),
