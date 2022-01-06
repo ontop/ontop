@@ -74,7 +74,7 @@ public class DateOrDatetimeFilterTest extends AbstractRDF4JTest {
                 "  fhir:Period.start [ fhir:value ?start ]  ;\n" +
                 "  fhir:Period.end   [ fhir:value ?end ] ] .\n" +
                 "BIND (ofn:daysBetween(?start,?end) as ?v)\n" +
-                //"FILTER (?v >= \"12\"^^xsd:integer)\n" +
+                "FILTER (?v >= \"12\"^^xsd:integer)\n" +
                 "}";
 
         runQueryAndCompare(query, ImmutableSet.of("14"));
