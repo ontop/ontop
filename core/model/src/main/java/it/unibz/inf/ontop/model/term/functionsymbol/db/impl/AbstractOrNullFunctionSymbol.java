@@ -25,8 +25,7 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
     protected AbstractOrNullFunctionSymbol(@Nonnull String name, int arity, DBTermType dbBooleanTermType,
                                            boolean possibleBoolean) {
         super(name, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> dbBooleanTermType)
+                .mapToObj(i -> dbBooleanTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
         this.possibleBoolean = possibleBoolean;
         if (arity <= 0)

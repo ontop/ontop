@@ -33,8 +33,7 @@ public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionS
                                                                     VariableNullability variableNullability) {
 
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
-                .boxed()
-                .map(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
+                .mapToObj(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableExpression denominatorZeroEquality = termFactory.getRDF2DBBooleanFunctionalTerm(

@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -24,20 +23,15 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private final ImmutableUnificationTools unificationTools;
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    protected final TermFactory termFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                       ImmutableUnificationTools unificationTools,
                                       ConstructionNodeTools constructionNodeTools,
-                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                      CoreUtilsFactory coreUtilsFactory) {
-        super(substitutionFactory, iqFactory);
+                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory) {
+        super(substitutionFactory, termFactory, iqFactory);
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
-        this.termFactory = termFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override

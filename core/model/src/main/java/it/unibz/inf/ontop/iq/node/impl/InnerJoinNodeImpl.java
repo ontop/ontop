@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -33,12 +34,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
-    private static final String JOIN_NODE_STR = "JOIN" ;
+    private static final String JOIN_NODE_STR = "JOIN";
     private final ConstructionNodeTools constructionNodeTools;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
-    private final ConditionSimplifier conditionSimplifier;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -51,10 +51,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
     }
 
@@ -66,12 +64,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-        this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
-        this.normalizer = normalizer;
+        this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
@@ -80,12 +74,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               SubstitutionFactory substitutionFactory, ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-        this.constructionNodeTools = constructionNodeTools;
-        this.variableNullabilityTools = variableNullabilityTools;
-        this.conditionSimplifier = conditionSimplifier;
-        this.normalizer = normalizer;
+        this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override
@@ -264,8 +254,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        return IntStream.range(0, children.size()).boxed()
-                .map(i -> Maps.immutableEntry(i, children.get(i)))
+        return IntStream.range(0, children.size())
+                .mapToObj(i -> Maps.immutableEntry(i, children.get(i)))
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
@@ -465,8 +455,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
         return iqFactory.createNaryIQTree(this,
                 IntStream.range(0, initialChildren.size())
-                        .boxed()
-                        .map(i -> i == childIndex
+                        .mapToObj(i -> i == childIndex
                                 ? unionGrandChild
                                 : initialChildren.get(i))
                         .collect(ImmutableCollectors.toList()));

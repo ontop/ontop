@@ -24,8 +24,7 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
 
     public AbstractCommonDenominatorFunctionSymbol(String functionSymbolName, int arity, MetaRDFTermType metaRDFTermType) {
         super(functionSymbolName, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> metaRDFTermType)
+                .mapToObj(i -> metaRDFTermType)
                 .collect(ImmutableCollectors.toList()));
         this.metaRDFTermType = metaRDFTermType;
     }
@@ -154,8 +153,7 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
                                                        ImmutableList<Variable> subVariables,
                                                        TypeConstantDictionary dictionary, TermFactory termFactory) {
         return termFactory.getConjunction(IntStream.range(0, constants.size())
-                .boxed()
-                .map(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i)))))
+                .mapToObj(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i)))))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty stream"));
     }
 

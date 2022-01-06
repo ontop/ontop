@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -71,10 +70,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.relationDefinition = relationDefinition;
-        this.argumentMap = argumentMap;
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     /**

@@ -35,11 +35,10 @@ import java.util.Optional;
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
+
     private final ConstructionNodeTools constructionNodeTools;
-    private final ConditionSimplifier conditionSimplifier;
     private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
@@ -49,12 +48,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
-        this.conditionSimplifier = conditionSimplifier;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
-        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override

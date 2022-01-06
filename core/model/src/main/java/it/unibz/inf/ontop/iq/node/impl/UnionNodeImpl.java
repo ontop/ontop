@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -32,16 +31,14 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-
 public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
+
     private final ImmutableSet<Variable> projectedVariables;
+
     private final ConstructionNodeTools constructionTools;
-    private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
     @AssistedInject
@@ -49,14 +46,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory,
-                          ConstructionSubstitutionNormalizer substitutionNormalizer, NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory);
+                          NotRequiredVariableRemover notRequiredVariableRemover) {
+        super(substitutionFactory, termFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
 
@@ -252,7 +246,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> s.apply(v))
+                .map(s -> s.applyToVariable(v))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -512,8 +506,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
                 IntStream.range(0, liftedChildren.size())
-                        .boxed()
-                        .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
+                        .mapToObj(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables))
                         .flatMap(this::flattenChild)
                         .map(c -> c.getVariables().equals(unionVariables)
@@ -698,7 +691,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         // this construction node
         ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
                 substitutionFactory.getSubstitution(
-                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)(ImmutableMap<Variable, ?>)
+                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)
                                 substitutionPair.propagatedSubstitution.getImmutableMap());
 
         IQTree newChild = liftedChildTree.getChild()

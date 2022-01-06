@@ -228,8 +228,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     : childIdVariable;
 
             ImmutableList<ChildDefinitionLift> childDefinitionLifts = IntStream.range(0, children.size())
-                    .boxed()
-                    .map(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
+                    .mapToObj(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
                     .collect(ImmutableCollectors.toList());
 
             ImmutableFunctionalTerm newDefinition = mergeDefinitions(idVariable, childDefinitionLifts);

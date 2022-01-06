@@ -45,19 +45,14 @@ public class ImmutableUnificationTools {
      *
      * MUTABLE
      */
-    private static class TermPair {
+    private class TermPair {
         private boolean canBeRemoved;
         private Variable leftVariable;
         private ImmutableTerm rightTerm;
-        private final SubstitutionFactory substitutionFactory;
-        private final ImmutableUnificationTools unificationTools;
 
-        private TermPair(Variable variable, ImmutableTerm rightTerm, SubstitutionFactory substitutionFactory,
-                         ImmutableUnificationTools unificationTools) {
+        private TermPair(Variable variable, ImmutableTerm rightTerm) {
             this.leftVariable = variable;
             this.rightTerm = rightTerm;
-            this.substitutionFactory = substitutionFactory;
-            this.unificationTools = unificationTools;
             this.canBeRemoved = false;
         }
 
@@ -75,7 +70,7 @@ public class ImmutableUnificationTools {
                 return ImmutableList.of();
             }
 
-            ImmutableTerm transformedLeftTerm = substitution.apply(leftVariable);
+            ImmutableTerm transformedLeftTerm = substitution.applyToVariable(leftVariable);
             ImmutableTerm transformedRightTerm = substitution.apply(rightTerm);
 
             if (transformedLeftTerm instanceof Variable) {
@@ -90,7 +85,7 @@ public class ImmutableUnificationTools {
             }
             else {
                 Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier =
-                        unificationTools.computeDirectedMGU(transformedLeftTerm, transformedRightTerm);
+                        computeDirectedMGU(transformedLeftTerm, transformedRightTerm);
                 if (!optionalUnifier.isPresent()) {
                     throw new UnificationException();
                 }
@@ -101,7 +96,7 @@ public class ImmutableUnificationTools {
                     canBeRemoved = true;
                     leftVariable = null;
                     rightTerm = null;
-                    return unificationTools.convertIntoPairs(optionalUnifier.get());
+                    return convertIntoPairs(optionalUnifier.get());
                 }
             }
         }
@@ -112,19 +107,6 @@ public class ImmutableUnificationTools {
             }
             return substitutionFactory.getSubstitution(ImmutableMap.of(leftVariable, rightTerm));
         }
-
-        boolean canBeRemoved() {
-            return canBeRemoved;
-        }
-
-        Variable getLeftVariable() {
-            return leftVariable;
-        }
-
-        ImmutableTerm getRightTerm() {
-            return rightTerm;
-        }
-
     }
 
     /**
@@ -355,7 +337,7 @@ public class ImmutableUnificationTools {
              */
             while (!pairsToVisit.isEmpty()) {
                 TermPair currentPair = pairsToVisit.poll();
-                if (currentPair.canBeRemoved()) {
+                if (currentPair.canBeRemoved) {
                     continue;
                 }
                 ImmutableSubstitution<ImmutableTerm> substitution = currentPair.getSubstitution();
@@ -371,7 +353,7 @@ public class ImmutableUnificationTools {
                         continue;
                     } else {
                         additionalPairs.addAll(pairToUpdate.applySubstitution(substitution));
-                        if (pairToUpdate.canBeRemoved()) {
+                        if (pairToUpdate.canBeRemoved) {
                             it.remove();
                         }
                     }
@@ -389,7 +371,7 @@ public class ImmutableUnificationTools {
     private ImmutableList<TermPair> convertIntoPairs(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList.Builder<TermPair> listBuilder = ImmutableList.builder();
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            listBuilder.add(new TermPair(entry.getKey(), entry.getValue(), substitutionFactory, this));
+            listBuilder.add(new TermPair(entry.getKey(), entry.getValue()));
         }
         return listBuilder.build();
     }
@@ -398,12 +380,10 @@ public class ImmutableUnificationTools {
             throws UnificationException {
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
         for(TermPair pair : pairs) {
-            Variable leftVariable = pair.getLeftVariable();
-            ImmutableTerm rightTerm = pair.getRightTerm();
-            if (!substitutionMap.containsKey(leftVariable)) {
-                substitutionMap.put(leftVariable, rightTerm);
+            if (!substitutionMap.containsKey(pair.leftVariable)) {
+                substitutionMap.put(pair.leftVariable, pair.rightTerm);
             }
-            else if (!substitutionMap.get(leftVariable).equals(rightTerm)) {
+            else if (!substitutionMap.get(pair.leftVariable).equals(pair.rightTerm)) {
                 throw new UnificationException();
             }
         }

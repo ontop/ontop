@@ -27,8 +27,7 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
     protected AbstractDBCoalesceFunctionSymbol(String nameInDialect, int arity, DBTermType rootDBTermType,
                                                DBFunctionSymbolSerializer serializer) {
         super(nameInDialect + arity, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> rootDBTermType)
+                .mapToObj(i -> rootDBTermType)
                 .collect(ImmutableCollectors.toList()));
         this.serializer = serializer;
     }

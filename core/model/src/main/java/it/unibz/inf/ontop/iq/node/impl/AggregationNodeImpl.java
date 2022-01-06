@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -40,6 +39,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     private final ImmutableSet<Variable> groupingVariables;
     private final ImmutableSubstitution<ImmutableFunctionalTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
+
     private final AggregationNormalizer aggregationNormalizer;
 
     @AssistedInject
@@ -49,9 +49,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                   AggregationNormalizer aggregationNormalizer,
                                   ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                   ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                  CoreUtilsFactory coreUtilsFactory, OntopModelSettings settings) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools,
-                termFactory, coreUtilsFactory);
+                                  OntopModelSettings settings) {
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;

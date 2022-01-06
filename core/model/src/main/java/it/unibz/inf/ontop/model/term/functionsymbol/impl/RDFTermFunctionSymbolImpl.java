@@ -171,16 +171,15 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     @Override
     public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory) {
         ImmutableMap<Integer, FunctionalTermSimplification> subTermSimplifications = IntStream.range(0, terms.size())
-                .boxed()
                 .filter(i -> terms.get(i) instanceof ImmutableFunctionalTerm)
+                .boxed()
                 .collect(ImmutableCollectors.toMap(
                         i -> i,
                         // Recursive
                         i -> ((ImmutableFunctionalTerm) terms.get(i)).simplifyAsGuaranteedToBeNonNull()));
 
         ImmutableList<ImmutableTerm> newSubTerms = IntStream.range(0, terms.size())
-                .boxed()
-                .map(i -> Optional.ofNullable(subTermSimplifications.get(i))
+                .mapToObj(i -> Optional.ofNullable(subTermSimplifications.get(i))
                         .map(FunctionalTermSimplification::getSimplifiedTerm)
                         .orElseGet(() -> terms.get(i)))
                 .collect(ImmutableCollectors.toList());

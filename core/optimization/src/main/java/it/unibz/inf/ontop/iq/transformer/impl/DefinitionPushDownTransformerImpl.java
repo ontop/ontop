@@ -146,8 +146,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .boxed()
                 .findAny()
                 .map(i -> IntStream.range(0, children.size())
-                        .boxed()
-                        .map(j -> i.equals(j)
+                        .mapToObj(j -> i.equals(j)
                                 // Pushes down the definition to selected child
                                 ? children.get(j).acceptTransformer(this)
                                 : children.get(j))

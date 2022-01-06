@@ -92,7 +92,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().apply(v))
+                    .map(v -> target.getSubstitution().applyToVariable(v))
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
                     .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
