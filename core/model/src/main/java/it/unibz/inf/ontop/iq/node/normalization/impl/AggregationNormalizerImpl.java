@@ -393,8 +393,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             i -> decomposeFunctionalTerm((ImmutableFunctionalTerm) arguments.get(i))));
 
             ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, arguments.size())
-                    .boxed()
-                    .map(i -> Optional.ofNullable(subTermDecompositions.get(i))
+                    .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
                             // Functional term
                             .map(optionalDecomposition -> optionalDecomposition
                                     // Injective functional sub-term

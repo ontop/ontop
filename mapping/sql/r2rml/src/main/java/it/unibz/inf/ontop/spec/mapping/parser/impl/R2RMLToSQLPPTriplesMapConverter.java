@@ -200,7 +200,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 		if (robm.getJoinConditions().isEmpty()) {
 			if (!parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim()))
-				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
+				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
 						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
 			childMap = parentMap = Stream.concat(

@@ -229,8 +229,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .flatMap(e -> {
                     ImmutableList<Attribute> parentAttributes = e.getKey().getAttributes();
                     return IntStream.range(0, parentAttributes.size())
-                            .boxed()
-                            .map(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable(
+                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable(
                                     e.getValue() + parentAttributes.get(i).getID().getName())));
                 })
                 .collect(ImmutableCollectors.toTable());
@@ -343,8 +342,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
+                        .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
     private void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,

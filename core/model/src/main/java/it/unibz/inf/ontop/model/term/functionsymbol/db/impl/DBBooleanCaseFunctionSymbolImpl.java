@@ -107,14 +107,12 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
 
                 if (IntStream.range(0, twoVLExpressions.size() - 1)
                         .filter(i -> i % 2 == 1)
-                        .boxed()
-                        .map(twoVLExpressions::get)
+                        .mapToObj(twoVLExpressions::get)
                         .allMatch(e -> e.equals(oppositeExpression))) {
 
                     ImmutableSet<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size() -1)
                             .filter(i -> i % 2 == 0)
-                            .boxed()
-                            .map(twoVLExpressions::get)
+                            .mapToObj(twoVLExpressions::get)
                             .collect(ImmutableCollectors.toSet());
 
                     /*

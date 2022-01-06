@@ -238,8 +238,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                     IntStream.range(0, liftedChildren.size())
-                            .boxed()
-                            .map(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : liftedChildren.get(i))
+                            .mapToObj(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : liftedChildren.get(i))
                             .collect(ImmutableCollectors.toList()));
 
             try {
@@ -267,8 +266,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             Optional<ConstructionNode> newParent = normalization.generateTopConstructionNode();
 
             ImmutableList<IQTree> newChildren = IntStream.range(0, liftedChildren.size())
-                    .boxed()
-                    .map(i -> i == selectedChildPosition
+                    .mapToObj(i -> i == selectedChildPosition
                             ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
                             : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
                     .map(normalization::updateChild)
@@ -344,15 +342,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          * Puts the LJ above the inner join if possible
          */
         protected Optional<IQTree> liftLeftJoin() {
-            Optional<Integer> ljChildToLiftIndex = IntStream.range(0, children.size())
+            OptionalInt ljChildToLiftIndex = IntStream.range(0, children.size())
                     .filter(this::isLeftJoinToLiftAboveJoin)
-                    .boxed()
                     .findFirst();
 
             if (!ljChildToLiftIndex.isPresent())
                 return Optional.empty();
 
-            int index = ljChildToLiftIndex.get();
+            int index = ljChildToLiftIndex.getAsInt();
             BinaryNonCommutativeIQTree ljChild = (BinaryNonCommutativeIQTree) children.get(index);
 
             NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
@@ -361,8 +358,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             Stream.of(ljChild.getLeftChild()),
                             IntStream.range(0, children.size())
                                     .filter(i -> i != index)
-                                    .boxed()
-                                    .map(children::get))
+                                    .mapToObj(children::get))
                             .collect(ImmutableCollectors.toList()));
 
             BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,

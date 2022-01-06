@@ -190,8 +190,7 @@ public class JsonSQLView extends JsonView {
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
+                        .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
     private void insertUniqueConstraints(NamedRelationDefinition relation,

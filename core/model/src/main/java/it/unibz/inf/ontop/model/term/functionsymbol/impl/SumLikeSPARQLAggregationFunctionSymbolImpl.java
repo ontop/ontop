@@ -168,8 +168,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         int nbTypes = numericAggregateVarMap.size();
 
         Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> numericLexicalWhenPairs = IntStream.range(0, nbTypes)
-                .boxed()
-                .map(i -> computeCombiningPair(i, orderedTypes, orderedVariables, termFactory));
+                .mapToObj(i -> computeCombiningPair(i, orderedTypes, orderedVariables, termFactory));
 
         DBConstant zero = termFactory.getDBIntegerConstant(0);
 
@@ -188,8 +187,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                 termFactory.getDBStringConstant("0"), true);
 
         Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> numericTypeWhenPairs = IntStream.range(0, nbTypes)
-                .boxed()
-                .map(i -> computeTypingPair(i, orderedTypes, orderedVariables, termFactory));
+                .mapToObj(i -> computeTypingPair(i, orderedTypes, orderedVariables, termFactory));
 
         ImmutableFunctionalTerm typeTerm = termFactory.getDBCase(
                 Stream.concat(

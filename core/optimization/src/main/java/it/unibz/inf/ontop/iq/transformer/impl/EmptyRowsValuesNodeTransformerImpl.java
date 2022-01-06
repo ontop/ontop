@@ -44,8 +44,7 @@ public class EmptyRowsValuesNodeTransformerImpl extends DefaultRecursiveIQTreeEx
 
         ImmutableList<ImmutableList<Constant>> newValues = ImmutableList.of(
                 IntStream.range(0, valuesNode.getValues().size())
-                        .boxed()
-                        .map(i -> placeholder)
+                        .mapToObj(i -> placeholder)
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);

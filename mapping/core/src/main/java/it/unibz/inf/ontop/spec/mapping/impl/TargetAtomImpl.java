@@ -34,13 +34,13 @@ public class TargetAtomImpl implements TargetAtom {
 
     @Override
     public ImmutableTerm getSubstitutedTerm(int index) {
-        return substitution.apply(atom.getTerm(index));
+        return substitution.applyToVariable(atom.getTerm(index));
     }
 
     @Override
     public ImmutableList<ImmutableTerm> getSubstitutedTerms() {
         return atom.getArguments().stream()
-                .map(substitution::apply)
+                .map(substitution::applyToVariable)
                 .collect(ImmutableCollectors.toList());
     }
 

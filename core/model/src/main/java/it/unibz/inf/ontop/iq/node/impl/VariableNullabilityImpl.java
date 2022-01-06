@@ -152,8 +152,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                         Map.Entry::getKey));
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = IntStream.range(0, groupCount.get())
-                .boxed()
-                .map(i -> i < groupList.size()
+                .mapToObj(i -> i < groupList.size()
                         ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i)))
                             .immutableCopy()
                         : ImmutableSet.copyOf(newVariableMultimap.get(i)))
@@ -241,8 +240,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                     ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
                     return IntStream.range(0, subTerms.size())
                             .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
-                            .boxed()
-                            .map(i -> Maps.immutableEntry(e.getKey(), i));
+                            .mapToObj(i -> Maps.immutableEntry(e.getKey(), i));
                 })
                 .collect(ImmutableCollectors.toMultimap());
 
@@ -261,8 +259,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                                     Variable v = e.getKey();
                                     ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
                                     ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                            .boxed()
-                                            .map(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
+                                            .mapToObj(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
                                                     .orElseGet(() -> def.getTerm(i)))
                                             .collect(ImmutableCollectors.toList());
 

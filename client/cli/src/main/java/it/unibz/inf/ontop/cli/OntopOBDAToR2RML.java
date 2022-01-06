@@ -241,7 +241,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         private TargetAtom normalize(TargetAtom target, Function<Variable, Optional<QuotedID>> lookup) {
             ImmutableMap<Variable, Optional<QuotedID>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().apply(v))
+                    .map(v -> target.getSubstitution().applyToVariable(v))
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
                     .collect(ImmutableCollectors.toMap(Function.identity(), lookup));

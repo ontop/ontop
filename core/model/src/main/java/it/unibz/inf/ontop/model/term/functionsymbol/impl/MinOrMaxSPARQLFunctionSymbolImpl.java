@@ -294,8 +294,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
             return Stream.empty();
 
         Stream<Map.Entry<ImmutableExpression, RDFTermTypeConstant>> firstPairStream = IntStream.range(0, matchingTypes.size() - 1)
-                .boxed()
-                .map(i -> createNumericOrDatetimeTypePair(matchingTypes.get(i),
+                .mapToObj(i -> createNumericOrDatetimeTypePair(matchingTypes.get(i),
                         matchingTypes.subList(i + 1, matchingTypes.size()), aggregateMap,
                         comparisonFct, termFactory));
 

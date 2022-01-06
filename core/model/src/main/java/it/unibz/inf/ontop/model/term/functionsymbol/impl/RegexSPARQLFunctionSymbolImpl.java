@@ -24,8 +24,7 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
     protected RegexSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
         super("SP_REGEX_" + arity, SPARQL.REGEX,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> xsdStringType)
+                        .mapToObj(i -> xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
         this.xsdBooleanType = xsdBooleanType;

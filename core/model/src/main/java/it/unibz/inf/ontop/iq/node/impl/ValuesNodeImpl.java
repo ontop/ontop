@@ -286,8 +286,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ImmutableList<Variable> newOrderedVariables = IntStream.range(0, formerArity)
                 .filter(i -> !substitutionVariableIndices.contains(i))
-                .boxed()
-                .map(formerOrderedVariables::get)
+                .mapToObj(formerOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<ImmutableList<Constant>> filteredValues = formerValues.stream()
@@ -300,8 +299,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
                 .map(tuple -> IntStream.range(0, tuple.size())//tuple.stream()
                         .filter(i -> !substitutionVariableIndices.contains(i))
-                        .boxed()
-                        .map(tuple::get)
+                        .mapToObj(tuple::get)
                         .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
@@ -425,8 +423,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .filter(i -> values.stream()
                             .map(t -> t.get(i))
                             .anyMatch(ImmutableTerm::isNull))
-                    .boxed()
-                    .map(orderedVariables::get)
+                    .mapToObj(orderedVariables::get)
                     .map(ImmutableSet::of)
                     .collect(ImmutableCollectors.toSet());
             variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, projectedVariables);

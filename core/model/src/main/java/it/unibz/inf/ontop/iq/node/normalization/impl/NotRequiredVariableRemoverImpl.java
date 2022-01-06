@@ -128,15 +128,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
             ImmutableList<Variable> newOrderedVariables = IntStream.range(0,arity)
                     .filter(i -> !indexesToRemove.contains(i))
-                    .boxed()
-                    .map(orderedVariables::get)
+                    .mapToObj(orderedVariables::get)
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
                     .map(t -> IntStream.range(0, arity)
                             .filter(i -> !indexesToRemove.contains(i))
-                            .boxed()
-                            .map(t::get)
+                            .mapToObj(t::get)
                             .collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
 

@@ -254,8 +254,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        return IntStream.range(0, children.size()).boxed()
-                .map(i -> Maps.immutableEntry(i, children.get(i)))
+        return IntStream.range(0, children.size())
+                .mapToObj(i -> Maps.immutableEntry(i, children.get(i)))
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
@@ -455,8 +455,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
         return iqFactory.createNaryIQTree(this,
                 IntStream.range(0, initialChildren.size())
-                        .boxed()
-                        .map(i -> i == childIndex
+                        .mapToObj(i -> i == childIndex
                                 ? unionGrandChild
                                 : initialChildren.get(i))
                         .collect(ImmutableCollectors.toList()));

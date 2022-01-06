@@ -59,8 +59,7 @@ public class JoinLikeChildBindingLifter {
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
-                .boxed()
-                .map(children::get)
+                .mapToObj(children::get)
                 .flatMap(iq -> iq.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 

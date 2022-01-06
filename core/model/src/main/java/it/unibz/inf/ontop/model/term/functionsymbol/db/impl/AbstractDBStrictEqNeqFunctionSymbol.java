@@ -21,8 +21,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     protected AbstractDBStrictEqNeqFunctionSymbol(String name, int arity, boolean isEq,
                                                   TermType rootTermType, DBTermType dbBooleanTermType) {
         super(name + arity, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> rootTermType)
+                .mapToObj(i -> rootTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
         this.isEq = isEq;
     }

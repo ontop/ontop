@@ -246,7 +246,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> s.apply(v))
+                .map(s -> s.applyToVariable(v))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -506,8 +506,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
                 IntStream.range(0, liftedChildren.size())
-                        .boxed()
-                        .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
+                        .mapToObj(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables))
                         .flatMap(this::flattenChild)
                         .map(c -> c.getVariables().equals(unionVariables)

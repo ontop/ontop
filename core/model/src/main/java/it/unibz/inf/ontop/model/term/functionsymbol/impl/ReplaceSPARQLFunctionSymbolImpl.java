@@ -22,8 +22,7 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
     protected ReplaceSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
         super("SP_REPLACE_" + arity, XPathFunction.REPLACE,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> xsdStringType)
+                        .mapToObj(i -> xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
 
