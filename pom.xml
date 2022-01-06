@@ -153,6 +153,8 @@
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>3.1</jsqlparser.version>
         <jsr305.version>3.0.2</jsr305.version>
+        <jstl.version>0.1.11</jstl.version>
+        <jts.version>1.16.0</jts.version>
         <junit.version>4.13.1</junit.version>
         <logback.version>1.2.3</logback.version>
         <narayana.version>5.12.0.Final</narayana.version>
@@ -768,6 +770,13 @@
                 </exclusions>
             </dependency>
             
+            <!-- JTS -->
+            <dependency>
+                <groupId>org.locationtech.jts</groupId>
+                <artifactId>jts-core</artifactId>
+                <version>${jts.version}</version>
+            </dependency>
+            
             <!-- Narayana -->
             <dependency>
                 <groupId>org.jboss.narayana.jta</groupId>
@@ -973,6 +982,13 @@
                 <version>${commons-collections4.version}</version>
             </dependency>
 
+            <!-- JSTL -->
+            <dependency>
+                <groupId>com.schibsted.spt.data</groupId>
+                <artifactId>jslt</artifactId>
+                <version>${jstl.version}</version>
+            </dependency>
+            
             <!-- Javax JSON Processing API (JSR 353) -->
             <dependency>
                 <groupId>org.glassfish</groupId>

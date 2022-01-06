@@ -9,15 +9,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -45,9 +40,6 @@ import org.teiid.language.Parameter;
 import org.teiid.language.QueryExpression;
 import org.teiid.language.Select;
 import org.teiid.language.TableReference;
-import org.teiid.metadata.AbstractMetadataRecord;
-import org.teiid.metadata.FunctionMethod;
-import org.teiid.metadata.FunctionParameter;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.RuntimeMetadata;
@@ -62,9 +54,16 @@ import org.teiid.translator.TranslatorException;
 import org.teiid.translator.TypeFacility.RUNTIME_CODES;
 import org.teiid.translator.UpdateExecution;
 
-import it.unibz.inf.ontop.teiid.services.util.Attribute;
-import it.unibz.inf.ontop.teiid.services.util.Signature;
-import it.unibz.inf.ontop.teiid.services.util.Tuple;
+import it.unibz.inf.ontop.teiid.services.invokers.ServiceInvoker;
+import it.unibz.inf.ontop.teiid.services.model.Attribute;
+import it.unibz.inf.ontop.teiid.services.model.Signature;
+import it.unibz.inf.ontop.teiid.services.model.Tuple;
+
+// TODO implement limit
+// TODO implement order by
+// TODO implement batched updates
+// TODO implement bulk update
+// TODO implement getCacheDirective
 
 @Translator(name = "service")
 public class ServiceExecutionFactory
@@ -83,14 +82,10 @@ public class ServiceExecutionFactory
     private static final String OPERATION_DELETE = "delete";
 
     public ServiceExecutionFactory() {
-        // TODO: supportsRowLimit/supportsRowOffset
-        // TODO: supportsOnlyLiteralComparison, supportsOnlyFormatLiterals
-        // TODO: supportsBatchedUpdates, supportsBulkUpdate
-        // TODO: getCacheDirective, isThreadBound
-
-        this.setImmutable(false); // can be reasonably changed by users
-        this.setSourceRequired(true);
-        this.setSupportsSelectDistinct(false);
+        setImmutable(false); // users may change this
+        setSupportsOrderBy(true); // users may disable (supportsOrderByNullOrdering == false)
+        setSourceRequired(true);
+        setSupportsSelectDistinct(false);
     }
 
     @Override
@@ -110,7 +105,7 @@ public class ServiceExecutionFactory
 
     @Override
     public boolean supportsDependentJoins() {
-        return true; // TODO experimental
+        return true; // required for bulk calls
     }
 
     // @Override
@@ -119,7 +114,27 @@ public class ServiceExecutionFactory
     // }
 
     @Override
+    public boolean supportsRowLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsRowOffset() {
+        return true;
+    }
+
+    @Override
     public boolean supportsUpsert() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsBatchedUpdates() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsBulkUpdate() {
         return true;
     }
 
@@ -161,17 +176,17 @@ public class ServiceExecutionFactory
             final ExecutionContext executionContext, final RuntimeMetadata metadata,
             final ServiceConnection connection) throws TranslatorException {
 
-        final Service service = getService(connection.getServiceManager(),
-                command.getMetadataObject());
+        final ServiceInvoker invoker = connection.getFactory()
+                .getInvoker(command.getMetadataObject());
 
-        final Tuple inputTuple = Tuple.create(service.getInputSignature());
+        final Tuple inputTuple = Tuple.create(invoker.getService().getInputSignature());
         for (final Argument arg : command.getArguments()) {
             final String name = arg.getMetadataObject().getName();
             final Object value = arg.getArgumentValue().getValue();
             inputTuple.set(name, value);
         }
 
-        return new ServiceExecution(service, ImmutableList.of(inputTuple), null);
+        return new ServiceExecution(invoker, ImmutableList.of(inputTuple), null);
     }
 
     @Nullable
@@ -227,13 +242,15 @@ public class ServiceExecutionFactory
         if (proc == null) {
             return null;
         }
-        final Service service = getService(conn.getServiceManager(), proc);
+        ServiceInvoker invoker = conn.getFactory().getInvoker(proc);
 
         // Prepare the service input tuples based on WHERE clause + parameters
-        final List<Tuple> inputTuples = getTuples(service.getInputSignature(), inputAttrs, pars);
+        final List<Tuple> inputTuples = getTuples(invoker.getService().getInputSignature(),
+                inputAttrs, pars);
 
         // Return a ResultSetExecution based on a (bulk) service invocation
-        return new ServiceExecution(service, inputTuples, Signature.create(outputAttrsList));
+        return new ServiceExecution(invoker, inputTuples,
+                Signature.forAttributes(outputAttrsList));
     }
 
     @Nullable
@@ -271,56 +288,10 @@ public class ServiceExecutionFactory
         }
 
         // TODO
-        final Service service = getService(conn.getServiceManager(), proc);
-        final List<Tuple> inputTuples = getTuples(service.getInputSignature(), attrs,
+        final ServiceInvoker invoker = conn.getFactory().getInvoker(proc);
+        final List<Tuple> inputTuples = getTuples(invoker.getService().getInputSignature(), attrs,
                 ((BulkCommand) command).getParameterValues());
-        return new ServiceExecution(service, inputTuples, null);
-    }
-
-    private synchronized Service getService(final ServiceManager manager,
-            final AbstractMetadataRecord metadata) throws TranslatorException {
-
-        final String name = metadata.getName();
-
-        Service service = manager.get(name);
-        if (service != null) {
-            return service;
-        }
-
-        final Map<String, Object> properties = ImmutableMap.copyOf(metadata.getProperties());
-
-        final Signature inputSignature, outputSignature;
-        if (metadata instanceof Procedure) {
-            final Procedure p = (Procedure) metadata;
-            inputSignature = Signature.create(Iterables.transform(p.getParameters(),
-                    c -> Attribute.create(c.getName(), c.getRuntimeType())));
-            outputSignature = Signature.create(Iterables.transform(p.getResultSet().getColumns(),
-                    c -> Attribute.create(c.getName(), c.getRuntimeType())));
-        } else if (metadata instanceof FunctionMethod) {
-            final FunctionMethod f = (FunctionMethod) metadata;
-            final FunctionParameter p = f.getOutputParameter();
-            inputSignature = Signature.create(Iterables.transform(f.getInputParameters(),
-                    c -> Attribute.create(c.getName(), c.getRuntimeType())));
-            outputSignature = Signature.create(Attribute
-                    .create(MoreObjects.firstNonNull(p.getName(), "result"), p.getRuntimeType()));
-        } else {
-            throw new Error();
-        }
-
-        try {
-            service = manager.define(name, inputSignature, outputSignature, properties);
-            if (service == null) {
-                throw new UnsupportedOperationException();
-            }
-            LOGGER.debug("Mapped {} to {}", metadata, service);
-            return service;
-
-        } catch (final Throwable ex) {
-            throw new TranslatorException(ex,
-                    "Cannot define service " + name + "(" + Joiner.on(", ").join(inputSignature)
-                            + "): (" + Joiner.on(", ").join(outputSignature) + ") with properties "
-                            + properties);
-        }
+        return new ServiceExecution(invoker, inputTuples, null);
     }
 
     @Nullable
@@ -487,7 +458,7 @@ public class ServiceExecutionFactory
 
     private static class ServiceExecution implements ProcedureExecution, UpdateExecution {
 
-        private final Service service;
+        private final ServiceInvoker invoker;
 
         private final List<Tuple> inputTuples;
 
@@ -495,16 +466,16 @@ public class ServiceExecutionFactory
 
         private List<Iterator<Tuple>> outputTuples;
 
-        public ServiceExecution(final Service service, final List<Tuple> inputTuples,
+        public ServiceExecution(final ServiceInvoker invoker, final List<Tuple> inputTuples,
                 @Nullable final Signature outputProjection) {
-            this.service = service;
+            this.invoker = invoker;
             this.inputTuples = inputTuples;
             this.outputProjection = outputProjection;
         }
 
         @Override
         public void execute() throws TranslatorException {
-            this.outputTuples = Lists.newLinkedList(this.service.invokeBatch(this.inputTuples));
+            this.outputTuples = Lists.newLinkedList(this.invoker.invokeBatch(this.inputTuples));
         }
 
         @Override
@@ -518,7 +489,7 @@ public class ServiceExecutionFactory
         }
 
         @Override
-        public List<?> next() throws TranslatorException, DataNotAvailableException {
+        public Tuple next() throws TranslatorException, DataNotAvailableException {
 
             while (!this.outputTuples.isEmpty()) {
 

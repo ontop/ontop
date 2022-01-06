@@ -16,10 +16,6 @@ public final class ServiceConnection implements Connection {
         return this.factory;
     }
 
-    public ServiceManager getServiceManager() {
-        return this.factory.getServiceManager();
-    }
-
     @Override
     public void close() {
     }

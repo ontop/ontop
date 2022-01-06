@@ -1,86 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+     <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<artifactId>ontop-db</artifactId>
-		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.2.0-SNAPSHOT</version>
-	</parent>
+     <parent>
+          <artifactId>ontop-db</artifactId>
+          <groupId>it.unibz.inf.ontop</groupId>
+          <version>4.2.0-SNAPSHOT</version>
+     </parent>
 
-	<artifactId>ontop-rdb-teiid-services</artifactId>
+     <artifactId>ontop-rdb-teiid-services</artifactId>
 
-	<dependencies>
+     <dependencies>
 
-		<!-- COMPILE DEPENDENCIES -->
+          <!-- COMPILE DEPENDENCIES -->
 
-		<!-- TEIID -->
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>teiid-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>teiid-common-core</artifactId>
-		</dependency>
+          <!-- TEIID -->
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-api</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-common-core</artifactId>
+          </dependency>
 
-		<!-- HTTP Client -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
+          <!-- JTS -->
+          <dependency>
+               <groupId>org.locationtech.jts</groupId>
+               <artifactId>jts-core</artifactId>
+          </dependency>
 
-		<!-- Jackson -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
+          <!-- HTTP Client -->
+          <dependency>
+               <groupId>org.apache.httpcomponents</groupId>
+               <artifactId>httpclient</artifactId>
+          </dependency>
 
-		<!-- SLF4J -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+          <!-- JSTL -->
+          <dependency>
+               <groupId>com.schibsted.spt.data</groupId>
+               <artifactId>jslt</artifactId>
+          </dependency>
 
-		<!-- Guava -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
+          <!-- Jackson -->
+          <dependency>
+               <groupId>com.fasterxml.jackson.core</groupId>
+               <artifactId>jackson-databind</artifactId>
+          </dependency>
 
-		<!-- PROVIDED DEPENDENCIES -->
+          <!-- SLF4J -->
+          <dependency>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-api</artifactId>
+          </dependency>
 
-		<!-- JSR-305 annotations -->
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<scope>provided</scope>
-		</dependency>
+          <!-- Guava -->
+          <dependency>
+               <groupId>com.google.guava</groupId>
+               <artifactId>guava</artifactId>
+          </dependency>
 
-		<!-- TEST DEPENDENCIES -->
+          <!-- PROVIDED DEPENDENCIES -->
 
-		<!-- Logback -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<scope>test</scope>
-		</dependency>
+          <!-- JSR-305 annotations -->
+          <dependency>
+               <groupId>com.google.code.findbugs</groupId>
+               <artifactId>jsr305</artifactId>
+               <scope>provided</scope>
+          </dependency>
 
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+          <!-- TEST DEPENDENCIES -->
 
-	</dependencies>
+          <!-- Logback -->
+          <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-classic</artifactId>
+               <scope>test</scope>
+          </dependency>
+          <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-core</artifactId>
+               <scope>test</scope>
+          </dependency>
+
+          <!-- JUnit -->
+          <dependency>
+               <groupId>junit</groupId>
+               <artifactId>junit</artifactId>
+               <scope>test</scope>
+          </dependency>
+
+     </dependencies>
 
 </project>

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.teiid.services.util;
+package it.unibz.inf.ontop.teiid.services.model;
 
 import java.io.Serializable;
 import java.util.AbstractList;
@@ -12,9 +12,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.teiid.metadata.BaseColumn;
+import org.teiid.metadata.Column;
+
 public final class Signature extends AbstractList<Attribute> implements Serializable {
 
-    public static final Signature EMPTY = create();
+    public static final Signature EMPTY = forAttributes();
 
     private static final long serialVersionUID = 1L;
 
@@ -27,11 +30,19 @@ public final class Signature extends AbstractList<Attribute> implements Serializ
         this.hash = hash;
     }
 
-    public static Signature create(final Attribute... attributes) {
-        return create(Arrays.asList(attributes));
+    public static Signature forNames(final String... names) {
+        return forNames(Arrays.asList(names));
     }
 
-    public static Signature create(final Iterable<Attribute> attributes) {
+    public static Signature forNames(final Iterable<String> names) {
+        return Signature.forAttributes(Iterables.transform(names, n -> Attribute.create(n)));
+    }
+
+    public static Signature forAttributes(final Attribute... attributes) {
+        return forAttributes(Arrays.asList(attributes));
+    }
+
+    public static Signature forAttributes(final Iterable<Attribute> attributes) {
         final Attribute[] attrs = new Attribute[Iterables.size(attributes)];
         final Set<String> names = Sets.newIdentityHashSet();
         int i = 0;
@@ -44,6 +55,14 @@ public final class Signature extends AbstractList<Attribute> implements Serializ
             attrs[i++] = attribute;
         }
         return new Signature(attrs, 0);
+    }
+
+    public static Signature forColumns(final Column... columns) {
+        return forColumns(Arrays.asList(columns));
+    }
+
+    public static Signature forColumns(final Iterable<? extends BaseColumn> columns) {
+        return Signature.forAttributes(Iterables.transform(columns, c -> Attribute.create(c)));
     }
 
     @Override
@@ -138,10 +157,10 @@ public final class Signature extends AbstractList<Attribute> implements Serializ
             outer: for (final Attribute attribute : signature) {
                 for (final Attribute oldAttribute : attributes) {
                     if (oldAttribute.getName() == attribute.getName()) {
-                        if (oldAttribute.getTypeName() != attribute.getTypeName()) {
+                        if (oldAttribute.getDatatype() != attribute.getDatatype()) {
                             throw new IllegalArgumentException("Type mismatch for attribute "
-                                    + attribute.getName() + ": " + oldAttribute.getTypeName()
-                                    + ", " + attribute.getTypeName());
+                                    + attribute.getName() + ": " + oldAttribute.getDatatype()
+                                    + ", " + attribute.getDatatype());
                         }
                         continue outer;
                     }

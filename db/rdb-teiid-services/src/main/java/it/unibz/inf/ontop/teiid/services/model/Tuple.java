@@ -1,18 +1,27 @@
-package it.unibz.inf.ontop.teiid.services.util;
+package it.unibz.inf.ontop.teiid.services.model;
 
 import java.io.Serializable;
 import java.sql.Clob;
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ContainerNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
 import org.teiid.core.types.BaseClobType;
+
+import it.unibz.inf.ontop.teiid.services.util.Json;
 
 public final class Tuple extends AbstractList<Object> implements Serializable, Cloneable {
 
@@ -49,6 +58,12 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         return tuple;
     }
 
+    public static Tuple create(final Signature signature, final JsonNode json) {
+        final Tuple tuple = new Tuple(signature, new Object[signature.size()]);
+        tuple.setAll(json);
+        return tuple;
+    }
+
     public Signature signature() {
         return this.signature;
     }
@@ -73,9 +88,15 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
     @Nullable
     public Object set(final int index, @Nullable Object value) {
         final Object oldValue = this.values[index];
-        final Class<?> typeClass = this.signature.get(index).getTypeClass();
-        if (value != null && !typeClass.isInstance(value)) {
-            value = DataTypes.convert(value, typeClass);
+        if (value != null) {
+            final Datatype datatype = this.signature.get(index).getDatatype();
+            if (value instanceof JsonNode) {
+                value = datatype != null //
+                        ? Json.map(value, datatype.getValueClass())
+                        : Datatype.normalize(Json.map(value, Object.class));
+            } else {
+                value = datatype != null ? datatype.cast(value) : Datatype.normalize(value);
+            }
         }
         this.values[index] = value;
         return oldValue;
@@ -108,13 +129,34 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         }
     }
 
+    public void setAll(final JsonNode json) {
+        if (json instanceof ObjectNode) {
+            for (final Iterator<Entry<String, JsonNode>> i = json.fields(); i.hasNext();) {
+                final Entry<String, JsonNode> e = i.next();
+                final int index = this.signature.nameToIndex(e.getKey(), -1);
+                set(index, e.getValue());
+            }
+        } else if (json instanceof ArrayNode) {
+            final int arraySize = json.size();
+            final int signatureSize = this.values.length;
+            final int minSize = Math.min(arraySize, signatureSize);
+            for (int index = 0; index < minSize; ++index) {
+                set(index, json.get(index));
+            }
+        } else {
+            Preconditions.checkArgument(this.signature.size() == 1,
+                    "Json object or array required for non-unary tuple signature");
+            set(0, json);
+        }
+    }
+
     public Tuple project(final Signature signature) {
         if (signature.equals(this.signature)) {
             return clone();
         } else {
             final Tuple tuple = Tuple.create(signature);
             for (int i = 0; i < signature.size(); ++i) {
-                int index = this.signature.nameToIndex(signature.get(i).getName(), -1);
+                final int index = this.signature.nameToIndex(signature.get(i).getName(), -1);
                 if (index >= 0) {
                     tuple.set(i, get(index));
                 }
@@ -140,15 +182,17 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         final int[] inputArgumentIndexes = new int[outputSignature.size()];
         for (int i = 0; i < outputSignature.size(); ++i) {
             final Attribute outputAttr = outputSignature.get(i);
+            final Datatype outputDatatype = outputAttr.getDatatype();
             for (int j = 0; j < inputSignatures.length; ++j) {
                 final int k = inputSignatures[j].nameToIndex(outputAttr.getName(), -1);
                 if (k >= 0) {
                     final Attribute inputAttr = inputSignatures[j].get(k);
-                    if (!DataTypes.canConvert(inputAttr.getTypeClass(),
-                            outputAttr.getTypeClass())) {
+                    final Datatype inputDatatype = inputAttr.getDatatype();
+                    if (outputDatatype != null && inputDatatype != null
+                            && !outputDatatype.canCast(inputDatatype.getValueClass())) {
                         throw new IllegalArgumentException("Cannot convert " + outputAttr.getName()
-                                + " from " + inputAttr.getTypeName() + " to "
-                                + outputAttr.getTypeName());
+                                + " from " + inputAttr.getDatatype() + " to "
+                                + outputAttr.getDatatype());
                     }
                     inputTupleIndexes[i] = j;
                     inputArgumentIndexes[i] = k;
@@ -174,6 +218,39 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
             return tuple;
         } catch (final CloneNotSupportedException ex) {
             throw new Error(ex); // not expected
+        }
+    }
+
+    public JsonNode toJson() {
+        return toJson(JsonNode.class);
+    }
+
+    public <T extends JsonNode> T toJson(final Class<T> nodeType) {
+
+        if (this.values.length == 1 && !ContainerNode.class.isAssignableFrom(nodeType)) {
+            final JsonNode node = Json.map(this.values[0], JsonNode.class);
+            return nodeType.cast(node); // may fail if incompatible nodeType was requested
+
+        } else if (nodeType.isAssignableFrom(Object.class)) {
+            final ObjectNode node = Json.getNodeFactory().objectNode();
+            for (int i = 0; i < this.values.length; ++i) {
+                final Object value = this.values[i];
+                if (value != null) {
+                    node.set(this.signature.get(i).getName(), Json.map(value, JsonNode.class));
+                }
+            }
+            return nodeType.cast(node);
+
+        } else if (nodeType.isAssignableFrom(Object.class)) {
+            final ArrayNode node = Json.getNodeFactory().arrayNode();
+            for (int i = 0; i < this.values.length; ++i) {
+                final Object value = this.values[i];
+                node.add(value == null ? NullNode.getInstance() : Json.map(value, JsonNode.class));
+            }
+            return nodeType.cast(node);
+
+        } else {
+            throw new ClassCastException("Cannot convert to " + nodeType);
         }
     }
 
