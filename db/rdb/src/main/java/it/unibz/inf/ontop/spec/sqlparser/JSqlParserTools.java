@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
@@ -15,10 +15,10 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class JSqlParserTools {
 
-    public static SelectBody parse(String sql) throws InvalidSelectQueryException, JSQLParserException {
+    public static SelectBody parse(String sql) throws InvalidQueryException, JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
         if (!(statement instanceof Select))
-            throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
+            throw new InvalidQueryException("The query is not a SELECT statement", statement);
 
         return ((Select) statement).getSelectBody();
     }

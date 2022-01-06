@@ -8,11 +8,10 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -40,7 +39,8 @@ public class MappingTestingTools {
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
 
-    public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
+    public static final FactExtractor FACT_EXTRACTOR;
+    public static final FactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
     public static final MappingSaturator MAPPING_SATURATOR;
@@ -48,7 +48,6 @@ public class MappingTestingTools {
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
-    public static final IQConverter IQ_CONVERTER;
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
@@ -72,13 +71,13 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
+        FACT_EXTRACTOR = injector.getInstance(FactExtractor.class);
+        A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(FactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
-        IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
@@ -97,10 +96,6 @@ public class MappingTestingTools {
         TABLE2_AR3 = builder.createRelationPredicate(5, 3);
         TABLE3_AR3 = builder.createRelationPredicate(6, 3);
         TABLE4_AR3 = builder.createRelationPredicate(7, 3);
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {

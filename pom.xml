@@ -12,7 +12,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -94,10 +94,11 @@
         <assembly.webapps.skip>true</assembly.webapps.skip>
         <assembly.protege.skip>true</assembly.protege.skip>
         <bundle.protege.phase>none</bundle.protege.phase>
-        <maven.war.skip>false</maven.war.skip>
+        <maven.war.skip>true</maven.war.skip>
         <metadata.git.skip>true</metadata.git.skip>
         <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
         <thirdparty.skip>true</thirdparty.skip>
+        <ignoreNonCompile>true</ignoreNonCompile>
 
         <!-- Plugin versions -->
         <antlr4-maven-plugin.version>4.8-1</antlr4-maven-plugin.version>
@@ -105,7 +106,7 @@
         <git-commit-id-plugin-version>4.0.3</git-commit-id-plugin-version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-        <maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>5.1.2</maven-bundle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
@@ -139,12 +140,13 @@
         <functionaljava.version>4.8.1</functionaljava.version>
         <gson.version>2.8.6</gson.version>
         <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
-        <guava.version>18.0</guava.version>
-        <guice.version>4.1.0</guice.version>
+        <guava.version>30.1.1-jre</guava.version>
+        <guice.version>5.0.1</guice.version>
         <h2gis.version>1.3.2</h2gis.version>
         <h2.version>1.4.196</h2.version>
+        <hamcrest.version>1.3</hamcrest.version>
         <hikari-cp.version>3.4.5</hikari-cp.version>
-        <httpclient.version>4.5.10</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
         <icu4j.version>58.2</icu4j.version>
         <jackson.version>2.12.1</jackson.version>
@@ -156,16 +158,18 @@
         <jstl.version>0.1.11</jstl.version>
         <jts.version>1.16.0</jts.version>
         <junit.version>4.13.1</junit.version>
-        <logback.version>1.2.3</logback.version>
+        <logback.version>1.2.9</logback.version>
         <narayana.version>5.12.0.Final</narayana.version>
         <opencsv.version>4.6</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
+        <owlapi-osgi.version>4.5.9</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
-        <r2rml-api.version>0.6.0</r2rml-api.version>
+        <r2rml-api.version>0.8.0</r2rml-api.version>
         <rdf4j.version>3.3.0</rdf4j.version>
-        <servlet-api.version>2.5</servlet-api.version>
+        <servlet2-api.version>2.5</servlet2-api.version>
+        <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
         <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
@@ -177,12 +181,13 @@
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <xerces.version>2.12.0</xerces.version>
         <xml-apis.version>1.4.01</xml-apis.version>
-		
+
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
         <caffeine.version>2.8.6</caffeine.version>
-        <checker-qual.version>3.7.0</checker-qual.version>
-        <commons-io.version>2.5</commons-io.version>
+        <checkerframework.version>3.8.0</checkerframework.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
+        <errorprone.version>2.5.1</errorprone.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
         <junit-jupiter-api.version>5.6.2</junit-jupiter-api.version>
         <osgi.version>6.0.0</osgi.version>
@@ -190,7 +195,7 @@
         <semargl.version>0.7</semargl.version>
         <sesame.version>2.7.16</sesame.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <tomcat-embed-core.version>9.0.41</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
     </properties>
 
     <dependencyManagement>
@@ -505,12 +510,27 @@
                 <artifactId>semargl-sesame</artifactId>
                 <version>${semargl-sesame.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.semarglproject</groupId>
+                <artifactId>semargl-rdfa</artifactId>
+                <version>${semargl.version}</version>
+            </dependency>
 
             <!-- JSONLD-Java -->
             <dependency>
                 <groupId>com.github.jsonld-java</groupId>
                 <artifactId>jsonld-java</artifactId>
                 <version>${jsonld-java.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>httpcore-osgi</artifactId>
+                        <groupId>org.apache.httpcomponents</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>httpclient-osgi</artifactId>
+                        <groupId>org.apache.httpcomponents</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Apache Commons RDF -->
@@ -555,6 +575,11 @@
                 <groupId>net.sourceforge.owlapi</groupId>
                 <artifactId>owlapi-oboformat</artifactId>
                 <version>${owlapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-osgidistribution</artifactId>
+                <version>${owlapi-osgi.version}</version>
             </dependency>
 
             <!-- RDF4J API -->
@@ -612,6 +637,11 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-rio-rdfxml</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-binary</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
@@ -783,8 +813,18 @@
                 <artifactId>narayana-jta</artifactId>
                 <version>${narayana.version}</version>
             </dependency>
-		
+            
             <!-- Spring Boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
@@ -816,7 +856,12 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+                <version>${servlet2-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet4-api.version}</version>
             </dependency>
 
             <!-- Apache HttpClient -->
@@ -1096,6 +1141,13 @@
                 <version>${junit.version}</version>
             </dependency>
 
+            <!-- Hamcrest -->
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>${hamcrest.version}</version>
+            </dependency>
+
             <!-- H2 -->
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -1173,6 +1225,16 @@
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
                 <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${checkerframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${errorprone.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1260,6 +1322,15 @@
                     <version>${maven-dependency-plugin.version}</version>
                     <configuration>
                         <ignoreDirect>false</ignoreDirect>
+                        <ignoreNonCompile>${ignoreNonCompile}</ignoreNonCompile>
+                        <ignoredUsedUndeclaredDependencies>
+                            <!-- Spring deps are indirectly imported using starter deps -->
+                            <ignoredUsedUndeclaredDependency>org.springframework:::</ignoredUsedUndeclaredDependency>
+                        </ignoredUsedUndeclaredDependencies>
+                        <ignoredUnusedDeclaredDependencies>
+                            <!-- Spring Boot starter deps must be declared but being empty their content is never used in code -->
+                            <ignoredUnusedDeclaredDependency>org.springframework.boot:::</ignoredUnusedDeclaredDependency>
+                        </ignoredUnusedDeclaredDependencies>
                         <outputXML>true</outputXML>
                     </configuration>
                 </plugin>
@@ -1320,6 +1391,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven-resources-plugin.version}</version>
+                    <configuration>
+                        <escapeString>\</escapeString>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1598,7 +1672,6 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <maven.test.skip>true</maven.test.skip>
                 <assembly.cli.skip>false</assembly.cli.skip>
-                <maven.war.skip>true</maven.war.skip>
             </properties>
         </profile>
         <profile>
@@ -1613,7 +1686,6 @@
                 <maven.test.skip>true</maven.test.skip>
                 <assembly.protege.skip>false</assembly.protege.skip>
                 <bundle.protege.phase>package</bundle.protege.phase>
-                <maven.war.skip>true</maven.war.skip>
             </properties>
         </profile>
         <profile>
@@ -1643,7 +1715,6 @@
                 <assembly.cli.skip>false</assembly.cli.skip>
                 <assembly.protege.skip>false</assembly.protege.skip>
                 <bundle.protege.phase>package</bundle.protege.phase>
-                <maven.war.skip>false</maven.war.skip>
             </properties>
         </profile>
 

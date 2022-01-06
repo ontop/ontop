@@ -361,7 +361,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE
+	 * IF THEN, ELSE IF ..., ELSE
 	 *
 	 * whenPairs must not be empty
 	 *
@@ -371,7 +371,7 @@ public interface TermFactory {
 									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE NULL
+	 * IF THEN, ELSE IF ..., ELSE NULL
 	 *
 	 * whenPairs must not be empty
 	 */
@@ -384,6 +384,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
@@ -513,11 +515,15 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
+
+	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm,
+			DBTermType targetType, java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
 
 	/**
 	 * Using the SPARQL "=" operator
@@ -597,5 +603,17 @@ public interface TermFactory {
 	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	/**
+	 * Time extension - duration arithmetic
+	 */
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 
 }

@@ -30,8 +30,6 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
-    IntermediateQueryBuilder createIQBuilder();
-
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
@@ -62,6 +60,9 @@ public interface IntermediateQueryFactory {
                                                   VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
+
+    ValuesNode createValuesNode(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
+                                @Assisted("values") ImmutableList<ImmutableList<Constant>> values);
 
     NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,

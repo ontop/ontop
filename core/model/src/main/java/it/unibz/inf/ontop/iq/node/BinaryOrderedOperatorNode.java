@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -27,16 +28,14 @@ import java.util.Optional;
  */
 public interface BinaryOrderedOperatorNode extends QueryNode {
 
-    enum ArgumentPosition {
-        LEFT,
-        RIGHT
-    }
-
     VariableNullability getVariableNullability(IQTree leftChild, IQTree rightChild);
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild);
+
+    <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild, IQTree rightChild,
+                                 T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 

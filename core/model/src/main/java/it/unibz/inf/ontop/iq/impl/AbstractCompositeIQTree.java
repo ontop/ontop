@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractCompositeIQTree<N extends QueryNode> implements CompositeIQTree<N> {
@@ -134,24 +133,15 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || ((o instanceof CompositeIQTree)
-                && isEquivalentTo((CompositeIQTree) o));
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractCompositeIQTree<N> other = (AbstractCompositeIQTree<N>) o;
+        return rootNode.equals(other.rootNode) && children.equals(other.children);
     }
 
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }
-
-    @Override
-    public boolean isEquivalentTo(IQTree tree) {
-        if (!getRootNode().isEquivalentTo(tree.getRootNode()))
-            return false;
-
-        ImmutableList<IQTree> otherChildren = tree.getChildren();
-        return (children.size() == otherChildren.size())
-                && IntStream.range(0, children.size())
-                    .allMatch(i -> children.get(i).isEquivalentTo(otherChildren.get(i)));
     }
 
     protected IQProperties getProperties() {

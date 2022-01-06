@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.vocabulary.RDF;

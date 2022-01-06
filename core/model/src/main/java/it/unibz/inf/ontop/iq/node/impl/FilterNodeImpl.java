@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -62,11 +63,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public FilterNode clone() {
-        return iqFactory.createFilterNode(getFilterCondition());
-    }
-
-    @Override
     public FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
@@ -82,21 +78,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (isFilteringNullValue(variable))
-            return false;
-
-        return query.getFirstChild(this)
-                .map(c -> c.isVariableNullable(query, variable))
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A filter node must have a child"));
-    }
-
-    @Override
     public VariableNullability getVariableNullability(IQTree child) {
         return variableNullabilityTools.updateWithFilter(getFilterCondition(),
                 child.getVariableNullability().getNullableGroups(), child.getVariables());
     }
-
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
@@ -165,6 +150,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformFilter(tree,this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitFilter(this, child);
     }
@@ -214,20 +204,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof FilterNode)
-                && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
+    public int hashCode() {
+        return getFilterCondition().hashCode();
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof FilterNode)
-                && getFilterCondition().equals(((FilterNode) queryNode).getFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass()
+                && getFilterCondition().equals(((FilterNode) o).getFilterCondition());
     }
 
     @Override

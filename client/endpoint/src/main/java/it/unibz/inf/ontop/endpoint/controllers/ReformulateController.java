@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.endpoint.controllers;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

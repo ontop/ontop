@@ -72,6 +72,11 @@
           }
         ]
       },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
       "type": "BasicViewDefinition"
     }
   ]

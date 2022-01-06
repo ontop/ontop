@@ -2,22 +2,21 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
-import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -25,11 +24,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.*;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -40,19 +36,10 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.IntStream;
 
-@JsonPropertyOrder({
-        "relations"
-})
 @JsonDeserialize(as = JsonSQLView.class)
 public class JsonSQLView extends JsonView {
     @Nonnull
     public final String query;
-    @Nonnull
-    public final UniqueConstraints uniqueConstraints;
-    @Nonnull
-    public final OtherFunctionalDependencies otherFunctionalDependencies;
-    @Nonnull
-    public final ForeignKeys foreignKeys;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSQLView.class);
 
@@ -61,12 +48,10 @@ public class JsonSQLView extends JsonView {
                        @JsonProperty("query") String query,
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
-                       @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
-        super(name);
+                       @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
+                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
         this.query = query;
-        this.uniqueConstraints = uniqueConstraints;
-        this.otherFunctionalDependencies = otherFunctionalDependencies;
-        this.foreignKeys = foreignKeys;
     }
 
     @Override
@@ -78,6 +63,12 @@ public class JsonSQLView extends JsonView {
 
         IQ iq = createIQ(relationId, dbParameters, parentCacheMetadataLookup);
 
+        int maxParentLevel = extractMaxParentLevel(iq, dbParameters.getCoreSingletons());
+
+        if (maxParentLevel > 0)
+            LOGGER.warn("It is dangerous to build SQLViewDefinitions above OntopViewDefinitions, " +
+                    "because the view definition will fail if the SQL query cannot be parsed by Ontop");
+
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
@@ -85,21 +76,34 @@ public class JsonSQLView extends JsonView {
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
-                // TODO: consider other levels
-                1,
+                maxParentLevel + 1,
                 dbParameters.getCoreSingletons());
     }
 
+    private int extractMaxParentLevel(IQ iq, CoreSingletons coreSingletons) {
+        LevelExtractor transformer = new LevelExtractor(coreSingletons);
+        // Side-effect (cheap but good enough implementation)
+        transformer.transform(iq.getTree());
+        return transformer.getMaxLevel();
+    }
+
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation,
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
-                                           MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
+        if (uniqueConstraints != null)
+            insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
 
-        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
+        if (otherFunctionalDependencies != null)
+            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
 
+    }
+
+    @Override
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+        return ImmutableList.of();
     }
 
 
@@ -121,7 +125,7 @@ public class JsonSQLView extends JsonView {
         try {
             raExpression = extractRAExpression(dbParameters, parentCacheMetadataLookup);
             initialChild = raExpression2IQConverter.convert(raExpression);
-        } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidSelectQueryException e) {
+        } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
@@ -173,7 +177,7 @@ public class JsonSQLView extends JsonView {
     }
 
     private RAExpression extractRAExpression(DBParameters dbParameters, MetadataLookup metadataLookup)
-            throws JSQLParserException, UnsupportedSelectQueryException, InvalidSelectQueryException {
+            throws JSQLParserException, UnsupportedSelectQueryException, InvalidQueryException, MetadataExtractionException {
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
         SQLQueryParser sq = new SQLQueryParser(coreSingletons);
         return sq.getRAExpression(query, metadataLookup);
@@ -188,26 +192,6 @@ public class JsonSQLView extends JsonView {
                 IntStream.range(0, arity)
                         .boxed()
                         .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
-    }
-
-    private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        UniqueTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
-
-        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
-        IQTree iqTree = iq.getTree();
-
-        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
-
-        for (Variable v : iqTree.getVariables()) {
-            builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
-                    (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
-                            // TODO: give the name of the view
-                            .orElseGet(dbTypeFactory::getAbstractRootDBType),
-                    iqTree.getVariableNullability().isPossiblyNullable(v));
-        }
-        return builder;
     }
 
     private void insertUniqueConstraints(NamedRelationDefinition relation,
@@ -244,166 +228,27 @@ public class JsonSQLView extends JsonView {
 
     }
 
-    @JsonPropertyOrder({
-            "added"
-    })
-    private static class UniqueConstraints extends JsonOpenObject {
-        @Nonnull
-        public final List<AddUniqueConstraints> added;
+    private static class LevelExtractor extends DefaultRecursiveIQTreeVisitingTransformer {
+        // Non-final
+        int maxLevel;
 
-        @JsonCreator
-        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "name",
-            "determinants",
-            "isPrimaryKey"
-    })
-    private static class AddUniqueConstraints extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final List<String> determinants;
-        public final Boolean isPrimaryKey;
-
-
-        @JsonCreator
-        public AddUniqueConstraints(@JsonProperty("name") String name,
-                                    @JsonProperty("determinants") List<String> determinants,
-                                    @JsonProperty("isPrimaryKey") Boolean isPrimaryKey) {
-            this.name = name;
-            this.determinants = determinants;
-            this.isPrimaryKey = isPrimaryKey;
+        public int getMaxLevel() {
+            return maxLevel;
         }
 
-        /*
-         * Ovverride equals method to ensure we can check for object equality
-         */
+        public LevelExtractor(CoreSingletons coreSingletons) {
+            super(coreSingletons);
+            maxLevel = 0;
+        }
+
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            AddUniqueConstraints other = (AddUniqueConstraints) obj;
-            return Objects.equals(determinants, other.determinants);
-        }
-
-        /*
-         * Ovverride hashCode method to ensure we can check for object equality
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(determinants);
-        }
-    }
-
-    private static class OtherFunctionalDependencies extends JsonOpenObject {
-        @Nonnull
-        public final List<AddFunctionalDependency> added;
-
-        @JsonCreator
-        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
-    private static class AddFunctionalDependency extends JsonOpenObject {
-        @Nonnull
-        public final List<String> determinants;
-        @Nonnull
-        public final List<String> dependents;
-
-        public AddFunctionalDependency(@JsonProperty("determinants") List<String> determinants,
-                                       @JsonProperty("dependents") List<String> dependents) {
-            this.determinants = determinants;
-            this.dependents = dependents;
-        }
-
-        /*
-         * Ovverride equals method to ensure we can check for object equality
-         */
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            AddFunctionalDependency other = (AddFunctionalDependency) obj;
-            return Objects.equals(ImmutableMap.of(determinants, dependents),
-                    ImmutableMap.of(other.determinants, other.dependents));
-        }
-
-        /*
-         * Ovverride hashCode method to ensure we can check for object equality
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(ImmutableMap.of(determinants, dependents));
-        }
-    }
-
-    private static class ForeignKeys extends JsonOpenObject {
-        @Nonnull
-        public final List<AddForeignKey> added;
-
-        @JsonCreator
-        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
-    private static class AddForeignKey extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final String from;
-        @Nonnull
-        public final ForeignKeyPart to;
-
-        public AddForeignKey(@JsonProperty("name") String name,
-                             @JsonProperty("from") String from,
-                             @JsonProperty("to") ForeignKeyPart to) {
-            this.name = name;
-            this.from = from;
-            this.to = to;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "relation",
-            "columns"
-    })
-    public static class ForeignKeyPart extends JsonOpenObject {
-        public final List<String> relation;
-        public final List<String> columns;
-
-        @JsonCreator
-        public ForeignKeyPart(@JsonProperty("relation") List<String> relation,
-                              @JsonProperty("columns") List<String> columns) {
-            this.relation = relation;
-            this.columns = columns;
+        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+            RelationDefinition parentRelation = dataNode.getRelationDefinition();
+            int level = (parentRelation instanceof OntopViewDefinition)
+                    ? ((OntopViewDefinition) parentRelation).getLevel()
+                    : 0;
+            maxLevel = Math.max(maxLevel, level);
+            return dataNode;
         }
     }
 }

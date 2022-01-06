@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.MetadataLookup;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -29,6 +26,11 @@ public class ImmutableMetadataLookup implements MetadataLookup {
             throw new RelationNotFoundInMetadataException(id, map.keySet());
 
         return relation;
+    }
+
+    @Override
+    public RelationDefinition getBlackBoxView(String query) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

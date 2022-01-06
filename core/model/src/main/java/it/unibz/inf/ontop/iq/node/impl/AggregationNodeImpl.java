@@ -9,11 +9,11 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -21,17 +21,13 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -228,6 +224,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformAggregation(tree, this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitAggregation(this, child);
     }
@@ -248,30 +249,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        // TODO: implement seriously!
-        return true;
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return Optional.of(node)
-                .filter(n -> n instanceof AggregationNode)
-                .map(n -> (AggregationNode) n)
-                .filter(n -> n.getGroupingVariables().equals(groupingVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
     }
 
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
@@ -279,8 +260,16 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AggregationNodeImpl that = (AggregationNodeImpl) o;
+        return groupingVariables.equals(that.groupingVariables) && substitution.equals(that.substitution);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupingVariables, substitution);
     }
 
     @Override
@@ -381,11 +370,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public AggregationNode clone() {
-        return iqFactory.createAggregationNode(groupingVariables, substitution);
     }
 
     @Override

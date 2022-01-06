@@ -4,8 +4,6 @@ import com.github.rvesse.airline.Cli;
 import com.github.rvesse.airline.builder.CliBuilder;
 import com.github.rvesse.airline.parser.errors.*;
 
-import static org.junit.Assert.fail;
-
 
 public class Ontop {
 
@@ -29,7 +27,7 @@ public class Ontop {
             System.err.println("Run `ontop help` to see the help");
         } catch (Exception e) {
             e.printStackTrace();
-            fail();
+            throw new AssertionError();
         }
     }
 

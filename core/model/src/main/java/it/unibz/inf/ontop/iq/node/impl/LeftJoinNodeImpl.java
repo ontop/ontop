@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -31,8 +32,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
 
 
@@ -94,13 +93,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public LeftJoinNode clone() {
-        return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, iqFactory,
-                unificationTools, substitutionTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
-    }
-
-    @Override
     public LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
@@ -113,33 +105,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        QueryNode leftChild = query.getChild(this, LEFT)
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A left child is required"));
-
-        if (query.getVariables(leftChild).contains(variable))
-            return leftChild.isVariableNullable(query, variable);
-
-        QueryNode rightChild = query.getChild(this, RIGHT)
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A right child is required"));
-
-        if (!query.getVariables(rightChild).contains(variable))
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-
-        return false;
-    }
-
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof LeftJoinNode)
-                && ((LeftJoinNode) node).getOptionalFilterCondition().equals(this.getOptionalFilterCondition());
+    public int hashCode() {
+        return getOptionalFilterCondition().hashCode();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof LeftJoinNode
-                && getOptionalFilterCondition().equals(((LeftJoinNode) queryNode).getOptionalFilterCondition());
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return obj != null && getClass() == obj.getClass()
+                && getOptionalFilterCondition().equals(((LeftJoinNode) obj).getOptionalFilterCondition());
     }
 
     @Override
@@ -233,6 +207,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
         return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild,
+                                    IQTree rightChild, T context) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild, context);
     }
 
     @Override

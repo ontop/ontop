@@ -36,11 +36,11 @@ import java.util.stream.IntStream;
 public class UnaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final DBTermType targetType;
-    private final Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct;
+    private final Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct;
 
     protected UnaryLatelyTypedFunctionSymbolImpl(DBTermType dbStringType, MetaRDFTermType metaRDFTermType,
                                                  DBTermType targetType,
-                                                 Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                 Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super("LATELY_TYPE_" + dbFunctionSymbolFct, ImmutableList.of(dbStringType, metaRDFTermType));
         this.targetType = targetType;
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
@@ -82,8 +82,15 @@ public class UnaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
             RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
             DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
 
+            Optional<DBFunctionSymbol> subFunctionSymbol = dbFunctionSymbolFct.apply(dbType);
+
+            // Irrelevant datatype -> stops the simplification.
+            // The functional term should be eliminated by other means (otherwise the query will fail).
+            if (!subFunctionSymbol.isPresent())
+                return termFactory.getImmutableFunctionalTerm(this, newTerms);
+
             ImmutableFunctionalTerm dbTerm = termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFct.apply(dbType),
+                    subFunctionSymbol.get(),
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType));
 
             return transformNaturalDBTerm(dbTerm, dbType, rdfType, termFactory)

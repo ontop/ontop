@@ -14,9 +14,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorNode {
 
     @Override
-    UnionNode clone();
-
-    @Override
     UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     /**

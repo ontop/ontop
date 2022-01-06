@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQ;
 
 import javax.annotation.Nonnull;

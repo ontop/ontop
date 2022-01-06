@@ -32,4 +32,22 @@ public class MirrorViewPersonTest extends AbstractRDF4JTest {
                 "}");
         assertEquals(count, 1);
     }
+
+    @Test
+    public void testFullNameIn() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "\t?p <http://person.example.org/fullName> ?n \n" +
+                "FILTER(?n IN (\"Roger Smith\",\"Francis Menard\"))\n" +
+                "}");
+        assertEquals(count, 1);
+    }
+
+    @Test
+    public void testFullNameNotIn() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "\t?p <http://person.example.org/fullName> ?n \n" +
+                "FILTER(?n NOT IN (\"Roger Smith\",\"Francis Menard\"))\n" +
+                "}");
+        assertEquals(count, 0);
+    }
 }

@@ -1,15 +1,13 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.*;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
@@ -22,263 +20,210 @@ import static org.junit.Assert.assertTrue;
  */
 public class NodeDeletionTest {
 
-    @Test(expected = EmptyQueryException.class)
-    public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
-        Variable x = TERM_FACTORY.getVariable("x");
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x));
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+
+    private static final ImmutableExpression FALSE_CONDITION =
+            TERM_FACTORY.getIsTrue(
+                TERM_FACTORY.getDBBooleanConstant(false));
+
+    @Test
+    public void testSimpleJoin() {
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate( 1), x);
+                ATOM_FACTORY.getRDFAnswerPredicate( 1), X);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(X));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(X));
 
-        DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
-        ImmutableExpression falseCondition = TERM_FACTORY.getIsTrue(falseValue);
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        joinNode,
+                        ImmutableList.of(dataNode1, dataNode2)));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(rootNode, joinNode);
-
-        ExtensionalDataNode table1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(x));
-        queryBuilder.addChild(joinNode, table1);
-
-        ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(x));
-        queryBuilder.addChild(joinNode, table2);
-
-        IntermediateQuery initialQuery = queryBuilder.build();
-        System.out.println("Initial query: " + initialQuery.toString());
-
-        /*
-         * Should throw the EmptyQueryException
-         */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
-        System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
+        IQ optimizedQuery = optimize(initialIQ);
+        assertTrue(optimizedQuery.getTree().isDeclaredAsEmpty());
     }
 
     @Test
-    public void testInvalidRightPartOfLeftJoin1() throws IntermediateQueryBuilderException, EmptyQueryException {
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
+    public void testInvalidRightPartOfLeftJoin1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
-
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
-
-        DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
-        ImmutableExpression falseCondition = TERM_FACTORY.getIsTrue(falseValue);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(rootNode, ljNode);
 
-        ExtensionalDataNode table1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(x));
-        queryBuilder.addChild(ljNode, table1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(X));
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
 
-        ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode, table2);
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                        ljNode,
+                        dataNode1,
+                        IQ_FACTORY.createNaryIQTree(
+                                joinNode,
+                                ImmutableList.of(dataNode2, dataNode3))));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode table3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode, table3);
+        IQ optimizedIQ = optimize(initialIQ);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
-        System.out.println("Initial query: " + initialQuery.toString());
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TERM_FACTORY.getNullConstant())));
+        IQTree newTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
-        /*
-         * Should replace the left join node by table 1.
-         */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
-        System.out.println("Optimized query : " + optimizedQuery.toString());
+        System.out.println("Expected query : " + expectedIQ);
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
-        assertTrue(viceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceRootNode).getRelationDefinition(), TABLE1_AR1);
-        assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
-    public void testUnion1() throws IntermediateQueryBuilderException, EmptyQueryException {
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-
+    public void testUnion1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
-        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), X, Y);
 
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
+        UnionNode topUnion = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
 
-        DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
-        ImmutableExpression falseCondition = TERM_FACTORY.getIsTrue(falseValue);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
 
-        UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
-        queryBuilder.addChild(rootNode, topUnion);
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
 
-        //DistinctVariableOnlyDataAtom subAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getAtomPredicate("ansu1", 2), x, y);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode1);
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(X, Y));
 
-        ExtensionalDataNode table1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(constructionNode1, table1);
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        topUnion,
+                        ImmutableList.of(
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode1,
+                                        dataNode1),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode2,
+                                        IQ_FACTORY.createNaryIQTree(
+                                                joinNode1,
+                                                ImmutableList.of(dataNode2, dataNode3))),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode3,
+                                        IQ_FACTORY.createNaryIQTree(
+                                                joinNode2,
+                                                ImmutableList.of(dataNode4, dataNode5))))));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode2);
+        IQ optimizedIQ = optimize(initialIQ);
 
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(constructionNode2, joinNode1);
+        IQTree newTree = dataNode1;
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
-        ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode1, table2);
+        System.out.println("Expected query : " + expectedIQ);
 
-        ExtensionalDataNode table3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode1, table3);
-
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode3);
-
-        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(constructionNode3, joinNode2);
-
-        ExtensionalDataNode table4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode2, table4);
-
-        ExtensionalDataNode table5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode2, table5);
-
-        IntermediateQuery initialQuery = queryBuilder.build();
-        System.out.println("Initial query: " + initialQuery.toString());
-
-        /*
-         * Should replace the left join node by table 1.
-         */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
-        System.out.println("Optimized query : " + optimizedQuery.toString());
-
-        QueryNode newRootNode = optimizedQuery.getRootNode();
-        assertTrue(newRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) newRootNode).getRelationDefinition(), TABLE1_AR2);
-        assertTrue(optimizedQuery.getChildren(newRootNode).isEmpty());
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
-    public void testUnion2() throws IntermediateQueryBuilderException, EmptyQueryException {
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-
+    public void testUnion2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
-        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
+        UnionNode topUnion = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
 
-        DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
-        ImmutableExpression falseCondition = TERM_FACTORY.getIsTrue(falseValue);
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
 
-        UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
-        queryBuilder.addChild(rootNode, topUnion);
-
-        //DataAtom subAtom = ATOM_FACTORY.getDataAtom(ATOM_FACTORY.getRDFAnswerPredicate("ansu1", 2), x, y);
-
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode1);
-
-        ExtensionalDataNode table1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(constructionNode1, table1);
-
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode2);
-
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(constructionNode2, joinNode1);
-
-        ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode1, table2);
-
-        ExtensionalDataNode table3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode1, table3);
-
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectedVariables);
-        queryBuilder.addChild(topUnion, constructionNode3);
-
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(constructionNode3, joinNode2);
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(X, Y));
 
-        ExtensionalDataNode table4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode2, table4);
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        topUnion,
+                        ImmutableList.of(
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode1,
+                                        dataNode1),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode2,
+                                        IQ_FACTORY.createNaryIQTree(
+                                                joinNode1,
+                                                ImmutableList.of(dataNode2, dataNode3))),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        constructionNode3,
+                                        IQ_FACTORY.createNaryIQTree(
+                                                joinNode2,
+                                                ImmutableList.of(dataNode4, dataNode5))))));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode table5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode2, table5);
+        IQ optimizedIQ = optimize(initialIQ);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
-        System.out.println("Initial query: " + initialQuery.toString());
+        IQTree newTree = IQ_FACTORY.createNaryIQTree(
+                topUnion,
+                ImmutableList.of(
+                        dataNode1,
+                        IQ_FACTORY.createNaryIQTree(
+                                joinNode2,
+                                ImmutableList.of(dataNode4, dataNode5))));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
+        System.out.println("Expected query : " + expectedIQ);
 
-        /*
-         * Should replace the left join node by table 1.
-         */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
-        System.out.println("Optimized query : " + optimizedQuery.toString());
-
-        QueryNode optimizedRootNode = optimizedQuery.getRootNode();
-        assertTrue(optimizedRootNode instanceof UnionNode);
-        assertEquals(2, optimizedQuery.getChildren(optimizedRootNode).size());
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
-    @Test(expected = EmptyQueryException.class)
-    public void testInvalidLeftPartOfLeftJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
+    @Test
+    public void testInvalidLeftPartOfLeftJoin() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
-
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
-
-        DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
-        ImmutableExpression falseCondition = TERM_FACTORY.getIsTrue(falseValue);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(rootNode, ljNode);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(FALSE_CONDITION);
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR1, ImmutableList.of(X));
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
-        queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                        ljNode,
+                        IQ_FACTORY.createNaryIQTree(joinNode,
+                                ImmutableList.of(dataNode2, dataNode3)),
+                        dataNode4));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode, table2);
-
-        ExtensionalDataNode table3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(x, y));
-        queryBuilder.addChild(joinNode, table3);
-
-        ExtensionalDataNode table4 = createExtensionalDataNode(TABLE4_AR1, ImmutableList.of(x));
-        queryBuilder.addChild(ljNode, table4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
-
-
-        IntermediateQuery initialQuery = queryBuilder.build();
-        System.out.println("Initial query: " + initialQuery.toString());
-
-        /*
-         * Should throw the EmptyQueryException
-         */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
-        System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
+        IQ optimizedQuery = optimize(initialIQ);
+        assertTrue(optimizedQuery.getTree().isDeclaredAsEmpty());
     }
 
-    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-        IQ initialIQ =  IQ_CONVERTER.convert(query);
+    private IQ optimize(IQ initialIQ)  {
+        System.out.println("Initial query: " + initialIQ);
 
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
-        if (optimizedIQ.getTree().isDeclaredAsEmpty())
-            throw new EmptyQueryException();
+        System.out.println("Optimized query: " + optimizedIQ);
 
-        return IQ_CONVERTER.convert(optimizedIQ);
+        return optimizedIQ;
     }
 }

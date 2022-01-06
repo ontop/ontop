@@ -26,8 +26,6 @@ public class OntopViewNormalizerImpl implements OntopViewNormalizer {
 
         if (initialIQ != newIQ)
             viewDefinition.updateIQ(newIQ);
-
-        viewDefinition.freeze();
     }
 
     protected IQ normalizeIQ(IQ iq) {

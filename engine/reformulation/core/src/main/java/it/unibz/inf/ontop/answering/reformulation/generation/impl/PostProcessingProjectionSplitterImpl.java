@@ -158,7 +158,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
             IQTree liftedTree = distinctNormalizer.normalizeForOptimization((DistinctNode) rootNode, possibleChildTree, variableGenerator,
                     iqFactory.createIQProperties());
 
-            return liftedTree.getRootNode().isEquivalentTo(constructionNode)
+            return liftedTree.getRootNode().equals(constructionNode)
                     ? possibleChildTree
                     : iqFactory.createUnaryIQTree(constructionNode, tree);
         }

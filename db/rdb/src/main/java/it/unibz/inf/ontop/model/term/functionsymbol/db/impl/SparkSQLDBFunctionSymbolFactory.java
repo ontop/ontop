@@ -21,7 +21,7 @@ import java.util.function.Function;
  */
 public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-    private static final String UNSUPPORTED_MSG = "Not supported by Spark or not still to be implemented";
+    private static final String UNSUPPORTED_MSG = "Not supported by Spark or not yet implemented";
 
     @Inject
     protected SparkSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -127,6 +127,61 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
         return new SparkSQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(DATEDIFF(%s, %s)/7)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(%s, %s)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/3600)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/60)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s))))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    /**
+     * Supported since Spark 3.1
+     */
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(UNIX_MILLIS(TO_TIMESTAMP(%s)) - UNIX_MILLIS(TO_TIMESTAMP(%s)))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 }
 

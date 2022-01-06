@@ -4,7 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 
 
 @Singleton
@@ -24,11 +26,10 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
     public IQ optimize(IQ initialIQ) {
         // Non-final
         IQ currentIQ = initialIQ;
-
-        for (int i=0; i < MAX_LOOP; i++){
-
-            IQ optimizedIQ = leftJoinIQOptimizer.optimize(innerJoinIQOptimizer.optimize(currentIQ))
-                    .normalizeForOptimization();
+        for (int i = 0; i < MAX_LOOP; i++) {
+            IQ innerJoinOptimizedIQ = innerJoinIQOptimizer.optimize(currentIQ);
+            IQ leftJoinOptimizedIQ = leftJoinIQOptimizer.optimize(innerJoinOptimizedIQ);
+            IQ optimizedIQ = leftJoinOptimizedIQ.normalizeForOptimization();
             if (optimizedIQ.equals(currentIQ))
                 return optimizedIQ;
             else

@@ -45,6 +45,11 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return transformLeaf(node);
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return transformLeaf(leafNode);
     }

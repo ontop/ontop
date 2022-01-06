@@ -57,18 +57,26 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
     @Option(type = OptionType.COMMAND, name = {"--disable-portal-page"}, title = "disable the portal page",
             description = "Disable the portal page (/index.html) of the SPARQL endpoint. ")
     private boolean disablePortalPage = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--enable-download-ontology"}, title = "allow to download the ontology",
+            description = "Allow to download the ontology as a plain text file (/ontology). Default: false")
+    private boolean enableDownloadOntology = false;
     
     @Override
     public void run() {
 
         ArrayList<String> argList = Lists.newArrayList(
                 "--mapping=" + this.mappingFile,
-                "--properties=" + this.propertiesFile,
+                //"--properties=" + this.propertiesFile,
                 "--port=" + this.port,
                 "--lazy=" + this.lazy,
                 "--dev=" + this.dev,
-                "--disable-portal-page=" + this.disablePortalPage
+                "--disable-portal-page=" + this.disablePortalPage,
+                "--enable-download-ontology=" + this.enableDownloadOntology
                 );
+
+        if (this.propertiesFile != null)
+            argList.add("--properties=" + this.propertiesFile);
 
         if (this.corsAllowedOrigins != null)
             argList.add("--cors-allowed-origins=" + this.corsAllowedOrigins);
@@ -109,11 +117,15 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
         if (dbUrl != null)
             argList.add("--db-url=" + this.dbUrl);
 
+        if (dbDriver != null)
+            argList.add("--db-driver=" + this.dbDriver);
+
         String[] args = new String[argList.size()];
         argList.toArray(args);
 
         // Spring boot gives warns when the logback.configurationFile property is set
-        System.setProperty("logback.configurationFile", "");
+        System.clearProperty("logback.configurationFile");
+        // System.setProperty("logback.configurationFile", "");
 
         OntopEndpointApplication.main(args);
     }

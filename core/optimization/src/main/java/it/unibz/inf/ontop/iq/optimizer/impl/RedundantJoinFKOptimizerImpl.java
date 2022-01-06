@@ -155,7 +155,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
         private boolean isSafeAndTargetMatching(ForeignKeyConstraint foreignKeyConstraint,
                                                 ExtensionalDataNode sourceNode, ExtensionalDataNode targetNode) {
             // Protection against FKs like from a PK to itself
-            if (sourceNode.isEquivalentTo((QueryNode) targetNode))
+            if (sourceNode.equals(targetNode))
                 return false;
 
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap = sourceNode.getArgumentMap();

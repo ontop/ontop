@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -93,11 +94,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public InnerJoinNode clone() {
-        return iqFactory.createInnerJoinNode(getOptionalFilterCondition());
-    }
-
-    @Override
     public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
@@ -139,43 +135,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-
-        if (isFilteringNullValue(variable))
-            return false;
-
-        // Non-already
-        boolean alsoProjectedByAnotherChild = false;
-
-        for(QueryNode child : query.getChildren(this)) {
-            if (query.getVariables(child).contains(variable)) {
-                // Joining conditions cannot be null
-                if (alsoProjectedByAnotherChild)
-                    return false;
-
-                if (child.isVariableNullable(query, variable))
-                    alsoProjectedByAnotherChild = true;
-                else
-                    return false;
-            }
-        }
-
-        if (!alsoProjectedByAnotherChild)
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-
-        return true;
+    public int hashCode() {
+        return getOptionalFilterCondition().hashCode();
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof InnerJoinNode) &&
-            this.getOptionalFilterCondition().equals(((InnerJoinNode) node).getOptionalFilterCondition());
-    }
-
-    @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof InnerJoinNode)
-                && getOptionalFilterCondition().equals(((InnerJoinNode) queryNode).getOptionalFilterCondition());
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return obj != null && getClass() == obj.getClass()
+                && getOptionalFilterCondition().equals(((InnerJoinNode) obj).getOptionalFilterCondition());
     }
 
     @Override
@@ -315,6 +283,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
         return transformer.transformInnerJoin(tree,this, children);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, ImmutableList<IQTree> children,
+                             T context) {
+        return transformer.transformInnerJoin(tree,this, children, context);
     }
 
     @Override

@@ -1,0 +1,39 @@
+{
+  "relations": [
+    {
+      "name": ["\"views\"", "\"v1\""],
+      "join": {
+        "relations": [
+          [
+            "\"table1\""
+          ],
+          [
+            "\"table2\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"id\" < 100",
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "JoinViewDefinition"
+    }
+  ]
+}

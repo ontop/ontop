@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -19,6 +20,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -69,7 +71,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (newChildRoot instanceof ConstructionNode)
             return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
         else if (newChildRoot instanceof SliceNode)
-            return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+            return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else if ((newChildRoot instanceof TrueNode)
@@ -97,7 +99,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 iqFactory.createIQProperties().declareNormalizedForOptimization());
     }
 
-    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, UnaryIQTree newChild, IQProperties currentIQProperties) {
         long newOffset = offset + newChildRoot.getOffset();
         Optional<Long> newLimit = newChildRoot.getLimit()
                 .map(cl -> Math.max(cl - offset, 0L))
@@ -112,7 +114,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(l -> iqFactory.createSliceNode(newOffset, l))
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
-        return iqFactory.createUnaryIQTree(newSliceNode, newChild, currentIQProperties.declareNormalizedForOptimization());
+        return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), currentIQProperties.declareNormalizedForOptimization());
     }
 
     @Override
@@ -146,6 +148,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformSlice(tree, this, child);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformSlice(tree, this, child, context);
     }
 
     @Override
@@ -195,30 +202,26 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof SliceNode
-                && ((SliceNode) queryNode).getOffset() == offset
-                && ((SliceNode) queryNode).getLimit().equals(getLimit());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SliceNodeImpl sliceNode = (SliceNodeImpl) o;
+        return offset == sliceNode.offset && Objects.equals(limit, sliceNode.limit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(offset, limit);
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
     }
 
     @Override
@@ -229,13 +232,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public Optional<Long> getLimit() {
         return Optional.ofNullable(limit);
-    }
-
-    @Override
-    public SliceNode clone() {
-        return getLimit()
-                .map(l -> iqFactory.createSliceNode(offset, l))
-                .orElseGet(() -> iqFactory.createSliceNode(offset));
     }
 
     @Override

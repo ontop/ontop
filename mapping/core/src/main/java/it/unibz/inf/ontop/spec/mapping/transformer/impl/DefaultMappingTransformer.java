@@ -10,9 +10,11 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
-import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -27,7 +29,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
-    private final ABoxFactIntoMappingConverter factConverter;
+    private final FactIntoMappingConverter factConverter;
     private final OntopMappingSettings settings;
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final SpecificationFactory specificationFactory;
@@ -39,7 +41,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
                                       MappingSaturator mappingSaturator,
-                                      ABoxFactIntoMappingConverter inserter,
+                                      FactIntoMappingConverter inserter,
                                       OntopMappingSettings settings,
                                       MappingSameAsInverseRewriter sameAsInverseRewriter,
                                       SpecificationFactory specificationFactory,
@@ -58,36 +60,20 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, Optional<Ontology> ontology) {
+    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
+                                       Optional<Ontology> ontology, ImmutableSet<RDFFact> facts) {
+        ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
+        ImmutableList<MappingAssertion> mappingWithFacts =
+                Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
+
         if (ontology.isPresent()) {
-            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(extractAboxFacts(ontology.get()),
-                    // Useless. To be removed (temporary)
-                    true);
-
-            ImmutableList<MappingAssertion> mappingWithFacts =
-                    Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
-
             return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory, termFactory).build().tbox();
-            return createSpecification(mapping, dbParameters, emptyTBox);
+            return createSpecification(mappingWithFacts, dbParameters, emptyTBox);
         }
     }
-
-    /**
-     * Temporary (before introducing FactExtractor)
-     */
-    protected ImmutableSet<RDFFact> extractAboxFacts(Ontology ontology) {
-        if (settings.isOntologyAnnotationQueryingEnabled())
-            return ontology.abox();
-
-        OntologyVocabularyCategory<AnnotationProperty> annotationProperties = ontology.annotationProperties();
-        return ontology.abox().stream()
-                .filter(f -> !annotationProperties.contains(f.getProperty().getIRI()))
-                .collect(ImmutableCollectors.toSet());
-    }
-
 
     private OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, ClassifiedTBox tbox) {
 

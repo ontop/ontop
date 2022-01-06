@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -10,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -21,7 +20,7 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -29,14 +28,12 @@ import java.util.Optional;
 public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
-    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(atom, iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
+        super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     @Override
@@ -45,31 +42,19 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IntensionalDataNode clone() {
-        return iqFactory.createIntensionalDataNode(getProjectionAtom());
-    }
-
-    @Override
     public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 
-    /**
-     * We assume all the variables are non-null. Ok for triple patterns.
-     * TODO: what about quads and default graphs?
-     */
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getVariables().contains(variable))
-            return false;
-        else
-            throw new IllegalArgumentException("The variable" + variable + " is not projected by " + this);
-    }
-
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformIntensionalData(this);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformIntensionalData(this, context);
     }
 
     /**
@@ -110,20 +95,15 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof IntensionalDataNode)
-                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+    public int hashCode() {
+        return getProjectionAtom().hashCode();
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof IntensionalDataNode)
-                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return obj != null && getClass() == obj.getClass()
+                && getProjectionAtom().equals(((IntensionalDataNode) obj).getProjectionAtom());
     }
 
     @Override

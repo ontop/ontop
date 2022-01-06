@@ -10,9 +10,11 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -25,6 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +38,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
     private final ConstructionNodeTools constructionTools;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -51,7 +53,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
-        this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -62,12 +63,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public UnionNode clone() {
-        return new UnionNodeImpl(projectedVariables, constructionTools, iqFactory,
-                substitutionFactory, termFactory, coreUtilsFactory, substitutionNormalizer, notRequiredVariableRemover);
     }
 
     @Override
@@ -90,15 +85,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return children.stream()
                 .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)
                         && ((ConstructionNode) c.getRootNode()).getSubstitution().isDefining(variable));
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        for(QueryNode child : query.getChildren(this)) {
-            if (child.isVariableNullable(query, variable))
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -322,6 +308,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
+                                    ImmutableList<IQTree> children, T context) {
+        return transformer.transformUnion(tree,this, children, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.visitUnion(this, children);
     }
@@ -336,10 +328,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableSet<Variable> unionVariables = getVariables();
 
         for (IQTree child : children) {
-            if (!child.getVariables().containsAll(unionVariables)) {
+            if (!child.getVariables().equals(unionVariables)) {
                 throw new InvalidIntermediateQueryException("This child " + child
-                        + " does not project all the variables " +
-                        "required by the UNION node (" + unionVariables + ")\n" + this);
+                        + " does not project exactly all the variables " +
+                        "of the UNION node (" + unionVariables + ")\n" + this);
             }
         }
     }
@@ -379,14 +371,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof UnionNode) {
-            return projectedVariables.equals(((UnionNode)node).getVariables());
-        }
-        return false;
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return projectedVariables;
     }
@@ -402,20 +386,21 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof UnionNode))
-            return false;
-        return projectedVariables.equals(((UnionNode) queryNode).getVariables());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnionNodeImpl unionNode = (UnionNodeImpl) o;
+        return projectedVariables.equals(unionNode.projectedVariables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables);
     }
 
     /**
@@ -531,6 +516,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables))
                         .flatMap(this::flattenChild)
+                        .map(c -> c.getVariables().equals(unionVariables)
+                                ? c
+                                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ);
@@ -643,10 +631,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             ImmutableFunctionalTerm functionalTerm1 = (ImmutableFunctionalTerm) d1;
             ImmutableFunctionalTerm functionalTerm2 = (ImmutableFunctionalTerm) d2;
 
+            FunctionSymbol firstFunctionSymbol = functionalTerm1.getFunctionSymbol();
+
             /*
-             * Different function symbols: stops the common part here
+             * Different function symbols: stops the common part here.
+             *
+             * Same for functions that do not strongly type their arguments (unsafe to decompose). Example: STRICT_EQ
              */
-            if (!functionalTerm1.getFunctionSymbol().equals(functionalTerm2.getFunctionSymbol())) {
+            if ((!firstFunctionSymbol.equals(functionalTerm2.getFunctionSymbol()))
+                    || (!firstFunctionSymbol.shouldBeDecomposedInUnion())) {
                 return topLevel
                         ? Optional.empty()
                         : Optional.of(variableGenerator.generateNewVariable());
@@ -666,7 +659,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                             .orElseGet(variableGenerator::generateNewVariable);
                     argumentBuilder.add(newArgument);
                 }
-                return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+                return Optional.of(termFactory.getImmutableFunctionalTerm(firstFunctionSymbol,
                         argumentBuilder.build()));
             }
         }

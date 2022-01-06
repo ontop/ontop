@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -157,6 +158,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCoalesce(int arity);
 
+    /**
+     * Min arity is 1
+     */
+    DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity);
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
@@ -215,10 +221,10 @@ public interface DBFunctionSymbolFactory {
      */
     DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName);
 
-    DBFunctionSymbol getAbs(DBTermType dbTermType);
-    DBFunctionSymbol getCeil(DBTermType dbTermType);
-    DBFunctionSymbol getFloor(DBTermType dbTermType);
-    DBFunctionSymbol getRound(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getAbs(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getCeil(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getFloor(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getRound(DBTermType dbTermType);
 
     DBFunctionSymbol getDBYearFromDatetime();
     DBFunctionSymbol getDBYearFromDate();
@@ -331,5 +337,15 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRelate();
     FunctionSymbol getDBRelateMatrix();
     FunctionSymbol getDBGetSRID();
+
+    // Time extension - duration arithmetic
+    DBFunctionSymbol getDBWeeksBetweenFromDateTime();
+    DBFunctionSymbol getDBWeeksBetweenFromDate();
+    DBFunctionSymbol getDBDaysBetweenFromDateTime();
+    DBFunctionSymbol getDBDaysBetweenFromDate();
+    DBFunctionSymbol getDBHoursBetweenFromDateTime();
+    DBFunctionSymbol getDBMinutesBetweenFromDateTime();
+    DBFunctionSymbol getDBSecondsBetweenFromDateTime();
+    DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
 }

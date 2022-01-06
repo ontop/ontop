@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.test.sparql;
 
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -79,9 +80,11 @@ public class MemoryTestExecutor {
 	}
 
 	private OntopRepository createRepository() throws RepositoryException, SemanticIndexException {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
+		Properties properties = new Properties();
+		properties.put(OntopModelSettings.TEST_MODE, "true");
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, properties)) {
 			OntopRepository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
+			repository.init();
 			return repository;
 		}
 	}
