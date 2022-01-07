@@ -326,8 +326,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
      * TODO: detect when we can do it (absence of cardinality-sensitive aggregation functions)
      */
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
-        return iqFactory.createUnaryIQTree(this, child, iqProperties.declareDistinctRemovalWithoutEffect());
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
+        return iqFactory.createUnaryIQTree(this, child, treeCache.declareDistinctRemoval(true));
     }
 
     @Override

@@ -398,15 +398,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties) {
+    public IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
         IQTree newLeftChild = leftChild.removeDistincts();
         IQTree newRightChild = rightChild.removeDistincts();
 
-        IQProperties newProperties = (newLeftChild.equals(leftChild) && newRightChild.equals(rightChild))
-                ? properties.declareDistinctRemovalWithoutEffect()
-                : properties.declareDistinctRemovalWithEffect();
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newLeftChild.equals(leftChild) && newRightChild.equals(rightChild));
 
-        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newProperties);
+        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newTreeCache);
     }
 
     /**

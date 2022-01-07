@@ -95,7 +95,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         return child.removeDistincts();
     }
 

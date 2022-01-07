@@ -172,10 +172,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     public IQTree removeDistincts() {
-        IQProperties properties = getProperties();
-        return properties.areDistinctAlreadyRemoved()
+        IQTreeCache treeCache = getTreeCache();
+        return treeCache.areDistinctAlreadyRemoved()
                 ? this
-                : getRootNode().removeDistincts(getChildren(), properties);
+                : getRootNode().removeDistincts(getChildren(), treeCache);
     }
 
     @Override

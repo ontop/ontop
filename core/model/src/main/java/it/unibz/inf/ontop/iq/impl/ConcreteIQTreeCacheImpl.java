@@ -150,23 +150,21 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 null, variables, null, null, null, null);
     }
 
-    @Override
-    public IQTreeCache declareDistinctRemovalWithoutEffect() {
-        return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
-                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
-    }
-
     /**
      * TODO: explicit assumptions about the effects
      */
+
     @Override
-    public IQTreeCache declareDistinctRemovalWithEffect() {
-        return new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
+    public IQTreeCache declareDistinctRemoval(boolean noEffect) {
+        return noEffect
+                ? new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
+                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct)
+                : new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
                 variableNullability, variables, null, possibleVariableDefinitions, null, null);
     }
 
     @Override
-    public synchronized void setVariableNullability(VariableNullability variableNullability) {
+    public synchronized void setVariableNullability(@Nonnull VariableNullability variableNullability) {
         if (this.variableNullability != null)
             throw new IllegalStateException("Variable nullability already present. Only call this method once");
         this.variableNullability = variableNullability;

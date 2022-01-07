@@ -28,11 +28,6 @@ public class IQPropertiesImpl implements IQProperties {
     }
 
     @Override
-    public boolean areDistinctAlreadyRemoved() {
-        return areDistinctAlreadyRemoved;
-    }
-
-    @Override
     public IQProperties declareNormalizedForOptimization() {
         return new IQPropertiesImpl(emptyTreeCache, true, areDistinctAlreadyRemoved);
     }
@@ -43,18 +38,13 @@ public class IQPropertiesImpl implements IQProperties {
     }
 
     @Override
-    public IQProperties declareDistinctRemovalWithEffect() {
-        return new IQPropertiesImpl(emptyTreeCache, false, true);
-    }
-
-    @Override
     public IQTreeCache convertIQTreeCache() {
         //Non-final
         IQTreeCache treeCache = emptyTreeCache;
         if (isNormalized)
             treeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
         if (areDistinctAlreadyRemoved)
-            treeCache = treeCache.declareDistinctRemovalWithoutEffect();
+            treeCache = treeCache.declareDistinctRemoval(true);
         return treeCache;
     }
 }

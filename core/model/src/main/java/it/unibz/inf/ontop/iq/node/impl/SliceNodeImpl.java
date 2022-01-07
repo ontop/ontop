@@ -165,14 +165,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override

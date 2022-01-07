@@ -300,16 +300,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(IQTree::removeDistincts)
                 .collect(ImmutableCollectors.toList());
 
-        IQProperties newProperties = newChildren.equals(children)
-                ? properties.declareDistinctRemovalWithoutEffect()
-                : properties.declareDistinctRemovalWithEffect();
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
 
-        return iqFactory.createNaryIQTree(this, children, newProperties);
+        return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
     /**

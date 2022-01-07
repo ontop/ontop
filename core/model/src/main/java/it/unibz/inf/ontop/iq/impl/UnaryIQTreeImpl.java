@@ -144,11 +144,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     public IQTree removeDistincts() {
-        IQProperties properties = getProperties();
+        IQTreeCache treeCache = getTreeCache();
 
-        return properties.areDistinctAlreadyRemoved()
+        return treeCache.areDistinctAlreadyRemoved()
             ? this
-            : getRootNode().removeDistincts(getChild(), properties);
+            : getRootNode().removeDistincts(getChild(), treeCache);
     }
 
     @Override
