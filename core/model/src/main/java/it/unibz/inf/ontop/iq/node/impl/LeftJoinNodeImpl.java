@@ -211,9 +211,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public IQTree normalizeForOptimization(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
-                              IQProperties currentIQProperties) {
+                              IQTreeCache treeCache) {
         return ljNormalizer.normalizeForOptimization(this, initialLeftChild, initialRightChild,
-                variableGenerator, currentIQProperties);
+                variableGenerator, treeCache);
     }
 
     @Override

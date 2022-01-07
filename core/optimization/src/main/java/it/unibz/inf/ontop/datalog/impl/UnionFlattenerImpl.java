@@ -54,7 +54,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
                 return rootCn.normalizeForOptimization(
                         transformedChild,
                         variableGenerator,
-                        iqFactory.createIQProperties()
+                        iqFactory.createIQProperties().convertIQTreeCache()
                 );
             }
             return iqFactory.createUnaryIQTree(rootCn, transformedChild);

@@ -56,10 +56,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        if (getProperties().isNormalizedForOptimization())
+        if (getTreeCache().isNormalizedForOptimization())
             return this;
         else
-            return getRootNode().normalizeForOptimization(getChild(), variableGenerator, getProperties());
+            return getRootNode().normalizeForOptimization(getChild(), variableGenerator, getTreeCache());
     }
 
     @Override

@@ -14,8 +14,6 @@ package it.unibz.inf.ontop.iq;
 @Deprecated
 public interface IQProperties {
 
-    boolean isNormalizedForOptimization();
-
     /**
      * Creates a NEW (immutable) object
      */

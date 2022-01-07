@@ -218,9 +218,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      *  (so as to reduce the recursive pressure)
      */
     @Override
-    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
-        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, treeCache);
     }
 
     @Override

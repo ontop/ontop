@@ -5,8 +5,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -57,8 +57,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
      */
     @Override
     public IQTree normalizeForOptimization(AggregationNode aggregationNode, IQTree child,
-                                           VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
+                                           VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
         if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty())
             return iqFactory.createTrueNode();
@@ -67,7 +67,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 aggregationNode.getLocallyRequiredVariables(), variableGenerator);
 
         if (shrunkChild.isDeclaredAsEmpty()) {
-            return normalizeEmptyChild(aggregationNode, normalizedProperties);
+            return normalizeEmptyChild(aggregationNode, normalizedTreeCache);
         }
 
         QueryNode rootNode = shrunkChild.getRootNode();
@@ -84,14 +84,14 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         AggregationNormalizationState finalState = stateAfterLiftingBindings.simplifyAggregationSubstitution();
         // TODO: consider filters
 
-        return finalState.createNormalizedTree(normalizedProperties);
+        return finalState.createNormalizedTree(normalizedTreeCache);
     }
 
     /**
      * If the child is empty, returns no tuple if there are some grouping variables.
      * Otherwise, returns a single tuple.
      */
-    private IQTree normalizeEmptyChild(AggregationNode aggregationNode, IQProperties normalizedProperties) {
+    private IQTree normalizeEmptyChild(AggregationNode aggregationNode, IQTreeCache normalizedTreeCache) {
         ImmutableSet<Variable> projectedVariables = aggregationNode.getVariables();
 
         if (!aggregationNode.getGroupingVariables().isEmpty())
@@ -106,7 +106,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 projectedVariables,
                 substitutionFactory.getSubstitution(newSubstitutionMap));
 
-        return iqFactory.createUnaryIQTree(constructionNode, iqFactory.createTrueNode(), normalizedProperties);
+        return iqFactory.createUnaryIQTree(constructionNode, iqFactory.createTrueNode(), normalizedTreeCache);
     }
 
     private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
@@ -424,7 +424,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         }
 
 
-        protected IQTree createNormalizedTree(IQProperties normalizedProperties) {
+        protected IQTree createNormalizedTree(IQTreeCache normalizedTreeCache) {
             IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
             IQTree newChildTree = Optional.ofNullable(childConstructionNode)
@@ -434,8 +434,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             AggregationNode aggregationNode = iqFactory.createAggregationNode(groupingVariables, aggregationSubstitution);
 
-            IQTree aggregationTree = iqFactory.createUnaryIQTree(aggregationNode, newChildTree,
-                    normalizedProperties);
+            IQTree aggregationTree = iqFactory.createUnaryIQTree(aggregationNode, newChildTree, normalizedTreeCache);
 
             return ancestors.reverse().stream()
                     .reduce(aggregationTree,

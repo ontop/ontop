@@ -61,7 +61,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         if ((limit != null) && limit == 0)
             return iqFactory.createEmptyNode(child.getVariables());
 
@@ -71,7 +71,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (newChildRoot instanceof ConstructionNode)
             return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
         else if (newChildRoot instanceof SliceNode)
-            return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, currentIQProperties);
+            return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, treeCache);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else if ((newChildRoot instanceof TrueNode)
@@ -86,9 +86,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .filter(l -> l <= 1)
                     .isPresent())
             // Distinct can be eliminated
-            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, currentIQProperties);
+            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
@@ -99,7 +99,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 iqFactory.createIQProperties().declareNormalizedForOptimization());
     }
 
-    private IQTree mergeWithSliceChild(SliceNode newChildRoot, UnaryIQTree newChild, IQProperties currentIQProperties) {
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, UnaryIQTree newChild, IQTreeCache treeCache) {
         long newOffset = offset + newChildRoot.getOffset();
         Optional<Long> newLimit = newChildRoot.getLimit()
                 .map(cl -> Math.max(cl - offset, 0L))
@@ -114,7 +114,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(l -> iqFactory.createSliceNode(newOffset, l))
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
-        return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), currentIQProperties.declareNormalizedForOptimization());
+        return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     @Override

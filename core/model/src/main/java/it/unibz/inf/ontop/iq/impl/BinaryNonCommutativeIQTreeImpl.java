@@ -111,10 +111,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        IQProperties properties = getProperties();
-        if (properties.isNormalizedForOptimization())
+        IQTreeCache treeCache = getTreeCache();
+        if (treeCache.isNormalizedForOptimization())
             return this;
-        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, properties);
+        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, treeCache);
     }
 
     @Override

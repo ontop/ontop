@@ -23,11 +23,6 @@ public class IQPropertiesImpl implements IQProperties {
     }
 
     @Override
-    public boolean isNormalizedForOptimization() {
-        return isNormalized;
-    }
-
-    @Override
     public IQProperties declareNormalizedForOptimization() {
         return new IQPropertiesImpl(emptyTreeCache, true, areDistinctAlreadyRemoved);
     }

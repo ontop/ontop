@@ -87,9 +87,9 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        return getProperties().isNormalizedForOptimization()
+        return getTreeCache().isNormalizedForOptimization()
                 ? this
-                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getProperties());
+                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getTreeCache());
     }
 
     /**

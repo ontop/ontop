@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
@@ -30,8 +30,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
      * NB: the loop is due to the lifting of both distinct and construction nodes
      */
     @Override
-    public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
         Optional<OrderByNode> simplifiedOrderByNode = simplifyOrderByNode(orderByNode, child.getVariableNullability());
         if (!simplifiedOrderByNode.isPresent())
@@ -42,7 +41,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         for (int i=0; i < MAX_ITERATIONS; i++) {
             State newState = state.liftChild();
             if (newState.hasConverged(state))
-                return newState.createNormalizedTree(variableGenerator, currentIQProperties);
+                return newState.createNormalizedTree(variableGenerator, treeCache);
             state = newState;
         }
         throw new MinorOntopInternalBugException("OrderByNormalizerImpl.normalizeForOptimization has not converged after "
@@ -146,15 +145,13 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
                     child.getChild());
         }
 
-        public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQTreeCache treeCache) {
             IQTree orderByLevelTree = orderByNode
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, child,
-                            currentIQProperties.declareNormalizedForOptimization()))
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, child, treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())
                 return orderByLevelTree;
-
 
             return ancestors.stream()
                     .reduce(orderByLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
