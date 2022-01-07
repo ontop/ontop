@@ -62,6 +62,25 @@ public class DateOrDatetimeFilterTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testOfnDaysBetweenDate() {
+        String query = "PREFIX fhir: <http://hl7.org/fhir/>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX ofn:<http://www.ontotext.com/sparql/functions/>\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "?e a fhir:Encounter . \n" +
+                "  ?e fhir:Encounter.period  [ \n" +
+                "  fhir:Period.startdate [ fhir:value ?start ]  ;\n" +
+                "  fhir:Period.enddate   [ fhir:value ?end ] ] .\n" +
+                "BIND (ofn:daysBetween(?start,?end) as ?v)\n" +
+                "FILTER (?v >= \"12\"^^xsd:integer)\n" +
+                "}";
+
+        runQueryAndCompare(query, ImmutableSet.of("14"));
+    }
+
+    @Test
     public void testOfnDaysBetweenDatetime() {
         String query = "PREFIX fhir: <http://hl7.org/fhir/>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
