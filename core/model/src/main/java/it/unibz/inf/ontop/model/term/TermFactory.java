@@ -523,7 +523,7 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm,
-			DBTermType targetType, java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			DBTermType targetType, java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	/**
 	 * Using the SPARQL "=" operator
