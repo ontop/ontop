@@ -7,7 +7,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -30,24 +29,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree leftChild;
     private final IQTree rightChild;
 
-
-    /**
-     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
-     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild, IQProperties iqProperties)}
-     */
-    @SuppressWarnings("unused")
-    @AssistedInject
-    private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
-                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
-
-        if (settings.isTestModeEnabled())
-            validate();
-    }
 
     /**
      * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
@@ -80,8 +61,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
                                            TermFactory termFactory,
-                                           OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
+                                           OntopModelSettings settings,
+                                           IQTreeCache freshTreeCash) {
+        this(rootNode, leftChild, rightChild, freshTreeCash, iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override

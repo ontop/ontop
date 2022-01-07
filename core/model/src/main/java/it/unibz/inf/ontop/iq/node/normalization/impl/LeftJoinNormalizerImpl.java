@@ -116,8 +116,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         protected LJNormalizationState(ImmutableSet<Variable> projectedVariables, IQTree initialLeftChild,
                                        IQTree initialRightChild, Optional<ImmutableExpression> ljCondition,
                                        VariableGenerator variableGenerator) {
-            this(projectedVariables, initialLeftChild, initialRightChild, ljCondition,
-                    ImmutableList.of(), variableGenerator);
+            this(projectedVariables, initialLeftChild, initialRightChild, ljCondition, ImmutableList.of(), variableGenerator);
         }
 
         private LJNormalizationState updateConditionAndRightChild(Optional<ImmutableExpression> newLJCondition,
@@ -367,7 +366,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return leftChild.equals(other.leftChild)
                     && rightChild.equals(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
-                    && ancestors.size() == other.ancestors.size()
                     && ancestors.equals(other.ancestors);
         }
 

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.ConcreteIQTreeCache;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -40,9 +39,6 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Nullable
     private Boolean isDistinct;
 
-    /**
-     * Initial constructor
-     */
     @Inject
     protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
@@ -189,18 +185,6 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         if (this.isDistinct != null)
             throw new IllegalStateException("Distinct information is already present. Only call this method once");
         this.isDistinct = isDistinct;
-    }
-
-    @Override
-    public IQProperties convertIntoIQProperties() {
-        // Non-final
-        IQProperties properties = coreSingletons.getIQFactory().createIQProperties();
-        if (areDistinctAlreadyRemoved)
-            properties = properties.declareDistinctRemovalWithoutEffect();
-        if (isNormalizedForOptimization)
-            properties = properties.declareNormalizedForOptimization();
-
-        return properties;
     }
 
     /**

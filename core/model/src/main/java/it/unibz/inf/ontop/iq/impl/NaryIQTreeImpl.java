@@ -6,7 +6,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -25,18 +24,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
-
-    @AssistedInject
-    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
-        if (children.size() < 2)
-            throw new IllegalArgumentException("At least two children are required for a n-ary node");
-
-        if (settings.isTestModeEnabled())
-            validate();
-    }
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,

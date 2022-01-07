@@ -303,7 +303,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // Taken from the child sub-tree
             VariableNullability variableNullability = Optional.ofNullable(childConstructionNode)
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
-                            iqFactory.createIQProperties().declareNormalizedForOptimization()))
+                            iqFactory.createIQTreeCache().declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(grandChild)
                     .getVariableNullability();
 
@@ -429,7 +429,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             IQTree newChildTree = Optional.ofNullable(childConstructionNode)
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
-                            iqFactory.createIQProperties().declareNormalizedForOptimization()))
+                            iqFactory.createIQTreeCache().declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(grandChild);
 
             AggregationNode aggregationNode = iqFactory.createAggregationNode(groupingVariables, aggregationSubstitution);

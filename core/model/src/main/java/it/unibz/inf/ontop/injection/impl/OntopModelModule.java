@@ -101,7 +101,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 BinaryNonCommutativeIQTree.class,
                 NaryIQTree.class,
                 IQ.class,
-                IQProperties.class
+                IQTreeCache.class
                 ),
                 IntermediateQueryFactory.class);
         install(iqFactoryModule);

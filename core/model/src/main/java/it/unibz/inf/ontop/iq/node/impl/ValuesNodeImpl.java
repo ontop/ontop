@@ -81,7 +81,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (lift.isPresent()) {
             LeafIQTree normalizedLeaf = furtherNormalize(lift.get().valuesNode);
             return iqFactory.createUnaryIQTree(lift.get().constructionNode, normalizedLeaf,
-                    iqFactory.createIQProperties().declareNormalizedForOptimization());
+                    iqFactory.createIQTreeCache().declareAsNormalizedForOptimizationWithEffect());
         }
         return furtherNormalize(this);
     }

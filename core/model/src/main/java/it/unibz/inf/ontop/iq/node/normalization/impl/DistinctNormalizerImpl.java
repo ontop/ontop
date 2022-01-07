@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -21,8 +20,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     private final CoreSingletons coreSingletons;
 
     @Inject
-    private DistinctNormalizerImpl(IntermediateQueryFactory iqFactory, CoreSingletons coreSingletons) {
-        this.iqFactory = iqFactory;
+    private DistinctNormalizerImpl(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
     }
 
@@ -69,8 +68,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 "did not converge after " + MAX_ITERATIONS);
     }
 
-    public IQTree createNormalizedTree(InjectiveBindingLiftState state, IQTreeCache treeCache, VariableGenerator variableGenerator) {
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+    private IQTree createNormalizedTree(InjectiveBindingLiftState state, IQTreeCache treeCache, VariableGenerator variableGenerator) {
 
         IQTree grandChildTree = state.getGrandChildTree();
         // No need to have a DISTINCT as a grand child
@@ -78,12 +76,12 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 ? ((UnaryIQTree)grandChildTree).getChild()
                 : grandChildTree;
 
-        IQProperties childProperties = (newGrandChildTree == grandChildTree)
-                ? iqFactory.createIQProperties().declareNormalizedForOptimization()
-                : iqFactory.createIQProperties();
+        IQTreeCache childTreeCache = (newGrandChildTree == grandChildTree)
+                ? iqFactory.createIQTreeCache().declareAsNormalizedForOptimizationWithEffect()
+                : iqFactory.createIQTreeCache();
 
         IQTree newChildTree = state.getChildConstructionNode()
-                .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childProperties))
+                .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childTreeCache))
                 // To be normalized again in case a DISTINCT was present as a grand child.
                 // NB: does nothing if it is not the case
                 .map(t -> t.normalizeForOptimization(variableGenerator))
