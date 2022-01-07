@@ -55,7 +55,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
     protected IQTree removeNonRequiredVariables(IQTree tree, ImmutableSet<Variable> variablesToRemove,
                                                 VariableGenerator variableGenerator) {
-        return new VariableRemoverTransformer(variablesToRemove, variableGenerator, coreSingletons).transform(tree);
+        return new VariableRemoverTransformer(variablesToRemove, variableGenerator).transform(tree);
     }
 
     /**
@@ -64,21 +64,19 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    protected static class VariableRemoverTransformer implements IQTreeVisitingTransformer {
+    protected class VariableRemoverTransformer implements IQTreeVisitingTransformer {
         protected final ImmutableSet<Variable> variablesToRemove;
         protected final IntermediateQueryFactory iqFactory;
         protected final SubstitutionFactory substitutionFactory;
-        protected final CoreSingletons coreSingletons;
         protected final VariableGenerator variableGenerator;
         protected final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
         public VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove,
-                                          VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                                          VariableGenerator variableGenerator) {
             this.variablesToRemove = variablesToRemove;
             this.variableGenerator = variableGenerator;
             this.iqFactory = coreSingletons.getIQFactory();
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.coreSingletons = coreSingletons;
             this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         }
 
@@ -86,7 +84,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
          * To be overridden by sub-classes
          */
         protected IQTreeTransformer createNewTransformer(ImmutableSet<Variable> variablesToRemove) {
-            return new VariableRemoverTransformer(variablesToRemove, variableGenerator, coreSingletons);
+            return new VariableRemoverTransformer(variablesToRemove, variableGenerator);
         }
 
         @Override

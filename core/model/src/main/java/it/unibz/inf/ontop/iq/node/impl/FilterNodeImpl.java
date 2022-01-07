@@ -167,14 +167,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
@@ -222,9 +218,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      *  (so as to reduce the recursive pressure)
      */
     @Override
-    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
-        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, treeCache);
     }
 
     @Override

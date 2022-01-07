@@ -331,16 +331,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(IQTree::removeDistincts)
                 .collect(ImmutableCollectors.toList());
 
-        IQProperties newProperties = newChildren.equals(children)
-                ? properties.declareDistinctRemovalWithoutEffect()
-                : properties.declareDistinctRemovalWithEffect();
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
 
-        return iqFactory.createNaryIQTree(this, children, newProperties);
+        return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
     /**
@@ -401,7 +399,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * TODO: refactor
      */
     @Override
-    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.normalizeForOptimization(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
@@ -414,7 +412,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, currentIQProperties);
+                return liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, treeCache);
         }
     }
 
@@ -476,14 +474,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * Has at least two children
      */
     private IQTree liftBindingFromLiftedChildrenAndFlatten(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
-                                                           IQProperties currentIQProperties) {
+                                                           IQTreeCache treeCache) {
 
         /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
-            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
 
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
                 .map(c -> (ConstructionNode) c.getRootNode())
@@ -495,7 +493,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     projectedVariables, tmpNormalizedChildSubstitutions, variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
-            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
         }
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
                 // Cleans up the temporary "normalization"

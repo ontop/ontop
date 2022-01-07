@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -40,7 +39,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 
     IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
-                                    IQProperties currentIQProperties);
+                                    IQTreeCache treeCache);
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
@@ -66,7 +65,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
      */
     void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException;
 
-    IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties);
+    IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQTreeCache treeCache);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild);
 

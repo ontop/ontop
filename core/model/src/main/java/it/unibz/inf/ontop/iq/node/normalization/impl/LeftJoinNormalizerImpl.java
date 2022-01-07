@@ -5,10 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -57,7 +54,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     @Override
     public IQTree normalizeForOptimization(LeftJoinNode ljNode, IQTree initialLeftChild, IQTree initialRightChild,
                                            VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
+                                           IQTreeCache treeCache) {
 
         ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)
                 .flatMap(c -> c.getVariables().stream())
@@ -70,7 +67,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         // The left child cannot be made empty because of the LJ. Therefore this step is enough to detect emptiness.
         state = state.liftLeftChild();
         if (state.isEmpty())
-            return state.createNormalizedTree(currentIQProperties);
+            return state.createNormalizedTree(treeCache);
 
         // Particularly needed when the LJ condition has never been propagated down
         // and no substitution on both side will give an opportunity.
@@ -85,7 +82,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .liftLeftChild();
 
             if (state.equals(newState))
-                return state.createNormalizedTree(currentIQProperties);
+                return state.createNormalizedTree(treeCache);
 
             state = newState;
         }
@@ -119,8 +116,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         protected LJNormalizationState(ImmutableSet<Variable> projectedVariables, IQTree initialLeftChild,
                                        IQTree initialRightChild, Optional<ImmutableExpression> ljCondition,
                                        VariableGenerator variableGenerator) {
-            this(projectedVariables, initialLeftChild, initialRightChild, ljCondition,
-                    ImmutableList.of(), variableGenerator);
+            this(projectedVariables, initialLeftChild, initialRightChild, ljCondition, ImmutableList.of(), variableGenerator);
         }
 
         private LJNormalizationState updateConditionAndRightChild(Optional<ImmutableExpression> newLJCondition,
@@ -370,7 +366,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return leftChild.equals(other.leftChild)
                     && rightChild.equals(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
-                    && ancestors.size() == other.ancestors.size()
                     && ancestors.equals(other.ancestors);
         }
 
@@ -622,11 +617,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return leftChild.isDeclaredAsEmpty();
         }
 
-        public IQTree createNormalizedTree(IQProperties currentIQProperties) {
+        public IQTree createNormalizedTree(IQTreeCache treeCache) {
             if (leftChild.isDeclaredAsEmpty())
                 return iqFactory.createEmptyNode(projectedVariables);
 
-            IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
+            IQTreeCache normalizedProperties = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
             IQTree ljLevelTree;
             if (rightChild.isDeclaredAsEmpty()) {

@@ -51,7 +51,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
     @Override
     public IQTree normalizeForOptimization(InnerJoinNode innerJoinNode, ImmutableList<IQTree> children,
-                                           VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+                                           VariableGenerator variableGenerator, IQTreeCache treeCache) {
         // Non-final
         State state = new State(children, innerJoinNode.getOptionalFilterCondition(), variableGenerator);
 
@@ -62,7 +62,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .liftConditionAndMergeJoins();
 
             if (newState.equals(state))
-                return newState.liftLeftJoinAndCreateNormalizedTree(currentIQProperties);
+                return newState.liftLeftJoinAndCreateNormalizedTree(treeCache);
             state = newState;
         }
 
@@ -277,10 +277,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .orElseGet(() -> updateConditionAndChildren(newCondition, newChildren));
         }
 
-        public IQTree liftLeftJoinAndCreateNormalizedTree(IQProperties currentIQProperties) {
-            IQProperties normalizedIQProperties = currentIQProperties.declareNormalizedForOptimization();
+        public IQTree liftLeftJoinAndCreateNormalizedTree(IQTreeCache treeCache) {
+            IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
-            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedIQProperties);
+            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedTreeCache);
 
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
@@ -321,7 +321,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
 
-        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQProperties normalizedIQProperties) {
+        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
             switch (children.size()) {
                 case 0:
                     return iqFactory.createTrueNode();
@@ -334,7 +334,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return liftLeftJoin()
                             .orElseGet(()-> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(joiningCondition),
-                                    children, normalizedIQProperties));
+                                    children, normalizedTreeCache));
             }
         }
 

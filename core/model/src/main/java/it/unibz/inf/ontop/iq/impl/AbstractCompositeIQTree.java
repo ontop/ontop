@@ -44,12 +44,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     private final TermFactory termFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
-                                      IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
-        this(rootNode, children, convertIQProperties(iqProperties), iqTreeTools, iqFactory, termFactory);
-    }
-
-    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqTreeTools = iqTreeTools;
@@ -65,10 +59,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         // To be computed on-demand
         knownVariables = null;
         hasBeenSuccessfullyValidate = false;
-    }
-
-    private static IQTreeCache convertIQProperties(IQProperties iqProperties) {
-        return iqProperties.convertIQTreeCache();
     }
 
     @Override
@@ -142,10 +132,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }
-
-    protected IQProperties getProperties() {
-        return treeCache.convertIntoIQProperties();
     }
 
     protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(

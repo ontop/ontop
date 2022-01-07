@@ -247,14 +247,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
@@ -311,14 +307,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      *  - Removes itself if useless
      */
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
         QueryNode shrunkChildRoot = shrunkChild.getRootNode();
         if (shrunkChildRoot instanceof ConstructionNode)
-            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, currentIQProperties,
-                    variableGenerator);
+            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, treeCache, variableGenerator);
         else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
@@ -341,7 +336,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
             return newTopConstructionNode
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
-                            currentIQProperties.declareNormalizedForOptimization()))
+                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
                             ? newChild
                             : iqFactory.createUnaryIQTree(
@@ -374,8 +369,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
     }
 
-    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties,
-                                  VariableGenerator variableGenerator) {
+    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQTreeCache treeCache, VariableGenerator variableGenerator) {
 
         IQTree grandChild = childIQ.getChild();
 
@@ -396,7 +390,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
                 ? newGrandChild
-                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, currentIQProperties.declareNormalizedForOptimization());
+                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     public static class PropagationResults<T extends VariableOrGroundTerm> {

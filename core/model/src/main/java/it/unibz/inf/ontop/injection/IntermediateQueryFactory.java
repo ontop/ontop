@@ -72,6 +72,7 @@ public interface IntermediateQueryFactory {
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();
+
     SliceNode createSliceNode(@Assisted("offset") long offset, @Assisted("limit") long limit);
     SliceNode createSliceNode(long offset);
 
@@ -83,7 +84,6 @@ public interface IntermediateQueryFactory {
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQTreeCache treeCache);
-    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
 
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
@@ -92,16 +92,12 @@ public interface IntermediateQueryFactory {
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild,
                                                                 IQTreeCache treeCache);
-    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
-                                                                @Assisted("left") IQTree leftChild,
-                                                                @Assisted("right") IQTree rightChild,
-                                                                IQProperties properties);
 
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQTreeCache treeCache);
-    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 
-    IQProperties createIQProperties();
+    IQTreeCache createIQTreeCache();
+    IQTreeCache createIQTreeCache(boolean isNormalizedForOptimization);
 }

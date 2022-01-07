@@ -25,8 +25,7 @@ public interface IQTreeCache {
      */
     IQTreeCache declareConstraintPushedDownWithEffect();
 
-    IQTreeCache declareDistinctRemovalWithoutEffect();
-    IQTreeCache declareDistinctRemovalWithEffect();
+    IQTreeCache declareDistinctRemoval(boolean noEffect);
 
     IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution);
 }
