@@ -72,6 +72,7 @@ public interface IntermediateQueryFactory {
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();
+
     SliceNode createSliceNode(@Assisted("offset") long offset, @Assisted("limit") long limit);
     SliceNode createSliceNode(long offset);
 
@@ -98,4 +99,5 @@ public interface IntermediateQueryFactory {
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 
     IQTreeCache createIQTreeCache();
+    IQTreeCache createIQTreeCache(boolean isNormalizedForOptimization);
 }

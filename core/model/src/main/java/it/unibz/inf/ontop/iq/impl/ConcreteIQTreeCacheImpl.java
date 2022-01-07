@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.ConcreteIQTreeCache;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -40,9 +42,15 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private Boolean isDistinct;
 
     @Inject
-    protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
+    @AssistedInject
+    private ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
+        this(false, coreSingletons);
+    }
+
+    @AssistedInject
+    private ConcreteIQTreeCacheImpl(@Assisted boolean isNormalizedForOptimization, CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.isNormalizedForOptimization = false;
+        this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = false;
     }
 
@@ -174,7 +182,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     }
 
     @Override
-    public void setUniqueConstraints(ImmutableSet<ImmutableSet<Variable>> uniqueConstraints) {
+    public void setUniqueConstraints(@Nonnull ImmutableSet<ImmutableSet<Variable>> uniqueConstraints) {
         if (this.uniqueConstraints != null)
             throw new IllegalStateException("Unique constraints already present. Only call this method once");
         this.uniqueConstraints = uniqueConstraints;
@@ -195,6 +203,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         VariableNullability newVariableNullability = variableNullability == null
                 ? null
                 : variableNullability.applyFreshRenaming(renamingSubstitution);
+
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
                 : variables.stream()

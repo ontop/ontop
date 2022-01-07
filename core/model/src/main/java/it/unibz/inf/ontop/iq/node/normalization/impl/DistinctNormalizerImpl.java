@@ -76,9 +76,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                 ? ((UnaryIQTree)grandChildTree).getChild()
                 : grandChildTree;
 
-        IQTreeCache childTreeCache = (newGrandChildTree == grandChildTree)
-                ? iqFactory.createIQTreeCache().declareAsNormalizedForOptimizationWithEffect()
-                : iqFactory.createIQTreeCache();
+        IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);
 
         IQTree newChildTree = state.getChildConstructionNode()
                 .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childTreeCache))
