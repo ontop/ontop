@@ -335,7 +335,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI(Y)));
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION3, EXPRESSION5));
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION3);
@@ -359,7 +359,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, X, Z));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Y, Z));
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X, W, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
+                ImmutableSet.of(X, W, Z), SUBSTITUTION_FACTORY.getSubstitution(X, generateURI(Y)));
 
         IQ query2 = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(constructionNode1,

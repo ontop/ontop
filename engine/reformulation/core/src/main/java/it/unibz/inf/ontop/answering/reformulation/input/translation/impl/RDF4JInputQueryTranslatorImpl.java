@@ -223,7 +223,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         rightTranslation.iqTree.getKnownVariables()
                 ));
 
-        InjectiveVar2VarSubstitution sub = generateVariableSubstitution(sharedVars, vGen);
+        InjectiveVar2VarSubstitution sub = substitutionFactory.getInjectiveVar2VarSubstitution(sharedVars.stream(),
+                vGen::generateNewVariableFromVar);
 
         ImmutableExpression ljCond = getLJConditionForDifference(
                 sharedVars,
@@ -572,8 +573,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 )
         );
         // May update the variable generator!!
-        InjectiveVar2VarSubstitution leftRenamingSubstitution = generateVariableSubstitution(toCoalesce, variableGenerator);
-        InjectiveVar2VarSubstitution rightRenamingSubstitution = generateVariableSubstitution(toCoalesce, variableGenerator);
+
+        InjectiveVar2VarSubstitution leftRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(toCoalesce.stream(),
+                variableGenerator::generateNewVariableFromVar);
+
+        InjectiveVar2VarSubstitution rightRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(toCoalesce.stream(),
+                variableGenerator::generateNewVariableFromVar);
 
         ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(toCoalesce.stream()
                 .collect(ImmutableCollectors.toMap(
@@ -656,16 +661,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                         variables,
                                         externalBindings))) :
                 Optional.empty();
-    }
-
-    private InjectiveVar2VarSubstitution generateVariableSubstitution(
-            ImmutableSet<Variable> domain, VariableGenerator variableGenerator) {
-
-        return substitutionFactory.getInjectiveVar2VarSubstitution(domain.stream()
-                .collect(ImmutableCollectors.toMap(
-                        x -> x,
-                        variableGenerator::generateNewVariableFromVar
-                )));
     }
 
     private Optional<ImmutableExpression> generateJoinCondition(InjectiveVar2VarSubstitution leftRenamingSubstitution,
@@ -803,11 +798,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
 
         // Substitution for possibly unbound variables
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(projectedVars.stream()
-                .filter(v -> !subQueryVariables.contains(v))
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> termFactory.getNullConstant())));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getNullSubstitution(projectedVars.stream()
+                .filter(v -> !subQueryVariables.contains(v)));
 
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
@@ -866,17 +858,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ImmutableSubstitution<ImmutableTerm> leftSubstitution = substitutionFactory.getSubstitution(nullOnLeft.stream()
-                .collect(ImmutableCollectors.toMap(
-                        x -> x,
-                        x -> termFactory.getNullConstant()
-                )));
-
-        ImmutableSubstitution<ImmutableTerm> rightSubstitution = substitutionFactory.getSubstitution(nullOnRight.stream()
-                .collect(ImmutableCollectors.toMap(
-                        x -> x,
-                        x -> termFactory.getNullConstant()
-                )));
+        ImmutableSubstitution<ImmutableTerm> leftSubstitution = substitutionFactory.getNullSubstitution(nullOnLeft.stream());
+        ImmutableSubstitution<ImmutableTerm> rightSubstitution = substitutionFactory.getNullSubstitution(nullOnRight.stream());
 
         ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, leftSubstitution);
         ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, rightSubstitution);
@@ -1057,14 +1040,18 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
          *  - non-projected variables from the left operand that are also present in the right operand
          *  - non-projected variables from the right operand that are also present in the left operand
          */
-        InjectiveVar2VarSubstitution leftSubstitution = generateVariableSubstitution(leftKnownVars.stream()
-                .filter(v -> !leftProjVars.contains(v))
-                .filter(rightKnownVars::contains)
-                .collect(ImmutableCollectors.toSet()), vGen);
-        InjectiveVar2VarSubstitution rightSubstitution = generateVariableSubstitution(rightKnownVars.stream()
-                .filter(v -> !rightProjVars.contains(v))
-                .filter(leftKnownVars::contains)
-                .collect(ImmutableCollectors.toSet()), vGen);
+
+        InjectiveVar2VarSubstitution leftSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(leftKnownVars.stream()
+                        .filter(v -> !leftProjVars.contains(v))
+                        .filter(rightKnownVars::contains)
+                        .distinct(),
+                vGen::generateNewVariableFromVar);
+
+        InjectiveVar2VarSubstitution rightSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(rightKnownVars.stream()
+                        .filter(v -> !rightProjVars.contains(v))
+                        .filter(leftKnownVars::contains)
+                        .distinct(),
+                vGen::generateNewVariableFromVar);
 
 
         return new NonProjVarRenamings(leftSubstitution, rightSubstitution);

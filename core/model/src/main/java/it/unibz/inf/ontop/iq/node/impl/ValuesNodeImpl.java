@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -250,15 +249,18 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private ConstructionAndFilterAndValues substituteGroundFunctionalTerms(ImmutableSubstitution<? extends GroundFunctionalTerm> substitution,
                                                                            ConstructionAndFilterAndValues constructionAndFilterAndValues) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
-        InjectiveVar2VarSubstitution renaming = computeVariableRenaming(valuesNode.getVariables(),
-                coreUtilsFactory.createVariableGenerator(valuesNode.getKnownVariables()))
-                .reduceDomainToIntersectionWith(substitution.getDomain());
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(valuesNode.getKnownVariables());
+        InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
+                        valuesNode.getVariables().stream(),
+                        variableGenerator::generateNewVariableFromVar)
+                .filter(substitution.getDomain()::contains);
 
-        return renaming.applyRenaming(substitution).convertIntoBooleanExpression().map(filterCondition ->
-                new ConstructionAndFilterAndValues(
-                constructionAndFilterAndValues.constructionNode,
-                iqFactory.createFilterNode(filterCondition),
-                (ValuesNode) valuesNode.applyFreshRenaming(renaming)))
+        return renaming.applyRenaming(substitution).convertIntoBooleanExpression()
+                .map(filterCondition ->
+                        new ConstructionAndFilterAndValues(
+                                constructionAndFilterAndValues.constructionNode,
+                                iqFactory.createFilterNode(filterCondition),
+                                valuesNode.applyFreshRenaming(renaming)))
                 .orElseGet(() -> new ConstructionAndFilterAndValues(null, null, valuesNode));
     }
 
@@ -365,14 +367,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .constructionNode, iqFactory.createUnaryIQTree(constructionAndFilterAndValues
                     .filterNode, constructionAndFilterAndValues
                         .valuesNode));
-    }
-
-    private InjectiveVar2VarSubstitution computeVariableRenaming(ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
-        ImmutableMap<Variable, Variable> substitutionMap = variables.stream().
-                collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        variableGenerator::generateNewVariableFromVar));
-        return substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap);
     }
 
     @Override

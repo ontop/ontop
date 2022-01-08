@@ -89,13 +89,10 @@ public class ReferenceValueReplacer {
         if (substitution.isEmpty())
             return constructionNode;
 
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> transformTerm(e.getValue(), referenceToInputMap)));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(substitution,
+                        v -> transformTerm(v, referenceToInputMap));
 
-        return iqFactory.createConstructionNode(constructionNode.getVariables(),
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+        return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }
 
     private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {

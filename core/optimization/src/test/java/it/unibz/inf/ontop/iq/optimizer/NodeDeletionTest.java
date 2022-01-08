@@ -76,7 +76,7 @@ public class NodeDeletionTest {
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getNullConstant()));
         IQTree newTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1);
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 

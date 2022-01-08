@@ -273,10 +273,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private IQTree renameSomeUnprojectedVariables(IQTree tree, Set<Variable> nonGroupingVariables) {
             InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    nonGroupingVariables.stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar)));
+                    nonGroupingVariables.stream(), variableGenerator::generateNewVariableFromVar);
 
             return tree.applyFreshRenamingToAllVariables(renaming);
         }

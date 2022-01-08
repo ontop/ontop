@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Singleton
@@ -347,14 +346,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private ImmutableSubstitution<ImmutableTerm> makeRightSpecificDefsProvenanceDependent(
                 ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, Optional<Variable> defaultProvenanceVariable,
                 ImmutableSet<Variable> leftVariables) {
-            return substitutionFactory.getSubstitution(
-                    ascendingSubstitution.getImmutableMap().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> (leftVariables.contains(e.getKey()) || isNullWhenRightIsRejected(e.getValue(), leftVariables))
-                                        ? e.getValue()
-                                        : transformRightSubstitutionValue(e.getValue(), leftVariables, defaultProvenanceVariable)
-                        )));
+            return substitutionFactory.transform(
+                    ascendingSubstitution,
+                    (k, v) -> (leftVariables.contains(k) || isNullWhenRightIsRejected(v, leftVariables))
+                            ? v
+                            : transformRightSubstitutionValue(v, leftVariables, defaultProvenanceVariable));
         }
 
         @Override
@@ -374,14 +370,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return this;
 
             ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+            ImmutableSet<Variable> rightVariables = rightChild.getVariables();
 
             try {
                 ConditionSimplifier.ExpressionAndSubstitution simplificationResults = conditionSimplifier.simplifyCondition(
                         ljCondition, leftVariables,
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
-                ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution = selectDownSubstitution(
-                        simplificationResults.getSubstitution(), rightChild.getVariables());
+                ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
+                        ((ImmutableSubstitution<? extends VariableOrGroundTerm>)
+                                simplificationResults.getSubstitution()).filter(rightVariables::contains);
 
                 if (downSubstitution.isEmpty())
                     return updateConditionAndRightChild(simplificationResults.getOptionalExpression(), rightChild);
@@ -399,14 +397,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         downSubstitution, rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
+                        Sets.union(leftVariables, rightVariables).immutableCopy(),
                         newAscendingSubstitution);
 
                 return updateParentConditionChildren(newParentConstructionNode,
                         simplificationResults.getOptionalExpression(),  leftChild, newRightChild);
 
             } catch (UnsatisfiableConditionException e) {
-                return updateConditionAndRightChild(Optional.empty(), iqFactory.createEmptyNode(rightChild.getVariables()));
+                return updateConditionAndRightChild(Optional.empty(), iqFactory.createEmptyNode(rightVariables));
             }
         }
 
@@ -509,11 +507,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
 
             ImmutableSubstitution<ImmutableTerm> liftableSubstitution = ljCondition
-                    .map(c -> rightSubstitution.getImmutableMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> (ImmutableTerm)termFactory.getIfElseNull(c, e.getValue()))))
-                    .map(substitutionFactory::getSubstitution)
+                    .map(c -> substitutionFactory.<ImmutableTerm, ImmutableTerm>transform(rightSubstitution, v -> termFactory.getIfElseNull(c, v)))
                     .orElse(rightSubstitution);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(
@@ -632,10 +626,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
                         Sets.union(leftVariables, rightSpecificVariables).immutableCopy(),
-                        substitutionFactory.getSubstitution(rightSpecificVariables.stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        v -> v,
-                                        v -> termFactory.getNullConstant()))));
+                        substitutionFactory.getNullSubstitution(rightSpecificVariables.stream()));
                 ljLevelTree = iqFactory.createUnaryIQTree(newParentConstructionNode, leftChild, normalizedProperties);
             }
             else if (rightChild.getRootNode() instanceof TrueNode) {
@@ -671,14 +662,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<? extends ImmutableTerm> selectedSubstitution,
                 Optional<Variable> rightProvenanceVariable, ImmutableSet<Variable> leftVariables) {
 
-            ImmutableMap<Variable, ImmutableTerm> newMap = selectedSubstitution.getImmutableMap().entrySet().stream()
-                    .filter(e -> !leftVariables.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> transformRightSubstitutionValue(e.getValue(), leftVariables,
-                                    rightProvenanceVariable)));
-
-            return substitutionFactory.getSubstitution(newMap);
+            return substitutionFactory.filterAndTransform(selectedSubstitution,
+                    (k, v) -> !leftVariables.contains(k),
+                    v -> transformRightSubstitutionValue(v, leftVariables, rightProvenanceVariable));
         }
 
         private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
@@ -698,19 +684,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .orElseThrow(() -> new MinorOntopInternalBugException("A default provenance variable was needed"));
 
             return termFactory.getIfElseNull(termFactory.getDBIsNotNull(provenanceVariable), value);
-        }
-
-        /**
-         * Selects the entries that can be applied to the right child.
-         *
-         * Useful when there is an equality between two variables defined on the right (otherwise would not converge)
-         */
-        private ImmutableSubstitution<? extends VariableOrGroundTerm> selectDownSubstitution(
-                ImmutableSubstitution<? extends VariableOrGroundTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
-            ImmutableMap<Variable, ? extends VariableOrGroundTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
-                    .filter(e -> rightVariables.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap());
-            return substitutionFactory.getSubstitution(newMap);
         }
 
         private RightProvenance createProvenanceElements(Map.Entry<Variable, Constant> provenanceVariableDefinition,
@@ -776,13 +749,10 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          * Return true when the term is guaranteed to be NULL when the right is rejected
          */
         private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm, ImmutableSet<Variable> leftVariables) {
-            ImmutableSubstitution<Constant> nullSubstitution = substitutionFactory.getSubstitution(
+            ImmutableSubstitution<ImmutableTerm> nullSubstitution = substitutionFactory.getNullSubstitution(
                     immutableTerm.getVariableStream()
                             .filter(v -> !leftVariables.contains(v))
-                            .distinct()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    v -> termFactory.getNullConstant())));
+                            .distinct());
 
             return nullSubstitution.apply(immutableTerm)
                     .simplify()

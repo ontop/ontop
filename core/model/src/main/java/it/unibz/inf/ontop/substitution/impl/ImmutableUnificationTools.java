@@ -105,7 +105,7 @@ public class ImmutableUnificationTools {
             if (canBeRemoved) {
                 return substitutionFactory.getSubstitution();
             }
-            return substitutionFactory.getSubstitution(ImmutableMap.of(leftVariable, rightTerm));
+            return substitutionFactory.getSubstitution(leftVariable, rightTerm);
         }
     }
 
@@ -219,7 +219,7 @@ public class ImmutableUnificationTools {
 
             ImmutableSubstitution<ImmutableTerm> substitution = sourceVariable.equals(targetTerm)
                     ? substitutionFactory.getSubstitution()
-                    : substitutionFactory.getSubstitution(ImmutableMap.of(sourceVariable, targetTerm));
+                    : substitutionFactory.getSubstitution(sourceVariable, targetTerm);
 
             return Optional.of(substitution);
         }
@@ -238,8 +238,7 @@ public class ImmutableUnificationTools {
                     return Optional.empty();
                 }
                 else {
-                    ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                            ImmutableMap.of(targetVariable, sourceTerm));
+                    ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetVariable, sourceTerm);
                     return Optional.of(substitution);
                 }
             }
@@ -257,8 +256,7 @@ public class ImmutableUnificationTools {
         else if(sourceTerm instanceof Constant) {
             if (targetTerm instanceof Variable) {
                 Variable targetVariable = (Variable) targetTerm;
-                ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                        ImmutableMap.of(targetVariable, sourceTerm));
+                ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetVariable, sourceTerm);
                 return Optional.of(substitution);
             }
             else if (sourceTerm.equals(targetTerm)) {

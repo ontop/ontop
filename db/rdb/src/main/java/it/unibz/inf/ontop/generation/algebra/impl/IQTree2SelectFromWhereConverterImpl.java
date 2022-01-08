@@ -95,7 +95,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s2 -> s2.composeWith(c.getSubstitution()).reduceDomainToIntersectionWith(c.getVariables()))
+                        .map(s2 -> s2.composeWith(c.getSubstitution()).filter(c.getVariables()::contains))
                         .orElseGet(c::getSubstitution))
                 .orElseGet(() -> aggregationNode
                         .map(AggregationNode::getSubstitution)

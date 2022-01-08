@@ -97,14 +97,11 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         if (!aggregationNode.getGroupingVariables().isEmpty())
             return iqFactory.createEmptyNode(projectedVariables);
 
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = aggregationNode.getSubstitution().getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> simplifyEmptyAggregate(e.getValue())));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(
+                aggregationNode.getSubstitution(),
+                this::simplifyEmptyAggregate);
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                projectedVariables,
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
         return iqFactory.createUnaryIQTree(constructionNode, iqFactory.createTrueNode(), normalizedTreeCache);
     }
@@ -182,20 +179,19 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     groupingVariables).immutableCopy();
 
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
-                    .reduceDomainToIntersectionWith(nonGroupingVariables);
+                    .filter(nonGroupingVariables::contains);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
                             nonGroupingSubstitution.composeWith(aggregationSubstitution)
-                                    .reduceDomainToIntersectionWith(aggregationSubstitution.getDomain());
+                                    .filter(aggregationSubstitution.getDomain()::contains);
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
                     groupingVariables,
                     newAggregationSubstitution);
 
             // Nullable
-            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution()
-                    .reduceDomainToIntersectionWith(groupingVariables))
+            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().filter(groupingVariables::contains))
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s))
                     .orElse(null);
@@ -254,8 +250,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     ancestors.stream(),
                     // Ancestors of the sub-state modified so as to project the aggregation variables
                     subStateAncestors.stream()
-                            .map(a -> iqFactory.createConstructionNode(Sets.union(a.getVariables(),
-                                    aggregateVariables).immutableCopy(), a.getSubstitution())))
+                            .map(a -> iqFactory.createConstructionNode(
+                                    Sets.union(a.getVariables(), aggregateVariables).immutableCopy(), a.getSubstitution())))
                     .collect(ImmutableCollectors.toList());
 
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
@@ -263,7 +259,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
                             (s, a) -> (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                                    a.getSubstitution().composeWith(s).reduceDomainToIntersectionWith(aggregateVariables),
+                                    a.getSubstitution().composeWith(s).filter(aggregateVariables::contains),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });

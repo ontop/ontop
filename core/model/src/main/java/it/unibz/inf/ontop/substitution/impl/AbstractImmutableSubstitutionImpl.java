@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -178,7 +180,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
             ImmutableMap<Variable, T> orientedMap = Stream.concat(
                     localMap.entrySet().stream()
-                            /**
+                            /*
                              * Removes entries that will be reversed
                              */
                             .filter(e -> !Optional.ofNullable(renamingMap.get(e.getValue()))
@@ -196,13 +198,10 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
-        if (restrictingDomain.containsAll(getDomain()))
-            return this;
-        return substitutionFactory.getSubstitution(
-                this.getImmutableMap().entrySet().stream()
-                        .filter(e -> restrictingDomain.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
+    public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {
+        return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
+                .filter(e -> filter.test(e.getKey()))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override
@@ -216,24 +215,18 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     private ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
-        return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> variableNullability
-                                .map(n -> e.getValue().simplify(n))
-                                .orElseGet(() -> e.getValue().simplify()))));
+        return substitutionFactory.transform(this,
+                        v -> variableNullability
+                                .map(v::simplify)
+                                .orElseGet(v::simplify));
     }
 
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {
-        ImmutableMap<Variable, S> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> type.isInstance(e.getValue()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> type.cast(e.getValue())));
-
-        return substitutionFactory.getSubstitution(newMap);
+        return substitutionFactory.filterAndTransform(this,
+                (k, v) -> type.isInstance(v),
+                type::cast);
     }
 
     @Override

@@ -347,14 +347,11 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = renamingSubstitution.getImmutableMap().entrySet().stream()
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> termFactory.getIfElseNull(condition, e.getValue())
-                ));
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.filterAndTransform(renamingSubstitution,
+                        (k, v) -> projectedVariables.contains(k),
+                        v -> termFactory.getIfElseNull(condition, v));
 
-        return iqFactory.createConstructionNode(projectedVariables, substitutionFactory.getSubstitution(substitutionMap));
+        return iqFactory.createConstructionNode(projectedVariables, substitution);
     }
 
 

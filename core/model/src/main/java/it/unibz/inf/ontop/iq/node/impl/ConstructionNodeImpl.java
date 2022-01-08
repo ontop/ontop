@@ -241,7 +241,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return childDefs.stream()
                 .map(childDef -> childDef.composeWith(substitution))
-                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(s -> s.filter(projectedVariables::contains))
                 .map(s -> s.getFragment(NonVariableTerm.class))
                 .collect(ImmutableCollectors.toSet());
     }

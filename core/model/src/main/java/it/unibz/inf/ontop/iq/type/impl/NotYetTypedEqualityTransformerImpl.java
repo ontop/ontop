@@ -65,12 +65,8 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             IQTree newChild = transform(child);
 
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                    initialSubstitution.getImmutableMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> transformTerm(e.getValue(), child))));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(
+                    initialSubstitution, v -> transformTerm(v, child));
 
             return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                     ? tree
@@ -84,12 +80,8 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             IQTree newChild = transform(child);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
-
-            ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = substitutionFactory.getSubstitution(
-                    initialSubstitution.getImmutableMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> transformFunctionalTerm(e.getValue(), child))));
+            ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = substitutionFactory.transform(
+                    initialSubstitution, v -> transformFunctionalTerm(v, child));
 
             return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                     ? tree

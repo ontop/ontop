@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Var2VarSubstitution that is injective
@@ -38,5 +39,5 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
 
     @Override
-    InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
+    InjectiveVar2VarSubstitution filter(Predicate<Variable> filter);
 }

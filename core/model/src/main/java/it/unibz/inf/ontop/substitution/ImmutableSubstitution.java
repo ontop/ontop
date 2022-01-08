@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.substitution;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -64,10 +66,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
-    /**
-     * Reduces the substitution's domain to its intersection with the argument domain
-     */
-    ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
+    ImmutableSubstitution<T> filter(Predicate<Variable> filter);
+
 
     ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
 

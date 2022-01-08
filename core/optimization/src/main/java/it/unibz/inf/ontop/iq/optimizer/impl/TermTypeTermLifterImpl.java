@@ -16,11 +16,9 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -65,19 +63,10 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
                 .map(ConstructionNode::getSubstitution)
-                .map(this::makeRDFTermTypeFunctionSymbolsSimplifiable)
+                .map(substitution -> substitutionFactory.transform(substitution, this::makeRDFTermTypeFunctionSymbolsSimplifiable))
                 .map(s -> iqFactory.createConstructionNode(tree.getVariables(), s))
                 .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree) tree).getChild()))
                 .orElse(tree);
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> makeRDFTermTypeFunctionSymbolsSimplifiable(
-            ImmutableSubstitution<ImmutableTerm> substitution) {
-        return substitutionFactory.getSubstitution(
-                substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> makeRDFTermTypeFunctionSymbolsSimplifiable(e.getValue()))));
     }
 
     /**

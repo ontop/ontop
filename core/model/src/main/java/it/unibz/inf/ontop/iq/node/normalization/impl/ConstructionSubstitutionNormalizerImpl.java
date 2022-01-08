@@ -42,7 +42,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     public ConstructionSubstitutionNormalization normalizeSubstitution(
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.reduceDomainToIntersectionWith(projectedVariables);
+        ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.filter(projectedVariables::contains);
 
         Var2VarSubstitution downRenamingSubstitution = substitutionFactory.getVar2VarSubstitution(
                 reducedAscendingSubstitution.getImmutableMap().entrySet().stream()
@@ -57,7 +57,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
                 .composeWith(reducedAscendingSubstitution)
-                .reduceDomainToIntersectionWith(projectedVariables)
+                .filter(projectedVariables::contains)
                 .simplifyValues();
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,

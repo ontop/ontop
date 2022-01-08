@@ -432,7 +432,7 @@ public class IQSyntacticEquivalenceCheckerTest {
     @Test
     public void testConstructionNodeDifferentSubstitutions() {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getNullConstant()));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Z));
 

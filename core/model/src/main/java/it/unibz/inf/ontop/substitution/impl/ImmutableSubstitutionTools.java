@@ -53,8 +53,7 @@ public class ImmutableSubstitutionTools {
                 return Optional.empty();
             }
 
-            ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                    ImmutableMap.of(sourceVariable, targetTerm));
+            ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(sourceVariable, targetTerm);
             return Optional.of(substitution);
         }
         /*
@@ -148,11 +147,7 @@ public class ImmutableSubstitutionTools {
 
     ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
             ImmutableSubstitution<ImmutableTerm> substitution) {
-        ImmutableMap<Variable, VariableOrGroundTerm> map = substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> GroundTermTools.convertIntoVariableOrGroundTerm(e.getValue())));
-        return substitutionFactory.getSubstitution(map);
+        return substitutionFactory.transform(substitution, GroundTermTools::convertIntoVariableOrGroundTerm);
     }
 
     /**

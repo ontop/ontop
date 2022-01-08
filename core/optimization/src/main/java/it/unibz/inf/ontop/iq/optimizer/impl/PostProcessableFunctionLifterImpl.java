@@ -279,10 +279,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                     originalDefinition.getVariableStream()
                             .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
-                            .distinct()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar)));
+                            .distinct(),
+                    variableGenerator::generateNewVariableFromVar);
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 
@@ -299,7 +297,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
                     .flatMap(s -> s.union(positionSubstitution))
-                    .map(s -> s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
+                    .map(s -> s.filter(projectedVariablesBeforeRenaming::contains))
                     .orElse(positionSubstitution);
 
 

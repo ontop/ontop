@@ -138,11 +138,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .collect(ImmutableCollectors.toSet());
 
             return children.stream().sequential()
-                    .map(t -> computeSubstitution(
-                            repeatedVariables,
-                            children,
-                            t
-                    ))
+                    .map(t -> substitutionFactory.getInjectiveVar2VarSubstitution(
+                                        t.getVariables().stream()
+                                                .filter(repeatedVariables::contains)
+                                                .filter(v -> !isFirstOcc(v, children, t)),
+                                        variableGenerator::generateNewVariableFromVar))
                     .collect(ImmutableCollectors.toList());
         }
 
@@ -151,17 +151,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             return substitutions.stream().sequential()
                     .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s))
                     .collect(ImmutableCollectors.toList());
-        }
-
-        private InjectiveVar2VarSubstitution computeSubstitution(ImmutableSet<Variable> repeatedVars, ImmutableList<IQTree> children, IQTree tree) {
-            return substitutionFactory.getInjectiveVar2VarSubstitution(
-                    tree.getVariables().stream()
-                            .filter(repeatedVars::contains)
-                            .filter(v -> !isFirstOcc(v, children, tree))
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar
-                            )));
         }
 
         private boolean isFirstOcc(Variable variable, ImmutableList<IQTree> children, IQTree tree) {
