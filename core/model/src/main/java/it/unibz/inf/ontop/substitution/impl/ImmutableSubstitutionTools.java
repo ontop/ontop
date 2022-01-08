@@ -145,11 +145,6 @@ public class ImmutableSubstitutionTools {
         return Optional.of(unifier);
     }
 
-    ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
-            ImmutableSubstitution<ImmutableTerm> substitution) {
-        return substitutionFactory.transform(substitution, GroundTermTools::convertIntoVariableOrGroundTerm);
-    }
-
     /**
      * Prevents priority variables to be renamed into non-priority variables.
      *

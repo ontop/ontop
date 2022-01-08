@@ -97,8 +97,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         if (!aggregationNode.getGroupingVariables().isEmpty())
             return iqFactory.createEmptyNode(projectedVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(
-                aggregationNode.getSubstitution(),
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution().transform(
                 this::simplifyEmptyAggregate);
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
@@ -306,7 +305,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // The simplification may do the "lifting" inside the functional term (having a non-aggregation
             // functional term above the aggregation one)
             ImmutableSubstitution<ImmutableTerm> simplifiedSubstitution = aggregationSubstitution
-                    .simplifyValues(variableNullability);
+                    .transform(v -> v.simplify(variableNullability));
 
             ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionMap =
                     simplifiedSubstitution.getImmutableMap().entrySet().stream()

@@ -58,7 +58,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
                 .composeWith(reducedAscendingSubstitution)
                 .filter(projectedVariables::contains)
-                .simplifyValues();
+                .transform(v -> v.simplify());
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);

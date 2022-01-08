@@ -27,13 +27,8 @@ public interface SubstitutionFactory {
 
    ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables);
 
-    <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(ImmutableSubstitution<T1> substitution, Function<T1, T2> function);
-
-    <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(ImmutableSubstitution<T1> substitution, BiFunction<Variable, T1, T2> function);
-
-    <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> filterAndTransform(ImmutableSubstitution<T1> substitution, BiPredicate<Variable, T1> filter, Function<T1, T2> function);
-
     Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
+
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer);

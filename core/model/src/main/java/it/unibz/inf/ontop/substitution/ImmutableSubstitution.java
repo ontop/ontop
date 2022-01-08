@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.substitution;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
@@ -68,10 +70,12 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     ImmutableSubstitution<T> filter(Predicate<Variable> filter);
 
+    ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter);
 
-    ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
+    <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(Function<T, T2> function);
 
-    ImmutableSubstitution<ImmutableTerm> simplifyValues();
+    <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(BiFunction<Variable, T, T2> function);
+
 
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 }

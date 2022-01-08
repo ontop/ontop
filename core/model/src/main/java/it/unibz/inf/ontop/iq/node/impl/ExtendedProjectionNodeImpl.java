@@ -140,8 +140,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.filter(vC::contains);
 
-        ImmutableSubstitution<NonFunctionalTerm> deltaC = extractDescendingSubstitution(newEta,
-                v -> v, thetaC, thetaCBar, projectedVariables);
+        ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta
+                .filter((k, v) -> !thetaC.isDefining(k) && ((!thetaCBar.isDefining(k)) || projectedVariables.contains(k)));
 
         /* ---------------
          * deltaC to thetaF
@@ -164,10 +164,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         )));
 
 
-        ImmutableSubstitution<ImmutableTerm> gamma = extractDescendingSubstitution(deltaC,
-                thetaFBar::apply,
-                thetaF, thetaFBar,
-                projectedVariables);
+        ImmutableSubstitution<ImmutableTerm> gamma = deltaC
+                .filter((k, v) -> !thetaF.isDefining(k) && ((!thetaFBar.isDefining(k)) || projectedVariables.contains(k)))
+                .transform(thetaFBar::apply);
+
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
 
         Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
@@ -199,10 +199,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
-        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.filterAndTransform(
-                        tauF,
-                        (k, v) -> !thetaBar.isDefining(k)  && !tauCPropagationResults.delta.isDefining(k),
-                        v -> (VariableOrGroundTerm)v)
+        ImmutableSubstitution<VariableOrGroundTerm> delta = tauF
+                .filter((k, v) -> !thetaBar.isDefining(k)  && !tauCPropagationResults.delta.isDefining(k))
+                .transform(v -> (VariableOrGroundTerm)v)
                 .composeWith2(tauCPropagationResults.delta);
 
         ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.filter(k -> !tauF.isDefining(k));
@@ -255,23 +254,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             throw new EmptyTreeException();
 
         return descendingConstraintResults.getExpression();
-    }
-
-    /**
-     * TODO: find a better name
-     *
-     */
-    private <T extends ImmutableTerm> ImmutableSubstitution<T> extractDescendingSubstitution(
-            ImmutableSubstitution<? extends NonFunctionalTerm> substitution,
-            java.util.function.Function<NonFunctionalTerm, T> valueTransformationFct,
-            ImmutableSubstitution<? extends ImmutableTerm> partialTheta,
-            ImmutableSubstitution<? extends ImmutableTerm> newPartialTheta,
-            ImmutableSet<Variable> originalProjectedVariables) {
-
-        return substitutionFactory.filterAndTransform(
-                substitution,
-                (k, v) -> !partialTheta.isDefining(k) && ((!newPartialTheta.isDefining(k)) || originalProjectedVariables.contains(k)),
-                valueTransformationFct::apply);
     }
 
     @Override

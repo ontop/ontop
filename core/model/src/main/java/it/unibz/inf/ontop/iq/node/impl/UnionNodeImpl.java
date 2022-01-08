@@ -486,7 +486,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
                 .map(c -> (ConstructionNode) c.getRootNode())
                 .map(ConstructionNode::getSubstitution)
-                .map(substitution -> substitutionFactory.transform(substitution, this::normalizeNullAndRDFConstants))
+                .map(substitution -> substitution.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
@@ -497,7 +497,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
                 // Cleans up the temporary "normalization"
-                mergedSubstitution.simplifyValues());
+                mergedSubstitution.transform(v -> v.simplify()));
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
         UnionNode newUnionNode = iqFactory.createUnionNode(unionVariables);
@@ -685,7 +685,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                     // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
-                    substitutionPair.bindings.simplifyValues());
+                    substitutionPair.bindings.transform(v -> v.simplify()));
 
         return substitutionPair.bindings.isEmpty()
                 ? newChild

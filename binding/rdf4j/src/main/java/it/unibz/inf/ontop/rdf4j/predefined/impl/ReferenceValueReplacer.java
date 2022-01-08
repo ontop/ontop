@@ -89,8 +89,7 @@ public class ReferenceValueReplacer {
         if (substitution.isEmpty())
             return constructionNode;
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(substitution,
-                        v -> transformTerm(v, referenceToInputMap));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform(v -> transformTerm(v, referenceToInputMap));
 
         return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }

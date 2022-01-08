@@ -74,34 +74,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(ImmutableSubstitution<T1> substitution, Function<T1, T2> function) {
-        return new ImmutableSubstitutionImpl<>(substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> function.apply(e.getValue()))),
-                atomFactory, termFactory, this);
-    }
-
-    @Override
-    public <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(ImmutableSubstitution<T1> substitution, BiFunction<Variable, T1, T2> function) {
-        return new ImmutableSubstitutionImpl<>(substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> function.apply(e.getKey(), e.getValue()))),
-                atomFactory, termFactory, this);
-    }
-
-    @Override
-    public <T1 extends ImmutableTerm, T2 extends ImmutableTerm> ImmutableSubstitution<T2> filterAndTransform(ImmutableSubstitution<T1> substitution, BiPredicate<Variable, T1> filter, Function<T1, T2> function) {
-        return new ImmutableSubstitutionImpl<>(substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> filter.test(e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> function.apply(e.getValue()))),
-                atomFactory, termFactory, this);
-    }
-
-    @Override
     public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
         return new Var2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory, this);
     }

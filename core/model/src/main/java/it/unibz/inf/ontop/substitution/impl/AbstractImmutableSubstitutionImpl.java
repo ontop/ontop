@@ -16,7 +16,9 @@ import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -169,7 +171,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
 
 
-        /**
+        /*
          * Applies the renaming
          */
         if (renamingMap.isEmpty()) {
@@ -199,35 +201,42 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {
-        return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
+        return constructNewSubstitution(getImmutableMap().entrySet().stream()
                 .filter(e -> filter.test(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability) {
-        return simplifyValues(Optional.of(variableNullability));
+    public ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter) {
+        return constructNewSubstitution(getImmutableMap().entrySet().stream()
+                .filter(e -> filter.test(e.getKey(), e.getValue()))
+                .collect(ImmutableCollectors.toMap()));
     }
-
-    @Override
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues() {
-        return simplifyValues(Optional.empty());
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
-        return substitutionFactory.transform(this,
-                        v -> variableNullability
-                                .map(v::simplify)
-                                .orElseGet(v::simplify));
-    }
-
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {
-        return substitutionFactory.filterAndTransform(this,
-                (k, v) -> type.isInstance(v),
-                type::cast);
+        return filter((k, v) -> type.isInstance(v)).transform(type::cast);
     }
+
+    @Override
+    public <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(Function<T, T2> function) {
+        return new ImmutableSubstitutionImpl<>(getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> function.apply(e.getValue()))),
+                atomFactory, termFactory, substitutionFactory);
+    }
+
+    @Override
+    public <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(BiFunction<Variable, T, T2> function) {
+        return new ImmutableSubstitutionImpl<>(getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> function.apply(e.getKey(), e.getValue()))),
+                atomFactory, termFactory, substitutionFactory);
+    }
+
+
 
     @Override
     public  Optional<ImmutableExpression> convertIntoBooleanExpression() {

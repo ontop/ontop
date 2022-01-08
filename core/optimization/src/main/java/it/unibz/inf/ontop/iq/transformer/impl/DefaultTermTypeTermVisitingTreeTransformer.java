@@ -120,7 +120,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .map(n -> (ConstructionNode)n)
                 .map(ConstructionNode::getSubstitution)
                 .filter(s -> !s.isEmpty())
-                .map(substitution -> substitutionFactory.transform(substitution, this::replaceTypeTermConstants))
+                .map(s -> s.transform(this::replaceTypeTermConstants))
                 .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                 .filter(n -> !n.equals(child.getRootNode()))
                 .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
@@ -195,7 +195,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.transform(initialConstructionNode.getSubstitution(),
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().transform(
                 (k, v) -> Optional.ofNullable(typeFunctionSymbolMap.get(k))
                         // RDF type definition
                         .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(v, functionSymbol))

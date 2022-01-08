@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -195,7 +196,7 @@ public class ImmutableUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
         return optionalMGUS
-                .map(substitutionTools::convertIntoVariableOrGroundTermSubstitution);
+                .map(substitution -> substitution.transform(GroundTermTools::convertIntoVariableOrGroundTerm));
     }
 
 
