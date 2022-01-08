@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -26,123 +23,6 @@ public class ImmutableSubstitutionTools {
     @Inject
     private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory) {
         this.substitutionFactory = substitutionFactory;
-    }
-
-
-    /**
-     * Returns a substitution theta (if it exists) such as :
-     *    theta(s) = t
-     *
-     * with
-     *    s : source term
-     *    t: target term
-     *
-     */
-    public Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitution(ImmutableTerm sourceTerm,
-                                                                                                   ImmutableTerm targetTerm) {
-        /*
-         * Variable
-         */
-        if (sourceTerm instanceof Variable) {
-            Variable sourceVariable = (Variable) sourceTerm;
-
-            // Constraint
-            if ((!sourceVariable.equals(targetTerm))
-                    && (targetTerm instanceof ImmutableFunctionalTerm)
-                    && ((ImmutableFunctionalTerm)targetTerm).getVariables().contains(sourceVariable)) {
-                return Optional.empty();
-            }
-
-            ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(sourceVariable, targetTerm);
-            return Optional.of(substitution);
-        }
-        /*
-         * Functional term
-         */
-        else if (sourceTerm instanceof ImmutableFunctionalTerm) {
-            if (targetTerm instanceof ImmutableFunctionalTerm) {
-                return computeUnidirectionalSubstitutionOfFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
-                        (ImmutableFunctionalTerm) targetTerm);
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-        /*
-         * Constant
-         */
-        else if(sourceTerm.equals(targetTerm)) {
-            return Optional.of(substitutionFactory.getSubstitution());
-        }
-        else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitutionOfFunctionalTerms(
-            ImmutableFunctionalTerm sourceFunctionalTerm, ImmutableFunctionalTerm targetFunctionalTerm) {
-
-        /*
-         * Function symbol equality
-         */
-        if (!sourceFunctionalTerm.getFunctionSymbol().equals(
-                targetFunctionalTerm.getFunctionSymbol())) {
-            return Optional.empty();
-        }
-
-
-        /*
-         * Source is ground term
-         */
-        if (sourceFunctionalTerm.isGround()) {
-            if (sourceFunctionalTerm.equals(targetFunctionalTerm)) {
-                return Optional.of(substitutionFactory.getSubstitution());
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getTerms();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getTerms();
-
-        /*
-         * Arity equality
-         */
-        int sourceArity = sourceChildren.size();
-        if (sourceArity != targetChildren.size()) {
-            return Optional.empty();
-        }
-
-        /*
-         * Children
-         */
-        // Non-final
-        ImmutableSubstitution<ImmutableTerm> unifier = substitutionFactory.getSubstitution();
-        for(int i=0; i < sourceArity ; i++) {
-
-            /*
-             * Recursive call
-             */
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeUnidirectionalSubstitution(
-                    sourceChildren.get(i), targetChildren.get(i));
-
-            if (!optionalChildUnifier.isPresent())
-                return Optional.empty();
-
-            ImmutableSubstitution<ImmutableTerm> childUnifier = optionalChildUnifier.get();
-
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalMergedUnifier = unifier.union(childUnifier);
-            if (optionalMergedUnifier.isPresent()) {
-                unifier = optionalMergedUnifier.get();
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-
-        // Present optional
-        return Optional.of(unifier);
     }
 
     /**

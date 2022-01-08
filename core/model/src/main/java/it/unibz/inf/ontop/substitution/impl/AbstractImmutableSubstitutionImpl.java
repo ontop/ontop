@@ -215,7 +215,12 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {
-        return filter((k, v) -> type.isInstance(v)).transform(type::cast);
+        return new ImmutableSubstitutionImpl<>(getImmutableMap().entrySet().stream()
+                .filter(e -> type.isInstance(e.getValue()))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> type.cast(e.getValue()))),
+                atomFactory, termFactory, substitutionFactory);
     }
 
     @Override

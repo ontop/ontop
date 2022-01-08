@@ -23,15 +23,12 @@ import java.util.*;
 public class ImmutableUnificationTools {
 
     private final SubstitutionFactory substitutionFactory;
-    private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
 
     @Inject
     private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools,
                                       UnifierUtilities unifierUtilities) {
         this.substitutionFactory = substitutionFactory;
-        this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
     }
 
@@ -168,9 +165,9 @@ public class ImmutableUnificationTools {
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
                                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
         if (substitution1.isEmpty())
-            return Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution2);
+            return Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution2);
         else if (substitution2.isEmpty())
-            Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution1);
+            Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution1);
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
@@ -204,7 +201,7 @@ public class ImmutableUnificationTools {
      * Computes a MGU that reuses as much as possible the variables from the target part.
      *
      */
-    public Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
+    private Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
                                                                                     ImmutableTerm targetTerm) {
         /*
          * Variable

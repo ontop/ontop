@@ -21,16 +21,12 @@ import java.util.stream.Stream;
 @Singleton
 public class ConstructionNodeTools {
 
-
-    private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
     private final ImmutableSubstitutionTools substitutionTools;
 
     @Inject
-    private ConstructionNodeTools(SubstitutionFactory substitutionFactory,
-                                  ImmutableUnificationTools unificationTools,
+    private ConstructionNodeTools(ImmutableUnificationTools unificationTools,
                                   ImmutableSubstitutionTools substitutionTools) {
-        this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
     }
@@ -73,11 +69,11 @@ public class ConstructionNodeTools {
          * Due to the current implementation of MGUS, the normalization should have no effect
          * (already in a normal form). Here for safety.
          */
-        ImmutableSubstitution<? extends ImmutableTerm> normalizedEta = substitutionTools.prioritizeRenaming(eta, newV);
+        ImmutableSubstitution<ImmutableTerm> normalizedEta = substitutionTools.prioritizeRenaming(eta, newV);
 
-        ImmutableSubstitution<? extends ImmutableTerm> newTheta = normalizedEta.filter(newV::contains);
+        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.filter(newV::contains);
 
-        ImmutableSubstitution<? extends ImmutableTerm> delta = normalizedEta
+        ImmutableSubstitution<ImmutableTerm> delta = normalizedEta
                 .filter(k -> !formerTheta.isDefining(k) && (!newTheta.isDefining(k) || formerV.contains(k)));
 
         return new NewSubstitutionPair(newTheta, delta);
@@ -88,11 +84,11 @@ public class ConstructionNodeTools {
      * TODO: find a better name
      */
     public static class NewSubstitutionPair {
-        public final ImmutableSubstitution<? extends ImmutableTerm> bindings;
-        public final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
+        public final ImmutableSubstitution<ImmutableTerm> bindings;
+        public final ImmutableSubstitution<ImmutableTerm> propagatedSubstitution;
 
-        private NewSubstitutionPair(ImmutableSubstitution<? extends ImmutableTerm> bindings,
-                                    ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
+        private NewSubstitutionPair(ImmutableSubstitution<ImmutableTerm> bindings,
+                                    ImmutableSubstitution<ImmutableTerm> propagatedSubstitution) {
             this.bindings = bindings;
             this.propagatedSubstitution = propagatedSubstitution;
         }

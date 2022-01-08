@@ -677,8 +677,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
         // this construction node
-        ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
-                (ImmutableSubstitution<? extends VariableOrGroundTerm>) substitutionPair.propagatedSubstitution;
+        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
+                substitutionPair.propagatedSubstitution.transform(v -> (VariableOrGroundTerm)v);
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
