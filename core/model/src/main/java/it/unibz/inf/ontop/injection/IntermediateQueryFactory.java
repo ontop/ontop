@@ -98,6 +98,15 @@ public interface IntermediateQueryFactory {
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 
+    /**
+     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
+     */
+    @Deprecated
     IQTreeCache createIQTreeCache();
+
+    /**
+     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
+     */
+    @Deprecated
     IQTreeCache createIQTreeCache(boolean isNormalizedForOptimization);
 }
