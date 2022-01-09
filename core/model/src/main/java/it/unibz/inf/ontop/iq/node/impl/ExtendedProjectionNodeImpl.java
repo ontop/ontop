@@ -151,7 +151,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> deltaC.apply(e.getKey()),
+                        e -> deltaC.applyToVariable(e.getKey()),
                         e -> deltaC.applyToFunctionalTerm(e.getValue())));
 
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(

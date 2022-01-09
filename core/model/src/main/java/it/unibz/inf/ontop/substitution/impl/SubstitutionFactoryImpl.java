@@ -64,6 +64,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             throw new IllegalArgumentException("lists of different lengths");
 
         ImmutableMap<Variable, T> map = IntStream.range(0, variables.size())
+                .filter(i -> !variables.get(i).equals(values.get(i)))
                 .boxed()
                 .collect(ImmutableCollectors.toMap(variables::get, values::get));
 

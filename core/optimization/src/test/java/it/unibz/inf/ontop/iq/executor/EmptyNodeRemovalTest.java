@@ -43,7 +43,7 @@ public class EmptyNodeRemovalTest {
     public void testUnionRemoval1NoTopSubstitution() {
         ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution();
         ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false)));
+                X, generateURI1(A, false), Y, generateURI1(B, false));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(PROJECTION_ATOM.getVariables());
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
@@ -60,9 +60,9 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testUnionRemoval2() {
         ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(X, generateURI1(A, false)));
+                X, generateURI1(A, false));
         ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(Y, generateURI1(B, false)));
+                Y, generateURI1(B, false));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(Y, A));
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
@@ -83,9 +83,8 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testUnionRemoval3() {
         ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false)));
-        ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of());
+                X, generateURI1(A, false), Y, generateURI1(B, false));
+        ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B));
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
@@ -101,7 +100,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testUnionNoNullPropagation() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         ImmutableSet<Variable> subQueryProjectedVariables = ImmutableSet.of(A, B);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(subQueryProjectedVariables);
@@ -115,7 +114,7 @@ public class EmptyNodeRemovalTest {
                                 IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, DATA_NODE_2, emptyNode)))));
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(subQueryProjectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(B, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(B, NULL));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -152,7 +151,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testLJ1() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, true)));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(B));
@@ -163,7 +162,7 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode,
@@ -176,7 +175,7 @@ public class EmptyNodeRemovalTest {
     public void testLJ2() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A));
 
@@ -191,7 +190,7 @@ public class EmptyNodeRemovalTest {
     public void testLJ3() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         LeftJoinNode topLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
         LeftJoinNode rightLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -214,7 +213,7 @@ public class EmptyNodeRemovalTest {
     public void testLJ4() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, true)));
 
         LeftJoinNode topLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
         LeftJoinNode rightLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -228,7 +227,7 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, DATA_NODE_2));
@@ -239,7 +238,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testJoin1() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
@@ -254,7 +253,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testJoin2() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A));
@@ -273,7 +272,7 @@ public class EmptyNodeRemovalTest {
     public void testJoin3() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of());
@@ -314,7 +313,7 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, false)));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -332,8 +331,7 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -352,8 +350,8 @@ public class EmptyNodeRemovalTest {
                                                                 boolean isVariableForBuildingYNullable) {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(variableForBuildingY, isVariableForBuildingYNullable))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false),
+                        Y, generateURI1(variableForBuildingY, isVariableForBuildingYNullable)));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -369,8 +367,8 @@ public class EmptyNodeRemovalTest {
     public void testFilter1() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(B, false))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false),
+                        Y, generateURI1(B, false)));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C));
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -387,8 +385,8 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testFilter2() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false),
+                        Y, generateURI1(B, true)));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNull(C));
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -400,8 +398,8 @@ public class EmptyNodeRemovalTest {
                                 IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, DATA_NODE_2, emptyNode))));
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false),
+                        Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, DATA_NODE_2));
@@ -413,8 +411,8 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testComplexTreeWithJoinCondition() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false),
+                        Y, generateURI1(B, true)));
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode();
         InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBIsNotNull(C));
@@ -430,8 +428,7 @@ public class EmptyNodeRemovalTest {
                                         IQ_FACTORY.createBinaryNonCommutativeIQTree(lj2, DATA_NODE_2, emptyNode))))));
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, DATA_NODE_2));
@@ -445,8 +442,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testLJRemovalDueToNull1()  {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, true)));
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
@@ -459,8 +455,7 @@ public class EmptyNodeRemovalTest {
                                 createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B1)))));
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, DATA_NODE_2));
@@ -474,8 +469,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testLJRemovalDueToNull2() {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, generateURI1(B, true)));
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode();
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
@@ -488,8 +482,7 @@ public class EmptyNodeRemovalTest {
                                 DATA_NODE_1)));
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A, false),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A, false), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, DATA_NODE_2));
@@ -501,8 +494,7 @@ public class EmptyNodeRemovalTest {
     public void testLJRemovalDueToNull3() {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(C, true),
-                        Y, generateURI1(B, true))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C, true), Y, generateURI1(B, true)));
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
@@ -515,8 +507,7 @@ public class EmptyNodeRemovalTest {
                                 createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B1, C)))));
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, TERM_FACTORY.getNullConstant(),
-                        Y, TERM_FACTORY.getNullConstant())));
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getNullConstant(), Y, TERM_FACTORY.getNullConstant()));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM,
                 IQ_FACTORY.createUnaryIQTree(newRootNode, IQ_FACTORY.createExtensionalDataNode(TABLE2_AR1, ImmutableMap.of())));

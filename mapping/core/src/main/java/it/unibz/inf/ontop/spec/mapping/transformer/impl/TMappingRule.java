@@ -102,11 +102,7 @@ public class TMappingRule {
 		if (projectionAtom.getArity() != headTerms.size())
 			throw new MinorOntopInternalBugException("size mismatch");
 
-		ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-				IntStream.range(0, projectionAtom.getArity())
-						.mapToObj(i -> Maps.immutableEntry(projectionAtom.getTerm(i), headTerms.get(i)))
-						.filter(e -> !e.getKey().equals(e.getValue())) // v -> v is not allowed in substitutions
-				 		.collect(ImmutableCollectors.toMap()));
+		ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), headTerms);
 
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
