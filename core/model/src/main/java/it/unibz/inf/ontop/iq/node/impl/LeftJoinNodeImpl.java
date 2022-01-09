@@ -176,20 +176,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         if (leftDefs.isEmpty())
             return rightDefs;
-        else if (rightDefs.isEmpty())
-            return leftDefs;
-        else
-            return leftDefs.stream()
-                    .flatMap(l -> rightDefs.stream()
-                            .map(r -> combine(l, r)))
-                    .collect(ImmutableCollectors.toSet());
-    }
 
-    private ImmutableSubstitution<NonVariableTerm> combine(ImmutableSubstitution<NonVariableTerm> l,
-                                                           ImmutableSubstitution<NonVariableTerm> r) {
-        return l.union(r)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "Unexpected conflict between " + l + " and " + r));
+        if (rightDefs.isEmpty())
+            return leftDefs;
+
+        return leftDefs.stream()
+                    .flatMap(l -> rightDefs.stream()
+                            .map(r -> l.union(r).orElseThrow(() -> new MinorOntopInternalBugException(
+                                                    "Unexpected conflict between " + l + " and " + r))))
+                    .collect(ImmutableCollectors.toSet());
     }
 
 

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -20,6 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
@@ -56,14 +54,20 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
-                                                                              Variable k3, T v3, Variable k4, T v4) {
-        return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory, this);
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory, this);
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<T> values) {
+        if (variables.size() != values.size())
+            throw new IllegalArgumentException("lists of different lengths");
+
+        ImmutableMap<Variable, T> map = IntStream.range(0, variables.size())
+                .boxed()
+                .collect(ImmutableCollectors.toMap(variables::get, values::get));
+
+        return getSubstitution(map);
     }
 
     @Override

@@ -68,13 +68,42 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
+    /**
+     * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.
+     *
+     * @param filter condition on variables
+     * @return new restricted substitution
+     */
+
     ImmutableSubstitution<T> filter(Predicate<Variable> filter);
+
+    /**
+     * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.
+     *
+     * @param filter condition on variables
+     * @return new restricted substitution
+     */
 
     ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter);
 
-    <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(Function<T, T2> function);
+    /**
+     * Constructs a new substitution by applying function to the range.
+     *
+     * @param function value transformation function
+     * @param <S> the type of the resulting terms
+     * @return new transformed substitution
+     */
+    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
 
-    <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(BiFunction<Variable, T, T2> function);
+    /**
+     * Constructs a new substitution by applying function to the range.
+     *
+     * @param function value transformation function
+     * @param <S> the type of the resulting terms
+     * @return new transformed substitution
+     */
+
+    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(BiFunction<Variable, T, S> function);
 
 
     Optional<ImmutableExpression> convertIntoBooleanExpression();

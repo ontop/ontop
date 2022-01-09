@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.substitution;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -21,9 +20,9 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
                                                                        Variable k3, T v3);
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
-                                                                       Variable k3, T v3, Variable k4, T v4);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
+
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<T> values);
 
    ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables);
 
