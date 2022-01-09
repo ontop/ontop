@@ -182,7 +182,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                 return dn;
 
             FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
-            DataAtom atom = replaceVars(dn.getProjectionAtom(), replacementVars);
+            DataAtom<AtomPredicate> atom = replaceVars(dn.getProjectionAtom(), replacementVars);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(

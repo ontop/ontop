@@ -21,8 +21,6 @@ public interface TargetAtom {
 
     ImmutableList<ImmutableTerm> getSubstitutedTerms();
 
-    TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution);
-
     /**
      * Returns a new (immutable) TargetAtom
      */

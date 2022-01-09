@@ -30,7 +30,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      * If T == ImmutableTerm, throws a ConversionException if
      * a substituted term is not a VariableOrGroundTerm.
      */
-    <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException;
+    ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) throws ConversionException;
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.

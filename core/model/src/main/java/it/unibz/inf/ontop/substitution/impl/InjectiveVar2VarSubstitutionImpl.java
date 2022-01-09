@@ -28,9 +28,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap,
                                                TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        super(substitutionMap, atomFactory, termFactory, substitutionFactory);
+        super(substitutionMap, termFactory, substitutionFactory);
 
         if (!isInjective(substitutionMap))
             throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
@@ -52,11 +52,14 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
+    public ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments)
             throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
 
-        return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(),  (ImmutableList) newArguments);
+        if (!newArguments.stream().allMatch(t -> t instanceof Variable))
+            throw new ConversionException("The substitution applied to an argument map has produced some non-Variable arguments " + newArguments);
+
+        return (ImmutableList) newArguments;
     }
 
 

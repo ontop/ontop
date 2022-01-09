@@ -22,9 +22,9 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    protected Var2VarSubstitutionImpl(ImmutableMap<Variable, ? extends Variable> substitutionMap, AtomFactory atomFactory,
+    protected Var2VarSubstitutionImpl(ImmutableMap<Variable, ? extends Variable> substitutionMap,
                                       TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        super(atomFactory, termFactory, substitutionFactory);
+        super(termFactory, substitutionFactory);
         this.map = (ImmutableMap)substitutionMap;
     }
 

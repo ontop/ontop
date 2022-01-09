@@ -28,27 +28,23 @@ import java.util.stream.Stream;
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
-    final AtomFactory atomFactory;
     final SubstitutionFactory substitutionFactory;
 
-    protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory,
+    protected AbstractImmutableSubstitutionImpl(TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {
         super(termFactory);
-        this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
     }
 
 
     @Override
-    public <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(atom.getArguments());
+    public ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) throws ConversionException {
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
 
-        if (!newArguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
-            throw new ConversionException("The substitution applied to a DataAtom has " +
-                    " produced some non-VariableOrGroundTerm arguments " + newArguments);
-        }
+        if (!newArguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm))
+            throw new ConversionException("The substitution applied to a DataAtom has produced some non-VariableOrGroundTerm arguments " + newArguments);
 
-        return atomFactory.getDataAtom(atom.getPredicate(), (ImmutableList<VariableOrGroundTerm>) newArguments);
+        return (ImmutableList<? extends VariableOrGroundTerm>) newArguments;
     }
 
     @Override
@@ -59,10 +55,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         Map.Entry::getKey,
                         e -> apply(e.getValue())));
 
-        if (!newArgumentMap.values().stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
-            throw new ConversionException("The substitution applied to an argument map has " +
-                    " produced some non-VariableOrGroundTerm arguments " + newArgumentMap);
-        }
+        if (!newArgumentMap.values().stream().allMatch(t -> t instanceof VariableOrGroundTerm))
+            throw new ConversionException("The substitution applied to an argument map has produced some non-VariableOrGroundTerm arguments " + newArgumentMap);
+
         return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
     }
 
@@ -217,7 +212,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> type.cast(e.getValue()))),
-                atomFactory, termFactory, substitutionFactory);
+                termFactory, substitutionFactory);
     }
 
     @Override
@@ -226,7 +221,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> function.apply(e.getValue()))),
-                atomFactory, termFactory, substitutionFactory);
+                termFactory, substitutionFactory);
     }
 
     @Override
@@ -235,6 +230,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> function.apply(e.getKey(), e.getValue()))),
-                atomFactory, termFactory, substitutionFactory);
+                termFactory, substitutionFactory);
     }
 }
