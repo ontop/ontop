@@ -1,110 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+     <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<artifactId>ontop-db</artifactId>
-		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.2.0-SNAPSHOT</version>
-	</parent>
+     <parent>
+          <artifactId>ontop-db</artifactId>
+          <groupId>it.unibz.inf.ontop</groupId>
+          <version>4.3.0-SNAPSHOT</version>
+     </parent>
 
-	<artifactId>ontop-rdb-teiid-embedded</artifactId>
+     <artifactId>ontop-rdb-teiid-embedded</artifactId>
 
-	<dependencies>
+     <dependencies>
 
-		<!-- COMPILE DEPENDENCIES -->
+          <!-- COMPILE DEPENDENCIES -->
 
-		<!-- Ontop modules -->
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-rdb-teiid-services</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+          <!-- Ontop modules -->
+          <!-- <dependency> -->
+          <!-- <groupId>${project.groupId}</groupId> -->
+          <!-- <artifactId>ontop-rdb-teiid-services</artifactId> -->
+          <!-- <version>${project.version}</version> -->
+          <!-- </dependency> -->
 
-		<!-- Teiid -->
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>teiid-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>teiid-runtime</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>teiid-common-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.teiid</groupId>
-			<artifactId>cache-caffeine</artifactId>
-		</dependency>
+          <!-- Teiid -->
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-api</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-runtime</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-common-core</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-engine</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-client</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>cache-caffeine</artifactId>
+          </dependency>
 
-		<!-- Hikari -->
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
+          <!-- Hikari -->
+          <dependency>
+               <groupId>com.zaxxer</groupId>
+               <artifactId>HikariCP</artifactId>
+          </dependency>
 
-		<!-- Narayana -->
-		<dependency>
-			<groupId>org.jboss.narayana.jta</groupId>
-			<artifactId>narayana-jta</artifactId>
-		</dependency>
+          <!-- Narayana -->
+          <dependency>
+               <groupId>org.jboss.narayana.jta</groupId>
+               <artifactId>narayana-jta</artifactId>
+          </dependency>
 
-		<!-- Guava -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
+          <!-- Guava -->
+          <dependency>
+               <groupId>com.google.guava</groupId>
+               <artifactId>guava</artifactId>
+          </dependency>
 
-		<!-- PROVIDED DEPENDENCIES -->
+          <!-- SLF4J -->
+          <dependency>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-api</artifactId>
+          </dependency>
 
-		<!-- JSR-305 annotations -->
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<scope>provided</scope>
-		</dependency>
+          <!-- PROVIDED DEPENDENCIES -->
 
-		<!-- TEST DEPENDENCIES -->
+          <!-- JSR-305 annotations -->
+          <dependency>
+               <groupId>com.google.code.findbugs</groupId>
+               <artifactId>jsr305</artifactId>
+               <scope>provided</scope>
+          </dependency>
 
-		<!-- Teiid JDBC translator -->
-		<dependency>
-			<groupId>org.teiid.connectors</groupId>
-			<artifactId>translator-jdbc</artifactId>
-			<scope>test</scope>
-		</dependency>
+          <!-- TEST DEPENDENCIES -->
 
-		<!-- MySQL JDBC connector -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.21</version>
-			<scope>test</scope>
-		</dependency>
+          <!-- Teiid JDBC translator -->
+          <dependency>
+               <groupId>org.teiid.connectors</groupId>
+               <artifactId>translator-jdbc</artifactId>
+               <scope>test</scope>
+          </dependency>
 
-		<!-- Logback -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<scope>test</scope>
-		</dependency>
+          <!-- MySQL JDBC connector -->
+          <dependency>
+               <groupId>mysql</groupId>
+               <artifactId>mysql-connector-java</artifactId>
+               <version>8.0.21</version>
+               <scope>test</scope>
+          </dependency>
 
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+          <!-- Logback -->
+          <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-classic</artifactId>
+               <scope>test</scope>
+          </dependency>
+          <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-core</artifactId>
+               <scope>test</scope>
+          </dependency>
 
-	</dependencies>
+          <!-- JUnit -->
+          <dependency>
+               <groupId>junit</groupId>
+               <artifactId>junit</artifactId>
+               <scope>test</scope>
+          </dependency>
+
+     </dependencies>
 
 </project>

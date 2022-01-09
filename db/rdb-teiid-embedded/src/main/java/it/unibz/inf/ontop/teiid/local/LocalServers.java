@@ -207,7 +207,8 @@ public final class LocalServers {
             }
 
             // Propagate
-            throw Throwables.propagate(ex);
+            Throwables.throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 

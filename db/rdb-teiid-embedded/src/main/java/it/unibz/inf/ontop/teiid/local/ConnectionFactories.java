@@ -183,7 +183,8 @@ public final class ConnectionFactories {
 
         } catch (final InvocationTargetException ex) {
             // Unwrap constructor/method error and propagate as unchecked exception
-            throw Throwables.propagate(ex.getCause());
+            Throwables.throwIfUnchecked(ex.getCause());
+            throw new RuntimeException(ex.getCause()); 
         }
     }
 

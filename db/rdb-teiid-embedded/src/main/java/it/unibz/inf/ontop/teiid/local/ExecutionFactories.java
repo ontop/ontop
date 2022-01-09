@@ -68,7 +68,8 @@ public final class ExecutionFactories {
 
         } catch (final Throwable ex) {
             // Wrap and propagate
-            throw Throwables.propagate(ex);
+            Throwables.throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
