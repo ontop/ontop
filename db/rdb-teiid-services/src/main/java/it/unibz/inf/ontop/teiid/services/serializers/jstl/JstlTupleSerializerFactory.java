@@ -17,11 +17,11 @@ import it.unibz.inf.ontop.teiid.services.serializers.TupleWriter;
 
 public final class JstlTupleSerializerFactory implements TupleSerializerFactory {
 
-    private static final String KEY_JSTL_IN = "jstlIn";
+    public static final String KEY_JSTL_IN = "jstlIn";
 
-    private static final String KEY_JSTL_OUT = "jstlOut";
+    public static final String KEY_JSTL_OUT = "jstlOut";
 
-    private static final String KEY_JSTL_OUT_TYPE = "jstlOutType";
+    public static final String KEY_JSTL_OUT_TYPE = "jstlOutType";
 
     @Override
     public boolean supportsReader(final Signature signature, final MediaType mediaType,

@@ -277,7 +277,7 @@ public class Json {
                     ? (JsonNode) object
                     : mapper.valueToTree(object);
             return TreeNode.class.isAssignableFrom(type.getRawType())
-                    && type.isAssignableFrom(node.getClass()) //
+                    && type.isSupertypeOf(node.getClass()) //
                             ? (T) node
                             : mapper.readValue(mapper.treeAsTokens(node),
                                     TypeFactory.defaultInstance().constructType(type.getType()));

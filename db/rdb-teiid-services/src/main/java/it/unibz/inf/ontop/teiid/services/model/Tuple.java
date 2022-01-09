@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ContainerNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
@@ -90,6 +91,9 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         final Object oldValue = this.values[index];
         if (value != null) {
             final Datatype datatype = this.signature.get(index).getDatatype();
+            if (value instanceof ValueNode) {
+                value = Json.map(value, Object.class); // Json -> Java primitive values
+            }
             if (value instanceof JsonNode) {
                 value = datatype != null //
                         ? Json.map(value, datatype.getValueClass())
@@ -231,7 +235,7 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
             final JsonNode node = Json.map(this.values[0], JsonNode.class);
             return nodeType.cast(node); // may fail if incompatible nodeType was requested
 
-        } else if (nodeType.isAssignableFrom(Object.class)) {
+        } else if (nodeType.isAssignableFrom(ObjectNode.class)) {
             final ObjectNode node = Json.getNodeFactory().objectNode();
             for (int i = 0; i < this.values.length; ++i) {
                 final Object value = this.values[i];
@@ -241,7 +245,7 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
             }
             return nodeType.cast(node);
 
-        } else if (nodeType.isAssignableFrom(Object.class)) {
+        } else if (nodeType.isAssignableFrom(ArrayNode.class)) {
             final ArrayNode node = Json.getNodeFactory().arrayNode();
             for (int i = 0; i < this.values.length; ++i) {
                 final Object value = this.values[i];
