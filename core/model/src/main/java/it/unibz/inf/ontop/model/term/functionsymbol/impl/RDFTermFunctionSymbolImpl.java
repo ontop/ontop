@@ -129,9 +129,8 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms,
                                                    TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
-        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
-                .filter(t -> (t.isNullable(nullableVariables)))
-                .map(termFactory::getDBIsNotNull));
+        Optional<ImmutableExpression> optionalExpression = termFactory.getDBIsNotNull(terms.stream()
+                .filter(t -> t.isNullable(nullableVariables)));
 
         return optionalExpression
                 .map(e -> e.evaluate(variableNullability, true))

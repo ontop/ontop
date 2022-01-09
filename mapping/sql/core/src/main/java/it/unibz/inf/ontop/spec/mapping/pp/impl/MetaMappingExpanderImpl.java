@@ -107,8 +107,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
 
-            IQTree topChildNotNull = termFactory.getConjunction(assertion.getTopChild().getVariables().stream()
-                    .map(termFactory::getDBIsNotNull))
+            IQTree topChildNotNull = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
                     .map(iqFactory::createFilterNode)
                     .map(n -> (IQTree)iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElse(assertion.getTopChild());

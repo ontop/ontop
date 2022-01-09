@@ -222,9 +222,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                    VariableNullability variableNullability) {
         if ((!mayReturnNullWithoutNullArguments()) && (!tolerateNulls())) {
             ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
-            Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
-                    .filter(t -> (t.isNullable(nullableVariables)))
-                    .map(termFactory::getDBIsNotNull));
+            Optional<ImmutableExpression> optionalExpression = termFactory.getDBIsNotNull(terms.stream()
+                    .filter(t -> (t.isNullable(nullableVariables))));
 
             return optionalExpression
                     .map(e -> e.evaluate(variableNullability, true))

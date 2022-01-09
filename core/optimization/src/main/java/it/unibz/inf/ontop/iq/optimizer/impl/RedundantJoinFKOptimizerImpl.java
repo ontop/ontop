@@ -91,10 +91,9 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             if (redundantNodes.isEmpty())
                 return Optional.empty();
 
-            Optional<ImmutableExpression> newConditions = termFactory.getConjunction(redundantNodes.stream()
+            Optional<ImmutableExpression> newConditions = termFactory.getDBIsNotNull(redundantNodes.stream()
                     .flatMap(n -> n.getVariables().stream())
-                    .distinct()
-                    .map(termFactory::getDBIsNotNull));
+                    .distinct());
 
             ImmutableList<IQTree> remainingChildren = extensionalChildren.stream()
                     .filter(n -> !redundantNodes.contains(n))

@@ -583,12 +583,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         externalBindings) :
                 Optional.empty();
 
-        Optional<ImmutableExpression> joinCondition = generateJoinCondition(
-                leftRenamingSubstitution,
-                rightRenamingSubstitution,
-                toCoalesce,
-                filterExpression
-        );
+        Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, toCoalesce.stream()
+                .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution)));
 
         JoinLikeNode joinLikeNode = join instanceof LeftJoin ?
                 iqFactory.createLeftJoinNode(joinCondition) :
@@ -644,16 +640,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                         variables,
                                         externalBindings))) :
                 Optional.empty();
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private Optional<ImmutableExpression> generateJoinCondition(InjectiveVar2VarSubstitution leftRenamingSubstitution,
-                                                                InjectiveVar2VarSubstitution rightRenamingSubstitution,
-                                                                ImmutableSet<Variable> toCoalesce,
-                                                                Optional<ImmutableExpression> filterCondition) {
-
-        return termFactory.getConjunction(filterCondition, toCoalesce.stream()
-                .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution)));
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,

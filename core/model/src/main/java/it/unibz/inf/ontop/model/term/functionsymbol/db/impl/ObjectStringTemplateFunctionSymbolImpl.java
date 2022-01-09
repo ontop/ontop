@@ -222,11 +222,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
         if (expression.isPresent()) {
-            ImmutableExpression nonNull = termFactory.getConjunction(
-                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream())
-                            .map(termFactory::getDBIsNotNull))
-                    .get(); // this conjunction cannot be empty because
-                            // there is at least one variable in the templates (taken together)
+            ImmutableExpression nonNull = termFactory.getDBIsNotNull(
+                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("cannot be empty because there is at least one variable in the templates (taken together)"));
             ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, expression.get());
             return ifElseNull.evaluate(variableNullability, true);
         }
