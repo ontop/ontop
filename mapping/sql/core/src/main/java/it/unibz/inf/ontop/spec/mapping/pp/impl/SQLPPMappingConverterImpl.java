@@ -116,7 +116,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetRenamingPart.applyToTarget(target.getSubstitution());
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = target.getSubstitution().transform(targetRenamingPart::apply);
 
         ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
                 targetMap.entrySet().stream() // getNonVariableFragment

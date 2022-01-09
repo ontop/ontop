@@ -123,7 +123,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
-                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        renamingSubstitution.applyToTerm(c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 
