@@ -104,7 +104,4 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      */
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> transform(BiFunction<Variable, T, S> function);
-
-
-    Optional<ImmutableExpression> convertIntoBooleanExpression();
 }

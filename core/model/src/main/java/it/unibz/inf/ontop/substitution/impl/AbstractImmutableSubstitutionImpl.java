@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -169,8 +168,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         (v1, v2) -> priorityVariables.indexOf(v1) <= priorityVariables.indexOf(v2) ? v1 : v2
                 ));
 
-
-
         /*
          * Applies the renaming
          */
@@ -239,37 +236,5 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         Map.Entry::getKey,
                         e -> function.apply(e.getKey(), e.getValue()))),
                 atomFactory, termFactory, substitutionFactory);
-    }
-
-
-
-    @Override
-    public  Optional<ImmutableExpression> convertIntoBooleanExpression() {
-        return convertIntoBooleanExpression(this);
-    }
-
-    protected Optional<ImmutableExpression> convertIntoBooleanExpression(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        List<ImmutableExpression> equalities = new ArrayList<>();
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
-        }
-
-        switch(equalities.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(equalities.get(0));
-            default:
-                Iterator<ImmutableExpression> equalityIterator = equalities.iterator();
-                // Non-final
-                ImmutableExpression aggregateExpression = equalityIterator.next();
-                while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
-                }
-                return Optional.of(aggregateExpression);
-        }
     }
 }

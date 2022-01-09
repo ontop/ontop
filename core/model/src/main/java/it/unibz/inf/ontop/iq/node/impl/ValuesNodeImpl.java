@@ -43,6 +43,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
 
     private boolean isNormalized = false;
     // LAZY
@@ -55,13 +56,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     protected ValuesNodeImpl(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
                              @Assisted("values") ImmutableList<ImmutableList<Constant>> values,
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
-                             OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
+                             OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqTreeTools, iqFactory);
         this.orderedVariables = orderedVariables;
         this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
         this.values = values;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -255,7 +257,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         variableGenerator::generateNewVariableFromVar)
                 .filter(substitution.getDomain()::contains);
 
-        return renaming.applyRenaming(substitution).convertIntoBooleanExpression()
+        return termFactory.getConjunction(renaming.applyRenaming(substitution).getImmutableMap().entrySet().stream()
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
                 .map(filterCondition ->
                         new ConstructionAndFilterAndValues(
                                 constructionAndFilterAndValues.constructionNode,
