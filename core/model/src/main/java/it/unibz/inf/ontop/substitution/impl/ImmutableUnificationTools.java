@@ -93,7 +93,7 @@ public class ImmutableUnificationTools {
         if (substitution1.isEmpty())
             return Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution2);
         else if (substitution2.isEmpty())
-            Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution1);
+            return Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution1);
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
