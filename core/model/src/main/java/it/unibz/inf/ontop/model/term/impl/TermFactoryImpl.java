@@ -396,7 +396,19 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNotNull(), immutableTerm);
 	}
 
-    @Override
+	@Override
+	public Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> stream) {
+		ImmutableList<ImmutableExpression> list = stream
+				.map(this::getDBIsNotNull)
+				.collect(ImmutableCollectors.toList());
+
+		if (list.isEmpty())
+			return Optional.empty();
+
+		return Optional.of(getConjunction(list));
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMd5(), stringTerm);
     }
