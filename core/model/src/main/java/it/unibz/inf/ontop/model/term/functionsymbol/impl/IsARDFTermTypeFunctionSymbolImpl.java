@@ -63,11 +63,12 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
 
     private ImmutableTerm simplifyIntoConjunction(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap,
                                                   ImmutableTerm term, TermFactory termFactory, VariableNullability variableNullability) {
-        ImmutableSet<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
+        ImmutableList<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
                 .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
                 .map(Map.Entry::getKey)
                 .map(n -> termFactory.getStrictNEquality(term, n))
-                .collect(ImmutableCollectors.toSet());
+                .distinct()
+                .collect(ImmutableCollectors.toList());
 
         if (excludedMagicNumbers.size() == conversionMap.size())
             return termFactory.getFalseOrNullFunctionalTerm(
@@ -79,8 +80,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                     ImmutableList.of(termFactory.getDBIsNotNull(term)))
                     .simplify(variableNullability);
 
-        return termFactory.getConjunction(excludedMagicNumbers.stream())
-                .orElseThrow(() -> new MinorOntopInternalBugException("The empty case should have already captured"))
+        return termFactory.getConjunction(excludedMagicNumbers)
                 .simplify(variableNullability);
     }
 

@@ -490,10 +490,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                     args -> (Variable) args.get(0),
                                     args -> (VariableOrGroundTerm) args.get(1))));
 
-        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                expressions.stream()
-                        .filter(e -> (!downSubstitutionExpressions.contains(e))
-                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains)))
+        Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
+                        .filter(e -> !downSubstitutionExpressions.contains(e)
+                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains))
+                        .collect(ImmutableCollectors.toList()))
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction)
                 .map(downSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);

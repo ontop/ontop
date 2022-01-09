@@ -262,7 +262,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         Stream.of(
                                 termFactory.getDisjunction(sharedVars.stream()
                                         .map(v1 -> termFactory.getStrictEquality(v1, sub.get(v1)))
-                                        .collect(ImmutableCollectors.toList())))).collect(ImmutableCollectors.toList()));
+                                        .collect(ImmutableCollectors.toList()))))
+                .collect(ImmutableCollectors.toList()));
     }
 
     private ImmutableExpression getEqOrNullable(Variable leftVar, Variable renamedVar, ImmutableSet<Variable> leftNullableVars,

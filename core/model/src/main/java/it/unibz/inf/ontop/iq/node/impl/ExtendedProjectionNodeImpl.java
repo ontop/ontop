@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -179,7 +181,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
-        Optional<ImmutableExpression> f = termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+        Optional<ImmutableExpression> f = Optional.of(Stream.concat(thetaFRelatedExpressions, blockedExpressions)
+                        .collect(ImmutableCollectors.toList()))
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction);
 
         return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
 

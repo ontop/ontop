@@ -126,7 +126,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 ));
 
         Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
-                .flatMap(e -> extractGroundFunctionalSubstitution(e));
+                .flatMap(this::extractGroundFunctionalSubstitution);
 
 
         Optional<ImmutableExpression> newExpression;

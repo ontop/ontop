@@ -55,7 +55,7 @@ public interface TermFactory {
 	/**
 	 * May be empty.
 	 *
-	 * Takes care of flattening the arguments
+	 * Takes care of flattening the of the optional expression, BUT not of expressionStream
 	 */
 	Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream);
 

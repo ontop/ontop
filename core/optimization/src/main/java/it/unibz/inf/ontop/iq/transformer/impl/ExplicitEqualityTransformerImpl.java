@@ -278,14 +278,16 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     termFactory.getConjunction(da.getArguments().stream()
                             .map(a -> getEquality(a, it.next()))
                             .filter(Optional::isPresent)
-                            .map(Optional::get)).get());
+                            .map(Optional::get)
+                            .collect(ImmutableCollectors.toList())));
         }
 
         private FilterNode createFilter(ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap,
                                         ImmutableMap<Integer, Variable> replacementVars) {
             return iqFactory.createFilterNode(
                     termFactory.getConjunction(replacementVars.entrySet().stream()
-                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))).get());
+                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))
+                            .collect(ImmutableCollectors.toList())));
         }
 
         private Optional<ImmutableExpression> getEquality(VariableOrGroundTerm t, Optional<Variable> replacement) {

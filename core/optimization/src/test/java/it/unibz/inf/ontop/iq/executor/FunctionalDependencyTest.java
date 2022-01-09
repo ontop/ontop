@@ -851,7 +851,7 @@ public class FunctionalDependencyTest {
                                         IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, dataNode2)))));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(A), TERM_FACTORY.getDBIsNotNull(B)));
+                TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(B), TERM_FACTORY.getDBIsNotNull(A)));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE15, ImmutableMap.of(0, X, 1, A, 2, B, 4, Y));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
@@ -922,7 +922,7 @@ public class FunctionalDependencyTest {
                                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, dataNode1, dataNode3)))));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(A), TERM_FACTORY.getDBIsNotNull(B)));
+                TERM_FACTORY.getConjunction(TERM_FACTORY.getDBIsNotNull(B), TERM_FACTORY.getDBIsNotNull(A)));
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE11, ImmutableMap.of(0, X, 1, A, 2, B, 3, Y));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
