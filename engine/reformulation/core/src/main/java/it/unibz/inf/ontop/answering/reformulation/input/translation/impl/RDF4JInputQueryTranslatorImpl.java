@@ -668,47 +668,28 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                                                 ImmutableSet<Variable> toCoalesce,
                                                                 Optional<ImmutableExpression> filterCondition) {
 
-        Optional<ImmutableExpression> compatibilityCondition = generateCompatibilityCondition(
-                leftRenamingSubstitution,
-                rightRenamingSubstitution,
-                toCoalesce
-        );
-        return compatibilityCondition.isPresent() ?
-                compatibilityCondition
-                        .map(compatExpr -> filterCondition.map(
-                                filterExpr -> termFactory.getConjunction(
-                                        filterExpr,
-                                        compatExpr
-                                )).orElse(compatExpr)
-                        ) :
-                filterCondition;
-    }
+        Optional<ImmutableExpression> compatibilityCondition = termFactory.getConjunction(toCoalesce.stream()
+                .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution)));
 
-    private Optional<ImmutableExpression> generateCompatibilityCondition(
-            InjectiveVar2VarSubstitution leftChildSubstitution,
-            InjectiveVar2VarSubstitution rightChildSubstitution, ImmutableSet<Variable> toCoalesce) {
-
-        return termFactory.getConjunction(toCoalesce.stream()
-                .map(v -> generateCompatibleExpression(
-                        v,
-                        leftChildSubstitution,
-                        rightChildSubstitution
-                )));
+        return compatibilityCondition.isPresent()
+                ? compatibilityCondition
+                        .map(c -> filterCondition
+                                .map(f -> termFactory.getConjunction(f, c))
+                                .orElse(c))
+                : filterCondition;
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,
                                                              InjectiveVar2VarSubstitution leftChildSubstitution,
                                                              InjectiveVar2VarSubstitution rightChildSubstitution) {
 
-        ImmutableExpression isNullExpression;
-
         Variable leftVariable = leftChildSubstitution.applyToVariable(outputVariable);
         Variable rightVariable = rightChildSubstitution.applyToVariable(outputVariable);
 
         ImmutableExpression equalityCondition = termFactory.getStrictEquality(leftVariable, rightVariable);
-        ImmutableExpression leftIsNull = termFactory.getDBIsNull(leftVariable);
-        ImmutableExpression rightIsNull = termFactory.getDBIsNull(rightVariable);
-        isNullExpression = termFactory.getDisjunction(leftIsNull, rightIsNull);
+        ImmutableExpression isNullExpression = termFactory.getDisjunction(
+                termFactory.getDBIsNull(leftVariable), termFactory.getDBIsNull(rightVariable));
+
         return termFactory.getDisjunction(equalityCondition, isNullExpression);
     }
 

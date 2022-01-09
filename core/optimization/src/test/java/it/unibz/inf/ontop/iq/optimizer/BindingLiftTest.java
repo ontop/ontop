@@ -59,17 +59,15 @@ public class BindingLiftTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, X, Y, Z);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSIONGT);
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Z),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Z, generateInt(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(Z, generateInt(A)));
         ImmutableSet<Variable> subQueryProjectedVariables = ImmutableSet.of(X,A);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(subQueryProjectedVariables);
         ConstructionNode subQueryConstructionNode1 = IQ_FACTORY.createConstructionNode(subQueryProjectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(B)));
         ConstructionNode subQueryConstructionNode2 = IQ_FACTORY.createConstructionNode(subQueryProjectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(E))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(E)));
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateIRIWithTemplate1(C),
-                        Y, generateInt(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(C), Y, generateInt(D)));
 
         IQTree tree = IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
                 IQ_FACTORY.createUnaryIQTree(leftNode,
@@ -85,8 +83,7 @@ public class BindingLiftTest {
 
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(C), Y, generateInt(D),
-                        Z, generateInt(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(C), Y, generateInt(D), Z, generateInt(A)));
         ImmutableExpression expectedExpressionGT = TERM_FACTORY.getDBDefaultInequality(GT, generateInt(A), generateInt(D));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(expectedExpressionGT);
 
@@ -107,15 +104,15 @@ public class BindingLiftTest {
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         InnerJoinNode joinNodeOnLeft = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode leftNodeJoin = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, W),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), W, generateString(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), W, generateString(B)));
         ConstructionNode rightNodeJoin = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W,Z),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateString(C), Z, generateInt(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(W, generateString(C), Z, generateInt(D)));
         ImmutableSet<Variable> subQueryProjectedVariables = ImmutableSet.of(X,Y);
         UnionNode unionNodeOnRight = IQ_FACTORY.createUnionNode(subQueryProjectedVariables);
         ConstructionNode subQueryConstructionNode1 = IQ_FACTORY.createConstructionNode(subQueryProjectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(E), Y, generateInt((F)))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(E), Y, generateInt((F))));
         ConstructionNode subQueryConstructionNode2 = IQ_FACTORY.createConstructionNode(subQueryProjectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(G), Y , generateInt(H))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(G), Y , generateInt(H)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -128,8 +125,7 @@ public class BindingLiftTest {
                                         IQ_FACTORY.createUnaryIQTree(subQueryConstructionNode2, DATA_NODE_7))))));
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateString(B), X, generateIRIWithTemplate1(A),
-                        Z, generateInt(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(W, generateString(B), X, generateIRIWithTemplate1(A), Z, generateInt(D)));
         LeftJoinNode expectedleftJoinNode = IQ_FACTORY.createLeftJoinNode();
         InnerJoinNode expectedJoinNodeOnLeft = IQ_FACTORY.createInnerJoinNode();
 
@@ -152,21 +148,21 @@ public class BindingLiftTest {
 
         UnionNode unionNode2 =  IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), Y, generateIRIWithTemplate1(B)));
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), Y, generateIRIWithTemplate1(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), Y, generateIRIWithTemplate1(D)));
 
         UnionNode unionNode3 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(Y));
         ConstructionNode subQuery1UnionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateIRIWithTemplate1(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(F)));
         ConstructionNode subQuery2UnionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI2(H))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI2(H)));
 
         UnionNode unionNode1 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ConstructionNode subQuery1UnionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(I))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(I)));
         ConstructionNode subQuery2UnionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(M))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(M)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
@@ -188,16 +184,16 @@ public class BindingLiftTest {
                                         createExtensionalDataNode(TABLE6_AR2, ImmutableList.of(M, N))))))));
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(F0),
                             //generateIRIWithTemplate1(F0, AF1),
-                        Y, generateIRIWithTemplate1(BF1))));
+                        Y, generateIRIWithTemplate1(BF1)));
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(BF1, F0));
         ConstructionNode expectedSubQuery1UnionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F0, generateIRIString(URI_TEMPLATE_STR_1, A))));
+                SUBSTITUTION_FACTORY.getSubstitution(F0, generateIRIString(URI_TEMPLATE_STR_1, A)));
         InnerJoinNode joinNode11 = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode expectedSubQuery2UnionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F0, generateIRIString(URI_TEMPLATE_STR_2, C))));
+                SUBSTITUTION_FACTORY.getSubstitution(F0, generateIRIString(URI_TEMPLATE_STR_2, C)));
         InnerJoinNode joinNode21 = IQ_FACTORY.createInnerJoinNode();
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -376,15 +372,15 @@ public class BindingLiftTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(B)));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(unionNode.getVariables());
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(I), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(I), Y, NULL));
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(M), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(M), Y, NULL));
         ConstructionNode subQueryJoinNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(unionNode, ImmutableList.of(
@@ -404,24 +400,24 @@ public class BindingLiftTest {
         Variable f3 = TERM_FACTORY.getVariable("f3");
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(f0f1),
-                        Y, TERM_FACTORY.getRDFFunctionalTerm(f2, f3))));
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(f2, f3)));
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f1, f2, f3));
         ConstructionNode expSubQueryUnionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         f2, generateIRIWithTemplate1(B).getTerm(0),
                         f3, TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getIRITermType()),
-                        f0f1, generateIRIString(URI_TEMPLATE_STR_1, A))));
+                        f0f1, generateIRIString(URI_TEMPLATE_STR_1, A)));
 
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode expectedRightConstructionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f2, NULL, f3, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(f2, NULL, f3, NULL));
         UnionNode expectedUnionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f1));
         ConstructionNode expSubQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(expectedUnionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f1, generateIRIString(URI_TEMPLATE_STR_1, I))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f1, generateIRIString(URI_TEMPLATE_STR_1, I)));
         ConstructionNode expSubQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(expectedUnionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f1, generateIRIString(URI_TEMPLATE_STR_2, M))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f1, generateIRIString(URI_TEMPLATE_STR_2, M)));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(topConstructionNode,
@@ -452,14 +448,14 @@ public class BindingLiftTest {
         UnionNode unionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
 
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(I, L), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(I, L), Y, NULL));
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(M, N), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(M, N), Y, NULL));
 
         ConstructionNode subQueryJoinNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(A, B), Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(A, B), Y, generateIRIWithTemplate1(B)));
         ConstructionNode subQueryJoinNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateIRIWithTemplate1(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(F)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(unionNode, ImmutableList.of(
@@ -480,17 +476,17 @@ public class BindingLiftTest {
         Variable f6 = TERM_FACTORY.getVariable("f6");
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateCompositeURI2(af3,bf4),
-                        Y, TERM_FACTORY.getRDFFunctionalTerm(f5, f6))));
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(f5, f6)));
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(bf4, af3, f5, f6));
         ConstructionNode expSubQueryUnionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         f5, generateIRIWithTemplate1(bf4).getTerm(0),
-                        f6, TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getIRITermType()))));
+                        f6, TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getIRITermType())));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode newRightConstructionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f5, NULL, f6, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(f5, NULL, f6, NULL));
         UnionNode expectedUnionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(af3, bf4));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -516,13 +512,13 @@ public class BindingLiftTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         UnionNode unionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X,Y));
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(I, L), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(I, L), Y, NULL));
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateCompositeURI2(M, N), Y, NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(M, N), Y, NULL));
         ConstructionNode subQueryJoinNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(A, B), Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(A, B), Y, generateIRIWithTemplate1(B)));
         ConstructionNode subQueryJoinNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateIRIWithTemplate1(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(F)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -544,7 +540,7 @@ public class BindingLiftTest {
         Variable f6 = TERM_FACTORY.getVariable("f6");
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(af3,bf4))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(af3,bf4)));
         UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(bf4, af3));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -577,16 +573,16 @@ public class BindingLiftTest {
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
         ConstructionNode rightNodeJoin = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateInt(H), Y, generateInt(G))));
+                SUBSTITUTION_FACTORY.getSubstitution(W, generateInt(H), Y, generateInt(G)));
 
         UnionNode unionNodeOnLeft = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
         ConstructionNode leftUnionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), Y, generateInt(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), Y, generateInt(B)));
         ConstructionNode rightUnionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), Y, generateInt(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), Y, generateInt(D)));
 
         ConstructionNode nodeOnRight = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(E), Z, generateInt(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(E), Z, generateInt(F)));
 
 
         IQTree tree = IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
@@ -623,14 +619,14 @@ public class BindingLiftTest {
         UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, BF1, F, H));
 
         ConstructionNode expectedNodeOnLeft = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        F0, generateIRIString(URI_TEMPLATE_STR_1, A))));
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        F0, generateIRIString(URI_TEMPLATE_STR_1, A)));
         LeftJoinNode expectedLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
         InnerJoinNode leftInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
         ConstructionNode expectedNodeOnRight = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, NULL,
-                        F0, generateIRIString(URI_TEMPLATE_STR_2, C))));
+                SUBSTITUTION_FACTORY.getSubstitution(F, NULL,
+                        F0, generateIRIString(URI_TEMPLATE_STR_2, C)));
         InnerJoinNode rightInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
         IQ expectedQuery =   IQ_FACTORY.createIQ(projectionAtom,
@@ -654,25 +650,25 @@ public class BindingLiftTest {
     public void testConstantNonPropagationAcrossUnions() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(B)));
         UnionNode topUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, B));
 
         UnionNode leftUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, B));
         DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), B, two));
         ExtensionalDataNode dataNode7 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(A));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), B, two));
         ExtensionalDataNode dataNode8 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         DBConstant three = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(D), B, three)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(D), B, three));
         ExtensionalDataNode dataNode9 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(D));
         ConstructionNode lastConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(E))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(E)));
         ExtensionalDataNode dataNode10 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(E));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -688,21 +684,19 @@ public class BindingLiftTest {
         Variable f0f2 = TERM_FACTORY.getVariable("f0f2");
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f2),
-                        Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(f0f2), Y, generateIRIWithTemplate1(B)));
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f2, B));
 
         ConstructionNode newLeftConstructionNode = IQ_FACTORY.createConstructionNode(newTopUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(B, two));
         UnionNode newLeftUnionNode = IQ_FACTORY.createUnionNode(newLeftConstructionNode.getChildVariables());
         ConstructionNode newConstructionNode1 = IQ_FACTORY.createConstructionNode(newLeftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f2, generateIRIString(URI_TEMPLATE_STR_1, A))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f2, generateIRIString(URI_TEMPLATE_STR_1, A)));
         ConstructionNode newConstructionNode2 = IQ_FACTORY.createConstructionNode(newLeftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f2, generateIRIString(URI_TEMPLATE_STR_2, C))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f2, generateIRIString(URI_TEMPLATE_STR_2, C)));
 
         ConstructionNode newConstructionNode3 = IQ_FACTORY.createConstructionNode(newTopUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f2, generateIRIString(URI_TEMPLATE_STR_1, D), B, three)));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f2, generateIRIString(URI_TEMPLATE_STR_1, D), B, three));
 
         IQ expectedQuery =  IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newRootNode,
@@ -725,21 +719,21 @@ public class BindingLiftTest {
     public void testConstantNonPropagationAcrossUnions2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(B)));
         UnionNode topUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, B));
 
         UnionNode leftUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, B));
         DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), B, two));
         ExtensionalDataNode dataNode7 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(A));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), B, two));
         ExtensionalDataNode dataNode8 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(D)));
         ExtensionalDataNode dataNode9 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(D));
         ExtensionalDataNode dataNode10 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(B));
 
@@ -756,21 +750,21 @@ public class BindingLiftTest {
 
         Variable f0f1 = TERM_FACTORY.getVariable("f0f1");
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, TERM_FACTORY.getIRIFunctionalTerm(f0f1),
-                        Y, generateIRIWithTemplate1(B))));
+                        Y, generateIRIWithTemplate1(B)));
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(newRootNode.getChildVariables());
 
         ConstructionNode newLeftConstructionNode = IQ_FACTORY.createConstructionNode(newTopUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(B, two)));
+                SUBSTITUTION_FACTORY.getSubstitution(B, two));
         UnionNode newLeftUnionNode = IQ_FACTORY.createUnionNode(newLeftConstructionNode.getChildVariables());
         ConstructionNode newConstructionNode1 = IQ_FACTORY.createConstructionNode(newLeftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f1, generateIRIString(URI_TEMPLATE_STR_1, A))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f1, generateIRIString(URI_TEMPLATE_STR_1, A)));
         ConstructionNode newConstructionNode2 = IQ_FACTORY.createConstructionNode(newLeftUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f1, generateIRIString(URI_TEMPLATE_STR_2, C))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f1, generateIRIString(URI_TEMPLATE_STR_2, C)));
 
         ConstructionNode constructionNode3b = IQ_FACTORY.createConstructionNode(newTopUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(f0f1, generateIRIString(URI_TEMPLATE_STR_1, D))));
+                SUBSTITUTION_FACTORY.getSubstitution(f0f1, generateIRIString(URI_TEMPLATE_STR_1, D)));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newRootNode,
@@ -799,12 +793,11 @@ public class BindingLiftTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ConstructionNode leftChildUnion = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A) )));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A) ));
         ConstructionNode rightChildUnion = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateString(C) )));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateString(C)));
         ConstructionNode otherNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(
-                        TERM_FACTORY.getDBStringConstant("2")))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateInt(TERM_FACTORY.getDBStringConstant("2"))));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
@@ -816,8 +809,8 @@ public class BindingLiftTest {
 
         Variable af0 = TERM_FACTORY.getVariable("af0");
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(af0), Y,
-                        TERM_FACTORY.getRDFLiteralConstant("2", XSD.INTEGER))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(af0), Y,
+                        TERM_FACTORY.getRDFLiteralConstant("2", XSD.INTEGER)));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(expectedRootNode,
@@ -836,15 +829,15 @@ public class BindingLiftTest {
     private void testJoinAndNotMatchingDatatypesDoubleRun(ImmutableExpression joiningCondition) {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
+                SUBSTITUTION_FACTORY.getSubstitution());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ConstructionNode leftChildUnion = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
         ConstructionNode rightChildUnion = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateString(C) )));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateString(C)));
         ConstructionNode otherNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateInt(F)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -855,7 +848,7 @@ public class BindingLiftTest {
                                 IQ_FACTORY.createUnaryIQTree(otherNode, DATA_NODE_6)))));
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(AF0), Y, generateInt(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(AF0), Y, generateInt(F)));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -871,13 +864,13 @@ public class BindingLiftTest {
     public void testDatatypeExpressionEvaluator()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
+                SUBSTITUTION_FACTORY.getSubstitution());
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
         ConstructionNode leftCn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
         ConstructionNode rightCn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateInt(B)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -886,7 +879,7 @@ public class BindingLiftTest {
                                 IQ_FACTORY.createUnaryIQTree(rightCn, DATA_NODE_9)))));
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A), Y, generateInt(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A), Y, generateInt(B)));
         InnerJoinNode jn2 = IQ_FACTORY.createInnerJoinNode();
 
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -902,11 +895,11 @@ public class BindingLiftTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode =  IQ_FACTORY.createLeftJoinNode();
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateIRIWithTemplate1(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(B)));
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), Y, generateIRIWithTemplate1(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), Y, generateIRIWithTemplate1(D)));
         ConstructionNode node1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createNaryIQTree(joinNode, ImmutableList.of(
@@ -927,11 +920,11 @@ public class BindingLiftTest {
         UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), Y, generateURI2(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), Y, generateURI2(B)));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(C), Y, generateURI2(D))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C), Y, generateURI2(D)));
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(E), Y, generateURI2(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(E), Y, generateURI2(F)));
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(rootNode,
@@ -962,9 +955,9 @@ public class BindingLiftTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(A), Y, generateURI2(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(A), Y, generateURI2(B)));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateIRIWithTemplate1(ONE_STR))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(ONE_STR)));
         TrueNode trueNode = IQ_FACTORY.createTrueNode();
 
         IQ unOptimizedQuery = IQ_FACTORY.createIQ(projectionAtom,
@@ -977,8 +970,7 @@ public class BindingLiftTest {
                                 IQ_FACTORY.createUnaryIQTree(constructionNode2, trueNode))));
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, generateIRIWithTemplate1(ONE_STR).simplify(), Y, generateURI2(B))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(ONE_STR).simplify(), Y, generateURI2(B)));
         ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
                 DATA_NODE_1.getRelationDefinition(), ImmutableMap.of(0, ONE_STR, 1, B));
 
@@ -1055,8 +1047,7 @@ public class BindingLiftTest {
         UnionNode unionNode5 = IQ_FACTORY.createUnionNode(ImmutableSet.of(F,C));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z),
-                SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, generateIRIWithTemplate1(F), Y, generateURI2(bf2f3), Z, generateIRIWithTemplate1(C))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateIRIWithTemplate1(F), Y, generateURI2(bf2f3), Z, generateIRIWithTemplate1(C)));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
 

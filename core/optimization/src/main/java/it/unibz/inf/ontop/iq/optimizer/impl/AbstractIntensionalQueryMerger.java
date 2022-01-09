@@ -113,12 +113,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                 throw new IllegalStateException("Different arities");
             }
 
-            ImmutableMap<Variable, VariableOrGroundTerm> newMap = FunctionalTools.zip(
-                    sourceAtom.getArguments(),
-                    (ImmutableList<VariableOrGroundTerm>) targetAtom.getArguments()).stream()
-                    .collect(ImmutableCollectors.toMap());
-
-            return substitutionFactory.getSubstitution(newMap);
+            return substitutionFactory.getSubstitution(sourceAtom.getArguments(), targetAtom.getArguments());
         }
     }
 }

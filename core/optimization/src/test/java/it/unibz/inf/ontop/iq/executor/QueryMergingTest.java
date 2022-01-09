@@ -372,7 +372,7 @@ public class QueryMergingTest {
 
         // Expected
         ConstructionNode remainingConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A)));
         ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, A));
 
         IQ expected = IQ_FACTORY.createIQ(ANS1_X_ATOM,
