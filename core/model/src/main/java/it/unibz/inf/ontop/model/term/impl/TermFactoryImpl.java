@@ -210,6 +210,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream) {
+		return getConjunction(Stream.concat(
+				optionalExpression
+						.map(ImmutableExpression::flattenAND)
+						.orElseGet(Stream::empty),
+				expressionStream));
+	}
+
+	@Override
 	public ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> disjunctionOfExpressions) {
 		final int size = disjunctionOfExpressions.size();
 		switch (size) {

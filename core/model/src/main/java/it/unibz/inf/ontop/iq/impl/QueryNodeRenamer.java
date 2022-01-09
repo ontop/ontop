@@ -86,7 +86,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
         return projectedVariables.stream()
                 .map(renamingSubstitution::applyToVariable)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

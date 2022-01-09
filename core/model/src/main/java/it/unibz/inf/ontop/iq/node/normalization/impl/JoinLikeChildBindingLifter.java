@@ -86,15 +86,12 @@ public class JoinLikeChildBindingLifter {
     private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
                                                                        ImmutableSubstitution<ImmutableTerm> substitution,
                                                                        InjectiveVar2VarSubstitution freshRenaming) {
-        Stream<ImmutableExpression> expressions1 = initialJoiningCondition
-                        .map(substitution::applyToBooleanExpression)
-                        .map(ImmutableExpression::flattenAND)
-                        .orElseGet(Stream::empty);
 
         Stream<ImmutableExpression> expressions2 = freshRenaming.getImmutableMap().entrySet().stream()
                         .map(r -> termFactory.getStrictEquality(substitution.applyToVariable(r.getKey()), r.getValue()));
 
-        return termFactory.getConjunction(Stream.concat(expressions1, expressions2));
+        return termFactory.getConjunction(
+                initialJoiningCondition.map(substitution::applyToBooleanExpression), expressions2);
     }
 
     @FunctionalInterface

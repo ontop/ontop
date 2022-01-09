@@ -131,9 +131,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .composeWith(substitutionFactory.getSubstitution(topVariable, instantiatedTemplate));
 
             IQTree filterTree = termFactory.getConjunction(values.entrySet().stream()
-                    .map(e -> termFactory.getNotYetTypedEquality(
-                            e.getKey(),
-                            e.getValue())))
+                            .map(e -> termFactory.getNotYetTypedEquality(e.getKey(), e.getValue())))
                     .map(iqFactory::createFilterNode)
                     .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));

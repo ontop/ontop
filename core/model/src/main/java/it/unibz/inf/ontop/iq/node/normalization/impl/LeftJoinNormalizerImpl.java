@@ -774,12 +774,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
             return termFactory.getConjunction(
-                    Stream.concat(
-                            ljCondition
-                                    .map(selectedSubstitution::applyToBooleanExpression)
-                                    .map(Stream::of)
-                                    .orElseGet(Stream::empty),
-                            equalitiesToInsert));
+                            ljCondition.map(selectedSubstitution::applyToBooleanExpression),
+                            equalitiesToInsert);
         }
 
         public LJNormalizationState propagateDownLJCondition() {

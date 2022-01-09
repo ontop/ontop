@@ -120,7 +120,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         ImmutableSubstitution<ImmutableTerm> newSubstitution = topSubstitution
                 .filter(v -> !v.equals(objectVariable))
                 .union(substitutionFactory.getSubstitution(objectVariable, objectDefinition))
-                .get();
+                .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen"));
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(

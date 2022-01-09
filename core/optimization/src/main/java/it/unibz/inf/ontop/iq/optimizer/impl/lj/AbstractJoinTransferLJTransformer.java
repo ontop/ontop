@@ -297,12 +297,9 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 termFactory, substitutionFactory);
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
-                Stream.concat(
                         rootNode.getOptionalFilterCondition()
-                                .map(renamingAndEqualities.renamingSubstitution::applyToBooleanExpression)
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
-                        renamingAndEqualities.equalities.stream()));
+                                .map(renamingAndEqualities.renamingSubstitution::applyToBooleanExpression),
+                        renamingAndEqualities.equalities.stream());
 
 
         IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, transformedRightChild,

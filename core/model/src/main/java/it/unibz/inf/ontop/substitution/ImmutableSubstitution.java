@@ -8,11 +8,7 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**

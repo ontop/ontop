@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
-import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.ProtoSubstitution;
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
-    final SubstitutionFactory substitutionFactory;
+    protected final SubstitutionFactory substitutionFactory;
 
     protected AbstractImmutableSubstitutionImpl(TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {
@@ -193,16 +192,20 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {
-        return constructNewSubstitution(getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, T> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> filter.test(e.getKey()))
-                .collect(ImmutableCollectors.toMap()));
+                .collect(ImmutableCollectors.toMap());
+
+        return (newMap.size() == getImmutableMap().size()) ? this : constructNewSubstitution(newMap);
     }
 
     @Override
     public ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter) {
-        return constructNewSubstitution(getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, T> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> filter.test(e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toMap()));
+                .collect(ImmutableCollectors.toMap());
+
+        return (newMap.size() == getImmutableMap().size()) ? this : constructNewSubstitution(newMap);
     }
 
     @Override

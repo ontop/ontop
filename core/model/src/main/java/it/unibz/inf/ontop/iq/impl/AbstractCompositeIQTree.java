@@ -191,8 +191,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 .collect(ImmutableCollectors.toSet());
 
         return termFactory.getConjunction(constraint.get().flattenAND()
-                .filter(e -> e.getVariableStream()
-                        .anyMatch(newVariables::contains)));
+                .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
     }
 
     protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);

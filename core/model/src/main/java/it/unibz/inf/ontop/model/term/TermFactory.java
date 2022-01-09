@@ -53,6 +53,13 @@ public interface TermFactory {
 	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
 	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
+	 */
+	Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream);
+
+	/**
 	 * Must be non-empty
 	 */
 	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);

@@ -163,23 +163,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                 e -> e.getValue().iterator().next()
                         )));
 
-
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC
                 .filter((k, v) -> !thetaF.isDefining(k) && ((!thetaFBar.isDefining(k)) || projectedVariables.contains(k)))
                 .transform(thetaFBar::apply);
 
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
-
-        Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
-
-        return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
-
-    }
-
-    private Optional<ImmutableExpression> computeF(ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m,
-                                                   ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
-                                                   ImmutableSubstitution<ImmutableTerm> gamma,
-                                                   ImmutableSubstitution<NonFunctionalTerm> newDeltaC) {
 
         ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.getImmutableMap().entrySet();
 
@@ -191,7 +179,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
-        return termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+        Optional<ImmutableExpression> f = termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+
+        return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
+
     }
 
     private ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> propagateTauF(ImmutableSubstitution<GroundFunctionalTerm> tauF,
@@ -218,11 +209,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                 .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));
 
-        Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
-                tauCPropagationResults.filter
-                        .map(ImmutableExpression::flattenAND)
-                        .orElseGet(Stream::empty),
-                newConditionStream));
+        Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 
         return new ConstructionNodeImpl.PropagationResults<>(newTheta, delta, newF);
     }

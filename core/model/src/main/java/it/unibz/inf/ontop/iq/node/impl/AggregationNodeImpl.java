@@ -110,10 +110,9 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
                 Stream.concat(
-                        blockedSubstitutionToGroundTerm.getImmutableMap().entrySet().stream()
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())),
-                        blockedVar2VarSubstitution.getImmutableMap().entrySet().stream()
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))))
+                        blockedSubstitutionToGroundTerm.getImmutableMap().entrySet().stream(),
+                        blockedVar2VarSubstitution.getImmutableMap().entrySet().stream())
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Inconsistent with the previous check"));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
