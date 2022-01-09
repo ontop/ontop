@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.substitution.impl;
 
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
@@ -15,6 +13,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
@@ -22,103 +21,30 @@ import java.util.*;
 @Singleton
 public class ImmutableUnificationTools {
 
+    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final UnifierUtilities unifierUtilities;
 
     @Inject
-    private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
-                                      UnifierUtilities unifierUtilities) {
+    public ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.unifierUtilities = unifierUtilities;
     }
 
     /**
-     * TODO: explain
-     */
-    private static class UnificationException extends Exception {
-    }
-
-    /**
-     * TODO: explain
+     * Computes the Most General Unifier (MGU) for two n-ary atoms.
      *
-     * MUTABLE
-     */
-    private class TermPair {
-        private boolean canBeRemoved;
-        private Variable leftVariable;
-        private ImmutableTerm rightTerm;
-
-        private TermPair(Variable variable, ImmutableTerm rightTerm) {
-            this.leftVariable = variable;
-            this.rightTerm = rightTerm;
-            this.canBeRemoved = false;
-        }
-
-        /**
-         *
-         * TODO: explain it
-         *
-         * May update itself.
-         * Returns a list of new pairs
-         *
-         */
-        public ImmutableList<TermPair> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution)
-                throws UnificationException {
-            if (canBeRemoved) {
-                return ImmutableList.of();
-            }
-
-            ImmutableTerm transformedLeftTerm = substitution.applyToVariable(leftVariable);
-            ImmutableTerm transformedRightTerm = substitution.apply(rightTerm);
-
-            if (transformedLeftTerm instanceof Variable) {
-                leftVariable = (Variable) transformedLeftTerm;
-                rightTerm = transformedRightTerm;
-                return ImmutableList.of();
-            }
-            else if (transformedRightTerm instanceof Variable) {
-                leftVariable = (Variable) transformedRightTerm;
-                rightTerm = transformedLeftTerm;
-                return ImmutableList.of();
-            }
-            else {
-                Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier =
-                        computeDirectedMGU(transformedLeftTerm, transformedRightTerm);
-                if (!optionalUnifier.isPresent()) {
-                    throw new UnificationException();
-                }
-                /*
-                 * TODO: explain
-                 */
-                else {
-                    canBeRemoved = true;
-                    leftVariable = null;
-                    rightTerm = null;
-                    return convertIntoPairs(optionalUnifier.get());
-                }
-            }
-        }
-
-        public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
-            if (canBeRemoved) {
-                return substitutionFactory.getSubstitution();
-            }
-            return substitutionFactory.getSubstitution(leftVariable, rightTerm);
-        }
-    }
-
-    /**
-     * TODO: explain
-     *
+     * @param args1
+     * @param args2
+     * @return the substitution corresponding to this unification.
      */
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
-        // TODO (ROMAN 12/02/20): why is it here?
-        if (args1.size() != args2.size())
-            throw new IllegalArgumentException("The two argument lists must have the same size");
+        ImmutableMap<Variable, ImmutableTerm> sub = unify(ImmutableMap.of(), args1, args2);
+        if (sub == null)
+            return Optional.empty();
 
-        return unifierUtilities.getMGU(args1, args2);
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap<Variable, T>)sub));
     }
 
     public Optional<ArgumentMapUnification> computeArgumentMapMGU(
@@ -129,7 +55,7 @@ public class ImmutableUnificationTools {
 
         Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = unifierUtilities.getMGU(
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = computeMGU(
                 commonIndexes.stream()
                         .map(argumentMap1::get)
                         .collect(ImmutableCollectors.toList()),
@@ -197,194 +123,6 @@ public class ImmutableUnificationTools {
     }
 
 
-    /**
-     * Computes a MGU that reuses as much as possible the variables from the target part.
-     *
-     */
-    private Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
-                                                                                    ImmutableTerm targetTerm) {
-        /*
-         * Variable
-         */
-        if (sourceTerm instanceof Variable) {
-            Variable sourceVariable = (Variable) sourceTerm;
-
-            // Constraint
-            if ((targetTerm instanceof ImmutableFunctionalTerm)
-                    && ((ImmutableFunctionalTerm) targetTerm).getVariables().contains(sourceVariable)) {
-                return Optional.empty();
-            }
-
-            ImmutableSubstitution<ImmutableTerm> substitution = sourceVariable.equals(targetTerm)
-                    ? substitutionFactory.getSubstitution()
-                    : substitutionFactory.getSubstitution(sourceVariable, targetTerm);
-
-            return Optional.of(substitution);
-        }
-
-        /*
-         * Functional term
-         */
-        else if (sourceTerm instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm sourceFunctionalTerm = (ImmutableFunctionalTerm) sourceTerm;
-
-            if (targetTerm instanceof Variable) {
-                Variable targetVariable = (Variable) targetTerm;
-
-                // Constraint
-                if (sourceFunctionalTerm.getVariables().contains(targetVariable)) {
-                    return Optional.empty();
-                }
-                else {
-                    ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetVariable, sourceTerm);
-                    return Optional.of(substitution);
-                }
-            }
-            else if (targetTerm instanceof ImmutableFunctionalTerm) {
-                return computeDirectedMGUOfTwoFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
-                        (ImmutableFunctionalTerm) targetTerm);
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-        /*
-         * Constant
-         */
-        else if(sourceTerm instanceof Constant) {
-            if (targetTerm instanceof Variable) {
-                Variable targetVariable = (Variable) targetTerm;
-                ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetVariable, sourceTerm);
-                return Optional.of(substitution);
-            }
-            else if (sourceTerm.equals(targetTerm)) {
-                return Optional.of(substitutionFactory.getSubstitution());
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-        else {
-            throw new RuntimeException("Unexpected term: " + sourceTerm + " (" + sourceTerm.getClass() + ")");
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    private Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGUOfTwoFunctionalTerms(
-            ImmutableFunctionalTerm sourceTerm, ImmutableFunctionalTerm targetTerm) {
-        /*
-         * Function symbol equality
-         */
-        if (!sourceTerm.getFunctionSymbol().equals(
-                targetTerm.getFunctionSymbol())) {
-            return Optional.empty();
-        }
-
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceTerm.getTerms();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetTerm.getTerms();
-
-        int childNb = sourceChildren.size();
-        if (targetChildren.size() != childNb) {
-            return Optional.empty();
-        }
-
-        final ImmutableList.Builder<TermPair> pairBuilder = ImmutableList.builder();
-        for (int i=0; i < childNb; i++) {
-            /*
-             * Recursive
-             */
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildTermUnifier =
-                    computeDirectedMGU(sourceChildren.get(i), targetChildren.get(i));
-
-            /*
-             * If the unification of one pair of sub-terms is not possible,
-             * no global unification is possible.
-             */
-            if (!optionalChildTermUnifier.isPresent()) {
-                return Optional.empty();
-            }
-
-            /*
-             * Adds all its pairs
-             */
-            pairBuilder.addAll(convertIntoPairs(optionalChildTermUnifier.get()));
-        }
-
-        return unifyPairs(pairBuilder.build());
-    }
-
-    /**
-     * TODO: explain
-     *
-     */
-    private Optional<ImmutableSubstitution<ImmutableTerm>> unifyPairs(ImmutableList<TermPair> originalPairs) {
-
-        /*
-         * Some pairs will be removed, some others will be added.
-         */
-        List<TermPair> allPairs = new LinkedList<>(originalPairs);
-        Queue<TermPair> pairsToVisit = new LinkedList<>(originalPairs);
-
-        try {
-            /*
-             * TODO: explain
-             */
-            while (!pairsToVisit.isEmpty()) {
-                TermPair currentPair = pairsToVisit.poll();
-                if (currentPair.canBeRemoved) {
-                    continue;
-                }
-                ImmutableSubstitution<ImmutableTerm> substitution = currentPair.getSubstitution();
-
-                List<TermPair> additionalPairs = new ArrayList<>();
-                /*
-                 * TODO: explain
-                 */
-                Iterator<TermPair> it = allPairs.iterator();
-                while (it.hasNext()) {
-                    TermPair pairToUpdate = it.next();
-                    if (pairToUpdate == currentPair) {
-                        continue;
-                    } else {
-                        additionalPairs.addAll(pairToUpdate.applySubstitution(substitution));
-                        if (pairToUpdate.canBeRemoved) {
-                            it.remove();
-                        }
-                    }
-                }
-                allPairs.addAll(additionalPairs);
-                pairsToVisit.addAll(additionalPairs);
-            }
-            return Optional.of(convertPairs2Substitution(allPairs));
-        }
-        catch (UnificationException e) {
-            return Optional.empty();
-        }
-    }
-
-    private ImmutableList<TermPair> convertIntoPairs(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        ImmutableList.Builder<TermPair> listBuilder = ImmutableList.builder();
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            listBuilder.add(new TermPair(entry.getKey(), entry.getValue()));
-        }
-        return listBuilder.build();
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> convertPairs2Substitution(List<TermPair> pairs)
-            throws UnificationException {
-        Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
-        for(TermPair pair : pairs) {
-            if (!substitutionMap.containsKey(pair.leftVariable)) {
-                substitutionMap.put(pair.leftVariable, pair.rightTerm);
-            }
-            else if (!substitutionMap.get(pair.leftVariable).equals(pair.rightTerm)) {
-                throw new UnificationException();
-            }
-        }
-        return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
-    }
 
     public static class ArgumentMapUnification {
         public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
@@ -396,4 +134,89 @@ public class ImmutableUnificationTools {
             this.substitution = substitution;
         }
     }
+
+
+
+
+    private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm)
+            return ((ImmutableFunctionalTerm)term).getTerms().stream()
+                    .anyMatch(t -> variableOccursInTerm(v, t));
+        return v.equals(term);
+    }
+
+    /**
+     * Recursive
+     */
+    private ImmutableTerm apply(ImmutableTerm t, ImmutableMap<Variable, ImmutableTerm> sub) {
+        if (sub.isEmpty())
+            return t;
+
+        if (t instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)t;
+            ImmutableList<ImmutableTerm> terms = f.getTerms().stream()
+                    .map(tt -> apply(tt, sub))
+                    .collect(ImmutableCollectors.toList());
+            return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), terms);
+        }
+        return sub.getOrDefault(t, t);
+    }
+
+
+    /**
+     * Creates a unifier for args1 and args2
+     *
+     * The operation is as follows
+     *
+     * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
+     *
+     * @return true the substitution (of null if it does not)
+     */
+
+    private ImmutableMap<Variable, ImmutableTerm> unify(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.size() != args2.size())
+            return null;
+
+        int arity = args1.size();
+        for (int i = 0; i < arity; i++) {
+            // applying the computed substitution first
+            ImmutableTerm term1 = apply(args1.get(i), sub);
+            ImmutableTerm term2 = apply(args2.get(i), sub);
+
+            if (term1.equals(term2))
+                continue;
+
+            // Special case: unification of two functional terms (possibly recursive)
+            if ((term1 instanceof ImmutableFunctionalTerm) && (term2 instanceof ImmutableFunctionalTerm)) {
+                ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
+                ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
+                if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
+                    return null;
+
+                sub = unify(sub, f1.getTerms(), f2.getTerms());
+                if (sub == null)
+                    return null;
+            }
+            else {
+                ImmutableMap<Variable, ImmutableTerm> s;
+                // avoid unifying x with f(g(x))
+                if (term1 instanceof Variable && !variableOccursInTerm((Variable) term1, term2))
+                    s = ImmutableMap.of((Variable) term1, term2);
+                else if (term2 instanceof Variable && !variableOccursInTerm((Variable) term2, term1))
+                    s = ImmutableMap.of((Variable) term2, term1);
+                else
+                    return null; // neither is a variable, impossible to unify distinct terms
+
+                sub = Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
+                                .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
+                                // The substitution for the current variable has become
+                                // trivial, e.g., x/x with the current composition. We
+                                // remove it to keep only a non-trivial unifier
+                                .filter(e -> !e.getValue().equals(e.getKey())))
+                        .collect(ImmutableCollectors.toMap());
+            }
+        }
+        return sub;
+    }
+
 }

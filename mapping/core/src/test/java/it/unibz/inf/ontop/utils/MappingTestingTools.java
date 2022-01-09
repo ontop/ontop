@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
 
 
@@ -36,8 +35,6 @@ public class MappingTestingTools {
     public static final CoreSingletons CORE_SINGLETONS;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
-
-    public static final UnifierUtilities UNIFIER_UTILITIES;
 
     public static final FactExtractor FACT_EXTRACTOR;
     public static final FactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
@@ -84,8 +81,6 @@ public class MappingTestingTools {
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 
         EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
-
-        UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 

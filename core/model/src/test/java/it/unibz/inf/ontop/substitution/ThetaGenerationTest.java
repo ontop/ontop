@@ -40,16 +40,9 @@ public class ThetaGenerationTest extends TestCase {
 	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
 	private Vector<Map.Entry<Variable, ImmutableTerm>> getMGUAsVector(ImmutableFunctionalTerm t1, ImmutableFunctionalTerm t2) {
-		Optional<ImmutableSubstitution<ImmutableTerm>> mgu = UNIFIER_UTILITIES.getMGU(
+		Optional<ImmutableSubstitution<ImmutableTerm>> mgu = UNIFICATION_TOOLS.computeMGU(
 				ImmutableList.of(t1), ImmutableList.of(t2));
-		Vector<Map.Entry<Variable, ImmutableTerm>> computedmgu;
-		if (!mgu.isPresent()) {
-			computedmgu = null;
-		}
-		else {
-			computedmgu = new Vector<>(mgu.get().getImmutableMap().entrySet());
-		}
-		return computedmgu;
+		return mgu.map(s -> new Vector<>(s.getImmutableMap().entrySet())).orElse(null);
 	}
 
 	private static FunctionSymbol createClassLikePredicate(String name) {
@@ -61,8 +54,6 @@ public class ThetaGenerationTest extends TestCase {
 
 	//A(x),A(x)
 	public void test_1(){
-
-		try {
 			ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
 			ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
 
@@ -76,18 +67,10 @@ public class ThetaGenerationTest extends TestCase {
 
 			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(0, s.size());
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
-
 	}
 
 	//A(x),A(y)
 	public void test_2(){
-
-		try {
 			ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
 			ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
 
@@ -108,11 +91,6 @@ public class ThetaGenerationTest extends TestCase {
 
 			assertEquals("y", ((Variable) t).getName());
 			assertEquals("x", v.getName());
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
 	}
 
 
@@ -253,8 +231,6 @@ public class ThetaGenerationTest extends TestCase {
 
 	//A('y'),A('x')
 	public void test_8(){
-
-		try {
 			ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("x", XSD.STRING);
 			ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
@@ -268,17 +244,10 @@ public class ThetaGenerationTest extends TestCase {
 
 			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertNull(s);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
 	}
 
 	//A('y'),A(p(x))
 	public void test_9(){
-
-		try {
 			ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 			ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
 
@@ -296,11 +265,6 @@ public class ThetaGenerationTest extends TestCase {
 
 			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertNull(s);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
 	}
 
 	//A(p(x)), A(x)
