@@ -159,7 +159,7 @@
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
-        <r2rml-api.version>0.6.0</r2rml-api.version>
+        <r2rml-api.version>0.8.0</r2rml-api.version>
         <rdf4j.version>3.3.0</rdf4j.version>
         <servlet-api.version>2.5</servlet-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
