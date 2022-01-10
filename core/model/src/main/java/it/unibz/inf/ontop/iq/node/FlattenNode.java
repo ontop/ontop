@@ -20,7 +20,7 @@ import java.util.Optional;
  *
  * Then the query:
  *   FLATTEN [ O/flatten(Y) ]
- *   R(X,Y)
+ *     R(X,Y)
  *
  * evaluated over R yields the relation R': {
  *     (1, a),
@@ -35,7 +35,7 @@ import java.util.Optional;
  *
  * So the query:
  *   FLATTEN STRICT [ O/flatten(Y) ]
- *   R(X,Y)
+ *     R(X,Y)
  *
  * evaluated over R yields the relation: {
  *     (1, a),
@@ -48,7 +48,7 @@ import java.util.Optional;
  *
  * So the query:
  *   FLATTEN [ O/flatten(Y), I/indexIn(Y) ]
- *   R(X,Y)
+ *     R(X,Y)
  *
  * evaluated over R yields the relation R'': {
  *     (1, a, 0),

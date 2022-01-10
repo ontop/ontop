@@ -85,16 +85,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
-            return transformFlattenNode(tree, node, child);
-        }
-
-        @Override
-        public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
-            return transformFlattenNode(tree, node, child);
-        }
-
-        @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
             if (substitutions.stream().allMatch(ImmutableSubstitution::isEmpty))
@@ -202,8 +192,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (empt(replacementVars))
                 return dn;
 
-            FilterNode filter = createFilter(dn.getDataAtom(), replacementVars);
-            DataAtom atom = replaceVars(dn.getDataAtom(), replacementVars);
+            FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
+            DataAtom atom = replaceVars(dn.getProjectionAtom(), replacementVars);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
@@ -320,28 +310,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private Optional<ImmutableExpression> getEquality(VariableOrGroundTerm t, Optional<Variable> replacement) {
             return replacement
                     .map(variable -> termFactory.getStrictEquality(t, variable));
-        }
-
-        private IQTree transformFlattenNode(IQTree tree, FlattenNode node, IQTree child) {
-
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(node.getDataAtom(), child.getVariables());
-
-            if (empt(replacementVars))
-                return tree;
-
-            FilterNode filter = createFilter(node.getDataAtom(), replacementVars);
-            DataAtom atom = replaceVars(node.getDataAtom(), replacementVars);
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(node.getDataAtom().getVariables()),
-                    iqFactory.createUnaryIQTree(
-                            filter,
-                            iqFactory.createUnaryIQTree(
-                                    node.newNode(
-                                            node.getFlattenedVariable(),
-                                            node.getArrayIndexIndex(),
-                                            atom),
-                                    child
-            )));
         }
     }
 
