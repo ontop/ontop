@@ -107,10 +107,6 @@
             <artifactId>jsonld-java</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.eclipse.rdf4j</groupId>-->
-<!--            <artifactId>rdf4j-util</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-model</artifactId>
