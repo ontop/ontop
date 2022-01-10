@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.jar.JarFile;
 
 public class QuestDatatypeTestUtils {
@@ -63,7 +64,7 @@ public class QuestDatatypeTestUtils {
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
 			try {
-				tmpDir = FileUtil.createTempDir("datatype-evaluation");
+				tmpDir = Files.createTempDirectory("datatype-evaluation").toFile();
 
 				JarURLConnection con = (JarURLConnection) url.openConnection();
 				JarFile jar = con.getJarFile();

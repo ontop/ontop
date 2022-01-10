@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.jar.JarFile;
 
 public class ParallelScenarioManifestTestUtils {
@@ -63,7 +64,7 @@ public class ParallelScenarioManifestTestUtils {
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
 			try {
-				tmpDir = FileUtil.createTempDir("scenario-evaluation");
+				tmpDir = Files.createTempDirectory("scenario-evaluation").toFile();
 
 				JarURLConnection con = (JarURLConnection) url.openConnection();
 				JarFile jar = con.getJarFile();
