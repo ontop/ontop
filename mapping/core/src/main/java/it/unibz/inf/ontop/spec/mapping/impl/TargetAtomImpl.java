@@ -45,12 +45,6 @@ public class TargetAtomImpl implements TargetAtom {
     }
 
     @Override
-    public TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution) {
-        return new TargetAtomImpl(renamingSubstitution.applyToDistinctVariableOnlyDataAtom(atom),
-                renamingSubstitution.applyRenaming(substitution));
-    }
-
-    @Override
     public TargetAtom changeSubstitution(ImmutableSubstitution<ImmutableTerm> newSubstitution) {
         return new TargetAtomImpl(atom, newSubstitution);
     }

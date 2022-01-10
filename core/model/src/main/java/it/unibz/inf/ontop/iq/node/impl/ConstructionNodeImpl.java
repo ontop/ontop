@@ -241,7 +241,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return childDefs.stream()
                 .map(childDef -> childDef.composeWith(substitution))
-                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(s -> s.filter(projectedVariables::contains))
                 .map(s -> s.getFragment(NonVariableTerm.class))
                 .collect(ImmutableCollectors.toSet());
     }
@@ -324,7 +324,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return shrunkChild;
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    substitution.simplifyValues(shrunkChild.getVariableNullability()), projectedVariables);
+                    substitution.transform(v -> v.simplify(shrunkChild.getVariableNullability())), projectedVariables);
 
             Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
 
@@ -374,7 +374,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                childConstructionNode.getSubstitution().composeWith(substitution).simplifyValues(grandChild.getVariableNullability()),
+                childConstructionNode.getSubstitution().composeWith(substitution).transform(v -> v.simplify(grandChild.getVariableNullability())),
                 projectedVariables
         );
 

@@ -94,10 +94,8 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
-            Optional<ImmutableExpression> expression = termFactory.getConjunction(
-                    Stream.concat(
-                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull),
-                            optionalFilterCondition.map(Stream::of).orElseGet(Stream::empty)));
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
+                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
 
             InnerJoinNode innerJoinNode = expression
                     .map(iqFactory::createInnerJoinNode)

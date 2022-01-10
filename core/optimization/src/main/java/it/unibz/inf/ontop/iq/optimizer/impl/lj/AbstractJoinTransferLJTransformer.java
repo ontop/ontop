@@ -297,12 +297,9 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 termFactory, substitutionFactory);
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
-                Stream.concat(
                         rootNode.getOptionalFilterCondition()
-                                .map(renamingAndEqualities.renamingSubstitution::applyToBooleanExpression)
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
-                        renamingAndEqualities.equalities.stream()));
+                                .map(renamingAndEqualities.renamingSubstitution::applyToBooleanExpression),
+                        renamingAndEqualities.equalities.stream());
 
 
         IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, transformedRightChild,
@@ -347,14 +344,11 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = renamingSubstitution.getImmutableMap().entrySet().stream()
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> termFactory.getIfElseNull(condition, e.getValue())
-                ));
+        ImmutableSubstitution<ImmutableTerm> substitution = renamingSubstitution
+                .filter(projectedVariables::contains)
+                .transform(v -> termFactory.getIfElseNull(condition, v));
 
-        return iqFactory.createConstructionNode(projectedVariables, substitutionFactory.getSubstitution(substitutionMap));
+        return iqFactory.createConstructionNode(projectedVariables, substitution);
     }
 
 

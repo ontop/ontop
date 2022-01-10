@@ -86,7 +86,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
         return projectedVariables.stream()
                 .map(renamingSubstitution::applyToVariable)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -123,7 +123,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
-                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        renamingSubstitution.applyToTerm(c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 

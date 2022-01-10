@@ -117,12 +117,10 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         ImmutableTerm objectDefinition = termFactory.getRDFLiteralFunctionalTerm(objectLexicalTerm, datatype);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                Stream.concat(
-                        topSubstitution.getImmutableMap().entrySet().stream()
-                                .filter(e -> !e.getKey().equals(objectVariable)),
-                        Stream.of(Maps.immutableEntry(objectVariable, objectDefinition)))
-                        .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = topSubstitution
+                .filter(v -> !v.equals(objectVariable))
+                .union(substitutionFactory.getSubstitution(objectVariable, objectDefinition))
+                .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen"));
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(

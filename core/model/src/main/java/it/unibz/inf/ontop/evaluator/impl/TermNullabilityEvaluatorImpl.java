@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 @Singleton
@@ -20,18 +21,13 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     private static final long TERM_EVALUATOR_CACHE_SIZE = 10000;
     private final SubstitutionFactory substitutionFactory;
-    private final Constant valueNull;
     private final CoreUtilsFactory coreUtilsFactory;
 
-    // Made stable in more recent versions of Guava (NB: we cannot update because of Protégé)
-    @SuppressWarnings("UnstableApiUsage")
     private final Cache<Map.Entry<ImmutableExpression, ImmutableSet<Variable>>, Boolean> cache;
 
     @Inject
-    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                                         CoreUtilsFactory coreUtilsFactory) {
+    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
         this.substitutionFactory = substitutionFactory;
-        this.valueNull = termFactory.getNullConstant();
         this.coreUtilsFactory = coreUtilsFactory;
         this.cache = CacheBuilder.newBuilder()
                 .maximumSize(TERM_EVALUATOR_CACHE_SIZE)
@@ -40,7 +36,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
+        ImmutableExpression nullCaseExpression = substitutionFactory.getNullSubstitution(Stream.of(variable))
                 .applyToBooleanExpression(expression);
 
         return nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
@@ -55,11 +51,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         if (cacheResult != null)
             return cacheResult;
 
-        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(
-                tightVariables.stream()
-                        .collect(ImmutableCollectors.toMap(
-                                v -> v,
-                                v -> valueNull)))
+        ImmutableExpression nullCaseExpression = substitutionFactory.getNullSubstitution(tightVariables.stream())
                 .applyToBooleanExpression(expression);
 
         boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))

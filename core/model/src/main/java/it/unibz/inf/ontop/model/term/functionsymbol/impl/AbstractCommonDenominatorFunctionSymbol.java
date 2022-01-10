@@ -153,8 +153,8 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
                                                        ImmutableList<Variable> subVariables,
                                                        TypeConstantDictionary dictionary, TermFactory termFactory) {
         return termFactory.getConjunction(IntStream.range(0, constants.size())
-                .mapToObj(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i)))))
-                .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty stream"));
+                .mapToObj(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i))))
+                .collect(ImmutableCollectors.toList()));
     }
 
     protected abstract Optional<RDFTermTypeConstant> evaluateCombination(ImmutableList<RDFTermTypeConstant> constants,

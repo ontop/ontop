@@ -76,17 +76,9 @@ public class SubstitutionTest {
     public void testOrientate4() {
         ImmutableList<Variable> priorityVariables = ImmutableList.of(X, Y, Z);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        X,W,
-                        Y,Z
-                ));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(X,W, Y,Z);
 
-        ImmutableSubstitution<ImmutableTerm> expectedSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        W,X,
-                        Z,Y
-                ));
+        ImmutableSubstitution<ImmutableTerm> expectedSubstitution = SUBSTITUTION_FACTORY.getSubstitution(W,X, Z,Y);
 
         runTests(priorityVariables, initialSubstitution, expectedSubstitution);
     }
@@ -95,17 +87,9 @@ public class SubstitutionTest {
     public void testOrientate5() {
         ImmutableList<Variable> priorityVariables = ImmutableList.of(X, Y, Z);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        X,W,
-                        Z,Y
-                ));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(X,W, Z,Y);
 
-        ImmutableSubstitution<ImmutableTerm> expectedSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        W,X,
-                        Z,Y
-                ));
+        ImmutableSubstitution<ImmutableTerm> expectedSubstitution = SUBSTITUTION_FACTORY.getSubstitution(W,X, Z,Y);
 
         runTests(priorityVariables, initialSubstitution, expectedSubstitution);
     }
@@ -115,11 +99,7 @@ public class SubstitutionTest {
     public void testOrientate6() {
         ImmutableList<Variable> priorityVariables = ImmutableList.of();
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        X,W,
-                        Z,Y
-                ));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(X,W, Z,Y);
 
         runTests(priorityVariables, initialSubstitution, initialSubstitution);
     }
@@ -128,11 +108,7 @@ public class SubstitutionTest {
     public void testOrientate7() {
         ImmutableList<Variable> priorityVariables = ImmutableList.of(X, Y, Z);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        X, Y,
-                        Y, ONE
-                ));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y, Y, ONE);
 
         runTestsWithExpectedRejection(priorityVariables, initialSubstitution);
     }
@@ -141,11 +117,7 @@ public class SubstitutionTest {
     public void testOrientate8() {
         ImmutableList<Variable> priorityVariables = ImmutableList.of(X, Y, Z);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                ImmutableMap.of(
-                        X, TERM_FACTORY.getDBIsNotNull(Y),
-                        Y, ONE
-                ));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBIsNotNull(Y), Y, ONE);
 
         runTestsWithExpectedRejection(priorityVariables, initialSubstitution);
     }

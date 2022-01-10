@@ -171,25 +171,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .immutableCopy();
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
-                .map(s -> s.reduceDomainToIntersectionWith(rightSpecificVariables))
+                .map(s -> s.filter(rightSpecificVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
         if (leftDefs.isEmpty())
             return rightDefs;
-        else if (rightDefs.isEmpty())
-            return leftDefs;
-        else
-            return leftDefs.stream()
-                    .flatMap(l -> rightDefs.stream()
-                            .map(r -> combine(l, r)))
-                    .collect(ImmutableCollectors.toSet());
-    }
 
-    private ImmutableSubstitution<NonVariableTerm> combine(ImmutableSubstitution<NonVariableTerm> l,
-                                                           ImmutableSubstitution<NonVariableTerm> r) {
-        return l.union(r)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "Unexpected conflict between " + l + " and " + r));
+        if (rightDefs.isEmpty())
+            return leftDefs;
+
+        return leftDefs.stream()
+                    .flatMap(l -> rightDefs.stream()
+                            .map(r -> l.union(r).orElseThrow(() -> new MinorOntopInternalBugException(
+                                                    "Unexpected conflict between " + l + " and " + r))))
+                    .collect(ImmutableCollectors.toSet());
     }
 
 
@@ -290,12 +285,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
                 Optional<ConstructionNode> constructionNode = Optional.of(projectedVariables)
                         .filter(vars -> !leftVariables.containsAll(vars))
-                        .map(vars -> substitutionFactory.getSubstitution(
+                        .map(vars -> substitutionFactory.getNullSubstitution(
                                 projectedVariables.stream()
-                                        .filter(v -> !leftVariables.contains(v))
-                                        .collect(ImmutableCollectors
-                                                .toMap(v -> v,
-                                                        v -> (ImmutableTerm) termFactory.getNullConstant()))))
+                                        .filter(v -> !leftVariables.contains(v))))
                         .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
                 return constructionNode
@@ -498,32 +490,28 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                     args -> (Variable) args.get(0),
                                     args -> (VariableOrGroundTerm) args.get(1))));
 
-        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                expressions.stream()
-                        .filter(e -> (!downSubstitutionExpressions.contains(e))
-                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains)))
+        Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
+                        .filter(e -> !downSubstitutionExpressions.contains(e)
+                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains))
+                        .collect(ImmutableCollectors.toList()))
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction)
                 .map(downSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
     }
 
     private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
-        Constant nullConstant = termFactory.getNullConstant();
-
         ImmutableSet<Variable> constraintVariables = constraint.getVariables();
 
-        ImmutableMap<Variable, Constant> nullSubstitutionMap = Sets.difference(
-                    rightChild.getVariables(),
-                    leftChild.getVariables()).stream()
+        ImmutableSet<Variable> nullVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables()).stream()
                 .filter(constraintVariables::contains)
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> nullConstant));
+                .collect(ImmutableCollectors.toSet());
 
-        if (nullSubstitutionMap.isEmpty())
+        if (nullVariables.isEmpty())
             return false;
 
-        ImmutableExpression nullifiedExpression = substitutionFactory.getSubstitution(nullSubstitutionMap)
+        ImmutableExpression nullifiedExpression = substitutionFactory.getNullSubstitution(nullVariables.stream())
                 .applyToBooleanExpression(constraint);
 
         return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))

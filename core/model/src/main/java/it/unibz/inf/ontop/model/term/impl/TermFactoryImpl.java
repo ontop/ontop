@@ -192,8 +192,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions) {
-		return getConjunction(
-				Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
+		return getConjunction(Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
 				.collect(ImmutableCollectors.toList()));
 	}
 
@@ -202,6 +201,21 @@ public class TermFactoryImpl implements TermFactory {
 		ImmutableList<ImmutableExpression> conjuncts = expressionStream
 				.flatMap(ImmutableExpression::flattenAND)
 				.distinct()
+				.collect(ImmutableCollectors.toList());
+
+		return Optional.of(conjuncts)
+				.filter(c -> !c.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
+	public Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream) {
+		ImmutableList<ImmutableExpression> conjuncts = Stream.concat(
+						optionalExpression
+								.map(ImmutableExpression::flattenAND)
+								.orElseGet(Stream::empty),
+						expressionStream)
+				//.distinct()
 				.collect(ImmutableCollectors.toList());
 
 		return Optional.of(conjuncts)
@@ -387,7 +401,16 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNotNull(), immutableTerm);
 	}
 
-    @Override
+	@Override
+	public Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> stream) {
+		return Optional.of(stream
+						.map(this::getDBIsNotNull)
+						.collect(ImmutableCollectors.toList()))
+				.filter(l -> !l.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMd5(), stringTerm);
     }

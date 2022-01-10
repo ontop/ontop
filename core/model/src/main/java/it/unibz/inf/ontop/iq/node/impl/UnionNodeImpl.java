@@ -70,7 +70,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.getPossibleVariableDefinitions().stream())
-                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(s -> s.filter(projectedVariables::contains))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -486,7 +486,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
                 .map(c -> (ConstructionNode) c.getRootNode())
                 .map(ConstructionNode::getSubstitution)
-                .map(this::tmpNormalizeNullAndRDFConstantsInSubstitution)
+                .map(substitution -> substitution.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
@@ -497,7 +497,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
                 // Cleans up the temporary "normalization"
-                mergedSubstitution.simplifyValues());
+                mergedSubstitution.transform(v -> v.simplify()));
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
         UnionNode newUnionNode = iqFactory.createUnionNode(unionVariables);
@@ -530,16 +530,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 : Stream.of(child);
     }
 
-    private ImmutableSubstitution<ImmutableTerm> tmpNormalizeNullAndRDFConstantsInSubstitution(
-            ImmutableSubstitution<ImmutableTerm> substitution) {
-        return substitutionFactory.getSubstitution(
-                substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> normalizeNullAndRDFConstants(e.getValue())
-                )));
-    }
-
     /**
      * RDF constants are transformed into RDF ground terms
      * Trick: NULL --> RDF(NULL,NULL)
@@ -568,7 +558,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = projectedVariables.stream()
                 .flatMap(v -> mergeDefinitions(v, childSubstitutions, variableGenerator)
-                        .map(d -> Stream.of(new SimpleEntry<>(v, d)))
+                        .map(d -> Stream.of(Maps.immutableEntry(v, d)))
                         .orElseGet(Stream::empty))
                 .collect(ImmutableCollectors.toMap());
 
@@ -687,17 +677,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
         // this construction node
-        ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
-                substitutionFactory.getSubstitution(
-                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)
-                                substitutionPair.propagatedSubstitution.getImmutableMap());
+        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
+                substitutionPair.propagatedSubstitution.transform(v -> (VariableOrGroundTerm)v);
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                     // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
-                    substitutionPair.bindings.simplifyValues());
+                    substitutionPair.bindings.transform(v -> v.simplify()));
 
         return substitutionPair.bindings.isEmpty()
                 ? newChild

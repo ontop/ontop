@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -28,11 +30,14 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
+    private final AtomFactory atomFactory;
+
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
+                                    CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
         super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
+        this.atomFactory = atomFactory;
     }
 
     @Override
@@ -111,15 +116,16 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IntensionalDataNode newAtom(DataAtom newAtom) {
+    public IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom) {
         return iqFactory.createIntensionalDataNode(newAtom);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        DataAtom novelAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
-        return newAtom(novelAtom);
+        DataAtom<AtomPredicate> atom = getProjectionAtom();
+        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), descendingSubstitution.applyToArguments(atom.getArguments()));
+        return newAtom(newAtom);
     }
 
     /**

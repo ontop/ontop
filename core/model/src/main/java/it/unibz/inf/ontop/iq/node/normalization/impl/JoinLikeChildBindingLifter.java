@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -56,15 +55,16 @@ public class JoinLikeChildBindingLifter {
 
         ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFragment(ImmutableFunctionalTerm.class);
 
-
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
                 .mapToObj(children::get)
                 .flatMap(iq -> iq.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
-        InjectiveVar2VarSubstitution freshRenaming = computeOtherChildrenRenaming(nonDownPropagableFragment,
-                otherChildrenVariables, variableGenerator);
+        InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
+                nonDownPropagableFragment.getImmutableMap().keySet().stream()
+                        .filter(otherChildrenVariables::contains),
+                variableGenerator::generateNewVariableFromVar);
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
@@ -84,30 +84,14 @@ public class JoinLikeChildBindingLifter {
     }
 
     private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
-                                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                                                       ImmutableSubstitution<ImmutableTerm> substitution,
                                                                        InjectiveVar2VarSubstitution freshRenaming) {
-        Stream<ImmutableExpression> expressions = Stream.concat(
-                initialJoiningCondition
-                        .map(substitution::applyToBooleanExpression)
-                        .map(ImmutableExpression::flattenAND)
-                        .orElseGet(Stream::empty),
-                freshRenaming.getImmutableMap().entrySet().stream()
-                        .map(r -> termFactory.getStrictEquality(
-                                substitution.applyToVariable(r.getKey()),
-                                r.getValue())));
 
-        return termFactory.getConjunction(expressions);
-    }
+        Stream<ImmutableExpression> expressions2 = freshRenaming.getImmutableMap().entrySet().stream()
+                        .map(r -> termFactory.getStrictEquality(substitution.applyToVariable(r.getKey()), r.getValue()));
 
-    private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagatedFragment,
-                                                                      ImmutableSet<Variable> otherChildrenVariables,
-                                                                      VariableGenerator variableGenerator) {
-        ImmutableMap<Variable, Variable> substitutionMap = nonDownPropagatedFragment.getImmutableMap().keySet().stream()
-                .filter(otherChildrenVariables::contains)
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        variableGenerator::generateNewVariableFromVar));
-        return substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap);
+        return termFactory.getConjunction(
+                initialJoiningCondition.map(substitution::applyToBooleanExpression), expressions2);
     }
 
     @FunctionalInterface

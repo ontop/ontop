@@ -53,6 +53,13 @@ public interface TermFactory {
 	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
 	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the of the optional expression, BUT not of expressionStream
+	 */
+	Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream);
+
+	/**
 	 * Must be non-empty
 	 */
 	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
@@ -483,7 +490,9 @@ public interface TermFactory {
 	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
 	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
 
-    ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
+	Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> immutableTerms);
+
+	ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);

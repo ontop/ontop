@@ -77,13 +77,14 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
 
         RDFTermTypeConstant xsdStringConstant = termFactory.getRDFTermTypeConstant(xsdStringType);
 
-        Stream<ImmutableExpression> conditionStream = Stream.concat(
+        ImmutableList<ImmutableExpression> conditions = Stream.concat(
                 Stream.of(termFactory.getIsAExpression(typeTerms.get(0), xsdStringType)),
                 typeTerms.stream()
                         .skip(1)
-                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)));
+                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)))
+                .collect(ImmutableCollectors.toList());
 
-        return termFactory.getConjunction(conditionStream).get()
+        return termFactory.getConjunction(conditions)
                 .evaluate(variableNullability);
     }
 }

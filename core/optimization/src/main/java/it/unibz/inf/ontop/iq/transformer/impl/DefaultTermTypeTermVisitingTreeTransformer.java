@@ -120,19 +120,11 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .map(n -> (ConstructionNode)n)
                 .map(ConstructionNode::getSubstitution)
                 .filter(s -> !s.isEmpty())
-                .map(this::replaceTypeTermConstants)
+                .map(s -> s.transform(this::replaceTypeTermConstants))
                 .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                 .filter(n -> !n.equals(child.getRootNode()))
                 .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
                 .orElse(child);
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> replaceTypeTermConstants(ImmutableSubstitution<ImmutableTerm> substitution) {
-        return substitutionFactory.getSubstitution(
-                substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> replaceTypeTermConstants(e.getValue()))));
     }
 
     /**
@@ -203,18 +195,14 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = initialConstructionNode.getSubstitution().getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> Optional.ofNullable(typeFunctionSymbolMap.get(e.getKey()))
-                                // RDF type definition
-                                .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(e.getValue(), functionSymbol))
-                                // Regular definition
-                                .orElse(e.getValue())));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().transform(
+                (k, v) -> Optional.ofNullable(typeFunctionSymbolMap.get(k))
+                        // RDF type definition
+                        .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(v, functionSymbol))
+                        // Regular definition
+                        .orElse(v));
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                tree.getVariables(),
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(tree.getVariables(),newSubstitution);
 
         return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree)tree).getChild());
     }

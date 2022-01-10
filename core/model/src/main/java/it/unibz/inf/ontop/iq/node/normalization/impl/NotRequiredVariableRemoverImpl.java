@@ -165,11 +165,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         public IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(aggregationNode.getGroupingVariables(),
                     // Can only concern variables from the substitutions, the grouping ones being required
-                    substitutionFactory.getSubstitution(
-                            aggregationNode.getSubstitution().getImmutableMap().entrySet().stream()
-                                    .filter(e -> !variablesToRemove.contains(e.getKey()))
-                                    .collect(ImmutableCollectors.toMap())
-                    ));
+                    aggregationNode.getSubstitution().filter(k -> !variablesToRemove.contains(k)));
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return iqFactory.createUnaryIQTree(newAggregationNode, child)
