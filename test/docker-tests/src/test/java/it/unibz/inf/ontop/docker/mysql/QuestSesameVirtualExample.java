@@ -85,7 +85,7 @@ public class QuestSesameVirtualExample {
 		/*
 		 * Repository must be always initialized first
 		 */
-		repo.initialize();
+		repo.init();
 
 		/*
 		 * Get the repository connection
@@ -178,7 +178,7 @@ public class QuestSesameVirtualExample {
 		/*
 		 * Repository must be always initialized first
 		 */
-		repo.initialize();
+		repo.init();
 
 		/*
 		 * Get the repository connection

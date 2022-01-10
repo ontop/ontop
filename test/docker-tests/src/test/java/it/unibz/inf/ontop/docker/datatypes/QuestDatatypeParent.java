@@ -54,6 +54,8 @@ import java.util.Set;
 
 
 public abstract class QuestDatatypeParent extends TestCase {
+	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
+
 	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeParent.class);
 
 	protected final String testURI;
@@ -117,7 +119,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 				configBuilder.propertyFile(parameterFileURL);
 
 		OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
-		repo.initialize();
+		repo.init();
 		return repo;
 	}
 
@@ -263,7 +265,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 		// Read manifest and create declared test cases
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		QuestDatatypeTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -288,7 +290,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
 		query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
 		query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
 		logger.debug("Evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -325,7 +327,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
 		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
+		TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
 		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {

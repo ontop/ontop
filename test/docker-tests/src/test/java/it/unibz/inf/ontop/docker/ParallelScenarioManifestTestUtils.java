@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.docker;
 import it.unibz.inf.ontop.docker.testsuite.ParallelScenarioTest;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.common.io.FileUtil;
 import org.eclipse.rdf4j.common.io.ZipUtil;
 import org.eclipse.rdf4j.model.Resource;
@@ -51,6 +50,7 @@ import java.net.URL;
 import java.util.jar.JarFile;
 
 public class ParallelScenarioManifestTestUtils {
+	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger logger = LoggerFactory.getLogger(ParallelScenarioManifestTestUtils.class);
 
@@ -99,7 +99,7 @@ public class ParallelScenarioManifestTestUtils {
 		};
 
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		addTurtle(con, new URL(manifestFile), manifestFile);
@@ -108,7 +108,7 @@ public class ParallelScenarioManifestTestUtils {
 				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
 				+ "  qt = <http://obda.org/quest/tests/test-query#>";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
@@ -131,7 +131,6 @@ public class ParallelScenarioManifestTestUtils {
 		}
 
 		try (InputStream in = url.openStream()) {
-			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 			

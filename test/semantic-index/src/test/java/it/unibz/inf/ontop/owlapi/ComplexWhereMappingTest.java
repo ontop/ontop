@@ -120,7 +120,7 @@ public class ComplexWhereMappingTest {
 			OWLLiteral val = bindingSet.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
-			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
+			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().render(val));
 		}
 		finally {
 			reasoner.dispose();

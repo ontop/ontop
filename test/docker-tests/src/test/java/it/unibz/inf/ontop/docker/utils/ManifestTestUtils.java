@@ -19,6 +19,7 @@ import java.util.List;
 import static it.unibz.inf.ontop.docker.ScenarioManifestTestUtils.addTurtle;
 
 public class ManifestTestUtils {
+    private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
     static final Logger LOGGER = LoggerFactory.getLogger(ManifestTestUtils.class);
 
@@ -33,7 +34,7 @@ public class ManifestTestUtils {
                     + ".\nPlease make sure resources have been generated");
 
         Repository manifestRep = new SailRepository(new MemoryStore());
-        manifestRep.initialize();
+        manifestRep.init();
         RepositoryConnection con = manifestRep.getConnection();
 
         String manifestFile = url.toString();
@@ -43,7 +44,7 @@ public class ManifestTestUtils {
                 + "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
                 + "  qt = <http://obda.org/quest/tests/test-query#>";
 
-        TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
+        TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
         List<Object[]> testCaseParameters = Lists.newArrayList();
         while (manifestResults.hasNext()) {
             BindingSet bindingSet = manifestResults.next();
@@ -75,7 +76,7 @@ public class ManifestTestUtils {
 
         // Read manifest and create declared test cases
         Repository manifestRep = new SailRepository(new MemoryStore());
-        manifestRep.initialize();
+        manifestRep.init();
         RepositoryConnection con = manifestRep.getConnection();
 
         String manifestName = getManifestName(manifestRep, con, subManifestFileURL.toString());
@@ -100,7 +101,7 @@ public class ManifestTestUtils {
         query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
         query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
         query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-        TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+        TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
         LOGGER.debug("Evaluating query..");
         TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -135,9 +136,9 @@ public class ManifestTestUtils {
             throws QueryEvaluationException, RepositoryException, MalformedQueryException
     {
         // Try to extract suite name from manifest file
-        TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
+        TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
                 "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
+        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
         TupleQueryResult manifestNames = manifestNameQuery.evaluate();
         try {
             if (manifestNames.hasNext()) {

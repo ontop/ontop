@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.docker.QuestParallelScenario;
 import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -22,6 +22,8 @@ import java.util.List;
 
 @Ignore
 public class ParallelScenarioTest extends TestCase {
+    private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestParallelScenario.class);
 
 
@@ -46,7 +48,7 @@ public class ParallelScenarioTest extends TestCase {
 
         // Read manifest and create declared test cases
         Repository manifestRep = new SailRepository(new MemoryStore());
-        manifestRep.initialize();
+        manifestRep.init();
         RepositoryConnection con = manifestRep.getConnection();
 
         ScenarioManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -72,7 +74,7 @@ public class ParallelScenarioTest extends TestCase {
         query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
         query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
         query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-        TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+        TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
         LOGGER.debug("Evaluating query..");
         TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -93,7 +95,7 @@ public class ParallelScenarioTest extends TestCase {
         while (testCases.hasNext()) {
             BindingSet bindingSet = testCases.next();
 
-            URI testURI = (URI) bindingSet.getValue("testURI");
+            IRI testURI = (IRI) bindingSet.getValue("testURI");
             String testName = bindingSet.getValue("testName").toString();
             String resultFile = bindingSet.getValue("resultFile").toString();
             String queryFile = bindingSet.getValue("queryFile").toString();
@@ -151,9 +153,9 @@ public class ParallelScenarioTest extends TestCase {
             throws QueryEvaluationException, RepositoryException, MalformedQueryException
     {
         // Try to extract extractTest name from manifest file
-        TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
+        TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
                 "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
+        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
         TupleQueryResult manifestNames = manifestNameQuery.evaluate();
         try {
             if (manifestNames.hasNext()) {

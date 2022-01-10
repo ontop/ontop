@@ -149,6 +149,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+        if (node instanceof QueryRoot) {
+            return translate(((QueryRoot) node).getArg(), externalBindings);
+        }
 
         if (node instanceof StatementPattern){
             StatementPattern stmt = (StatementPattern)node;

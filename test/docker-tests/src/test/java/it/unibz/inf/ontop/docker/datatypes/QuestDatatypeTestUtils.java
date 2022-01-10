@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.docker.datatypes;
 import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.common.io.FileUtil;
 import org.eclipse.rdf4j.common.io.ZipUtil;
 import org.eclipse.rdf4j.model.Resource;
@@ -50,6 +49,7 @@ import java.net.URL;
 import java.util.jar.JarFile;
 
 public class QuestDatatypeTestUtils {
+	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeTestUtils.class);
 
@@ -101,7 +101,7 @@ public class QuestDatatypeTestUtils {
 		};
 
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		addTurtle(con, new URL(manifestFile), manifestFile);
@@ -110,7 +110,7 @@ public class QuestDatatypeTestUtils {
 				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
 				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
@@ -136,7 +136,6 @@ public class QuestDatatypeTestUtils {
 		InputStream in = url.openStream();
 
 		try {
-			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 			ParserConfig config = rdfParser.getParserConfig();

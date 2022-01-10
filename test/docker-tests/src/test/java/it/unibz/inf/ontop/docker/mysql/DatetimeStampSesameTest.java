@@ -46,7 +46,7 @@ public class DatetimeStampSesameTest  {
 				.build();
 
 		repository = OntopRepository.defaultRepository(configuration);
-		repository.initialize();
+		repository.init();
 	}
 	@Before
 	public void setUp() {

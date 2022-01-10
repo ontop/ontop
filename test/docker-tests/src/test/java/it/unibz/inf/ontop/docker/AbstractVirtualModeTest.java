@@ -100,7 +100,7 @@ public abstract class AbstractVirtualModeTest {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            return ToStringRenderer.getInstance().getRendering(ind1);
+            return ToStringRenderer.getInstance().render(ind1);
         }
     }
 

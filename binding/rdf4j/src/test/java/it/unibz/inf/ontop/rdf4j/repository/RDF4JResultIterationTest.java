@@ -87,7 +87,7 @@ public class RDF4JResultIterationTest {
                 .build();
 
         OntopRepository repo = OntopRepository.defaultRepository(configuration);
-        repo.initialize();
+        repo.init();
         /*
 		 * Prepare the data connection for querying.
 		 */

@@ -14,8 +14,8 @@ import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.*;
 import org.eclipse.rdf4j.queryrender.RenderUtils;
@@ -203,7 +203,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         Set<String> keys = namesp.keySet();
         for (String key : keys) {
             //convert into namespace objects
-            namespSet.add(new NamespaceImpl(key, namesp.get(key)));
+            namespSet.add(new SimpleNamespace(key, namesp.get(key)));
         }
         return new RepositoryResult<Namespace>(new CloseableIteratorIteration<Namespace, RepositoryException>(
                 namespSet.iterator()));
@@ -257,7 +257,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     @Override
     public ValueFactory getValueFactory() {
         //Gets a ValueFactory for this OntopRepositoryConnection.
-        return new ValueFactoryImpl();
+        return SimpleValueFactory.getInstance();
     }
 
     @Override
