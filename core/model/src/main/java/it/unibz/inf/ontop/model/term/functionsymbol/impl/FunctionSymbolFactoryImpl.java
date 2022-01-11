@@ -603,7 +603,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                              DBTermType targetType) {
-        return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
+        return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, metaRDFType, targetType,
+                dbFunctionSymbolFct);
     }
 
 }

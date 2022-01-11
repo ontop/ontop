@@ -462,11 +462,12 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1,
-																	  ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
+																	  ImmutableTerm inputRDFTypeTerm0, ImmutableTerm inputRDFTypeTerm1,
+																	  DBTermType targetType,
 																	  java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getBinaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
-				lexicalTerm0, lexicalTerm1, inputRDFTypeTerm);
+				lexicalTerm0, lexicalTerm1, inputRDFTypeTerm0, inputRDFTypeTerm1);
 	}
 
 	@Override
