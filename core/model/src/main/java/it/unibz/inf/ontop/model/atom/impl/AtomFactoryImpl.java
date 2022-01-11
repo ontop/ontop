@@ -114,14 +114,4 @@ public class AtomFactoryImpl implements AtomFactory {
                                                             Variable namedGraph) {
         return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
     }
-
-    @Override
-    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, ImmutableList<? extends VariableOrGroundTerm> args) {
-        return getDataAtom(pred, args);
-    }
-
-    @Override
-    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, VariableOrGroundTerm... args) {
-        return getFlattenNodeDataAtom(pred, ImmutableList.copyOf(args));
-    }
 }

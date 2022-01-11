@@ -59,8 +59,4 @@ public interface AtomFactory {
 
     DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                      Variable namedGraph);
-
-    DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, ImmutableList<? extends VariableOrGroundTerm> arguments);
-
-    DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, VariableOrGroundTerm ... argument);
 }

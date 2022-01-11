@@ -64,13 +64,20 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     /**
      * Affects (left) joins, data and flatten nodes.
+     *
      * - left join: if the same variable is returned by both operands (implicit equality),
-     * rename it (with a fresh variable each time) in each branch but the left one,
-     * and make the corresponding equalities explicit.
-     * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
-     * - data node or: if the data atom contains a ground term or a duplicate variable, create a variable and make the equality explicit (create a filter).
-     * - flatten node: identical to data node, but also applies to a variable appearing both in the data atom and the subtree
-     * If needed, creates a root projection to ensure that the transformed query has the same signature as the input one
+     * rename it (with a fresh variable) in the left branch, and make the corresponding equality explicit.
+     *
+     * - inner join: identical to left join, except that renaming is performed in each branch but the first where the variable appears.
+     *
+     * - data node or: if the data atom contains a ground term or a duplicate variable,
+     * create a variable and make the equality explicit by create a filter.
+     *
+     * - flatten node: rename in order of priority the output variable and/or the index variable,
+     * if they are identical and/or returned by the operand.
+     * Make the equalitie(s) explicit by creating a filter.
+     *
+     * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
     class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -388,17 +395,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             )),
                     trimRootFilter(child)
             );
-        }
-
-
-        @Override
-        public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
-            return transformFlattenNode(tree, node, child);
-        }
-
-        @Override
-        public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
-            return transformFlattenNode(tree, node, child);
         }
 
 

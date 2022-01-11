@@ -17,18 +17,14 @@ import org.junit.Test;
 
 import java.sql.Types;
 
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.FLATTEN_NODE_PRED_AR2;
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.FLATTEN_NODE_PRED_AR3;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.assertTrue;
 
 public class FlattenLiftTest {
 
 
-    private static final DBMetadata DB_METADATA;
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
     private static final RelationPredicate TABLE3_PREDICATE;
