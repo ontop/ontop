@@ -24,7 +24,6 @@ import static junit.framework.TestCase.assertTrue;
 
 public class LevelUpOptimizerTest {
 
-    private static final DBMetadata DB_METADATA;
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
     private static final RelationPredicate TABLE3_PREDICATE;

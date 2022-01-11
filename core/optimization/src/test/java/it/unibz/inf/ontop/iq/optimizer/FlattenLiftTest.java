@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -11,11 +13,14 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
 
 import java.sql.Types;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -24,12 +29,15 @@ import static junit.framework.TestCase.assertTrue;
 
 public class FlattenLiftTest {
 
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE3;
+    private final static NamedRelationDefinition TABLE4;
 
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
     private static final RelationPredicate TABLE3_PREDICATE;
     private static final RelationPredicate TABLE4_PREDICATE;
-//    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
 
@@ -54,52 +62,43 @@ public class FlattenLiftTest {
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
-    private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1");
-    private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        /*
-          Table 1: non-composite unique constraint and regular field
-         */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
+        TABLE1 = builder.createDatabaseRelation( "TABLE1",
+                "pk", integerDBType, false,
+                "arr", arrayDBType, true,
+                "col3", integerDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
-        Attribute col1T2 = table2Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, true);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
-        TABLE2_PREDICATE = table2Def.getAtomPredicate();
+        TABLE2 = builder.createDatabaseRelation( "TABLE2",
+                "pk", integerDBType, false,
+                "col2", integerDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        TABLE3_PREDICATE = table3Def.getAtomPredicate();
+        TABLE3 = builder.createDatabaseRelation( "TABLE3",
+                "pk", integerDBType, false,
+                "arr", arrayDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table4Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table4Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
-        table4Def.addAttribute(idFactory.createAttributeID("arr3"), Types.ARRAY, null, true);
-        table4Def.addAttribute(idFactory.createAttributeID("arr4"), Types.ARRAY, null, true);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        TABLE4_PREDICATE = table4Def.getAtomPredicate();
+        TABLE4 = builder.createDatabaseRelation( "TABLE4",
+                "pk", integerDBType, false,
+                "arr1", arrayDBType, true,
+                "arr2", arrayDBType, true,
+                "arr3", arrayDBType, true,
+                "arr4", arrayDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
 
-        dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
     }
 
 
     @Test
     public void testFlattenWithoutFilteringCondition1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
@@ -107,22 +106,19 @@ public class FlattenLiftTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(rootNode, joinNode);
 
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, B));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
         queryBuilder.addChild(joinNode, leftDataNode);
 
-        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, E));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(Y, F, Optional.empty(), true);
         queryBuilder.addChild(joinNode, flattenNode);
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, C));
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X,F,C));
         queryBuilder.addChild(flattenNode, rightDataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, flattenNode);
         expectedQueryBuilder.addChild(flattenNode, joinNode);
@@ -136,31 +132,28 @@ public class FlattenLiftTest {
 
     @Test
     public void testFlattenWithoutFilteringCondition2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, C, ONE);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(C, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression);
         queryBuilder.addChild(rootNode, joinNode);
 
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, B));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
         queryBuilder.addChild(joinNode, leftDataNode);
 
-        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, E));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(Y, F, Optional.empty(), true);
         queryBuilder.addChild(joinNode, flattenNode);
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, C));
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X,F, C));
         queryBuilder.addChild(flattenNode, rightDataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, flattenNode);
         expectedQueryBuilder.addChild(flattenNode, joinNode);
@@ -174,7 +167,7 @@ public class FlattenLiftTest {
 
     @Test
     public void testFlattenWithFilteringCondition1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
