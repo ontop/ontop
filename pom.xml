@@ -769,7 +769,7 @@
             
             <!-- Teiid -->
             <dependency>
-			    <groupId>org.teiid</groupId>
+                <groupId>org.teiid</groupId>
                 <artifactId>teiid-api</artifactId>
                 <version>${teiid.version}</version>
             </dependency>
@@ -786,6 +786,16 @@
             <dependency>
                 <groupId>org.teiid</groupId>
                 <artifactId>cache-caffeine</artifactId>
+                <version>${teiid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teiid</groupId>
+                <artifactId>teiid-engine</artifactId>
+                <version>${teiid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teiid</groupId>
+                <artifactId>teiid-client</artifactId>
                 <version>${teiid.version}</version>
             </dependency>
             <dependency>
@@ -1165,11 +1175,6 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.checkerframework</groupId>
-                <artifactId>checker-qual</artifactId>
-                <version>${checker-qual.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>

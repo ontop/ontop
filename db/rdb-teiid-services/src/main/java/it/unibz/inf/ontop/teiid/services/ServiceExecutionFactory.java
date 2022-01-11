@@ -1,10 +1,16 @@
 package it.unibz.inf.ontop.teiid.services;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -13,12 +19,12 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Booleans;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.teiid.core.types.DataTypeManager;
 import org.teiid.language.AndOr;
 import org.teiid.language.Argument;
@@ -27,6 +33,7 @@ import org.teiid.language.Call;
 import org.teiid.language.ColumnReference;
 import org.teiid.language.Command;
 import org.teiid.language.Comparison;
+import org.teiid.language.Comparison.Operator;
 import org.teiid.language.Condition;
 import org.teiid.language.Delete;
 import org.teiid.language.DerivedColumn;
@@ -34,16 +41,24 @@ import org.teiid.language.Expression;
 import org.teiid.language.ExpressionValueSource;
 import org.teiid.language.Insert;
 import org.teiid.language.InsertValueSource;
+import org.teiid.language.Limit;
 import org.teiid.language.Literal;
 import org.teiid.language.NamedTable;
+import org.teiid.language.OrderBy;
 import org.teiid.language.Parameter;
 import org.teiid.language.QueryExpression;
 import org.teiid.language.Select;
+import org.teiid.language.SortSpecification;
+import org.teiid.language.SortSpecification.NullOrdering;
+import org.teiid.language.SortSpecification.Ordering;
 import org.teiid.language.TableReference;
+import org.teiid.metadata.BaseColumn.NullType;
+import org.teiid.metadata.Column;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.RuntimeMetadata;
 import org.teiid.metadata.Table;
+import org.teiid.query.processor.relational.ListNestedSortComparator;
 import org.teiid.translator.DataNotAvailableException;
 import org.teiid.translator.ExecutionContext;
 import org.teiid.translator.ExecutionFactory;
@@ -56,11 +71,12 @@ import org.teiid.translator.UpdateExecution;
 
 import it.unibz.inf.ontop.teiid.services.invokers.ServiceInvoker;
 import it.unibz.inf.ontop.teiid.services.model.Attribute;
+import it.unibz.inf.ontop.teiid.services.model.Attribute.Role;
+import it.unibz.inf.ontop.teiid.services.model.Datatype;
 import it.unibz.inf.ontop.teiid.services.model.Signature;
 import it.unibz.inf.ontop.teiid.services.model.Tuple;
+import it.unibz.inf.ontop.teiid.services.util.Iteration;
 
-// TODO implement limit
-// TODO implement order by
 // TODO implement batched updates
 // TODO implement bulk update
 // TODO implement getCacheDirective
@@ -68,8 +84,6 @@ import it.unibz.inf.ontop.teiid.services.model.Tuple;
 @Translator(name = "service")
 public class ServiceExecutionFactory
         extends ExecutionFactory<ServiceConnectionFactory, ServiceConnection> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceExecutionFactory.class);
 
     private static final String OPERATION_SELECT = "select";
 
@@ -94,6 +108,16 @@ public class ServiceExecutionFactory
     }
 
     @Override
+    public boolean supportsCompareCriteriaOrdered() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCompareCriteriaOrderedExclusive() {
+        return true;
+    }
+
+    @Override
     public boolean supportsIsNullCriteria() {
         return true;
     }
@@ -108,11 +132,6 @@ public class ServiceExecutionFactory
         return true; // required for bulk calls
     }
 
-    // @Override
-    // public boolean supportsFullDependentJoins() {
-    // return true; // TODO may want to support this too
-    // }
-
     @Override
     public boolean supportsRowLimit() {
         return true;
@@ -121,6 +140,18 @@ public class ServiceExecutionFactory
     @Override
     public boolean supportsRowOffset() {
         return true;
+    }
+
+    @Override
+    public boolean supportsOrderByNullOrdering() {
+        // Required as Ontop usually specify NULLS FIRST/LAST and without this flag sorting will
+        // be always done inside TEIID
+        return true;
+    }
+
+    @Override
+    public NullOrder getDefaultNullOrder() {
+        return NullOrder.UNKNOWN; // Depends on the service
     }
 
     @Override
@@ -186,7 +217,7 @@ public class ServiceExecutionFactory
             inputTuple.set(name, value);
         }
 
-        return new ServiceExecution(invoker, ImmutableList.of(inputTuple), null);
+        return new ProcedureExecutionImpl(() -> invoker.invoke(inputTuple));
     }
 
     @Nullable
@@ -230,6 +261,7 @@ public class ServiceExecutionFactory
             outputAttrs.add(a);
             outputAttrsList.add(Attribute.create(a, DataTypeManager.getDataTypeName(e.getType())));
         }
+        final Signature outputSignature = Signature.forAttributes(outputAttrsList);
 
         // Process the WHERE clause, extracting <column, constant|parameter> pairs
         final Map<String, Expression> inputAttrs = getConstraints(select.getWhere());
@@ -237,20 +269,125 @@ public class ServiceExecutionFactory
             return null;
         }
 
+        // Process the ORDER BY clause, delegating it to the service if possible
+        OrderBy orderBy = select.getOrderBy();
+        if (orderBy != null && orderBy.getSortSpecifications().isEmpty()) {
+            orderBy = null; // no need to apply, ignore
+        }
+        boolean orderByDelegable = false;
+        if (orderBy != null && orderBy.getSortSpecifications().size() == 1) {
+            final SortSpecification ss = orderBy.getSortSpecifications().get(0);
+            if (ss.getExpression() instanceof ColumnReference) {
+                final Column column = ((ColumnReference) ss.getExpression()).getMetadataObject();
+                if (column.getNullType() == NullType.No_Nulls) {
+                    orderByDelegable = true;
+                    inputAttrs.put(Role.SORT_BY.getPrefix(),
+                            new Literal(column.getName(), Datatype.STRING.getValueClass()));
+                    inputAttrs.put(Role.SORT_ASC.getPrefix(), new Literal(
+                            ss.getOrdering() == Ordering.ASC, Datatype.BOOLEAN.getValueClass()));
+                }
+            }
+        }
+
+        // Process the LIMIT clause, delegating it to the service if possible
+        Limit limit = select.getLimit();
+        if (limit != null && limit.getRowOffset() <= 0 && limit.getRowLimit() < 0) {
+            limit = null; // no need to apply, ignore
+        }
+        if (limit != null) {
+            inputAttrs.put(Role.OFFSET.getPrefix(),
+                    new Literal(limit.getRowOffset(), Datatype.INTEGER.getValueClass()));
+            inputAttrs.put(Role.LIMIT.getPrefix(),
+                    new Literal(limit.getRowLimit(), Datatype.INTEGER.getValueClass()));
+        }
+
         // Lookup a procedure/service matching the given table, input columns, output columns
         final Procedure proc = getProcedure(table, "select", inputAttrs.keySet(), outputAttrs);
         if (proc == null) {
             return null;
         }
-        ServiceInvoker invoker = conn.getFactory().getInvoker(proc);
+        final ServiceInvoker invoker = conn.getFactory().getInvoker(proc);
+        final Signature srvInputSignature = invoker.getService().getInputSignature();
+        final Signature srvOutputSignature = invoker.getService().getOutputSignature();
+        final Signature srvMergedSignature = Signature
+                .join(ImmutableList.of(srvOutputSignature, srvInputSignature));
+
+        // Determine which kind of post-processing FILTER is needed
+        final Map<String, Expression> postProcessFilter = Maps.newHashMap();
+        for (final Entry<String, Expression> e : inputAttrs.entrySet()) {
+            final Role role = Role.decodeAttributeName(e.getKey()).getKey();
+            if (!srvInputSignature.has(e.getKey()) && (role == Role.EQUAL
+                    || role == Role.MAX_EXCLUSIVE || role == Role.MAX_INCLUSIVE
+                    || role == Role.MIN_EXCLUSIVE || role == Role.MIN_INCLUSIVE)) {
+                if (!(e.getValue() instanceof Literal)) {
+                    return null; // TODO: should handle this case by exploding call
+                }
+                postProcessFilter.put(e.getKey(), e.getValue());
+            }
+        }
+
+        // Decide whether post-processing ORDER BY is needed
+        final OrderBy postProcessOrderBy = orderBy == null
+                || orderByDelegable && srvInputSignature.has(Role.SORT_BY.getPrefix())
+                        && srvInputSignature.has(Role.SORT_ASC.getPrefix()) ? null : orderBy;
+        if (postProcessOrderBy != null) {
+            inputAttrs.remove(Role.SORT_BY.getPrefix()); // don't sort in the service
+            inputAttrs.remove(Role.SORT_ASC.getPrefix());
+        }
+
+        // Decide whether post-processing LIMIT is needed
+        final Limit postProcessLimit = limit == null || postProcessOrderBy == null
+                && (limit.getRowLimit() < 0 || srvInputSignature.has(Role.LIMIT.getPrefix()))
+                && (limit.getRowOffset() <= 0 || srvInputSignature.has(Role.OFFSET.getPrefix()))
+                        ? null
+                        : limit;
+        if (postProcessLimit != null) {
+            inputAttrs.remove(Role.LIMIT.getPrefix()); // don't apply limit in the service
+            inputAttrs.remove(Role.OFFSET.getPrefix());
+        }
 
         // Prepare the service input tuples based on WHERE clause + parameters
-        final List<Tuple> inputTuples = getTuples(invoker.getService().getInputSignature(),
-                inputAttrs, pars);
+        final List<Tuple> inputTuples = getTuples(srvInputSignature, inputAttrs, pars);
+
+        // Return an empty result in case there are no invocations to perform
+        // (may only happen with bulk calls if no parameters are supplied)
+        if (inputTuples.isEmpty()) {
+            return new ProcedureExecutionImpl(() -> Collections.emptyIterator());
+        }
+
+        // Build a supplier that will invoke the service and perform post-processing when called
+        final Supplier<Iterator<Tuple>> outputTuplesSupplier = () -> {
+
+            // Invoke service
+            // TODO: double check that there are no issues when combining output tuples with
+            // input tuples in presence of batch service calls
+            Iterator<Tuple> output = Iteration.transform(invoker.invokeBatch(inputTuples),
+                    t -> Tuple.project(srvMergedSignature, t, inputTuples.get(0)));
+
+            // Enforce WHERE filters, if needed
+            if (postProcessFilter != null) {
+                output = Iteration.filter(output,
+                        getFilter(srvMergedSignature, postProcessFilter));
+            }
+
+            // Enforce ORDER BY clause, if needed
+            if (postProcessOrderBy != null) {
+                output = Iteration.sort(output,
+                        getComparator(srvMergedSignature, postProcessOrderBy));
+            }
+
+            // Enforce LIMIT clause, if needed
+            if (postProcessLimit != null) {
+                output = Iteration.slice(output, postProcessLimit.getRowOffset(),
+                        postProcessLimit.getRowLimit());
+            }
+
+            output = Iteration.transform(output, t -> t.project(outputSignature));
+            return output;
+        };
 
         // Return a ResultSetExecution based on a (bulk) service invocation
-        return new ServiceExecution(invoker, inputTuples,
-                Signature.forAttributes(outputAttrsList));
+        return new ProcedureExecutionImpl(outputTuplesSupplier);
     }
 
     @Nullable
@@ -287,11 +424,18 @@ public class ServiceExecutionFactory
             return null;
         }
 
-        // TODO
         final ServiceInvoker invoker = conn.getFactory().getInvoker(proc);
         final List<Tuple> inputTuples = getTuples(invoker.getService().getInputSignature(), attrs,
                 ((BulkCommand) command).getParameterValues());
-        return new ServiceExecution(invoker, inputTuples, null);
+
+        return new UpdateExecutionImpl(() -> {
+            final Iterator<Tuple> output = invoker.invokeBatch(inputTuples);
+            Iterators.advance(output, Integer.MAX_VALUE);
+            Iteration.closeQuietly(output);
+            final int[] result = new int[inputTuples.size()];
+            Arrays.fill(result, -1);
+            return result;
+        });
     }
 
     @Nullable
@@ -305,16 +449,37 @@ public class ServiceExecutionFactory
             final Map<String, Expression> constrainedAttributes) {
 
         if (condition instanceof Comparison) {
+
+            // Match <col> <op> <value> or <value> <op> <col>, excluding "!=" <op>
             final Comparison e = (Comparison) condition;
-            if (e.getOperator() != Comparison.Operator.EQ) {
-                return false;
+            final Operator op = e.getOperator();
+            final boolean rev = !(e.getLeftExpression() instanceof ColumnReference); // reverse
+            final Expression c = rev ? e.getRightExpression() : e.getLeftExpression();
+            final Expression v = rev ? e.getLeftExpression() : e.getRightExpression();
+            if (!(c instanceof ColumnReference)
+                    || !(v instanceof Literal || v instanceof Parameter) //
+                    || op == Operator.NE) {
+                return false; // don't know how to handle, but Teiid should not send this
             }
-            final Expression el = e.getLeftExpression();
-            final Expression er = e.getRightExpression();
-            final Expression c = el instanceof ColumnReference ? el : er;
-            final Expression v = el instanceof ColumnReference ? er : el;
-            return c instanceof ColumnReference && (v instanceof Literal || v instanceof Parameter)
-                    && constrainedAttributes.put(((ColumnReference) c).getName(), v) == null;
+
+            // Identify attribute role (equal, min/max inclusive/exclusive)
+            Role role = Role.EQUAL;
+            if (op == Operator.GE) {
+                role = rev ? Role.MAX_INCLUSIVE : Role.MIN_INCLUSIVE;
+            } else if (op == Operator.GT) {
+                role = rev ? Role.MAX_EXCLUSIVE : Role.MIN_EXCLUSIVE;
+            } else if (op == Operator.LE) {
+                role = rev ? Role.MIN_INCLUSIVE : Role.MAX_INCLUSIVE;
+            } else if (op == Operator.LT) {
+                role = rev ? Role.MIN_EXCLUSIVE : Role.MAX_EXCLUSIVE;
+            }
+
+            // Build the attribute name to be supplied to the service
+            final String target = ((ColumnReference) c).getName();
+            final String name = Role.encodeAttributeName(role, target);
+
+            // Store the constraint, failing on multiple constraint for same attribute
+            return constrainedAttributes.put(name, v) == null;
 
         } else if (condition instanceof AndOr) {
             final AndOr e = (AndOr) condition;
@@ -350,6 +515,73 @@ public class ServiceExecutionFactory
         return constraints;
     }
 
+    @SuppressWarnings("rawtypes")
+    private Predicate<Tuple> getFilter(final Signature signature,
+            final Map<String, Expression> constraints) {
+
+        final Comparator<Comparable> comparator = com.google.common.collect.Ordering.natural();
+
+        final List<Predicate<Tuple>> filters = Lists.newArrayList();
+
+        for (final Entry<String, Expression> e : constraints.entrySet()) {
+
+            final Entry<Role, String> roleTarget = Role.decodeAttributeName(e.getKey());
+            final Role role = roleTarget.getKey();
+            final String target = roleTarget.getValue();
+            final int index = signature.nameToIndex(target);
+
+            final Object value = ((Literal) e.getValue()).getValue();
+
+            if (role == Role.EQUAL) {
+                filters.add(t -> Objects.equals(t.get(index), value));
+            } else if (role == Role.MIN_EXCLUSIVE) {
+                filters.add(t -> Objects.compare((Comparable) t.get(index), (Comparable) value,
+                        comparator) > 0);
+            } else if (role == Role.MIN_INCLUSIVE) {
+                filters.add(t -> Objects.compare((Comparable) t.get(index), (Comparable) value,
+                        comparator) >= 0);
+            } else if (role == Role.MAX_EXCLUSIVE) {
+                filters.add(t -> Objects.compare((Comparable) t.get(index), (Comparable) value,
+                        comparator) < 0);
+            } else if (role == Role.MAX_INCLUSIVE) {
+                filters.add(t -> Objects.compare((Comparable) t.get(index), (Comparable) value,
+                        comparator) <= 0);
+            }
+        }
+
+        return t -> {
+            for (final Predicate<Tuple> filter : filters) {
+                if (!filter.test(t)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Comparator<Tuple> getComparator(final Signature signature, final OrderBy order) {
+
+        final int size = order.getSortSpecifications().size();
+        final int[] parameters = new int[size];
+        final boolean[] ascendings = new boolean[size];
+        final NullOrdering[] nulls = new NullOrdering[size];
+
+        for (int i = 0; i < size; ++i) {
+            final SortSpecification item = order.getSortSpecifications().get(i);
+            parameters[i] = signature
+                    .nameToIndex(((ColumnReference) item.getExpression()).getName());
+            ascendings[i] = !(item.getOrdering() == Ordering.DESC);
+            nulls[i] = item.getNullOrdering();
+        }
+
+        ListNestedSortComparator<Comparable<? super Comparable<?>>> comparator;
+        comparator = new ListNestedSortComparator<>(parameters, Booleans.asList(ascendings));
+        comparator.setNullOrdering(Arrays.asList(nulls));
+
+        return (Comparator) comparator;
+    }
+
     private List<Tuple> getTuples(final Signature signature, final Map<String, Expression> exprs,
             @Nullable final Iterator<? extends List<?>> pars) {
 
@@ -360,7 +592,10 @@ public class ServiceExecutionFactory
             // Parameters missing: return a single tuple based on literal values in expressions
             final Tuple tuple = Tuple.create(signature);
             for (final Entry<String, Expression> e : exprs.entrySet()) {
-                tuple.set(e.getKey(), ((Literal) e.getValue()).getValue());
+                final int attrIndex = signature.nameToIndex(e.getKey(), -1);
+                if (attrIndex >= 0) {
+                    tuple.set(attrIndex, ((Literal) e.getValue()).getValue());
+                }
             }
             return ImmutableList.of(tuple);
 
@@ -372,11 +607,14 @@ public class ServiceExecutionFactory
                 final List<?> parameters = pars.next();
                 final Tuple tuple = Tuple.create(signature);
                 for (final Entry<String, Expression> e : exprs.entrySet()) {
-                    if (e.getValue() instanceof Literal) {
-                        tuple.set(e.getKey(), ((Literal) e.getValue()).getValue());
-                    } else {
-                        final int index = ((Parameter) e.getValue()).getValueIndex();
-                        tuple.set(e.getKey(), parameters.get(index));
+                    final int attrIndex = signature.nameToIndex(e.getKey(), -1);
+                    if (attrIndex >= 0) {
+                        if (e.getValue() instanceof Literal) {
+                            tuple.set(e.getKey(), ((Literal) e.getValue()).getValue());
+                        } else {
+                            final int index = ((Parameter) e.getValue()).getValueIndex();
+                            tuple.set(e.getKey(), parameters.get(index));
+                        }
                     }
                 }
                 builder.add(tuple);
@@ -456,26 +694,19 @@ public class ServiceExecutionFactory
         return hasDefault; // note: Teiid maps DEFAULT NULL to lowercase string 'null'
     }
 
-    private static class ServiceExecution implements ProcedureExecution, UpdateExecution {
+    private static class ProcedureExecutionImpl implements ProcedureExecution {
 
-        private final ServiceInvoker invoker;
+        private final Supplier<Iterator<Tuple>> callback;
 
-        private final List<Tuple> inputTuples;
+        private Iterator<Tuple> iterator;
 
-        private final Signature outputProjection;
-
-        private List<Iterator<Tuple>> outputTuples;
-
-        public ServiceExecution(final ServiceInvoker invoker, final List<Tuple> inputTuples,
-                @Nullable final Signature outputProjection) {
-            this.invoker = invoker;
-            this.inputTuples = inputTuples;
-            this.outputProjection = outputProjection;
+        public ProcedureExecutionImpl(final Supplier<Iterator<Tuple>> callback) {
+            this.callback = callback;
         }
 
         @Override
         public void execute() throws TranslatorException {
-            this.outputTuples = Lists.newLinkedList(this.invoker.invokeBatch(this.inputTuples));
+            this.iterator = this.callback.get();
         }
 
         @Override
@@ -484,28 +715,8 @@ public class ServiceExecutionFactory
         }
 
         @Override
-        public int[] getUpdateCounts() throws DataNotAvailableException, TranslatorException {
-            return new int[] { 1 }; // TODO
-        }
-
-        @Override
         public Tuple next() throws TranslatorException, DataNotAvailableException {
-
-            while (!this.outputTuples.isEmpty()) {
-
-                final Iterator<Tuple> iter = this.outputTuples.get(0);
-                if (iter.hasNext()) {
-                    Tuple t = iter.next();
-                    if (this.outputProjection != null) {
-                        t = t.project(this.outputProjection);
-                    }
-                    return t;
-                }
-
-                closeQuietly(iter);
-                this.outputTuples.remove(0);
-            }
-            return null;
+            return this.iterator.hasNext() ? this.iterator.next() : null;
         }
 
         @Override
@@ -514,20 +725,39 @@ public class ServiceExecutionFactory
 
         @Override
         public void close() {
-            for (final Iterator<Tuple> iter : this.outputTuples) {
-                closeQuietly(iter);
-            }
-            this.outputTuples = null;
+            Iteration.closeQuietly(this.iterator);
+            this.iterator = null;
         }
 
-        private static void closeQuietly(@Nullable final Object object) {
-            if (object instanceof AutoCloseable) {
-                try {
-                    ((AutoCloseable) object).close();
-                } catch (final Throwable ex) {
-                    LOGGER.warn("Ignoring error closing " + object.getClass().getSimpleName(), ex);
-                }
-            }
+    }
+
+    private static class UpdateExecutionImpl implements UpdateExecution {
+
+        private final Supplier<int[]> callback;
+
+        private int[] updateCounts;
+
+        public UpdateExecutionImpl(final Supplier<int[]> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void execute() throws TranslatorException {
+            this.updateCounts = this.callback.get();
+        }
+
+        @Override
+        public int[] getUpdateCounts() throws DataNotAvailableException, TranslatorException {
+            return this.updateCounts;
+        }
+
+        @Override
+        public void cancel() throws TranslatorException {
+        }
+
+        @Override
+        public void close() {
+            this.updateCounts = null;
         }
 
     }

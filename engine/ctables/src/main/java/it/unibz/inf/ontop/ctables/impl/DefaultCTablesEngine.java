@@ -1,15 +1,7 @@
 package it.unibz.inf.ontop.ctables.impl;
 
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,10 +19,7 @@ import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.slf4j.Logger;
@@ -38,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import it.unibz.inf.ontop.ctables.CTablesEngine;
 import it.unibz.inf.ontop.ctables.CTablesException;
-import it.unibz.inf.ontop.ctables.spec.Rule;
 import it.unibz.inf.ontop.ctables.spec.Ruleset;
 
 public final class DefaultCTablesEngine implements CTablesEngine {
@@ -48,6 +36,8 @@ public final class DefaultCTablesEngine implements CTablesEngine {
     private final Supplier<Connection> connectionFactory;
 
     private final Ruleset ruleset;
+
+    private final Operator operator;
 
     private final AtomicInteger iteration;
 
@@ -77,6 +67,7 @@ public final class DefaultCTablesEngine implements CTablesEngine {
         // Initialize object
         this.connectionFactory = connectionFactory;
         this.ruleset = ruleset;
+        this.operator = Operator.compile(ruleset);
         this.iteration = new AtomicInteger();
         this.scheduler = scheduler;
         this.executor = null;
@@ -196,106 +187,17 @@ public final class DefaultCTablesEngine implements CTablesEngine {
         // Operate within a single connection
         try (Connection conn = this.connectionFactory.get()) {
 
+            // Create operator context to store refresh-wide data
+            final OperatorContext context = new OperatorContext(conn);
+
             // Wipe out the content of computed tables (TODO: incremental update)
             for (final String target : this.ruleset.getTargets()) {
-                evalUpdate(conn, "DELETE FROM " + target);
+                context.evalUpdate("DELETE FROM " + target);
             }
 
             // Execute rules
-            for (final Rule rule : this.ruleset.getRules()) {
-
-                // Evaluate the source part of the rule, obtaining a relation
-                final Relation relation = evalQuery(conn, rule.getSource());
-
-                // Generate a SQL upsert statement to update the target computed table
-                final String updateSql = new StringBuilder() //
-                        .append("UPSERT INTO ").append(rule.getTarget()).append(" (") //
-                        .append(Joiner.on(", ").join(Iterables.transform( //
-                                Arrays.asList(relation.signature), a -> '"' + a + '"'))) //
-                        .append(") VALUES (")
-                        .append(Joiner.on(", ")
-                                .join(Collections.nCopies(relation.signature.length, "?")))
-                        .append(")").toString();
-
-                // Execute the upsert statement one tuple at a time (TODO: make more efficient)
-                for (final Object[] tuple : relation.tuples) {
-                    evalUpdate(conn, updateSql, tuple);
-                }
-            }
+            this.operator.run(context, false);
         }
-    }
-
-    private static int evalUpdate(final Connection conn, final String sql, final Object... args)
-            throws SQLException {
-
-        // Use a parameterized prepared statement
-        try (final PreparedStatement stmt = conn.prepareStatement(sql)) {
-            injectParameters(stmt, args);
-            return stmt.executeUpdate();
-        }
-    }
-
-    private static Relation evalQuery(final Connection conn, final String sql,
-            final Object... args) throws SQLException {
-
-        // Allocate variables for query output (relation = signature + tuples)
-        String[] signature = null;
-        final List<Object[]> tuples = Lists.newArrayList();
-
-        // Use a prepared statement where to inject parameters
-        try (final PreparedStatement stmt = conn.prepareStatement(sql)) {
-            injectParameters(stmt, args);
-            try (ResultSet rs = stmt.executeQuery()) {
-
-                // Extract signature from result set metadata
-                final ResultSetMetaData meta = rs.getMetaData();
-                final int numColumns = meta.getColumnCount();
-                signature = new String[numColumns];
-                for (int i = 1; i <= numColumns; ++i) {
-                    signature[i - 1] = meta.getColumnLabel(i);
-                }
-
-                // Extract result tuples
-                while (rs.next()) {
-                    final Object[] tuple = new Object[numColumns];
-                    for (int i = 1; i <= numColumns; ++i) {
-                        tuple[i - 1] = rs.getObject(i);
-                    }
-                    tuples.add(tuple);
-                }
-            }
-        }
-
-        // Build and return the expected relation = signature + tuples object
-        return new Relation(signature, tuples);
-    }
-
-    private static void injectParameters(final PreparedStatement stmt, final Object... args)
-            throws SQLException {
-
-        // Inject parameters, mapping Clobs to Strings (to address issue with TEIID)
-        // TODO: fix in the TEIID embedded module
-        for (int i = 0; i < args.length; ++i) {
-            Object arg = args[i];
-            if (arg instanceof Clob) {
-                final Clob clob = (Clob) arg;
-                arg = clob.getSubString(1, (int) clob.length());
-            }
-            stmt.setObject(i + 1, arg);
-        }
-    }
-
-    private static class Relation {
-
-        final String[] signature;
-
-        final List<Object[]> tuples;
-
-        Relation(final String[] signature, final List<Object[]> tuples) {
-            this.signature = signature;
-            this.tuples = tuples;
-        }
-
     }
 
 }

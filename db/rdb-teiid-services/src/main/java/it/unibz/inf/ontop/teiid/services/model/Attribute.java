@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.teiid.services.model;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,37 +26,39 @@ public final class Attribute implements Comparable<Attribute>, Serializable {
     private final Optional<?> defaultValue;
 
     @Nullable
-    private final Role role;
+    private transient Role role;
+
+    @Nullable
+    private transient String target;
 
     private Attribute(final String name, @Nullable final Datatype datatype,
-            @Nullable final Optional<?> defaultValue, @Nullable final Role role) {
+            @Nullable final Optional<?> defaultValue) {
         this.name = name;
         this.datatype = datatype;
         this.defaultValue = defaultValue;
-        this.role = role;
     }
 
     public static Attribute create(final String name) {
-        return create(name, (Datatype) null, null, null);
+        return create(name, (Datatype) null, null);
     }
 
     public static Attribute create(final String name, @Nullable final String datatype) {
-        return create(name, Datatype.forName(datatype), null, null);
+        return create(name, Datatype.forName(datatype), null);
     }
 
     public static Attribute create(final String name, @Nullable final Datatype datatype) {
-        return create(name, datatype, null, null);
+        return create(name, datatype, null);
     }
 
     public static Attribute create(final String name, @Nullable final String datatype,
-            @Nullable final Optional<?> defaultValue, @Nullable final Role role) {
-        return create(name, Datatype.forName(datatype), defaultValue, role);
+            @Nullable final Optional<?> defaultValue) {
+        return create(name, Datatype.forName(datatype), defaultValue);
     }
 
     public static Attribute create(final String name, @Nullable final Datatype datatype,
-            @Nullable final Optional<?> defaultValue, @Nullable final Role role) {
+            @Nullable final Optional<?> defaultValue) {
         Objects.requireNonNull(name);
-        return new Attribute(name.intern(), datatype, defaultValue, role);
+        return new Attribute(name.intern(), datatype, defaultValue);
     }
 
     public static Attribute create(final BaseColumn column) {
@@ -77,10 +81,7 @@ public final class Attribute implements Comparable<Attribute>, Serializable {
             }
         }
 
-        final String r = column.getProperty("role");
-        final Role role = r == null ? null : Role.valueOf(r.trim().toUpperCase());
-
-        return create(name, typeName, defaultValue, role);
+        return create(name, typeName, defaultValue);
     }
 
     public String getName() {
@@ -96,9 +97,23 @@ public final class Attribute implements Comparable<Attribute>, Serializable {
         return this.defaultValue;
     }
 
-    @Nullable
     public Role getRole() {
+        decodeNameIfNeeded();
         return this.role;
+    }
+
+    @Nullable
+    public String getTarget() {
+        decodeNameIfNeeded();
+        return this.target;
+    }
+
+    private void decodeNameIfNeeded() {
+        if (this.role == null) {
+            final Entry<Role, String> e = Role.decodeAttributeName(this.name);
+            this.role = e.getKey();
+            this.target = e.getValue();
+        }
     }
 
     @Override
@@ -147,15 +162,64 @@ public final class Attribute implements Comparable<Attribute>, Serializable {
 
     public enum Role {
 
-        FILTER,
+        SELECT("__select__", false),
 
-        OFFSET,
+        SORT_BY("__sort_by__", false),
 
-        LIMIT,
+        SORT_ASC("__sort_asc__", false),
 
-        PROJECT,
+        OFFSET("__offset__", false),
 
-        ORDER
+        LIMIT("__limit__", false),
+
+        MIN_INCLUSIVE("__min_inclusive__", true),
+
+        MAX_INCLUSIVE("__max_inclusive__", true),
+
+        MIN_EXCLUSIVE("__min_exclusive__", true),
+
+        MAX_EXCLUSIVE("__max_exclusive__", true),
+
+        EQUAL("", true);
+
+        private String prefix;
+
+        private boolean targetUsed;
+
+        private Role(final String prefix, final boolean targetUsed) {
+            this.prefix = prefix;
+            this.targetUsed = targetUsed;
+        }
+
+        public String getPrefix() {
+            return this.prefix;
+        }
+
+        public boolean isTargetUsed() {
+            return this.targetUsed;
+        }
+
+        public static String encodeAttributeName(final Role role, @Nullable final String target) {
+            Preconditions.checkArgument(role.targetUsed == (target != null));
+            return role.targetUsed ? role.prefix + target : role.prefix;
+        }
+
+        public static Entry<Role, String> decodeAttributeName(final String attributeName) {
+            for (final Role role : Role.values()) {
+                if (!attributeName.startsWith(role.prefix)) {
+                    continue;
+                }
+                String target = null;
+                if (role.targetUsed) {
+                    Preconditions.checkArgument(role.prefix.length() < attributeName.length());
+                    target = attributeName.substring(role.prefix.length());
+                } else {
+                    Preconditions.checkArgument(role.prefix.length() == attributeName.length());
+                }
+                return new AbstractMap.SimpleEntry<>(role, target);
+            }
+            throw new Error(); // should not happen, EQUAL should always match
+        }
 
     }
 

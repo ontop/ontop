@@ -13,8 +13,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.net.MediaType;
 
@@ -40,6 +44,7 @@ import it.unibz.inf.ontop.teiid.services.serializers.TupleReader;
 import it.unibz.inf.ontop.teiid.services.serializers.TupleSerializer;
 import it.unibz.inf.ontop.teiid.services.serializers.TupleSerializerFactory;
 import it.unibz.inf.ontop.teiid.services.serializers.TupleWriter;
+import it.unibz.inf.ontop.teiid.services.util.Iteration;
 
 public class HttpServiceInvoker extends AbstractServiceInvoker {
 
@@ -59,6 +64,10 @@ public class HttpServiceInvoker extends AbstractServiceInvoker {
     @Nullable
     private final TupleReader responseBodyReader;
 
+    private final Signature batchGroupBy;
+
+    private final int batchSize;
+
     public HttpServiceInvoker(final HttpClient client, final Service service) {
         super(service);
         this.client = Objects.requireNonNull(client);
@@ -71,15 +80,32 @@ public class HttpServiceInvoker extends AbstractServiceInvoker {
                 null, service.getProperties(), "requestBody");
         this.responseBodyReader = createSerializer(TupleReader.class, service.getOutputSignature(),
                 null, service.getProperties(), "responseBody");
+        this.batchGroupBy = Signature.forAttributes(Iterables.transform(
+                Splitter.on(CharMatcher.anyOf(",; \t")).omitEmptyStrings().trimResults()
+                        .split(service.getProperties().getOrDefault("batchGroupBy", "")),
+                name -> service.getInputSignature().get(name)));
+        this.batchSize = Integer.parseInt(service.getProperties().getOrDefault("batchSize", "1"));
     }
 
     @Override
-    public Iterator<Tuple> invoke(final Tuple inputTuple) {
+    public Iterator<Tuple> invokeBatch(final Iterable<Tuple> tuples) {
+
+        // TODO: batchGroupBy and batchGroupSize logic should be centralized
+        
+        final Iterable<List<Tuple>> batches = Iterables
+                .concat(Iterables.transform(Tuple.groupBy(batchGroupBy, tuples).values(),
+                        group -> Iterables.partition(group, batchSize)));
+
+        return Iteration.concat( //
+                Iteration.transform(batches.iterator(), batch -> doInvokeBatch(batch)));
+    }
+
+    private Iterator<Tuple> doInvokeBatch(final List<Tuple> inputTuples) {
 
         final String requestId = String.format("REQ%04d", REQUEST_COUNTER.incrementAndGet());
 
         try {
-            final String uri = this.urlWriter.writeString(ImmutableList.of(inputTuple));
+            final String uri = this.urlWriter.writeString(inputTuples);
 
             final HttpUriRequest request = this.method.createRequest(uri);
 
@@ -89,13 +115,21 @@ public class HttpServiceInvoker extends AbstractServiceInvoker {
 
             if (this.requestBodyWriter != null) {
                 final EntityTemplate requestBody = new EntityTemplate(stream -> {
-                    this.requestBodyWriter.write(stream, ImmutableList.of(inputTuple));
+                    this.requestBodyWriter.write(stream, inputTuples);
                 });
                 requestBody.setContentType(this.requestBodyWriter.getMediaType().toString());
                 ((HttpEntityEnclosingRequestBase) request).setEntity(requestBody);
             }
 
-            LOGGER.info("{}: {} {} {}", requestId, this.method, uri, inputTuple.toString(true));
+            if (LOGGER.isInfoEnabled()) {
+                final String inputTuplesStr = inputTuples.size() == 1
+                        ? inputTuples.get(0).toString(true)
+                        : "(" + inputTuples.size() + " tuples) ["
+                                + Joiner.on(", ").join(
+                                        Iterables.transform(inputTuples, t -> t.toString(true)))
+                                + "]";
+                LOGGER.info("{}: {} {} {}", requestId, this.method, uri, inputTuplesStr);
+            }
 
             final HttpResponse resp = this.client.execute(request);
 

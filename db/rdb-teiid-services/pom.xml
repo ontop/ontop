@@ -8,7 +8,7 @@
      <parent>
           <artifactId>ontop-db</artifactId>
           <groupId>it.unibz.inf.ontop</groupId>
-          <version>4.2.0-SNAPSHOT</version>
+          <version>4.3.0-SNAPSHOT</version>
      </parent>
 
      <artifactId>ontop-rdb-teiid-services</artifactId>
@@ -36,6 +36,10 @@
           <!-- HTTP Client -->
           <dependency>
                <groupId>org.apache.httpcomponents</groupId>
+               <artifactId>httpcore</artifactId>
+          </dependency>
+          <dependency>
+               <groupId>org.apache.httpcomponents</groupId>
                <artifactId>httpclient</artifactId>
           </dependency>
 
@@ -46,6 +50,10 @@
           </dependency>
 
           <!-- Jackson -->
+          <dependency>
+               <groupId>com.fasterxml.jackson.core</groupId>
+               <artifactId>jackson-core</artifactId>
+          </dependency>
           <dependency>
                <groupId>com.fasterxml.jackson.core</groupId>
                <artifactId>jackson-databind</artifactId>
@@ -64,6 +72,13 @@
           </dependency>
 
           <!-- PROVIDED DEPENDENCIES -->
+
+          <!-- Teiid -->
+          <dependency>
+               <groupId>org.teiid</groupId>
+               <artifactId>teiid-engine</artifactId>
+               <scope>provided</scope>
+          </dependency>
 
           <!-- JSR-305 annotations -->
           <dependency>

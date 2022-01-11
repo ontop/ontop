@@ -5,6 +5,7 @@ import java.sql.Clob;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -18,13 +19,19 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.teiid.core.types.BaseClobType;
 
 import it.unibz.inf.ontop.teiid.services.util.Json;
 
 public final class Tuple extends AbstractList<Object> implements Serializable, Cloneable {
+
+    public static final Tuple EMPTY = create(Signature.EMPTY);
 
     private static final long serialVersionUID = 1L;
 
@@ -212,6 +219,23 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
             }
             return result;
         };
+    }
+
+    public static Map<Tuple, List<Tuple>> groupBy(final Signature signature,
+            final Iterable<Tuple> tuples) {
+
+        if (signature.isEmpty()) {
+            return ImmutableMap.of(Tuple.EMPTY, tuples instanceof List<?> //
+                    ? (List<Tuple>) tuples
+                    : ImmutableList.copyOf(tuples));
+        } else {
+            Map<Tuple, List<Tuple>> groups = Maps.newLinkedHashMap();
+            for (final Tuple tuple : tuples) {
+                final Tuple key = tuple.project(signature);
+                groups.computeIfAbsent(key, k -> Lists.newArrayList()).add(tuple);
+            }
+            return groups;
+        }
     }
 
     @Override

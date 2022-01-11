@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.teiid.services.invokers;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 
 import it.unibz.inf.ontop.teiid.services.model.Service;
 import it.unibz.inf.ontop.teiid.services.model.Tuple;
+import it.unibz.inf.ontop.teiid.services.util.Iteration;
 
 public class AbstractServiceInvoker implements ServiceInvoker {
 
@@ -18,10 +18,12 @@ public class AbstractServiceInvoker implements ServiceInvoker {
         this.service = Objects.requireNonNull(service);
     }
 
+    @Override
     public Service getService() {
         return this.service;
     }
 
+    @Override
     public Iterator<Tuple> invoke(final Tuple tuple) {
         final Iterable<Tuple> tuples = new Iterable<Tuple>() {
 
@@ -30,20 +32,18 @@ public class AbstractServiceInvoker implements ServiceInvoker {
                 return Iterators.singletonIterator(tuple);
             }
         };
-        return invokeBatch(tuples).get(0);
+        return invokeBatch(tuples);
     }
 
-    public List<Iterator<Tuple>> invokeBatch(final Iterable<Tuple> tuples) {
+    @Override
+    public Iterator<Tuple> invokeBatch(final Iterable<Tuple> tuples) {
         final Class<?> enclosingClass = tuples.getClass().getEnclosingClass();
         if (enclosingClass == AbstractServiceInvoker.class) {
             throw new Error(
                     "At least one of methods invoke() and invokeBatch() should be overridden");
         }
-        final List<Iterator<Tuple>> result = Lists.newArrayList();
-        for (final Tuple tuple : tuples) {
-            result.add(invoke(tuple));
-        }
-        return result;
+        return Iteration.concat( //
+                Iteration.transform(tuples.iterator(), inputTuple -> invoke(inputTuple)));
     }
 
 }

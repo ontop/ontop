@@ -79,6 +79,10 @@ public final class Signature extends AbstractList<Attribute> implements Serializ
         return this.attributes[nameToIndex(name)];
     }
 
+    public boolean has(String name) {
+        return nameToIndex(name, -1) >= 0;
+    }
+
     public int nameToIndex(final String name) {
 
         // Delegate and return index if successful

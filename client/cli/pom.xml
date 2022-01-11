@@ -78,20 +78,23 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-ctables</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdb-teiid-embedded</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdb-teiid-services</artifactId>
-        </dependency>
-       <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-ctables</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>org.teiid.connectors</groupId>
             <artifactId>translator-jdbc</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -208,15 +211,16 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
