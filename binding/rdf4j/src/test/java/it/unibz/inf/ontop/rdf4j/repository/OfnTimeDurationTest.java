@@ -83,6 +83,32 @@ public class OfnTimeDurationTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testDaysBetweenMixedInput() {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22\"^^xsd:date AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
+                + "}";
+
+        runQueryAndCompare(query, ImmutableSet.of("24767"));
+    }
+
+    @Test
+    public void testDaysBetweenMixedInput2() {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  BIND(\"1999-12-14\"^^xsd:date AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
+                + "}";
+
+        runQueryAndCompare(query, ImmutableSet.of("24766"));
+    }
+
+    @Test
     public void testHoursBetweenDateTime() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"

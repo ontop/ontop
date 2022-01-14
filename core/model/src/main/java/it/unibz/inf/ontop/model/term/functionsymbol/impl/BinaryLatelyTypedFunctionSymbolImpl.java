@@ -37,9 +37,11 @@ public class BinaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
     private final Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct;
 
     protected BinaryLatelyTypedFunctionSymbolImpl(DBTermType dbStringType0, DBTermType dbStringType1,
-                                                  MetaRDFTermType metaRDFTermType, DBTermType targetType,
+                                                  MetaRDFTermType metaRDFTermType0, MetaRDFTermType metaRDFTermType1,
+                                                  DBTermType targetType,
                                                   Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
-        super("BINARY_LATELY_TYPE_" + dbFunctionSymbolFct, ImmutableList.of(dbStringType0, dbStringType1, metaRDFTermType));
+        super("BINARY_LATELY_TYPE_" + dbFunctionSymbolFct, ImmutableList.of(dbStringType0, dbStringType1,
+                metaRDFTermType0, metaRDFTermType1));
         this.targetType = targetType;
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
     }
@@ -75,29 +77,36 @@ public class BinaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableTerm rdfTypeTerm = newTerms.get(2);
-        if (rdfTypeTerm instanceof RDFTermTypeConstant) {
-            RDFTermType rdfType = ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
-            DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
+        // Mixing of term types allowed e.g. date and datetime for ofn time functions
+        ImmutableTerm rdfTypeTerm0 = newTerms.get(2);
+        ImmutableTerm rdfTypeTerm1 = newTerms.get(3);
+        if (rdfTypeTerm0 instanceof RDFTermTypeConstant && rdfTypeTerm1 instanceof RDFTermTypeConstant) {
+            RDFTermType rdfType0 = ((RDFTermTypeConstant) rdfTypeTerm0).getRDFTermType();
+            RDFTermType rdfType1 = ((RDFTermTypeConstant) rdfTypeTerm1).getRDFTermType();
+            DBTermType dbType0 = rdfType0.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
+            DBTermType dbType1 = rdfType1.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
 
-            Optional<DBFunctionSymbol> subFunctionSymbol = dbFunctionSymbolFct.apply(dbType);
+            Optional<DBFunctionSymbol> subFunctionSymbol0 = dbFunctionSymbolFct.apply(dbType0);
+            Optional<DBFunctionSymbol> subFunctionSymbol1 = dbFunctionSymbolFct.apply(dbType1);
 
             // Irrelevant datatype -> stops the simplification.
             // The functional term should be eliminated by other means (otherwise the query will fail).
-            if (!subFunctionSymbol.isPresent())
+            if (!subFunctionSymbol0.isPresent() || !subFunctionSymbol1.isPresent())
                 return termFactory.getImmutableFunctionalTerm(this, newTerms);
 
             ImmutableFunctionalTerm dbTerm = termFactory.getImmutableFunctionalTerm(
-                    subFunctionSymbol.get(),
-                    termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType),
-                    termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
+                    // Both DATE and DATETIME will yield the same function symbol
+                    subFunctionSymbol0.get(),
+                    termFactory.getConversionFromRDFLexical2DB(dbType0, newTerms.get(0), rdfType0),
+                    termFactory.getConversionFromRDFLexical2DB(dbType1, newTerms.get(1), rdfType1));
 
-            return transformNaturalDBTerm(dbTerm, dbType, rdfType, termFactory)
+            return transformNaturalDBTerm(dbTerm, dbType0, dbType1, rdfType0, rdfType1, termFactory)
                     .simplify(variableNullability);
         }
         else
             // Tries to lift the DB case of the rdf type term if there is any
-            return Optional.of(rdfTypeTerm)
+            // If the first term is of the correct datatype try to lift the second
+            return Optional.of(rdfTypeTerm0 instanceof RDFTermTypeConstant ? rdfTypeTerm1 : rdfTypeTerm0)
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
                     .map(t -> (ImmutableFunctionalTerm)t)
                     .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
@@ -115,7 +124,9 @@ public class BinaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
     /**
      * By default, returns the natural DB term
      */
-    protected ImmutableTerm transformNaturalDBTerm(ImmutableFunctionalTerm dbTerm, DBTermType inputDBType, RDFTermType rdfType,
+    protected ImmutableTerm transformNaturalDBTerm(ImmutableFunctionalTerm dbTerm,
+                                                   DBTermType inputDBType0, DBTermType inputDBType1,
+                                                   RDFTermType rdfType0, RDFTermType rdfType1,
                                                    TermFactory termFactory) {
         return dbTerm;
     }

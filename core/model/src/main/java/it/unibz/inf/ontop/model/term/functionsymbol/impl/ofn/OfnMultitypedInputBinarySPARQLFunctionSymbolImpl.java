@@ -26,14 +26,15 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
      * Returns a DB term with the natural type associated to the target type.
      * @see it.unibz.inf.ontop.model.term.functionsymbol.impl.MultitypedInputUnarySPARQLFunctionSymbolImpl for one lexical term input
      */
-    private final QuadriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> lexicalTermFct;
+    private final PentaFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> lexicalTermFct;
 
     public OfnMultitypedInputBinarySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull IRI functionIRI,
                                                             @Nonnull RDFTermType inputBaseType,
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
-                                                            QuadriFunction<TermFactory, ImmutableTerm, ImmutableTerm,
-                                                                    ImmutableTerm, ImmutableFunctionalTerm> lexicalTermFct) {
+                                                            PentaFunction<TermFactory, ImmutableTerm, ImmutableTerm,
+                                                                    ImmutableTerm, ImmutableTerm,
+                                                                    ImmutableFunctionalTerm> lexicalTermFct) {
         super(functionSymbolName, functionIRI, ImmutableList.of(inputBaseType, inputBaseType));
         this.targetType = targetType;
         this.isAlwaysInjective = isAlwaysInjective;
@@ -56,8 +57,9 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                             @Nonnull RDFTermType inputBaseType,
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
-                                                            QuadriFunction<TermFactory, ImmutableTerm, ImmutableTerm,
-                                                                    ImmutableTerm, ImmutableFunctionalTerm> lexicalTermFct) {
+                                                            PentaFunction<TermFactory, ImmutableTerm, ImmutableTerm,
+                                                                    ImmutableTerm, ImmutableTerm,
+                                                                    ImmutableFunctionalTerm> lexicalTermFct) {
         super(functionSymbolName, officialName, ImmutableList.of(inputBaseType, inputBaseType));
         this.lexicalTermFct = lexicalTermFct;
         this.targetType = targetType;
@@ -76,12 +78,12 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
 
-    private static QuadriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> createLatelyTypedFct(
+    private static PentaFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> createLatelyTypedFct(
             RDFTermType targetType,
             DBTypeFactory dbTypeFactory,
             Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
-        return (termFactory, lexicalTerm0, lexicalTerm1, rdfTermTypeTerm) ->
-                termFactory.getBinaryLatelyTypedFunctionalTerm(lexicalTerm0, lexicalTerm1, rdfTermTypeTerm,
+        return (termFactory, lexicalTerm0, lexicalTerm1, rdfTermTypeTerm0, rdfTermTypeTerm1) ->
+                termFactory.getBinaryLatelyTypedFunctionalTerm(lexicalTerm0, lexicalTerm1, rdfTermTypeTerm0, rdfTermTypeTerm1,
                         targetType.getClosestDBType(dbTypeFactory),
                         dbFunctionSymbolFct);
     }
@@ -92,7 +94,8 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                ImmutableTerm returnedTypeTerm) {
 
         return termFactory.getConversion2RDFLexical(
-                lexicalTermFct.apply(termFactory, subLexicalTerms.get(1), subLexicalTerms.get(0), typeTerms.get(0)),
+                lexicalTermFct.apply(termFactory, subLexicalTerms.get(1), subLexicalTerms.get(0),
+                        typeTerms.get(0), typeTerms.get(1)),
                 targetType);
     }
 
@@ -119,8 +122,8 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
     }
 
     @FunctionalInterface
-    public interface QuadriFunction<S, T, U, V, R> {
-        R apply(S var1, T var2, U var3, V var4);
+    public interface PentaFunction<S, T, U, V, W, R> {
+        R apply(S var1, T var2, U var3, V var4, W var5);
     }
 }
 
