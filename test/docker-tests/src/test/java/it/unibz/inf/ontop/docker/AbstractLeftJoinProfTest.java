@@ -1177,6 +1177,43 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         return ImmutableList.of("Depp", "Poppins", "Smith", "Smith", "Smith");
     }
 
+    @Test
+    public void testValuesNodeOntologyProperty() throws Exception {
+
+        String querySelect =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "?p a :Teacher ;\n" +
+                "   :fullname ?v ;\n" +
+                "   :conductsLab ?c .\n" +
+                "}\n" ;
+
+        List<String> expectedValues = Lists.newArrayList("Jane Smith", "Joe Logan");
+        checkReturnedValuesAndOrderReturnSql(querySelect, expectedValues);
+
+    }
+
+    @Test
+    public void testAggregationMappingProfStudentCountProperty() throws Exception {
+
+        String querySelect =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "?p a :Teacher ;\n" +
+                "   :nbStudents ?v .\n" +
+                "}" +
+                "ORDER BY ?v\n" ;
+
+        ImmutableList<String> expectedValues = getExpectedAggregationMappingProfStudentCountPropertyResults();
+        checkReturnedValuesAndOrderReturnSql(querySelect, expectedValues);
+    }
+
+    protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
+        return ImmutableList.of("12", "13", "31");
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

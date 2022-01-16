@@ -1,0 +1,17 @@
+<#just_a_map_five>
+	a rr:TriplesMap;
+	rr:logicalTable [
+		rr:tableName "SG_TABLE_ONE"
+	];
+	rr:subjectMap [
+		rr:termType rr:IRI;
+		rr:template "http://example.org/test/id-{ID}";
+		rr:graph <http://example.org/test>
+	];
+	rr:predicateObjectMap [
+		rr:predicateMap [
+			rr:template "http://example.org/{NAME}";
+			rr:termType rr:IRI
+		];
+		rr:objectMap [ rr:column "NAME" ];
+	].

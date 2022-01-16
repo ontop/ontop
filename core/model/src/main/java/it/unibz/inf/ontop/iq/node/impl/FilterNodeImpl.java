@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -34,11 +35,10 @@ import java.util.Optional;
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
+
     private final ConstructionNodeTools constructionNodeTools;
-    private final ConditionSimplifier conditionSimplifier;
     private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
-    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
@@ -48,22 +48,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
-        this.conditionSimplifier = conditionSimplifier;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
-        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public FilterNode clone() {
-        return iqFactory.createFilterNode(getFilterCondition());
     }
 
     @Override
@@ -82,21 +75,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (isFilteringNullValue(variable))
-            return false;
-
-        return query.getFirstChild(this)
-                .map(c -> c.isVariableNullable(query, variable))
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A filter node must have a child"));
-    }
-
-    @Override
     public VariableNullability getVariableNullability(IQTree child) {
         return variableNullabilityTools.updateWithFilter(getFilterCondition(),
                 child.getVariableNullability().getNullableGroups(), child.getVariables());
     }
-
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
@@ -165,6 +147,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformFilter(tree,this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitFilter(this, child);
     }
@@ -180,14 +167,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
@@ -214,20 +197,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof FilterNode)
-                && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
+    public int hashCode() {
+        return getFilterCondition().hashCode();
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof FilterNode)
-                && getFilterCondition().equals(((FilterNode) queryNode).getFilterCondition());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass()
+                && getFilterCondition().equals(((FilterNode) o).getFilterCondition());
     }
 
     @Override
@@ -240,9 +218,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      *  (so as to reduce the recursive pressure)
      */
     @Override
-    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
-        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, initialChild, variableGenerator, treeCache);
     }
 
     @Override

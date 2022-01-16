@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -10,13 +9,13 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -46,26 +45,19 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
-        ImmutableMap<Variable, ImmutableTerm> initialSubstitutionMap = rootNode.getSubstitution().getImmutableMap();
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = initialSubstitutionMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> transformDefinition(e.getValue())));
+        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution().transform(
+                definition -> (definition instanceof ImmutableExpression)
+                        ? transformExpression((ImmutableExpression) definition)
+                        : definition);
 
-        ConstructionNode newRootNode = newSubstitutionMap.equals(initialSubstitutionMap)
+        ConstructionNode newRootNode = newSubstitution.equals(initialSubstitution)
                 ? rootNode
-                : iqFactory.createConstructionNode(rootNode.getVariables(),
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+                : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
 
         return ((newRootNode == rootNode) && (child == newChild))
                 ? tree
                 : iqFactory.createUnaryIQTree(newRootNode, newChild);
-    }
-
-    private ImmutableTerm transformDefinition(ImmutableTerm definition) {
-        return (definition instanceof ImmutableExpression)
-                ? transformExpression((ImmutableExpression) definition)
-                : definition;
     }
 
     @Override

@@ -38,17 +38,17 @@ public class DAGEquivalenceTest extends TestCase {
 	/**
 	 * R1 = R2^- = R3, S1 = S2^- = S3, R1 ISA S1
 	 */
-	private final String testEquivalenceRoles = "src/test/resources/test/dag/role-equivalence.owl";
+	private static final String testEquivalenceRoles = "src/test/resources/test/dag/role-equivalence.owl";
 
 	/**
 	 * A1 = A2^- = A3, B1 = B2^- = B3, C1 = C2^- = C3, C1 ISA B1 ISA A1
 	 */
-	private final String testEquivalenceRolesInverse = "src/test/resources/test/dag/test-equivalence-roles-inverse.owl";
+	private static final String testEquivalenceRolesInverse = "src/test/resources/test/dag/test-equivalence-roles-inverse.owl";
 
 	/**
 	 * A1 = A2 = A3, B1 = B2 = B3, B1 ISA A1
 	 */
-	private final String testEquivalenceClasses = "src/test/resources/test/dag/test-equivalence-classes.owl";
+	private static final String testEquivalenceClasses = "src/test/resources/test/dag/test-equivalence-classes.owl";
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";

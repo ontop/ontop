@@ -16,7 +16,9 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -67,7 +69,9 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .collect(ImmutableCollectors.toList());
 
             return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables())
-                    .orElse(tree);
+                    .orElseGet(() -> children.equals(liftedChildren)
+                            ? tree
+                            : iqFactory.createNaryIQTree(rootNode, liftedChildren));
         }
     }
 
@@ -109,12 +113,12 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .collect(ImmutableCollectors.toMultiset());
 
             ImmutableSet<ImmutableExpression> expressions = Stream.concat(
-                    variableOccurrences.entrySet().stream()
-                            // Co-occurring terms
-                            .filter(e -> e.getCount() > 1)
-                            .map(Multiset.Entry::getElement)
-                            .map(termFactory::getDBIsNotNull),
-                    normalization.equalities.stream())
+                            variableOccurrences.entrySet().stream()
+                                    // Co-occurring terms
+                                    .filter(e -> e.getCount() > 1)
+                                    .map(Multiset.Entry::getElement)
+                                    .map(termFactory::getDBIsNotNull),
+                            normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
 
             return unifyDataNodes(normalization.dataNodes.stream(), ExtensionalDataNode::getArgumentMap)

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
@@ -75,6 +76,9 @@ public class ReferenceValueReplacer {
         else if (rootNode instanceof NativeNode) {
             return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
         }
+        else if (rootNode instanceof EmptyNode) {
+            return tree;
+        }
         else
             throw new IllegalArgumentException("Was only expecting construction nodes and native nodes");
     }
@@ -85,13 +89,9 @@ public class ReferenceValueReplacer {
         if (substitution.isEmpty())
             return constructionNode;
 
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> transformTerm(e.getValue(), referenceToInputMap)));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform(v -> transformTerm(v, referenceToInputMap));
 
-        return iqFactory.createConstructionNode(constructionNode.getVariables(),
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+        return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }
 
     private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {

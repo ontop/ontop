@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -53,7 +54,7 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
         }
 
         try {
-            return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory, settings);
+            return new OntopRepositoryConnectionImpl(this, getOntopConnection(), inputQueryFactory, settings);
         } catch (Exception e) {
             logger.error("Error creating repo connection: " + e.getMessage());
             throw new RepositoryException(e);

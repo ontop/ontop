@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
@@ -64,8 +62,10 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
-        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(),
-                WITH_ALL);
+        DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.DATE));
+
+        DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
@@ -87,6 +87,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(NAME_STR, nameType);
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
+        map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
 
@@ -119,6 +120,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBGeographyType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBDistanceSphere() {
         return true;
     }
 }

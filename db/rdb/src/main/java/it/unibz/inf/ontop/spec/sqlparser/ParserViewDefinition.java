@@ -34,19 +34,18 @@ import java.util.stream.Collectors;
 */
 
 public class ParserViewDefinition extends AbstractRelationDefinition {
-
-	/**
-	 * @param statement
-	 */
 	
 	public ParserViewDefinition(ImmutableList<QuotedID> attrs, String statement, DBTypeFactory dbTypeFactory) {
-		super("(" + statement + ")", attributeListBuilder(attrs, dbTypeFactory));
+		this(attributeListBuilder(attrs, dbTypeFactory), statement);
+	}
+
+	public ParserViewDefinition(AttributeListBuilder attributeListBuilder, String statement) {
+		super("(" + statement + ")", attributeListBuilder);
 	}
 
 	private static AttributeListBuilder attributeListBuilder(ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
 		AttributeListBuilder builder = attributeListBuilder();
 		for (QuotedID id : attrs) {
-			// TODO: infer types?
 			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
 		}
 		return builder;

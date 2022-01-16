@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.resultset.*;
 
+import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.BNodeGenerator;
@@ -16,7 +16,6 @@ import org.eclipse.rdf4j.query.algebra.ProjectionElem;
 import org.eclipse.rdf4j.query.algebra.ProjectionElemList;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.ValueExpr;
-import org.eclipse.rdf4j.sail.SailException;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
@@ -35,23 +34,12 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 	private final ResultSetIterator iterator;
 
-	private final int fetchSize;
-
 	public DefaultSimpleGraphResultSet(
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
-			boolean preloadStatements)
-			throws OntopConnectionException {
-		this.fetchSize = tupleResultSet.getFetchSize();
-		try {
-			iterator =
-					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, ontopStatement,
-							preloadStatements);
-		} catch (Exception e) {
-			throw new SailException(e.getCause());
-		}
+			RDF rdfFactory, boolean excludeInvalidTriples) {
+		iterator = new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, excludeInvalidTriples);
 	}
 
 	@Override
@@ -80,28 +68,21 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		private final TermFactory termFactory;
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
 		private final Queue<RDFFact> statementBuffer;
-		private final OntopStatement ontopStatement;
-		private final boolean enablePreloadStatements;
 		private ImmutableMap<String, ValueExpr> extMap;
+		private final boolean excludeInvalidTriples;
 
 		private ResultSetIterator(
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
-				org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
-				boolean enablePreloadStatements)
-				throws OntopConnectionException, OntopResultConversionException {
+				RDF rdfFactory, boolean excludeInvalidTriples) {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
-			this.ontopStatement = ontopStatement;
+			this.excludeInvalidTriples = excludeInvalidTriples;
 			intExtMap();
 			this.statementBuffer = new LinkedList<>();
-			this.enablePreloadStatements = enablePreloadStatements;
-			if (enablePreloadStatements) {
-				preloadStatements();
-			}
 		}
 
 		@Override
@@ -110,7 +91,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				addStatementFromResultSet();
 			}
 			boolean hasNext = !statementBuffer.isEmpty();
-			if (!hasNext && !enablePreloadStatements) {
+			if (!hasNext) {
 				handleClose();
 			}
 			return hasNext;
@@ -118,35 +99,25 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 		@Override
 		public RDFFact next() throws OntopConnectionException {
-			if (statementBuffer.isEmpty() && !enablePreloadStatements) {
+			if (statementBuffer.isEmpty()) {
 				handleClose();
 			}
 			return statementBuffer.remove();
 		}
 
 		@Override
-		public void remove() throws OntopConnectionException {
-			next();
-		}
-
-		@Override
 		public void handleClose() throws OntopConnectionException {
 			try {
 				if (resultSet.isConnectionAlive()) {
-					// closing sql statement, automatically closes the result set as well, but should not close
-					// for Describe queries as it is used multiple times
-					if (ontopStatement != null && !enablePreloadStatements) {
-						ontopStatement.close();
-					} else {
-						resultSet.close();
-					}
+					// The responsibility to close or not the DB statement is delegated to the underlying tuple result set
+					resultSet.close();
 				}
 			} catch (Exception e) {
 				throw new OntopConnectionException(e);
 			}
 		}
 
-		private void addStatementFromResultSet() {
+		private void addStatementFromResultSet() throws OntopConnectionException, OntopResultConversionException {
 			try {
 				OntopBindingSet bindingSet = resultSet.next();
 				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
@@ -164,8 +135,10 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 						}
 					}
 				}
-			} catch (OntopResultConversionException | OntopConnectionException e) {
-				e.printStackTrace();
+			} catch (OntopResultConversionException e) {
+				if (!excludeInvalidTriples)
+					throw e;
+				// TODO: inform the query logger that a triple has been excluded
 			}
 		}
 
@@ -208,10 +181,6 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			return constant;
 		}
 
-		public void addNewRDFFact(RDFFact statement) {
-			statementBuffer.add(statement);
-		}
-
 		private void intExtMap() {
 			Extension ex = constructTemplate.getExtension();
 			if (ex != null) {
@@ -223,17 +192,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 		}
 
-		private void preloadStatements() throws OntopConnectionException, OntopResultConversionException {
-			while (resultSet.hasNext()) {
-				addStatementFromResultSet();
-			}
-			handleClose();
-		}
-
 		private boolean resultSetHasNext() throws OntopConnectionException, OntopResultConversionException {
-			if (enablePreloadStatements) {
-				return false;
-			}
 			if (!resultSet.isConnectionAlive()) {
 				return false;
 			}

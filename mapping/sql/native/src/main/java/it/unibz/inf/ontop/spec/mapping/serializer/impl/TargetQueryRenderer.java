@@ -187,8 +187,12 @@ public class TargetQueryRenderer {
 
         String suffix = datatype.getLanguageTag()
                 .map(tag -> "@" + tag.getFullString())
-                .orElseGet(() -> datatype.getIRI().equals(XSD.STRING)
-                            ? ""  // in Turtle, the default datatype is xsd:string
+                .orElseGet(() ->
+                        // in Turtle, the default datatype is xsd:string
+                        datatype.getIRI().equals(XSD.STRING) && (lexicalTerm instanceof RDFLiteralConstant) ||
+                        // suppress rdfs:Literal for non-constants
+                        datatype.getIRI().equals(RDFS.LITERAL) && !(lexicalTerm instanceof RDFLiteralConstant)
+                            ? ""
                             : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString()));
 
         return lexicalString + suffix;

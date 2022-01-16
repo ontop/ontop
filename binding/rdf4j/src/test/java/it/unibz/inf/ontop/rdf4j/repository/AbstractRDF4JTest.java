@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +31,14 @@ public class AbstractRDF4JTest {
     private static final String PASSWORD = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRDF4JTest.class);
     private static Connection SQL_CONNECTION;
-    private static RepositoryConnection REPO_CONNECTION;
+    private static OntopRepositoryConnection REPO_CONNECTION;
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
         initOBDA(dbScriptRelativePath, obdaRelativePath, null);
     }
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
-        initOBDA(dbScriptRelativePath, obdaRelativePath, null, null);
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, null);
     }
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
@@ -48,6 +49,12 @@ public class AbstractRDF4JTest {
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile,
                                    @Nullable String viewFile) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, viewFile, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String viewFile, @Nullable String dbMetadataFile) throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
@@ -83,15 +90,19 @@ public class AbstractRDF4JTest {
         if (viewFile != null)
             builder.ontopViewFile(AbstractRDF4JTest.class.getResource(viewFile).getPath());
 
+        if (dbMetadataFile != null)
+            builder.dbMetadataFile(AbstractRDF4JTest.class.getResource(dbMetadataFile).getPath());
+
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopRepository repo = OntopRepository.defaultRepository(config);
+        OntopVirtualRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
         /*
          * Prepare the data connection for querying.
          */
         REPO_CONNECTION = repo.getConnection();
     }
+
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
         initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);
@@ -124,7 +135,7 @@ public class AbstractRDF4JTest {
         st.executeUpdate(bf.toString());
         SQL_CONNECTION.commit();
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(AbstractRDF4JTest.class.getResource(r2rmlRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
@@ -139,7 +150,7 @@ public class AbstractRDF4JTest {
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopRepository repo = OntopRepository.defaultRepository(config);
+        OntopVirtualRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
         /*
          * Prepare the data connection for querying.
@@ -166,6 +177,16 @@ public class AbstractRDF4JTest {
         return count;
     }
 
+    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues) {
+        runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues,
+                                      BindingSet bindings) {
+        ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
+        assertEquals(expectedVValues, vValues);
+    }
+
     protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues) {
         runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
     }
@@ -174,6 +195,10 @@ public class AbstractRDF4JTest {
                                       BindingSet bindings) {
         ImmutableList<String> vValues = runQuery(queryString, bindings);
         assertEquals(expectedVValues, vValues);
+    }
+
+    protected String reformulate(String queryString) {
+        return REPO_CONNECTION.reformulate(queryString);
     }
 
     protected ImmutableList<String> runQuery(String queryString) {
@@ -201,6 +226,25 @@ public class AbstractRDF4JTest {
         result.close();
 
         return vValueBuilder.build();
+    }
+
+    protected ImmutableList<ImmutableMap<String, String>> executeQuery(String queryString) {
+        TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+
+        TupleQueryResult result = query.evaluate();
+        ImmutableList.Builder<ImmutableMap<String, String>> list = ImmutableList.builder();
+        while (result.hasNext()) {
+            BindingSet bindingSet = result.next();
+            ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+            for (Binding b : bindingSet) {
+                map.put(b.getName(), b.getValue().stringValue());
+            }
+            list.add(map.build());
+            LOGGER.debug(bindingSet + "\n");
+        }
+        result.close();
+
+        return list.build();
     }
 
     protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph) {

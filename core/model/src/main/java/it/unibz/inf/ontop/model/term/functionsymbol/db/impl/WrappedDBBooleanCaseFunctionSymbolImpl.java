@@ -28,8 +28,7 @@ public class WrappedDBBooleanCaseFunctionSymbolImpl extends DBBooleanCaseFunctio
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> newTerms = IntStream.range(0, terms.size())
-                .boxed()
-                .map(i -> (i % 2 == 0) && (i < terms.size() - 1)
+                .mapToObj(i -> (i % 2 == 0) && (i < terms.size() - 1)
                         ? terms.get(i)
                         : wrapThenExpression((ImmutableExpression) terms.get(i), termFactory))
                 .collect(ImmutableCollectors.toList());

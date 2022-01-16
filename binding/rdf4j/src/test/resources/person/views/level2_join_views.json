@@ -1,0 +1,118 @@
+{
+  "relations": [
+    {
+      "name": ["\"views\"", "\"persons\""],
+      "baseRelation": ["\"person\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"fullNameAndLocality\"",
+            "expression": "CONCAT(UPPER(\"fullName\"),' ',\"locality\")"
+          },
+          {
+            "name": "\"localityAbbrev\"",
+            "expression": "REGEXP_REPLACE(\"locality\",'Botzen', 'Bz')"
+          },
+          {
+            "name": "\"nullifItaly\"",
+            "expression": "NULLIF(\"country\",'it')"
+          },
+          {
+            "name": "\"region\"",
+            "expression": "\"locality\""
+          },
+          {
+            "name": "\"nickname\"",
+            "expression": "UPPER(\"nickname\")"
+          },
+          {
+            "name": "\"nick\"",
+            "expression": "CONCAT(\"nickname\", '!')"
+          }
+        ],
+        "hidden": [
+          "\"fullName\"",
+          "\"locality\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
+      "type": "BasicViewDefinition"
+    },
+    {
+      "name": ["\"views\"", "\"person_countries\""],
+      "join": {
+        "relations": [
+          [
+            "\"views\"",
+            "\"persons\""
+          ],
+          [
+            "\"country\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"country\"=\"c_acronym\" AND \"c_acronym\" <> 'de'",
+      "columns": {
+        "added": [
+          {
+            "name": "\"country_with_code\"",
+            "expression": "CONCAT(UPPER(\"c_name\"),' ',\"c_acronym\")"
+          }
+        ],
+        "hidden": [
+          "\"c_acronym\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
+      "type": "JoinViewDefinition"
+    }
+  ]
+}

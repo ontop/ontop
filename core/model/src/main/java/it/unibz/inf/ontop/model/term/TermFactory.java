@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -51,6 +51,13 @@ public interface TermFactory {
 	 * Takes care of flattening the arguments
 	 */
 	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
+
+	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the of the optional expression, BUT not of expressionStream
+	 */
+	Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream);
 
 	/**
 	 * Must be non-empty
@@ -299,7 +306,7 @@ public interface TermFactory {
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
@@ -312,7 +319,7 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term);
 
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> bnodeTemplate,
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<Template.Component> bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
@@ -361,7 +368,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE
+	 * IF THEN, ELSE IF ..., ELSE
 	 *
 	 * whenPairs must not be empty
 	 *
@@ -371,7 +378,7 @@ public interface TermFactory {
 									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE NULL
+	 * IF THEN, ELSE IF ..., ELSE NULL
 	 *
 	 * whenPairs must not be empty
 	 */
@@ -384,6 +391,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
@@ -481,7 +490,9 @@ public interface TermFactory {
 	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
 	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
 
-    ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
+	Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> immutableTerms);
+
+	ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
@@ -516,11 +527,16 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
+
+	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm0,
+			ImmutableTerm inputRDFTypeTerm1, DBTermType targetType,
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	/**
 	 * Using the SPARQL "=" operator
@@ -582,6 +598,8 @@ public interface TermFactory {
 	// Non-topological and common form functions
 	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
 	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTGeomFromText(ImmutableTerm arg1);
+	ImmutableTerm getDBSTMakePoint(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
@@ -598,5 +616,17 @@ public interface TermFactory {
 	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	/**
+	 * Time extension - duration arithmetic
+	 */
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 
 }

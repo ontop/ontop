@@ -1,34 +1,50 @@
 package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.reformulation.input.ConstructQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JDescribeQuery;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
+import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.impl.ListBindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
-class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> implements RDF4JDescribeQuery {
+class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
+
+    private static final String DESCRIBE_VARIABLE = "d";
+    private static final String P1 = "p1";
+    private static final String O1 = "o1";
+    private static final String S2 = "s2";
+    private static final String P2 = "p2";
 
     private final ParsedQuery originalParsedQuery;
+
+    private final String queryString;
+    private final BindingSet bindings;
 
     // True if the pattern "?s ?p <describedIRI>" should also be considered while answering a DESCRIBE query.
     private final boolean isFixedObjectIncludedInDescribe;
 
-    // LAZY
-    private ConstructTemplate constructTemplate;
-
     RDF4JDescribeQueryImpl(ParsedQuery originalParsedQuery, String queryString, BindingSet bindings,
                            boolean isFixedObjectIncludedInDescribe) {
-        super(queryString, bindings);
         this.originalParsedQuery = originalParsedQuery;
+        this.queryString = queryString;
+        this.bindings = bindings;
         this.isFixedObjectIncludedInDescribe = isFixedObjectIncludedInDescribe;
     }
 
@@ -38,16 +54,17 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> impleme
     }
 
     @Override
-    protected ParsedQuery transformParsedQuery() throws OntopUnsupportedInputQueryException {
-        ConstructQuerySplit split = convertIntoConstructionQuerySplit(originalParsedQuery, isFixedObjectIncludedInDescribe);
-        constructTemplate = split.getConstructTemplate();
-
-        return split.getSelectParsedQuery();
+    public String getInputString() {
+        return queryString;
     }
 
-    private static ConstructQuerySplit convertIntoConstructionQuerySplit(ParsedQuery originalParsedQuery,
-                                                                         boolean isFixedObjectIncludedInDescribe)
-            throws OntopUnsupportedInputQueryException {
+    @Override
+    public IQ translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+        throw new UnsupportedOperationException("DESCRIBE queries cannot be translated in one step.");
+    }
+
+    @Override
+    public SelectQuery getSelectQuery() {
         TupleExpr root = originalParsedQuery.getTupleExpr();
         TupleExpr topNonDescribeExpression = Optional.of(root)
                 .filter(t -> t instanceof DescribeOperator)
@@ -61,43 +78,36 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> impleme
                 .orElseThrow(() -> new MinorOntopInternalBugException("The describe query was expected to have a Project " +
                         "after the DescribeOperator"));
 
-        ProjectionElem describeVariable = extractProjectElement(projection);
+        return new RDF4JSelectQueryImpl(new ParsedTupleQuery(projection), "# SELECT QUERY OF THE FOLLOWING: \n"
+                + queryString, bindings);
+    }
 
-        String p1 = generateUniqueVariableName("p");
-        String o1 = generateUniqueVariableName("o");
-        String s2 = generateUniqueVariableName("s");
-        String p2 = generateUniqueVariableName("p");
+    @Override
+    public ImmutableCollection<ConstructQuery> computeConstructQueries(ImmutableSet<IRI> resourcesToDescribe) {
+        ConstructQuerySplit split = createConstructionQuerySplit(isFixedObjectIncludedInDescribe);
+        SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
-        UnaryTupleOperator newProjection = createNewProjection(describeVariable, p1, o1, s2, p2, isFixedObjectIncludedInDescribe);
+        return resourcesToDescribe.stream()
+                .map(d -> new RDF4JConstructQueryImpl(split, "# Construct for describing " + d,
+                        new ListBindingSet(ImmutableList.of(DESCRIBE_VARIABLE), valueFactory.createIRI(d.getIRIString()))))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private static ConstructQuerySplit createConstructionQuerySplit(boolean isFixedObjectIncludedInDescribe) {
+        ParsedTupleQuery selectQuery = new ParsedTupleQuery(createSPPOUnion(isFixedObjectIncludedInDescribe));
+
+        UnaryTupleOperator newProjection = createNewProjection(isFixedObjectIncludedInDescribe);
         ConstructTemplate constructTemplate = new RDF4JConstructTemplate(newProjection, null);
-
-        TupleExpr initialSubQuery = projection.getArg().clone();
-
-        ParsedTupleQuery selectQuery = createSelectQuery(initialSubQuery, describeVariable, p1, o1, s2, p2,
-                isFixedObjectIncludedInDescribe);
 
         return new ConstructQuerySplit(constructTemplate, selectQuery);
     }
 
-    private static String generateUniqueVariableName(String prefix) {
-        return prefix + UUID.randomUUID().toString();
-    }
-
-    private static ProjectionElem extractProjectElement(Projection topProjection) throws OntopUnsupportedInputQueryException {
-        List<ProjectionElem> projectionElements = topProjection.getProjectionElemList().getElements();
-
-        if (projectionElements.size() == 1)
-            return projectionElements.get(0);
-
-        throw new OntopUnsupportedInputQueryException("DESCRIBE queries with more than one term (variable or IRI) are not supported");
-    }
-
-    private static UnaryTupleOperator createNewProjection(ProjectionElem describeTerm, String p1, String o1, String s2, String p2,
-                                                          boolean isFixedObjectIncludedInDescribe) {
-        ProjectionElemList projection1 = new ProjectionElemList(describeTerm, new ProjectionElem(p1), new ProjectionElem(o1));
+    private static UnaryTupleOperator createNewProjection(boolean isFixedObjectIncludedInDescribe) {
+        ProjectionElem describeProjectElem = new ProjectionElem(DESCRIBE_VARIABLE);
+        ProjectionElemList projection1 = new ProjectionElemList(describeProjectElem, new ProjectionElem(P1), new ProjectionElem(O1));
 
         if (isFixedObjectIncludedInDescribe) {
-            ProjectionElemList projection2 = new ProjectionElemList(new ProjectionElem(s2), new ProjectionElem(p2), describeTerm);
+            ProjectionElemList projection2 = new ProjectionElemList(new ProjectionElem(S2), new ProjectionElem(P2), describeProjectElem);
 
             MultiProjection multiProjection = new MultiProjection();
             multiProjection.addProjection(projection1);
@@ -113,44 +123,23 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> impleme
         }
     }
 
-    private static ParsedTupleQuery createSelectQuery(TupleExpr initialSubQuery, ProjectionElem describeProjectionElem, String p1,
-                                                      String o1, String s2, String p2, boolean isFixedObjectIncludedInDescribe) {
-        Join joinTree = new Join(
-                transformSubQuery(initialSubQuery, describeProjectionElem),
-                createSPPOUnion(describeProjectionElem, p1, o1, s2, p2, isFixedObjectIncludedInDescribe));
+    private static TupleExpr createSPPOUnion(boolean isFixedObjectIncludedInDescribe) {
+        Var describeVariable = new Var(DESCRIBE_VARIABLE);
+        StatementPattern leftStatement = new StatementPattern(describeVariable, new Var(P1), new Var(O1));
 
-        return new ParsedTupleQuery(joinTree);
-    }
-
-    private static TupleExpr transformSubQuery(TupleExpr initialSubQuery, ProjectionElem describeProjectionElem) {
-        return new Distinct(
-                new Projection(initialSubQuery, new ProjectionElemList(describeProjectionElem)));
-    }
-
-    private static TupleExpr createSPPOUnion(ProjectionElem describeProjectionElem, String p1,
-                                             String o1, String s2, String p2, boolean isFixedObjectIncludedInDescribe) {
-        Var describeVariable = new Var(describeProjectionElem.getTargetName());
-        StatementPattern leftStatement = new StatementPattern(describeVariable, new Var(p1), new Var(o1));
+        ProjectionElem describeProjectionElem = new ProjectionElem(DESCRIBE_VARIABLE);
 
         Projection left = new Projection(leftStatement,
-                new ProjectionElemList(describeProjectionElem, new ProjectionElem(p1), new ProjectionElem(o1)));
+                new ProjectionElemList(describeProjectionElem, new ProjectionElem(P1), new ProjectionElem(O1)));
 
         if (isFixedObjectIncludedInDescribe) {
-            StatementPattern rightStatement = new StatementPattern(new Var(s2), new Var(p2), describeVariable);
+            StatementPattern rightStatement = new StatementPattern(new Var(S2), new Var(P2), describeVariable);
             Projection right = new Projection(rightStatement,
-                    new ProjectionElemList(new ProjectionElem(s2), new ProjectionElem(p2), describeProjectionElem));
+                    new ProjectionElemList(new ProjectionElem(S2), new ProjectionElem(P2), describeProjectionElem));
 
             return new Union(left, right);
         }
         else
             return left;
-    }
-
-    @Override
-    public ConstructTemplate getConstructTemplate() {
-        if (constructTemplate == null)
-            throw new IllegalStateException("Please make to reformulate the query before calling this method");
-
-        return constructTemplate;
     }
 }

@@ -5,9 +5,8 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -28,23 +26,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        ImmutableMultiset<Variable> childrenVariableBag = query.getChildren(this).stream()
-                .flatMap(c -> query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toMultiset());
-
-        Stream<Variable> cooccuringVariableStream = childrenVariableBag.entrySet().stream()
-                .filter(e -> e.getCount() > 1)
-                .map(Multiset.Entry::getElement);
-
-        return Stream.concat(cooccuringVariableStream, getLocallyRequiredVariables().stream())
-                .collect(ImmutableCollectors.toSet());
+                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
     }
 
 

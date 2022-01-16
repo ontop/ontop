@@ -43,9 +43,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     }
 
     private IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        Optional<ImmutableExpression> condition = termFactory.getConjunction(
-                tree.getVariables().stream()
-                        .map(termFactory::getDBIsNotNull));
+        Optional<ImmutableExpression> condition = termFactory.getDBIsNotNull(tree.getVariables().stream());
 
         return condition
                 .map(iQFactory::createFilterNode)

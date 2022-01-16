@@ -31,6 +31,8 @@ public interface DBTypeFactory {
 
     boolean supportsDBGeographyType();
 
+    boolean supportsDBDistanceSphere();
+
     DBTermType getDBHexBinaryType();
 
 

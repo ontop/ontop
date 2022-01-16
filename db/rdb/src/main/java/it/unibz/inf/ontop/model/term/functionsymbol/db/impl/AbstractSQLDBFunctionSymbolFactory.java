@@ -11,8 +11,10 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -68,7 +70,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_DISTANCE_SPHEROID = "ST_DISTANCESPHEROID";
 
     protected static final String ST_TRANSFORM = "ST_TRANSFORM";
-
+    protected static final String ST_GEOMFROMTEXT = "ST_GEOMFROMTEXT";
+    protected static final String ST_MAKEPOINT = "ST_MAKEPOINT";
     protected static final String ST_SETSRID = "ST_SETSRID";
 
     protected static final String ST_FLIP_COORDINATES = "ST_FLIPCOORDINATES";
@@ -349,6 +352,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_SRID, 1, getsridSymbol);
 
+        DBFunctionSymbol setsridSymbol = new GeoDBTypedFunctionSymbol(ST_SETSRID, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SETSRID, 2, setsridSymbol);
+
+        DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
+
+        DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_MAKEPOINT, 2, makepointSymbol);
+
         return builder.build();
     }
 
@@ -575,6 +590,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    String parameterString = terms.stream()
+                            .map(termConverter)
+                            .collect(Collectors.joining(","));
+                    return String.format("COALESCE(%s) IS TRUE", parameterString);
+                });
+    }
+
+    @Override
     protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
@@ -590,23 +617,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false));
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check the term type
+        return Optional.of(new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false));
     }
 
     @Override
@@ -718,6 +749,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
+        return new DefaultSimpleDBCastFunctionSymbol(geoType, geoType, Serializers.getCastSerializer(geoType));
+    }
+
+    @Override
     protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
         return new DefaultTypedDBMathBinaryOperator(MULTIPLY_STR, dbNumericType);
     }
@@ -816,6 +852,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return ifThenElse;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBNullIf() {
+        return getRegularDBFunctionSymbol(NULLIF_STR, 2);
     }
 
     @Override
@@ -1068,6 +1109,87 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     public DBFunctionSymbol getDBSTSetSRID() {
         return getRegularDBFunctionSymbol(ST_SETSRID, 2);
     }
+
+    @Override
+    public DBFunctionSymbol getDBSTGeomFromText() { return getRegularDBFunctionSymbol(ST_GEOMFROMTEXT, 1); }
+
+    @Override
+    public DBFunctionSymbol getDBSTMakePoint() { return getRegularDBFunctionSymbol(ST_MAKEPOINT, 2); }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeWeeksBetween(terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeWeeksBetween(terms, termConverter, termFactory);
+    }
+
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(WEEK, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDaysBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeDaysBetween(terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeDaysBetween(terms, termConverter, termFactory);
+    }
+
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(DAY, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(HOUR, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(MINUTE, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(SECOND, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TIMESTAMPDIFF(MILLISECOND, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
 
     /**
      * Can be overridden.

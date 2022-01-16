@@ -95,7 +95,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s2 -> s2.composeWith(c.getSubstitution()).reduceDomainToIntersectionWith(c.getVariables()))
+                        .map(s2 -> s2.composeWith(c.getSubstitution()).filter(c.getVariables()::contains))
                         .orElseGet(c::getSubstitution))
                 .orElseGet(() -> aggregationNode
                         .map(AggregationNode::getSubstitution)
@@ -218,6 +218,10 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof ExtendedProjectionNode || rootNode instanceof QueryModifierNode){
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             return convert(tree, signature);
+        }
+        else if (rootNode instanceof ValuesNode) {
+            ValuesNode valuesNode = (ValuesNode) rootNode;
+            return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

@@ -1,0 +1,37 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"", "\"persons\""],
+      "query": "SELECT r.\"id\", r.\"status\", r.\"country\" FROM \"person\" AS r WHERE r.\"status\" = 1",
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"statusConstraint\"",
+            "determinants" : [ "\"status\""]
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "determinants": ["\"id\""],
+            "dependents": ["\"status\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
+      "type": "SQLViewDefinition"
+    }
+  ]
+}

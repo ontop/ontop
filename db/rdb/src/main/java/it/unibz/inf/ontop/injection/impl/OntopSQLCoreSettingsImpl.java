@@ -29,10 +29,9 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
     private final String jdbcDriver;
-    private final String jdbcName;
 
     /**
-     * Beware: immutable class!
+     * Beware: immutable class!
      * <p>
      * Recommended constructor.
      * <p>
@@ -46,8 +45,6 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
         jdbcUrl = getRequiredProperty(OntopSQLCoreSettings.JDBC_URL);
         jdbcDriver = getRequiredProperty(OntopSQLCoreSettings.JDBC_DRIVER);
-        jdbcName = getProperty(OntopSQLCoreSettings.JDBC_NAME)
-                .orElseGet(() -> IDGenerator.getNextUniqueID(DB_PREFIX));
     }
 
     static Properties loadSQLCoreProperties(Properties userProperties) {
@@ -132,11 +129,6 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     @Override
     public String getJdbcUrl() {
         return jdbcUrl;
-    }
-
-    @Override
-    public String getJdbcName() {
-        return jdbcName;
     }
 
     @Override

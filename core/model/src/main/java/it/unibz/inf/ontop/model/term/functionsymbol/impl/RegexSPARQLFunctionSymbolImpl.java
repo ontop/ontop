@@ -24,8 +24,7 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
     protected RegexSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
         super("SP_REGEX_" + arity, SPARQL.REGEX,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> xsdStringType)
+                        .mapToObj(i -> xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
         this.xsdBooleanType = xsdBooleanType;
@@ -78,13 +77,14 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
 
         RDFTermTypeConstant xsdStringConstant = termFactory.getRDFTermTypeConstant(xsdStringType);
 
-        Stream<ImmutableExpression> conditionStream = Stream.concat(
+        ImmutableList<ImmutableExpression> conditions = Stream.concat(
                 Stream.of(termFactory.getIsAExpression(typeTerms.get(0), xsdStringType)),
                 typeTerms.stream()
                         .skip(1)
-                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)));
+                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)))
+                .collect(ImmutableCollectors.toList());
 
-        return termFactory.getConjunction(conditionStream).get()
+        return termFactory.getConjunction(conditions)
                 .evaluate(variableNullability);
     }
 }

@@ -16,7 +16,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration, Ontop
 
 
 
-    static Builder<? extends Builder> defaultBuilder() {
+    static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopMappingConfigurationImpl.BuilderImpl<>();
     }
 

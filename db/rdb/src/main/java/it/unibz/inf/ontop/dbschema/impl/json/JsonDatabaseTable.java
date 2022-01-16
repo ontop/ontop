@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -76,7 +77,9 @@ public class JsonDatabaseTable extends JsonOpenObject {
         for (Column attribute: columns)
             attributeListBuilder.addAttribute(
                     idFactory.createAttributeID(attribute.name),
-                    dbTypeFactory.getDBTermType(attribute.datatype),
+                    attribute.datatype != null
+                            ? dbTypeFactory.getDBTermType(attribute.datatype)
+                            :dbTypeFactory.getAbstractRootDBType(),
                     attribute.isNullable);
 
         ImmutableList<RelationID> allIDs = Stream.concat(Stream.of(name), otherNames.stream())
@@ -86,21 +89,19 @@ public class JsonDatabaseTable extends JsonOpenObject {
         return new DatabaseTableDefinition(allIDs, attributeListBuilder);
     }
 
-    public void insertIntegrityConstraints(MetadataLookup lookup) throws MetadataExtractionException {
-        DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(
-                JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), name));
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup lookupForFk) throws MetadataExtractionException {
 
         for (JsonUniqueConstraint uc: uniqueConstraints)
-            uc.insert(relation, lookup.getQuotedIDFactory());
+            uc.insert(relation, lookupForFk.getQuotedIDFactory());
 
         for (JsonFunctionalDependency fd: otherFunctionalDependencies)
-            fd.insert(relation, lookup.getQuotedIDFactory());
+            fd.insert(relation, lookupForFk.getQuotedIDFactory());
 
         for (JsonForeignKey fk : foreignKeys) {
             if (!fk.from.relation.equals(this.name))
                 throw new MetadataExtractionException("Table names mismatch: " + name + " != " + fk.from.relation);
 
-            fk.insert(relation, lookup);
+            fk.insert(relation, lookupForFk);
         }
     }
 
@@ -113,12 +114,13 @@ public class JsonDatabaseTable extends JsonOpenObject {
     public static class Column extends JsonOpenObject {
         public final String name;
         public final Boolean isNullable;
+        @Nullable
         public final String datatype;
 
         @JsonCreator
         public Column(@JsonProperty("name") String name,
                       @JsonProperty("isNullable") Boolean isNullable,
-                      @JsonProperty("datatype") String datatype) {
+                      @Nullable @JsonProperty("datatype") String datatype) {
             this.name = name;
             this.isNullable = isNullable;
             this.datatype = datatype;
@@ -127,7 +129,9 @@ public class JsonDatabaseTable extends JsonOpenObject {
         public Column(Attribute attribute) {
             this.name = attribute.getID().getSQLRendering();
             this.isNullable = attribute.isNullable();
-            this.datatype = ((AttributeImpl)attribute).getSQLTypeName();
+            this.datatype = attribute.getTermType().isAbstract()
+                    ? null
+                    : ((AttributeImpl)attribute).getSQLTypeName();
         }
     }
 }

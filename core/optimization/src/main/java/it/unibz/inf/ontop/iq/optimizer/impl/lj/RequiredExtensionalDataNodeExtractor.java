@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,10 +39,12 @@ public class RequiredExtensionalDataNodeExtractor {
          * TODO: see how to safely extract data nodes in the fromRight case
          */
         if (fromLeft && (root instanceof LeftJoinNode))
-            return extractOtherType(((BinaryNonCommutativeIQTree) tree).getLeftChild());
+            return extractSomeRequiredNodes(((BinaryNonCommutativeIQTree) tree).getLeftChild(), true);
 
-        // Usually at the top of the right child of a LJ
-        if ((!fromLeft) && (root instanceof ConstructionNode))
+        // Usually at the top of the right child of a LJ, with a substitution with ground terms (normally provenance constants)
+        if ((!fromLeft) && (root instanceof ConstructionNode)
+                && ((ConstructionNode) root).getSubstitution().getImmutableMap().values().stream()
+                .allMatch(ImmutableTerm::isGround))
             return extractSomeRequiredNodes(((UnaryIQTree) tree).getChild(), false);
 
         return extractOtherType(tree);

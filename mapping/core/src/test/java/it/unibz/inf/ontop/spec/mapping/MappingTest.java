@@ -5,13 +5,11 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -41,16 +39,16 @@ public class MappingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
-    private static Variable A = TERM_FACTORY.getVariable("a");
-    private static Variable B = TERM_FACTORY.getVariable("b");
-    private static Variable C = TERM_FACTORY.getVariable("c");
-    private static Variable S = TERM_FACTORY.getVariable("s");
-    private static Variable P = TERM_FACTORY.getVariable("p");
-    private static Variable O = TERM_FACTORY.getVariable("o");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable S = TERM_FACTORY.getVariable("s");
+    private static final Variable P = TERM_FACTORY.getVariable("p");
+    private static final Variable O = TERM_FACTORY.getVariable("o");
 
     private final static Variable Y = TERM_FACTORY.getVariable("company");
 
-    private static final ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = Template.of("http://example.org/person/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/person/", 0);
 
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
@@ -90,8 +88,7 @@ public class MappingTest {
         RDFAtomPredicate rdfAtomPredicate = null;
 
         // Properties
-        for (IRI propertyIri : propertyIris){
-            IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
+        for (IRI propertyIri : propertyIris) {
             ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                     SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                             P, getConstantIRI(propertyIri),
@@ -100,25 +97,21 @@ public class MappingTest {
             DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
             rdfAtomPredicate = (RDFAtomPredicate) mappingProjectionAtom.getPredicate();
 
-            mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
-            mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-            IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
+            IQ mappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
             propertyMapBuilder.put(propertyIri, mappingAssertion);
-            LOGGER.info("Mapping assertion:\n" +mappingAssertion);
+            LOGGER.info("Mapping assertion:\n" + mappingAssertion);
         }
 
         // Class
-        IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                 SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
-        mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
+        DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
-        mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-        IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
+        IQ classMappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
         LOGGER.info("Mapping assertion:\n" + classMappingAssertion);
 
@@ -147,7 +140,7 @@ public class MappingTest {
         Set<Variable> variableUnion = new HashSet<>();
 
         // Properties
-        for (IRI propertyIri : propertyIris){
+        for (IRI propertyIri : propertyIris) {
 
             IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
 
@@ -168,7 +161,7 @@ public class MappingTest {
         System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
         if(Stream.of(mappingAssertionVariables)
-                .anyMatch(variableUnion::contains)){
+                .anyMatch(variableUnion::contains)) {
             fail();
         }
         variableUnion.addAll(mappingAssertionVariables);
@@ -188,11 +181,7 @@ public class MappingTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, table1DataNode);
-
-        IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ mappingAssertion = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, table1DataNode));
         LOGGER.info(mappingAssertion.toString());
 
 //        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();

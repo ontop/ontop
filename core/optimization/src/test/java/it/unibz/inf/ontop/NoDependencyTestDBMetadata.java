@@ -26,39 +26,20 @@ public class NoDependencyTestDBMetadata {
     public static final RelationDefinition TABLE5_AR3;
     public static final RelationDefinition TABLE6_AR3;
 
+    public static final RelationDefinition TABLE13_AR2;
+
     public static final RelationDefinition TABLE7_AR4;
 
     public static final RelationDefinition INT_TABLE1_AR2;
     public static final RelationDefinition INT_TABLE2_AR2;
+    public static final RelationDefinition INT_TABLE1_AR3;
     public static final RelationDefinition INT_TABLE1_NULL_AR2;
     public static final RelationDefinition INT_TABLE2_NULL_AR2;
     public static final RelationDefinition INT_TABLE1_NULL_AR3;
 
-//
-//    private static FlattenNodePredicate createFlattenNodePredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory, int arity){
-//        return dbMetadata.createFlattenNodeRelation(
-//                idFactory.createRelationID(
-//                        null,
-//                        String.format(
-//                                "flatten_node_pred_arity_%s",
-//                                arity
-//                        )),
-//                createAttributeIds(idFactory, arity),
-//                IntStream.range(0, arity)
-//                        .mapToObj(i -> TYPE_FACTORY.getUnderspecifiedDBType())
-//                        .collect(ImmutableCollectors.toList()),
-//                IntStream.range(0, arity)
-//                        .mapToObj(i -> true)
-//                        .collect(ImmutableCollectors.toList())
-//                ).getAtomPredicate();
-//    }
-//
-//    private static ImmutableList<QuotedID> createAttributeIds(QuotedIDFactory idFac, int arity) {
-//        return IntStream.range(1, arity+1).boxed()
-//                .map(i -> idFac.createAttributeID("col"+i))
-//                .collect(ImmutableCollectors.toList());
-//    }
-//
+    public static final RelationDefinition UUID_TABLE1_AR3;
+
+
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         TABLE1_AR1 = builder.createRelationWithStringAttributes(1, 1, false);
@@ -83,8 +64,14 @@ public class NoDependencyTestDBMetadata {
 
         TABLE7_AR4 = builder.createRelationWithStringAttributes(7, 4, false);
 
+
+        TABLE13_AR2 = builder.createRelationWithStringAttributes(13, 2, true);
+
         INT_TABLE1_AR2 = builder.createRelationWithIntAttributes(1, 2, false);
         INT_TABLE2_AR2 = builder.createRelationWithIntAttributes(2, 2, false);
+        INT_TABLE1_AR3 = builder.createRelationWithIntAttributes(1, 3, false);
+
+        UUID_TABLE1_AR3 = builder.createRelationWithUuidAttributes(1, 3, false);
 
         INT_TABLE1_NULL_AR2 = builder.createRelationWithIntAttributes(1, 2, true);
         INT_TABLE2_NULL_AR2 = builder.createRelationWithIntAttributes(2, 2, true);

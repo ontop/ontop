@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCTupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -24,24 +23,18 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
-/**
- * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link DistinctJDBCTupleResultSet}
- */
-
-public class DistinctResultSetTest { //
+public class DistinctResultSetTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String owlFile = "/mysql/example/exampleBooks.owl";
     private static final String obdaFile = "/mysql/example/exampleBooks.obda";
     private static  final String propertyFile = "/mysql/example/exampleBooks.properties";
-    static String owlFileName;
-    static String obdaFileName;
-    static String propertyFileName;
+    private static String owlFileName;
+    private static String obdaFileName;
+    private static String propertyFileName;
 
     @Before
     public void setUp() throws Exception {
@@ -79,9 +72,6 @@ public class DistinctResultSetTest { //
 
     private int runTestsSesame(String query, String configFile) {
         //create a sesame repository
-        RepositoryConnection con = null;
-        Repository repo = null;
-        int count = 0;
         OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(obdaFileName)
@@ -89,13 +79,14 @@ public class DistinctResultSetTest { //
                 .enableTestMode()
                 .build();
 
-        repo = OntopRepository.defaultRepository(configuration);
+        Repository repo = OntopRepository.defaultRepository(configuration);
 
         repo.initialize();
 
-        con = repo.getConnection();
+        RepositoryConnection con = repo.getConnection();
 
         ///query repo
+        int count = 0;
         TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
         try (TupleQueryResult result = tupleQuery.evaluate()) {
             List<String> bindings = result.getBindingNames();

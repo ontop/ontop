@@ -33,7 +33,6 @@ public class OntopR2RMLToOBDA implements OntopCommand {
 
         OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(inputMappingFile)
-                .jdbcName("h2")
                 .jdbcUrl("jdbc:h2:tcp://localhost/DBName")
                 .jdbcUser("username")
                 .jdbcPassword("password")

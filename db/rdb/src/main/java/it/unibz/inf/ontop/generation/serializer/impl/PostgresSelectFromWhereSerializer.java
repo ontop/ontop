@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -17,6 +18,11 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             @Override
             protected String castFloatingConstant(String value, DBTermType dbType) {
                 return String.format("%s::%s", value, dbType.getCastName());
+            }
+
+            @Override
+            protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
+                return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
             }
         });
     }
@@ -43,7 +49,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     // serializeLimit and serializeOffset are standard
 
                     @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d\nOFFSET %d", limit, offset);
                     }
                 });

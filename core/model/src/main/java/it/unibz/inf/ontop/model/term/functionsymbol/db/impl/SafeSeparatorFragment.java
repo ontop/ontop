@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 
 import javax.annotation.Nullable;
 import java.util.regex.Pattern;
@@ -10,6 +12,7 @@ import java.util.stream.IntStream;
 
 public class SafeSeparatorFragment {
     private final String fragment;
+    private final ImmutableList<Template.Component> components;
     private final char separator;
     private final int firstPlaceholderIndex;
 
@@ -33,6 +36,7 @@ public class SafeSeparatorFragment {
         this.fragment = fragment;
         this.separator = separator;
         this.firstPlaceholderIndex = firstPlaceholderIndex;
+        this.components = TemplateParser.getComponents(fragment, true);
     }
 
     private SafeSeparatorFragment(String fragment, char separator) {
@@ -46,6 +50,8 @@ public class SafeSeparatorFragment {
     public char getSeparator() {
         return separator;
     }
+
+    public ImmutableList<Template.Component> getComponents() { return components; }
 
     @Override
     public String toString() {

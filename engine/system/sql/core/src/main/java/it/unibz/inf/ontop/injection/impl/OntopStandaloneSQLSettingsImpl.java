@@ -29,13 +29,13 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return getRequiredBoolean(DISTINCT_RESULTSET);
+    public boolean isPostProcessingAvoided() {
+        return systemSettings.isPostProcessingAvoided();
     }
 
     @Override
-    public boolean isPostProcessingAvoided() {
-        return systemSettings.isPostProcessingAvoided();
+    public boolean areInvalidTriplesExcludedFromResultSet() {
+        return systemSettings.areInvalidTriplesExcludedFromResultSet();
     }
 
     @Override
@@ -139,17 +139,7 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public Optional<Integer> getHttpMaxAge() {
-        return systemSettings.getHttpMaxAge();
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleWhileRevalidate() {
-        return systemSettings.getHttpStaleWhileRevalidate();
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleIfError() {
-        return systemSettings.getHttpStaleIfError();
+    public Optional<String> getHttpCacheControl() {
+        return systemSettings.getHttpCacheControl();
     }
 }

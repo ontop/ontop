@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
@@ -45,7 +44,7 @@ public class UnionFlattenerTest {
     private final static ExtensionalDataNode DATA_NODE5 = IQ_FACTORY.createExtensionalDataNode(
             TABLE2_AR2, ImmutableMap.of(0, Y, 1, Z));
 
-    private final static ImmutableList<TemplateComponent> uriTemplate2 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().addColumn().build();
+    private final static ImmutableList<Template.Component> uriTemplate2 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().addColumn().build();
 
     private final static DBConstant CONSTANT_STRING = TERM_FACTORY.getDBConstant("john",
             TYPE_FACTORY.getDBTypeFactory().getDBStringType());
@@ -60,25 +59,38 @@ public class UnionFlattenerTest {
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z)),
                 ImmutableList.of(DATA_NODE1, DATA_NODE2)
         );
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR3, ImmutableMap.of(0, X, 1, Y));
+
         IQTree union1 = IQ_FACTORY.createNaryIQTree(
                 unionNode1,
-                ImmutableList.of(union2, DATA_NODE3)
+                ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(unionNode1.getVariables()),
+                                union2),
+                        dataNode3)
         );
 
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM1, union1);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER.optimize(iq)
+                .normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR3, ImmutableMap.of(0, X, 1, Y));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR3, ImmutableMap.of(0, X, 1, Y));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 iq.getProjectionAtom(),
                 IQ_FACTORY.createNaryIQTree(
                         unionNode1,
                         ImmutableList.of(
-                                DATA_NODE3,
-                                DATA_NODE1,
-                                DATA_NODE2
+                                dataNode3,
+                                dataNode1,
+                                dataNode2
                         )));
         System.out.println("\nExpected: \n" + expectedIQ);
 

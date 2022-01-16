@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -192,8 +192,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions) {
-		return getConjunction(
-				Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
+		return getConjunction(Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
 				.collect(ImmutableCollectors.toList()));
 	}
 
@@ -202,6 +201,21 @@ public class TermFactoryImpl implements TermFactory {
 		ImmutableList<ImmutableExpression> conjuncts = expressionStream
 				.flatMap(ImmutableExpression::flattenAND)
 				.distinct()
+				.collect(ImmutableCollectors.toList());
+
+		return Optional.of(conjuncts)
+				.filter(c -> !c.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
+	public Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream) {
+		ImmutableList<ImmutableExpression> conjuncts = Stream.concat(
+						optionalExpression
+								.map(ImmutableExpression::flattenAND)
+								.orElseGet(Stream::empty),
+						expressionStream)
+				//.distinct()
 				.collect(ImmutableCollectors.toList());
 
 		return Optional.of(conjuncts)
@@ -387,7 +401,16 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNotNull(), immutableTerm);
 	}
 
-    @Override
+	@Override
+	public Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> stream) {
+		return Optional.of(stream
+						.map(this::getDBIsNotNull)
+						.collect(ImmutableCollectors.toList()))
+				.filter(l -> !l.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMd5(), stringTerm);
     }
@@ -455,7 +478,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
 																	 ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-																	 java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+																	 java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getUnaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
 				lexicalTerm, inputRDFTypeTerm);
@@ -464,10 +487,20 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getUnaryLexicalFunctionSymbol(dbFunctionSymbolFct),
 				lexicalTerm, rdfDatatypeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1,
+																	  ImmutableTerm inputRDFTypeTerm0, ImmutableTerm inputRDFTypeTerm1,
+																	  DBTermType targetType,
+																	  java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getBinaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
+				lexicalTerm0, lexicalTerm1, inputRDFTypeTerm0, inputRDFTypeTerm1);
 	}
 
 	@Override
@@ -639,9 +672,19 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTTransform(), arg1, srid);
     }
 
+	@Override
+	public ImmutableTerm getDBSTGeomFromText(ImmutableTerm arg1) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTGeomFromText(), ImmutableList.of(arg1));
+	}
+
+	@Override
+	public ImmutableTerm getDBSTMakePoint(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTMakePoint(), ImmutableList.of(arg1, arg2));
+	}
+
     @Override
     public ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSetSRID(), arg1, arg2);
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSetSRID(), ImmutableList.of(arg1, arg2));
     }
 
     @Override
@@ -724,7 +767,51 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBGetSRID(), ImmutableList.of(arg1));
     }
 
-    @Override
+	/**
+	 * Time extension - duration arithmetic
+	 */
+
+	@Override
+	public ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeeksBetweenFromDate(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDaysBetweenFromDate(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBHoursBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMinutesBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSecondsBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMillisBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
 		return getImmutableExpression(functionSymbolFactory.getNotYetTypedEquality(), t1, t2);
     }
@@ -861,7 +948,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate,
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> iriTemplate,
 														ImmutableList<? extends ImmutableTerm> arguments) {
 		if (arguments.isEmpty())
 			throw new IllegalArgumentException("At least one argument for the IRI functional term " +
@@ -887,7 +974,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> bnodeTemplate,
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<Template.Component> bnodeTemplate,
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
@@ -1047,7 +1134,14 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoalesce(terms.size()), terms);
     }
 
-    @Override
+	@Override
+	public ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 1)
+			throw new IllegalArgumentException("At least one argument is expected");
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCoalesce(terms.size()), terms);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
 	}

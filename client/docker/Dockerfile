@@ -1,5 +1,4 @@
-FROM openjdk:8-jdk-alpine
-RUN apk add --no-cache bash
+FROM openjdk:11-jre-buster
 VOLUME /tmp
 RUN mkdir -p /opt/ontop
 COPY . /opt/ontop/

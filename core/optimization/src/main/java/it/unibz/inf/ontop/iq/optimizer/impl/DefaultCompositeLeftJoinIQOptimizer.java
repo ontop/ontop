@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.lj.CardinalityInsensitiveJoinTransferLJOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.lj.CardinalitySensitiveJoinTransferLJOptimizer;
 
 public class DefaultCompositeLeftJoinIQOptimizer implements LeftJoinIQOptimizer {
@@ -13,10 +14,11 @@ public class DefaultCompositeLeftJoinIQOptimizer implements LeftJoinIQOptimizer 
 
     @Inject
     private DefaultCompositeLeftJoinIQOptimizer(
-            CardinalitySensitiveJoinTransferLJOptimizer cardinalitySensitiveJoinTransferLJOptimizer) {
-        // TODO: enrich
+            CardinalitySensitiveJoinTransferLJOptimizer cardinalitySensitiveJoinTransferLJOptimizer,
+            CardinalityInsensitiveJoinTransferLJOptimizer cardinalityInsensitiveJoinTransferLJOptimizer) {
         this.optimizers = ImmutableList.of(
-                cardinalitySensitiveJoinTransferLJOptimizer);
+                cardinalitySensitiveJoinTransferLJOptimizer,
+                cardinalityInsensitiveJoinTransferLJOptimizer);
 
     }
 

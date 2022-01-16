@@ -41,6 +41,11 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return node.acceptNodeTransformer(nodeTransformer);
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return leafNode.acceptNodeTransformer(nodeTransformer);
     }

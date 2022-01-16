@@ -7,12 +7,12 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,19 +29,12 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree leftChild;
     private final IQTree rightChild;
 
-    @AssistedInject
-    private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
-                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
 
-        if (settings.isTestModeEnabled())
-            validate();
-    }
-
+    /**
+     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
+     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache)}
+     */
+    @SuppressWarnings("unused")
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
@@ -56,6 +49,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
             validate();
     }
 
+    /**
+     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
+     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild)}
+     */
+    @SuppressWarnings("unused")
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild,
@@ -63,8 +61,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
                                            TermFactory termFactory,
-                                           OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
+                                           OntopModelSettings settings,
+                                           IQTreeCache freshTreeCash) {
+        this(rootNode, leftChild, rightChild, freshTreeCash, iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -83,16 +82,21 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return getRootNode().acceptVisitor(visitor, leftChild, rightChild);
     }
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        IQProperties properties = getProperties();
-        if (properties.isNormalizedForOptimization())
+        IQTreeCache treeCache = getTreeCache();
+        if (treeCache.isNormalizedForOptimization())
             return this;
-        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, properties);
+        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, treeCache);
     }
 
     @Override
@@ -104,7 +108,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
+                : renamingSubstitution.filter(getVariables()::contains);
 
         return selectedSubstitution.isEmpty()
                 ? this
@@ -158,7 +162,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree removeDistincts() {
-        IQProperties properties = getProperties();
+        IQTreeCache properties = getTreeCache();
         return properties.areDistinctAlreadyRemoved()
                 ? this
                 : getRootNode().removeDistincts(leftChild, rightChild, properties);

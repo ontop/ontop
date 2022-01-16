@@ -126,7 +126,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 ));
 
         Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
-                .flatMap(e -> extractGroundFunctionalSubstitution(e));
+                .flatMap(this::extractGroundFunctionalSubstitution);
 
 
         Optional<ImmutableExpression> newExpression;
@@ -181,10 +181,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     .applyToBooleanExpression(optionalConstraint.get());
 
             ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
-                    .flatMap(e -> termFactory.getConjunction(
-                            Stream.concat(
-                                    e.flattenAND(),
-                                    substitutedConstraint.flattenAND())))
+                    .flatMap(e -> termFactory.getConjunction(Stream.of(e, substitutedConstraint)))
                     .orElse(substitutedConstraint);
 
             ImmutableExpression.Evaluation evaluationResults = combinedExpression.evaluate2VL(childVariableNullability);

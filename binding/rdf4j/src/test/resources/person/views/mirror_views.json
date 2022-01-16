@@ -3,6 +3,7 @@
     {
       "name": ["\"hr\"", "\"persons\""],
       "baseRelation": ["\"person\""],
+      "filterExpression": "",
       "columns": {
         "added": [
         ],

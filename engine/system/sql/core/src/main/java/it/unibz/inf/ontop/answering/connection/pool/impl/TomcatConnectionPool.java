@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 
 /**
@@ -25,9 +26,10 @@ public class TomcatConnectionPool implements JDBCConnectionPool {
         PoolProperties poolProperties = new PoolProperties();
         poolProperties.setUrl(settings.getJdbcUrl());
         poolProperties.setDriverClassName(settings.getJdbcDriver());
-
-        poolProperties.setUsername(settings.getJdbcUser());
-        poolProperties.setPassword(settings.getJdbcPassword());
+        settings.getJdbcUser()
+                .ifPresent(poolProperties::setUsername);
+        settings.getJdbcPassword()
+                .ifPresent(poolProperties::setPassword);
         poolProperties.setJmxEnabled(true);
 
         // TEST connection before using it

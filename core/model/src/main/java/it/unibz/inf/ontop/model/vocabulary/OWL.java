@@ -23,4 +23,15 @@ public class OWL {
     public static final IRI BOTTOM_DATA_PROPERTY  = RDF_FACTORY.createIRI(PREFIX + "bottomDataProperty");
 
     public static final IRI SAME_AS = RDF_FACTORY.createIRI(PREFIX + "sameAs");
+
+    public static final IRI CLASS = RDF_FACTORY.createIRI(PREFIX + "Class");
+    public static final IRI DISJOINT_WITH = RDF_FACTORY.createIRI(PREFIX + "disjointWith");
+
+    public static final IRI RESTRICTION = RDF_FACTORY.createIRI(PREFIX + "Restriction");
+    public static final IRI ON_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "onProperty");
+    public static final IRI SOME_VALUES_FROM = RDF_FACTORY.createIRI(PREFIX + "someValuesFrom");
+
+    public static final IRI OBJECT_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "ObjectProperty");
+    public static final IRI DATATYPE_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "DatatypeProperty");
+    public static final IRI INVERSE_OF = RDF_FACTORY.createIRI(PREFIX + "inverseOf");
 }

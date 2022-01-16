@@ -95,13 +95,12 @@ public class NullIfDBFunctionSymbolImpl extends AbstractArgDependentTypedDBFunct
         Stream<ImmutableTerm> secondTerms = decomposition.getValue();
 
         ImmutableExpression conjunction = termFactory.getConjunction(
-                Stream.concat(
-                        Stream.of(termFactory.getDBIsNotNull(firstTerm)),
-                        secondTerms
-                                .map(term2 -> termFactory.getDisjunction(
-                                        termFactory.getDBIsNull(term2),
-                                        termFactory.getDBNot(termFactory.getDBNonStrictDefaultEquality(firstTerm, term2))))))
-                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting to have at least one second term"));
+                Stream.concat(Stream.of(termFactory.getDBIsNotNull(firstTerm)),
+                                secondTerms
+                                        .map(term2 -> termFactory.getDisjunction(
+                                                termFactory.getDBIsNull(term2),
+                                                termFactory.getDBNot(termFactory.getDBNonStrictDefaultEquality(firstTerm, term2)))))
+                        .collect(ImmutableCollectors.toList()));
 
         return conjunction.evaluate(variableNullability, true);
     }

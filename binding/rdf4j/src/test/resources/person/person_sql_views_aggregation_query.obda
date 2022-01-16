@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://person.example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-person
+target		:person/{"id"} a :Person ; :country {"country"} ; :sum {"SUM"} .
+source		SELECT "id", "country", "SUM" FROM "hr"."persons";
+
+]]

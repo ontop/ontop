@@ -1,0 +1,162 @@
+{
+  "ontop.cardinalityMode": {
+    "type": "Enum",
+    "description": "Default value: `STRICT`. If set to `LOOSE`, the cardinality is not guaranteed to be preserved anymore."
+  },
+  "ontop.testMode": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, performs extra checks. Should not be enabled in production."
+  },
+  "ontop.maxNbChildrenLiftingDBFS": {
+    "type": "Integer",
+    "description": "Default value: `10`. Above this threshold, the preference for a function symbol to be post-processed is not considered."
+  },
+  "ontop.sameAs": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, enforces the owl:sameAs semantics at the mapping level. Not very efficient, please consider using canonical IRIs instead. See https://ontop-vkg.org/tutorial/mapping/uri-templates#canonical-iris"
+  },
+  "jdbc.url": {
+    "type": "IRI",
+    "description": "JDBC URL for connecting the database. The username and the password are not expected to be specified in this URL."
+  },
+  "jdbc.driver": {
+    "type": "String",
+    "description": "Canonical name of the JDBC driver class."
+  },
+  "jdbc.user": {
+    "type": "String",
+    "description": "Username for connecting to the database."
+  },
+  "jdbc.password": {
+    "type": "String",
+    "description": "Password for connecting to the database."
+  },
+  "jdbc.name": {
+    "type": "String",
+    "description": "DEPRECATED. This value is ignored."
+  },
+  "ontop.queryOntologyAnnotation": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, includes annotations about classes and properties in the virtual graph."
+  },
+  "ontop.inferDefaultDatatype": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If false, throws an exception if the system is not able to infer the datatype from the database. If true, uses the default datatype (xsd:string)."
+  },
+  "ontop.tolerateAbstractDatatype": {
+    "type": "Boolean",
+   "description": "Default value: `false`. If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion. If true, abstract datatypes will be replaced by concrete ones."
+  },
+  "ontop.isCanonicalIRIComplete": {
+    "type": "Boolean",
+    "description": "Default value: `true`. Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology). And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S). Now let C be all mapping assertions with isCanonicalIRIOf as predicate, and let A_sub (resp(A_obj)) be all mapping assertions whose subject (resp. object) is built with a URI template, and whose predicate is not isCanonicalIRIOf. If this parameter is set to `true`, then for any a in A_sub, either dom({a}(S)) \\cap range(C(S)) = \\emptyset, or dom({a}(S)) \\subseteq range(C(S))). Similarly, for any a in A_obj, either range({a}(S)) \\cap range(C(S)) = \\emptyset, or range({a}(S)) \\subseteq range(C(S)))."
+  },
+  "ontop.allowRetrievingBlackBoxViewMetadataFromDB": {
+    "type": "Boolean",
+    "description": "Since 4.2.0. Default value: `false`. If `true`, the column names of black-box views and their data types are retrieved by querying the database. If `false`, data types remain unknown and the extraction of column names is unsafe."
+  },
+  "ontop.enableValuesNode": {
+    "type": "Boolean",
+    "description": "Since 4.2.0. Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
+  },
+  "ontop.enableFactExtractionWithTBox": {
+    "type": "Boolean",
+    "description": "Since 4.2.0. Default value: `false`. If `true`, saturated tbox will be used to extract facts in addition to the explicit ontology facts."
+  },
+  "ontop.ontop.querySuperClassesOfDomainRange": {
+    "type": "Boolean",
+    "description": "Since 4.2.0. Default value: `true`. If `false`, no additional facts on superclasses for rdfs:domain/range are integrated in addition to the explicit ontology facts."
+  },
+  "mapping.baseIri": {
+    "type": "IRI",
+    "description": "See http://www.w3.org/TR/r2rml/#dfn-base-iri"
+  },
+  "ontop.existentialReasoning": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, rewrites the SPARQL query using the tree witnesses technique."
+  },
+  "ontop.distinctResultSet": {
+    "type": "Boolean",
+    "description": "REMOVED from 4.2.0. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
+  },
+  "ontop.avoidPostProcessing": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, maximizes the processing done by the SQL query."
+  },
+  "ontop.excludeInvalidTriplesFromResultSet": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If false, makes the query fail when an invalid triple is detected."
+  },
+  "ontop.cache.query.size": {
+    "type": "Integer",
+    "description": "Default value: `1000`. Maximum size for the internal query cache for bypassing query reformulation."
+  },
+  "ontop.queryLogging": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, enables query logging."
+  },
+  "ontop.applicationName": {
+    "type": "String",
+    "description": "Default value: `Ontop`. Application name appearing in the query log."
+  },
+  "ontop.queryLogging.includeSparqlQuery": {
+    "type": "Boolean",
+    "description": "Includes the SPARQL query string into the query log."
+  },
+  "ontop.queryLogging.includeReformulatedQuery": {
+    "type": "Boolean",
+    "description": "Includes the reformulated query into the query log."
+  },
+  "ontop.queryLogging.includeClassesAndProperties": {
+    "type": "Boolean",
+    "description": "Includes classes and properties into the query log."
+  },
+  "ontop.queryLogging.includeTables": {
+    "type": "Boolean",
+    "description": "Includes DB tables/views into the query log."
+  },
+  "ontop.queryLogging.includeHttpHeader.HEADER_NAME": {
+    "type": "Boolean",
+    "description": "If true, includes a specific HTTP header (please replace `HEADER_NAME` by the desired one) into the query log."
+  },
+  "ontop.queryLogging.extractQueryTemplate": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, extracts a query template and constants out of the SPARQL query. Allows to recognize queries generated from the same template."
+  },
+  "ontop.queryLogging.decomposition": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, outputs multiple log entries per query (after decomposition, after receiving the first result, after receiving all the results)."
+  },
+  "ontop.queryLogging.decompositionAndMergingMutuallyExclusive": {
+    "type": "Boolean",
+    "description": "Default value: `true`. If true, either outputs an unique log entry per query or, if the decomposition is enabled,  log entries per query (after decomposition, after receiving the first result, after receiving all the results, but not the version including all the keys."
+  },
+  "ontop.includeFixedObjectPositionInDescribe": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If true, the pattern `?s ?p <to_describe>` is also considered when answering a DESCRIBE query."
+  },
+  "ontop.query.defaultTimeout": {
+    "type": "Integer",
+    "description": "Query timeout assigned to the DB engine. Has no effect if negative or equal to 0."
+  },
+  "ontop.permanentConnection": {
+    "type": "Boolean",
+    "description": "Needed by some in-memory DBs (e.g. an H2 DB storing a semantic index)."
+  },
+  "ontop.http.cacheControl": {
+    "type": "String",
+    "description": "Value to assign to the HTTP header Cache-Control in case of success. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control"
+  },
+  "ontop.http.cache.maxAge": {
+    "type": "Integer",
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
+  },
+  "ontop.http.cache.staleWhileRevalidate": {
+    "type": "Integer",
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
+  },
+  "ontop.http.cache.staleIfError": {
+    "type": "Integer",
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
+  }
+}

@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.List;
@@ -35,10 +35,8 @@ public class JsonUniqueConstraint extends JsonOpenObject {
         this.determinants = JsonMetadata.serializeAttributeList(uc.getAttributes().stream());
     }
 
-    public void insert(DatabaseTableDefinition relation, QuotedIDFactory idFactory) throws MetadataExtractionException {
-            FunctionalDependency.Builder builder = isPrimaryKey
-                    ? UniqueConstraint.primaryKeyBuilder(relation, name)
-                    : UniqueConstraint.builder(relation, name);
+    public void insert(NamedRelationDefinition relation, QuotedIDFactory idFactory) throws MetadataExtractionException {
+            FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, name);
 
             JsonMetadata.deserializeAttributeList(idFactory, determinants, builder::addDeterminant);
             builder.build();

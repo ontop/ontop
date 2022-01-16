@@ -7,7 +7,7 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 
-abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
+abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology file",
             description = "OWL ontology file")
@@ -19,12 +19,6 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String mappingFile;
-
-    @Option(type = OptionType.COMMAND, name = {"-p", "--properties"}, title = "properties file",
-            description = "Properties file")
-    @Required
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String propertiesFile;
 
     @Option(type = OptionType.COMMAND, name = {"-c", "--constraint"}, title = "constraint file",
             description = "user supplied DB constraint file")
@@ -40,21 +34,6 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
             description = "User-supplied view file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String ontopViewFile;
-
-    @Option(type = OptionType.COMMAND, name = {"--db-password"}, title = "DB password",
-            description = "DB password (overrides the properties)")
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String dbPassword;
-
-    @Option(type = OptionType.COMMAND, name = {"-u", "--db-user"}, title = "DB user",
-            description = "DB user (overrides the properties)")
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String dbUser;
-
-    @Option(type = OptionType.COMMAND, name = {"--db-url"}, title = "DB URL",
-            description = "DB URL (overrides the properties)")
-    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String dbUrl;
 
     protected boolean isR2rmlFile(String mappingFile) {
         return !mappingFile.endsWith(".obda");

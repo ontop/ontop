@@ -230,7 +230,6 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 
 		@Override
 		public T getCanonicalForm(T v) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}

@@ -30,11 +30,6 @@ public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorI
     }
 
     @Override
-    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return false;
-    }
-
-    @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }

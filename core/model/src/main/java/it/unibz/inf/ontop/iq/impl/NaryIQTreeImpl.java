@@ -6,13 +6,13 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -24,18 +24,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
-
-    @AssistedInject
-    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
-        if (children.size() < 2)
-            throw new IllegalArgumentException("At least two children are required for a n-ary node");
-
-        if (settings.isTestModeEnabled())
-            validate();
-    }
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -75,15 +63,20 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return getRootNode().acceptTransformer(this, transformer, getChildren(), context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return getRootNode().acceptVisitor(visitor, getChildren());
     }
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        return getProperties().isNormalizedForOptimization()
+        return getTreeCache().isNormalizedForOptimization()
                 ? this
-                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getProperties());
+                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getTreeCache());
     }
 
     /**
@@ -98,7 +91,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
+                : renamingSubstitution.filter(getVariables()::contains);
 
         return selectedSubstitution.isEmpty()
                 ? this
@@ -166,10 +159,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     public IQTree removeDistincts() {
-        IQProperties properties = getProperties();
-        return properties.areDistinctAlreadyRemoved()
+        IQTreeCache treeCache = getTreeCache();
+        return treeCache.areDistinctAlreadyRemoved()
                 ? this
-                : getRootNode().removeDistincts(getChildren(), properties);
+                : getRootNode().removeDistincts(getChildren(), treeCache);
     }
 
     @Override

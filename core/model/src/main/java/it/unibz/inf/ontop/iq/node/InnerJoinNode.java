@@ -12,9 +12,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface InnerJoinNode extends InnerJoinLikeNode {
 
     @Override
-    InnerJoinNode clone();
-
-    @Override
     InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 

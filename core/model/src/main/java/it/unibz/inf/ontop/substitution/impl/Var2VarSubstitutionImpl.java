@@ -22,9 +22,9 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    protected Var2VarSubstitutionImpl(ImmutableMap<Variable, ? extends Variable> substitutionMap, AtomFactory atomFactory,
+    protected Var2VarSubstitutionImpl(ImmutableMap<Variable, ? extends Variable> substitutionMap,
                                       TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        super(atomFactory, termFactory, substitutionFactory);
+        super(termFactory, substitutionFactory);
         this.map = (ImmutableMap)substitutionMap;
     }
 
@@ -33,19 +33,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         Variable r = map.get(variable);
         return r == null ? variable : r;
     }
-
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> applyToTarget(ImmutableSubstitution<T> otherSubstitution) {
-        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
-
-        for (Map.Entry<Variable, T> otherEntry : otherSubstitution.getImmutableMap().entrySet()) {
-            T newValue = applyToTerm(otherEntry.getValue());
-            if (!otherEntry.getKey().equals(newValue))
-                mapBuilder.put(otherEntry.getKey(), newValue);
-        }
-        return substitutionFactory.getSubstitution(mapBuilder.build());
-    }
-
 
     @Override
     public Variable get(Variable var) {
@@ -80,14 +67,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
         return substitutionFactory.getVar2VarSubstitution(map);
-    }
-
-    @Override
-    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
-        if (term instanceof Variable)
-            return applyToVariable((Variable)term);
-        else
-            return (NonGroundTerm) applyToFunctionalTerm((ImmutableFunctionalTerm) term);
     }
 
     @Override

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -29,14 +30,16 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final AtomFactory atomFactory;
     private final QueryTransformerFactory transformerFactory;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                      CoreUtilsFactory coreUtilsFactory, QueryTransformerFactory transformerFactory) {
+                                      CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, QueryTransformerFactory transformerFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.atomFactory = atomFactory;
         this.transformerFactory = transformerFactory;
     }
 
@@ -66,7 +69,8 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                             disjointVariableSetRenaming.getImmutableMap().values());
 
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
-                            disjointVariableSetRenaming.applyToDistinctVariableOnlyDataAtom(def.getProjectionAtom()),
+                            atomFactory.getDistinctVariableOnlyDataAtom(def.getProjectionAtom().getPredicate(),
+                                    disjointVariableSetRenaming.applyToVariableArguments(def.getProjectionAtom().getArguments())),
                             projectionAtom)
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
@@ -84,10 +88,15 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     return queryRenamer.transform(def).getTree();
                 });
 
+        ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
+
         ImmutableList<IQTree> unionChildren = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions)
+                .map(c -> c.getVariables().equals(unionVariables)
+                        ? c
+                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
                 .collect(ImmutableCollectors.toList());
 
-        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(projectionAtom.getVariables()),
+        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(unionVariables),
                 unionChildren);
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));

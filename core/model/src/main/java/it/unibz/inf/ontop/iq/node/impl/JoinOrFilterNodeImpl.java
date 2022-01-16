@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -21,30 +22,32 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implements JoinOrFilterNode {
 
-    private Optional<ImmutableExpression> optionalFilterCondition;
-    private final TermNullabilityEvaluator nullabilityEvaluator;
-    protected final TermFactory termFactory;
+    private final Optional<ImmutableExpression> optionalFilterCondition;
+
+    protected final TermNullabilityEvaluator nullabilityEvaluator;
     protected final TypeFactory typeFactory;
-    protected final SubstitutionFactory substitutionFactory;
     protected final ImmutableUnificationTools unificationTools;
     protected final ImmutableSubstitutionTools substitutionTools;
-
+    protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
+    protected final ConditionSimplifier conditionSimplifier;
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, TypeFactory typeFactory,
                                    SubstitutionFactory substitutionFactory,
-                                   ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(substitutionFactory, iqFactory);
+                                   ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
+        super(substitutionFactory, termFactory, iqFactory);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
-        this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
+        this.variableNullabilityTools = variableNullabilityTools;
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     @Override
@@ -53,31 +56,22 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     }
 
     protected String getOptionalFilterString() {
-        if (optionalFilterCondition.isPresent()) {
-            return " " + optionalFilterCondition.get().toString();
-        }
-
-        return "";
+        return getOptionalFilterCondition()
+                .map(f -> " " + f)
+                .orElse("");
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        if (optionalFilterCondition.isPresent()) {
-            return optionalFilterCondition.get().getVariables();
-        }
-        else {
-            return ImmutableSet.of();
-        }
+        return getOptionalFilterCondition()
+                .map(ImmutableFunctionalTerm::getVariables)
+                .orElse(ImmutableSet.of());
     }
 
     protected boolean isFilteringNullValue(Variable variable) {
         return getOptionalFilterCondition()
                 .filter(e -> nullabilityEvaluator.isFilteringNullValue(e, variable))
                 .isPresent();
-    }
-
-    protected TermNullabilityEvaluator getNullabilityEvaluator() {
-        return nullabilityEvaluator;
     }
 
     @Override

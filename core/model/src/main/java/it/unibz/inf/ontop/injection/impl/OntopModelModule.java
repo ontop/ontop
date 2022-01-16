@@ -4,16 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -23,7 +20,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
-import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -33,7 +29,11 @@ import org.apache.commons.rdf.api.RDF;
 public class OntopModelModule extends OntopAbstractModule {
 
     protected OntopModelModule(OntopModelConfiguration configuration) {
-        super(configuration.getSettings());
+        this(configuration.getSettings());
+    }
+
+    protected OntopModelModule(OntopModelSettings settings) {
+        super(settings);
     }
 
     @Override
@@ -47,11 +47,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
 
-        bindFromSettings(IntermediateQueryValidator.class);
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
-        bindFromSettings(IQConverter.class);
         bindFromSettings(ConditionSimplifier.class);
         bindFromSettings(ConstructionSubstitutionNormalizer.class);
         bindFromSettings(FilterNormalizer.class);
@@ -61,8 +59,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
+        bindFromSettings(NotYetTypedEqualityTransformer.class);
         bindFromSettings(RDF.class);
-        bindFromSettings(UniqueTermTypeExtractor.class);
+        bindFromSettings(SingleTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
         bindFromSettings(IQTreeCache.class);
@@ -82,7 +81,6 @@ public class OntopModelModule extends OntopAbstractModule {
         install(dbTypeFactoryModule);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
-                IntermediateQueryBuilder.class,
                 ConstructionNode.class,
                 UnionNode.class,
                 InnerJoinNode.class,
@@ -91,6 +89,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
                 NativeNode.class,
+                ValuesNode.class,
                 EmptyNode.class,
                 TrueNode.class,
                 DistinctNode.class,
@@ -102,7 +101,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 BinaryNonCommutativeIQTree.class,
                 NaryIQTree.class,
                 IQ.class,
-                IQProperties.class
+                IQTreeCache.class
                 ),
                 IntermediateQueryFactory.class);
         install(iqFactoryModule);

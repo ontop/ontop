@@ -22,13 +22,16 @@ public class LanguageTagImpl implements LanguageTag {
         try {
             Locale locale = new Locale.Builder().setLanguageTag(fullString).build();
             this.prefix = locale.getLanguage();
+            if (prefix.length() < 2 || prefix.length() > 3)
+                // language not well-formed (required for RDF)
+                throw new IllegalStateException("Invalid language tag found: " + fullString + ". The language code can only have 2 or 3 chars.");
+            
             this.optionalSuffix = Optional.of(locale.getCountry())
                     .filter(v -> !v.isEmpty())
                     .map(v -> v.toLowerCase(Locale.ENGLISH));
 
         } catch (IllformedLocaleException ex) {
-            throw new IllegalStateException("Invalid language tag found: " + fullString
-                    + " (should have been detected before)");
+            throw new IllegalStateException("Invalid language tag found: " + fullString);
         }
     }
 

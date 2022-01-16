@@ -1,0 +1,34 @@
+{
+  "relations": [
+    {
+      "name" : ["\"views\"", "\"professors\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"PROFESSORS\""],
+      "columns" : {
+        "added" : [
+        ],
+        "hidden" : []
+      },
+      "type": "BasicViewDefinition"
+    },
+    {
+      "name" : ["\"views\"", "\"course\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"COURSE\""],
+      "columns" : {
+        "added" : [
+        ],
+        "hidden" : []
+      },
+      "type": "BasicViewDefinition"
+    },
+    {
+      "name" : ["\"views\"", "\"teaching\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"TEACHING\""],
+      "columns" : {
+        "added" : [
+        ],
+        "hidden" : []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

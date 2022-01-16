@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -19,7 +17,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
@@ -43,6 +40,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     // Created in init()
     private DBBooleanFunctionSymbol dbLikeFunctionSymbol;
+    // Created in init()
+    private DBBooleanFunctionSymbol dbSimilarToFunctionSymbol;
     // Created in init()
     private DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
     // Created in init()
@@ -86,6 +85,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol secondsFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
+
+    // Time extension - duration arithmetic
+    private DBFunctionSymbol weeksBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol weeksBetweenFromDateFunctionSymbol;
+    private DBFunctionSymbol daysBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol daysBetweenFromDateFunctionSymbol;
+    private DBFunctionSymbol hoursBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol minutesBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol secondsBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol millisBetweenFromDateTimeFunctionSymbol;
 
     private final Map<String, DBFunctionSymbol> extractFunctionSymbolsMap;
     private final Map<String, DBFunctionSymbol> currentDateTimeFunctionSymbolsMap;
@@ -195,6 +204,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBFunctionSymbol> coalesceMap;
 
+
+    /**
+     * Coalesce functions according to their arities
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCoalesceMap;
+
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> numericInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> booleanInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
@@ -228,8 +243,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
-    private final Map<ImmutableList<TemplateComponent>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
-    private final Map<ImmutableList<TemplateComponent>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final Map<ImmutableList<Template.Component>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
+    private final Map<ImmutableList<Template.Component>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
     private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
 
@@ -288,6 +303,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dateInequalityMap = new ConcurrentHashMap<>();
         this.defaultInequalityMap = new ConcurrentHashMap<>();
         this.coalesceMap = new ConcurrentHashMap<>();
+        this.booleanCoalesceMap = new ConcurrentHashMap<>();
 
         this.absMap = new ConcurrentHashMap<>();
         this.ceilMap = new ConcurrentHashMap<>();
@@ -322,6 +338,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
         dbEndsWithFunctionSymbol = createStrEndsFunctionSymbol();
         dbLikeFunctionSymbol = createLikeFunctionSymbol();
+        dbSimilarToFunctionSymbol = createSimilarToFunctionSymbol();
         ifElseNullFunctionSymbol = createRegularIfElseNull();
         dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
@@ -352,6 +369,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         minutesFunctionSymbol = createMinutesFunctionSymbol();
         secondsFunctionSymbol = createSecondsFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
+
+        weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
+        weeksBetweenFromDateFunctionSymbol = createWeeksBetweenFromDateFunctionSymbol();
+        daysBetweenFromDateTimeFunctionSymbol = createDaysBetweenFromDateTimeFunctionSymbol();
+        daysBetweenFromDateFunctionSymbol = createDaysBetweenFromDateFunctionSymbol();
+        hoursBetweenFromDateTimeFunctionSymbol = createHoursBetweenFromDateTimeFunctionSymbol();
+        minutesBetweenFromDateTimeFunctionSymbol = createMinutesBetweenFromDateTimeFunctionSymbol();
+        secondsBetweenFromDateTimeFunctionSymbol = createSecondsBetweenFromDateTimeFunctionSymbol();
+        millisBetweenFromDateTimeFunctionSymbol = createMillisBetweenFromDateTimeFunctionSymbol();
 
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
@@ -408,13 +434,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
 
     @Override
-    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate) {
+    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<Template.Component> iriTemplate) {
         return iriTemplateMap.computeIfAbsent(iriTemplate,
                         t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
-    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate) {
+    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<Template.Component> bnodeTemplate) {
         return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
                         t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
@@ -683,6 +709,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity) {
+        if (arity < 1)
+            throw new IllegalArgumentException("Minimal arity is 1");
+
+        return booleanCoalesceMap
+                .computeIfAbsent(arity, (this::createBooleanCoalesceFunctionSymbol));
+    }
+
+    @Override
     public FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity) {
         return falseOrNullMap
                 .computeIfAbsent(arity, (this::createFalseOrNullFunctionSymbol));
@@ -702,6 +737,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBBooleanFunctionSymbol getDBLike() {
         return dbLikeFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSimilarTo() {
+        return dbSimilarToFunctionSymbol;
     }
 
     @Override
@@ -762,42 +802,42 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getAbs(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getAbs(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = absMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
-        absMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> absMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getCeil(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getCeil(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = ceilMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
-        ceilMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> ceilMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getFloor(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getFloor(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = floorMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
-        floorMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> floorMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getRound(DBTermType dbTermType) {
+    public Optional<DBFunctionSymbol> getRound(DBTermType dbTermType) {
         DBFunctionSymbol existingFunctionSymbol = roundMap.get(dbTermType);
         if (existingFunctionSymbol != null)
-            return existingFunctionSymbol;
-        DBFunctionSymbol dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
-        roundMap.put(dbTermType, dbFunctionSymbol);
+            return Optional.of(existingFunctionSymbol);
+        Optional<DBFunctionSymbol> dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
+        dbFunctionSymbol.ifPresent(fs -> roundMap.put(dbTermType, fs));
         return dbFunctionSymbol;
     }
 
@@ -859,6 +899,45 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
         return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+    @Override
+    public DBFunctionSymbol getDBWeeksBetweenFromDateTime() { return weeksBetweenFromDateTimeFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBWeeksBetweenFromDate() { return weeksBetweenFromDateFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBDaysBetweenFromDateTime() {
+        return daysBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDaysBetweenFromDate() {
+        return daysBetweenFromDateFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBHoursBetweenFromDateTime() {
+        return hoursBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMinutesBetweenFromDateTime() {
+        return minutesBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSecondsBetweenFromDateTime() {
+        return secondsBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMillisBetweenFromDateTime() {
+        return millisBetweenFromDateTimeFunctionSymbol;
     }
 
     @Override
@@ -961,9 +1040,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+    }
+
+    protected DBBooleanFunctionSymbol createSimilarToFunctionSymbol() {
+        return new DBSimilarToFunctionSymbolImpl(dbBooleanType, rootDBType);
     }
 
     protected DBIfElseNullFunctionSymbol createRegularIfElseNull() {
@@ -1163,6 +1247,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
+    protected abstract DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity);
 
     protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
         return new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
@@ -1176,10 +1261,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars);
 
-    protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType);
-    protected abstract DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType);
+    protected abstract Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType);
 
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
         return new SimplifiableTypedNullFunctionSymbol(termType);
@@ -1269,6 +1354,85 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                       Function<ImmutableTerm, String> termConverter,
                                       TermFactory termFactory) {
         return "CURRENT_" + type;
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    protected abstract String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter,
+                                                                TermFactory termFactory);
+
+    protected abstract String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory);
+
+    protected abstract String serializeDaysBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter,
+                                                               TermFactory termFactory);
+
+    protected abstract String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
+
+    protected abstract String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory);
+
+    protected abstract String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory);
+
+    protected abstract String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter,
+                                                     TermFactory termFactory);
+
+    /**
+     * Time extension - duration arithmetic
+     */
+    protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeWeeksBetweenFromDateTime);
+    }
+
+    protected DBFunctionSymbol createWeeksBetweenFromDateFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeWeeksBetweenFromDate);
+    }
+
+    protected DBFunctionSymbol createDaysBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DAY_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeDaysBetweenFromDateTime);
+    }
+
+    protected DBFunctionSymbol createDaysBetweenFromDateFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DAY_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeDaysBetweenFromDate);
+    }
+
+    protected DBFunctionSymbol createHoursBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_HOUR_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeHoursBetween);
+    }
+
+    protected DBFunctionSymbol createMinutesBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_MINUTE_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeMinutesBetween);
+    }
+
+    protected DBFunctionSymbol createSecondsBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_SECOND_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeSecondsBetween);
+    }
+
+    protected DBFunctionSymbol createMillisBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeMillisBetween);
     }
 
     /**

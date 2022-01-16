@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -106,12 +108,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .orElse(optimizedExtensionalDataNodes);
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                Stream.concat(
-                        rootNode.getOptionalFilterCondition()
-                                .map(ImmutableExpression::flattenAND)
-                                .orElseGet(Stream::empty),
-                        optimizationStates.stream()
-                                .flatMap(s -> s.newExpressions.stream())));
+                rootNode.getOptionalFilterCondition(),
+                optimizationStates.stream()
+                        .flatMap(s -> s.newExpressions.stream()));
 
         return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables));
     }
@@ -237,12 +236,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<ExtensionalDataNode> newDataNodes = Stream.concat(
-                simplifications.stream()
-                        .map(Optional::get)
-                        .flatMap(s -> s.dataNodes.stream()),
-                map.entrySet().stream()
-                        .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
-                        .flatMap(e -> e.getValue().stream()))
+                        simplifications.stream()
+                                .map(Optional::get)
+                                .flatMap(s -> s.dataNodes.stream()),
+                        map.entrySet().stream()
+                                .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
+                                .flatMap(e -> e.getValue().stream()))
                 .map(n -> applySubstitution(unifier, n))
                 .collect(ImmutableCollectors.toList());
 
@@ -279,7 +278,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             ImmutableUnificationTools.ArgumentMapUnification previousUnification,
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
 
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
                 previousUnification.substitution.applyToArgumentMap(argumentMap);
 
         return unificationTools.computeArgumentMapMGU(previousUnification.argumentMap, updatedArgumentMap)

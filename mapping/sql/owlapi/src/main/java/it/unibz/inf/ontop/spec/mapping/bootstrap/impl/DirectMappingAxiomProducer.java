@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -104,13 +103,14 @@ public class DirectMappingAxiomProducer {
 				.orElse(table.getAttributes());
 	}
 
-	// TODO: use quotation marks here and for variables names too
-
 	private static String getTableName(NamedRelationDefinition relation) {
 		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
 	}
 	private static String getColumnAlias(Attribute attr) {
-		 return getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();
+    	String rendering = attr.getID().getSQLRendering();
+    	String name = attr.getID().getName(); // TODO: find a better way of constructing IDs
+    	return rendering.replace(name,
+				getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + name);
 	}
 	
 	private static String getQualifiedColumnName(Attribute attr) {
@@ -131,7 +131,9 @@ public class DirectMappingAxiomProducer {
 
 		//Class Atom
 		ImmutableTerm sub = generateTerm(table, "", bnodeTemplateMap);
-		atoms.add(getAtom(rdfFactory.createIRI(getTableIRIString(table)), sub));
+		atoms.add(targetAtomFactory.getTripleTargetAtom(sub,
+				termFactory.getConstantIRI(RDF.TYPE),
+				termFactory.getConstantIRI(rdfFactory.createIRI(getTableIRIString(table)))));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
@@ -142,8 +144,10 @@ public class DirectMappingAxiomProducer {
 
 			Variable objV = termFactory.getVariable(att.getID().getName());
 			ImmutableTerm obj = termFactory.getRDFLiteralFunctionalTerm(objV, typeIRI);
-			
-			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
+
+			atoms.add(targetAtomFactory.getTripleTargetAtom(sub,
+					termFactory.getConstantIRI(getLiteralPropertyIRI(att)),
+					obj));
 		}
 
 		return atoms.build();
@@ -163,7 +167,9 @@ public class DirectMappingAxiomProducer {
 		ImmutableTerm obj = generateTerm(fk.getReferencedRelation(),
 				getTableName(fk.getReferencedRelation()) + "_", bnodeTemplateMap);
 
-		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
+		TargetAtom atom = targetAtomFactory.getTripleTargetAtom(sub,
+				termFactory.getConstantIRI(getReferencePropertyIRI(fk)),
+				obj);
 		return ImmutableList.of(atom);
 	}
 
@@ -272,18 +278,6 @@ public class DirectMappingAxiomProducer {
 			return termFactory.getRDFFunctionalTerm(lexicalTerm,
 					termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType()));
 		}
-	}
-
-	private TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
-		return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getConstantIRI(iri),
-				o);
-	}
-
-	private TargetAtom getAtom(IRI iri, ImmutableTerm s) {
-    	return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getConstantIRI(RDF.TYPE),
-				termFactory.getConstantIRI(iri));
 	}
 
 

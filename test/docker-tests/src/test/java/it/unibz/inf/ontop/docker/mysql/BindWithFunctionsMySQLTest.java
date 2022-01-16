@@ -124,4 +124,36 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         super.testBNODE1();
     }
 
+    @Override
+    protected List<String> getDaysExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"1352\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"1351\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413511200\"^^xsd:long");
+        expectedValues.add("\"1492154272\"^^xsd:long");
+        expectedValues.add("\"1532987586\"^^xsd:long");
+        expectedValues.add("\"116803200\"^^xsd:long");
+
+        return expectedValues;
+    }
+
 }

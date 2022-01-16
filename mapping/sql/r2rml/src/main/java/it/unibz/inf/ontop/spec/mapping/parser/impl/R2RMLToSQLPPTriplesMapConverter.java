@@ -200,7 +200,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 		if (robm.getJoinConditions().isEmpty()) {
 			if (!parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim()))
-				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
+				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
 						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
 			childMap = parentMap = Stream.concat(
@@ -231,12 +231,12 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							.map(j -> Maps.immutableEntry(CHILD_PREFIX + "." + j.getChild(), PARENT_PREFIX + "." + j.getParent())));
 		}
 
-		Var2VarSubstitution sub = substitutionFactory.getVar2VarSubstitution(childMap);
+		Var2VarSubstitution sub = substitutionFactory.getInjectiveVar2VarSubstitution(childMap);
 		ImmutableTerm subject = sub.apply(extractedSubject);
 		ImmutableList<ImmutableTerm>  graphs = extractedGraphs.stream()
 				.map(sub::apply)
 				.collect(ImmutableCollectors.toList());
-		Var2VarSubstitution ob = substitutionFactory.getVar2VarSubstitution(parentMap);
+		Var2VarSubstitution ob = substitutionFactory.getInjectiveVar2VarSubstitution(parentMap);
 		ImmutableTerm object = ob.apply(extractedObject);
 
 		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(sub::apply)
@@ -305,10 +305,12 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 
 	private <T extends TermMap> NonVariableTerm extract(ImmutableMap<IRI, TermMapFactory<T, ? extends TemplateFactory>> map, T termMap) {
-		return map.computeIfAbsent(termMap.getTermType(), k -> {
+		TermMapFactory<T, ? extends TemplateFactory> termMapFactory = map.get(termMap.getTermType());
+		if (termMapFactory == null) {
 			throw new R2RMLParsingBugException("Was expecting one of " + map.keySet() +
-						" when encountered " + termMap);
-		}).extract(termMap);
+					" when encountered " + termMap);
+		}
+		return termMapFactory.extract(termMap);
 	}
 
 	/*
@@ -328,7 +330,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		}
 
 		protected NonVariableTerm onTemplate(String template) {
-			return templateFactory.getTemplate(templateFactory.getComponents(template));
+			return templateFactory.getTemplateTerm(templateFactory.getComponents(template));
 		}
 
 		public NonVariableTerm extract(T termMap) {
@@ -353,7 +355,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		@Override
 		protected NonVariableTerm onConstant(RDFTerm constant) {
 			return templateFactory.getConstant(
-							R2RMLVocabulary.resolveIri(constant.toString(), baseIri));
+					R2RMLVocabulary.resolveIri(((IRI)constant).getIRIString(), baseIri));
 		}
 		@Override
 		protected NonVariableTerm onTemplate(String template) {

@@ -35,8 +35,7 @@ public class DefaultUntypedDBFunctionSymbol extends FunctionSymbolImpl implement
 
     protected DefaultUntypedDBFunctionSymbol(@Nonnull String nameInDialect, int arity, DBTermType rootDBTermType) {
         super(nameInDialect + arity, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> (TermType) rootDBTermType)
+                .mapToObj(i -> (TermType) rootDBTermType)
                 .collect(ImmutableCollectors.toList()));
         this.serializer = Serializers.getRegularSerializer(nameInDialect);
     }

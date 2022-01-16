@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -44,7 +44,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
-    private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -72,7 +72,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer,
                                 MappingCaster mappingCaster,
-                                MappingEqualityTransformer mappingEqualityTransformer,
+                                NotYetTypedEqualityTransformer mappingEqualityTransformer,
                                 NoNullValueEnforcer noNullValueEnforcer,
                                 IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
@@ -159,8 +159,10 @@ public class SQLMappingExtractor implements MappingExtractor {
             IQTree equalityTransformedTree = mappingEqualityTransformer.transform(tree);
             IQTree normalizedTree = equalityTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
             IQTree noNullTree = noNullValueEnforcer.transform(normalizedTree);
-            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
+            if (noNullTree.isDeclaredAsEmpty())
+                continue;
 
+            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
             MappingAssertion filledProvAssertion = mappingDatatypeFiller.transform(noNullAssertion);
             MappingAssertion castAssertion = mappingCaster.transform(filledProvAssertion);
             builder.add(castAssertion);
@@ -195,8 +197,18 @@ public class SQLMappingExtractor implements MappingExtractor {
         try {
             if (optionalDbMetadataReader.isPresent()) {
                 try (Reader dbMetadataReader = optionalDbMetadataReader.get()) {
-                    return convert(mapping, constraintFile, ontopViewReader,
-                            serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
+
+                    if (settings.allowRetrievingBlackBoxViewMetadataFromDB()) {
+                        try (Connection connection = LocalJDBCConnectionUtils.createLazyConnection(settings)) {
+
+                            return convert(mapping, constraintFile, ontopViewReader,
+                                    serializedMetadataProviderFactory.getMetadataProvider(
+                                            dbMetadataReader, () -> metadataProviderFactory.getMetadataProvider(connection)));
+                        }
+                    }
+                    else
+                        return convert(mapping, constraintFile, ontopViewReader,
+                                serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {

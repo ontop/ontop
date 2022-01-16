@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -30,8 +29,6 @@ import java.util.Optional;
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
-
-    IntermediateQueryBuilder createIQBuilder(ExecutorRegistry executorRegistry);
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
@@ -69,6 +66,9 @@ public interface IntermediateQueryFactory {
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
+    ValuesNode createValuesNode(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
+                                @Assisted("values") ImmutableList<ImmutableList<Constant>> values);
+
     NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
                                 @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
@@ -77,6 +77,7 @@ public interface IntermediateQueryFactory {
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();
+
     SliceNode createSliceNode(@Assisted("offset") long offset, @Assisted("limit") long limit);
     SliceNode createSliceNode(long offset);
 
@@ -88,7 +89,6 @@ public interface IntermediateQueryFactory {
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQTreeCache treeCache);
-    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
 
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
@@ -97,16 +97,21 @@ public interface IntermediateQueryFactory {
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild,
                                                                 IQTreeCache treeCache);
-    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
-                                                                @Assisted("left") IQTree leftChild,
-                                                                @Assisted("right") IQTree rightChild,
-                                                                IQProperties properties);
 
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQTreeCache treeCache);
-    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 
-    IQProperties createIQProperties();
+    /**
+     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
+     */
+    @Deprecated
+    IQTreeCache createIQTreeCache();
+
+    /**
+     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
+     */
+    @Deprecated
+    IQTreeCache createIQTreeCache(boolean isNormalizedForOptimization);
 }

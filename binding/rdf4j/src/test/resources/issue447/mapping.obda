@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+ex: http://example.org/
+
+[MappingDeclaration] @collection [[
+mappingId	map1
+target		ex:{id1} ex:prop1 ex:{val1}.
+source		SELECT * FROM table1
+
+mappingId	map2
+target		ex:{id2} ex:prop2 ex:{val2}.
+source		SELECT * FROM table2
+
+mappingId	map3
+target		ex:{id3} ex:prop3 ex:{val3}.
+source		SELECT * FROM table3
+]]

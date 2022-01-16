@@ -122,7 +122,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 		
 	public static final class EquivalencesDAGImplOnGraph<T> implements EquivalencesDAG<T> {
 
-		private DefaultDirectedGraph<T,DefaultEdge> graph;
+		private final DefaultDirectedGraph<T,DefaultEdge> graph;
 		
 		public EquivalencesDAGImplOnGraph(DefaultDirectedGraph<T, DefaultEdge> graph) {
 			this.graph = graph;
@@ -319,13 +319,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
 		@Override
 		public ImmutableSet<T> getSubRepresentatives(T v) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public T getCanonicalForm(T v) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}

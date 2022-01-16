@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -31,7 +31,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
     private final OntopSQLCredentialSettings settings;
 
@@ -39,7 +39,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private MetaMappingExpanderImpl(SubstitutionFactory substitutionFactory,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory,
-                                    MappingEqualityTransformer mappingEqualityTransformer,
+                                    NotYetTypedEqualityTransformer mappingEqualityTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator,
                                     OntopSQLCredentialSettings settings) {
         this.substitutionFactory = substitutionFactory;
@@ -107,8 +107,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
 
-            IQTree topChildNotNull = termFactory.getConjunction(assertion.getTopChild().getVariables().stream()
-                    .map(termFactory::getDBIsNotNull))
+            IQTree topChildNotNull = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
                     .map(iqFactory::createFilterNode)
                     .map(n -> (IQTree)iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElse(assertion.getTopChild());
@@ -130,13 +129,11 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
                     .composeWith(substitutionFactory.getSubstitution(topVariable, instantiatedTemplate));
 
-            IQTree filterTree = termFactory.getConjunction(values.entrySet().stream()
-                    .map(e -> termFactory.getNotYetTypedEquality(
-                            e.getKey(),
-                            e.getValue())))
-                    .map(iqFactory::createFilterNode)
-                    .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));
+            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
+                            termFactory.getConjunction(values.entrySet().stream()
+                                    .map(e -> termFactory.getNotYetTypedEquality(e.getKey(), e.getValue()))
+                                    .collect(ImmutableCollectors.toList()))),
+                            assertion.getTopChild());
 
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                             instantiatedSub.getDomain(), instantiatedSub),

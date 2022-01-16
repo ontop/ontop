@@ -229,6 +229,11 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
+    public Optional<IQTree> visitValues(ValuesNode valuesNode) {
+        return visitLeafNode();
+    }
+
+    @Override
     public Optional<IQTree> visitNonStandardLeafNode(LeafIQTree leafNode) {
         return visitLeafNode();
     }

@@ -37,5 +37,33 @@ source		SELECT * FROM GEOMS WHERE ID=25
 mappingId	geoms
 target		:epsg3044/{ID} a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> {THE_GEOM}"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
 source		SELECT * FROM GEOMS WHERE ID=26
+
+mappingId	points
+target		:point/{ID} a :Geom ; geo:asWKT "POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM POINTS
+
+mappingId	geoms
+target		:point/epsg3044/21 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM POINTS WHERE ID=21
+
+mappingId	geoms
+target		:point/epsg3044/26 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM POINTS WHERE ID=26
+
+mappingId	features
+target		:feature/{ID} a :Feature ; geo:hasGeometry :geomid/{GID} ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM FEATURES
+
+mappingId	features
+target		:geomid/{GID} a :Geom ; geo:asWKT {THE_GEOM}^^geo:wktLiteral .
+source		SELECT * FROM FEATURES
+
+mappingId	rivers
+target		:rivers/{id} a :River ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT ({lon} {lat})"^^geo:wktLiteral .
+source		SELECT id, lon, lat from rivers
+
+mappingId	lakes
+target		:lakes/{id} a :Lake ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT ({lon} {lat})"^^geo:wktLiteral .
+source		SELECT id, lon, lat from lakes
 ]]
 

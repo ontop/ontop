@@ -10,11 +10,10 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -24,9 +23,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * "Default" implementation for an extensional data node.
@@ -65,15 +64,13 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
      */
+    @SuppressWarnings("unused")
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.relationDefinition = relationDefinition;
-        this.argumentMap = argumentMap;
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory);
     }
 
     /**
@@ -110,11 +107,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public ExtensionalDataNode clone() {
-        return iqFactory.createExtensionalDataNode(relationDefinition, argumentMap);
-    }
-
-    @Override
     public ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
@@ -127,21 +119,13 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (!getVariables().contains(variable))
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-
-        // NB: DB column indexes start at 1.
-        return argumentMap.entrySet().stream()
-                .filter(e -> e.getValue().equals(variable))
-                .map(e -> e.getKey() + 1)
-                .map(relationDefinition::getAttribute)
-                .allMatch(Attribute::isNullable);
+    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
+        return transformer.transformExtensionalData(this);
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return transformer.transformExtensionalData(this);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformExtensionalData(this, context);
     }
 
     @Override
@@ -266,15 +250,16 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ExtensionalDataNode)
-                && ((ExtensionalDataNode) node).getRelationDefinition().equals(relationDefinition)
-                && ((ExtensionalDataNode) node).getArgumentMap().equals(argumentMap);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExtensionalDataNodeImpl that = (ExtensionalDataNodeImpl) o;
+        return relationDefinition.equals(that.relationDefinition) && argumentMap.equals(that.argumentMap);
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+    public int hashCode() {
+        return Objects.hash(relationDefinition, argumentMap);
     }
 
     @Override
@@ -312,11 +297,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return getLocalVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
     }
 
     @Override

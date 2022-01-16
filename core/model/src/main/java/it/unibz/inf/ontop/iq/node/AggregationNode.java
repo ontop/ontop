@@ -22,9 +22,6 @@ public interface AggregationNode extends ExtendedProjectionNode {
     ImmutableSet<Variable> getGroupingVariables();
 
     @Override
-    AggregationNode clone();
-
-    @Override
     AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 }

@@ -51,23 +51,17 @@ public class RDF4JBindingsTest {
     public void init() throws Exception {
 
         sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
-        java.sql.Statement s = sqlConnection.createStatement();
 
-        try {
-            Scanner sqlFile = new Scanner(new File(uc_create));
-            String text = sqlFile.useDelimiter("\\A").next();
-            sqlFile.close();
+        try (java.sql.Statement s = sqlConnection.createStatement()) {
+            try (Scanner sqlFile = new Scanner(new File(uc_create))) {
+                String text = sqlFile.useDelimiter("\\A").next();
+                s.execute(text);
+            }
 
-            s.execute(text);
             for (int i = 1; i <= 100; i++) {
                 s.execute("INSERT INTO TABLE1 VALUES (" + i + "," + i + ");");
             }
-
-        } catch (SQLException sqle) {
-            System.out.println("Exception in creating db from script");
         }
-
-        s.close();
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

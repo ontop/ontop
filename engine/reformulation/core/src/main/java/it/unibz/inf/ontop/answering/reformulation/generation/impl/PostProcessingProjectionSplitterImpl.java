@@ -35,8 +35,10 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.avoidPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
-                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed);
-        this.proPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(ImmutableFunctionalTerm::canBePostProcessed);
+                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed,
+                t -> !(t.isNull() || (t instanceof Variable) || (t instanceof DBConstant)));
+        this.proPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
+                ImmutableFunctionalTerm::canBePostProcessed, t -> true);
         this.distinctNormalizer = distinctNormalizer;
     }
 
@@ -154,9 +156,9 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
             UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, childTree);
 
             IQTree liftedTree = distinctNormalizer.normalizeForOptimization((DistinctNode) rootNode, possibleChildTree, variableGenerator,
-                    iqFactory.createIQProperties());
+                    iqFactory.createIQTreeCache());
 
-            return liftedTree.getRootNode().isEquivalentTo(constructionNode)
+            return liftedTree.getRootNode().equals(constructionNode)
                     ? possibleChildTree
                     : iqFactory.createUnaryIQTree(constructionNode, tree);
         }
