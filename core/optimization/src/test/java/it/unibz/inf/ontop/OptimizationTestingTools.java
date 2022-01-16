@@ -47,7 +47,7 @@ public class OptimizationTestingTools {
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final FlattenLifter FLATTEN_LIFTER;
     public static final LevelUpOptimizer LEVEL_UP_OPTIMIZER;
-    public static final NRAJoinLikeOptimizerImpl NRA_JOIN_LIKE_OPTIMIZER;
+    public static final NRAJoinLikeOptimizer NRA_JOIN_LIKE_OPTIMIZER;
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
@@ -91,6 +91,7 @@ public class OptimizationTestingTools {
     public static final Variable M;
     public static final Variable N;
     public static final Variable NF0;
+    public static final Variable O;
     public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR, THREE_STR, FOUR_STR, FIVE_STR;
 
@@ -125,6 +126,11 @@ public class OptimizationTestingTools {
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
+
+        FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
+        LEVEL_UP_OPTIMIZER = injector.getInstance(LevelUpOptimizer.class);
+        NRA_JOIN_LIKE_OPTIMIZER = injector.getInstance(NRAJoinLikeOptimizer.class);
+
 
         NULL = TERM_FACTORY.getNullConstant();
         TRUE = TERM_FACTORY.getDBBooleanConstant(true);
@@ -170,6 +176,7 @@ public class OptimizationTestingTools {
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        O = TERM_FACTORY.getVariable("o");
         NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
