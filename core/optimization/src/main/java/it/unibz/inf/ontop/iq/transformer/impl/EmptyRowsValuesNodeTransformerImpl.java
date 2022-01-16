@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;

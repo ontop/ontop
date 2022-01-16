@@ -1,21 +1,17 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -26,6 +22,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -52,7 +49,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory) {
-        super(substitutionFactory, iqFactory);
+        super(substitutionFactory, termFactory, iqFactory);
         this.outputVariable = outputVariable;
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
@@ -132,6 +129,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return ImmutableSet.of(flattenedVariable);
     }
 
+    /**
+     * TODO: see what is required here
+     */
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return iqFactory.createUnaryIQTree(this, child);
+    }
+
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
         return iqFactory.createUnaryIQTree(
@@ -177,17 +182,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     /**
-     * Same implementation  as for other unary operators (except aggregation)
+     * Same implementation as FilterNode
      */
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     /**
@@ -284,11 +285,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return ImmutableSet.of(flattenedVariable);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         throw new FlattenNodeException("This method should not be called");
     }
@@ -299,28 +295,18 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         }
     }
 
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (indexVariable.isPresent() && variable.equals(indexVariable.get()))
-            return isStrict;
-        if (variable.equals(outputVariable)) {
-            return false;
-        }
-        return query.getFirstChild(this)
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
-                .isVariableNullable(query, variable);
-    }
+//    @Override
+//    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+//        if (indexVariable.isPresent() && variable.equals(indexVariable.get()))
+//            return isStrict;
+//        if (variable.equals(outputVariable)) {
+//            return false;
+//        }
+//        return query.getFirstChild(this)
+//                .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
+//                .isVariableNullable(query, variable);
+//    }
 
-    /**
-     * TODO: check what is needed here
-     */
-    @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return iqFactory.createUnaryIQTree(
-                this,
-                child.normalizeForOptimization(variableGenerator)
-        );
-    }
 
     /**
      * Without further information about the flattened arrays, we cannot assume that distinctness is preserved after flattening.
@@ -361,20 +347,19 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof FlattenNode) {
-            FlattenNode flattenNode = (FlattenNode) node;
-            return flattenNode.getFlattenedVariable().equals(flattenedVariable) &&
-                    flattenNode.getOutputVariable().equals(outputVariable) &&
-                    flattenNode.getIndexVariable().equals(indexVariable) &&
-                    flattenNode.isStrict() == isStrict;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FlattenNodeImpl that = (FlattenNodeImpl) o;
+        return isStrict == that.isStrict &&
+                flattenedVariable.equals(that.flattenedVariable) &&
+                outputVariable.equals(that.outputVariable) &&
+                indexVariable.equals(that.indexVariable);
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode node) {
-        return isSyntacticallyEquivalentTo(node);
+    public int hashCode() {
+        return Objects.hash(flattenedVariable, outputVariable, indexVariable, isStrict);
     }
 
     @Override
@@ -391,6 +376,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformFlatten(tree, this, child);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformFlatten(tree,this, child, context);
     }
 
     @Override

@@ -129,14 +129,10 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
-            if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get()))
+            if (variable.equals(flattenNode.getOutputVariable()) ||
+                    flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get()))
                 return ((ImmutableTerm) flattenNode.getSubstitution().getImmutableMap().get(variable))
-                        .inferType()
-                        .flatMap(TermTypeInference::getTermType);
-            if (variable.equals(flattenNode.getOutputVariable()))
-                return ((ImmutableTerm) flattenNode.getSubstitution().getImmutableMap().get(variable))
-                        .inferType()
-                        .flatMap(TermTypeInference::getTermType);
+                        .inferType().get().getTermType();
             return child.acceptVisitor(this);
         }
 
