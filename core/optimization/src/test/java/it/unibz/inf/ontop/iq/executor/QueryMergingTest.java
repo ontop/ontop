@@ -1200,7 +1200,7 @@ public class QueryMergingTest {
 
     private static IQ merge(IQ mainQuery, IQ subQuery, IntensionalDataNode intensionalNode) {
         BasicIntensionalQueryMerger queryMerger = new BasicIntensionalQueryMerger(
-                ImmutableMap.of(intensionalNode.getDataAtom().getPredicate(), subQuery));
+                ImmutableMap.of(intensionalNode.getProjectionAtom().getPredicate(), subQuery));
 
         return queryMerger.optimize(mainQuery);
     }
@@ -1249,7 +1249,7 @@ public class QueryMergingTest {
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-                return Optional.ofNullable(map.get(dataNode.getDataAtom().getPredicate()));
+                return Optional.ofNullable(map.get(dataNode.getProjectionAtom().getPredicate()));
             }
 
             @Override
