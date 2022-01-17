@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -54,8 +54,13 @@ public class FlattenLiftTest {
     private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static {
+
+
+
+
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType arrayDBType = builder.getDBTypeFactory().getArrayDBType();
 
         TABLE1 = builder.createDatabaseRelation( "TABLE1",
                 "pk", integerDBType, false,

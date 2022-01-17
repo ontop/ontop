@@ -35,7 +35,7 @@ public interface DBTypeFactory {
 
     DBTermType getDBHexBinaryType();
 
-
+    DBTermType getArrayDBType();
 
     /**
      * Returns an abstract type
