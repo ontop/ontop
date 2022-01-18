@@ -20,13 +20,10 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
     }
 
-    public RAExpression parse(String sql) throws InvalidQueryException, UnsupportedSelectQueryException {
+    public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
         try {
             SelectBody selectBody = JSqlParserTools.parse(sql);
             return translateSelectBody(selectBody);
-        }
-        catch (JSQLParserException e) {
-            throw new InvalidQueryException(e.getMessage(), sql);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());

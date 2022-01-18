@@ -27,7 +27,7 @@ public class SQLQueryParser {
         try {
             return sqp.parse(sourceQuery);
         }
-        catch (UnsupportedSelectQueryException e) {
+        catch (UnsupportedSelectQueryException | JSQLParserException e) {
             RelationDefinition view = metadataLookup.getBlackBoxView(sourceQuery);
             return sqp.translateParserView(view);
         }
