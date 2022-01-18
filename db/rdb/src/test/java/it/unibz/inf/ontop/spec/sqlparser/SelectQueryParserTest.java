@@ -40,7 +40,7 @@ public class SelectQueryParserTest {
     private static final String D1 = "D1";
     private static final String D2 = "D2";
 
-    private RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
+    private RAExpression parse(String sql) throws InvalidQueryException, UnsupportedSelectQueryException {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
@@ -77,7 +77,7 @@ public class SelectQueryParserTest {
         MetadataLookup metadataLookup = builder.build();
         SelectQueryParser parser = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
 
-        return parser.parse(JSqlParserTools.parse(sql));
+        return parser.parse(sql);
     }
 
 
@@ -367,107 +367,107 @@ public class SelectQueryParserTest {
     // -----------------------------------------------
     // invalid combinations for JSQLParser
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_outer_join() throws Exception {
         parse("SELECT * FROM P NATURAL OUTER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_outer_join() throws Exception {
         parse("SELECT * FROM P CROSS OUTER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_inner_join() throws Exception {
         parse("SELECT * FROM P NATURAL INNER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_inner_join() throws Exception {
         parse("SELECT * FROM P CROSS INNER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_right_inner_join() throws Exception {
         parse("SELECT * FROM P RIGHT INNER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_full_inner_join() throws Exception {
         parse("SELECT * FROM P FULL INNER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_inner_join() throws Exception {
         parse("SELECT * FROM P LEFT INNER JOIN Q");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_outer_join_on() throws Exception {
         parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_outer_join_on() throws Exception {
         parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_inner_join_on() throws Exception {
         parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_inner_join_on() throws Exception {
         parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_right_inner_join_on() throws Exception {
         parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_full_inner_join_on() throws Exception {
         parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_inner_join_on() throws Exception {
         parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_outer_join_using() throws Exception {
         parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_outer_join_using() throws Exception {
         parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_inner_join_using() throws Exception {
         parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_inner_join_using() throws Exception {
         parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_right_inner_join_using() throws Exception {
         parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_full_inner_join_using() throws Exception {
         parse("SELECT * FROM P FULL INNER JOIN Q USING(A)");
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_inner_join_using() throws Exception {
         parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)");
     }

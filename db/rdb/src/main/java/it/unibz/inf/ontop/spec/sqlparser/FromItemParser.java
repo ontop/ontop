@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
@@ -11,19 +11,17 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeExce
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public abstract class FromItemParser<T> {
 
     protected final ExpressionParser expressionParser;
-    protected final QuotedIDFactory idfac;
     protected final TermFactory termFactory;
 
+    protected final QuotedIDFactory idfac;
     private final MetadataLookup metadata;
 
     protected final RAOperations<T> operations;
@@ -34,11 +32,11 @@ public abstract class FromItemParser<T> {
 
     protected abstract T translateSelectBody(SelectBody selectBody);
 
-    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata, TermFactory termFactory, RAOperations<T> operations) {
-        this.expressionParser = expressionParser;
-        this.idfac = idfac;
+    protected FromItemParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
+        this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
+        this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;
-        this.termFactory = termFactory;
+        this.termFactory = coreSingletons.getTermFactory();
         this.operations = operations;
     }
 

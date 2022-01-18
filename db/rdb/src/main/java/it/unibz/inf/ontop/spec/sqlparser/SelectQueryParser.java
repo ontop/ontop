@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -14,18 +15,18 @@ import net.sf.jsqlparser.statement.select.*;
  *
  */
 public class SelectQueryParser extends FromItemParser<RAExpression> {
-    private final QuotedIDFactory idfac;
-    private final ExpressionParser expressionParser;
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
-        this.idfac = metadata.getQuotedIDFactory();
-        this.expressionParser = new ExpressionParser(idfac, coreSingletons);
+        super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
     }
 
-    public RAExpression parse(SelectBody selectBody) throws InvalidQueryException, UnsupportedSelectQueryException {
+    public RAExpression parse(String sql) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
+            SelectBody selectBody = JSqlParserTools.parse(sql);
             return translateSelectBody(selectBody);
+        }
+        catch (JSQLParserException e) {
+            throw new InvalidQueryException(e.getMessage(), sql);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());

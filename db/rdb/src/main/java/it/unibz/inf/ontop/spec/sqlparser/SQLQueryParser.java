@@ -25,10 +25,9 @@ public class SQLQueryParser {
     public RAExpression getRAExpression(String sourceQuery, MetadataLookup metadataLookup) throws InvalidQueryException, MetadataExtractionException {
         SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {
-            SelectBody selectBody = JSqlParserTools.parse(sourceQuery);
-            return sqp.parse(selectBody);
+            return sqp.parse(sourceQuery);
         }
-        catch (UnsupportedSelectQueryException | JSQLParserException e) {
+        catch (UnsupportedSelectQueryException e) {
             RelationDefinition view = metadataLookup.getBlackBoxView(sourceQuery);
             return sqp.translateParserView(view);
         }

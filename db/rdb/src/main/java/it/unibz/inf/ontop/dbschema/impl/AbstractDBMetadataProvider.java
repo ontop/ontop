@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -406,13 +405,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             SelectBody selectBody = JSqlParserTools.parse(query);
             ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(selectBody).getUnqualifiedAttributes();
             attributes = ImmutableList.copyOf(attrs.keySet());
-        } catch (JSQLParserException e) {
+        }
+        catch (JSQLParserException e) {
             // TODO: LOGGER.warn() should be instead after revising the logging policy
-            System.out.println(String.format("FAILED TO PARSE: %s %s", query, getJSQLParserErrorMessage(query, e)));
+            System.out.printf("FAILED TO PARSE: %s %s\n", query, getJSQLParserErrorMessage(query, e));
 
             ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
             attributes = sqae.getAttributes(query);
-        } catch (UnsupportedSelectQueryException e) {
+        }
+        catch (UnsupportedSelectQueryException e) {
             ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
             attributes = sqae.getAttributes(query);
         }

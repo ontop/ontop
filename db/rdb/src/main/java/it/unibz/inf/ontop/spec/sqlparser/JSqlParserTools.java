@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -15,12 +16,19 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class JSqlParserTools {
 
-    public static SelectBody parse(String sql) throws InvalidQueryException, JSQLParserException {
+
+
+    public static SelectBody parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
         Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
         if (!(statement instanceof Select))
             throw new InvalidQueryException("The query is not a SELECT statement", statement);
 
-        return ((Select) statement).getSelectBody();
+        Select select = (Select) statement;
+
+        if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty())
+            throw new UnsupportedSelectQueryException("WITH is not supported in SELECT statements", select);
+
+        return select.getSelectBody();
     }
 
     /**

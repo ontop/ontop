@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
@@ -14,15 +13,9 @@ import net.sf.jsqlparser.statement.select.*;
  */
 
 public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpressionAttributes> {
-    private final QuotedIDFactory idfac;
-    private final TermFactory termFactory;
-    private final CoreSingletons coreSingletons;
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionAttributesOperations());
-        this.idfac = metadata.getQuotedIDFactory();
-        this.termFactory = coreSingletons.getTermFactory();
-        this.coreSingletons = coreSingletons;
+        super(metadata, coreSingletons, new RAExpressionAttributesOperations());
     }
 
     public RAExpressionAttributes getRAExpressionAttributes(SelectBody selectBody) throws InvalidQueryException, UnsupportedSelectQueryException {
@@ -50,10 +43,9 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
         }
 
-        ExpressionParser ep = new ExpressionParser(idfac, coreSingletons);
         SelectItemParser sip = new SelectItemParser(attributes,
                 (e, a) -> (e instanceof Column)
-                        ? ep.parseTerm(e, a)
+                        ? expressionParser.parseTerm(e, a)
                         : termFactory.getVariable("something"), idfac);
 
         return sip.parseSelectItems(plainSelect.getSelectItems());
@@ -61,6 +53,6 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
 
     @Override
     protected RAExpressionAttributes create(NamedRelationDefinition relation) {
-        return ((RAExpressionAttributesOperations)operations).create(relation, createAttributeVariables(relation));
+        return operations.create(relation, createAttributeVariables(relation));
     }
 }

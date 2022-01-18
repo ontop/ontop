@@ -177,14 +177,14 @@ public class SQLParserTest {
 	}
 
 	private RAExpression parse(String sql) throws InvalidQueryException, UnsupportedSelectQueryException {
-		try {
-			RAExpression rae = sqp.parse(JSqlParserTools.parse(sql));
-			System.out.println(rae);
-			return rae;
-		}
-		catch (JSQLParserException e) {
-			throw new InvalidQueryException(e.getCause().getMessage(), sql);
-		}
+		RAExpression rae = sqp.parse(sql);
+		System.out.println(rae);
+		return rae;
+	}
+
+	@Test(expected = UnsupportedSelectQueryException.class) // due to WITH
+	public void test_0() throws UnsupportedSelectQueryException, InvalidQueryException {
+		RAExpression re = parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp");
 	}
 
 	@Test
