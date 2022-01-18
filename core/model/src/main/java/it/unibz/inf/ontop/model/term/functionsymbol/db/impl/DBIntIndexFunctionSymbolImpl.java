@@ -26,8 +26,7 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
                 Stream.concat(
                         Stream.of(dbIntegerType),
                         IntStream.range(0, nbEntries)
-                                .boxed()
-                                .map(i -> rootDBType))
+                                .mapToObj(i -> rootDBType))
                         .collect(ImmutableCollectors.toList()));
         if (nbEntries == 0) {
             throw new IllegalArgumentException("nbEntries must be positive");
@@ -51,8 +50,7 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
     protected Stream<? extends ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
         return IntStream.range(2, terms.size())
                 .filter(i -> i % 2 == 0)
-                .boxed()
-                .map(terms::get);
+                .mapToObj(terms::get);
     }
 
     @Override
@@ -94,8 +92,7 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
 
         ImmutableFunctionalTerm caseTerm = termFactory.getDBCase(
                 IntStream.range(0, getArity() - 1)
-                        .boxed()
-                        .map(i -> Maps.immutableEntry(
+                        .mapToObj(i -> Maps.immutableEntry(
                                 termFactory.getStrictEquality(subTerm, termFactory.getDBIntegerConstant(i)),
                                 terms.get(i + 1))),
                 // TODO: find a way to cause a fatal error for the default case (instead of returning NULL)
@@ -130,8 +127,7 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
 
             ImmutableExpression disjunction = termFactory.getDisjunction(
                     IntStream.range(1, getArity())
-                            .boxed()
-                            .map(i -> termFactory.getConjunction(
+                            .mapToObj(i -> termFactory.getConjunction(
                                     termFactory.getStrictEquality(indexTerm, termFactory.getDBIntegerConstant(i)),
                                     termFactory.getStrictEquality(terms.get(i), otherTerms.get(i+1)))))
                     .orElseThrow(() -> new MinorOntopInternalBugException("Arity > 1 was expected"));

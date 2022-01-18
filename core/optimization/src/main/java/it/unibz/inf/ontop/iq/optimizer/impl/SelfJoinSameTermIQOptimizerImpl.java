@@ -84,22 +84,18 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                             currentChildren.get(i),
                             IntStream.range(0, partiallySimplifiedChildren.size())
                                     .filter(j -> j!= i)
-                                    .boxed()
-                                    .map(currentChildren::get)))
+                                    .mapToObj(currentChildren::get)))
                     // SIDE-EFFECT
                     .forEach(i -> currentChildren.set(i, iqFactory.createTrueNode()));
 
             ImmutableSet<Variable> variablesToFilterNulls = IntStream.range(0, partiallySimplifiedChildren.size())
                     .filter(i -> currentChildren.get(i).getRootNode() instanceof TrueNode)
-                    .boxed()
-                    .map(i -> partiallySimplifiedChildren.get(i).getVariables())
+                    .mapToObj(i -> partiallySimplifiedChildren.get(i).getVariables())
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
-            Optional<ImmutableExpression> expression = termFactory.getConjunction(
-                    Stream.concat(
-                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull),
-                            optionalFilterCondition.map(Stream::of).orElseGet(Stream::empty)));
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
+                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
 
             InnerJoinNode innerJoinNode = expression
                     .map(iqFactory::createInnerJoinNode)

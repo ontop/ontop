@@ -98,4 +98,39 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     public void testIRI7() throws Exception {
         super.testIRI7();
     }
+
+    /**
+     * SQL Server different input file.
+     */
+    @Override
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    /**
+     * SQL Server different input file.
+     */
+    @Override
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413514800\"^^xsd:long");
+        expectedValues.add("\"1492161472\"^^xsd:long");
+        expectedValues.add("\"1532994786\"^^xsd:long");
+        expectedValues.add("\"22112400\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Ignore("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Test
+    @Override
+    public void testDaysBetweenDateMappingInput() throws Exception {
+        super.testDaysBetweenDateMappingInput();
+    }
 }

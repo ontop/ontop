@@ -99,7 +99,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
 
             // Fix-point before pursing (recursive, potentially dangerous!)
-            if (!normalizedTree.isEquivalentTo(tree)) {
+            if (!normalizedTree.equals(tree)) {
                 return normalizedTree.acceptTransformer(this);
             }
 
@@ -228,8 +228,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     : childIdVariable;
 
             ImmutableList<ChildDefinitionLift> childDefinitionLifts = IntStream.range(0, children.size())
-                    .boxed()
-                    .map(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
+                    .mapToObj(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
                     .collect(ImmutableCollectors.toList());
 
             ImmutableFunctionalTerm newDefinition = mergeDefinitions(idVariable, childDefinitionLifts);
@@ -280,10 +279,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                     originalDefinition.getVariableStream()
                             .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
-                            .distinct()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar)));
+                            .distinct(),
+                    variableGenerator::generateNewVariableFromVar);
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 
@@ -300,7 +297,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
                     .flatMap(s -> s.union(positionSubstitution))
-                    .map(s -> s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
+                    .map(s -> s.filter(projectedVariablesBeforeRenaming::contains))
                     .orElse(positionSubstitution);
 
 

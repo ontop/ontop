@@ -62,6 +62,9 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
+        DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.DATE));
+
         DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
@@ -84,6 +87,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(NAME_STR, nameType);
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
+        map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
 

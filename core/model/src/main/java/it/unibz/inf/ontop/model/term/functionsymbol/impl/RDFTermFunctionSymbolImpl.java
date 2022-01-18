@@ -129,9 +129,8 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms,
                                                    TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
-        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
-                .filter(t -> (t.isNullable(nullableVariables)))
-                .map(termFactory::getDBIsNotNull));
+        Optional<ImmutableExpression> optionalExpression = termFactory.getDBIsNotNull(terms.stream()
+                .filter(t -> t.isNullable(nullableVariables)));
 
         return optionalExpression
                 .map(e -> e.evaluate(variableNullability, true))
@@ -171,16 +170,15 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     @Override
     public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory) {
         ImmutableMap<Integer, FunctionalTermSimplification> subTermSimplifications = IntStream.range(0, terms.size())
-                .boxed()
                 .filter(i -> terms.get(i) instanceof ImmutableFunctionalTerm)
+                .boxed()
                 .collect(ImmutableCollectors.toMap(
                         i -> i,
                         // Recursive
                         i -> ((ImmutableFunctionalTerm) terms.get(i)).simplifyAsGuaranteedToBeNonNull()));
 
         ImmutableList<ImmutableTerm> newSubTerms = IntStream.range(0, terms.size())
-                .boxed()
-                .map(i -> Optional.ofNullable(subTermSimplifications.get(i))
+                .mapToObj(i -> Optional.ofNullable(subTermSimplifications.get(i))
                         .map(FunctionalTermSimplification::getSimplifiedTerm)
                         .orElseGet(() -> terms.get(i)))
                 .collect(ImmutableCollectors.toList());

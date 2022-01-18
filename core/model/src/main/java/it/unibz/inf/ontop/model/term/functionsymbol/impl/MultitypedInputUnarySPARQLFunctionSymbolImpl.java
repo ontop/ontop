@@ -48,7 +48,7 @@ public class MultitypedInputUnarySPARQLFunctionSymbolImpl extends ReduciblePosit
                                                            @Nonnull RDFTermType targetType,
                                                            boolean isAlwaysInjective,
                                                            DBTypeFactory dbTypeFactory,
-                                                           java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                           java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         this(functionSymbolName, functionIRI, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
@@ -71,7 +71,7 @@ public class MultitypedInputUnarySPARQLFunctionSymbolImpl extends ReduciblePosit
                                                            @Nonnull RDFTermType targetType,
                                                            boolean isAlwaysInjective,
                                                            DBTypeFactory dbTypeFactory,
-                                                           java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                           java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         this(functionSymbolName, officialName, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
@@ -79,7 +79,7 @@ public class MultitypedInputUnarySPARQLFunctionSymbolImpl extends ReduciblePosit
     private static TriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> createLatelyTypedFct(
             RDFTermType targetType,
             DBTypeFactory dbTypeFactory,
-            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+            Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         return (termFactory, lexicalTerm, rdfTermTypeTerm) ->
                 termFactory.getUnaryLatelyTypedFunctionalTerm(lexicalTerm, rdfTermTypeTerm,
                         targetType.getClosestDBType(dbTypeFactory),

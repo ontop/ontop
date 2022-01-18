@@ -17,9 +17,6 @@ public interface ExtensionalDataNode extends LeafIQTree {
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();
 
     @Override
-    ExtensionalDataNode clone();
-
-    @Override
     ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 }

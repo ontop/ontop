@@ -57,6 +57,10 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
     @Option(type = OptionType.COMMAND, name = {"--disable-portal-page"}, title = "disable the portal page",
             description = "Disable the portal page (/index.html) of the SPARQL endpoint. ")
     private boolean disablePortalPage = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--enable-download-ontology"}, title = "allow to download the ontology",
+            description = "Allow to download the ontology as a plain text file (/ontology). Default: false")
+    private boolean enableDownloadOntology = false;
     
     @Override
     public void run() {
@@ -67,7 +71,8 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
                 "--port=" + this.port,
                 "--lazy=" + this.lazy,
                 "--dev=" + this.dev,
-                "--disable-portal-page=" + this.disablePortalPage
+                "--disable-portal-page=" + this.disablePortalPage,
+                "--enable-download-ontology=" + this.enableDownloadOntology
                 );
 
         if (this.propertiesFile != null)
@@ -111,9 +116,6 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (dbUrl != null)
             argList.add("--db-url=" + this.dbUrl);
-
-        if (dbName != null)
-            argList.add("--db-name=" + this.dbName);
 
         if (dbDriver != null)
             argList.add("--db-driver=" + this.dbDriver);

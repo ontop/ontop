@@ -212,22 +212,20 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         UnmodifiableIterator<? extends ImmutableTerm> subTermIterator = subTerms.iterator();
         UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator = otherTerm.getTerms().iterator();
 
-        Stream<ImmutableExpression> expressionStream = IntStream.range(0, safeSeparatorFragments.size())
+        ImmutableList<ImmutableExpression> expressions = IntStream.range(0, safeSeparatorFragments.size())
                 // Sequential execution is essential
                 .mapToObj(i -> convertToEquality(
                         safeSeparatorFragments.get(i), subTermIterator,
                         other.safeSeparatorFragments.get(i), otherSubTermIterator, termFactory))
                 .filter(Optional::isPresent)
-                .map(Optional::get);
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
 
-        Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
-        if (expression.isPresent()) {
-            ImmutableExpression nonNull = termFactory.getConjunction(
-                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream())
-                            .map(termFactory::getDBIsNotNull))
-                    .get(); // this conjunction cannot be empty because
-                            // there is at least one variable in the templates (taken together)
-            ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, expression.get());
+        if (!expressions.isEmpty()) {
+            ImmutableExpression nonNull = termFactory.getDBIsNotNull(
+                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("cannot be empty because there is at least one variable in the templates (taken together)"));
+            ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, termFactory.getConjunction(expressions));
             return ifElseNull.evaluate(variableNullability, true);
         }
         else
@@ -444,9 +442,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         IntStream.range(0, getArity())
                                 .mapToObj(i -> termFactory.getStrictEquality(
                                         termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)),
-                                        termFactory.getDBStringConstant(matcher.group(i + 1)))))
-                        .orElseThrow(() -> new MinorOntopInternalBugException(
-                                "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
+                                        termFactory.getDBStringConstant(matcher.group(i + 1))))
+                                .collect(ImmutableCollectors.toList()));
 
                 return newExpression.evaluate(variableNullability, true);
             }

@@ -108,12 +108,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .orElse(optimizedExtensionalDataNodes);
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
-                Stream.concat(
-                        rootNode.getOptionalFilterCondition()
-                                .map(ImmutableExpression::flattenAND)
-                                .orElseGet(Stream::empty),
-                        optimizationStates.stream()
-                                .flatMap(s -> s.newExpressions.stream())));
+                rootNode.getOptionalFilterCondition(),
+                optimizationStates.stream()
+                        .flatMap(s -> s.newExpressions.stream()));
 
         return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables));
     }

@@ -33,11 +33,6 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     @Override
-    public String getJdbcName() {
-        return sqlSettings.getJdbcName();
-    }
-
-    @Override
     public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }

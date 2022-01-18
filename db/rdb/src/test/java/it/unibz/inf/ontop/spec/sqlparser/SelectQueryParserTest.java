@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
@@ -652,6 +653,6 @@ public class SelectQueryParserTest {
     private static void assertMatches(ImmutableList<ExtensionalDataNode> list0, List<ExtensionalDataNode> list) {
         assertEquals(list0.size(), list.size());
         list0.forEach(a -> assertTrue(list.stream()
-                .anyMatch(b -> b.isSyntacticallyEquivalentTo(a))));
+                .anyMatch(b -> b.equals(a))));
     }
 }

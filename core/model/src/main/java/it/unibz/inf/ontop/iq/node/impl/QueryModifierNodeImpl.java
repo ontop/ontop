@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryModifierNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -15,11 +13,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements QueryModifierNode {
 
-    protected final IntermediateQueryFactory iqFactory;
-
     protected QueryModifierNodeImpl(IntermediateQueryFactory iqFactory) {
-        super();
-        this.iqFactory = iqFactory;
+        super(iqFactory);
     }
 
     @Override
@@ -40,12 +35,5 @@ public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements Que
     @Override
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return child.getPossibleVariableDefinitions();
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        return query.getFirstChild(this)
-                .map(c -> c.isVariableNullable(query, variable))
-                .orElseThrow(() -> new InvalidIntermediateQueryException("A query modifier node must have a child"));
     }
 }

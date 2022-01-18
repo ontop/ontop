@@ -49,8 +49,7 @@ public class IQ2CQ {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = node.getArgumentMap();
         RelationPredicate predicate = node.getRelationDefinition().getAtomPredicate();
         ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
-                .boxed()
-                .map(i -> Optional.ofNullable(argumentMap.get(i))
+                .mapToObj(i -> Optional.ofNullable(argumentMap.get(i))
                         .map(t -> (VariableOrGroundTerm) t)
                         .orElseGet(variableGenerator::generateNewVariable))
                 .collect(ImmutableCollectors.toList());
@@ -95,10 +94,8 @@ public class IQ2CQ {
             SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
             InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    originalValuesNode.getOrderedVariables().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    v -> variableGenerator.generateNewVariable(v.getName()))));
+                    originalValuesNode.getOrderedVariables().stream(),
+                    v -> variableGenerator.generateNewVariable(v.getName()));
 
             ValuesNode freshValuesNode = originalValuesNode.applyFreshRenaming(freshRenaming);
             ImmutableList<Variable> freshVariables = freshValuesNode.getOrderedVariables();
@@ -116,9 +113,7 @@ public class IQ2CQ {
 
             return dataNode.getVariables().containsAll(newValuesNode.getVariables())
                     ? newValuesNode
-                    : iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(dataNode.getVariables()),
-                    newValuesNode);
+                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(dataNode.getVariables()), newValuesNode);
         }
         else
             return dataNode;

@@ -55,7 +55,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
     protected IQTree removeNonRequiredVariables(IQTree tree, ImmutableSet<Variable> variablesToRemove,
                                                 VariableGenerator variableGenerator) {
-        return new VariableRemoverTransformer(variablesToRemove, variableGenerator, coreSingletons).transform(tree);
+        return new VariableRemoverTransformer(variablesToRemove, variableGenerator).transform(tree);
     }
 
     /**
@@ -64,21 +64,19 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    protected static class VariableRemoverTransformer implements IQTreeVisitingTransformer {
+    protected class VariableRemoverTransformer implements IQTreeVisitingTransformer {
         protected final ImmutableSet<Variable> variablesToRemove;
         protected final IntermediateQueryFactory iqFactory;
         protected final SubstitutionFactory substitutionFactory;
-        protected final CoreSingletons coreSingletons;
         protected final VariableGenerator variableGenerator;
         protected final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
         public VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove,
-                                          VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                                          VariableGenerator variableGenerator) {
             this.variablesToRemove = variablesToRemove;
             this.variableGenerator = variableGenerator;
             this.iqFactory = coreSingletons.getIQFactory();
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.coreSingletons = coreSingletons;
             this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         }
 
@@ -86,7 +84,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
          * To be overridden by sub-classes
          */
         protected IQTreeTransformer createNewTransformer(ImmutableSet<Variable> variablesToRemove) {
-            return new VariableRemoverTransformer(variablesToRemove, variableGenerator, coreSingletons);
+            return new VariableRemoverTransformer(variablesToRemove, variableGenerator);
         }
 
         @Override
@@ -128,15 +126,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
             ImmutableList<Variable> newOrderedVariables = IntStream.range(0,arity)
                     .filter(i -> !indexesToRemove.contains(i))
-                    .boxed()
-                    .map(orderedVariables::get)
+                    .mapToObj(orderedVariables::get)
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
                     .map(t -> IntStream.range(0, arity)
                             .filter(i -> !indexesToRemove.contains(i))
-                            .boxed()
-                            .map(t::get)
+                            .mapToObj(t::get)
                             .collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
 
@@ -169,11 +165,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         public IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(aggregationNode.getGroupingVariables(),
                     // Can only concern variables from the substitutions, the grouping ones being required
-                    substitutionFactory.getSubstitution(
-                            aggregationNode.getSubstitution().getImmutableMap().entrySet().stream()
-                                    .filter(e -> !variablesToRemove.contains(e.getKey()))
-                                    .collect(ImmutableCollectors.toMap())
-                    ));
+                    aggregationNode.getSubstitution().filter(k -> !variablesToRemove.contains(k)));
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return iqFactory.createUnaryIQTree(newAggregationNode, child)

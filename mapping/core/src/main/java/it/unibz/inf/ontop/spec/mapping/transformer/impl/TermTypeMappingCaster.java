@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -22,7 +21,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -65,27 +63,11 @@ public class TermTypeMappingCaster implements MappingCaster {
         }
         IQTree childTree = assertion.getTopChild();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
-                assertion.getTopSubstitution().getImmutableMap(), childTree);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().transform(v -> transformDefinition(v, childTree));
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);
 
         return assertion.copyOf(iqFactory.createUnaryIQTree(newRootNode, childTree), iqFactory);
-    }
-
-    /**
-     * TODO: explain why all the transformation is done in the top construction node substitution
-     */
-    private ImmutableSubstitution<ImmutableTerm> transformTopSubstitution(
-            ImmutableMap<Variable, ImmutableTerm> substitutionMap,
-            IQTree childTree) {
-
-        return substitutionFactory.getSubstitution(
-                substitutionMap.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> (ImmutableTerm) transformDefinition(e.getValue(), childTree)
-                        )));
     }
 
     private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -25,7 +24,7 @@ import java.util.Optional;
  */
 public interface UnaryOperatorNode extends QueryNode {
 
-    IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties);
+    IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache);
 
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, IQTree child);
@@ -63,7 +62,7 @@ public interface UnaryOperatorNode extends QueryNode {
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child);
 
-    IQTree removeDistincts(IQTree child, IQProperties iqProperties);
+    IQTree removeDistincts(IQTree child, IQTreeCache treeCache);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child);
 

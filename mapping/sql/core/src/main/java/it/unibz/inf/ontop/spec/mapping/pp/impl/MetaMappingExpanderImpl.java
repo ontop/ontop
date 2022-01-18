@@ -107,8 +107,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
 
-            IQTree topChildNotNull = termFactory.getConjunction(assertion.getTopChild().getVariables().stream()
-                    .map(termFactory::getDBIsNotNull))
+            IQTree topChildNotNull = termFactory.getDBIsNotNull(assertion.getTopChild().getVariables().stream())
                     .map(iqFactory::createFilterNode)
                     .map(n -> (IQTree)iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElse(assertion.getTopChild());
@@ -130,13 +129,11 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
                     .composeWith(substitutionFactory.getSubstitution(topVariable, instantiatedTemplate));
 
-            IQTree filterTree = termFactory.getConjunction(values.entrySet().stream()
-                    .map(e -> termFactory.getNotYetTypedEquality(
-                            e.getKey(),
-                            e.getValue())))
-                    .map(iqFactory::createFilterNode)
-                    .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));
+            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
+                            termFactory.getConjunction(values.entrySet().stream()
+                                    .map(e -> termFactory.getNotYetTypedEquality(e.getKey(), e.getValue()))
+                                    .collect(ImmutableCollectors.toList()))),
+                            assertion.getTopChild());
 
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                             instantiatedSub.getDomain(), instantiatedSub),

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
@@ -181,7 +181,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private Optional<ImmutableSet<NonVariableTerm>> getDefinitions(IQTree tree, Variable variable) {
             ImmutableSet<ImmutableTerm> possibleValues = tree.getPossibleVariableDefinitions().stream()
-                    .map(s -> s.apply(variable))
+                    .map(s -> s.applyToVariable(variable))
                     .collect(ImmutableCollectors.toSet());
 
             // If a definition is not available (e.g. the possible value is a variable), everything is possible
@@ -223,8 +223,8 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             ImmutableList<ImmutableList<IQTree>> multiGroups = groups.stream()
                     .map(g -> unionChildren.entrySet().stream()
                             .filter(e -> g.contains(e.getElement()))
-                            .flatMap(e -> IntStream.range(0, e.getCount()).boxed()
-                                    .map(i -> e.getElement()))
+                            .flatMap(e -> IntStream.range(0, e.getCount())
+                                    .mapToObj(i -> e.getElement()))
                             .collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
 
@@ -273,10 +273,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private IQTree renameSomeUnprojectedVariables(IQTree tree, Set<Variable> nonGroupingVariables) {
             InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    nonGroupingVariables.stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar)));
+                    nonGroupingVariables.stream(), variableGenerator::generateNewVariableFromVar);
 
             return tree.applyFreshRenamingToAllVariables(renaming);
         }

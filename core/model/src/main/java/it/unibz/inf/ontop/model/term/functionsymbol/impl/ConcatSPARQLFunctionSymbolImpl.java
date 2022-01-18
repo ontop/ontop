@@ -24,8 +24,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
     protected ConcatSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
         super("SP_CONCAT" + arity, XPathFunction.CONCAT,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> (TermType) xsdStringType)
+                        .mapToObj(i -> (TermType) xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
         if (arity < 2)

@@ -14,9 +14,15 @@ public class LocalJDBCConnectionUtils {
      */
     public static Connection createConnection(OntopSQLCredentialSettings settings) throws SQLException {
 
+        Properties jdbcInfo = new Properties();
+        settings.getJdbcUser()
+                .ifPresent(u -> jdbcInfo.put("user", u));
+        settings.getJdbcPassword()
+                .ifPresent(p -> jdbcInfo.put("password", p));
+
         try {
             // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+            return DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
         } catch (SQLException ex) {
             // HACKY(xiao): This part is still necessary for Tomcat.
             // Otherwise, JDBC drivers are not initialized by default.
@@ -26,7 +32,7 @@ public class LocalJDBCConnectionUtils {
                 throw new SQLException("Cannot load the driver: " + e.getMessage());
             }
 
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+            return DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
         }
     }
 

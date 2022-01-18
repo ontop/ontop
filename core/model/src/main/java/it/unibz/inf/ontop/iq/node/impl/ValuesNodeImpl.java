@@ -1,14 +1,12 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -27,6 +25,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,8 +40,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     // The variables consistent with all interfaces, as unordered set.
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableList<ImmutableList<Constant>> values;
+
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+
     private boolean isNormalized = false;
     // LAZY
     private VariableNullability variableNullability;
@@ -54,13 +56,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     protected ValuesNodeImpl(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
                              @Assisted("values") ImmutableList<ImmutableList<Constant>> values,
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
-                             OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
+                             OntopModelSettings settings, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqTreeTools, iqFactory);
         this.orderedVariables = orderedVariables;
         this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
         this.values = values;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -79,7 +82,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (lift.isPresent()) {
             LeafIQTree normalizedLeaf = furtherNormalize(lift.get().valuesNode);
             return iqFactory.createUnaryIQTree(lift.get().constructionNode, normalizedLeaf,
-                    iqFactory.createIQProperties().declareNormalizedForOptimization());
+                    iqFactory.createIQTreeCache(true));
         }
         return furtherNormalize(this);
     }
@@ -161,24 +164,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        return getVariableNullability().isPossiblyNullable(variable);
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ValuesNode)
-                && ((ValuesNode) node).getVariables().equals(projectedVariables)
-                && ((ValuesNode) node).getValues().equals(values);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return ImmutableSet.of();
     }
 
@@ -188,8 +174,16 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ValuesNode) && queryNode.isSyntacticallyEquivalentTo(this);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ValuesNodeImpl that = (ValuesNodeImpl) o;
+        return projectedVariables.equals(that.projectedVariables) && values.equals(that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables, values);
     }
 
     @Override
@@ -210,11 +204,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitValues(this);
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return true;
     }
 
     @Override
@@ -262,15 +251,19 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private ConstructionAndFilterAndValues substituteGroundFunctionalTerms(ImmutableSubstitution<? extends GroundFunctionalTerm> substitution,
                                                                            ConstructionAndFilterAndValues constructionAndFilterAndValues) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
-        InjectiveVar2VarSubstitution renaming = computeVariableRenaming(valuesNode.getVariables(),
-                coreUtilsFactory.createVariableGenerator(valuesNode.getKnownVariables()))
-                .reduceDomainToIntersectionWith(substitution.getDomain());
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(valuesNode.getKnownVariables());
+        InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
+                        valuesNode.getVariables().stream(),
+                        variableGenerator::generateNewVariableFromVar)
+                .filter(substitution.getDomain()::contains);
 
-        return renaming.applyRenaming(substitution).convertIntoBooleanExpression().map(filterCondition ->
-                new ConstructionAndFilterAndValues(
-                constructionAndFilterAndValues.constructionNode,
-                iqFactory.createFilterNode(filterCondition),
-                (ValuesNode) valuesNode.applyFreshRenaming(renaming)))
+        return termFactory.getConjunction(renaming.applyRenaming(substitution).getImmutableMap().entrySet().stream()
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
+                .map(filterCondition ->
+                        new ConstructionAndFilterAndValues(
+                                constructionAndFilterAndValues.constructionNode,
+                                iqFactory.createFilterNode(filterCondition),
+                                valuesNode.applyFreshRenaming(renaming)))
                 .orElseGet(() -> new ConstructionAndFilterAndValues(null, null, valuesNode));
     }
 
@@ -298,8 +291,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ImmutableList<Variable> newOrderedVariables = IntStream.range(0, formerArity)
                 .filter(i -> !substitutionVariableIndices.contains(i))
-                .boxed()
-                .map(formerOrderedVariables::get)
+                .mapToObj(formerOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<ImmutableList<Constant>> filteredValues = formerValues.stream()
@@ -312,8 +304,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
                 .map(tuple -> IntStream.range(0, tuple.size())//tuple.stream()
                         .filter(i -> !substitutionVariableIndices.contains(i))
-                        .boxed()
-                        .map(tuple::get)
+                        .mapToObj(tuple::get)
                         .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
@@ -381,26 +372,13 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .valuesNode));
     }
 
-    private InjectiveVar2VarSubstitution computeVariableRenaming(ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
-        ImmutableMap<Variable, Variable> substitutionMap = variables.stream().
-                collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        variableGenerator::generateNewVariableFromVar));
-        return substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap);
-    }
-
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         if (constraint.isGround())
             return this;
         getVariableNullability();
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .filter(constants -> !((ImmutableExpression) substitutionFactory.getSubstitution(
-                        IntStream.range(0, orderedVariables.size())
-                                .boxed()
-                                .collect(ImmutableCollectors.toMap(
-                                        orderedVariables::get,
-                                        constants::get)))
+                .filter(constants -> !((ImmutableExpression) substitutionFactory.getSubstitution(orderedVariables, constants)
                         .apply(constraint))
                         .evaluate(variableNullability)
                         .isEffectiveFalse())
@@ -437,8 +415,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .filter(i -> values.stream()
                             .map(t -> t.get(i))
                             .anyMatch(ImmutableTerm::isNull))
-                    .boxed()
-                    .map(orderedVariables::get)
+                    .mapToObj(orderedVariables::get)
                     .map(ImmutableSet::of)
                     .collect(ImmutableCollectors.toSet());
             variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, projectedVariables);
@@ -463,11 +440,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public ValuesNode clone() {
-        return iqFactory.createValuesNode(orderedVariables, values);
     }
 
     @Override

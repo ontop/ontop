@@ -423,6 +423,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 case INTEGER:
                 case BOOLEAN:
                     return constant.getValue();
+                case DATE:
+                case DATETIME:
+                    return serializeDatetimeConstant(constant.getValue(), dbType);
                 default:
                     return serializeStringConstant(constant.getValue());
             }
@@ -435,6 +438,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected String serializeStringConstant(String constant) {
             // duplicates single quotes, and adds outermost quotes
             return "'" + constant.replace("'", "''") + "'";
+        }
+
+        protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
+            return serializeStringConstant(datetime);
         }
     }
 }

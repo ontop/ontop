@@ -19,11 +19,4 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      */
     <T extends ImmutableTerm> T applyToTerm(T term);
 
-    NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
-
-    /**
-     * Applies the current substitution to the "target" part of another substitution
-     */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> applyToTarget(ImmutableSubstitution<T> otherSubstitution);
-
 }

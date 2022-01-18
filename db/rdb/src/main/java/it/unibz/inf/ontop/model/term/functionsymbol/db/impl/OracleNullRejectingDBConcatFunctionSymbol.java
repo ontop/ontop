@@ -21,8 +21,7 @@ public class OracleNullRejectingDBConcatFunctionSymbol extends NullRejectingDBCo
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableExpression condition = termFactory.getConjunction(newTerms.stream()
-                .map(termFactory::getDBIsNotNull))
+        ImmutableExpression condition = termFactory.getDBIsNotNull(newTerms.stream())
                 .get();
 
         ImmutableFunctionalTerm thenValue = termFactory.getImmutableFunctionalTerm(

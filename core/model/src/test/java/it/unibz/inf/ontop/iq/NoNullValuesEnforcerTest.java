@@ -66,28 +66,23 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testConstructionNodeAsRoot() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Y);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_2);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_2))));
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_Z);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
-        queryBuilder2.init(projectionAtom, filterNode);
-        queryBuilder2.addChild(filterNode, constructionNode);
-        queryBuilder2.addChild(constructionNode, innerJoinNode);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_2);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(filterNode,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode,
+                                IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_2)))))
+                .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
         assertEquals(expectedQuery.getTree(), transformedTree);
@@ -96,15 +91,12 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testConstructionNodeAsRoot_noNullableVariable() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Y);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, innerJoinNode);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_3);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build()).normalizeForOptimization();
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_3)))).normalizeForOptimization();
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
@@ -116,25 +108,19 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testNonConstructionNodeAsRoot() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_Y_Z);
-        queryBuilder.init(projectionAtom, innerJoinNode);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_3);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_3)));
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
-        queryBuilder2.init(projectionAtom, filterNode);
-        queryBuilder2.addChild(filterNode, innerJoinNode);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_3);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build())
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(filterNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_3))))
                 .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
@@ -144,25 +130,20 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void test2NonNullableVariables() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS4_PREDICATE, W, X, Y, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_Y_Z);
-        queryBuilder.init(projectionAtom, innerJoinNode);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder.addChild(innerJoinNode, DATA_NODE_2);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_2)));
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X_AND_NOT_NULL_W);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
-        queryBuilder2.init(projectionAtom, filterNode);
-        queryBuilder2.addChild(filterNode, innerJoinNode);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
-        queryBuilder2.addChild(innerJoinNode, DATA_NODE_2);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(filterNode,
+                        IQ_FACTORY.createNaryIQTree(innerJoinNode, ImmutableList.of(DATA_NODE_1, DATA_NODE_2))))
+            .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
         assertEquals(expectedQuery.getTree(), transformedTree);

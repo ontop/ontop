@@ -62,17 +62,8 @@ public class OntopBootstrap extends AbstractOntopCommand {
             if (dbUser != null)
                 builder.jdbcUser(dbUser);
 
-            if (dbName != null)
-                builder.jdbcName(dbName);
-
             if (dbDriver != null)
                 builder.jdbcDriver(dbDriver);
-
-            if (dbMetadataFile != null)
-                builder.dbMetadataFile(dbMetadataFile);
-
-            if (ontopViewFile != null)
-                builder.ontopViewFile(ontopViewFile);
 
             OntopSQLOWLAPIConfiguration configuration = builder.build();
 
@@ -87,7 +78,7 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
             OWLOntology onto = results.getOntology();
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));
-
+            
         } catch (Exception e) {
             System.err.println("Error occurred during bootstrapping: "
                     + e.getMessage());

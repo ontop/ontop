@@ -74,12 +74,8 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 });
 
         return optionalLocalDefinition
-                .map(d -> Stream.concat(
-                        // Adds the new definition to the substitution map
-                        Stream.of(Maps.immutableEntry(newRequest.getNewVariable(), d)),
-                        initialSubstitution.getImmutableMap().entrySet().stream())
-                        .collect(ImmutableCollectors.toMap()))
-                .map(substitutionFactory::getSubstitution)
+                .flatMap(d -> initialSubstitution.union(
+                        substitutionFactory.getSubstitution(newRequest.getNewVariable(), d)))
                 .map(s -> iqFactory.createConstructionNode(newProjectedVariables, s))
                 // Stops the definition to the new construction node
                 .map(c -> iqFactory.createUnaryIQTree(c, child))
@@ -146,8 +142,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .boxed()
                 .findAny()
                 .map(i -> IntStream.range(0, children.size())
-                        .boxed()
-                        .map(j -> i.equals(j)
+                        .mapToObj(j -> i.equals(j)
                                 // Pushes down the definition to selected child
                                 ? children.get(j).acceptTransformer(this)
                                 : children.get(j))

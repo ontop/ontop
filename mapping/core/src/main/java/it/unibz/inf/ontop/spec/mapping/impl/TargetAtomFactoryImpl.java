@@ -55,12 +55,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     private TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableList<ImmutableTerm> initialTerms) {
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                IntStream.range(0, projectionAtom.getArity())
-                        .mapToObj(i -> Maps.immutableEntry(projectionAtom.getTerm(i), initialTerms.get(i)))
-                        .filter(e -> !e.getKey().equals(e.getValue()))
-                        .collect(ImmutableCollectors.toMap()));
-
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(projectionAtom.getArguments(), initialTerms);
         return new TargetAtomImpl(projectionAtom, substitution);
     }
 

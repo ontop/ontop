@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -42,13 +43,11 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
     }
 
     private IQ appendSuffixToVariableNames(IQ query, int suffix) {
-        ImmutableMap<Variable, Variable> substitutionMap =
-                query.getTree().getKnownVariables().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Function.identity(),
-                                v -> termFactory.getVariable(v.getName() + "m" + suffix)));
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(
-                substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap));
+        InjectiveVar2VarSubstitution substitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+                query.getTree().getKnownVariables().stream(),
+                v -> termFactory.getVariable(v.getName() + "m" + suffix));
+
+        QueryRenamer queryRenamer = transformerFactory.createRenamer(substitution);
         return queryRenamer.transform(query);
     }
 }

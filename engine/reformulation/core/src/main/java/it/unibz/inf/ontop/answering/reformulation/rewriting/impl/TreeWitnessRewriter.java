@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -338,15 +339,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
-        for (int i = 0; i < vars.size(); i++) {
-            Variable v1 = vars.get(i);
-            Variable v2 = cq.getAnswerVariables().get(i);
-            if (!v1.equals(v2))
-                map.put(v1, v2);
-        }
+        ImmutableMap<Variable, ImmutableTerm> map = IntStream.range(0, vars.size())
+                .mapToObj(i -> Maps.<Variable, ImmutableTerm>immutableEntry(vars.get(i), cq.getAnswerVariables().get(i)))
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
 
-        ImmutableSubstitution substitution = substitutionFactory.getSubstitution(map.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(map);
         if (substitution.isEmpty())
             return body;
 

@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.substitution;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
@@ -26,7 +26,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      * If T == ImmutableTerm, throws a ConversionException if
      * a substituted term is not a VariableOrGroundTerm.
      */
-    <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException;
+    ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) throws ConversionException;
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.
@@ -65,13 +65,39 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
     /**
-     * Reduces the substitution's domain to its intersection with the argument domain
+     * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.
+     *
+     * @param filter condition on variables
+     * @return new restricted substitution
      */
-    ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 
-    ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
+    ImmutableSubstitution<T> filter(Predicate<Variable> filter);
 
-    ImmutableSubstitution<ImmutableTerm> simplifyValues();
+    /**
+     * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.
+     *
+     * @param filter condition on variables
+     * @return new restricted substitution
+     */
 
-    Optional<ImmutableExpression> convertIntoBooleanExpression();
+    ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter);
+
+    /**
+     * Constructs a new substitution by applying function to the range.
+     *
+     * @param function value transformation function
+     * @param <S> the type of the resulting terms
+     * @return new transformed substitution
+     */
+    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
+
+    /**
+     * Constructs a new substitution by applying function to the range.
+     *
+     * @param function value transformation function
+     * @param <S> the type of the resulting terms
+     * @return new transformed substitution
+     */
+
+    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(BiFunction<Variable, T, S> function);
 }

@@ -156,11 +156,11 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
             ImmutableSet<Variable> unionVariables = unionTree.getVariables();
 
             ImmutableList<Integer> pushableSiblings = IntStream.range(0, children.size())
-                    .boxed()
                     // Leaf siblings ...
                     .filter(i -> (children.get(i) instanceof LeafIQTree)
                             // ... that naturally joins (i.e. share a variable) with the union
                             && !Sets.intersection(unionVariables, children.get(i).getVariables()).isEmpty())
+                    .boxed()
                     .collect(ImmutableCollectors.toList());
 
             return pushableSiblings.isEmpty()
@@ -195,9 +195,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                     newUnionChildren);
 
             return IntStream.range(0, children.size())
-                    .boxed()
                     .filter(i -> !pushableSiblingIndexes.contains(i))
-                    .map(children::get)
+                    .mapToObj(children::get)
                     .map(c -> (c == unionTree) ? newUnionTree : c)
                     .collect(ImmutableCollectors.toList());
         }

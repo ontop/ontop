@@ -138,7 +138,6 @@ public class DataSource {
 	public Properties asProperties() {
 		Properties p = new Properties();
 		p.putAll(properties);
-		p.put(OntopSQLCoreSettings.JDBC_NAME, id.toString());
 		p.put(OntopSQLCoreSettings.JDBC_URL, url);
 		p.put(OntopSQLCredentialSettings.JDBC_USER, username);
 		p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, password);
@@ -147,7 +146,6 @@ public class DataSource {
 	}
 
 	public static final ImmutableSet<String> CONNECTION_PARAMETER_NAMES = ImmutableSet.of(
-			OntopSQLCoreSettings.JDBC_NAME,
 			OntopSQLCoreSettings.JDBC_URL,
 			OntopSQLCredentialSettings.JDBC_USER,
 			OntopSQLCredentialSettings.JDBC_PASSWORD,
@@ -232,10 +230,7 @@ public class DataSource {
 
 	public void store(File propertyFile) throws IOException {
 		Properties properties = asProperties();
-		// Generate a property file iff there is at least one property that is not "jdbc.name"
-		boolean nonEmpty = properties.entrySet().stream()
-				.anyMatch(e -> !OntopSQLCoreSettings.JDBC_NAME.equals(e.getKey()) &&
-						!"".equals(e.getValue()));
+		boolean nonEmpty = !properties.isEmpty();
 
 		DialogUtils.saveFileOrDeleteEmpty(!nonEmpty, propertyFile, file -> {
 			try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {

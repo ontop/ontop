@@ -66,10 +66,6 @@ if [ "${ONTOP_DB_URL_FILE+x}" ]; then
   args_array+=("--db-url=$(< "${ONTOP_DB_URL_FILE}")")
 fi
 
-if [ "${ONTOP_DB_NAME+x}" ]; then
-  args_array+=("--db-name=${ONTOP_DB_NAME}")
-fi
-
 if [ "${ONTOP_DB_DRIVER+x}" ]; then
   args_array+=("--db-driver=${ONTOP_DB_DRIVER}")
 fi
@@ -120,6 +116,10 @@ fi
 
 if [ "${ONTOP_DISABLE_PORTAL_PAGE+x}" ]; then
   args_array+=("--disable-portal-page")
+fi
+
+if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY+x}" ]; then
+  args_array+=("--enable-download-ontology")
 fi
 
 if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then

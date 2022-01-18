@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -60,7 +61,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         if ((limit != null) && limit == 0)
             return iqFactory.createEmptyNode(child.getVariables());
 
@@ -70,7 +71,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if (newChildRoot instanceof ConstructionNode)
             return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
         else if (newChildRoot instanceof SliceNode)
-            return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+            return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, treeCache);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else if ((newChildRoot instanceof TrueNode)
@@ -85,9 +86,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .filter(l -> l <= 1)
                     .isPresent())
             // Distinct can be eliminated
-            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, currentIQProperties);
+            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
@@ -95,10 +96,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree.getChild())
                 .normalizeForOptimization(variableGenerator);
         return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
-                iqFactory.createIQProperties().declareNormalizedForOptimization());
+                iqFactory.createIQTreeCache(true));
     }
 
-    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, UnaryIQTree newChild, IQTreeCache treeCache) {
         long newOffset = offset + newChildRoot.getOffset();
         Optional<Long> newLimit = newChildRoot.getLimit()
                 .map(cl -> Math.max(cl - offset, 0L))
@@ -113,7 +114,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(l -> iqFactory.createSliceNode(newOffset, l))
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
-        return iqFactory.createUnaryIQTree(newSliceNode, newChild, currentIQProperties.declareNormalizedForOptimization());
+        return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     @Override
@@ -164,14 +165,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
@@ -201,30 +198,26 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof SliceNode
-                && ((SliceNode) queryNode).getOffset() == offset
-                && ((SliceNode) queryNode).getLimit().equals(getLimit());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SliceNodeImpl sliceNode = (SliceNodeImpl) o;
+        return offset == sliceNode.offset && Objects.equals(limit, sliceNode.limit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(offset, limit);
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
     }
 
     @Override
@@ -235,13 +228,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public Optional<Long> getLimit() {
         return Optional.ofNullable(limit);
-    }
-
-    @Override
-    public SliceNode clone() {
-        return getLimit()
-                .map(l -> iqFactory.createSliceNode(offset, l))
-                .orElseGet(() -> iqFactory.createSliceNode(offset));
     }
 
     @Override

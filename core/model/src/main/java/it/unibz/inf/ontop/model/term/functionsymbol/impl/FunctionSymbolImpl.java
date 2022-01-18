@@ -139,8 +139,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         ImmutableTerm conditionalTerm = ifElseNullTerm.getTerm(1);
 
         ImmutableList<ImmutableTerm> newTerms = IntStream.range(0, terms.size())
-                .boxed()
-                .map(i -> i == index ? conditionalTerm : terms.get(i))
+                .mapToObj(i -> i == index ? conditionalTerm : terms.get(i))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableFunctionalTerm newFunctionalTerm = (this instanceof BooleanFunctionSymbol)
@@ -223,9 +222,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                    VariableNullability variableNullability) {
         if ((!mayReturnNullWithoutNullArguments()) && (!tolerateNulls())) {
             ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
-            Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
-                    .filter(t -> (t.isNullable(nullableVariables)))
-                    .map(termFactory::getDBIsNotNull));
+            Optional<ImmutableExpression> optionalExpression = termFactory.getDBIsNotNull(terms.stream()
+                    .filter(t -> (t.isNullable(nullableVariables))));
 
             return optionalExpression
                     .map(e -> e.evaluate(variableNullability, true))
@@ -285,16 +283,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                                         TermFactory termFactory) {
         if (!mayReturnNullWithoutNullArguments() && (!tolerateNulls())) {
             ImmutableMap<Integer, FunctionalTermSimplification> subTermSimplifications = IntStream.range(0, terms.size())
-                    .boxed()
                     .filter(i -> terms.get(i) instanceof ImmutableFunctionalTerm)
+                    .boxed()
                     .collect(ImmutableCollectors.toMap(
                             i -> i,
                             // Recursive
                             i -> ((ImmutableFunctionalTerm) terms.get(i)).simplifyAsGuaranteedToBeNonNull()));
 
             ImmutableList<ImmutableTerm> newSubTerms = IntStream.range(0, terms.size())
-                    .boxed()
-                    .map(i -> Optional.ofNullable(subTermSimplifications.get(i))
+                    .mapToObj(i -> Optional.ofNullable(subTermSimplifications.get(i))
                             .map(FunctionalTermSimplification::getSimplifiedTerm)
                             .orElseGet(() -> terms.get(i)))
                     .collect(ImmutableCollectors.toList());
@@ -346,8 +343,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
-                            .boxed()
-                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
+                            .mapToObj(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
 
             return newExpression.evaluate(variableNullability, true);
@@ -477,8 +473,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                 .analyzeInjectivity(nonFreeVariables, variableNullability, variableGenerator)));
 
         ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, getArity())
-                .boxed()
-                .map(i -> Optional.ofNullable(subTermDecompositions.get(i))
+                .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
                         .map(optionalDecomposition -> optionalDecomposition
                                 // Injective functional sub-term
                                 .map(FunctionalTermDecomposition::getLiftableTerm)
@@ -559,8 +554,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             c -> termFactory.getImmutableFunctionalTerm(
                                     this,
                                     IntStream.range(0, newTerms.size())
-                                            .boxed()
-                                            .map(i -> i == index ? c : newTerms.get(i))
+                                            .mapToObj(i -> i == index ? c : newTerms.get(i))
                                             .collect(ImmutableCollectors.toList())),
                             termFactory, isBoolean)
                     // Recursive
