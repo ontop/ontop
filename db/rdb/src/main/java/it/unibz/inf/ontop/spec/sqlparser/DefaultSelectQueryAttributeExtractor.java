@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
 
+import java.util.List;
+
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
@@ -18,9 +20,9 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());
     }
 
-    public RAExpressionAttributes getRAExpressionAttributes(SelectBody selectBody) throws InvalidQueryException, UnsupportedSelectQueryException {
+    public RAExpressionAttributes getRAExpressionAttributes(Select select) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            return translateSelectBody(selectBody);
+            return translateSelect(select.getSelectBody(), select.getWithItemsList());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());
@@ -32,7 +34,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
 
 
     @Override
-    protected RAExpressionAttributes translateSelectBody(SelectBody selectBody) {
+    protected RAExpressionAttributes translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
         PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
 
         RAExpressionAttributes attributes;

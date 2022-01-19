@@ -30,7 +30,7 @@ public abstract class FromItemParser<T> {
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected abstract T translateSelectBody(SelectBody selectBody);
+    protected abstract T translateSelect(SelectBody selectBody, List<WithItem> withItemsList);
 
     protected FromItemParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
         this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
@@ -218,13 +218,10 @@ public abstract class FromItemParser<T> {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
-            if (subSelect.getWithItemsList() != null)
-                throw new UnsupportedSelectQueryRuntimeException("WITH is not supported", subSelect);
-
             if (subSelect.getPivot() != null || subSelect.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subSelect);
 
-            T rae = translateSelectBody(subSelect.getSelectBody());
+            T rae = translateSelect(subSelect.getSelectBody(), subSelect.getWithItemsList());
             result = alias(rae, subSelect.getAlias());
         }
 

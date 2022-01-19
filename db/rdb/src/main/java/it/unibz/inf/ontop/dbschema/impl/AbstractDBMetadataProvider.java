@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.TokenMgrException;
+import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,8 +403,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         ImmutableList<QuotedID> attributes;
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
-            SelectBody selectBody = JSqlParserTools.parse(query);
-            ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(selectBody).getUnqualifiedAttributes();
+            Select select = JSqlParserTools.parse(query);
+            ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(select).getUnqualifiedAttributes();
             attributes = ImmutableList.copyOf(attrs.keySet());
         }
         catch (JSQLParserException e) {

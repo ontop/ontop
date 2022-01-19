@@ -10,6 +10,8 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
+import java.util.List;
+
 /**
  * Created by Roman Kontchakov on 01/11/2016.
  *
@@ -22,8 +24,8 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
     public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            SelectBody selectBody = JSqlParserTools.parse(sql);
-            return translateSelectBody(selectBody);
+            Select select = JSqlParserTools.parse(sql);
+            return translateSelect(select.getSelectBody(), select.getWithItemsList());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());
@@ -35,8 +37,11 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
 
     @Override
-    protected RAExpression translateSelectBody(SelectBody selectBody) {
+    protected RAExpression translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
         PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
+
+        if (withItemsList != null && !withItemsList.isEmpty())
+            throw new UnsupportedSelectQueryRuntimeException("WITH is not supported in SELECT statements", withItemsList);
 
         if (plainSelect.getOracleHint() != null)
             throw new UnsupportedSelectQueryRuntimeException("Oracle hints are not supported", plainSelect);

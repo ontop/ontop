@@ -18,17 +18,12 @@ public class JSqlParserTools {
 
 
 
-    public static SelectBody parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
+    public static Select parse(String sql) throws JSQLParserException, InvalidQueryException {
         Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
         if (!(statement instanceof Select))
             throw new InvalidQueryException("The query is not a SELECT statement", statement);
 
-        Select select = (Select) statement;
-
-        if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty())
-            throw new UnsupportedSelectQueryException("WITH is not supported in SELECT statements", select);
-
-        return select.getSelectBody();
+        return (Select) statement;
     }
 
     /**
