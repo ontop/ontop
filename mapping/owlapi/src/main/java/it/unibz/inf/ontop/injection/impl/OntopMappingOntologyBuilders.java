@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMapp
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -18,15 +19,18 @@ public class OntopMappingOntologyBuilders {
 
         final Optional<URL> ontologyURL;
 
+        final Optional<Reader> ontologyReader;
+
         final Optional<String> xmlCatalogFile;
 
         final OntopMappingOptions mappingOptions;
 
         private OntopMappingOntologyOptions(Optional<File> ontologyFile,
                                             Optional<URL> ontologyURL,
-                                            Optional<String> xmlCatalogFile,
+                                            Optional<Reader> ontologyReader, Optional<String> xmlCatalogFile,
                                             OntopMappingOptions mappingOptions) {
             this.ontologyFile = ontologyFile;
+            this.ontologyReader = ontologyReader;
             this.xmlCatalogFile = xmlCatalogFile;
             this.ontologyURL = ontologyURL;
             this.mappingOptions = mappingOptions;
@@ -40,6 +44,7 @@ public class OntopMappingOntologyBuilders {
         private final Runnable declareOntologyDefinedCB;
         private Optional<File> ontologyFile = Optional.empty();
         private Optional<URL> ontologyURL = Optional.empty();
+        private Optional<Reader> ontologyReader = Optional.empty();
         private Optional<String> xmlCatalogFile = Optional.empty();
 
         StandardMappingOntologyBuilderFragment(B builder,
@@ -52,7 +57,7 @@ public class OntopMappingOntologyBuilders {
         public B ontologyFile(@Nonnull String urlOrPath) {
             try {
                 URL url = new URL(urlOrPath);
-                /**
+                /*
                  * If no protocol, treats it as a path
                  */
                 String protocol = url.getProtocol();
@@ -89,8 +94,15 @@ public class OntopMappingOntologyBuilders {
             return builder;
         }
 
+        @Override
+        public B ontologyReader(@Nonnull Reader reader) {
+            declareOntologyDefinedCB.run();
+            this.ontologyReader = Optional.of(reader);
+            return builder;
+        }
+
         OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
-            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, xmlCatalogFile, mappingOptions);
+            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, xmlCatalogFile, mappingOptions);
         }
     }
 }
