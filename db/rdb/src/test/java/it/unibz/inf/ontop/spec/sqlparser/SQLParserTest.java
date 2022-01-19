@@ -186,13 +186,7 @@ public class SQLParserTest {
 	public void test_0() throws Exception {
 		RAExpression re = parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp");
 	}
-
-	@Test(expected = JSQLParserException.class)
-	public void test_00() throws Exception {
-		RAExpression re = parse("select AT.table_name as NAME from sys.all_tables AT where AT.table_name  = 'BROKERWORKSFOR_NEW'");
-	}
-
-
+	
 
 	@Test
 	public void test_1_1_1() throws Exception {

@@ -24,12 +24,13 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
@@ -705,57 +706,16 @@ public class ExpressionParser {
             }
         }
 
-        private class InExpressionItemsListVisitor implements ItemsListVisitor {
-            ImmutableList<ImmutableExpression> equalities;
-            InExpression expression;
-
-            InExpressionItemsListVisitor(InExpression expression) {
-                this.expression = expression;
-            }
-
-            @Override
-            public void visit(SubSelect subSelect) {
-                throw new UnsupportedSelectQueryRuntimeException("SubSelect in IN is not supported", expression);
-            }
-
-            @Override
-            public void visit(ExpressionList expressionList) {
-                ImmutableTerm leftTerm = getTerm(expression.getLeftExpression());
-                equalities = expressionList.getExpressions().stream()
-                        .map(item -> termFactory.getNotYetTypedEquality(leftTerm, getTerm(item)))
-                        .collect(ImmutableCollectors.toList());
-            }
-
-            @Override
-            public void visit(NamedExpressionList namedExpressionList) {
-                throw new UnsupportedSelectQueryRuntimeException("NamedExpressionList in IN is not supported", expression);
-            }
-
-            @Override
-            public void visit(MultiExpressionList multiExprList) {
-                Expression left = expression.getLeftExpression();
-                if (!(left instanceof RowConstructor))
-                    throw new InvalidSelectQueryRuntimeException("Expected RowConstructor on the left", expression);
-
-                RowConstructor leftRowConstructor = (RowConstructor)left;
-                ImmutableList<ImmutableTerm> leftList = leftRowConstructor.getExprList().getExpressions().stream()
+        private ImmutableList<ImmutableTerm> getExpressionsList(Expression expression) {
+            if (expression instanceof RowConstructor) {
+                RowConstructor leftRowConstructor = (RowConstructor) expression;
+                return leftRowConstructor.getExprList().getExpressions().stream()
                         .map(TermVisitor.this::getTerm)
                         .collect(ImmutableCollectors.toList());
-
-                equalities = multiExprList.getExpressionLists().stream()
-                        .map(ExpressionList::getExpressions)
-                        .map(e -> e.stream().map(TermVisitor.this::getTerm).collect(ImmutableCollectors.toList()))
-                        .map(r -> {
-                    if (leftList.size() != r.size())
-                        throw new InvalidSelectQueryRuntimeException("Mismatch in the length of the lists", expression);
-
-                    return termFactory.getConjunction(IntStream.range(0, leftList.size())
-                                    .mapToObj(i -> termFactory.getNotYetTypedEquality(leftList.get(i), r.get(i))))
-                            .get();
-                }).collect(ImmutableCollectors.toList());
             }
+            else
+                return ImmutableList.of(getTerm(expression));
         }
-
 
         @Override
         //  Expression [(+)] [NOT] MultiExpressionList | ItemsList | Expression
@@ -768,25 +728,40 @@ public class ExpressionParser {
             //if (expression.getOraclePriorPosition() != SupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR)
             //    throw new UnsupportedSelectQueryRuntimeException("Oracle PRIOR syntax is not supported", expression);
 
-            InExpressionItemsListVisitor visitor = new InExpressionItemsListVisitor(expression);
-            MultiExpressionList rightMultiExpressionList = expression.getMultiExpressionList();
-            if (rightMultiExpressionList != null) {
-                visitor.visit(rightMultiExpressionList);
+            ImmutableList<ImmutableExpression> equalities;
+
+            ItemsList rightItemsList = expression.getRightItemsList();
+            if (rightItemsList != null) {
+                if (!(rightItemsList instanceof ExpressionList))
+                    throw new UnsupportedSelectQueryRuntimeException("Expression on the right in IN is not an ExpressionList", expression);
+
+                ExpressionList rightItemsExpressionList = (ExpressionList) rightItemsList;
+
+                ImmutableList<ImmutableTerm> leftList = getExpressionsList(expression.getLeftExpression());
+
+                equalities = rightItemsExpressionList.getExpressions().stream()
+                        .map(this::getExpressionsList)
+                        .map(r -> {
+                            if (leftList.size() != r.size())
+                                throw new InvalidSelectQueryRuntimeException("Mismatch in the length of the lists", expression);
+
+                            return termFactory.getConjunction(IntStream.range(0, leftList.size())
+                                            .mapToObj(i -> termFactory.getNotYetTypedEquality(leftList.get(i), r.get(i))))
+                                    .get();
+                        }).collect(ImmutableCollectors.toList());
             }
             else {
-                ItemsList rightItemsList = expression.getRightItemsList();
-                if (rightItemsList != null) {
-                    rightItemsList.accept(visitor);
-                }
-                else {
-                    throw new UnsupportedSelectQueryRuntimeException("Expression on the right in IN is not supported", expression);
-                }
+                Expression rightExpression = expression.getRightExpression();
+                if (rightExpression == null)
+                    throw new InvalidSelectQueryRuntimeException("Both RightExpression and RightItemsList are missing", expression);
+
+                throw new UnsupportedSelectQueryRuntimeException("Expression on the right in IN is not supported", expression);
             }
 
-            if (visitor.equalities.isEmpty())
+            if (equalities.isEmpty())
                 throw new InvalidSelectQueryRuntimeException("IN must contain at least one expression", expression);
 
-            result = notOperation(expression.isNot()).apply(termFactory.getDisjunction(visitor.equalities));
+            result = notOperation(expression.isNot()).apply(termFactory.getDisjunction(equalities));
         }
 
 
@@ -843,6 +818,10 @@ public class ExpressionParser {
             result = termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBTermType(datatype), term);
         }
 
+        @Override
+        public void visit(TryCastExpression cast) {
+
+        }
 
 
         // ------------------------------------------------------------
@@ -864,7 +843,6 @@ public class ExpressionParser {
         public void visit(AnyComparisonExpression expression) { // ANY|SOME sub-select
             throw new UnsupportedSelectQueryRuntimeException("ANY is not supported yet", expression);
         }
-
 
 
 
@@ -942,6 +920,21 @@ public class ExpressionParser {
         public void visit(OracleNamedFunctionParameter expression) {
             // TODO: CHECK
             throw new UnsupportedSelectQueryRuntimeException("OracleNamedFunctionParameter is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(AllColumns allColumns) {
+
+        }
+
+        @Override
+        public void visit(AllTableColumns allTableColumns) {
+
+        }
+
+        @Override
+        public void visit(AllValue allValue) {
+
         }
 
         @Override
