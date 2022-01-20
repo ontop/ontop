@@ -186,7 +186,7 @@ public class SQLParserTest {
 	public void test_0() throws Exception {
 		RAExpression re = parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp");
 	}
-	
+
 
 	@Test
 	public void test_1_1_1() throws Exception {

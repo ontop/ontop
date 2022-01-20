@@ -125,7 +125,8 @@ public class JsonSQLView extends JsonView {
         try {
             raExpression = extractRAExpression(dbParameters, parentCacheMetadataLookup);
             initialChild = raExpression2IQConverter.convert(raExpression);
-        } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidQueryException e) {
+        }
+        catch (JSQLParserException | UnsupportedSelectQueryException | InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 

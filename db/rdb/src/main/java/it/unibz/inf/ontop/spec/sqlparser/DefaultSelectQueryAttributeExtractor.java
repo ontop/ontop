@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Roman Kontchakov on 25/01/2017.
  */
 
-public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpressionAttributes> {
+public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes> {
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());
@@ -35,7 +35,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
 
     @Override
     protected RAExpressionAttributes translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
-        PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
+        PlainSelect plainSelect = getPlainSelect(selectBody);
 
         RAExpressionAttributes attributes;
         try {

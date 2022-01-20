@@ -16,7 +16,7 @@ import java.util.List;
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
-public class SelectQueryParser extends FromItemParser<RAExpression> {
+public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
@@ -38,7 +38,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
     @Override
     protected RAExpression translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
-        PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
+        PlainSelect plainSelect = getPlainSelect(selectBody);
 
         if (withItemsList != null && !withItemsList.isEmpty())
             throw new UnsupportedSelectQueryRuntimeException("WITH is not supported in SELECT statements", withItemsList);

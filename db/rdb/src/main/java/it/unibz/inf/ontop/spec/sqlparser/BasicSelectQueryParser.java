@@ -16,7 +16,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 
-public abstract class FromItemParser<T> {
+public abstract class BasicSelectQueryParser<T> {
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
@@ -30,15 +30,43 @@ public abstract class FromItemParser<T> {
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected abstract T translateSelect(SelectBody selectBody, List<WithItem> withItemsList);
-
-    protected FromItemParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
+    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
         this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
         this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;
         this.termFactory = coreSingletons.getTermFactory();
         this.operations = operations;
     }
+
+
+    protected abstract T translateSelect(SelectBody selectBody, List<WithItem> withItemsList);
+
+    /**
+     *
+     * @param selectBody
+     * @return
+     * @throws UnsupportedSelectQueryRuntimeException
+     * @throws InvalidSelectQueryRuntimeException
+     */
+
+    protected PlainSelect getPlainSelect(SelectBody selectBody) {
+        // other subclasses of SelectBody are
+        //      SelectOperationList (INTERSECT, EXCEPT, MINUS, UNION),
+        //      ValuesStatement (VALUES)
+        //      WithItem ([RECURSIVE]...)
+
+        if (!(selectBody instanceof PlainSelect))
+            throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
+
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+
+        if (plainSelect.getIntoTables() != null)
+            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
+
+        return plainSelect;
+    }
+
+
 
     /**
      * main method for analysing FROM clauses
