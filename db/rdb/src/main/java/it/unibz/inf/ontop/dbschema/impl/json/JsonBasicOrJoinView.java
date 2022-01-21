@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import net.sf.jsqlparser.JSQLParserException;
@@ -69,18 +68,19 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {
 
-        ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
+        ImmutableList<ParentDefinition> parentDefinitions = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
 
-        Integer maxParentLevel = parentDefinitionMap.keySet().stream()
-                .map(r -> (r instanceof OntopViewDefinition)
-                        ? ((OntopViewDefinition) r).getLevel()
-                        : 0)
+        Integer maxParentLevel = parentDefinitions.stream()
+                .map(p -> p.relation)
+                .filter(r -> r instanceof OntopViewDefinition)
+                .map(r -> (OntopViewDefinition)r)
+                .map(OntopViewDefinition::getLevel)
                 .reduce(0, Math::max, Math::max);
 
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
         RelationID relationId = idFactory.createRelationID(name.toArray(new String[0]));
 
-        IQ iq = createIQ(relationId, parentDefinitionMap, dbParameters);
+        IQ iq = createIQ(relationId, parentDefinitions, dbParameters);
 
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
@@ -115,41 +115,57 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 baseRelations);
     }
 
-    private IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
+    private IQ createIQ(RelationID relationId, ImmutableList<ParentDefinition> parentDefinitions, DBParameters dbParameters)
             throws MetadataExtractionException {
 
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
 
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
+        // cannot use the keySet of substitutionMap because need to createAttributeVariableMap first
         ImmutableSet<Variable> addedVariables = columns.added.stream()
-                .map(a -> a.name)
-                .map(attributeName -> getVariable(attributeName, quotedIdFactory, termFactory))
+                .map(a -> getVariable(a.name, idFactory, termFactory))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, columns.hidden, parentDefinitionMap,
-                dbParameters);
+        VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(addedVariables);
+        parentDefinitions.forEach(p -> p.createAttributeVariableMap(variableGenerator));
 
-        ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable = createParentArgumentTable(
-                addedVariables, parentDefinitionMap, coreSingletons.getCoreUtilsFactory());
+        RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = extractParentAttributeMap(
-                parentDefinitionMap, parentArgumentTable, quotedIdFactory);
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (AddColumns a : columns.added) {
+            Variable v = getVariable(a.name, idFactory, termFactory);
+            ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
+            substitutionMapBuilder.put(v, value);
+        }
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitutionMapBuilder.build();
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMap);
+
+        ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
+                .getConstructionSubstitutionNormalizer();
+
+        ImmutableSet<Variable> hiddenVariables = columns.hidden.stream()
+                .map(a -> getVariable(a, idFactory, termFactory))
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
 
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                createConstructionSubstitution(projectedVariables, parentAttributeMap, dbParameters);
+                substitutionNormalizer.normalizeSubstitution(substitution,
+                        ImmutableSet.copyOf(projectedVariables));
 
-        IQTree parentTree = createParentTree(parentArgumentTable, iqFactory);
+        IQTree parentTree = createParentTree(parentDefinitions, iqFactory);
 
         ConstructionNode constructionNode = normalization.generateTopConstructionNode()
                 // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
                 // It may be eliminated by the IQ normalization
                 .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
-        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, quotedIdFactory, coreSingletons);
+        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
 
         IQTree updatedParentDataNode = filterConditions.stream()
                 .reduce(termFactory::getConjunction)
@@ -166,14 +182,43 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .normalizeForOptimization();
     }
 
-    abstract protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
+    protected static class ParentDefinition {
+        private final String prefix;
+        private final NamedRelationDefinition relation;
+        @Nullable
+        private ImmutableMap<Attribute, Variable> attributeVariableMap; // initialized by createAttributeVariableMap
+
+        public ParentDefinition(NamedRelationDefinition relation, String prefix) {
+            this.relation = relation;
+            this.prefix = prefix;
+        }
+
+        public String getPrefixedAttributeName(Attribute a) {
+            return prefix + a.getID().getName();
+        }
+
+        public void createAttributeVariableMap(VariableGenerator variableGenerator) {
+            // NB: the non-necessary variables will be pruned out by normalizing the IQ
+            attributeVariableMap = relation.getAttributes().stream()
+                                    .collect(ImmutableCollectors.toMap(
+                                            a -> a,
+                                            a -> variableGenerator.generateNewVariable(getPrefixedAttributeName(a))));
+        }
+
+        public ImmutableMap<Integer, Variable> getArgumentMap() {
+            return attributeVariableMap.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(ae -> ae.getKey().getIndex() - 1, Map.Entry::getValue));
+        }
+    }
+
+    abstract protected ImmutableList<ParentDefinition> extractParentDefinitions(DBParameters dbParameters,
                                                                                               MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    private IQTree createParentTree(ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
+    private IQTree createParentTree(Collection<ParentDefinition> parentArgumentTable,
                                     IntermediateQueryFactory iqFactory) throws MetadataExtractionException {
-        ImmutableList<IQTree> parents = parentArgumentTable.rowKeySet().stream()
-                .map(d -> iqFactory.createExtensionalDataNode(d, parentArgumentTable.row(d)))
+        ImmutableList<IQTree> parents = parentArgumentTable.stream()
+                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
                 .collect(ImmutableCollectors.toList());
 
         switch (parents.size()) {
@@ -188,64 +233,33 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         }
     }
 
-    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, List<String> hidden,
-                                                             ImmutableMap<NamedRelationDefinition, String> parentDefinitions, DBParameters dbParameters) {
-        TermFactory termFactory = dbParameters.getCoreSingletons().getTermFactory();
-        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, ImmutableSet<Variable> hiddenVariables,
+                                                             ImmutableList<ParentDefinition> parentDefinitions, TermFactory termFactory) {
 
-        ImmutableList<Variable> hiddenVariables = hidden.stream()
-                .map(attributeName -> getVariable(attributeName, idFactory, termFactory))
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<Variable> inheritedVariableStream = parentDefinitions.entrySet().stream()
-                .flatMap(e -> e.getKey().getAttributes().stream()
-                        .map(a -> e.getValue() + a.getID().getName()))
+        Stream<Variable> inheritedVariableStream = parentDefinitions.stream()
+                .flatMap(p -> p.relation.getAttributes().stream()
+                        .map(p::getPrefixedAttributeName))
                 .map(termFactory::getVariable)
                 .filter(v -> !hiddenVariables.contains(v))
-                .filter(v -> !addedVariables.contains(v))
-                .collect(ImmutableCollectors.toList());
+                .filter(v -> !addedVariables.contains(v));
 
-        return Stream.concat(
-                        addedVariables.stream(),
-                        inheritedVariableStream.stream())
+        return Stream.concat(addedVariables.stream(), inheritedVariableStream)
                 .collect(ImmutableCollectors.toList());
     }
 
-    private ImmutableTable<NamedRelationDefinition, Integer, Variable> createParentArgumentTable(ImmutableSet<Variable> addedVariables,
-                                                                                                 ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
-                                                                                                 CoreUtilsFactory coreUtilsFactory) {
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(addedVariables);
-
-        // NB: the non-necessary variables will be pruned out by normalizing the IQ
-        return parentDefinitionMap.entrySet().stream()
-                .flatMap(e -> {
-                    ImmutableList<Attribute> parentAttributes = e.getKey().getAttributes();
-                    return IntStream.range(0, parentAttributes.size())
-                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable(
-                                    e.getValue() + parentAttributes.get(i).getID().getName())));
-                })
-                .collect(ImmutableCollectors.toTable());
-    }
-
-    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> extractParentAttributeMap(
-            ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
-            ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
-            QuotedIDFactory quotedIdFactory) throws MetadataExtractionException {
+    private RAExpressionAttributes extractParentAttributeMap(ImmutableList<ParentDefinition> parentDefinitionMap, QuotedIDFactory quotedIdFactory)
+            throws MetadataExtractionException {
 
         RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        ImmutableMap<QualifiedAttributeID, Collection<Variable>> map = parentArgumentTable.cellSet().stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        c -> new QualifiedAttributeID(null,
-                                idFactory.createAttributeID(
-                                        // Prefix
-                                        parentDefinitionMap.get(c.getRowKey()) +
-                                        // Original column name
-                                        c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName())),
-                        Table.Cell::getValue
-                )).asMap();
+        ImmutableMap<QuotedID, Collection<Variable>> map = parentDefinitionMap.stream()
+                .flatMap(p -> p.attributeVariableMap.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
+                                e.getValue())))
+                .collect(ImmutableCollectors.toMultimap()).asMap();
 
-        ImmutableSet<QualifiedAttributeID> conflictingAttributeIds = map.entrySet().stream()
+        ImmutableSet<QuotedID> conflictingAttributeIds = map.entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
@@ -253,39 +267,14 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         if (!conflictingAttributeIds.isEmpty())
             throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
 
-        return map.entrySet().stream()
+        return new RAExpressionAttributes(map.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()));
-    }
-
-    private ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization createConstructionSubstitution(
-            ImmutableList<Variable> projectedVariables,
-            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
-            DBParameters dbParameters) throws MetadataExtractionException {
-
-        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-        TermFactory termFactory = coreSingletons.getTermFactory();
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (AddColumns a : columns.added) {
-            Variable v = getVariable(a.name, idFactory, termFactory);
-            ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
-            substitutionMapBuilder.put(v, value);
-        }
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMapBuilder.build());
-
-        ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
-                .getConstructionSubstitutionNormalizer();
-
-        return substitutionNormalizer.normalizeSubstitution(substitution,
-                ImmutableSet.copyOf(projectedVariables));
+                        e -> new QualifiedAttributeID(null, e.getKey()),
+                        e -> e.getValue().iterator().next())), null);
     }
 
     private ImmutableTerm extractExpression(AddColumns column,
-                                            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
+                                            RAExpressionAttributes parentAttributeMap,
                                             QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
@@ -296,14 +285,14 @@ public abstract class JsonBasicOrJoinView extends JsonView {
             Select statement = JSqlParserTools.parse(sqlQuery);
             SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
             exp = ((SelectExpressionItem) si).getExpression();
-            return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
+            return parser.parseTerm(exp, parentAttributeMap);
         }
         catch (Exception e) {
             throw new MetadataExtractionException("Unsupported expression for " + column.name + " in " + name + ":\n" + e, e);
         }
     }
 
-    private ImmutableList<ImmutableExpression> extractFilter(ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
+    private ImmutableList<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
                                                              QuotedIDFactory quotedIdFactory,
                                                              CoreSingletons coreSingletons) throws MetadataExtractionException {
         if (filterExpression == null || filterExpression.isEmpty())
@@ -316,7 +305,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
             PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
             return plainSelect.getWhere() == null
                     ? ImmutableList.of()
-                    : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
+                    : parser.parseBooleanExpression(plainSelect.getWhere(), parentAttributeMap);
         }
         catch (InvalidQueryException | JSQLParserException e) {
             throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
@@ -404,15 +393,12 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
         ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = tree.inferUniqueConstraints();
 
-        ImmutableList<Attribute> attributes = relation.getAttributes();
         DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();
 
-        ImmutableMap<Variable, QuotedID> variableIds = IntStream.range(0, attributes.size())
-                .boxed()
+        ImmutableMap<Variable, QuotedID> variableIds = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(
-                        projectedAtom::getTerm,
-                        i -> attributes.get(i).getID()
-                ));
+                        a -> projectedAtom.getTerm(a.getIndex() - 1),
+                        Attribute::getID));
 
         return variableUniqueConstraints.stream()
                 .map(vs -> new AddUniqueConstraints(
