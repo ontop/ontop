@@ -16,7 +16,7 @@ import java.util.List;
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
-public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
+public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAExpressionOperations> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
@@ -139,11 +139,11 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
     }
 
     @Override
-    public RAExpression create(NamedRelationDefinition relation) {
+    protected RAExpression create(NamedRelationDefinition relation) {
         return operations.create(relation, createAttributeVariables(relation));
     }
 
     public RAExpression translateParserView(RelationDefinition view) {
-        return ((RAExpressionOperations)operations).createWithoutName(view, createAttributeVariables(view));
+        return operations.createWithoutName(view, createAttributeVariables(view));
     }
 }

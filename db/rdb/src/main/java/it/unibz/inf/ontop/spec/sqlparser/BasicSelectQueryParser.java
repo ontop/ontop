@@ -16,7 +16,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 
-public abstract class BasicSelectQueryParser<T> {
+public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
@@ -24,13 +24,13 @@ public abstract class BasicSelectQueryParser<T> {
     protected final QuotedIDFactory idfac;
     private final MetadataLookup metadata;
 
-    protected final RAOperations<T> operations;
+    protected final O operations;
 
     private int relationIndex = 0;
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
+    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, O operations) {
         this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
         this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;
@@ -95,10 +95,10 @@ public abstract class BasicSelectQueryParser<T> {
     /**
      * can be overridden to add additional checks
      *
-     * @param left
-     * @param join
-     * @return
-     * @throws IllegalJoinException
+     * @param left expression
+     * @param join JSQLParser's Join
+     * @return resulting expression
+     * @throws IllegalJoinException if incorrect combination of modifiers is used
      */
     protected T join(T left, Join join) throws IllegalJoinException {
 
@@ -112,7 +112,7 @@ public abstract class BasicSelectQueryParser<T> {
             | CROSS
             | OUTER ]
           (   JOIN
-            | "," (OUTER)?
+            | simple "," (OUTER)?
             | STRAIGHT_JOIN
             | APPLY )
          */
@@ -142,16 +142,25 @@ public abstract class BasicSelectQueryParser<T> {
             if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
                     || join.isInner() || join.isNatural() || join.isCross())
                 throw new InvalidSelectQueryRuntimeException("Invalid STRAIGHT_JOIN", join);
+
+            // covered below
         }
 
         if (join.isSimple()) {
-            // JSQLParser apparently allows weird combinations like SELECT * FROM P LEFT, Q
-            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
-                    || join.isInner() || join.isNatural() || join.isCross())
+            // JSQLParser apparently allows weird combinations like SELECT * FROM P, LEFT Q
+            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi()
+                    || join.isInner() || join.isNatural() || join.isCross()
+                    || !join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
 
-            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
-                throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
+            // but FROM P, OUTER Q is supported by Informix
+            // https://www.oninit.com/manual/informix/100/sqlt/sqltmst104.htm
+            // SELECT c.customer_num, c.lname, c.company,
+            //     c.phone, u.call_dtime, u.call_descr
+            //   FROM customer c, OUTER cust_calls u
+            //   WHERE c.customer_num = u.customer_num
+            if (join.isOuter())
+                throw new UnsupportedSelectQueryRuntimeException("Simple OUTER join is not supported", join);
 
             return operations.crossJoin(left, right);
         }

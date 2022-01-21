@@ -118,15 +118,14 @@ public class JsonSQLView extends JsonView {
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-        RAExpression2IQConverter raExpression2IQConverter = new RAExpression2IQConverter(coreSingletons);
-
         IQTree initialChild;
         RAExpression raExpression;
         try {
-            raExpression = extractRAExpression(dbParameters, parentCacheMetadataLookup);
-            initialChild = raExpression2IQConverter.convert(raExpression);
+            SQLQueryParser sq = new SQLQueryParser(coreSingletons);
+            raExpression = sq.getRAExpression(query, parentCacheMetadataLookup);
+            initialChild = sq.convert(raExpression);
         }
-        catch (JSQLParserException | UnsupportedSelectQueryException | InvalidQueryException e) {
+        catch (InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
@@ -175,13 +174,6 @@ public class JsonSQLView extends JsonView {
 
         return iqFactory.createIQ(projectionAtom, transformedTree)
                 .normalizeForOptimization();
-    }
-
-    private RAExpression extractRAExpression(DBParameters dbParameters, MetadataLookup metadataLookup)
-            throws JSQLParserException, UnsupportedSelectQueryException, InvalidQueryException, MetadataExtractionException {
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-        SQLQueryParser sq = new SQLQueryParser(coreSingletons);
-        return sq.getRAExpression(query, metadataLookup);
     }
 
     private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {

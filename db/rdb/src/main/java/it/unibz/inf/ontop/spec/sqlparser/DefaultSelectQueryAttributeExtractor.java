@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Roman Kontchakov on 25/01/2017.
  */
 
-public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes> {
+public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes, RAExpressionAttributesOperations> {
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());
