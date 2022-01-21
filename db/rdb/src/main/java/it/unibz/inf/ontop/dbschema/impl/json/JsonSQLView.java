@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -129,36 +130,15 @@ public class JsonSQLView extends JsonView {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributeVariableMap = raExpression.getAttributes().asMap().keySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        k -> k,
-                        k -> termFactory.getVariable(k.getAttribute().getName())
-                ));
+        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
+                raExpression.getUnqualifiedAttributes().entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                e -> termFactory.getVariable(e.getKey().getName()),
+                                Map.Entry::getValue)));
 
-        ImmutableList<Variable> atomVariables = raExpression.getAttributes().asMap().keySet().stream()
-                .map(attributeVariableMap::get)
-                .collect(ImmutableCollectors.toList());
+        ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 
-        ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(atomVariables);
-
-        if (atomVariables.size() != projectedVariables.size()) {
-            ImmutableMultiset<Variable> multiSet = ImmutableMultiset.copyOf(atomVariables);
-            ImmutableSet<Variable> conflictingVariables = multiSet.stream()
-                    .filter(v -> multiSet.count(v) > 1)
-                    .collect(ImmutableCollectors.toSet());
-
-            throw new MetadataExtractionException("The following projected columns have multiple possible provenances: "
-                    + conflictingVariables);
-        }
-
-        ImmutableMap<Variable, ImmutableTerm> ascendingSubstitutionMap = raExpression.getAttributes().asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> attributeVariableMap.get(e.getKey()),
-                        Map.Entry::getValue));
-
-        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                substitutionFactory.getSubstitution(ascendingSubstitutionMap),
-                projectedVariables);
+        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
 
         IQTree updatedChild = normalization.updateChild(initialChild);
 
@@ -169,8 +149,8 @@ public class JsonSQLView extends JsonView {
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, atomVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, atomVariables);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
 
         return iqFactory.createIQ(projectionAtom, transformedTree)
                 .normalizeForOptimization();
@@ -183,7 +163,8 @@ public class JsonSQLView extends JsonView {
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
-                        .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
+                        .mapToObj(i -> dbRootType)
+                        .collect(ImmutableCollectors.toList()));
     }
 
     private void insertUniqueConstraints(NamedRelationDefinition relation,
