@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
+import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -22,6 +24,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
+import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -29,8 +32,6 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -58,7 +59,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     protected JsonBasicOrJoinView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                   @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
-                                  Columns columns, String filterExpression) {
+                                  @Nonnull Columns columns, @Nonnull String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
         this.columns = columns;
         this.filterExpression = filterExpression;
@@ -76,8 +77,8 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                         : 0)
                 .reduce(0, Math::max, Math::max);
 
-        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
-        RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+        RelationID relationId = idFactory.createRelationID(name.toArray(new String[0]));
 
         IQ iq = createIQ(relationId, parentDefinitionMap, dbParameters);
 
@@ -149,21 +150,13 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 // It may be eliminated by the IQ normalization
                 .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
-        ImmutableList<ImmutableExpression> filterConditions;
-        try {
-            filterConditions = filterExpression != null && !filterExpression.isEmpty()
-                    ? extractFilter(parentAttributeMap, quotedIdFactory, coreSingletons)
-                    : ImmutableList.of();
-        } catch (JSQLParserException e) {
-            throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
-        }
+        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, quotedIdFactory, coreSingletons);
 
         IQTree updatedParentDataNode = filterConditions.stream()
                 .reduce(termFactory::getConjunction)
                 .map(iqFactory::createFilterNode)
-                .map(f -> updateParentDataNode(normalization,
-                        iqFactory.createUnaryIQTree(f, parentTree)))
-                .orElse(updateParentDataNode(normalization, parentTree));
+                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree)))
+                .orElse(normalization.updateChild(parentTree));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
@@ -199,10 +192,10 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, List<String> hidden,
                                                              ImmutableMap<NamedRelationDefinition, String> parentDefinitions, DBParameters dbParameters) {
         TermFactory termFactory = dbParameters.getCoreSingletons().getTermFactory();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
 
         ImmutableList<String> hiddenColumnNames = hidden.stream()
-                .map(attributeName -> normalizeAttributeName(attributeName, quotedIdFactory))
+                .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<Variable> inheritedVariableStream = parentDefinitions.entrySet().stream()
@@ -235,27 +228,21 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .collect(ImmutableCollectors.toTable());
     }
 
-    private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
-                                        IQTree parentIQTree) {
-
-        return normalization.updateChild(parentIQTree);
-    }
-
     private ImmutableMap<QualifiedAttributeID, ImmutableTerm> extractParentAttributeMap(
             ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
             ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
             QuotedIDFactory quotedIdFactory) throws MetadataExtractionException {
 
+        RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
+
         ImmutableMap<QualifiedAttributeID, Collection<Variable>> map = parentArgumentTable.cellSet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         c -> new QualifiedAttributeID(null,
-                                quotedIdFactory.createAttributeID(
-                                        quotedIdFactory.getIDQuotationString() +
-                                                // Prefix
-                                                parentDefinitionMap.get(c.getRowKey()) +
-                                                // Original column name
-                                                c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName() +
-                                                quotedIdFactory.getIDQuotationString())),
+                                idFactory.createAttributeID(
+                                        // Prefix
+                                        parentDefinitionMap.get(c.getRowKey()) +
+                                        // Original column name
+                                        c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName())),
                         Table.Cell::getValue
                 )).asMap();
 
@@ -270,9 +257,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         return map.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()
-                ));
-
+                        e -> e.getValue().iterator().next()));
     }
 
     private ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization createConstructionSubstitution(
@@ -280,20 +265,20 @@ public abstract class JsonBasicOrJoinView extends JsonView {
             ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
             DBParameters dbParameters) throws MetadataExtractionException {
 
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
         TermFactory termFactory = coreSingletons.getTermFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
 
-
         ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
         for (AddColumns a : columns.added) {
-            Variable v = termFactory.getVariable(normalizeAttributeName(a.name, quotedIdFactory));
+            Variable v = termFactory.getVariable(normalizeAttributeName(a.name, idFactory));
             try {
-                ImmutableTerm value = extractExpression(a.expression, parentAttributeMap, quotedIdFactory, coreSingletons);
+                ImmutableTerm value = extractExpression(a.expression, parentAttributeMap, idFactory, coreSingletons);
                 substitutionMapBuilder.put(v, value);
-            } catch (JSQLParserException | UnsupportedSelectQueryRuntimeException e) {
+            }
+            catch (JSQLParserException | UnsupportedSelectQueryRuntimeException e) {
                 throw new UnsupportedAddedColumnExpressionException("Unsupported expression for " + a.name + " in " + name + ":\n" + e, e);
             }
         }
@@ -310,24 +295,39 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                                             ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
                                             QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons)
             throws JSQLParserException, UnsupportedSelectQueryRuntimeException {
-        String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable";
+
         ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
-        SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
-        net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
+        net.sf.jsqlparser.expression.Expression exp;
+        try {
+            String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable";
+            Select statement = JSqlParserTools.parse(sqlQuery);
+            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
+            exp = ((SelectExpressionItem) si).getExpression();
+        }
+        catch (InvalidQueryException e) {
+            throw new MinorOntopInternalBugException("can never be thrown because the query is manually constructed");
+        }
         return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
     }
 
     private ImmutableList<ImmutableExpression> extractFilter(ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
                                                              QuotedIDFactory quotedIdFactory,
-                                                             CoreSingletons coreSingletons) throws JSQLParserException {
-        String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
-        ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
-        PlainSelect plainSelect = ((PlainSelect) ((Select) statement).getSelectBody());
-        return plainSelect.getWhere() == null
-                ? ImmutableList.of()
-                : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
+                                                             CoreSingletons coreSingletons) throws MetadataExtractionException {
+        if (filterExpression == null || filterExpression.isEmpty())
+            return ImmutableList.of();
+
+        try {
+            String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
+            ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
+            Select statement = JSqlParserTools.parse(sqlQuery);
+            PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
+            return plainSelect.getWhere() == null
+                    ? ImmutableList.of()
+                    : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
+        }
+        catch (InvalidQueryException | JSQLParserException e) {
+            throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
+        }
     }
 
 
@@ -356,7 +356,8 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 coreSingletons);
 
         for (AddUniqueConstraints addUC : list) {
-            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
+            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey)
+                LOGGER.warn("Primary key set in the view file for " + addUC.name);
 
             FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
 
@@ -593,35 +594,36 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
     protected void insertForeignKey(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
 
-        RelationID targetRelationId = JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation);
+        QuotedIDFactory idFactory = lookup.getQuotedIDFactory();;
+
+        RelationID targetRelationId = JsonMetadata.deserializeRelationID(idFactory, addForeignKey.to.relation);
         NamedRelationDefinition targetRelation;
         try {
             targetRelation = lookup.getRelation(targetRelationId);
         }
-        // If the target relation has not
         catch (MetadataExtractionException e) {
             LOGGER.info("Cannot find relation {} for FK {}", targetRelationId, addForeignKey.name);
-            return ;
+            return;
         }
 
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
 
         int columnCount = addForeignKey.to.columns.size();
         if (addForeignKey.from.size() != columnCount)
             throw new MetadataExtractionException("Not the same number of from and to columns in FK definition");
 
         try {
-            for (int i=0; i < columnCount; i++ ) {
+            ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
+            for (int i = 0; i < columnCount; i++) {
                 builder.add(
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from.get(i)),
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.to.columns.get(i)));
+                        idFactory.createAttributeID(addForeignKey.from.get(i)),
+                        idFactory.createAttributeID(addForeignKey.to.columns.get(i)));
             }
+
+            builder.build();
         }
         catch (AttributeNotFoundException e) {
             throw new MetadataExtractionException(e);
         }
-
-        builder.build();
     }
 
     /**
