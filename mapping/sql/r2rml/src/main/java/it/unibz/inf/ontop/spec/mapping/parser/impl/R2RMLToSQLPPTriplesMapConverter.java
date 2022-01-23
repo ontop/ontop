@@ -202,14 +202,14 @@ public class R2RMLToSQLPPTriplesMapConverter {
 			// TODO: Make the tripleRef have an IRIStringTemplateFunctionSymbol, this leads to errors and would need
 			// further exceptions in UniqueTermTypeMappingCaster.transform().
 			/*IRIStringTemplateFunctionSymbol dbTemplate = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(Template.builder()
-					.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+					.addSeparator("https://w3id.org/obda/r2rmlstar/tripleref/" + uuid+ '/')
 					.addColumn().addSeparator("/")
 					.addColumn().addSeparator("/").addColumn()
 					.build());
 			tripleRef = termFactory.getImmutableFunctionalTerm(dbTemplate, nestedTerms);*/
 			tripleRef = termFactory.getIRIFunctionalTerm(
 					Template.builder()
-							.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid + '/')
+							.addSeparator("https://w3id.org/obda/r2rmlstar/tripleref/" + uuid + '/')
 							.addColumn().addSeparator("/")
 							.addColumn().addSeparator("/").addColumn()
 							.build(),
@@ -224,14 +224,14 @@ public class R2RMLToSQLPPTriplesMapConverter {
 			// TODO: Make the tripleRef have an IRIStringTemplateFunctionSymbol, this leads to errors and would need
 			// further exceptions in UniqueTermTypeMappingCaster.transform().
 			/*IRIStringTemplateFunctionSymbol dbTemplate = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(Template.builder()
-					.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+					.addSeparator("https://w3id.org/obda/r2rmlstar/tripleref/" + uuid+ '/')
 					.addColumn().addSeparator("/")
 					.addColumn().addSeparator("/").addColumn()
 					.build());
 			tripleRef = termFactory.getImmutableFunctionalTerm(dbTemplate, nestedTerms);*/
 			tripleRef = termFactory.getIRIFunctionalTerm(
 					Template.builder()
-							.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+							.addSeparator("https://w3id.org/obda/r2rmlstar/tripleref/" + uuid+ '/')
 							.addColumn().addSeparator("/")
 							.addColumn().addSeparator("/").addColumn()
 							.build(),
