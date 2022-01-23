@@ -3,7 +3,7 @@
 @prefix rr: <http://www.w3.org/ns/r2rml#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-@prefix star: <http://ontop-vkg.org/2021/rdfstar#>.
+@prefix star: <https://w3id.org/obda/r2rmlstar#>.
 @prefix ex: <http://example.org/>.
 
 <urn:MAPID-professor-certainty> a rr:TriplesMap;
