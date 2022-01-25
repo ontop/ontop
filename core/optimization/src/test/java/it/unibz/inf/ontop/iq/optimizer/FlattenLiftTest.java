@@ -62,14 +62,13 @@ public class FlattenLiftTest {
 
         TABLE1 = builder.createDatabaseRelation( "TABLE1",
                 "pk", integerDBType, false,
-                "arr", arrayDBType, true,
-                "col3", integerDBType, true);
+                "col2", integerDBType, true);
         UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
 
         TABLE2 = builder.createDatabaseRelation( "TABLE2",
                 "pk", integerDBType, false,
-                "col2", integerDBType, true);
-        UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
+                "arr", arrayDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE2.getAttribute(1));
 
         TABLE3 = builder.createDatabaseRelation( "TABLE3",
                 "pk", integerDBType, false,
@@ -78,65 +77,34 @@ public class FlattenLiftTest {
 
         TABLE4 = builder.createDatabaseRelation( "TABLE4",
                 "pk", integerDBType, false,
-                "arr1", arrayDBType, true,
-                "arr2", arrayDBType, true,
-                "arr3", arrayDBType, true,
-                "arr4", arrayDBType, true);
-        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
+                "arr", arrayDBType, true,
+                "col3", integerDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE4.getAttribute(1));
+
+
+
+//        TABLE4 = builder.createDatabaseRelation( "TABLE4",
+//                "pk", integerDBType, false,
+//                "arr1", arrayDBType, true,
+//                "arr2", arrayDBType, true,
+//                "arr3", arrayDBType, true,
+//                "arr4", arrayDBType, true);
+//        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
 
     }
 
 
     @Test
-    public void testFlattenWithoutFilteringCondition1() throws EmptyQueryException {
+    public void testLiftFlatten1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
+                ATOM_FACTORY.getRDFAnswerPredicate(2), X, O, B);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
-        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(Y, F, Optional.empty(), true);
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X,F,C));
-
-        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        rootNode,
-                        IQ_FACTORY.createNaryIQTree(
-                                joinNode,
-                                ImmutableList.of(
-                                        leftDataNode,
-                                        IQ_FACTORY.createUnaryIQTree(
-                                                flattenNode,
-                                                rightDataNode
-                                        )))));
-
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        rootNode,
-                        IQ_FACTORY.createUnaryIQTree(
-                                flattenNode,
-                                IQ_FACTORY.createNaryIQTree(
-                                        joinNode,
-                                        ImmutableList.of(
-                                        leftDataNode,
-                                                rightDataNode
-                                        )))));
-
-        optimizeAndCompare(initialIQ, expectedIQ);
-    }
-
-    @Test
-    public void testFlattenWithoutFilteringCondition2() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
-
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(C, ONE));
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
-        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(Y, F, Optional.empty(), true);
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, F, C));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, B));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, F, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F));
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -166,16 +134,101 @@ public class FlattenLiftTest {
     }
 
     @Test
-    public void testFlattenWithFilteringCondition1() {
+    public void testLiftFlatten2() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), X, O, B);
+
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(C, ONE));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, B));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, F, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE4, ImmutableList.of(X, F, C));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                joinNode,
+                                ImmutableList.of(
+                                        leftDataNode,
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                flattenNode,
+                                                rightDataNode
+                                        )))));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flattenNode,
+                                IQ_FACTORY.createNaryIQTree(
+                                        joinNode,
+                                        ImmutableList.of(
+                                                leftDataNode,
+                                                rightDataNode
+                                        )))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
+
+    @Test
+    public void testLiftFlatten3() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X, O1, O2);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(E, ONE);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(C, ONE));
+        FlattenNode leftFlattenNode = IQ_FACTORY.createFlattenNode(O1, F1, Optional.empty(), true);
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F1));
+        FlattenNode rightFlattenNode = IQ_FACTORY.createFlattenNode(O2, F2, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE4, ImmutableList.of(X, F2, C));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                joinNode,
+                                ImmutableList.of(
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                leftFlattenNode,
+                                                leftDataNode
+                                        ),
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                rightFlattenNode,
+                                                rightDataNode
+                                        )))));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                rightFlattenNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        leftFlattenNode,
+                                        IQ_FACTORY.createNaryIQTree(
+                                                joinNode,
+                                                ImmutableList.of(
+                                                        leftDataNode,
+                                                        rightDataNode
+                                                ))))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
+    @Test
+    public void testLiftFlattenAndJoinCondition1() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X, O, B);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(O, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression);
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
-        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(Y, F, Optional.empty(), true);
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, F, C));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, B));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, F, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F));
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -210,71 +263,17 @@ public class FlattenLiftTest {
     }
 
     @Test
-    public void testDoubleFlattenWithoutFilteringCondition1() {
+    public void testLiftFlattenAndJoinCondition2() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X, O1, O2);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
-        FlattenNode level2FlattenNode = IQ_FACTORY.createFlattenNode(Y, F1, Optional.empty(), true);
-        FlattenNode level1FlattenNode = IQ_FACTORY.createFlattenNode(F1,F2,Optional.empty(), true);
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F2, C));
-
-        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        rootNode,
-                        IQ_FACTORY.createNaryIQTree(
-                                joinNode,
-                                ImmutableList.of(
-                                        leftDataNode,
-                                        IQ_FACTORY.createUnaryIQTree(
-                                                level2FlattenNode,
-                                                IQ_FACTORY.createUnaryIQTree(
-                                                        level1FlattenNode,
-                                                        rightDataNode
-                                        ))))));
-
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        rootNode,
-                        IQ_FACTORY.createUnaryIQTree(
-                                level2FlattenNode,
-                                IQ_FACTORY.createUnaryIQTree(
-                                        level1FlattenNode,
-                                        IQ_FACTORY.createNaryIQTree(
-                                                joinNode,
-                                                ImmutableList.of(
-                                                        leftDataNode,
-                                                        rightDataNode
-                                                ))))));
-
-        optimizeAndCompare(initialIQ, expectedIQ);
-    }
-
-    @Test
-    public void testFlattenJoinFilterOnLeft1() {
-        testFlattenJoinFilterOnLeft(F);
-    }
-
-    @Test
-    public void testFlattenJoinFilterOnLeft2() {
-        testFlattenJoinFilterOnLeft(D);
-    }
-
-    private void testFlattenJoinFilterOnLeft(Variable rightNestedVariable) {
-
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(E, ONE);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(O1, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression);
-        FlattenNode leftFlattenNode = IQ_FACTORY.createFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, E));
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(X,A,C));
-        FlattenNode rightFlattenNode = IQ_FACTORY.createFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, Z, rightNestedVariable));
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
+        FlattenNode leftFlattenNode = IQ_FACTORY.createFlattenNode(O1, F1, Optional.empty(), true);
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F1));
+        FlattenNode rightFlattenNode = IQ_FACTORY.createFlattenNode(O2, F2, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(X, F2));
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -287,9 +286,9 @@ public class FlattenLiftTest {
                                                 leftDataNode
                                         ),
                                         IQ_FACTORY.createUnaryIQTree(
-                                                        rightFlattenNode,
-                                                        rightDataNode
-                                                )))));
+                                                rightFlattenNode,
+                                                rightDataNode
+                                        )))));
 
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
@@ -314,23 +313,18 @@ public class FlattenLiftTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+
     @Test
-    public void testFlattenJoinNonBlockingFilterOnLeft() {
+    public void testLiftDoubleFlatten() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X, O, B);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(C, ONE));
-        FlattenNode leftFlattenNode = IQ_FACTORY.createFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, C));
-        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE3, ImmutableList.of(X,A,C));
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, C));
-        FlattenNode rightFlattenNode = IQ_FACTORY.createFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, Z, F));
-        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X,B));
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, B));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, B));
+        FlattenNode level2FlattenNode = IQ_FACTORY.createFlattenNode(O, F1, Optional.empty(), true);
+        FlattenNode level1FlattenNode = IQ_FACTORY.createFlattenNode(F1, F2, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, F2));
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -338,22 +332,21 @@ public class FlattenLiftTest {
                         IQ_FACTORY.createNaryIQTree(
                                 joinNode,
                                 ImmutableList.of(
+                                        leftDataNode,
                                         IQ_FACTORY.createUnaryIQTree(
-                                                leftFlattenNode,
-                                                leftDataNode
-                                        ),
-                                        IQ_FACTORY.createUnaryIQTree(
-                                                rightFlattenNode,
-                                                rightDataNode
-                                        )))));
+                                                level2FlattenNode,
+                                                IQ_FACTORY.createUnaryIQTree(
+                                                        level1FlattenNode,
+                                                        rightDataNode
+                                        ))))));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
                         rootNode,
                         IQ_FACTORY.createUnaryIQTree(
-                                rightFlattenNode,
+                                level2FlattenNode,
                                 IQ_FACTORY.createUnaryIQTree(
-                                        leftFlattenNode,
+                                        level1FlattenNode,
                                         IQ_FACTORY.createNaryIQTree(
                                                 joinNode,
                                                 ImmutableList.of(
@@ -416,12 +409,12 @@ public class FlattenLiftTest {
     }
 
     @Test
-    public void testFlattenLeftJoinImplicitExpression1() throws EmptyQueryException {
+    public void testFlattenLeftJoinImplicitExpression1() {
         testFlattenLeftJoinImplicitExpression(E, X);
     }
 
     @Test
-    public void testFlattenLeftJoinImplicitExpression2() throws EmptyQueryException {
+    public void testFlattenLeftJoinImplicitExpression2() {
         testFlattenLeftJoinImplicitExpression(F, Y);
     }
 

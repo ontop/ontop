@@ -79,15 +79,18 @@ import java.util.stream.Stream;
  * filter(B' = 2)
  *
  * - inner join:
- * . the explicit join condition is isolated as a filter,
+ * . the join condition is isolated as a filter,
  * . flatten nodes are systematically lifted above the join (and below the filter)
  * . the procedure for a lift above the filter is applied
  * . if a filter-join sequence has been produced, it may be simplified (as a join with an explicit join condition).
  *
  * - left join:
  * . the explicit join condition is never lifted.
- * . flatten nodes from the right-hand-side are not lifted
  * . flatten nodes from the left-hand-side are lifted if they do not define a variable used in the left join condition
+ * . flatten nodes from the right-hand-side:
+ *        . non-strict flatten: same solution as for the left-hand-side
+ *        . strict flatten: lifting the flatten node would affect the semantics, so it is kept as it is.
+ *
  *
  * - construction node:
  * . flatten nodes are lifted if they do not define a variable used in the substitution's range.

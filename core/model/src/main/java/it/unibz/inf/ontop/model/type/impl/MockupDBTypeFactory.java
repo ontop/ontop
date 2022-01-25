@@ -92,6 +92,11 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public DBTermType getArrayDBType() {
+        return getDBTermType("ARRAY");
+    }
+
+    @Override
     public DBTermType getAbstractRootDBType() {
         return rootDBType;
     }
