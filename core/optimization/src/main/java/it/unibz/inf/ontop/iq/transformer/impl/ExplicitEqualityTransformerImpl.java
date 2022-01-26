@@ -63,7 +63,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     }
 
     /**
-     * Affects (left) joins, data and flatten nodes.
+     * Affects left joins, inner joins and data nodes.
      *
      * - left join: if the same variable is returned by both operands (implicit equality),
      * rename it (with a fresh variable) in the left branch, and make the corresponding equality explicit.
@@ -71,11 +71,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * - inner join: identical to left join, except that renaming is performed in each branch but the first where the variable appears.
      *
      * - data node or: if the data atom contains a ground term or a duplicate variable,
-     * create a variable and make the equality explicit by create a filter.
-     *
-     * - flatten node: rename in order of priority the output variable and/or the index variable,
-     * if they are identical and/or returned by the operand.
-     * Make the equalitie(s) explicit by creating a filter.
+     * create a variable and make the equality explicit by creating a filter.
      *
      * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
@@ -178,7 +174,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
             ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
 
-            if (empt(replacementVars))
+            if (allAbsent(replacementVars))
                 return dn;
 
             FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
@@ -208,9 +204,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             );
         }
 
-
-
-        private boolean empt(ImmutableList<Optional<Variable>> replacementVars) {
+        private boolean allAbsent(ImmutableList<Optional<Variable>> replacementVars) {
             return replacementVars.stream()
                     .noneMatch(Optional::isPresent);
         }
@@ -241,18 +235,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom<AtomPredicate> dataAtom) {
-            Set<Variable> vars = new HashSet<>();
+            Set<Variable> newVariables = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
             for (VariableOrGroundTerm term: dataAtom.getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {
                     Variable var = (Variable) term;
-                    if (vars.contains(var)) {
+                    if (newVariables.contains(var)) {
                         replacements.add(Optional.of(variableGenerator.generateNewVariableFromVar(var)));
                     } else {
                         replacements.add(Optional.empty());
-                        vars.add(var);
+                        newVariables.add(var);
                     }
                 }
             }
