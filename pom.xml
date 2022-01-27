@@ -174,7 +174,7 @@
         <toml4j.version>0.7.2</toml4j.version>
         <treelayout.version>1.0.3</treelayout.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
-        <xerces.version>2.12.0</xerces.version>
+        <xerces.version>2.12.2</xerces.version>
         <xml-apis.version>1.4.01</xml-apis.version>
 
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
