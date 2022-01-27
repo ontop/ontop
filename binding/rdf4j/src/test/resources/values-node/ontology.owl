@@ -18,6 +18,9 @@
          rdfs:domain :Teacher ;
          rdfs:range :Course .
 
+###  http://te.st/ValuesNodeTest#attends
+:attends rdf:type owl:ObjectProperty .
+
 
 #################################################################
 #    Classes
@@ -30,6 +33,8 @@
 ###  http://te.st/ValuesNodeTest#Teacher
 :Teacher rdf:type owl:Class .
 
+###  http://te.st/ValuesNodeTest#Student
+:Student rdf:type owl:Class .
 
 #################################################################
 #    Individuals
@@ -67,6 +72,10 @@
 <http://te.st/ValuesNodeTest#teacher/Joe> rdf:type owl:NamedIndividual ,
                                                    :Teacher ;
                                           :teaches <http://te.st/ValuesNodeTest#course/DataIntegration> .
+
+<http://te.st/ValuesNodeTest#student/Francis> rdf:type :Student ; :attends <http://te.st/ValuesNodeTest#course/DataIntegration> .
+
+<http://te.st/ValuesNodeTest#student/Anna> rdf:type :Student ; :attends <http://te.st/ValuesNodeTest#course/Mathematics> .
 
 
 #################################################################
