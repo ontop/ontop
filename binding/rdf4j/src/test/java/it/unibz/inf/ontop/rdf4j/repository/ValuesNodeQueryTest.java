@@ -58,6 +58,6 @@ public class ValuesNodeQueryTest extends AbstractRDF4JTest {
                 "  ?s a <http://te.st/ValuesNodeTest#Student>.\n" +
                 "  ?s <http://te.st/ValuesNodeTest#attends> ?c " +
                 "}");
-        assertEquals(count, 3);
+        assertEquals(count, 2);
     }
 }

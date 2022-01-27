@@ -78,9 +78,11 @@ public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerialize
                     .map(tuple -> tuple.stream()
                             .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
                             .collect(Collectors.joining(",", " (", ")")))
-                    .collect(Collectors.joining(",", "", ")"));
-            String sql = "(VALUES " + tuplesSerialized;
+                    .collect(Collectors.joining(","));
 
+            RelationID alias = generateFreshViewAlias();
+
+            String sql = "(VALUES " + tuplesSerialized + " AS " + alias + " )";
 
             ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
 
@@ -89,7 +91,7 @@ public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerialize
                     .collect(ImmutableCollectors.toMap(
                             variable -> variable,
                             variable -> new QualifiedAttributeID(null, idFactory.createAttributeID(
-                                    "C" + (orderedVariables.indexOf(variable) + 1)))));
+                                    alias + ".C" + (orderedVariables.indexOf(variable) + 1)))));
 
             return new QuerySerializationImpl(sql, columnIDs);
         }
