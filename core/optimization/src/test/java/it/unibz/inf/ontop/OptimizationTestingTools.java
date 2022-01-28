@@ -81,8 +81,6 @@ public class OptimizationTestingTools {
     public static final Variable N;
     public static final Variable NF0;
     public static final Variable O;
-    public static final Variable O1;
-    public static final Variable O2;
     public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR, THREE_STR, FOUR_STR, FIVE_STR;
 
