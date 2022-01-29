@@ -28,22 +28,11 @@ public class FlattenLiftTest {
 
 
     private final static Variable A = TERM_FACTORY.getVariable("A");
-    private final static Variable A1 = TERM_FACTORY.getVariable("A1");
-    private final static Variable A2 = TERM_FACTORY.getVariable("A2");
     private final static Variable B = TERM_FACTORY.getVariable("B");
-    private final static Variable B1 = TERM_FACTORY.getVariable("B1");
-    private final static Variable B2 = TERM_FACTORY.getVariable("B2");
     private final static Variable C = TERM_FACTORY.getVariable("C");
-    private final static Variable C1 = TERM_FACTORY.getVariable("C1");
-    private final static Variable C2 = TERM_FACTORY.getVariable("C2");
-    private final static Variable C3 = TERM_FACTORY.getVariable("C3");
-    private final static Variable C4 = TERM_FACTORY.getVariable("C4");
     private final static Variable D = TERM_FACTORY.getVariable("D");
-    private final static Variable D1 = TERM_FACTORY.getVariable("D1");
-    private final static Variable D2 = TERM_FACTORY.getVariable("D2");
     private final static Variable N1 = TERM_FACTORY.getVariable("N1");
     private final static Variable N2 = TERM_FACTORY.getVariable("N2");
-    private final static Variable N3 = TERM_FACTORY.getVariable("N3");
     private final static Variable N4 = TERM_FACTORY.getVariable("N4");
     private final static Variable N5 = TERM_FACTORY.getVariable("N5");
     private final static Variable O1 = TERM_FACTORY.getVariable("O1");
@@ -53,8 +42,6 @@ public class FlattenLiftTest {
     private final static Variable O5 = TERM_FACTORY.getVariable("O5");
     private final static Variable X1 = TERM_FACTORY.getVariable("X1");
     private final static Variable X2 = TERM_FACTORY.getVariable("X2");
-    private final static Variable Y = TERM_FACTORY.getVariable("Y");
-    private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
     private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
@@ -101,15 +88,6 @@ public class FlattenLiftTest {
                 "arr3", arrayDBType, true,
                 "arr4", arrayDBType, true);
         UniqueConstraint.primaryKeyOf(TABLE5.getAttribute(1));
-
-
-//        TABLE4 = builder.createDatabaseRelation( "TABLE4",
-//                "pk", integerDBType, false,
-//                "arr1", arrayDBType, true,
-//                "arr2", arrayDBType, true,
-//                "arr3", arrayDBType, true,
-//                "arr4", arrayDBType, true);
-//        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
 
     }
 

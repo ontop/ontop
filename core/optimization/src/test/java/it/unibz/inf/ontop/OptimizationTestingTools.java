@@ -155,8 +155,6 @@ public class OptimizationTestingTools {
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
         O = TERM_FACTORY.getVariable("o");
-        O1 = TERM_FACTORY.getVariable("o1");
-        O2 = TERM_FACTORY.getVariable("o2");
         NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
@@ -226,7 +224,7 @@ public class OptimizationTestingTools {
         }
     }
 
-    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {
+    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<? extends VariableOrGroundTerm> arguments) {
         return IQ_FACTORY.createExtensionalDataNode(relation,
                 IntStream.range(0, arguments.size())
                         .boxed()
