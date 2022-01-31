@@ -352,4 +352,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSecondsBetweenFromDateTime();
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
+    //JSON
+    DBFunctionSymbol getTextFromJsonPath();
+    DBFunctionSymbol getJsonEltFromJsonPath();
+
 }

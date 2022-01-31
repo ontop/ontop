@@ -37,6 +37,8 @@ public interface DBTypeFactory {
 
     DBTermType getArrayDBType();
 
+    DBTermType getJsonDBType();
+
     /**
      * Returns an abstract type
      */

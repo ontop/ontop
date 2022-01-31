@@ -454,7 +454,6 @@ public class LevelUpOptimizerTest {
             return view;
         }
 
-
         /**
          * TODO: add projectionNode
          */
