@@ -2,22 +2,18 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.*;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
@@ -27,23 +23,19 @@ import java.util.stream.IntStream;
 
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class LevelUpOptimizerTest {
 
 
-    private static final OntopViewDefinition BASE_VIEW_1;
-    private static final OntopViewDefinition BASE_VIEW_2;
-    private static final OntopViewDefinition BASE_VIEW_31;
+    private final static OfflineMetadataProviderBuilder2 BUILDER;
 
-    private static final OntopViewDefinition NESTED_VIEW_1;
-    private static final OntopViewDefinition NESTED_VIEW_2;
-    private static final OntopViewDefinition NESTED_VIEW_3;
-    private static final OntopViewDefinition NESTED_VIEW4;
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE3;
 
-    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
-    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
-    private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
+
 
     private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable A1 = TERM_FACTORY.getVariable("A1");
@@ -72,28 +64,28 @@ public class LevelUpOptimizerTest {
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
-    private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1");
-    private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static {
 
 
-        OfflineMetadataProviderBuilder2 builder = createMetadataProviderBuilder();
-        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
-        DBTermType arrayDBType = builder.getDBTypeFactory().getArrayDBType();
+        BUILDER = createMetadataProviderBuilder();
+        DBTermType integerDBType = BUILDER.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType arrayDBType = BUILDER.getDBTypeFactory().getArrayDBType();
 
-        NamedRelationDefinition TABLE1 = builder.createDatabaseRelation("TABLE1",
+        TABLE1 = BUILDER.createDatabaseRelation("TABLE1",
                 "pk", integerDBType, false,
                 "arr", arrayDBType, true,
                 "col3", integerDBType, true);
         UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
 
-        NamedRelationDefinition TABLE2 = builder.createDatabaseRelation("TABLE2",
+        TABLE2 = BUILDER.createDatabaseRelation("TABLE2",
                 "pk", integerDBType, false,
                 "col2", integerDBType, true);
         UniqueConstraint.primaryKeyOf(TABLE2.getAttribute(1));
 
-        NamedRelationDefinition TABLE3 = builder.createDatabaseRelation("TABLE3",
+        TABLE3 = BUILDER.createDatabaseRelation("TABLE3",
                 "pk", integerDBType, false,
                 "arr1", arrayDBType, true,
                 "arr2", arrayDBType, true);
@@ -188,57 +180,87 @@ public class LevelUpOptimizerTest {
 
 
     @Test
-    public void testNoLevelUp() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+    public void testNoLevelUp() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), X, O
+        );
+
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, rootNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, B));
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, N, Optional.empty(), true);
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, N, C));
 
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, B));
-        queryBuilder.addChild(joinNode, leftDataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                joinNode,
+                                ImmutableList.of(
+                                        leftDataNode,
+                                        IQ_FACTORY.createUnaryIQTree(
+                                                flattenNode,
+                                                rightDataNode
+                                        )))));
 
-        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(N, 0,
-                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, E));
-        queryBuilder.addChild(joinNode, flattenNode);
+//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+//        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+//        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+//        queryBuilder.init(projectionAtom, rootNode);
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, N, C));
-        queryBuilder.addChild(flattenNode, rightDataNode);
+//        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+//        queryBuilder.addChild(rootNode, joinNode);
 
-        IntermediateQuery query = queryBuilder.build();
+//        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
+//                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, B));
+//        queryBuilder.addChild(joinNode, leftDataNode);
+//
+//        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(N, 0,
+//                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, Y, D, E));
+//        queryBuilder.addChild(joinNode, flattenNode);
+//
+//        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
+//                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, N, C));
+//        queryBuilder.addChild(flattenNode, rightDataNode);
+//
+//        IntermediateQuery query = queryBuilder.build();
 
-        optimizeAndCompare(query, query);
+        optimizeAndCompare(initialIQ, initialIQ);
     }
 
 
     @Test
-    public void testLevelUp1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, rootNode);
+    public void testLevelUp1() {
 
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), X
+        );
+
+        OntopViewDefinition baseView = BUILDER.createBaseView(TABLE1, ImmutableList.of(X, N, C));
+        OntopViewDefinition nestedView = BUILDER.createNestedView(baseView, true, N, ImmutableList.of(X, C), )
+
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(NESTED_VIEW1, X, B, C));
+
         queryBuilder.addChild(rootNode, dataNode);
 
 
-        IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(F0, 0,
                 ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, X, B, C));
-        expectedQueryBuilder.addChild(rootNode, flattenNode);
-        expectedQueryBuilder.addChild(flattenNode, IQ_FACTORY.createExtensionalDataNode(
+
+        IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F1, F2, F0)));
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        expectedQueryBuilder.addChild(rootNode, flattenNode);
+        expectedQueryBuilder.addChild(flattenNode,
+                IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F1, F2, F0)));
+
 
         optimizeAndCompare(query, expectedQuery);
     }
@@ -379,18 +401,14 @@ public class LevelUpOptimizerTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery) throws EmptyQueryException {
+    private static void optimizeAndCompare(IQ query, IQ expectedQuery) {
         System.out.println("\nBefore optimization: \n" + query);
         System.out.println("\nExpected: \n" + expectedQuery);
 
-        IQ optimizedIQ = LEVEL_UP_OPTIMIZER.optimize(IQ_CONVERTER.convert(query));
-        IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
-                optimizedIQ,
-                query.getExecutorRegistry()
-        );
-        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+        IQ optimizedIQ = LEVEL_UP_OPTIMIZER.optimize(query);
+        System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertEquals(expectedQuery, optimizedIQ);
     }
 
     public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {
@@ -460,12 +478,20 @@ public class LevelUpOptimizerTest {
         private IQ createNestedViewIQ(OntopViewDefinition parentView,
                                       boolean isStrictFlatten,
                                       Variable flattenedVariable,
+                                      Variable outputVariable,
                                       ImmutableList<Variable> retainedVariables,
-                                      ImmutableList<Variable> freshVariables) {
+                                      ImmutableList<Variable> renamedRetainedVariables
+        ) {
 
+            ImmutableList projectedVars = ImmutableList.<Variable>builder().addAll(renamedRetainedVariables).add(outputVariable).build();
             DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                    ATOM_FACTORY.getRDFAnswerPredicate(retainedVariables.size() + freshVariables.size()),
-                    ImmutableList.<Variable>builder().addAll(retainedVariables).addAll(freshVariables).build()
+                    ATOM_FACTORY.getRDFAnswerPredicate(retainedVariables.size() + 1),
+                    projectedVars
+            );
+
+            ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
+                    ImmutableSet.copyOf(projectedVars),
+                    getJSONSubstitution(retainedVariables, renamedRetainedVariables)
             );
 
             FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, flattenedVariable, Optional.empty(), isStrictFlatten);
@@ -477,6 +503,27 @@ public class LevelUpOptimizerTest {
                                     parentView,
                                     parentView.getIQ().getProjectionAtom().getArguments()
                     )));
+
+        }
+
+        private ImmutableSubstitution<ImmutableTerm> getJSONSubstitution(ImmutableList<Variable> retainedVariables, ImmutableList<Variable> renamedRetainedVariables) {
+
+            return SUBSTITUTION_FACTORY.getSubstitution(
+                    IntStream.range(0, retainedVariables.size()).boxed()
+                            .collect(ImmutableCollectors.toMap(
+                                    i -> renamedRetainedVariables.get(i),
+                                    i -> getJSONEltFunctionalTerm(renamedRetainedVariables.get(i))
+                            )));
+
+
+
+        }
+
+        private ImmutableTerm getJSONEltFunctionalTerm(Variable variable) {
+            TERM_FACTORY.getImmutableFunctionalTerm(
+                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromJsonPath()),
+            variable);
+
 
         }
 

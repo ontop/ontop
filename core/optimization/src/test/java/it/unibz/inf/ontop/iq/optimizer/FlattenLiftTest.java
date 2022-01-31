@@ -437,22 +437,7 @@ public class FlattenLiftTest {
                                         rightDataNode
                                 ))));
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(
-                projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        rootNode,
-                        IQ_FACTORY.createBinaryNonCommutativeIQTree(
-                                leftJoinNode,
-                                IQ_FACTORY.createUnaryIQTree(
-                                        leftFlattenNode,
-                                        leftDataNode
-                                ),
-                                IQ_FACTORY.createUnaryIQTree(
-                                        rightFlattenNode,
-                                        rightDataNode
-                                ))));
-
-        optimizeAndCompare(initialIQ, expectedIQ);
+        optimizeAndCompare(initialIQ, initialIQ);
     }
 
 
@@ -614,17 +599,15 @@ public class FlattenLiftTest {
                                 IQ_FACTORY.createUnaryIQTree(
                                         flatten2,
                                         IQ_FACTORY.createUnaryIQTree(
-                                                filter1,
+                                                flatten1,
                                                 IQ_FACTORY.createUnaryIQTree(
-                                                        flatten1,
+                                                        filter2,
                                                         IQ_FACTORY.createUnaryIQTree(
-                                                                filter2,
+                                                                flatten3,
                                                                 IQ_FACTORY.createUnaryIQTree(
-                                                                        flatten3,
-                                                                        IQ_FACTORY.createUnaryIQTree(
-                                                                                flatten5,
-                                                                                dataNode
-                                                                )))))))));
+                                                                        flatten5,
+                                                                        dataNode
+                                                                ))))))));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
