@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
-import java.sql.Types;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -61,6 +60,7 @@ public class LevelUpOptimizerTest {
     private final static Variable G = TERM_FACTORY.getVariable("G");
     private final static Variable N = TERM_FACTORY.getVariable("N");
     private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable X1 = TERM_FACTORY.getVariable("X1");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
@@ -99,83 +99,83 @@ public class LevelUpOptimizerTest {
 //        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         // has nestedView1 as child, and no parent
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
-
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table2"));
-        Attribute col1T2 = table2Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
-        TABLE2_PREDICATE = table2Def.getAtomPredicate();
-
-
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table3Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        TABLE3_PREDICATE = table3Def.getAtomPredicate();
-
-        // has table1 as parent
-        NestedView nestedView1 = dbMetadata.createNestedView(
-                idFactory.createRelationID(null, "nestedView1"),
-                table1Def,
-                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
-                2
-        );
-        Attribute col1N1 = nestedView1.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        nestedView1.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        nestedView1.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, false);
-        nestedView1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N1));
-        NESTED_VIEW1 = nestedView1.getAtomPredicate();
-
-        // has nestedView1 as parent
-        NestedView nestedView2 = dbMetadata.createNestedView(
-                idFactory.createRelationID(null, "nestedView2"),
-                nestedView1,
-                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
-                2
-        );
-        Attribute col1N2 = nestedView2.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        nestedView2.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        nestedView2.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        nestedView2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N2));
-        NESTED_VIEW2 = nestedView2.getAtomPredicate();
-
-        // has table3 as parent
-        NestedView nestedView3 = dbMetadata.createNestedView(
-                idFactory.createRelationID(null, "nestedView3"),
-                table3Def,
-                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
-                2
-        );
-
-        Attribute col1N3 = nestedView3.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        nestedView3.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        nestedView3.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        nestedView3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
-        NESTED_VIEW3 = nestedView3.getAtomPredicate();
-
-        // has table3 as parent
-        NestedView nestedView4 = dbMetadata.createNestedView(
-                idFactory.createRelationID(null, "nestedView4"),
-                table1Def,
-                FLATTEN_NODE_PRED_AR4.getRelationDefinition(),
-                3
-        );
-
-        Attribute col1N4 = nestedView4.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        nestedView4.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        nestedView4.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        nestedView4.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
-        NESTED_VIEW4 = nestedView3.getAtomPredicate();
-
-        dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
+//        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table1"));
+//        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+//        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
+//        TABLE1_PREDICATE = table1Def.getAtomPredicate();
+//
+//        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table2"));
+//        Attribute col1T2 = table2Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
+//        TABLE2_PREDICATE = table2Def.getAtomPredicate();
+//
+//
+//        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
+//        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+//        table3Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
+//        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
+//        TABLE3_PREDICATE = table3Def.getAtomPredicate();
+//
+//        // has table1 as parent
+//        NestedView nestedView1 = dbMetadata.createNestedView(
+//                idFactory.createRelationID(null, "nestedView1"),
+//                table1Def,
+//                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
+//                2
+//        );
+//        Attribute col1N1 = nestedView1.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        nestedView1.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        nestedView1.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, false);
+//        nestedView1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N1));
+//        NESTED_VIEW1 = nestedView1.getAtomPredicate();
+//
+//        // has nestedView1 as parent
+//        NestedView nestedView2 = dbMetadata.createNestedView(
+//                idFactory.createRelationID(null, "nestedView2"),
+//                nestedView1,
+//                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
+//                2
+//        );
+//        Attribute col1N2 = nestedView2.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        nestedView2.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        nestedView2.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+//        nestedView2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N2));
+//        NESTED_VIEW2 = nestedView2.getAtomPredicate();
+//
+//        // has table3 as parent
+//        NestedView nestedView3 = dbMetadata.createNestedView(
+//                idFactory.createRelationID(null, "nestedView3"),
+//                table3Def,
+//                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
+//                2
+//        );
+//
+//        Attribute col1N3 = nestedView3.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        nestedView3.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        nestedView3.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+//        nestedView3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
+//        NESTED_VIEW3 = nestedView3.getAtomPredicate();
+//
+//        // has table3 as parent
+//        NestedView nestedView4 = dbMetadata.createNestedView(
+//                idFactory.createRelationID(null, "nestedView4"),
+//                table1Def,
+//                FLATTEN_NODE_PRED_AR4.getRelationDefinition(),
+//                3
+//        );
+//
+//        Attribute col1N4 = nestedView4.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+//        nestedView4.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+//        nestedView4.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+//        nestedView4.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
+//        NESTED_VIEW4 = nestedView3.getAtomPredicate();
+//
+//        dbMetadata.freeze();
+//        DB_METADATA = dbMetadata;
     }
 
 
@@ -234,18 +234,27 @@ public class LevelUpOptimizerTest {
     public void testLevelUp1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(1), X
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X1, C1, O
         );
 
         OntopViewDefinition baseView = BUILDER.createBaseView(TABLE1, ImmutableList.of(X, N, C));
-        OntopViewDefinition nestedView = BUILDER.createNestedView(baseView, true, N, ImmutableList.of(X, C), )
+        OntopViewDefinition nestedView = BUILDER.createStrictNestedViewNoDependency(
+                baseView,
+                N,
+                O,
+                ImmutableList.of(X, C),
+                ImmutableList.of(X1, C1)
+        );
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode dataNode = createExtensionalDataNodeFromView(nestedView);
 
-        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(NESTED_VIEW1, X, B, C));
-
-        queryBuilder.addChild(rootNode, dataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        dataNode
+                ));
 
 
 
@@ -449,16 +458,28 @@ public class LevelUpOptimizerTest {
                     ));
         }
 
+
+        private OntopViewDefinition createStrictNestedViewNoDependency( OntopViewDefinition parentView,
+                                                     Variable flattenedVariable,
+                                                     Variable outputVariable,
+                                                     ImmutableList<Variable> retainedVariables,
+                                                     ImmutableList<Variable> freshVariables) {
+
+            return createNestedView(parentView, true, flattenedVariable, outputVariable, retainedVariables, freshVariables, ImmutableList.of(), ImmutableSet.of());
+        }
+
+
         private OntopViewDefinition createNestedView(OntopViewDefinition parentView,
                                                      boolean isStrictFlatten,
                                                      Variable flattenedVariable,
+                                                     Variable outputVariable,
                                                      ImmutableList<Variable> retainedVariables,
                                                      ImmutableList<Variable> freshVariables,
                                                      ImmutableList<FunctionalDependency> functionalDependencies,
                                                      ImmutableSet<QuotedID> nonNullAttributes) {
 
             RelationID id = getQuotedIDFactory().createRelationID("FLATTEN_" + parentView.getID().toString());
-            IQ iq = createNestedViewIQ(parentView, isStrictFlatten, flattenedVariable, retainedVariables, freshVariables);
+            IQ iq = createNestedViewIQ(parentView, isStrictFlatten, flattenedVariable, outputVariable, retainedVariables, freshVariables);
             RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, nonNullAttributes);
 
             OntopViewDefinition view = new OntopViewDefinitionImpl(
@@ -520,11 +541,10 @@ public class LevelUpOptimizerTest {
         }
 
         private ImmutableTerm getJSONEltFunctionalTerm(Variable variable) {
-            TERM_FACTORY.getImmutableFunctionalTerm(
-                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromJsonPath()),
-            variable);
-
-
+            return TERM_FACTORY.getImmutableFunctionalTerm(
+                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromJsonPath(),
+                    variable
+            );
         }
 
         private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, ImmutableSet<QuotedID> nonNullAttributes) {
@@ -552,7 +572,13 @@ public class LevelUpOptimizerTest {
 
     }
 
-    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<? extends Variable> arguments) {
+
+    private static ExtensionalDataNode createExtensionalDataNodeFromView(OntopViewDefinition view) {
+        return createExtensionalDataNode(view, view.getIQ().getProjectionAtom().getArguments());
+    }
+
+
+    private static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<? extends Variable> arguments) {
         return IQ_FACTORY.createExtensionalDataNode(relation,
                 IntStream.range(0, arguments.size())
                         .boxed()
