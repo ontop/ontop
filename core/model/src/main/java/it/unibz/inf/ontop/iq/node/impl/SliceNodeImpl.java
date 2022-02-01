@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -12,16 +13,20 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
@@ -87,6 +92,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .isPresent())
             // Distinct can be eliminated
             return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
+        else if ((newChildRoot instanceof ValuesNode))
+            return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
+                    ((ValuesNode) newChildRoot).getValues().subList((int) offset, (int) (offset+limit)));
+        // Only triggered if a VALUES node is present under the UNION
+        else if ((newChildRoot instanceof UnionNode) && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode))
+            return simplifyValues((UnionNode) newChildRoot, newChild, treeCache);
         else
             return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
@@ -115,6 +126,69 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
         return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
+    }
+
+    private IQTree simplifyValues(UnionNode newChildRoot, IQTree newChild, IQTreeCache treeCache) {
+
+        // Retrieve size of Values node
+        long totalvalues = newChild.getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> (ValuesNode) c)
+                .map(ValuesNode::getValues)
+                .mapToLong(Collection::size)
+                .sum();
+
+        /*
+         * CASE 1: All nodes within Union are Values nodes - merge values nodes and simplify
+         */
+        if (newChild.getChildren().stream().allMatch(c -> c instanceof ValuesNode)) {
+            ImmutableList<ImmutableList<Constant>> alpha0 = newChild.getChildren().stream()
+                    .map(c -> ((ValuesNode) c).getValues())
+                    .flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toList());
+            return iqFactory.createValuesNode(((ValuesNode) newChild.getChildren().get(0)).getOrderedVariables(),
+                    alpha0.subList((int) offset, (int) (Math.min(offset + limit, totalvalues))));
+        }
+
+        /*
+         * CASE 2: Mixture of Values and Non-Values nodes within Union
+         */
+        ImmutableList<QueryNode> vNodelist = newChild.getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(IQTree::getRootNode)
+                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> nonVnodeList = newChild.getChildren().stream()
+                .filter(c -> !(c instanceof ValuesNode))
+                .collect(ImmutableCollectors.toList());
+
+        // CASE 2.1: Values node does not even cover offset - No optimization
+        if (offset >= totalvalues) {
+            return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+        // CASE 2.2: Values node fully covers offset and/or limit - Drop other non-Values Node
+        } else if (((offset + limit)) <= totalvalues) {
+            return iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
+                ((ValuesNode) vNodelist.get(0)).getValues().subList((int) offset, (int) (offset + limit)));
+        // CASE 2.3: Values Node does not fully cover offset and/or limit - Drop slice from values node, keep for nonvalues
+        } else {
+
+            ImmutableList<ValuesNode> filteredValuesNodeList = ImmutableList.of(
+                    iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
+                    ((ValuesNode) vNodelist.get(0)).getValues().subList((int) offset, (int) (Math.min(offset + limit, totalvalues)))));
+
+            return iqFactory.createNaryIQTree(
+                newChildRoot,
+                Stream.concat(filteredValuesNodeList.stream(),
+                        ImmutableList.of(iqFactory.createUnaryIQTree(
+                                // New slice node with remaining limit
+                                iqFactory.createSliceNode(Math.max(0, offset - totalvalues), limit - (totalvalues - offset)),
+                                // CASE 2.3.1 - Multiple non-Values nodes - keep Union
+                                // CASE 2.3.2 - Single non-Values node - drop Union
+                                nonVnodeList.size() > 1
+                                    ? iqFactory.createNaryIQTree(newChildRoot,nonVnodeList)
+                                    : nonVnodeList.get(0)
+                                )).stream())
+                        .collect(ImmutableCollectors.toList()));
+        }
     }
 
     @Override

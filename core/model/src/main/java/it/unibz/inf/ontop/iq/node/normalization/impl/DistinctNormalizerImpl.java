@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -10,6 +11,8 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 @Singleton
@@ -40,6 +43,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     (UnaryIQTree) newChild, variableGenerator);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
+        else if (newChildRoot instanceof ValuesNode) {
+            return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
+                    ((ValuesNode) newChildRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
+        }
         else
             return createDistinctTree(distinctNode, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
