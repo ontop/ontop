@@ -296,7 +296,7 @@ public abstract class JsonView extends JsonOpenObject {
                     instanceClass = JsonJoinView.class;
                     break;
                 case "FlattenedViewDefinition":
-                    instanceClass = JsonFlattenedView.class;
+                    instanceClass = JsonNestedView.class;
                     break;
                 default:
                     // TODO: throw proper exception
