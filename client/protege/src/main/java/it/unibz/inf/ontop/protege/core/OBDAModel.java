@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.connection.DataSource;
@@ -25,6 +26,7 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * An OBDAModel is created for an ontology.
@@ -70,6 +72,8 @@ public class OBDAModel {
     public static final String PROPERTY_EXT = ".properties"; // The default property file extension.
     public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
     public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
+    public static final String CATALOG_PREFIX = "catalog";
+    public static final String CATALOG_EXT = ".xml";
 
     private final OWLOntology ontology;
 
@@ -92,6 +96,9 @@ public class OBDAModel {
 
     @Nullable
     private File dbMetadataFile;
+
+    @Nullable
+    private String catalogFilePath;
 
     private TypeFactory typeFactory;
 
@@ -142,8 +149,7 @@ public class OBDAModel {
     }
 
     private void resetFactories() {
-        OntopMappingSQLAllConfiguration configuration = constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
-                .ontologyReader(createOntologyReader())
+        OntopMappingSQLAllConfiguration configuration = constructBuilder(OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder())
                 .build();
         typeFactory = configuration.getTypeFactory();
         triplesMapFactory.reset(configuration);
@@ -180,25 +186,40 @@ public class OBDAModel {
      */
 
     public void load() throws Exception {
-        String owlFilename = getOwlFilename();
-        if (owlFilename == null)
+        String owlFileBaseName = getOwlFileBaseName();
+        if (owlFileBaseName == null)
             return;
 
-        File obdaFile = fileOf(owlFilename, OBDA_EXT);
+        File obdaFile = fileOf(owlFileBaseName, OBDA_EXT);
         if (obdaFile.exists()) {
-            File implicitDBConstraintFile = fileOf(owlFilename, DBPREFS_EXT);
+            File implicitDBConstraintFile = fileOf(owlFileBaseName, DBPREFS_EXT);
             this.implicitDBConstraintFile = implicitDBConstraintFile.exists()
                     ? implicitDBConstraintFile
                     : null;
 
-            File dbMetadataFile = fileOf(owlFilename, DBMETADATA_EXT);
+            File dbMetadataFile = fileOf(owlFileBaseName, DBMETADATA_EXT);
             this.dbMetadataFile = dbMetadataFile.exists()
                     ? dbMetadataFile
                     : null;
 
-            datasource.load(fileOf(owlFilename, PROPERTY_EXT));
+            File owlFile = new File(URI.create(Objects.requireNonNull(getOwlFileName())));
+            if (owlFile.exists()) {
+                File parentDirectory = owlFile.getParentFile();
+                if (parentDirectory.exists()) {
+                    File[] catalogFiles = parentDirectory.listFiles(
+                            (dir, name) -> name.startsWith(CATALOG_PREFIX) && name.endsWith(CATALOG_EXT));
+
+                    if (catalogFiles != null) {
+                        this.catalogFilePath = Stream.of(catalogFiles)
+                                .map(File::getAbsolutePath)
+                                .findAny()
+                                .orElse(null);
+                    }
+                }
+            }
+            datasource.load(fileOf(owlFileBaseName, PROPERTY_EXT));
             triplesMapManager.load(obdaFile, this); // can update datasource!
-            queryManager.load(fileOf(owlFilename, QUERY_EXT));
+            queryManager.load(fileOf(owlFileBaseName, QUERY_EXT));
             obdaModelManager.getModelManager().setClean(ontology);
         }
         else {
@@ -207,7 +228,7 @@ public class OBDAModel {
     }
 
     public void store() throws IOException {
-        String owlFilename = getOwlFilename();
+        String owlFilename = getOwlFileBaseName();
         if (owlFilename == null)
             return;
 
@@ -222,16 +243,23 @@ public class OBDAModel {
         }
     }
 
-    private String getOwlFilename() {
+    private String getOwlFileBaseName() {
+        String owlDocumentIriString = getOwlFileName();
+        if (owlDocumentIriString == null)
+            return null;
+        int i = owlDocumentIriString.lastIndexOf(".");
+        return owlDocumentIriString.substring(0, i);
+    }
+
+    private String getOwlFileName() {
         IRI documentIRI = ontology.getOWLOntologyManager().getOntologyDocumentIRI(ontology);
 
         if (!UIUtil.isLocalFile(documentIRI.toURI()))
             return null;
 
-        String owlDocumentIriString = documentIRI.toString();
-        int i = owlDocumentIriString.lastIndexOf(".");
-        return owlDocumentIriString.substring(0, i);
+        return documentIRI.toString();
     }
+
 
     private static File fileOf(String owlFileName, String extension) {
         return new File(URI.create(owlFileName + extension));
@@ -252,14 +280,14 @@ public class OBDAModel {
 
 
     public SQLPPMapping parseNativeMapping(Reader mappingReader) throws MappingException {
-        return constructBuilder(OntopMappingSQLAllConfiguration.defaultBuilder())
+        return constructBuilder(OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder())
                 .nativeOntopMappingReader(mappingReader)
                 .build()
                 .loadProvidedPPMapping();
     }
 
     public SQLPPMapping parseR2RMLMapping(File file) throws MappingException {
-        return constructBuilder(OntopMappingSQLAllConfiguration.defaultBuilder())
+        return constructBuilder(OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder())
                 .r2rmlMappingFile(file)
                 .build()
                 .loadProvidedPPMapping();
@@ -270,23 +298,20 @@ public class OBDAModel {
                     .ppMapping(triplesMapManager.generatePPMapping())
                     .ontologyReader(createOntologyReader())
                     .build();
-
     }
 
     private Reader createOntologyReader() {
         try {
-            PipedInputStream inputStream = new PipedInputStream();
-            PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ontology.getOWLOntologyManager().saveOntology(ontology, outputStream);
-
-            return new InputStreamReader(inputStream);
-        } catch (IOException | OWLOntologyStorageException e) {
+            return new InputStreamReader(new ByteArrayInputStream(outputStream.toByteArray()));
+        } catch (OWLOntologyStorageException e) {
             // TODO: shall we throw a checked exception?
             throw new RuntimeException(e);
         }
     }
 
-    private <B extends OntopMappingSQLAllConfiguration.Builder<?>> B constructBuilder(B builder) {
+    private <B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<?>> B constructBuilder(B builder) {
 
         Properties properties = new Properties();
         properties.put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
@@ -299,6 +324,9 @@ public class OBDAModel {
 
         Optional.ofNullable(dbMetadataFile)
                 .ifPresent(builder::dbMetadataFile);
+
+        Optional.ofNullable(catalogFilePath)
+                .ifPresent(builder::xmlCatalogFile);
 
         return builder;
     }
