@@ -14,11 +14,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -44,30 +40,11 @@ public class OntopQuery extends OntopReasoningCommandBase {
     @Override
     public void run() {
 
-        OWLOntology ontology;
-        try {
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-
-            if (owlFile != null) {
-                ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
-                if (disableReasoning) {
-                    /*
-                     * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
-                     */
-                    ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
-                }
-            }
-            else {
-                ontology = manager.createOntology();
-            }
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontology(ontology)
+        OntopSQLOWLAPIConfiguration.Builder<?> configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableOntologyAnnotationQuerying(enableAnnotations);
+
+        if (owlFile != null)
+            configurationBuilder.ontologyFile(owlFile);
 
         if (propertiesFile != null) {
             configurationBuilder.propertyFile(propertiesFile);
@@ -150,7 +127,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
             final OWLBindingSet bindingSet = result.next();
             ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
             for (String columnName : signature) {
-                // TODO: make it robust to NULLs
+                // TODO: make it robust to NULLs
                 valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
             }
             wr.append(String.join(",", valueListBuilder.build()));
