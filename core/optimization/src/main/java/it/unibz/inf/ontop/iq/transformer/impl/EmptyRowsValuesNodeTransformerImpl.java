@@ -42,11 +42,10 @@ public class EmptyRowsValuesNodeTransformerImpl extends DefaultRecursiveIQTreeEx
         DBConstant placeholder = new DBConstantImpl("placeholder",
                 coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType());
 
-        ImmutableList<ImmutableList<Constant>> newValues = ImmutableList.of(
-                IntStream.range(0, valuesNode.getValues().size())
+        ImmutableList<ImmutableList<Constant>> newValues = IntStream.range(0, valuesNode.getValues().size())
                         .boxed()
-                        .map(i -> placeholder)
-                        .collect(ImmutableCollectors.toList()));
+                        .map(i -> ImmutableList.of((Constant) placeholder))
+                        .collect(ImmutableCollectors.toList());
 
         return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
     }
