@@ -22,9 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.util.*;
 
@@ -145,7 +143,7 @@ public class OBDAModel {
 
     private void resetFactories() {
         OntopMappingSQLAllConfiguration configuration = constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
-                .ontology(ontology)
+                .ontologyReader(createOntologyReader())
                 .build();
         typeFactory = configuration.getTypeFactory();
         triplesMapFactory.reset(configuration);
@@ -268,10 +266,24 @@ public class OBDAModel {
     }
 
     public OntopSQLOWLAPIConfiguration getOntopConfiguration() {
-        return constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
-                .ppMapping(triplesMapManager.generatePPMapping())
-                .ontology(ontology)
-                .build();
+            return constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
+                    .ppMapping(triplesMapManager.generatePPMapping())
+                    .ontologyReader(createOntologyReader())
+                    .build();
+
+    }
+
+    private Reader createOntologyReader() {
+        try {
+            PipedInputStream inputStream = new PipedInputStream();
+            PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+            ontology.getOWLOntologyManager().saveOntology(ontology, outputStream);
+
+            return new InputStreamReader(inputStream);
+        } catch (IOException | OWLOntologyStorageException e) {
+            // TODO: shall we throw a checked exception?
+            throw new RuntimeException(e);
+        }
     }
 
     private <B extends OntopMappingSQLAllConfiguration.Builder<?>> B constructBuilder(B builder) {
