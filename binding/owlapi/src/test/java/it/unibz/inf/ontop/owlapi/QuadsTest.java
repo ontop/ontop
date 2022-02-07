@@ -90,7 +90,7 @@ public class QuadsTest {
             .properties(properties)
             .enableTestMode()
             .build();
-    OntopOWLReasoner reasoner = factory.createReasoner(config);
+    OntopOWLEngine reasoner = factory.createEngine(config);
 
     // Now we are ready for querying
     OntopOWLConnection conn = reasoner.getConnection();
@@ -123,7 +123,7 @@ public class QuadsTest {
     }
     finally {
       conn.close();
-      reasoner.dispose();
+      reasoner.close();
     }
     return sql;
   }

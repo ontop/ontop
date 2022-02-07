@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -67,7 +67,7 @@ public class RegexpTest extends TestCase {
 	private String obdafile;
 	private String propertyfile;
 	
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private Connection sqlConnection;
 	private boolean isH2;
 	private final boolean acceptFlags;
@@ -142,7 +142,7 @@ public class RegexpTest extends TestCase {
 				.propertyFile(propertyFileUrl.toString())
 				.ontologyFile(owlFileUrl)
 				.build();
-        reasoner = factory.createReasoner(config);
+        reasoner = factory.createEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
@@ -153,7 +153,7 @@ public class RegexpTest extends TestCase {
 	@After
 	public void tearDown() throws Exception{
 		conn.close();
-		reasoner.dispose();
+		reasoner.close();
 		if(this.isH2)
 			deleteH2Database();
 	}

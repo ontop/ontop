@@ -95,7 +95,7 @@ public class LeftJoinMultipleMatchingTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         try (OWLConnection conn = reasoner.getConnection();
             OWLStatement st = conn.createStatement()) {
@@ -117,7 +117,7 @@ public class LeftJoinMultipleMatchingTest {
             log.debug("Elapsed time: {} ms", (end - start) / 1_000_000);
         }
         finally {
-            reasoner.dispose();
+            reasoner.close();
         }
     }
 }

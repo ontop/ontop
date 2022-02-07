@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -31,16 +32,16 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractBindTestWithFunctions {
 
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
-    private final OntopOWLReasoner reasoner;
+    private final OntopOWLEngine reasoner;
     private final OWLConnection conn;
 
 
-    protected AbstractBindTestWithFunctions(OntopOWLReasoner reasoner) {
+    protected AbstractBindTestWithFunctions(OntopOWLEngine reasoner) {
         this.reasoner = reasoner;
         this.conn = reasoner.getConnection();
     }
 
-    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
@@ -52,10 +53,10 @@ public abstract class AbstractBindTestWithFunctions {
                 .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        return factory.createReasoner(config);
+        return factory.createEngine(config);
     }
 
-    public OntopOWLReasoner getReasoner() {
+    public OntopOWLEngine getReasoner() {
         return reasoner;
     }
 

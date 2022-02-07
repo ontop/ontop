@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -89,7 +90,7 @@ public class QuestOWLExample_OntowisTests {
 
 
 	// Internal Modifiable State
-	OntopOWLReasoner reasoner ;
+	OntopOWLEngine reasoner;
 
 	public QuestOWLExample_OntowisTests(String obdaFile, DBType type, boolean mKeys){
 		this.obdaFile = obdaFile;
@@ -202,7 +203,7 @@ public class QuestOWLExample_OntowisTests {
 	 * @param conn
 	 * @throws OWLException
 	 */
-	private void closeEverything(OWLConnection conn) throws OWLException {
+	private void closeEverything(OWLConnection conn) throws Exception {
 		/*
 		 * Close connection and resources
 		 */
@@ -210,7 +211,7 @@ public class QuestOWLExample_OntowisTests {
 		if (conn != null && !conn.isClosed()) {
 			conn.close();
 		}
-		this.reasoner.dispose();
+		this.reasoner.close();
 	}
 	
 	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidMappingException{
@@ -253,7 +254,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 
 		this.reasoner = reasoner;
 		/*

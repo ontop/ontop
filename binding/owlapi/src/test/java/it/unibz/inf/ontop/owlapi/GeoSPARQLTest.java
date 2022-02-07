@@ -27,7 +27,7 @@ public class GeoSPARQLTest {
     private static final String obdaFile = "src/test/resources/geosparql/geosparql-h2.obda";
     private static final String propertyFile = "src/test/resources/geosparql/geosparql-h2.properties";
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
     private OWLConnection conn;
     private Connection sqlConnection;
 
@@ -48,14 +48,14 @@ public class GeoSPARQLTest {
                 .build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        reasoner = factory.createReasoner(config);
+        reasoner = factory.createEngine(config);
         conn = reasoner.getConnection();
     }
 
     @After
     public void tearDown() throws Exception {
         conn.close();
-        reasoner.dispose();
+        reasoner.close();
         if (!sqlConnection.isClosed()) {
             try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");

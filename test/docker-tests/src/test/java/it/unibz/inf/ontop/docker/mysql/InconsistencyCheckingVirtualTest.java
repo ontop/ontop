@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,12 +63,12 @@ public class InconsistencyCheckingVirtualTest {
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFileName)
-				.ontology(ontology)
+				.ontologyFile(owlFile)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 
-	    reasoner = factory.createReasoner(config);
+	    reasoner = factory.createReasoner(ontology, config);
 	}
 	
 	@Test

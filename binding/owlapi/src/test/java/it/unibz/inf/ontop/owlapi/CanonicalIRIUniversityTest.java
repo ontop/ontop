@@ -24,7 +24,7 @@ public class CanonicalIRIUniversityTest {
     private static final String owlFile = "src/test/resources/canonicalIRI/university/univ-ontology.ttl";
     private static final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
     private OntopOWLConnection conn;
     private Connection sqlConnection;
 
@@ -53,14 +53,14 @@ public class CanonicalIRIUniversityTest {
 		 */
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
-        reasoner = factory.createReasoner(config);
+        reasoner = factory.createEngine(config);
         conn = reasoner.getConnection();
     }
 
     @After
     public void tearDown() throws Exception {
         conn.close();
-        reasoner.dispose();
+        reasoner.close();
         if (!sqlConnection.isClosed()) {
             try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
@@ -71,7 +71,7 @@ public class CanonicalIRIUniversityTest {
         }
     }
 
-    private void runSelectQuery(String query) throws OWLException {
+    private void runSelectQuery(String query) throws Exception {
         ArrayList<String> retVal = new ArrayList<>();
         try (OWLStatement st = conn.createStatement()) {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
@@ -87,7 +87,7 @@ public class CanonicalIRIUniversityTest {
         }
         finally {
             conn.close();
-            reasoner.dispose();
+            reasoner.close();
         }
     }
 

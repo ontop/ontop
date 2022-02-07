@@ -94,7 +94,7 @@ public class NPDTest {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
 	

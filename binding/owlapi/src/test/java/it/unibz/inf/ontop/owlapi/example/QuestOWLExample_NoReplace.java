@@ -23,8 +23,9 @@ package it.unibz.inf.ontop.owlapi.example;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -58,7 +59,7 @@ public class QuestOWLExample_NoReplace {
                 .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
 		/*
          * Get the book information that is stored in the database
@@ -108,7 +109,7 @@ public class QuestOWLExample_NoReplace {
             System.out.println((t2 - t1) + "ms");
 
         } finally {
-            reasoner.dispose();
+            reasoner.close();
         }
     }
 

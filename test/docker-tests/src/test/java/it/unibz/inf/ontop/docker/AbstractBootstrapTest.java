@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
@@ -35,7 +36,7 @@ public class AbstractBootstrapTest {
                 .enableTestMode()
                 .build();
         try {
-            OntopOWLReasoner reasoner = factory.createReasoner(config);
+            OntopOWLEngine reasoner = factory.createEngine(config);
             OWLConnection conn = reasoner.getConnection();
             return conn.createStatement();
         }

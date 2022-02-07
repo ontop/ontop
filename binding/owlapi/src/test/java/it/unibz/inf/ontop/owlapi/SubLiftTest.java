@@ -89,7 +89,7 @@ public class SubLiftTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
@@ -123,7 +123,7 @@ public class SubLiftTest {
         }
         finally {
             conn.close();
-            reasoner.dispose();
+            reasoner.close();
         }
         return sql;
     }

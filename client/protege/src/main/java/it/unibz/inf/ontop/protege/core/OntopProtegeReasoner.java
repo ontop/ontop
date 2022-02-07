@@ -24,7 +24,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopProtegeOWLConfiguration configuration;
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
     private OntopOWLConnection owlConnection;
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
@@ -62,7 +62,8 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
 
     private void reasonerSetup() {
         try {
-            reasoner = factory.createReasoner(configuration.getOntopConfiguration(getRootOntology()));
+            OWLOntology rootOntology = getRootOntology();
+            reasoner = factory.createReasoner(rootOntology, configuration.getOntopConfiguration(rootOntology));
             owlConnection = reasoner.getConnection();
         }
         catch (OWLOntologyCreationException e) {

@@ -20,8 +20,15 @@ public interface OntopOWLFactory extends OWLReasonerFactory {
             throws IllegalConfigurationException;
 
     @Nonnull
+    OntopOWLReasoner createReasoner(@Nonnull OWLOntology ontology, @Nonnull OntopSystemOWLAPIConfiguration config)
+            throws IllegalConfigurationException;
+
+    @Deprecated
+    @Nonnull
     OntopOWLReasoner createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
             throws IllegalConfigurationException, OWLOntologyCreationException;
+
+    OntopOWLEngine createEngine(@Nonnull OntopSystemOWLAPIConfiguration config) throws IllegalConfigurationException;
 
     static OntopOWLFactory defaultFactory() {
         return new QuestOWLFactory();

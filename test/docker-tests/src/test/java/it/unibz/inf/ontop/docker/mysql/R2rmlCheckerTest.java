@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -67,8 +67,8 @@ public class R2rmlCheckerTest {
 	private final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 	private ClassifiedTBox onto;
-	private OntopOWLReasoner reasonerOBDA;
-	private OntopOWLReasoner reasonerR2rml;
+	private OntopOWLEngine reasonerOBDA;
+	private OntopOWLEngine reasonerR2rml;
 
     @Before
 	public void setUp() throws Exception {
@@ -101,11 +101,11 @@ public class R2rmlCheckerTest {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		if (reasonerOBDA != null)
-			reasonerOBDA.dispose();
+			reasonerOBDA.close();
 		if (reasonerR2rml != null)
-			reasonerR2rml.dispose();
+			reasonerR2rml.close();
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects

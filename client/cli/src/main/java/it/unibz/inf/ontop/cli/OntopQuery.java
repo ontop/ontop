@@ -8,6 +8,7 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -76,8 +77,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
-        try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());
-             OWLConnection conn = reasoner.getConnection();
+        try (OntopOWLEngine engine = factory.createEngine(configurationBuilder.build());
+             OWLConnection conn = engine.getConnection();
              OWLStatement st = conn.createStatement();
         ) {
 

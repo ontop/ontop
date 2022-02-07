@@ -40,7 +40,7 @@ public class Issue472Test {
     }
 
     @Test
-    public void test_load() throws Exception {
+    public void test_load() {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
@@ -49,6 +49,6 @@ public class Issue472Test {
                 .build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        factory.createReasoner(config);
+        factory.createEngine(config);
     }
 }

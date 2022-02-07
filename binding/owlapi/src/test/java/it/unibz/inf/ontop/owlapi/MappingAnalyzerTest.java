@@ -70,7 +70,7 @@ public class MappingAnalyzerTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
+		OntopOWLEngine reasoner = factory.createEngine(configuration);
 		reasoner.close();
 	}
 

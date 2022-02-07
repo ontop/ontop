@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 @Ignore("A proper Docker-compose env needs to added")
 public class TeiidTest {
-    public static OntopOWLReasoner res;
+    public static OntopOWLEngine res;
     public static OntopOWLConnection ct;
     public static OntopOWLStatement st;
     public static TupleOWLResultSet rs;

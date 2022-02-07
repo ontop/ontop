@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -44,7 +44,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private OWLConnection conn = null;
 	private OWLStatement stmt = null;
-	private OntopOWLReasoner reasoner = null;
+	private OntopOWLEngine reasoner = null;
 	
 	private Connection jdbcconn = null;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -104,7 +104,7 @@ public class PropertyCharacteristicTest extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
 	}
 	
 	private TupleOWLResultSet  executeSelectQuery(String sparql) throws Exception {

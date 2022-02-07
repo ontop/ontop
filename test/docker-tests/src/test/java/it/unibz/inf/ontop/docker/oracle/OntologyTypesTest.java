@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -76,7 +76,7 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
+		OntopOWLEngine reasoner = factory.createEngine(configBuilder.build());
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
@@ -95,7 +95,7 @@ public class OntologyTypesTest {
 		} finally {
 
 			conn.close();
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 
@@ -246,7 +246,7 @@ public class OntologyTypesTest {
 					.enableTestMode()
 					.propertyFile(propertyFileName)
 					.build();
-			OntopOWLReasoner reasoner = factory.createReasoner(config);
+			OntopOWLEngine reasoner = factory.createEngine(config);
 
 
 		} catch (Exception e) {

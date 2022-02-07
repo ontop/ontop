@@ -54,7 +54,7 @@ public class MarriageTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MarriageTest.class);
 
 	private static Connection CONNECTION;
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
@@ -71,12 +71,12 @@ public class MarriageTest {
 				.enableTestMode()
 				.build();
 
-		REASONER = owlFactory.createReasoner(config);
+		REASONER = owlFactory.createEngine(config);
 	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		REASONER.dispose();
+		REASONER.close();
 		CONNECTION.close();
 	}
 

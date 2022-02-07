@@ -49,9 +49,9 @@ public class MovieOntologyTest {
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 
-		reasoner.dispose();
+		reasoner.close();
 
 		assertTrue(true);
 	}

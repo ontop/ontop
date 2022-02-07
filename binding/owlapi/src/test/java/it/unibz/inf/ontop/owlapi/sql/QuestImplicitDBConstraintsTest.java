@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.owlapi.sql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.utils.OWLAPITestingTools;
@@ -38,7 +39,7 @@ public class QuestImplicitDBConstraintsTest {
 
 	private OntopOWLConnection conn;
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private Connection sqlConnection;
 
 	
@@ -53,7 +54,7 @@ public class QuestImplicitDBConstraintsTest {
 		if (conn != null)
 			conn.close();
 		if (reasoner != null)
-			reasoner.dispose();
+			reasoner.close();
 		if (!sqlConnection.isClosed()) {
 			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
@@ -77,7 +78,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
         
 
 		// Now we are ready for querying
@@ -104,7 +105,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
         
 		
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
@@ -135,7 +136,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
 
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
@@ -162,7 +163,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
         
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
@@ -192,7 +193,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
         
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
@@ -225,7 +226,7 @@ public class QuestImplicitDBConstraintsTest {
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
         
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();

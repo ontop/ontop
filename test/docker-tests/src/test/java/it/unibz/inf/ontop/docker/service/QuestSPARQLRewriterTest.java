@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.docker.service;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import junit.framework.TestCase;
@@ -45,7 +45,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	private static final String PROPERTY_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.properties";
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -60,7 +60,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 					.build();
 
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-			reasoner = factory.createReasoner(configuration);
+			reasoner = factory.createEngine(configuration);
 
 		} catch (Exception exc) {
 			reasoner.close();

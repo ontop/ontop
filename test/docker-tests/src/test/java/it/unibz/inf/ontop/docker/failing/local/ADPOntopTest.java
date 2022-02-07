@@ -4,13 +4,12 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.FileReader;
 
@@ -41,7 +40,7 @@ public class ADPOntopTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
 		/*
 		 * Prepare the data connection for querying.
@@ -88,7 +87,7 @@ public class ADPOntopTest {
 			if (conn != null && !conn.isClosed()) {
 				conn.close();
 			}
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 

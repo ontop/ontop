@@ -88,7 +88,7 @@ public class H2ComplexSameAsTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
@@ -109,7 +109,7 @@ public class H2ComplexSameAsTest {
 		}
 		finally {
 			conn.close();
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 

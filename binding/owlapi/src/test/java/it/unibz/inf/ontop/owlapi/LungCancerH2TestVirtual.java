@@ -81,7 +81,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
@@ -122,7 +122,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		}
 		finally {
 			conn.close();
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 	

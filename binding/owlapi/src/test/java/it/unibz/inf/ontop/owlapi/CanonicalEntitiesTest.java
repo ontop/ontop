@@ -49,7 +49,7 @@ public class CanonicalEntitiesTest {
                 .enableExistentialReasoning(true)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT ?S ?P ?O WHERE { ?S ?S ?P }";
         try (OWLConnection conn = reasoner.getConnection();

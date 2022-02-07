@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -63,7 +64,7 @@ public class SameAsOntowisTest {
 
 
     // Internal Modifiable State
-    OntopOWLReasoner reasoner ;
+    OntopOWLEngine reasoner;
 
     public SameAsOntowisTest(String obdaFile){
         this.obdaFile = obdaFile;
@@ -255,7 +256,7 @@ public class SameAsOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws Exception {
 		/*
 		 * Close connection and resources
 		 */
@@ -263,7 +264,7 @@ public class SameAsOntowisTest {
         if (conn != null && !conn.isClosed()) {
             conn.close();
         }
-        this.reasoner.dispose();
+        this.reasoner.close();
     }
 
     private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
@@ -284,7 +285,7 @@ public class SameAsOntowisTest {
 
 
 
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         this.reasoner = reasoner;
 		/*

@@ -64,7 +64,7 @@ public class AbstractOWLAPITest {
         OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }
@@ -86,7 +86,7 @@ public class AbstractOWLAPITest {
                 .build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }

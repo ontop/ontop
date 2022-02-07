@@ -53,7 +53,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private static final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
 	private ClassifiedTBox onto;
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private OWLConnection conn;
 	private Connection connection;
 
@@ -80,7 +80,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+		reasoner = factory.createEngine(config);
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 	}
@@ -88,7 +88,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@After
 	public void tearDown() throws Exception {
 		executeFromFile(connection, "src/test/resources/test/emptiesDatabase-drop-h2.sql");
-		reasoner.dispose();
+		reasoner.close();
 		connection.close();
 	}
 

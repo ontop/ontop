@@ -36,6 +36,6 @@ public class TMappingUOBMShortTest {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = factory.createEngine(config);
 	}
 }

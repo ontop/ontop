@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -66,7 +66,7 @@ public class EmptyEntitiesTest {
 	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
 	private Set<Description> emptyProperties = new HashSet<>();
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private ClassifiedTBox onto;
 
 	@Before
@@ -85,7 +85,7 @@ public class EmptyEntitiesTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+        reasoner = factory.createEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
@@ -97,7 +97,7 @@ public class EmptyEntitiesTest {
 	@After
 	public void tearDown() throws Exception {
 //			dropTables();
-			reasoner.dispose();
+			reasoner.close();
 //			connection.close();
 	}
 

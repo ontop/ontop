@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -71,7 +72,7 @@ public class CanonicalIRIOntowisTest {
 
 
     // Internal Modifiable State
-    OntopOWLReasoner reasoner ;
+    OntopOWLEngine reasoner ;
 
     public CanonicalIRIOntowisTest(String obdaFile, String propertyFile){
         this.obdaFile = obdaFile;
@@ -491,7 +492,7 @@ public class CanonicalIRIOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws Exception {
 		/*
 		 * Close connection and resources
 		 */
@@ -499,7 +500,7 @@ public class CanonicalIRIOntowisTest {
         if (conn != null && !conn.isClosed()) {
             conn.close();
         }
-        this.reasoner.dispose();
+        this.reasoner.close();
     }
 
     /**
@@ -523,7 +524,7 @@ public class CanonicalIRIOntowisTest {
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
         this.reasoner = reasoner;
 		/*
