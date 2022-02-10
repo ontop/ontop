@@ -22,14 +22,10 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
@@ -49,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -66,13 +61,13 @@ public class JsonNestedView extends JsonView {
     public final List<String> baseRelation;
     @Nonnull
     private final String flattenedColumn;
-    @Nonnull
+
     private final String position;
-    @Nonnull
+
     public final UniqueConstraints uniqueConstraints;
-    @Nonnull
+
     public final OtherFunctionalDependencies otherFunctionalDependencies;
-    @Nonnull
+
     public final ForeignKeys foreignKeys;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(JsonNestedView.class);
@@ -163,32 +158,51 @@ public class JsonNestedView extends JsonView {
                 variableGenerator
         );
 
-        Variable nestedVar = getNestedVariable(flattenedColumn, parentArgumentMap);
+        Variable flattenedColumnVariable = variableGenerator.generateNewVariable(this.flattenedColumn);
 
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
-        Optional<Variable> positionVar = getPositionVariable(position, parentArgumentMap);
+        ImmutableMap<Variable, ExtractedColumn> extractedColumnsMap = columns.extracted.stream()
+                .collect(ImmutableCollectors.toMap(
+                        c -> variableGenerator.generateNewVariable(c.name),
+                        c -> c
+                ));
 
-        ImmutableSubstitution<ImmutableTerm> substitution = getExtractedArgumentsSubstitution(
+        Optional<Variable> positionVariable = (position == null)?
+                Optional.empty():
+                Optional.ofNullable(variableGenerator.generateNewVariable(position));
+
+        ImmutableSubstitution<ImmutableTerm> checkIfArraySubstitution = getCheckIfArraySubstitution(
+                flattenedColumnVariable,
+                coreSingletons
+        );
+
+        ImmutableSubstitution<ImmutableTerm> columnExtractionSubstitution = getExtractionSubstitution(
                 flattenOutputVariable,
-                columns.extracted,
-                positionVar,
-                variableGenerator
+                positionVariable,
+                extractedColumnsMap,
+                coreSingletons
+        );
+
+        ImmutableSubstitution<ImmutableTerm> castSubstitution = getCastSubstitution(
+
+                variableGenerator,
+                coreSingletons
         );
 
 
-        ImmutableList<Variable> projectedVariables = getProjectedVariables(parentArgumentMap, substitution, positionVar);
+        ImmutableList<Variable> projectedVariables = getProjectedVariables(parentArgumentMap, columnExtractionSubstitution);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
 
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), substitution);
+        ConstructionNode columnExtractionConstructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), columnExtractionSubstitution);
 
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
-                nestedVar,
-                positionVar,
+                flattenedColumnVariable,
+                positionVariable,
                 true
         );
 
@@ -196,24 +210,29 @@ public class JsonNestedView extends JsonView {
 
         return iqFactory.createIQ(projectionAtom,
                 iqFactory.createUnaryIQTree(
-                        constructionNode,
+                        columnExtractionConstructionNode,
                         iqFactory.createUnaryIQTree(
                                 flattennode,
                                 dataNode
                 )));
     }
 
-    private Variable getNestedVariable(String flattenedColumn, ImmutableMap<Integer, Variable> parentArgumentMap) {
+    private Optional<Variable> getPositionVariable(VariableGenerator variableGenerator) {
+        return (position == null)?
+                Optional.empty():
+                Optional.of(
+                        variableGenerator.generateNewVariable(position)
+                );
+
     }
 
 
-    private ImmutableList<Variable> getProjectedVariables(ImmutableMap<Integer, Variable> parentArgumentMap, ImmutableSubstitution<ImmutableTerm> substitution, Optional<Variable> positionVar) {
 
-        ImmutableSet.Builder<Variable> builder = ImmutableSet.<Variable>builder()
+    private ImmutableList<Variable> getProjectedVariables(ImmutableMap<Integer, Variable> parentArgumentMap, ImmutableSubstitution<ImmutableTerm> substitution) {
+       return  ImmutableList.<Variable>builder()
                 .addAll(parentArgumentMap.values())
-                .addAll(substitution.getDomain());
-        positionVar.ifPresent(builder::add);
-        return builder.build();
+                .addAll(substitution.getDomain())
+               .build();
     }
 
 //        return iqFactory.createIQ(
@@ -308,39 +327,49 @@ public class JsonNestedView extends JsonView {
 
     }
 
-    private ImmutableSubstitution<ImmutableTerm> getExtractedArgumentsSubstitution(Variable flattenOutputVariable,
-                                                                                   List<ExtractedColumn> extracted,
-                                                                                   Optional<Variable> position,
-                                                                                   VariableGenerator variableGenerator,
-                                                                                   SubstitutionFactory substitutionFactory
-    ) {
+    private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,
+                                                                           Optional<Variable> positionVariable,
+                                                                           ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
+                                                                           CoreSingletons cs){
 
         ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.<Variable, ImmutableTerm>builder()
                 .putAll(
-                        extracted.stream()
+                        extractColumnsMap.entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
-                                        c -> createVariable(c.name, variableGenerator),
-                                        c -> getExtractfromJSONFunctionalTerm(c.key, c.datatype, flattenOutputVariable)
+                                        c -> c.getKey(),
+                                        c -> getExtractFromJSONFunctionalTerm(c.getKey(), c.getValue().key, cs)
                                 )));
+        positionVariable
+                .ifPresent(p -> builder.put(p, getPositionInJSONArrayFunctionalTerm(positionVariable.get(), cs)));
 
-        position.ifPresent(p -> builder.put(p, getPositionFromJSONArrayFunctionalTerm(flattenOutputVariable)));
-        return substitutionFactory.getSubstitution(builder.build());
+        return cs.getSubstitutionFactory().getSubstitution(builder.build());
     }
 
-    private Variable createVariable(String name, VariableGenerator variableGenerator) {
 
+    private ImmutableFunctionalTerm getExtractFromJSONFunctionalTerm(Variable var, List<String> key, CoreSingletons cs) {
+        DBConstant path = buildJSONPath(key, cs);
+        return cs.getTermFactory().getImmutableFunctionalTerm(
+                cs.getDBFunctionsymbolFactory().getDBRetrieveJSONElementFunctionSymbol(),
+                path,
+                var
+        );
     }
 
-    private ImmutableFunctionalTerm getPositionFromJSONArrayFunctionalTerm(Variable flattenOutputVariable) {
+    private DBConstant buildJSONPath(List<String> key, CoreSingletons cs) {
+        return cs.getTermFactory().getDBConstant(
+                cs.getDBFunctionsymbolFactory().serializeJSONPath(key),
+                cs.getTypeFactory().getDBTypeFactory().getDBStringType()
+        );
     }
 
-    private ImmutableFunctionalTerm getExtractfromJSONFunctionalTerm(List<String> key, String datatype, Variable flattenOutputVariable) {
-    }
 
-    ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
-                        Map.Entry::getValue));
+
+    private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable positionVar, CoreSingletons cs) {
+        return cs.getTermFactory()
+                .getImmutableFunctionalTerm(
+                        cs.getDBFunctionsymbolFactory().getDBPositionInJSONArrayFunctionSymbol(),
+
+                )
 
     }
 
