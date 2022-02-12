@@ -175,7 +175,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         ConstructionNode castConstructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), castSubstitution);
 
         ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(
-                getExtractionOutputVariables(retainedVariables, extractionSubstitution),
+                union(
+                        retainedVariables,
+                        extractionSubstitution.getDomain()
+                ),
                 extractionSubstitution
         );
 
