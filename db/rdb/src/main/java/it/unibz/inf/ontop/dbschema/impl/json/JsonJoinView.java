@@ -5,24 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @JsonDeserialize(as = JsonJoinView.class)
 public class JsonJoinView extends JsonBasicOrJoinView {
