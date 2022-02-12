@@ -5,11 +5,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -22,8 +19,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
@@ -31,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -121,67 +115,79 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 //    }
 
 
-    private IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
+    protected IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
+            throws MetadataExtractionException {
 
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-
-        TermFactory termFactory = coreSingletons.getTermFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
-        AtomFactory atomFactory = coreSingletons.getAtomFactory();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-        CoreUtilsFactory coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-
-
-        ImmutableMap<Integer, Variable> parentArgumentMap = createParentArgumentMap(
-                columns.kept,
-                flattenedColumn,
-                parentDefinition,
-                coreSingletons.getCoreUtilsFactory(),
-                variableGenerator
+        if(parentDefinitionMap.size() != 1) {
+            throw "A nested view should have exactly one parent";
+        }
+        return createIQ(
+                relationId,
+                parentDefinitionMap.entrySet().stream().findFirst().get().getKey(),
+                dbParameters
         );
+    }
 
-        Variable flattenedColumnVariable = variableGenerator.generateNewVariable(this.flattenedColumn);
+    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters)
+            throws MetadataExtractionException {
 
-        Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
+        CoreSingletons cs = dbParameters.getCoreSingletons();
 
-        ImmutableMap<Variable, ExtractedColumn> extractedColumnsMap = columns.extracted.stream()
-                .collect(ImmutableCollectors.toMap(
-                        c -> variableGenerator.generateNewVariable(c.name),
-                        c -> c
-                ));
+        IntermediateQueryFactory iqFactory = cs.getIQFactory();
+        AtomFactory atomFactory = cs.getAtomFactory();
+//        CoreUtilsFactory coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
+        VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
+
+        ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
+        ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
+
+
+//        ImmutableMap<String, Variable> parentAttribute2VarMap = createAttribute2VarMap(
+////                columns.kept,
+////                flattenedColumn,
+//                parentDefinition,
+//                variableGenerator
+////                cs
+//        );
 
         Optional<Variable> positionVariable = (position == null)?
                 Optional.empty():
                 Optional.ofNullable(variableGenerator.generateNewVariable(position));
 
-        ImmutableSubstitution<ImmutableTerm> checkIfArraySubstitution = getCheckIfArraySubstitution(
-                flattenedColumnVariable,
-                coreSingletons
-        );
 
-        ImmutableSubstitution<ImmutableTerm> columnExtractionSubstitution = getExtractionSubstitution(
+        ImmutableSet<Variable> retainedVariables = columns.kept.stream()
+                .map(c -> parentVariableMap.get(c))
+                .collect(ImmutableCollectors.toSet());
+
+        Variable flattenedColumnVariable = variableGenerator.generateNewVariable(this.flattenedColumn);
+
+        Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
+
+        ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
                 flattenOutputVariable,
                 positionVariable,
-                extractedColumnsMap,
-                coreSingletons
+                buildVar2ExtractedColumnMap(variableGenerator),
+                cs
         );
 
         ImmutableSubstitution<ImmutableTerm> castSubstitution = getCastSubstitution(
-
-                variableGenerator,
-                coreSingletons
+                extractionSubstitution,
+                cs
         );
 
 
-        ImmutableList<Variable> projectedVariables = getProjectedVariables(parentArgumentMap, columnExtractionSubstitution);
+        ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, castSubstitution.getImmutableMap().keySet()));
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), cs);
 
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
 
-        ConstructionNode columnExtractionConstructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), columnExtractionSubstitution);
+        ConstructionNode castConstructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), castSubstitution);
+
+        ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(
+                getExtractionOutputVariables(retainedVariables, extractionSubstitution),
+                extractionSubstitution
+        );
 
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
@@ -190,16 +196,46 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 true
         );
 
-        ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
+        ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
         return iqFactory.createIQ(projectionAtom,
                 iqFactory.createUnaryIQTree(
-                        columnExtractionConstructionNode,
+                        castConstructionNode,
                         iqFactory.createUnaryIQTree(
-                                flattennode,
-                                dataNode
-                )));
+                                extractionConstructionNode,
+                                iqFactory.createUnaryIQTree(
+                                        flattennode,
+                                        dataNode
+                                ))));
     }
+
+    private ImmutableMap<String, Variable> buildParentAttribute2VariableMap(ImmutableMap<Integer, String> parentAttributeMap,
+                                                                            VariableGenerator variableGenerator) {
+        return parentAttributeMap.values().stream()
+                .collect(ImmutableCollectors.toMap(
+                        s -> s,
+                        s -> variableGenerator.generateNewVariable(s)
+                ));
+    }
+
+    private ImmutableMap<Integer, String> buildParentIndex2AttributeMap(NamedRelationDefinition parentRelation) {
+        ImmutableList<Attribute> attributes = parentRelation.getAttributes();
+        return IntStream.range(0, attributes.size()).boxed()
+                .collect(ImmutableCollectors.toMap(
+                        i -> i,
+                        i -> attributes.get(i).getID().getName()
+                ));
+    }
+
+    private ImmutableMap<Variable, ExtractedColumn> buildVar2ExtractedColumnMap(VariableGenerator variableGenerator) {
+
+        return  columns.extracted.stream()
+                .collect(ImmutableCollectors.toMap(
+                        c -> variableGenerator.generateNewVariable(c.name),
+                        c -> c
+                ));
+    }
+
 
     private Optional<Variable> getPositionVariable(VariableGenerator variableGenerator) {
         return (position == null)?
@@ -260,8 +296,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
 
 
-
-
     private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables,
                                                              ImmutableSet<String> keptColumnNames,
                                                              NamedRelationDefinition parentDefinition,
@@ -279,21 +313,29 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private ImmutableMap<Integer, Variable> createParentArgumentMap(ImmutableSet<Variable> addedVariables,
-                                                                    NamedRelationDefinition parentDefinition,
-                                                                    CoreUtilsFactory coreUtilsFactory) {
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(addedVariables);
+
+//    private ImmutableMap<String, Variable> createParentArgumentMap(List<String> kept,
+//                                                                   String flattenedColumn,
+//                                                                   NamedRelationDefinition parentDefinition,
+//                                                                   VariableGenerator variableGenerator,
+//                                                                   CoreSingletons cs) {
+//
+//    }
+
+
+
+
+    private ImmutableMap<String, Variable> createAttribute2VarMap(NamedRelationDefinition parentDefinition,
+                                                                  VariableGenerator variableGenerator) {
 
         ImmutableList<Attribute> parentAttributes = parentDefinition.getAttributes();
 
-        // NB: the non-necessary variables will be pruned out by normalizing the IQ
-        return IntStream.range(0, parentAttributes.size())
-                .boxed()
+        return parentAttributes.stream()
+                .map(a -> a.getID().getName())
                 .collect(ImmutableCollectors.toMap(
-                        i -> i,
-                        i -> variableGenerator.generateNewVariable(
-                                parentAttributes.get(i).getID().getName())));
-
+                        n -> n,
+                        n -> variableGenerator.generateNewVariable(n)
+                ));
     }
 
     private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,

@@ -106,22 +106,6 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                                                                                               MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    protected ImmutableTable<NamedRelationDefinition, Integer, Variable> createParentArgumentTable(ImmutableSet<Variable> addedVariables,
-                                                                                                   ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
-                                                                                                   CoreUtilsFactory coreUtilsFactory) {
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(addedVariables);
-
-        // NB: the non-necessary variables will be pruned out by normalizing the IQ
-        return parentDefinitionMap.entrySet().stream()
-                .flatMap(e -> {
-                    ImmutableList<Attribute> parentAttributes = e.getKey().getAttributes();
-                    return IntStream.range(0, parentAttributes.size())
-                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable(
-                                    e.getValue() + parentAttributes.get(i).getID().getName())));
-                })
-                .collect(ImmutableCollectors.toTable());
-    }
-
     protected String normalizeAttributeName(String attributeName, QuotedIDFactory quotedIdFactory) {
         return quotedIdFactory.createAttributeID(attributeName).getName();
     }

@@ -21,7 +21,9 @@ import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
@@ -35,6 +37,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
@@ -137,6 +140,56 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
                 .collect(ImmutableCollectors.toList());
     }
 
+    protected ImmutableTable<NamedRelationDefinition, Integer, Variable> createParentArgumentTable(ImmutableSet<Variable> addedVariables,
+                                                                                                   ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
+                                                                                                   CoreUtilsFactory coreUtilsFactory) {
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(addedVariables);
+
+        // NB: the non-necessary variables will be pruned out by normalizing the IQ
+        return parentDefinitionMap.entrySet().stream()
+                .flatMap(e -> {
+                    ImmutableList<Attribute> parentAttributes = e.getKey().getAttributes();
+                    return IntStream.range(0, parentAttributes.size())
+                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable(
+                                    e.getValue() + parentAttributes.get(i).getID().getName())));
+                })
+                .collect(ImmutableCollectors.toTable());
+    }
+
+
+    protected ImmutableMap<QualifiedAttributeID, ImmutableTerm> extractParentAttributeMap(
+            ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
+            ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
+            QuotedIDFactory quotedIdFactory) throws MetadataExtractionException {
+
+        ImmutableMap<QualifiedAttributeID, Collection<Variable>> map = parentArgumentTable.cellSet().stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        c -> new QualifiedAttributeID(null,
+                                quotedIdFactory.createAttributeID(
+                                        quotedIdFactory.getIDQuotationString() +
+                                                // Prefix
+                                                parentDefinitionMap.get(c.getRowKey()) +
+                                                // Original column name
+                                                c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName() +
+                                                quotedIdFactory.getIDQuotationString())),
+                        Table.Cell::getValue
+                )).asMap();
+
+        ImmutableSet<QualifiedAttributeID> conflictingAttributeIds = map.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!conflictingAttributeIds.isEmpty())
+            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
+
+        return map.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next()
+                ));
+
+    }
 
     private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
                                         IQTree parentIQTree) {
@@ -300,40 +353,6 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
         return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
                 ? Stream.empty()
                 : Stream.of(parentDependentId);
-    }
-
-    protected ImmutableMap<QualifiedAttributeID, ImmutableTerm> extractParentAttributeMap(
-            ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
-            ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
-            QuotedIDFactory quotedIdFactory) throws MetadataExtractionException {
-
-        ImmutableMap<QualifiedAttributeID, Collection<Variable>> map = parentArgumentTable.cellSet().stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        c -> new QualifiedAttributeID(null,
-                                quotedIdFactory.createAttributeID(
-                                        quotedIdFactory.getIDQuotationString() +
-                                                // Prefix
-                                                parentDefinitionMap.get(c.getRowKey()) +
-                                                // Original column name
-                                                c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName() +
-                                                quotedIdFactory.getIDQuotationString())),
-                        Table.Cell::getValue
-                )).asMap();
-
-        ImmutableSet<QualifiedAttributeID> conflictingAttributeIds = map.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-        if (!conflictingAttributeIds.isEmpty())
-            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
-
-        return map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()
-                ));
-
     }
 
 
