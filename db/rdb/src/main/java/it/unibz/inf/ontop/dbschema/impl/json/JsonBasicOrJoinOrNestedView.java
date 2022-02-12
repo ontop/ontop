@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -19,13 +20,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,6 +72,14 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     protected abstract IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
             throws MetadataExtractionException;
 
+    abstract protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
+                                                                                              MetadataLookup parentCacheMetadataLookup)
+            throws MetadataExtractionException;
+
+    protected abstract ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory);
+
+    protected abstract ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory);
+
     @Override
     public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
@@ -87,24 +93,97 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                 (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
                 baseRelations, coreSingletons);
 
-        insertFunctionalDependencies(relation, idFactory,
+        insertFunctionalDependencies(
+                relation,
+                idFactory,
+                getHiddenColumns(baseRelations, idFactory),
+                getAddedColumns(idFactory),
                 (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
-                baseRelations);
+                baseRelations
+        );
 
         insertForeignKeys(relation, metadataLookupForFK,
                 (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
                 baseRelations);
     }
 
-    abstract protected void insertFunctionalDependencies(NamedRelationDefinition relation,
-                                                         QuotedIDFactory idFactory,
-                                                         List<AddFunctionalDependency> addFunctionalDependencies,
-                                                         ImmutableList<NamedRelationDefinition> baseRelations)
-            throws MetadataExtractionException;
+    /**
+     * Infer functional dependencies from the parent
+     *
+     * TODO: for joins, we could convert the non-inherited unique constraints into general functional dependencies.
+     */
+    protected void insertFunctionalDependencies(NamedRelationDefinition relation,
+                                                QuotedIDFactory idFactory,
+                                                ImmutableSet<QuotedID> hiddenColumns,
+                                                ImmutableSet<QuotedID> addedColumns,
+                                                List<AddFunctionalDependency> addFunctionalDependencies,
+                                                ImmutableList<NamedRelationDefinition> baseRelations)
+            throws MetadataExtractionException {
 
-    abstract protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
-                                                                                              MetadataLookup parentCacheMetadataLookup)
-            throws MetadataExtractionException;
+        Stream<FunctionalDependencyConstruct> inheritedFDConstructs = baseRelations.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .filter(f -> canFDBeInherited(f, hiddenColumns, addedColumns))
+                .map(f -> new FunctionalDependencyConstruct(
+                        f.getDeterminants().stream()
+                                .map(Attribute::getID)
+                                .collect(ImmutableCollectors.toSet()),
+                        f.getDependents().stream()
+                                .map(Attribute::getID)
+                                .flatMap(d -> extractNewDependents(d, addedColumns, hiddenColumns))
+                                .collect(ImmutableCollectors.toSet())));
+
+        Stream<FunctionalDependencyConstruct> declaredFdDependencies = addFunctionalDependencies.stream()
+                .map(jsonFD -> new FunctionalDependencyConstruct(
+                        jsonFD.determinants.stream()
+                                .map(idFactory::createAttributeID)
+                                .collect(ImmutableCollectors.toSet()),
+                        jsonFD.dependents.stream()
+                                .map(idFactory::createAttributeID)
+                                .collect(ImmutableCollectors.toSet())));
+
+        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap = Stream.concat(declaredFdDependencies, inheritedFDConstructs)
+                .collect(ImmutableCollectors.toMultimap(
+                        FunctionalDependencyConstruct::getDeterminants,
+                        fd -> fd));
+
+        ImmutableSet<FunctionalDependencyConstruct> fdConstructs = fdMultimap.asMap().values().stream()
+                .map(fds -> fds.stream()
+                        .reduce((f1, f2) -> f1.merge(f2)
+                                .orElseThrow(() -> new MinorOntopInternalBugException(
+                                        "Should be mergeable as they are having the same determinants")))
+                        // Guaranteed by the multimap structure
+                        .get())
+                .collect(ImmutableCollectors.toSet());
+
+        // Insert the FDs
+        for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
+            addFunctionalDependency(relation, idFactory, fdConstruct);
+        }
+    }
+
+    /**
+     * The selecting criteria could be relaxed in the future
+     */
+    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
+                                     ImmutableSet<QuotedID> addedColumns) {
+        return fd.getDeterminants().stream()
+                .map(Attribute::getID)
+                .noneMatch(d -> hiddenColumns.contains(d) || addedColumns.contains(d));
+    }
+
+    /**
+     * At the moment, only consider mirror attribute (same as in the parent)
+     *
+     * TODO: enrich the stream so as to include all derived attributes id
+     */
+    private Stream<QuotedID> extractNewDependents(QuotedID parentDependentId,
+                                                  ImmutableSet<QuotedID> addedColumns,
+                                                  ImmutableSet<QuotedID> hiddenColumns) {
+        return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
+                ? Stream.empty()
+                : Stream.of(parentDependentId);
+    }
 
     protected String normalizeAttributeName(String attributeName, QuotedIDFactory quotedIdFactory) {
         return quotedIdFactory.createAttributeID(attributeName).getName();
@@ -371,34 +450,5 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                 parentVariableIndexes.stream()
                         .map(i -> ontopViewDefinition.getAttribute(i + 1))
                         .collect(ImmutableCollectors.toList()));
-    }
-
-    protected static class Columns extends JsonOpenObject {
-        @Nonnull
-        public final List<AddColumns> added;
-        @Nonnull
-        public final List<String> hidden;
-
-        @JsonCreator
-        public Columns(@JsonProperty("added") List<AddColumns> added,
-                       @JsonProperty("hidden") List<String> hidden) {
-            this.added = added;
-            this.hidden = hidden;
-        }
-    }
-
-    protected static class AddColumns extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final String expression;
-
-
-        @JsonCreator
-        public AddColumns(@JsonProperty("name") String name,
-                          @JsonProperty("expression") String expression) {
-            this.name = name;
-            this.expression = expression;
-        }
     }
 }

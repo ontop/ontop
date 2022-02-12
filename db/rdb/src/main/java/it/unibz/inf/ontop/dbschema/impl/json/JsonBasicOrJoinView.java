@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -270,91 +271,49 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
         return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
     }
 
-    /**
-     * Infer functional dependencies from the parent
-     *
-     * TODO: for joins, we could convert the non-inherited unique constraints into general functional dependencies.
-     */
-    protected void insertFunctionalDependencies(NamedRelationDefinition relation,
-                                              QuotedIDFactory idFactory,
-                                              List<AddFunctionalDependency> addFunctionalDependencies,
-                                              ImmutableList<NamedRelationDefinition> baseRelations)
-            throws MetadataExtractionException {
-
-        ImmutableSet<QuotedID> hiddenColumns = columns.hidden.stream()
-                .map(idFactory::createAttributeID)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<QuotedID> addedColumns = columns.added.stream()
+    @Override
+    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+        return columns.added.stream()
                 .map(a -> a.name)
                 .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toSet());
+    }
 
-        Stream<FunctionalDependencyConstruct> inheritedFDConstructs = baseRelations.stream()
-                .map(RelationDefinition::getOtherFunctionalDependencies)
-                .flatMap(Collection::stream)
-                .filter(f -> canFDBeInherited(f, hiddenColumns, addedColumns))
-                .map(f -> new FunctionalDependencyConstruct(
-                        f.getDeterminants().stream()
-                                .map(Attribute::getID)
-                                .collect(ImmutableCollectors.toSet()),
-                        f.getDependents().stream()
-                                .map(Attribute::getID)
-                                .flatMap(d -> extractNewDependents(d, addedColumns, hiddenColumns))
-                                .collect(ImmutableCollectors.toSet())));
-
-        Stream<FunctionalDependencyConstruct> declaredFdDependencies = addFunctionalDependencies.stream()
-                .map(jsonFD -> new FunctionalDependencyConstruct(
-                        jsonFD.determinants.stream()
-                                .map(idFactory::createAttributeID)
-                                .collect(ImmutableCollectors.toSet()),
-                        jsonFD.dependents.stream()
-                                .map(idFactory::createAttributeID)
-                                .collect(ImmutableCollectors.toSet())));
-
-        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap = Stream.concat(declaredFdDependencies, inheritedFDConstructs)
-                .collect(ImmutableCollectors.toMultimap(
-                        FunctionalDependencyConstruct::getDeterminants,
-                        fd -> fd));
-
-        ImmutableSet<FunctionalDependencyConstruct> fdConstructs = fdMultimap.asMap().values().stream()
-                .map(fds -> fds.stream()
-                        .reduce((f1, f2) -> f1.merge(f2)
-                                .orElseThrow(() -> new MinorOntopInternalBugException(
-                                        "Should be mergeable as they are having the same determinants")))
-                        // Guaranteed by the multimap structure
-                        .get())
+    @Override
+    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
+        return columns.hidden.stream()
+                .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toSet());
+    }
 
-        // Insert the FDs
-        for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
-            addFunctionalDependency(relation, idFactory, fdConstruct);
+    protected static class Columns extends JsonOpenObject {
+        @Nonnull
+        public final List<AddColumns> added;
+        @Nonnull
+        public final List<String> hidden;
+
+        @JsonCreator
+        public Columns(@JsonProperty("added") List<AddColumns> added,
+                       @JsonProperty("hidden") List<String> hidden) {
+            this.added = added;
+            this.hidden = hidden;
         }
     }
 
-    /**
-     * The selecting criteria could be relaxed in the future
-     */
-    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
-                                     ImmutableSet<QuotedID> addedColumns) {
-        return fd.getDeterminants().stream()
-                .map(Attribute::getID)
-                .noneMatch(d -> hiddenColumns.contains(d) || addedColumns.contains(d));
-    }
+    protected static class AddColumns extends JsonOpenObject {
+        @Nonnull
+        public final String name;
+        @Nonnull
+        public final String expression;
 
-    /**
-     * At the moment, only consider mirror attribute (same as in the parent)
-     *
-     * TODO: enrich the stream so as to include all derived attributes id
-     */
-    private Stream<QuotedID> extractNewDependents(QuotedID parentDependentId,
-                                                  ImmutableSet<QuotedID> addedColumns,
-                                                  ImmutableSet<QuotedID> hiddenColumns) {
-        return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
-                ? Stream.empty()
-                : Stream.of(parentDependentId);
-    }
 
+        @JsonCreator
+        public AddColumns(@JsonProperty("name") String name,
+                          @JsonProperty("expression") String expression) {
+            this.name = name;
+            this.expression = expression;
+        }
+    }
 
 
 }

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -35,7 +36,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     @Nonnull
     public final Columns columns;
     @Nonnull
-    public final List<String> baseRelation;
+    public final String baseRelation;
     @Nonnull
     private final String flattenedColumn;
 
@@ -52,7 +53,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     @JsonCreator
     public JsonNestedView(
             @JsonProperty("name") List<String> name,
-            @JsonProperty("baseRelation") List<String> baseRelation,
+            @JsonProperty("baseRelation") String baseRelation,
             @JsonProperty("flattenedColumn") String flattenedColumn,
             @JsonProperty("position") String position,
             @JsonProperty("columns") Columns columns,
@@ -119,7 +120,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
             throws MetadataExtractionException {
 
         if(parentDefinitionMap.size() != 1) {
-            throw "A nested view should have exactly one parent";
+            throw new JSONNestedViewException("A nested view should have exactly one parent");
         }
         return createIQ(
                 relationId,
@@ -128,27 +129,17 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         );
     }
 
-    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters)
-            throws MetadataExtractionException {
+    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
 
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         AtomFactory atomFactory = cs.getAtomFactory();
-//        CoreUtilsFactory coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
 
-
-//        ImmutableMap<String, Variable> parentAttribute2VarMap = createAttribute2VarMap(
-////                columns.kept,
-////                flattenedColumn,
-//                parentDefinition,
-//                variableGenerator
-////                cs
-//        );
 
         Optional<Variable> positionVariable = (position == null)?
                 Optional.empty():
@@ -174,7 +165,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 extractionSubstitution,
                 cs
         );
-
 
         ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, castSubstitution.getImmutableMap().keySet()));
 
@@ -207,6 +197,22 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                         flattennode,
                                         dataNode
                                 ))));
+    }
+
+    private ImmutableSubstitution<ImmutableTerm> getCastSubstitution(ImmutableSubstitution<ImmutableTerm> extractionSubstitution, CoreSingletons cs) {
+
+    }
+
+    private ImmutableMap<Integer,? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, String> map1, ImmutableMap<String, Variable> map2) {
+        return map1.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> e.getKey(),
+                        e -> map2.get(e.getValue())
+                ));
+    }
+
+    private ImmutableSet union(ImmutableSet<Variable> s1, ImmutableSet<Variable> s2) {
+        return Sets.union(s1, s2).immutableCopy();
     }
 
     private ImmutableMap<String, Variable> buildParentAttribute2VariableMap(ImmutableMap<Integer, String> parentAttributeMap,
@@ -450,12 +456,70 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 //    }
 
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
+                                                                                    ImmutableList<Attribute> parentAttributes) {
+        return ImmutableList.of();
     }
 
     @Override
-    protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
+    protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+            throws MetadataExtractionException {
+            return ImmutableMap.of(extractParentDefinition(dbParameters, parentCacheMetadataLookup), baseRelation);
     }
+
+    @Override
+    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+
+        ImmutableSet.Builder<QuotedID> builder =  ImmutableSet.<QuotedID>builder().addAll(
+                columns.extracted.stream()
+                        .map(e -> e.name)
+                        .map(idFactory::createAttributeID)
+                        .iterator()
+        );
+        if(position != null){
+            builder.add(idFactory.createAttributeID(position));
+        }
+        return builder.build();
+    }
+
+    @Override
+    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
+        if(baseRelations.size() != 1) {
+            throw new JSONNestedViewException("A nested view should have exactly one parent");
+        }
+        return baseRelations.get(0).getAttributes().stream()
+                .map(a -> a.getID())
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private NamedRelationDefinition extractParentDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+            throws MetadataExtractionException {
+        return parentCacheMetadataLookup.getRelation(dbParameters.getQuotedIDFactory().createRelationID(baseRelation));
+    }
+
+//    @Override
+//    protected List<String> getAddedColumns() {
+//        ImmutableList.Builder<String> builder =  ImmutableList.<String>builder()
+//                .addAll(
+//                        columns.extracted.stream()
+//                                .map(e -> e.name)
+//                                .iterator()
+//                );
+//        if(position != null){
+//            builder.add(position);
+//        }
+//        return builder.build();
+//    }
+//
+//    @Override
+//    protected List<String> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations) {
+//        if(baseRelations.size() != 1) {
+//            throw new JSONNestedViewException("A nested view should have exactly one parent");
+//        }
+//        return baseRelations.get(0)
+//                .
+//    }
+
 
     @JsonPropertyOrder({
             "kept",
@@ -502,6 +566,14 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
             this.name = name;
             this.datatype = datatype;
             this.key = key;
+        }
+    }
+
+
+    protected static class JSONNestedViewException extends OntopInternalBugException {
+
+        protected JSONNestedViewException (String message) {
+            super(message);
         }
     }
 }
