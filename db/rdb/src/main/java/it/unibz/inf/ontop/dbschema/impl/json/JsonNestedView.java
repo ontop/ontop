@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -337,10 +338,10 @@ public class JsonNestedView extends JsonView {
                         extractColumnsMap.entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
                                         c -> c.getKey(),
-                                        c -> getExtractFromJSONFunctionalTerm(c.getKey(), c.getValue().key, cs)
+                                        c -> getExtractFromJSONFunctionalTerm(flattenOutputVariable, c.getValue().key, cs)
                                 )));
         positionVariable
-                .ifPresent(p -> builder.put(p, getPositionInJSONArrayFunctionalTerm(positionVariable.get(), cs)));
+                .ifPresent(p -> builder.put(flattenOutputVariable, getPositionInJSONArrayFunctionalTerm(positionVariable.get(), cs)));
 
         return cs.getSubstitutionFactory().getSubstitution(builder.build());
     }
@@ -350,8 +351,8 @@ public class JsonNestedView extends JsonView {
         DBConstant path = buildJSONPath(key, cs);
         return cs.getTermFactory().getImmutableFunctionalTerm(
                 cs.getDBFunctionsymbolFactory().getDBRetrieveJSONElementFunctionSymbol(),
-                path,
-                var
+                var,
+                path
         );
     }
 
@@ -362,81 +363,81 @@ public class JsonNestedView extends JsonView {
         );
     }
 
-
-
-    private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable positionVar, CoreSingletons cs) {
+    private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable var, CoreSingletons cs) {
         return cs.getTermFactory()
                 .getImmutableFunctionalTerm(
                         cs.getDBFunctionsymbolFactory().getDBPositionInJSONArrayFunctionSymbol(),
-
-                )
+                        var
+                );
 
     }
 
+//    private ConstructionNode createConstructionNode(ImmutableList<Variable> projectedVariables,
+//                                                    NamedRelationDefinition parentDefinition,
+//                                                    ImmutableMap<Integer, Variable> parentArgumentMap,
+//                                                    DBParameters dbParameters) throws MetadataExtractionException {
+//
+//        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+//        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+//        TermFactory termFactory = coreSingletons.getTermFactory();
+//        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+//        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+//
+//        ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
+//                .collect(ImmutableCollectors.toMap(
+//                        e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
+//                        Map.Entry::getValue));
+//
+//
+//        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+//        for (AddColumns a : columns.added) {
+//            Variable v = termFactory.getVariable(normalizeAttributeName(a.name, quotedIdFactory));
+//            try {
+//                ImmutableTerm value = extractExpression(a.expression, parentAttributeMap, quotedIdFactory, coreSingletons);
+//                substitutionMapBuilder.put(v, value);
+//            } catch (JSQLParserException e) {
+//                throw new MetadataExtractionException("Unsupported expression for " + a.name + " in " + name + ":\n" + e);
+//            }
+//        }
+//
+//        return iqFactory.createConstructionNode(
+//                ImmutableSet.copyOf(projectedVariables),
+//                substitutionFactory.getSubstitution(substitutionMapBuilder.build()));
+//    }
 
-    private ConstructionNode createConstructionNode(ImmutableList<Variable> projectedVariables,
-                                                    NamedRelationDefinition parentDefinition,
-                                                    ImmutableMap<Integer, Variable> parentArgumentMap,
-                                                    DBParameters dbParameters) throws MetadataExtractionException {
+//    private ImmutableTerm extractExpression(String partialExpression,
+//                                            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
+//                                            QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons) throws JSQLParserException {
+//        String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable";
+//        ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
+//        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
+//        SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
+//        net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
+//        return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
+//    }
 
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+
+    @Override
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
+                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
+
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
+
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-        TermFactory termFactory = coreSingletons.getTermFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
-                        Map.Entry::getValue));
+        insertUniqueConstraints(relation, idFactory,
+                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
+                baseRelations, coreSingletons);
 
+        insertFunctionalDependencies(relation, idFactory,
+                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
+                baseRelations);
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (AddColumns a : columns.added) {
-            Variable v = termFactory.getVariable(normalizeAttributeName(a.name, quotedIdFactory));
-            try {
-                ImmutableTerm value = extractExpression(a.expression, parentAttributeMap, quotedIdFactory, coreSingletons);
-                substitutionMapBuilder.put(v, value);
-            } catch (JSQLParserException e) {
-                throw new MetadataExtractionException("Unsupported expression for " + a.name + " in " + name + ":\n" + e);
-            }
-        }
-
-        return iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(projectedVariables),
-                substitutionFactory.getSubstitution(substitutionMapBuilder.build()));
+        insertForeignKeys(relation, metadataLookupForFK,
+                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
+                baseRelations);
     }
-
-    private ImmutableTerm extractExpression(String partialExpression,
-                                            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
-                                            QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons) throws JSQLParserException {
-        String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable";
-        ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
-        SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
-        net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
-        return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
-    }
-
-    private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        UniqueTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-
-        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
-        IQTree iqTree = iq.getTree();
-
-        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
-
-        for (Variable v : iqTree.getVariables()) {
-            builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
-                    (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
-                            // TODO: give the name of the view
-                            .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
-                    iqTree.getVariableNullability().isPossiblyNullable(v));
-        }
-        return builder;
-    }
-
     private void insertUniqueConstraints(NamedRelationDefinition relation,
                                          QuotedIDFactory idFactory,
                                          List<AddUniqueConstraints> addUniqueConstraints,
