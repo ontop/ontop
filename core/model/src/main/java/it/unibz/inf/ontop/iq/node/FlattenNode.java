@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
+import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -66,6 +68,9 @@ import java.util.Optional;
  *  I the "index variable"
  */
 public interface FlattenNode extends UnaryOperatorNode {
+
+    @Override
+    FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     Variable getFlattenedVariable();
 
