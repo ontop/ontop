@@ -609,7 +609,7 @@ public class LevelUpOptimizerTest {
 
         private ImmutableTerm getJSONEltFunctionalTerm(Variable variable) {
             return TERM_FACTORY.getImmutableFunctionalTerm(
-                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromPath(),
+                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonElt(),
                     variable
             );
         }

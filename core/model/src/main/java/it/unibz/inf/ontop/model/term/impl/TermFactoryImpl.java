@@ -37,6 +37,10 @@ public class TermFactoryImpl implements TermFactory {
 	private final CoreUtilsFactory coreUtilsFactory;
 	private final DBConstant valueTrue, valueFalse, lexicalTrue, lexicalFalse;
 	private final Constant valueNull;
+	private final DBTermType dbBooleanType;
+	private final DBTermType dbStringType;
+	private final DBTermType dbDoubleType;
+
 	@Nullable
 	private final DBConstant doubleNaN;
 	private final DBConstant provenanceConstant;
@@ -58,7 +62,10 @@ public class TermFactoryImpl implements TermFactory {
 
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
-		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+		this.dbBooleanType = dbTypeFactory.getDBBooleanType();
+		this.dbStringType = dbTypeFactory.getDBStringType();
+		this.dbDoubleType = dbTypeFactory.getDBDoubleType();
+
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
 		this.lexicalTrue = getDBStringConstant("true");
@@ -1296,4 +1303,33 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(functionSymbolFactory.getLexicalLangMatches(), langTagTerm, langRangeTerm);
     }
 
+	@Override
+	public ImmutableFunctionalTerm getDBJsonElement(ImmutableList<DBConstant> path, ImmutableTerm arg) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonElt(), getDBBuildJsonPath(path), arg);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBBuildJsonPath(ImmutableList<DBConstant> path) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuildJsonPath(), path);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBPositionInJsonArray(ImmutableTerm arg) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBPositionInJsonArray(), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsBoolean(ImmutableList<DBConstant> path, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbBooleanType), getDBBuildJsonPath(path), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsNumeric(ImmutableList<DBConstant> path, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbDoubleType), getDBBuildJsonPath(path), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsString(ImmutableList<DBConstant> path, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbStringType), getDBBuildJsonPath(path), arg);
+	}
 }

@@ -97,6 +97,11 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public DBTermType getJsonDBType() {
+        return getDBTermType("JSON");
+    }
+
+    @Override
     public DBTermType getAbstractRootDBType() {
         return rootDBType;
     }

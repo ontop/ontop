@@ -59,8 +59,6 @@ public interface DBTypeFactory {
      */
     Optional<String> getDBNaNLexicalValue();
 
-    ImmutableMap<String, DBTermType.Category> getJSONType2TermTypeMap();
-
     /**
      * TODO: find a better name
      *

@@ -81,7 +81,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     protected IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters) {
 
         if(parentDefinitionMap.size() != 1) {
-            throw new JSONNestedViewException("A nested view should have exactly one parent");
+            throw new JsonNestedViewException("A nested view should have exactly one parent");
         }
         return createIQ(
                 relationId,
@@ -202,7 +202,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                         Map.Entry::getKey,
                                         e -> getCheckDatatypeExtractAndCastFromJson(
                                                 flattenOutputVariable,
-                                                ImmutableList.copyOf(e.getValue().key),
+                                                getPathAsDBConstants(e.getValue().key, cs.getTermFactory()),
                                                 getTermTypeCategoryFor(e.getValue().datatype, e.getValue().name),
                                                 cs,
                                                 dbTypeFactory
@@ -212,6 +212,12 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 .ifPresent(p -> builder.put(flattenOutputVariable, getPositionInJSONArrayFunctionalTerm(positionVariable.get(), cs)));
 
         return cs.getSubstitutionFactory().getSubstitution(builder.build());
+    }
+
+    private ImmutableList<DBConstant> getPathAsDBConstants(List<String> path, TermFactory termFactory) {
+        return path.stream()
+                .map(termFactory::getDBStringConstant)
+                .collect(ImmutableCollectors.toList());
     }
 
     private DBTermType.Category getTermTypeCategoryFor(String datatype, String columnName) {
@@ -228,7 +234,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     }
 
 
-    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable var, ImmutableList<String> path, DBTermType.Category expectedDBType,
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable var, ImmutableList<DBConstant> path, DBTermType.Category expectedDBType,
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
         return termFactory.getIfElseNull(
@@ -237,15 +243,21 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         );
     }
 
-    private ImmutableExpression getDatatypeCondition(DBTermType.Category expectedType, ImmutableList<String> path, Variable var, CoreSingletons cs) {
-        return cs.getTermFactory().getDBJsonElementHasType(
-                path,
-                expectedType,
-                var
-        );
+    private ImmutableExpression getDatatypeCondition(DBTermType.Category expectedType, ImmutableList<DBConstant> path, Variable var, CoreSingletons cs) {
+        switch (expectedType){
+            case BOOLEAN:
+                return cs.getTermFactory().getDBJsonIsBoolean(path, var);
+            case STRING:
+                return cs.getTermFactory().getDBJsonIsString(path, var);
+            case INTEGER:
+            case FLOAT_DOUBLE:
+            case DECIMAL:
+                return cs.getTermFactory().getDBJsonIsNumeric(path, var);
+        }
+        throw new JsonNestedViewException("Unexpected DBType category");
     }
 
-    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<String> path, DBTermType.Category dbTypeCategory,
+    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<DBConstant> path, DBTermType.Category dbTypeCategory,
                                                               Variable var, CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
@@ -263,10 +275,12 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 return typeFactory.getDBBooleanType();
             case STRING:
                 return typeFactory.getDBStringType();
+            case INTEGER:
             case FLOAT_DOUBLE:
+            case DECIMAL:
                 return typeFactory.getDBDoubleType();
         }
-        throw new JSONNestedViewException("Unexpected datatype category");
+        throw new JsonNestedViewException("Unexpected datatype category");
     }
 
     private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable var, CoreSingletons cs) {
@@ -303,7 +317,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     @Override
     protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
         if(baseRelations.size() != 1) {
-            throw new JSONNestedViewException("A nested view should have exactly one parent");
+            throw new JsonNestedViewException("A nested view should have exactly one parent");
         }
         return baseRelations.get(0).getAttributes().stream()
                 .map(Attribute::getID)
@@ -314,30 +328,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
             throws MetadataExtractionException {
         return parentCacheMetadataLookup.getRelation(dbParameters.getQuotedIDFactory().createRelationID(baseRelation));
     }
-
-//    @Override
-//    protected List<String> getAddedColumns() {
-//        ImmutableList.Builder<String> builder =  ImmutableList.<String>builder()
-//                .addAll(
-//                        columns.extracted.stream()
-//                                .map(e -> e.name)
-//                                .iterator()
-//                );
-//        if(position != null){
-//            builder.add(position);
-//        }
-//        return builder.build();
-//    }
-//
-//    @Override
-//    protected List<String> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations) {
-//        if(baseRelations.size() != 1) {
-//            throw new JSONNestedViewException("A nested view should have exactly one parent");
-//        }
-//        return baseRelations.get(0)
-//                .
-//    }
-
 
     @JsonPropertyOrder({
             "kept",
@@ -387,9 +377,9 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         }
     }
 
-    protected static class JSONNestedViewException extends OntopInternalBugException {
+    protected static class JsonNestedViewException extends OntopInternalBugException {
 
-        protected JSONNestedViewException (String message) {
+        protected JsonNestedViewException(String message) {
             super(message);
         }
     }
