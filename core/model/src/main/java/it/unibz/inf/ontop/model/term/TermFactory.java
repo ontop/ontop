@@ -632,5 +632,6 @@ public interface TermFactory {
 
 	// JSON
 	ImmutableFunctionalTerm getDBJsonElement(ImmutableList<String> path, ImmutableTerm arg);
+	ImmutableFunctionalTerm getDBPositionInJsonArray(ImmutableTerm arg);
 	ImmutableExpression getDBJsonElementHasType(ImmutableList<String> path, DBTermType.Category type, ImmutableTerm arg);
 }
