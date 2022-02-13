@@ -1190,6 +1190,40 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 termConverter.apply(terms.get(0)));
     }
 
+    @Override
+    public DBFunctionSymbol getDBFlattenArray() {
+        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIndexInArray() {
+        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonElt() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIndexInJsonArray() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type) {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonIsArray() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBBuildJsonPath() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
 
     /**
      * Can be overridden.
@@ -1206,5 +1240,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROW_NUMBER() OVER ()";
     }
+
+
 
 }

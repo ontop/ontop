@@ -261,9 +261,6 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
-    FunctionSymbol getDBFlattenArray();
-    FunctionSymbol getDBIndexIn();
-
 
     //-------------
     // Aggregation
@@ -352,9 +349,16 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSecondsBetweenFromDateTime();
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
+    //NRA
+    DBFunctionSymbol getDBFlattenArray();
+    DBFunctionSymbol getDBIndexInArray();
+
+
     //JSON
     DBFunctionSymbol getDBJsonElt();
-    DBFunctionSymbol getDBPositionInJsonArray();
     DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type);
+    DBFunctionSymbol getDBJsonIsArray();
     DBFunctionSymbol getDBBuildJsonPath();
+    DBFunctionSymbol getDBIndexInJsonArray();
+
 }

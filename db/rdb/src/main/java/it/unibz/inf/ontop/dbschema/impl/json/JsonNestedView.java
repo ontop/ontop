@@ -284,7 +284,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     }
 
     private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable var, CoreSingletons cs) {
-        return cs.getTermFactory().getDBPositionInJsonArray(var);
+        return cs.getTermFactory().getDBIndexInJsonArray(var);
     }
 
     @Override

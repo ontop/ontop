@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
@@ -306,7 +307,28 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
+    public DBTermType getArrayDBType() {
+        throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
+    }
+
+    @Override
+    public DBTermType getJsonDBType() {
+        throw new UnsupportedDBTypeException("DBType JSON not supported for this DBMS");
+    }
+
+    @Override
     public DBTermType getAbstractRootDBType() {
         return sqlTypeMap.get(ABSTRACT_DB_TYPE_STR);
     }
+
+
+    private static class UnsupportedDBTypeException extends OntopInternalBugException {
+
+        public UnsupportedDBTypeException(String message) {
+            super(message);
+        }
+    }
+
 }
+
+

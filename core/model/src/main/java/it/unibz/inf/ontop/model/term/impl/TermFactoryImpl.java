@@ -444,7 +444,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getDBIndexIn(Variable arg) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexIn(), arg);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexInArray(), arg);
 	}
 
 	@Override
@@ -1314,8 +1314,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDBPositionInJsonArray(ImmutableTerm arg) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBPositionInJsonArray(), arg);
+	public ImmutableFunctionalTerm getDBIndexInJsonArray(ImmutableTerm arg) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexInJsonArray(), arg);
 	}
 
 	@Override
