@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://hl7.org/fhir/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+fhir:		http://hl7.org/fhir/
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping8
+target	<http://hl7.org/fhir/Condition/{condition_occurrence_id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://hl7.org/fhir/Condition> . <http://hl7.org/fhir/Condition/{condition_occurrence_id}> <http://hl7.org/fhir/Condition.code> <http://hl7.org/fhir/CodeableConcept/{condition_concept_id}> . <http://hl7.org/fhir/Condition/{condition_occurrence_id}> <http://hl7.org/fhir/Condition.subject> <http://hl7.org/fhir/Condition/{condition_occurrence_id}/Condition.subject> . <http://hl7.org/fhir/Condition/{condition_occurrence_id}/Condition.subject> <http://hl7.org/fhir/link> <http://hl7.org/fhir/Patient/{person_id}> . <http://hl7.org/fhir/Condition/{condition_occurrence_id}> <http://hl7.org/fhir/Condition.onsetDateTime> <http://hl7.org/fhir/Condition/{condition_occurrence_id}/Condition.onsetDateTime> . <http://hl7.org/fhir/Condition/{condition_occurrence_id}/Condition.onsetDateTime> <http://hl7.org/fhir/value> "{condition_start_datetime}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+source	SELECT * FROM condition_occurrence
+
+mappingId	mapping14
+target	<http://hl7.org/fhir/CodeableConcept/{concept_id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://hl7.org/fhir/CodeableConcept> . <http://hl7.org/fhir/CodeableConcept/{concept_id}> <http://hl7.org/fhir/CodeableConcept.coding> <http://hl7.org/fhir/CodeableConcept/{concept_id}/CodeableConcept.coding> . <http://hl7.org/fhir/CodeableConcept/{concept_id}/CodeableConcept.coding> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://hl7.org/fhir/Coding> . <http://hl7.org/fhir/CodeableConcept/{concept_id}/CodeableConcept.coding> <http://hl7.org/fhir/Coding.code> <http://hl7.org/fhir/CodeableConcept/{concept_id}/CodeableConcept.coding/Coding.code> . <http://hl7.org/fhir/CodeableConcept/{concept_id}/CodeableConcept.coding/Coding.code> <http://hl7.org/fhir/value> "{concept_code}"^^<http://www.w3.org/2001/XMLSchema#string> .
+source	SELECT * FROM concept
+]]
