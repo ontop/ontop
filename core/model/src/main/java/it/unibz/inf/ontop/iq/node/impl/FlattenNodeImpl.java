@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -36,7 +37,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
     private final boolean isStrict;
-    private final TermFactory termFactory;
 
     // generated if needed: the substitution does not carry extra information
     private Optional<ImmutableSubstitution> substitution;
@@ -54,7 +54,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
         this.isStrict = isStrict;
-        this.termFactory = termFactory;
     }
 
     private ImmutableSubstitution generateSubstitution() {

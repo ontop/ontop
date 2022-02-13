@@ -86,6 +86,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 InnerJoinNode.class,
                 LeftJoinNode.class,
                 FilterNode.class,
+                FlattenNode.class,
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
                 NativeNode.class,
