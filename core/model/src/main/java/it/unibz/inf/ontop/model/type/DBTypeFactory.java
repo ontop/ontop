@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.model.type;
 
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.term.DBConstant;
+
 import java.util.Optional;
 
 /**
@@ -56,7 +59,7 @@ public interface DBTypeFactory {
      */
     Optional<String> getDBNaNLexicalValue();
 
-
+    ImmutableMap<String, DBTermType.Category> getJSONType2TermTypeMap();
 
     /**
      * TODO: find a better name

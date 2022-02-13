@@ -629,4 +629,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 
+
+	// JSON
+	ImmutableFunctionalTerm getDBJsonElement(ImmutableList<String> path, ImmutableTerm arg);
+	ImmutableExpression getDBJsonElementHasType(ImmutableList<String> path, DBTermType.Category type, ImmutableTerm arg);
 }

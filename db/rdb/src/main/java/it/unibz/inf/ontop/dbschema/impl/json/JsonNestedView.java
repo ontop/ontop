@@ -15,10 +15,11 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -72,52 +73,8 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         this.foreignKeys = foreignKeys;
     }
 
-//    @Override
-//    public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
-//            throws MetadataExtractionException {
-//
-//        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
-//        RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
-//
-//        NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
-//                baseRelation.toArray(new String[0])));
-//
-//
-//        IQ iq = createIQ(relationId, parentDefinition, dbParameters);
-//
-//        // For added columns the termtype, quoted ID and nullability all need to come from the IQ
-//        RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
-//
-//        return new OntopViewDefinitionImpl(
-//                ImmutableList.of(relationId),
-//                attributeBuilder,
-//                iq,
-//                parentDefinition instanceof OntopViewDefinition ?
-//                        ((OntopViewDefinition) parentDefinition).getLevel() + 1
-//                        : 1,
-//                dbParameters.getCoreSingletons());
-//
-//    }
 
-//    @Override
-//    public void insertIntegrityConstraints(NamedRelationDefinition relation,
-//                                           ImmutableList<NamedRelationDefinition> baseRelations,
-//                                           MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
-//
-//        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
-//
-//        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations);
-//
-//        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
-//
-//        for (AddForeignKey fk : foreignKeys.added) {
-//            insertForeignKeys(relation, metadataLookupForFK, fk);
-//        }
-//    }
-
-
-    protected IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
-            throws MetadataExtractionException {
+    protected IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters) {
 
         if(parentDefinitionMap.size() != 1) {
             throw new JSONNestedViewException("A nested view should have exactly one parent");
@@ -132,19 +89,15 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
-
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
-        AtomFactory atomFactory = cs.getAtomFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
 
-
         Optional<Variable> positionVariable = (position == null)?
                 Optional.empty():
                 Optional.ofNullable(variableGenerator.generateNewVariable(position));
-
 
         ImmutableSet<Variable> retainedVariables = columns.kept.stream()
                 .map(c -> parentVariableMap.get(c))
@@ -158,19 +111,15 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 flattenOutputVariable,
                 positionVariable,
                 buildVar2ExtractedColumnMap(variableGenerator),
-                cs
-        );
-
-        ImmutableSubstitution<ImmutableTerm> castSubstitution = getCastSubstitution(
-                extractionSubstitution,
-                cs
+                cs,
+                dbParameters.getDBTypeFactory()
         );
 
         ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, castSubstitution.getImmutableMap().keySet()));
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), cs);
 
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+        DistinctVariableOnlyDataAtom projectionAtom = cs.getAtomFactory().getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
 
         ConstructionNode castConstructionNode = iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables), castSubstitution);
 
@@ -202,9 +151,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                 ))));
     }
 
-    private ImmutableSubstitution<ImmutableTerm> getCastSubstitution(ImmutableSubstitution<ImmutableTerm> extractionSubstitution, CoreSingletons cs) {
 
-    }
 
     private ImmutableMap<Integer,? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, String> map1, ImmutableMap<String, Variable> map2) {
         return map1.entrySet().stream()
@@ -350,14 +297,20 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,
                                                                            Optional<Variable> positionVariable,
                                                                            ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
-                                                                           CoreSingletons cs){
+                                                                           CoreSingletons cs, DBTypeFactory dbTypeFactory){
 
         ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.<Variable, ImmutableTerm>builder()
                 .putAll(
                         extractColumnsMap.entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
-                                        c -> c.getKey(),
-                                        c -> getExtractFromJSONFunctionalTerm(flattenOutputVariable, c.getValue().key, cs)
+                                        e -> e.getKey(),
+                                        e -> getCheckDatatypeExtractAndCastFromJson(
+                                                flattenOutputVariable,
+                                                ImmutableList.copyOf(e.getValue().key),
+                                                getTermTypeCategoryFor(e.getValue().datatype, e.getValue().name),
+                                                cs,
+                                                dbTypeFactory
+                                        )
                                 )));
         positionVariable
                 .ifPresent(p -> builder.put(flattenOutputVariable, getPositionInJSONArrayFunctionalTerm(positionVariable.get(), cs)));
@@ -365,21 +318,59 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         return cs.getSubstitutionFactory().getSubstitution(builder.build());
     }
 
+    private DBTermType.Category getTermTypeCategoryFor(String datatype, String columnName) {
+        switch (datatype.toLowerCase()){
+            case "boolean":
+                return DBTermType.Category.BOOLEAN;
+            case "string":
+                return DBTermType.Category.STRING;
+            case "number":
+                return DBTermType.Category.FLOAT_DOUBLE;
+        }
+        throw new InvalidOntopViewException("Incorrect datatype "+ datatype + " for column " + columnName +
+                "\n One of \"boolean\", \"string\" or \"number\" is expected");
+    }
 
-    private ImmutableFunctionalTerm getExtractFromJSONFunctionalTerm(Variable var, List<String> key, CoreSingletons cs) {
-        DBConstant path = buildJSONPath(key, cs);
-        return cs.getTermFactory().getImmutableFunctionalTerm(
-                cs.getDBFunctionsymbolFactory().getDBRetrieveJSONElementFunctionSymbol(),
-                var,
-                path
+
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable var, ImmutableList<String> path, DBTermType.Category expectedDBType,
+                                                                           CoreSingletons cs, DBTypeFactory dbTypeFactory) {
+        TermFactory termFactory = cs.getTermFactory();
+        return termFactory.getIfElseNull(
+                        getDatatypeCondition(expectedDBType, path, var, cs),
+                        getExtractAndCastFromJson(path, expectedDBType, var, cs, dbTypeFactory)
         );
     }
 
-    private DBConstant buildJSONPath(List<String> key, CoreSingletons cs) {
-        return cs.getTermFactory().getDBConstant(
-                cs.getDBFunctionsymbolFactory().serializeJSONPath(key),
-                cs.getTypeFactory().getDBTypeFactory().getDBStringType()
+    private ImmutableExpression getDatatypeCondition(DBTermType.Category expectedType, ImmutableList<String> path, Variable var, CoreSingletons cs) {
+        return cs.getTermFactory().getDBJsonElementHasType(
+                path,
+                expectedType,
+                var
         );
+    }
+
+    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<String> path, DBTermType.Category dbTypeCategory,
+                                                              Variable var, CoreSingletons cs, DBTypeFactory dbTypeFactory) {
+        TermFactory termFactory = cs.getTermFactory();
+
+        return termFactory.getDBCastFunctionalTerm(
+                getDefaultDBType(dbTypeCategory, dbTypeFactory),
+                termFactory.getDBJsonElement(
+                        path,
+                        var
+                ));
+    }
+
+    private DBTermType getDefaultDBType(DBTermType.Category dbTypeCategory, DBTypeFactory typeFactory) {
+        switch (dbTypeCategory){
+            case BOOLEAN:
+                return typeFactory.getDBBooleanType();
+            case STRING:
+                return typeFactory.getDBStringType();
+            case FLOAT_DOUBLE:
+                return typeFactory.getDBDoubleType();
+        }
+        throw new JSONNestedViewException("Unexpected datatype category");
     }
 
     private ImmutableTerm getPositionInJSONArrayFunctionalTerm(Variable var, CoreSingletons cs) {
@@ -576,6 +567,12 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     protected static class JSONNestedViewException extends OntopInternalBugException {
 
         protected JSONNestedViewException (String message) {
+            super(message);
+        }
+    }
+
+    private class InvalidOntopViewException extends RuntimeException {
+        public InvalidOntopViewException(String message) {
             super(message);
         }
     }

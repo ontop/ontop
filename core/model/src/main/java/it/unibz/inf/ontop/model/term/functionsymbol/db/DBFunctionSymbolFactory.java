@@ -353,7 +353,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
     //JSON
-    DBFunctionSymbol getDBTextFromJsonPath();
-    DBFunctionSymbol getDBJsonEltFromJsonPath();
+    DBFunctionSymbol getDBJsonEltFromPath();
+    DBFunctionSymbol getDBJsonTypeOf();
 
 }

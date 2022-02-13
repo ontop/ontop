@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.dbschema.impl.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -610,7 +609,7 @@ public class LevelUpOptimizerTest {
 
         private ImmutableTerm getJSONEltFunctionalTerm(Variable variable) {
             return TERM_FACTORY.getImmutableFunctionalTerm(
-                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromJsonPath(),
+                    FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getDBJsonEltFromPath(),
                     variable
             );
         }
