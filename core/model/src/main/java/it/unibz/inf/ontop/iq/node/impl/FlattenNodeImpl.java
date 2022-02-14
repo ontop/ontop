@@ -42,8 +42,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private Optional<ImmutableSubstitution> substitution;
 
     @AssistedInject
-    private FlattenNodeImpl(@Assisted Variable outputVariable,
-                            @Assisted Variable flattenedVariable,
+    private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
+                            @Assisted ("flattenedVariable") Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
                             @Assisted boolean isStrict,
                             SubstitutionFactory substitutionFactory,

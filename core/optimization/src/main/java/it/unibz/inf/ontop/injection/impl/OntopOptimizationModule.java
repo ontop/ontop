@@ -51,6 +51,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(RedundantJoinFKOptimizer.class);
         bindFromSettings(OntopViewUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
+        bindFromSettings(FlattenLifter.class);
+        bindFromSettings(LevelUpOptimizer.class);
+        bindFromSettings(NRAJoinLikeOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
