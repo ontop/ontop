@@ -121,6 +121,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
 
+    // Created in init()
+    private DBFunctionSymbol jsonGetElt;
+    // Created in init()
+    private DBBooleanFunctionSymbol jsonHasType;
+    // Created in init()
+    private DBFunctionSymbol jsonIsArray;
+
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
      */
@@ -384,6 +391,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
+
+        jsonGetElt = createJsonGetElt();
+        jsonHasType = createJsonHasType();
+        jsonIsArray = createJsonIsArray();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -1018,6 +1029,25 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
     }
 
+    @Override
+    public DBFunctionSymbol getDBJsonElt() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type) {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsArray() {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBBuildJsonPath(int arity) {
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
@@ -1434,6 +1464,19 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeMillisBetween);
     }
+
+    protected DBBooleanFunctionSymbol createJsonIsArray() {
+        return null;
+    }
+
+    protected DBBooleanFunctionSymbol createJsonHasType() {
+        return null;
+    }
+
+    protected DBFunctionSymbol createJsonGetElt() {
+        return null;
+    }
+
 
     /**
      * By default, uses the row number

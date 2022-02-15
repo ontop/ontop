@@ -58,7 +58,7 @@ public class FlattenLiftTest {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
-        DBTermType arrayDBType = builder.getDBTypeFactory().getArrayDBType();
+        DBTermType arrayDBType = builder.getDBTypeFactory().getDBArrayType();
 
         TABLE1 = builder.createDatabaseRelation( "TABLE1",
                 "pk", integerDBType, false,

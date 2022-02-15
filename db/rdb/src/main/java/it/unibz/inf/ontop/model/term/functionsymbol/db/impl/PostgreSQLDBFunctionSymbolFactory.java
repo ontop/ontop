@@ -112,8 +112,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
             return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
         else
             return new NonSimplifiableTypedNullFunctionSymbol(termType);
-
-
     }
 
     @Override
@@ -136,6 +134,56 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
         return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsArray() {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(dbTypeFactory.getDBJsonType()),
+                dbTypeFactory.getDBBooleanType(),
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "json_typeof(%s) = 'array'",
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonHasType() {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_HAS_TYPE",
+                ImmutableList.of(
+                        dbTypeFactory.getDBJsonType(),
+                        dbTypeFactory.getDBStringType()
+                ),
+                dbTypeFactory.getDBBooleanType(),
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "json_typeof(%s) = '%s'",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
+                ));
+    }
+
+    @Override
+    protected DBFunctionSymbol createJsonGetElt() {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_GET_ELT",
+                ImmutableList.of(
+                        dbTypeFactory.getDBJsonType(),
+                        dbTypeFactory.getDBStringType()
+                ),
+                dbTypeFactory.getDBBooleanType(),
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s::json#>'%s'",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
+                ));
+    }
+
+
+
 
     /**
      * TODO: find a way to use the stored TZ instead of the local one

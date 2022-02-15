@@ -77,7 +77,7 @@ public class LevelUpOptimizerTest {
 
         BUILDER = createMetadataProviderBuilder();
         DBTermType integerDBType = BUILDER.getDBTypeFactory().getDBLargeIntegerType();
-        DBTermType arrayDBType = BUILDER.getDBTypeFactory().getArrayDBType();
+        DBTermType arrayDBType = BUILDER.getDBTypeFactory().getDBArrayType();
 
         TABLE1 = BUILDER.createDatabaseRelation("TABLE1",
                 "pk", integerDBType, false,

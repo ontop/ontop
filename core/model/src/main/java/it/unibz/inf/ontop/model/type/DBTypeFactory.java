@@ -38,9 +38,9 @@ public interface DBTypeFactory {
 
     DBTermType getDBHexBinaryType();
 
-    DBTermType getArrayDBType();
+    DBTermType getDBArrayType();
 
-    DBTermType getJsonDBType();
+    DBTermType getDBJsonType();
 
     /**
      * Returns an abstract type

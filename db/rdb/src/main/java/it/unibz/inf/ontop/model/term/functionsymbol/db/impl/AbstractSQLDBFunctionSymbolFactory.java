@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import sun.jvm.hotspot.utilities.UnsupportedPlatformException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -1116,6 +1117,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBSTMakePoint() { return getRegularDBFunctionSymbol(ST_MAKEPOINT, 2); }
 
+    @Override
+    public DBFunctionSymbol getDBFlattenArray() {
+        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIndexInArray() {
+        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
+    }
+
     /**
      * Time extension - duration arithmetic
      */
@@ -1188,41 +1199,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return String.format("TIMESTAMPDIFF(MILLISECOND, %s, %s)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    public DBFunctionSymbol getDBFlattenArray() {
-        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBIndexInArray() {
-        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBJsonElt() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBIndexInJsonArray() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type) {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBJsonIsArray() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBBuildJsonPath() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
     }
 
     /**

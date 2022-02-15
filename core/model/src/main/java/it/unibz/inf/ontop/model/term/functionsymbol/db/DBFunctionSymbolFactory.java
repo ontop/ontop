@@ -357,8 +357,7 @@ public interface DBFunctionSymbolFactory {
     //JSON
     DBFunctionSymbol getDBJsonElt();
     DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type);
-    DBFunctionSymbol getDBJsonIsArray();
-    DBFunctionSymbol getDBBuildJsonPath();
-    DBFunctionSymbol getDBIndexInJsonArray();
+    DBBooleanFunctionSymbol getDBJsonIsArray();
+    DBFunctionSymbol getDBBuildJsonPath(int arity);
 
 }

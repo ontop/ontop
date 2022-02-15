@@ -307,12 +307,12 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
-    public DBTermType getArrayDBType() {
+    public DBTermType getDBArrayType() {
         throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
     }
 
     @Override
-    public DBTermType getJsonDBType() {
+    public DBTermType getDBJsonType() {
         throw new UnsupportedDBTypeException("DBType JSON not supported for this DBMS");
     }
 
