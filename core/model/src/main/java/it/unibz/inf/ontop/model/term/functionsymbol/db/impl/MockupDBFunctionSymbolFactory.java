@@ -581,7 +581,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getDBBuildJsonPath() {
+    public DBFunctionSymbol getDBBuildJsonPath(int arity) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

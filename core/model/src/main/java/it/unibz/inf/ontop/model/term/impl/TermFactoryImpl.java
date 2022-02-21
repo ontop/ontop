@@ -1310,12 +1310,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getDBBuildJsonPath(ImmutableList<DBConstant> path) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuildJsonPath(), path);
-	}
-
-	@Override
-	public ImmutableFunctionalTerm getDBIndexInJsonArray(ImmutableTerm arg) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexInJsonArray(), arg);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuildJsonPath(path.size()), path);
 	}
 
 	@Override
