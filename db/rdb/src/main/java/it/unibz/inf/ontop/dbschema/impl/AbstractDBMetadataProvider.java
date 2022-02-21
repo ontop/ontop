@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -65,12 +64,18 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             this.escape = metadata.getSearchStringEscape();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
+
+            String dbVersion = metadata.getDatabaseProductVersion();
+
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
                     metadata.getDriverVersion(),
                     metadata.getDatabaseProductName(),
-                    metadata.getDatabaseProductVersion(),
+                    dbVersion,
                     idFactory,
                     coreSingletons);
+
+            coreSingletons.getDatabaseInfoSupplier().setDatabaseVersion(dbVersion);
+
             this.coreSingletons = coreSingletons;
             this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
 

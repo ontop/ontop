@@ -57,6 +57,8 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                 idFactory,
                 coreSingletons);
 
+        coreSingletons.getDatabaseInfoSupplier().setDatabaseVersion(jsonMetadata.metadata.dbmsVersion);
+
         relationMap = jsonMetadata.relations.stream()
                 .collect(ImmutableCollectors.toMap(t -> JsonMetadata.deserializeRelationID(idFactory, t.name), t -> t));
 
