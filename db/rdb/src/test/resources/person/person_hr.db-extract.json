@@ -1,0 +1,42 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+        "name" : "\"ssn\"",
+        "datatype" : "INTEGER",
+        "isNullable" : false
+    }, {
+      "name" : "\"fullName\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"tags\"",
+      "datatype" : "JSON",
+      "isNullable" : true
+    }, {
+        "name" : "\"friends\"",
+        "datatype" : "JSON",
+        "isNullable" : true
+      }
+    ],
+    "name": ["\"hr\"","\"persons-xt\""]
+  }],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\"",
+    "extractionTime" : "2020-11-12T17:24:30"
+  }
+}

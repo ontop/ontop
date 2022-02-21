@@ -1,0 +1,80 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"","\"persons-tags\""],
+      "baseRelation": ["\"hr\"","\"persons-xt\""],
+      "flattenedColumn": "\"tags\"",
+      "columns": {
+        "kept": [
+          "\"id\"",
+          "\"ssn\""
+        ],
+        "position": "\"pos\"",
+        "extracted": [
+          {
+            "name": "\"tag_str\"",
+            "datatype": "text"
+          },
+          {
+            "name": "\"tag_int\"",
+            "datatype": "integer"
+          }
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "FlattenedViewDefinition"
+    },
+    {
+      "name": ["\"hr\"","\"persons-friends\""],
+      "baseRelation": ["\"hr\"","\"persons-xt\""],
+      "flattenedColumn": "\"friends\"",
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "position": "\"pos\"",
+        "extracted": [
+          {
+            "name": "\"firstName\"",
+            "key": ["fName"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"nickNames\"",
+            "key": ["nickname"],
+            "datatype": "jsonb"
+          },
+          {
+            "name": "\"nickName_str\"",
+            "key": ["nickname"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"city\"",
+            "key": ["address", "city"],
+            "datatype": "text"
+          }
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "FlattenedViewDefinition"
+    }
+  ]
+}
+

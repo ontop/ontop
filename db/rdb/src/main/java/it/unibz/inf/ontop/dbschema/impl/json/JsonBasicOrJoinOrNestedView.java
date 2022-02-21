@@ -41,41 +41,6 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
     }
 
-    @Override
-    public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
-            throws MetadataExtractionException {
-
-        ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
-
-        Integer maxParentLevel = parentDefinitionMap.keySet().stream()
-                .map(r -> (r instanceof OntopViewDefinition)
-                        ? ((OntopViewDefinition) r).getLevel()
-                        : 0)
-                .reduce(0, Math::max, Math::max);
-
-        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
-        RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
-
-        IQ iq = createIQ(relationId, parentDefinitionMap, dbParameters);
-
-        // For added columns the termtype, quoted ID and nullability all need to come from the IQ
-        RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
-
-        return new OntopViewDefinitionImpl(
-                ImmutableList.of(relationId),
-                attributeBuilder,
-                iq,
-                maxParentLevel + 1,
-                dbParameters.getCoreSingletons());
-    }
-
-    protected abstract IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
-            throws MetadataExtractionException;
-
-    abstract protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
-                                                                                              MetadataLookup parentCacheMetadataLookup)
-            throws MetadataExtractionException;
-
     protected abstract ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory);
 
     protected abstract ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory);

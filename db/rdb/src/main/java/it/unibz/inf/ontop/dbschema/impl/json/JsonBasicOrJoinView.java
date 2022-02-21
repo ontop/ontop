@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -57,6 +58,38 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
         this.columns = columns;
         this.filterExpression = filterExpression;
     }
+
+    @Override
+    public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+            throws MetadataExtractionException {
+
+        ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
+
+        Integer maxParentLevel = parentDefinitionMap.keySet().stream()
+                .map(r -> (r instanceof OntopViewDefinition)
+                        ? ((OntopViewDefinition) r).getLevel()
+                        : 0)
+                .reduce(0, Math::max, Math::max);
+
+        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
+        RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
+
+        IQ iq = createIQ(relationId, parentDefinitionMap, dbParameters);
+
+        // For added columns the termtype, quoted ID and nullability all need to come from the IQ
+        RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
+
+        return new OntopViewDefinitionImpl(
+                ImmutableList.of(relationId),
+                attributeBuilder,
+                iq,
+                maxParentLevel + 1,
+                dbParameters.getCoreSingletons());
+    }
+
+    abstract protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
+                                                                                              MetadataLookup parentCacheMetadataLookup)
+            throws MetadataExtractionException;
 
     protected IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
             throws MetadataExtractionException {
