@@ -36,6 +36,10 @@ public interface DBTypeFactory {
 
     boolean supportsDBDistanceSphere();
 
+    boolean supportsJSONType();
+
+    boolean supportsArrayType();
+
     DBTermType getDBHexBinaryType();
 
     DBTermType getDBArrayType();

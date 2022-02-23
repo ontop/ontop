@@ -73,7 +73,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         TIME,
         DATETIMESTAMP,
         GEOMETRY,
-        GEOGRAPHY
+        GEOGRAPHY,
+        ARRAY,
+        JSON
     }
 
     // MUTABLE
@@ -302,17 +304,33 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
+    public boolean supportsJSONType() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsArrayType() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.HEXBINARY));
     }
 
     @Override
     public DBTermType getDBArrayType() {
+        if(supportsArrayType()){
+            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY));
+        }
         throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
     }
 
     @Override
     public DBTermType getDBJsonType() {
+        if(supportsJSONType()){
+            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.JSON));
+        }
         throw new UnsupportedDBTypeException("DBType JSON not supported for this DBMS");
     }
 

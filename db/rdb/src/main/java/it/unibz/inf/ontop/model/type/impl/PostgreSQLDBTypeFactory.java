@@ -29,6 +29,8 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
+    public static final String JSON_STR = "JSON";
+    public static final String ARRAY_STR = "ARRAY";
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
     protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
@@ -97,6 +99,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
         map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
 
+        /*
+         * JSON
+         */
+        map.put(JSON_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(JSON_STR, rootAncestry, xsdString));
+
         return map;
     }
 
@@ -109,6 +116,10 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          */
         map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
+        /*
+         * JSON
+         */
+        map.put(DefaultTypeCode.JSON, JSON_STR);
 
         return ImmutableMap.copyOf(map);
     }
@@ -125,6 +136,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBDistanceSphere() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsJSONType() {
         return true;
     }
 }

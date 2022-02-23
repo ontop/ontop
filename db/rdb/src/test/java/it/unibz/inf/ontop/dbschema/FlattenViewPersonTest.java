@@ -13,7 +13,7 @@ public class FlattenViewPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/flatten_views_tmp.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_hr.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
 
     public FlattenViewPersonTest() throws Exception {
     }
