@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -340,35 +341,131 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
+                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
+
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
+
+        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+
+        if(baseRelations.size() != 1){
+            throw new JsonNestedViewException("A nested view should have exactly one base relation");
+        }
+        NamedRelationDefinition baseRelation = baseRelations.get(0);
+
+        insertUniqueConstraints(
+                relation,
+                idFactory,
+                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
+                /*
+                 * No UC can be inherited as such from the parent.
+                 */
+                ImmutableList.of(),
+                coreSingletons
+        );
+
+        ImmutableSet<QuotedID> addedColumns = getAddedColumns(idFactory);
+        ImmutableSet<QuotedID> keptColumns = getKeptColumns(idFactory);
+        ImmutableSet<QuotedID> hiddenColumns = getHiddenColumns(baseRelation, keptColumns, idFactory);
+
+        /*
+         * FDs declared as such n the parent relation are inherited similarly to Join views.
+         * UCs declared in the parent relation may be added as FDs.
+         */
+        insertFunctionalDependencies(
+                relation,
+                idFactory,
+                hiddenColumns,
+                addedColumns,
+                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
+                inferFDsFromParentUCs(keptColumns, baseRelation),
+                baseRelations
+        );
+
+        insertForeignKeys(relation, metadataLookupForFK,
+                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
+                baseRelations);
+    }
+
+    private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
+
+              return  baseRelation.getUniqueConstraints().stream()
+                        .map(uc -> uc.getAttributes())
+                        .map(attributes -> toQuotedIDs(attributes))
+                        .filter(a -> keptColumns.containsAll(a))
+                        .map(quotedIds -> new FunctionalDependencyConstruct(
+                                quotedIds,
+                                Sets.difference(
+                                        keptColumns,
+                                        quotedIds
+                                ).immutableCopy())
+                        ).collect(ImmutableCollectors.toList());
+    }
+
+    private ImmutableSet<QuotedID> toQuotedIDs(ImmutableList<Attribute> attributes) {
+        return attributes.stream()
+                .map(a -> a.getID())
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+        ImmutableSet.Builder<QuotedID> builder = ImmutableSet.builder();
+        if(position != null) {
+            builder.add(idFactory.createAttributeID(position));
+        }
+        builder.addAll(
+                columns.extracted.stream()
+                .map(a -> a.name)
+                .map(idFactory::createAttributeID)
+                        .iterator()
+        );
+        return builder.build();
+    }
+
+    private ImmutableSet<QuotedID> getHiddenColumns(NamedRelationDefinition baseRelation, ImmutableSet<QuotedID> keptColumns, QuotedIDFactory idFactory) {
+        return baseRelation.getAttributes().stream()
+                .map(Attribute::getID)
+                .filter(d -> !keptColumns.contains(d))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<QuotedID> getKeptColumns(QuotedIDFactory idFactory) {
+        return columns.kept.stream()
+                .map(idFactory::createAttributeID)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
                                                                                     ImmutableList<Attribute> parentAttributes) {
         return ImmutableList.of();
     }
 
-    @Override
-    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+//    @Override
+//    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+//
+//        ImmutableSet.Builder<QuotedID> builder =  ImmutableSet.<QuotedID>builder().addAll(
+//                columns.extracted.stream()
+//                        .map(e -> e.name)
+//                        .map(idFactory::createAttributeID)
+//                        .iterator()
+//        );
+//        if(position != null){
+//            builder.add(idFactory.createAttributeID(position));
+//        }
+//        return builder.build();
+//    }
 
-        ImmutableSet.Builder<QuotedID> builder =  ImmutableSet.<QuotedID>builder().addAll(
-                columns.extracted.stream()
-                        .map(e -> e.name)
-                        .map(idFactory::createAttributeID)
-                        .iterator()
-        );
-        if(position != null){
-            builder.add(idFactory.createAttributeID(position));
-        }
-        return builder.build();
-    }
-
-    @Override
-    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
-        if(baseRelations.size() != 1) {
-            throw new JsonNestedViewException("A nested view should have exactly one parent");
-        }
-        return baseRelations.get(0).getAttributes().stream()
-                .map(Attribute::getID)
-                .collect(ImmutableCollectors.toSet());
-    }
+//    @Override
+//    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
+//        if(baseRelations.size() != 1) {
+//            throw new JsonNestedViewException("A nested view should have exactly one parent");
+//        }
+//        return baseRelations.get(0).getAttributes().stream()
+//                .map(Attribute::getID)
+//                .collect(ImmutableCollectors.toSet());
+//    }
 
     @JsonPropertyOrder({
             "kept",

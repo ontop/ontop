@@ -41,115 +41,6 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
     }
 
-    protected abstract ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory);
-
-    protected abstract ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory);
-
-    @Override
-    public void insertIntegrityConstraints(OntopViewDefinition relation,
-                                           ImmutableList<NamedRelationDefinition> baseRelations,
-                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
-
-        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
-
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-
-        insertUniqueConstraints(relation, idFactory,
-                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
-                baseRelations, coreSingletons);
-
-        insertFunctionalDependencies(
-                relation,
-                idFactory,
-                getHiddenColumns(baseRelations, idFactory),
-                getAddedColumns(idFactory),
-                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
-                baseRelations
-        );
-
-        insertForeignKeys(relation, metadataLookupForFK,
-                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
-                baseRelations);
-    }
-
-    /**
-     * Infer functional dependencies from the parent
-     *
-     * TODO: for joins, we could convert the non-inherited unique constraints into general functional dependencies.
-     */
-    protected void insertFunctionalDependencies(NamedRelationDefinition relation,
-                                                QuotedIDFactory idFactory,
-                                                ImmutableSet<QuotedID> hiddenColumns,
-                                                ImmutableSet<QuotedID> addedColumns,
-                                                List<AddFunctionalDependency> addFunctionalDependencies,
-                                                ImmutableList<NamedRelationDefinition> baseRelations)
-            throws MetadataExtractionException {
-
-        Stream<FunctionalDependencyConstruct> inheritedFDConstructs = baseRelations.stream()
-                .map(RelationDefinition::getOtherFunctionalDependencies)
-                .flatMap(Collection::stream)
-                .filter(f -> canFDBeInherited(f, hiddenColumns, addedColumns))
-                .map(f -> new FunctionalDependencyConstruct(
-                        f.getDeterminants().stream()
-                                .map(Attribute::getID)
-                                .collect(ImmutableCollectors.toSet()),
-                        f.getDependents().stream()
-                                .map(Attribute::getID)
-                                .flatMap(d -> extractNewDependents(d, addedColumns, hiddenColumns))
-                                .collect(ImmutableCollectors.toSet())));
-
-        Stream<FunctionalDependencyConstruct> declaredFdDependencies = addFunctionalDependencies.stream()
-                .map(jsonFD -> new FunctionalDependencyConstruct(
-                        jsonFD.determinants.stream()
-                                .map(idFactory::createAttributeID)
-                                .collect(ImmutableCollectors.toSet()),
-                        jsonFD.dependents.stream()
-                                .map(idFactory::createAttributeID)
-                                .collect(ImmutableCollectors.toSet())));
-
-        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap = Stream.concat(declaredFdDependencies, inheritedFDConstructs)
-                .collect(ImmutableCollectors.toMultimap(
-                        FunctionalDependencyConstruct::getDeterminants,
-                        fd -> fd));
-
-        ImmutableSet<FunctionalDependencyConstruct> fdConstructs = fdMultimap.asMap().values().stream()
-                .map(fds -> fds.stream()
-                        .reduce((f1, f2) -> f1.merge(f2)
-                                .orElseThrow(() -> new MinorOntopInternalBugException(
-                                        "Should be mergeable as they are having the same determinants")))
-                        // Guaranteed by the multimap structure
-                        .get())
-                .collect(ImmutableCollectors.toSet());
-
-        // Insert the FDs
-        for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
-            addFunctionalDependency(relation, idFactory, fdConstruct);
-        }
-    }
-
-    /**
-     * The selecting criteria could be relaxed in the future
-     */
-    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
-                                     ImmutableSet<QuotedID> addedColumns) {
-        return fd.getDeterminants().stream()
-                .map(Attribute::getID)
-                .noneMatch(d -> hiddenColumns.contains(d) || addedColumns.contains(d));
-    }
-
-    /**
-     * At the moment, only consider mirror attribute (same as in the parent)
-     *
-     * TODO: enrich the stream so as to include all derived attributes id
-     */
-    private Stream<QuotedID> extractNewDependents(QuotedID parentDependentId,
-                                                  ImmutableSet<QuotedID> addedColumns,
-                                                  ImmutableSet<QuotedID> hiddenColumns) {
-        return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
-                ? Stream.empty()
-                : Stream.of(parentDependentId);
-    }
-
     protected String normalizeAttributeName(String attributeName, QuotedIDFactory quotedIdFactory) {
         return quotedIdFactory.createAttributeID(attributeName).getName();
     }
@@ -164,7 +55,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                         .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
-    private void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,
+    protected void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,
                                          List<AddUniqueConstraints> addUniqueConstraints,
                                          ImmutableList<NamedRelationDefinition> baseRelations,
                                          CoreSingletons coreSingletons)
@@ -253,6 +144,91 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                         false
                 ))
                 .collect(ImmutableCollectors.toList());
+    }
+
+    /**
+     * Infer functional dependencies from the parent
+     *
+     * TODO: for joins, we could convert the non-inherited unique constraints into general functional dependencies.
+     */
+    protected void insertFunctionalDependencies(NamedRelationDefinition relation,
+                                                QuotedIDFactory idFactory,
+                                                ImmutableSet<QuotedID> hiddenColumns,
+                                                ImmutableSet<QuotedID> addedColumns,
+                                                List<AddFunctionalDependency> addFunctionalDependencies,
+                                                List<FunctionalDependencyConstruct> inferredFunctionalDependencies,
+                                                ImmutableList<NamedRelationDefinition> baseRelations)
+            throws MetadataExtractionException {
+
+        Stream<FunctionalDependencyConstruct> inheritedFDConstructs = baseRelations.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .filter(f -> canFDBeInherited(f, hiddenColumns, addedColumns))
+                .map(f -> new FunctionalDependencyConstruct(
+                        f.getDeterminants().stream()
+                                .map(Attribute::getID)
+                                .collect(ImmutableCollectors.toSet()),
+                        f.getDependents().stream()
+                                .map(Attribute::getID)
+                                .flatMap(d -> extractNewDependents(d, addedColumns, hiddenColumns))
+                                .collect(ImmutableCollectors.toSet())));
+
+        Stream<FunctionalDependencyConstruct> declaredFdDependencies = addFunctionalDependencies.stream()
+                .map(jsonFD -> new FunctionalDependencyConstruct(
+                        jsonFD.determinants.stream()
+                                .map(idFactory::createAttributeID)
+                                .collect(ImmutableCollectors.toSet()),
+                        jsonFD.dependents.stream()
+                                .map(idFactory::createAttributeID)
+                                .collect(ImmutableCollectors.toSet())));
+
+        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap =
+                Stream.of(
+                        declaredFdDependencies,
+                        inheritedFDConstructs,
+                        inferredFunctionalDependencies.stream()
+                ).flatMap(d -> d)
+                .collect(ImmutableCollectors.toMultimap(
+                        FunctionalDependencyConstruct::getDeterminants,
+                        fd -> fd
+                ));
+
+        ImmutableSet<FunctionalDependencyConstruct> fdConstructs = fdMultimap.asMap().values().stream()
+                .map(fds -> fds.stream()
+                        .reduce((f1, f2) -> f1.merge(f2)
+                                .orElseThrow(() -> new MinorOntopInternalBugException(
+                                        "Should be mergeable as they are having the same determinants")))
+                        // Guaranteed by the multimap structure
+                        .get())
+                .collect(ImmutableCollectors.toSet());
+
+        // Insert the FDs
+        for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
+            addFunctionalDependency(relation, idFactory, fdConstruct);
+        }
+    }
+
+    /**
+     * The selecting criteria could be relaxed in the future
+     */
+    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
+                                     ImmutableSet<QuotedID> addedColumns) {
+        return fd.getDeterminants().stream()
+                .map(Attribute::getID)
+                .noneMatch(d -> hiddenColumns.contains(d) || addedColumns.contains(d));
+    }
+
+    /**
+     * At the moment, only consider mirror attribute (same as in the parent)
+     *
+     * TODO: enrich the stream so as to include all derived attributes id
+     */
+    private Stream<QuotedID> extractNewDependents(QuotedID parentDependentId,
+                                                  ImmutableSet<QuotedID> addedColumns,
+                                                  ImmutableSet<QuotedID> hiddenColumns) {
+        return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
+                ? Stream.empty()
+                : Stream.of(parentDependentId);
     }
 
     protected void addFunctionalDependency(NamedRelationDefinition viewDefinition,

@@ -6,6 +6,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -305,15 +306,41 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
+                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
+
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
+
+        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+
+        insertUniqueConstraints(relation, idFactory,
+                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
+                baseRelations, coreSingletons);
+
+        insertFunctionalDependencies(
+                relation,
+                idFactory,
+                getHiddenColumns(idFactory),
+                getAddedColumns(idFactory),
+                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
+                ImmutableList.of(),
+                baseRelations
+        );
+
+        insertForeignKeys(relation, metadataLookupForFK,
+                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
+                baseRelations);
+    }
+
+    private ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
         return columns.added.stream()
                 .map(a -> a.name)
                 .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toSet());
     }
 
-    @Override
-    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
+    private ImmutableSet<QuotedID> getHiddenColumns(QuotedIDFactory idFactory) {
         return columns.hidden.stream()
                 .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toSet());
