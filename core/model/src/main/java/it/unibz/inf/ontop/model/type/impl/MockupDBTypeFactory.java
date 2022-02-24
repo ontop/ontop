@@ -87,7 +87,12 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
-    public boolean supportsJSONType() {
+    public boolean supportsJson() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsJsonB() {
         return false;
     }
 
@@ -109,6 +114,11 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     @Override
     public DBTermType getDBJsonType() {
         return getDBTermType("JSON");
+    }
+
+    @Override
+    public DBTermType getDBJsonBType() {
+        return getDBTermType("JSONB");
     }
 
     @Override

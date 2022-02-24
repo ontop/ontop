@@ -75,7 +75,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         GEOMETRY,
         GEOGRAPHY,
         ARRAY,
-        JSON
+        JSON,
+        JSONB,
     }
 
     // MUTABLE
@@ -304,7 +305,12 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
-    public boolean supportsJSONType() {
+    public boolean supportsJson() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsJsonB() {
         return false;
     }
 
@@ -328,10 +334,18 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     @Override
     public DBTermType getDBJsonType() {
-        if(supportsJSONType()){
+        if(supportsJson()){
             return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.JSON));
         }
         throw new UnsupportedDBTypeException("DBType JSON not supported for this DBMS");
+    }
+
+    @Override
+    public DBTermType getDBJsonBType() {
+        if(supportsJsonB()){
+            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.JSONB));
+        }
+        throw new UnsupportedDBTypeException("DBType JSONB not supported for this DBMS");
     }
 
     @Override

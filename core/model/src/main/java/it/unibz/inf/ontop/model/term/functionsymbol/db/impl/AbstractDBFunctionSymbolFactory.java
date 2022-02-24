@@ -126,7 +126,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBBooleanFunctionSymbol jsonHasType;
     // Created in init()
-    private DBFunctionSymbol jsonIsArray;
+    private DBBooleanFunctionSymbol jsonIsArray;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -264,6 +264,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBFunctionSymbol> minMap;
     private final Map<DBTermType, DBFunctionSymbol> maxMap;
 
+    private final Map<Integer, DBFunctionSymbol> jsonBuildPathMap;
+
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
@@ -330,6 +332,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
+
+        this.jsonBuildPathMap = Maps.newConcurrentMap();
     }
 
     /**
@@ -1031,22 +1035,29 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBJsonElt() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        if(jsonGetElt == null)
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonGetElt;
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type) {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        if(jsonHasType == null)
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonHasType;
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBJsonIsArray() {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        if(jsonIsArray == null)
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonIsArray;
     }
 
     @Override
     public DBFunctionSymbol getDBBuildJsonPath(int arity) {
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonBuildPathMap
+                .computeIfAbsent(arity, a -> createJsonBuildPath(arity));
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
@@ -1469,12 +1480,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return null;
     }
 
-    protected DBBooleanFunctionSymbol createJsonHasType() {
+    protected DBBooleanFunctionSymbol createJsonHasType(){
         return null;
     }
 
-    protected DBFunctionSymbol createJsonGetElt() {
+    protected DBFunctionSymbol createJsonGetElt(){
         return null;
+    }
+
+    protected DBFunctionSymbol createJsonBuildPath(int arity){
+        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
     }
 
 

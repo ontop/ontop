@@ -30,6 +30,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
     public static final String JSON_STR = "JSON";
+    public static final String JSONB_STR = "JSONB";
     public static final String ARRAY_STR = "ARRAY";
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
@@ -103,6 +104,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          * JSON
          */
         map.put(JSON_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(JSON_STR, rootAncestry, xsdString));
+        map.put(JSONB_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(JSONB_STR, rootAncestry, xsdString));
 
         return map;
     }
@@ -120,6 +122,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          * JSON
          */
         map.put(DefaultTypeCode.JSON, JSON_STR);
+        map.put(DefaultTypeCode.JSONB, JSONB_STR);
 
         return ImmutableMap.copyOf(map);
     }
@@ -140,7 +143,12 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     }
 
     @Override
-    public boolean supportsJSONType() {
+    public boolean supportsJson() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsJsonB() {
         return true;
     }
 }

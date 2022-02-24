@@ -36,7 +36,9 @@ public interface DBTypeFactory {
 
     boolean supportsDBDistanceSphere();
 
-    boolean supportsJSONType();
+    boolean supportsJson();
+
+    boolean supportsJsonB();
 
     boolean supportsArrayType();
 
@@ -45,6 +47,8 @@ public interface DBTypeFactory {
     DBTermType getDBArrayType();
 
     DBTermType getDBJsonType();
+
+    DBTermType getDBJsonBType();
 
     /**
      * Returns an abstract type

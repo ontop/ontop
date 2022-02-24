@@ -34,7 +34,9 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @JsonDeserialize(as = JsonNestedView.class)
 public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
@@ -88,12 +90,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 ((OntopViewDefinition) parentDefinition).getLevel():
                 0;
 
-        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
-        RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
+        RelationID relationId = dbParameters.getQuotedIDFactory().createRelationID(name.toArray(new String[0]));
 
         IQ iq = createIQ(relationId, parentDefinition, dbParameters);
 
-        // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
         return new OntopViewDefinitionImpl(
@@ -115,6 +115,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         CoreSingletons cs = dbParameters.getCoreSingletons();
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
@@ -123,7 +124,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 Optional.empty():
                 Optional.ofNullable(variableGenerator.generateNewVariable(position));
 
-        ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, dbParameters.getQuotedIDFactory());
+        ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, idFactory);
 
         Variable flattenedColumnVariable = variableGenerator.generateNewVariable(this.flattenedColumn);
 
@@ -131,10 +132,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
                 flattenOutputVariable,
-                buildVar2ExtractedColumnMap(variableGenerator),
+                buildVar2ExtractedColumnMap(variableGenerator, idFactory),
                 cs,
                 dbParameters.getDBTypeFactory(),
-                dbParameters.getQuotedIDFactory()
+                idFactory
         );
 
         ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, extractionSubstitution.getImmutableMap().keySet()));
@@ -220,11 +221,15 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 ));
     }
 
-    private ImmutableMap<Variable, ExtractedColumn> buildVar2ExtractedColumnMap(VariableGenerator variableGenerator) {
+    private ImmutableMap<Variable, ExtractedColumn> buildVar2ExtractedColumnMap(VariableGenerator variableGenerator, QuotedIDFactory idFactory) {
 
         return  columns.extracted.stream()
                 .collect(ImmutableCollectors.toMap(
-                        c -> variableGenerator.generateNewVariable(c.name),
+                        c -> variableGenerator.generateNewVariable(
+                                                normalizeAttributeName(
+                                                        c.name,
+                                                        idFactory
+                                                )),
                         c -> c
                 ));
     }
@@ -239,14 +244,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
                                 e -> getCheckDatatypeExtractAndCastFromJson(
+//                                        variableGenerator.generateNewVariable(
                                         flattenOutputVariable,
                                         getPathAsDBConstants(e.getValue().key, cs.getTermFactory()),
-                                        getTermTypeCategoryFor(
-                                                e.getValue().datatype,
-                                                normalizeAttributeName(
-                                                        e.getValue().name,
-                                                        idFactory
-                                                )),
+                                        getExtractedColumnType(e.getValue().datatype, e.getValue().name),
                                         cs,
                                         typeFactory
                                 ))));
@@ -260,67 +261,82 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                         .collect(ImmutableCollectors.toList());
     }
 
-    private DBTermType.Category getTermTypeCategoryFor(String datatype, String columnName) {
-        switch (datatype.toLowerCase()){
-            case "boolean":
-                return DBTermType.Category.BOOLEAN;
-            case "text":
-                return DBTermType.Category.STRING;
-            case "number":
-                return DBTermType.Category.FLOAT_DOUBLE;
+    private ExtractedColumnType getExtractedColumnType(String datatype, String columnName) {
+        ExtractedColumnType extractedColumnType = extractedColumnTypeMap.get(datatype.toLowerCase());
+        if(extractedColumnType == null){
+            throw new InvalidOntopViewException("Incorrect datatype " + datatype + " for column " + columnName + ".\n " +
+                    "One of " +
+                    listAdmissibleTypes() +
+                    " is expected"
+            );
         }
-        throw new InvalidOntopViewException("Incorrect datatype " + datatype + " for column " + columnName +
-                "\n One of \"boolean\", \"text\" or \"number\" is expected");
+        return extractedColumnType;
     }
 
 
-    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable var, ImmutableList<DBConstant> path, DBTermType.Category expectedDBType,
+    /**
+     * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
+     */
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, ImmutableList<DBConstant> path, ExtractedColumnType extractedColumnType,
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
-        return termFactory.getIfElseNull(
-                        getDatatypeCondition(expectedDBType, path, var, cs),
-                        getExtractAndCastFromJson(path, expectedDBType, var, cs, dbTypeFactory)
-        );
+        switch (extractedColumnType) {
+            case JSON:
+            case JSONB:
+                return getExtractAndCastFromJson(path, extractedColumnType, sourceVar, cs, dbTypeFactory);
+            default:
+                return termFactory.getIfElseNull(
+                        getDatatypeCondition(extractedColumnType, path, sourceVar, cs),
+                        getExtractAndCastFromJson(path, extractedColumnType, sourceVar, cs, dbTypeFactory)
+                );
+        }
     }
 
-    private ImmutableExpression getDatatypeCondition(DBTermType.Category expectedType, ImmutableList<DBConstant> path, Variable var, CoreSingletons cs) {
-        switch (expectedType){
+    private ImmutableExpression getDatatypeCondition(ExtractedColumnType extractedColumnType, ImmutableList<DBConstant> path, Variable var, CoreSingletons cs) {
+        switch (extractedColumnType){
             case BOOLEAN:
                 return cs.getTermFactory().getDBJsonIsBoolean(path, var);
-            case STRING:
+            case TEXT:
                 return cs.getTermFactory().getDBJsonIsString(path, var);
             case INTEGER:
-            case FLOAT_DOUBLE:
+            case FLOAT:
             case DECIMAL:
                 return cs.getTermFactory().getDBJsonIsNumeric(path, var);
+            default:
+                throw new JsonNestedViewException("Unexpected extracted column type");
         }
-        throw new JsonNestedViewException("Unexpected DBType category");
     }
 
-    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<DBConstant> path, DBTermType.Category dbTypeCategory,
+    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<DBConstant> path, ExtractedColumnType extractedColumnType,
                                                               Variable var, CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
         return termFactory.getDBCastFunctionalTerm(
-                getDefaultDBType(dbTypeCategory, dbTypeFactory),
+                getDefaultDBType(extractedColumnType, dbTypeFactory),
                 termFactory.getDBJsonElement(
                         path,
                         var
                 ));
     }
 
-    private DBTermType getDefaultDBType(DBTermType.Category dbTypeCategory, DBTypeFactory typeFactory) {
-        switch (dbTypeCategory){
+    private DBTermType getDefaultDBType(ExtractedColumnType extractedColumnType, DBTypeFactory typeFactory) {
+        switch (extractedColumnType){
             case BOOLEAN:
                 return typeFactory.getDBBooleanType();
-            case STRING:
+            case TEXT:
                 return typeFactory.getDBStringType();
             case INTEGER:
-            case FLOAT_DOUBLE:
+                return typeFactory.getDBLargeIntegerType();
+            case FLOAT:
             case DECIMAL:
                 return typeFactory.getDBDoubleType();
+            case JSON:
+                return typeFactory.getDBJsonType();
+            case JSONB:
+                return typeFactory.getDBJsonBType();
+            default:
+                throw new JsonNestedViewException("Unexpected datatype");
         }
-        throw new JsonNestedViewException("Unexpected datatype category");
     }
 
     @Override
@@ -413,5 +429,34 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         public InvalidOntopViewException(String message) {
             super(message);
         }
+    }
+
+    private static enum ExtractedColumnType {
+        TEXT("text"),
+        INTEGER("integer"),
+        DECIMAL("decimal"),
+        FLOAT("float"),
+        BOOLEAN("boolean"),
+        JSON("json"),
+        JSONB("jsonb");
+
+        String label;
+
+        private ExtractedColumnType(String label) {
+            this.label = label;
+        }
+
+    }
+
+    private static ImmutableMap<String, ExtractedColumnType> extractedColumnTypeMap =
+            Stream.of(ExtractedColumnType.values())
+                    .collect(ImmutableCollectors.toMap(
+                            e -> e.label,
+                            e -> e
+                    ));
+
+    private static String listAdmissibleTypes (){
+        return extractedColumnTypeMap.keySet().stream()
+                .collect(Collectors.joining(", "));
     }
 }

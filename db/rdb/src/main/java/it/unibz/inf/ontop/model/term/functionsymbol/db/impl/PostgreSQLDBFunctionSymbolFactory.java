@@ -8,14 +8,14 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
@@ -27,9 +27,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     private static final String RANDOM_STR = "RANDOM";
     private static final String POSITION_STR = "POSITION";
 
+    private final DBTermType dbJsonType;
+
     @Inject
     protected PostgreSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createPostgreSQLRegularFunctionTable(typeFactory), typeFactory);
+        this.dbJsonType = dbTypeFactory.getDBJsonType();
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createPostgreSQLRegularFunctionTable(
@@ -139,8 +142,8 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected DBBooleanFunctionSymbol createJsonIsArray() {
         return new DBBooleanFunctionSymbolWithSerializerImpl(
                 "JSON_IS_ARRAY",
-                ImmutableList.of(dbTypeFactory.getDBJsonType()),
-                dbTypeFactory.getDBBooleanType(),
+                ImmutableList.of(dbJsonType),
+                dbBooleanType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
                         "json_typeof(%s) = 'array'",
@@ -153,10 +156,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return new DBBooleanFunctionSymbolWithSerializerImpl(
                 "JSON_HAS_TYPE",
                 ImmutableList.of(
-                        dbTypeFactory.getDBJsonType(),
-                        dbTypeFactory.getDBStringType()
+                        dbJsonType,
+                        dbStringType
                 ),
-                dbTypeFactory.getDBBooleanType(),
+                dbBooleanType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
                         "json_typeof(%s) = '%s'",
@@ -167,13 +170,13 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
 
     @Override
     protected DBFunctionSymbol createJsonGetElt() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(
+        return new DBFunctionSymbolWithSerializerImpl(
                 "JSON_GET_ELT",
                 ImmutableList.of(
-                        dbTypeFactory.getDBJsonType(),
-                        dbTypeFactory.getDBStringType()
+                        dbJsonType,
+                        dbStringType
                 ),
-                dbTypeFactory.getDBBooleanType(),
+                dbStringType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
                         "%s::json#>'%s'",
@@ -181,6 +184,25 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         termConverter.apply(terms.get(1))
                 ));
     }
+
+    @Override
+    protected DBFunctionSymbol createJsonBuildPath(int arity) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_BUILD PATH",
+                IntStream.range(0, arity)
+                        .mapToObj(i -> dbStringType)
+                        .collect(ImmutableCollectors.toList()),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) ->
+                        "\'{"+
+                        terms.stream()
+                                .map(termConverter::apply)
+                                .collect(Collectors.joining(","))
+                        +"}\'"
+                );
+    }
+
 
 
 
