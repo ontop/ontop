@@ -1314,17 +1314,17 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getDBJsonIsBoolean(ImmutableList<DBConstant> path, ImmutableTerm arg) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbBooleanType), getDBBuildJsonPath(path), arg);
+	public ImmutableExpression getDBJsonIsBoolean(ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsBoolean(), arg);
 	}
 
 	@Override
-	public ImmutableExpression getDBJsonIsNumeric(ImmutableList<DBConstant> path, ImmutableTerm arg) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbDoubleType), getDBBuildJsonPath(path), arg);
+	public ImmutableExpression getDBJsonIsNumber(ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsNumber(), arg);
 	}
 
 	@Override
-	public ImmutableExpression getDBJsonIsString(ImmutableList<DBConstant> path, ImmutableTerm arg) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonHasType(dbStringType), getDBBuildJsonPath(path), arg);
+	public ImmutableExpression getDBJsonIsScalar(ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsScalar(), arg);
 	}
 }

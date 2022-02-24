@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -245,7 +244,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
                                 e -> getCheckDatatypeExtractAndCastFromJson(
-//                                        variableGenerator.generateNewVariable(
                                         flattenOutputVariable,
                                         getPathAsDBConstants(e.getValue().key, cs.getTermFactory()),
                                         getExtractedColumnType(e.getValue().datatype, e.getValue().name),
@@ -281,43 +279,44 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, ImmutableList<DBConstant> path, ExtractedColumnType extractedColumnType,
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
+
+        ImmutableFunctionalTerm retrieveJsonElt = termFactory.getDBJsonElement(path, sourceVar);
+
         switch (extractedColumnType) {
             case JSON:
             case JSONB:
-                return getExtractAndCastFromJson(path, extractedColumnType, sourceVar, cs, dbTypeFactory);
+                return getCast(retrieveJsonElt, extractedColumnType, cs, dbTypeFactory);
             default:
                 return termFactory.getIfElseNull(
-                        getDatatypeCondition(extractedColumnType, path, sourceVar, cs),
-                        getExtractAndCastFromJson(path, extractedColumnType, sourceVar, cs, dbTypeFactory)
+                        getDatatypeCondition(retrieveJsonElt, extractedColumnType, cs),
+                        getCast(retrieveJsonElt, extractedColumnType, cs, dbTypeFactory)
                 );
         }
     }
 
-    private ImmutableExpression getDatatypeCondition(ExtractedColumnType extractedColumnType, ImmutableList<DBConstant> path, Variable var, CoreSingletons cs) {
+    private ImmutableExpression getDatatypeCondition(ImmutableFunctionalTerm arg, ExtractedColumnType extractedColumnType, CoreSingletons cs) {
         switch (extractedColumnType){
             case BOOLEAN:
-                return cs.getTermFactory().getDBJsonIsBoolean(path, var);
+                return cs.getTermFactory().getDBJsonIsBoolean(arg);
             case TEXT:
-                return cs.getTermFactory().getDBJsonIsString(path, var);
+                return cs.getTermFactory().getDBJsonIsScalar(arg);
             case INTEGER:
             case FLOAT:
             case DECIMAL:
-                return cs.getTermFactory().getDBJsonIsNumeric(path, var);
+                return cs.getTermFactory().getDBJsonIsNumber(arg);
             default:
                 throw new JsonNestedViewException("Unexpected extracted column type");
         }
     }
 
-    private ImmutableFunctionalTerm getExtractAndCastFromJson(ImmutableList<DBConstant> path, ExtractedColumnType extractedColumnType,
-                                                              Variable var, CoreSingletons cs, DBTypeFactory dbTypeFactory) {
+    private ImmutableFunctionalTerm getCast(ImmutableFunctionalTerm arg, ExtractedColumnType extractedColumnType,
+                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
         return termFactory.getDBCastFunctionalTerm(
                 getDefaultDBType(extractedColumnType, dbTypeFactory),
-                termFactory.getDBJsonElement(
-                        path,
-                        var
-                ));
+                arg
+        );
     }
 
     private DBTermType getDefaultDBType(ExtractedColumnType extractedColumnType, DBTypeFactory typeFactory) {

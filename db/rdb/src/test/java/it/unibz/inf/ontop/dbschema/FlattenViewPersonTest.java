@@ -20,7 +20,7 @@ public class FlattenViewPersonTest {
     }
 
     @Test
-    public void testUCs() {
+    public void testNoUC() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -33,7 +33,7 @@ public class FlattenViewPersonTest {
     }
 
     @Test
-    public void testFDs() {
+    public void testInferredFD() {
         ImmutableSet<FunctionalDependency> fds = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(l -> l.stream())

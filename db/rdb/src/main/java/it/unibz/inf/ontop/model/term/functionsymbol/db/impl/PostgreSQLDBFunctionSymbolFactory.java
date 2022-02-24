@@ -152,20 +152,34 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createJsonHasType() {
+    protected DBBooleanFunctionSymbol createJsonIsBoolean() {
+        return createJsonHasType("JSON_IS_BOOLEAN", ImmutableList.of("boolean"));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsScalar() {
+        return createJsonHasType("JSON_IS_SCALAR", ImmutableList.of("boolean", "string", "number"));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsNumber() {
+        return createJsonHasType("JSON_IS_NUMBER",  ImmutableList.of("number"));
+    }
+
+    private DBBooleanFunctionSymbol createJsonHasType(String functionName, ImmutableList<String> types) {
         return new DBBooleanFunctionSymbolWithSerializerImpl(
-                "JSON_HAS_TYPE",
-                ImmutableList.of(
-                        dbJsonType,
-                        dbStringType
-                ),
+                functionName,
+                ImmutableList.of(dbJsonType),
                 dbBooleanType,
                 false,
-                (terms, termConverter, termFactory) -> String.format(
-                        "json_typeof(%s) = '%s'",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1))
-                ));
+                (terms, termConverter, termFactory) ->
+                        types.stream()
+                        .map(t -> String.format(
+                                "json_typeof(%s) = \'"+ t+ "\'",
+                                termConverter.apply(terms.get(0))
+                        ))
+                        .collect(Collectors.joining(" OR"))
+                );
     }
 
     @Override
@@ -188,7 +202,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected DBFunctionSymbol createJsonBuildPath(int arity) {
         return new DBBooleanFunctionSymbolWithSerializerImpl(
-                "JSON_BUILD PATH",
+                "JSON_BUILD_PATH",
                 IntStream.range(0, arity)
                         .mapToObj(i -> dbStringType)
                         .collect(ImmutableCollectors.toList()),

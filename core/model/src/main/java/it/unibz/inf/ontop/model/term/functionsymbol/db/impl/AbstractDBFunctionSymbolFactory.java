@@ -124,7 +124,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol jsonGetElt;
     // Created in init()
-    private DBBooleanFunctionSymbol jsonHasType;
+    private DBBooleanFunctionSymbol jsonIsScalar;
+    // Created in init()
+    private DBBooleanFunctionSymbol jsonIsBoolean;
+    // Created in init()
+    private DBBooleanFunctionSymbol jsonIsNumber;
     // Created in init()
     private DBBooleanFunctionSymbol jsonIsArray;
 
@@ -397,8 +401,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowNumberFct = createDBRowNumber();
 
         jsonGetElt = createJsonGetElt();
-        jsonHasType = createJsonHasType();
         jsonIsArray = createJsonIsArray();
+        jsonIsNumber = createJsonIsNumber();
+        jsonIsBoolean = createJsonIsBoolean();
+        jsonIsScalar = createJsonIsScalar();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -1041,10 +1047,24 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonHasType(DBTermType type) {
-        if(jsonHasType == null)
+    public DBBooleanFunctionSymbol getDBJsonIsScalar() {
+        if(jsonIsScalar == null)
             throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonHasType;
+        return jsonIsScalar;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsNumber() {
+        if(jsonIsNumber == null)
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonIsNumber;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean() {
+        if(jsonIsBoolean == null)
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+        return jsonIsBoolean;
     }
 
     @Override
@@ -1480,7 +1500,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return null;
     }
 
-    protected DBBooleanFunctionSymbol createJsonHasType(){
+    protected DBBooleanFunctionSymbol createJsonIsNumber() {
+        return null;
+    }
+
+    protected DBBooleanFunctionSymbol createJsonIsBoolean() {
+        return null;
+    }
+
+    protected DBBooleanFunctionSymbol createJsonIsScalar() {
         return null;
     }
 
