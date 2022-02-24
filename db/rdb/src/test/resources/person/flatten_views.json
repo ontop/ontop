@@ -7,7 +7,8 @@
       "columns": {
         "kept": [
           "\"id\"",
-          "\"ssn\""
+          "\"ssn\"",
+          "\"fullName\""
         ],
         "position": "\"pos\"",
         "extracted": [

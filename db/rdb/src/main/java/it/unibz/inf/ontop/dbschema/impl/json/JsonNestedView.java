@@ -370,7 +370,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         ImmutableSet<QuotedID> hiddenColumns = getHiddenColumns(baseRelation, keptColumns, idFactory);
 
         /*
-         * FDs declared as such n the parent relation are inherited similarly to Join views.
+         * FDs declared as such in the parent relation are inherited similarly to Join views.
          * UCs declared in the parent relation may be added as FDs.
          */
         insertFunctionalDependencies(
@@ -390,17 +390,30 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
 
-              return  baseRelation.getUniqueConstraints().stream()
+
+       ImmutableSet<ImmutableSet<QuotedID>> b =  baseRelation.getUniqueConstraints().stream()
+                .map(uc -> uc.getAttributes())
+                .map(attributes -> toQuotedIDs(attributes))
+               .filter(a -> keptColumns.containsAll(a))
+               .collect(ImmutableCollectors.toSet());
+
+        return baseRelation.getUniqueConstraints().stream()
                         .map(uc -> uc.getAttributes())
                         .map(attributes -> toQuotedIDs(attributes))
-                        .filter(a -> keptColumns.containsAll(a))
-                        .map(quotedIds -> new FunctionalDependencyConstruct(
-                                quotedIds,
-                                Sets.difference(
-                                        keptColumns,
-                                        quotedIds
-                                ).immutableCopy())
-                        ).collect(ImmutableCollectors.toList());
+                        .map(attributes -> getInferredFD(attributes, keptColumns))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(ImmutableCollectors.toList());
+    }
+
+    private Optional<FunctionalDependencyConstruct> getInferredFD(ImmutableSet<QuotedID> determinants, ImmutableSet<QuotedID> keptColumns) {
+        if(keptColumns.containsAll(determinants)){
+            ImmutableSet<QuotedID> difference = Sets.difference(keptColumns, determinants).immutableCopy();
+            if(!difference.isEmpty()){
+                return Optional.of(new FunctionalDependencyConstruct(determinants, difference));
+            }
+        }
+        return Optional.empty();
     }
 
     private ImmutableSet<QuotedID> toQuotedIDs(ImmutableList<Attribute> attributes) {
