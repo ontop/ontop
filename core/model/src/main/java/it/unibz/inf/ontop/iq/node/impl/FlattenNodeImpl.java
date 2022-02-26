@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -43,7 +44,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
-                            @Assisted ("flattenedVariable") Variable flattenedVariable,
+                            @Assisted("flattenedVariable") Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
                             @Assisted boolean isStrict,
                             SubstitutionFactory substitutionFactory,
@@ -56,19 +57,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.isStrict = isStrict;
     }
 
-    private ImmutableSubstitution generateSubstitution() {
-        ImmutableTerm flattenTerm = termFactory.getDBFlattenFunction(flattenedVariable);
-        this.substitution = Optional.of(
-                indexVariable.isPresent() ?
-                        substitutionFactory.getSubstitution(
-                                outputVariable,
-                                flattenTerm,
-                                indexVariable.get(),
-                                termFactory.getDBIndexIn(flattenedVariable)) :
-                        substitutionFactory.getSubstitution(
-                                outputVariable,
-                                flattenTerm
-                        ));
+    private ImmutableSubstitution<Variable> generateSubstitution() {
+        ImmutableMap.Builder<Variable, ImmutableFunctionalTerm> builder = ImmutableMap.builder();
+        builder.put(outputVariable, termFactory.getDBFlatten(flattenedVariable));
+        indexVariable.ifPresent(
+                v -> builder.put(v, termFactory.getDBIndexIn(flattenedVariable))
+        );
+        this.substitution = Optional.of(substitutionFactory.getSubstitution(builder.build()));
         return this.substitution.get();
     }
 

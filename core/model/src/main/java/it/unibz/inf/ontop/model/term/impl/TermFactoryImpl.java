@@ -438,13 +438,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDBFlattenArray(Variable arg) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBFlattenArray(), arg);
+	public ImmutableFunctionalTerm getDBFlatten(Variable arg) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBFlatten(), arg);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getDBIndexIn(Variable arg) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexInArray(), arg);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIndexIn(), arg);
 	}
 
 	@Override

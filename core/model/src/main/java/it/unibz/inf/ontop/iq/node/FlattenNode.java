@@ -82,5 +82,5 @@ public interface FlattenNode extends UnaryOperatorNode {
 
     // The substitution does not carry extra information:
     // it can be generated out of the output variable, flattened variable and optional index variable
-    ImmutableSubstitution getSubstitution();
+    ImmutableSubstitution<Variable> getSubstitution();
 }

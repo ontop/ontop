@@ -556,12 +556,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getDBFlattenArray() {
+    public DBFunctionSymbol getDBFlatten() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    public DBFunctionSymbol getDBIndexInArray() {
+    public DBFunctionSymbol getDBIndexIn() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

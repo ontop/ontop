@@ -350,8 +350,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
     //NRA
-    DBFunctionSymbol getDBFlattenArray();
-    DBFunctionSymbol getDBIndexInArray();
+    DBFunctionSymbol getDBFlatten();
+    DBFunctionSymbol getDBIndexIn();
 
 
     //JSON

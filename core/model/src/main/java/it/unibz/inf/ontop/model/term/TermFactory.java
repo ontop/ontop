@@ -635,4 +635,7 @@ public interface TermFactory {
 	ImmutableExpression getDBJsonIsBoolean(ImmutableTerm arg);
 	ImmutableExpression getDBJsonIsNumber(ImmutableTerm arg);
 	ImmutableExpression getDBJsonIsScalar(ImmutableTerm arg);
+
+	ImmutableFunctionalTerm getDBFlatten(Variable flattenedVariable);
+	ImmutableFunctionalTerm getDBIndexIn(Variable flattenedVariable);
 }
