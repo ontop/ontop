@@ -497,8 +497,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
 
-	ImmutableFunctionalTerm getDBFlattenArray(Variable arg);
-	ImmutableFunctionalTerm getDBIndexIn(Variable arg);
+//	ImmutableFunctionalTerm getDBIndexIn(Variable arg);
 
 	ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1,
 																		ImmutableTerm rdfTypeTerm2);

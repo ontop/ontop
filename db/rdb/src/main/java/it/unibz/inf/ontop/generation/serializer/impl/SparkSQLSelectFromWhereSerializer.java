@@ -64,7 +64,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs = fromQuerySerialization.getColumnIDs();
                 String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
-                        variableAliases, selectFromWhere.getSubstitution(), columnIDs);
+                        variableAliases, selectFromWhere.getSubstitution(), selectFromWhere.getFlattenSubstitution(), columnIDs);
 
                 String fromString = fromQuerySerialization.getString();
 

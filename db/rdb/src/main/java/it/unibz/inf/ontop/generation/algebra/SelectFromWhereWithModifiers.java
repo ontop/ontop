@@ -32,6 +32,8 @@ public interface SelectFromWhereWithModifiers extends SQLExpression {
     Optional<Long> getLimit();
     Optional<Long> getOffset();
 
+    Optional<ImmutableSubstitution> getFlattenSubstitution();
+
     ImmutableList<SQLOrderComparator> getSortConditions();
 
     default boolean hasOrder() {

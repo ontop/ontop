@@ -57,7 +57,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     private ImmutableSubstitution generateSubstitution() {
-        ImmutableTerm flattenTerm = termFactory.getDBFlattenArray(flattenedVariable);
+        ImmutableTerm flattenTerm = termFactory.getDBFlattenFunction(flattenedVariable);
         this.substitution = Optional.of(
                 indexVariable.isPresent() ?
                         substitutionFactory.getSubstitution(

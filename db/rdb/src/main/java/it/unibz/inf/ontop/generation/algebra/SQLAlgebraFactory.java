@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -23,6 +24,7 @@ public interface SQLAlgebraFactory {
                                                        boolean isDistinct,
                                                        @Assisted("limit") Optional<Long> limit,
                                                        @Assisted("offset") Optional<Long> offset,
+                                                       @Assisted("flatten") Optional<ImmutableSubstitution> flattenSubstitution,
                                                        @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions);
 
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, QuotedID> columnNames);

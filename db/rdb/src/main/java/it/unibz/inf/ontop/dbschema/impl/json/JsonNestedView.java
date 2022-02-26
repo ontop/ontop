@@ -126,7 +126,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, idFactory);
 
-        Variable flattenedColumnVariable = variableGenerator.generateNewVariable(this.flattenedColumn);
+        Variable flattenedColumnVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn, idFactory));
+        if(flattenedColumnVariable == null){
+            throw new InvalidOntopViewException("The flattened column "+flattenedColumn+ " is not present in the base relation");
+        }
 
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
@@ -208,8 +211,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         return parentAttributeMap.values().stream()
                 .collect(ImmutableCollectors.toMap(
                         s -> s,
-                        variableGenerator::generateNewVariable
-                ));
+                        s -> variableGenerator.generateNewVariable(s)));
     }
 
     private ImmutableMap<Integer, String> buildParentIndex2AttributeMap(NamedRelationDefinition parentRelation) {
@@ -346,7 +348,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+        CoreSingletons cs = dbParameters.getCoreSingletons();
 
         if(baseRelations.size() != 1){
             throw new JsonNestedViewException("A nested view should have exactly one base relation");
@@ -361,12 +363,12 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                  * No UC can be inherited as such from the parent.
                  */
                 ImmutableList.of(),
-                coreSingletons
+                cs
         );
 
         ImmutableSet<QuotedID> addedColumns = getAddedColumns(idFactory);
         ImmutableSet<QuotedID> keptColumns = getKeptColumns(idFactory);
-        ImmutableSet<QuotedID> hiddenColumns = getHiddenColumns(baseRelation, keptColumns, idFactory);
+        ImmutableSet<QuotedID> hiddenColumns = getHiddenColumns(baseRelation, keptColumns);
 
         /*
          * FDs declared as such in the parent relation are inherited similarly to Join views.
@@ -389,12 +391,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
 
-
-       ImmutableSet<ImmutableSet<QuotedID>> b =  baseRelation.getUniqueConstraints().stream()
-                .map(uc -> uc.getAttributes())
-                .map(attributes -> toQuotedIDs(attributes))
-               .filter(a -> keptColumns.containsAll(a))
-               .collect(ImmutableCollectors.toSet());
 
         return baseRelation.getUniqueConstraints().stream()
                         .map(uc -> uc.getAttributes())
@@ -435,7 +431,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         return builder.build();
     }
 
-    private ImmutableSet<QuotedID> getHiddenColumns(NamedRelationDefinition baseRelation, ImmutableSet<QuotedID> keptColumns, QuotedIDFactory idFactory) {
+    private ImmutableSet<QuotedID> getHiddenColumns(NamedRelationDefinition baseRelation, ImmutableSet<QuotedID> keptColumns) {
         return baseRelation.getAttributes().stream()
                 .map(Attribute::getID)
                 .filter(d -> !keptColumns.contains(d))

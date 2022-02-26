@@ -9,14 +9,14 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class FlattenViewPersonTest {
+public class NestedViewsPersonTest {
 
-    private static final String VIEW_FILE = "src/test/resources/person/flatten_views.json";
+    private static final String VIEW_FILE = "src/test/resources/person/nested_views.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_hr.db-extract.json";
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
 
-    public FlattenViewPersonTest() throws Exception {
+    public NestedViewsPersonTest() throws Exception {
     }
 
     @Test

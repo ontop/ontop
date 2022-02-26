@@ -72,7 +72,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = fromQuerySerialization.getColumnIDs();
             String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
-                                variableAliases, selectFromWhere.getSubstitution(), columnIDs);
+                                variableAliases, selectFromWhere.getSubstitution(), selectFromWhere.getFlattenSubstitution(), columnIDs);
 
             String fromString = fromQuerySerialization.getString();
 
@@ -132,6 +132,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
                                              ImmutableMap<Variable, QuotedID> variableAliases,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                             Optional<ImmutableSubstitution> flattenSubstitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
 
             if (projectedVariables.isEmpty())

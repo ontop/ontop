@@ -61,6 +61,11 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n);
 
+        Optional<FlattenNode> flattenNode = Optional.of(firstNonSliceDistinctTree)
+                .map(IQTree::getRootNode)
+                .filter(n -> n instanceof FlattenNode)
+                .map(n -> (FlattenNode) n);
+
         IQTree firstNonSliceDistinctConstructionTree = constructionNode
                 .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
                 .orElse(firstNonSliceDistinctTree);
@@ -126,6 +131,8 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 sliceNode
                         .map(SliceNode::getOffset)
                         .filter(o -> o > 0),
+                flattenNode
+                        .map(f -> f.getSubstitution()),
                 comparators);
     }
 
