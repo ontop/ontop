@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
@@ -16,8 +18,10 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -71,23 +75,54 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 " ( "+
                                 subQuerySerialization.getString() +
                                 " ) "+
-                                getFlattenIndexInString(sqlFlattenExpression.getFlattenendVar());
+                                getFlattenIndexInString(sqlFlattenExpression.getIndexVar());
 
-                        ImmutableMap<Variable, QualifiedAttributeID> columnIDs = buildFlattenColumIDMap(subQuerySerialization.getColumnIDs());
+                        ImmutableMap<Variable, QualifiedAttributeID> columnIDs = buildFlattenColumIDMap(
+                                sqlFlattenExpression,
+                                subQuerySerialization
+                        );
 
                         return new QuerySerializationImpl(sql, columnIDs);
 
                     }
 
-                    private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+                    private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
+                                                                                                QuerySerialization subQuerySerialization) {
+
+                        Variable flattenedVar = sqlFlattenExpression.getFlattenendVar();
+
+                        ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        e -> e.getKey(),
+                                        e -> new QualifiedAttributeID(null,e.getValue())
+                                ));
+
+                        ImmutableMap<Variable, QualifiedAttributeID> retainedVariableAliases = subQuerySerialization.getColumnIDs().entrySet().stream()
+                                .filter(e -> e.getKey() != flattenedVar)
+                                .collect(ImmutableCollectors.toMap());
+
+                        return ImmutableMap.<Variable, QualifiedAttributeID>builder()
+                                .putAll(freshVariableAliases)
+                                .putAll(retainedVariableAliases)
+                                .build();
                     }
 
-                    private String getFlattenIndexInString(Variable flattenendVar) {
+                    private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
+                        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+                        builder.add(sqlFlattenExpression.getOutputVar());
+                        sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
+                        return builder.build();
+                    }
+
+                    private String getFlattenIndexInString(Optional<Variable> flattenendVar) {
+
+
                     }
 
                     private String getFlattenFunctionSymbolString(Optional<TermTypeInference> inferType) {
 
                     }
+
                 });
     }
 }
