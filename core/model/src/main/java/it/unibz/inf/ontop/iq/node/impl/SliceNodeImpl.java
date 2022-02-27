@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -13,7 +14,6 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -37,8 +37,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Nullable
     private final Long limit;
 
+    private final OntopModelSettings settings;
+
     @AssistedInject
-    private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit, IntermediateQueryFactory iqFactory) {
+    private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit,
+                          IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(iqFactory);
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
@@ -46,15 +49,17 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             throw new IllegalArgumentException("The limit must not be negative");
         this.offset = offset;
         this.limit = limit;
+        this.settings = settings;
     }
 
     @AssistedInject
-    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory) {
+    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(iqFactory);
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;
         this.limit = null;
+        this.settings = settings;
     }
 
     /**
@@ -92,12 +97,45 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .isPresent())
             // Distinct can be eliminated
             return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
-        else if ((newChildRoot instanceof ValuesNode))
+        // Condition - For offset > 0, we create the option to activate or deactivate any optimizations
+        else if ((newChildRoot instanceof ValuesNode) && (offset == 0 || !settings.isSliceOptimizationDisabled()))
             return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
                     ((ValuesNode) newChildRoot).getValues().subList((int) offset, (int) (offset+limit)));
         // Only triggered if a VALUES node is present under the UNION
-        else if ((newChildRoot instanceof UnionNode) && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode))
+        else if ((newChildRoot instanceof UnionNode)
+                && (offset == 0 || !settings.isSliceOptimizationDisabled())
+                && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
+                && !treeCache.isNormalizedForOptimization()
+        )
             return simplifyValues((UnionNode) newChildRoot, newChild, treeCache);
+            // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+        else if ((newChildRoot instanceof DistinctNode) &&
+                (offset == 0 || !settings.isSliceOptimizationDisabled()) &&
+                newChild.getChildren().size() == 1 &&
+                newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode) &&
+                newChild.getChildren().get(0).getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
+                newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).filter(c -> c.isDistinct()).count()>0) {
+
+            // Retrieve size of Values Node
+            long totalValues = newChild.getChildren().get(0).getChildren().stream()
+                    .filter(c -> c instanceof ValuesNode)
+                    .map(c -> (ValuesNode) c)
+                    .map(ValuesNode::getValues)
+                    .mapToLong(Collection::size)
+                    .sum();
+
+            // If total values is higher than limit, get only Values Node
+            // Otherwise do nothing due to the distinct in the pattern, we cannot know if non-values nodes are distinct or not
+            ValuesNode vNode = newChild.getChildren().get(0).getChildren().stream()
+                    .filter(c -> c instanceof ValuesNode)
+                    .map(IQTree::getRootNode)
+                    .map(v -> (ValuesNode) v)
+                    .findFirst().get();
+
+            return totalValues > (offset + limit)
+                    ? iqFactory.createValuesNode(vNode.getOrderedVariables(), vNode.getValues().subList((int) offset, (int) (offset+limit)))
+                    : iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+        }
         else
             return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
@@ -130,61 +168,59 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     private IQTree simplifyValues(UnionNode newChildRoot, IQTree newChild, IQTreeCache treeCache) {
 
-        // Retrieve size of Values node
-        long totalvalues = newChild.getChildren().stream()
+        // Retrieve size of Values Node
+        long totalValues = newChild.getChildren().stream()
                 .filter(c -> c instanceof ValuesNode)
                 .map(c -> (ValuesNode) c)
                 .map(ValuesNode::getValues)
                 .mapToLong(Collection::size)
                 .sum();
 
-        /*
-         * CASE 1: All nodes within Union are Values nodes - merge values nodes and simplify
+        /**
+         * Only one Values Node should be present at this optimization step
+         * @see it.unibz.inf.ontop.iq.node.impl.UnionNodeImpl#liftBindingFromLiftedChildrenAndFlatten(ImmutableList, VariableGenerator, IQTreeCache)
          */
-        if (newChild.getChildren().stream().allMatch(c -> c instanceof ValuesNode)) {
-            ImmutableList<ImmutableList<Constant>> alpha0 = newChild.getChildren().stream()
-                    .map(c -> ((ValuesNode) c).getValues())
-                    .flatMap(Collection::stream)
-                    .collect(ImmutableCollectors.toList());
-            return iqFactory.createValuesNode(((ValuesNode) newChild.getChildren().get(0)).getOrderedVariables(),
-                    alpha0.subList((int) offset, (int) (Math.min(offset + limit, totalvalues))));
-        }
-
-        /*
-         * CASE 2: Mixture of Values and Non-Values nodes within Union
-         */
-        ImmutableList<QueryNode> vNodelist = newChild.getChildren().stream()
+        ValuesNode vNode = newChild.getChildren().stream()
                 .filter(c -> c instanceof ValuesNode)
                 .map(IQTree::getRootNode)
-                .collect(ImmutableCollectors.toList());
+                .map(v -> (ValuesNode) v)
+                .findFirst().get();
+
         ImmutableList<IQTree> nonVnodeList = newChild.getChildren().stream()
                 .filter(c -> !(c instanceof ValuesNode))
                 .collect(ImmutableCollectors.toList());
 
-        // CASE 2.1: Values node does not even cover offset - No optimization
-        if (offset >= totalvalues) {
+        // Retrieve the Values Node variables - we know at least one Values Node is present
+        ImmutableList<Variable> orderedVariables = newChild.getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> ((ValuesNode) c))
+                .map(ValuesNode::getOrderedVariables)
+                .findFirst().get();
+
+        // CASE 1: Values Node does not even cover offset - No optimization
+        if (offset >= totalValues) {
             return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
-        // CASE 2.2: Values node fully covers offset and/or limit - Drop other non-Values Node
-        } else if (((offset + limit)) <= totalvalues) {
-            return iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
-                ((ValuesNode) vNodelist.get(0)).getValues().subList((int) offset, (int) (offset + limit)));
-        // CASE 2.3: Values Node does not fully cover offset and/or limit - Drop slice from values node, keep for nonvalues
+        // CASE 2: Values Node fully covers offset and/or limit - Drop other non-Values Node
+        } else if (((offset + limit)) <= totalValues) {
+            return iqFactory.createValuesNode(orderedVariables,
+                vNode.getValues().subList((int) offset, (int) (offset + limit)));
+        // CASE 3: Values Node does not fully cover offset and/or limit - Drop slice from values node, keep for nonvalues
         } else {
 
             ImmutableList<ValuesNode> filteredValuesNodeList = ImmutableList.of(
-                    iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
-                    ((ValuesNode) vNodelist.get(0)).getValues().subList((int) offset, (int) (Math.min(offset + limit, totalvalues)))));
+                    iqFactory.createValuesNode(orderedVariables,
+                    vNode.getValues().subList((int) offset, (int) (Math.min(offset + limit, totalValues)))));
 
             return iqFactory.createNaryIQTree(
                 newChildRoot,
                 Stream.concat(filteredValuesNodeList.stream(),
                         ImmutableList.of(iqFactory.createUnaryIQTree(
                                 // New slice node with remaining limit
-                                iqFactory.createSliceNode(Math.max(0, offset - totalvalues), limit - (totalvalues - offset)),
-                                // CASE 2.3.1 - Multiple non-Values nodes - keep Union
-                                // CASE 2.3.2 - Single non-Values node - drop Union
+                                iqFactory.createSliceNode(Math.max(0, offset - totalValues), limit - (totalValues - offset)),
                                 nonVnodeList.size() > 1
+                                    // CASE 3.1 - Multiple non-Values nodes - keep Union
                                     ? iqFactory.createNaryIQTree(newChildRoot,nonVnodeList)
+                                    // CASE 3.2 - Single non-Values node - drop Union
                                     : nonVnodeList.get(0)
                                 )).stream())
                         .collect(ImmutableCollectors.toList()));

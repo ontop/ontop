@@ -13,6 +13,12 @@ public interface OntopModelSettings {
     boolean isTestModeEnabled();
 
     /**
+     * If true, no Slice Node optimizations are present
+     * If false, Slice Node optimizations are present to speed up Slice Queries with Values Node
+     */
+    boolean isSliceOptimizationDisabled();
+
+    /**
      * Not for end-users!
      *
      * Please avoid using that class.
@@ -44,4 +50,5 @@ public interface OntopModelSettings {
 
     String CARDINALITY_MODE = "ontop.cardinalityMode";
     String TEST_MODE = "ontop.testMode";
+    String DISABLE_SLICE_OPTIMIZATION = "ontop.disableSliceOptimization";
 }

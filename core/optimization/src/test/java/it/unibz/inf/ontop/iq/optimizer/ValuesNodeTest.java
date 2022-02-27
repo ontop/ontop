@@ -3,14 +3,12 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE3_AR1;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertTrue;
@@ -190,179 +188,6 @@ public class ValuesNodeTest {
                     .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(ImmutableList.of(ONE, TWO))));
 
         assertTrue(baseTestPropagateDownConstraints(initialTree, expectedTree));
-    }
-
-    @Test
-    public void test13normalizationSlice() {
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(1, 1),
-                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(TWO_STR)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    @Test
-    public void test14normalizationDistinct() {
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createDistinctNode(),
-                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(ONE_STR), ImmutableList.of(THREE_STR))));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(THREE_STR)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    @Test
-    public void test15normalizationSliceUnionValuesValues() {
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
-                    IQ_FACTORY.createNaryIQTree(
-                            IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                                    ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                        ImmutableList.of(TWO_STR),
-                                        ImmutableList.of(THREE_STR))),
-                            IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                    ImmutableList.of(ImmutableList.of(ONE_STR),
-                                            ImmutableList.of(TWO_STR),
-                                            ImmutableList.of(THREE_STR))))));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR), ImmutableList.of(ONE_STR)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Values enough for whole limit
-    @Test
-    public void test16normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(1, 2),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Values covers only part of limit, remainder is single non-values node
-    @Test
-    public void test17normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(
-                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR))),
-                IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1), dataNode)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Values covers only part of limit, remainder is multiple non-values nodes
-    @Test
-    public void test18normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 3),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode,
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(
-                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR))),
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 2),
-                                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                                        ImmutableList.of(dataNode, dataNode)))));;
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Offset is too high - no optimization
-    @Test
-    public void test19normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(4, 2),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = initialTree;
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Offset is equal to size of values node - no optimization
-    @Test
-    public void test20normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(3, 1),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = initialTree;
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
     private Boolean baseTestNormalization(IQTree initialTree, IQTree expectedTree) {

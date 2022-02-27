@@ -15,6 +15,9 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Singleton
 public class DistinctNormalizerImpl implements DistinctNormalizer {
 
@@ -46,6 +49,39 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         else if (newChildRoot instanceof ValuesNode) {
             return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
                     ((ValuesNode) newChildRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
+        }
+        // DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...] scenario
+        else if ((newChildRoot instanceof UnionNode) &&
+                // Check for Values Nodes present otherwise no optimization
+                newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
+                // Ensure tree not already optimized
+                !treeCache.isNormalizedForOptimization()) {
+
+            // For code readability we separate the values and non-values nodes
+            ImmutableList<IQTree> vNodelist = newChild.getChildren().stream()
+                    .filter(c -> c instanceof ValuesNode)
+                    .collect(ImmutableCollectors.toList());
+            ImmutableList<IQTree> nonVnodeList = newChild.getChildren().stream()
+                    .filter(c -> !(c instanceof ValuesNode))
+                    .collect(ImmutableCollectors.toList());
+
+            /**
+             * Check if values node is already distinct, in that scenario, we do not push the DISTINCT further down
+             * Since for this optimization under UnionNodeImpl, we merge all Values Nodes into 1, checking for the first
+             * Values Node should prove sufficient
+             * @see it.unibz.inf.ontop.iq.node.impl.UnionNodeImpl#liftBindingFromLiftedChildrenAndFlatten(ImmutableList, VariableGenerator, IQTreeCache)
+              */
+            return vNodelist.get(0).isDistinct()
+                    // CASE 1: Values Node already distinct, no further optimization
+                    ? createDistinctTree(distinctNode, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect())
+                    // CASE 2: Push DISTINCT further down as per case scenario
+                    : iqFactory.createUnaryIQTree(distinctNode,
+                    iqFactory.createNaryIQTree((UnionNode) newChildRoot,
+                            Stream.concat(
+                                        vNodelist.stream()
+                                            .map(v -> iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), v)),
+                                        nonVnodeList.stream())
+                                    .collect(ImmutableCollectors.toList())));
         }
         else
             return createDistinctTree(distinctNode, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());

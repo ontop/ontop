@@ -476,6 +476,38 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private IQTree liftBindingFromLiftedChildrenAndFlatten(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
                                                            IQTreeCache treeCache) {
 
+
+        /*
+         * If multiple VALUES nodes are present, merge them
+         */
+        if (liftedChildren.stream().filter(c -> c instanceof ValuesNode).count()>1) {
+
+            // Merge all Values Nodes
+            ImmutableList<ImmutableList<Constant>> mergedValuesNodes = liftedChildren.stream()
+                    .filter(c -> c instanceof ValuesNode)
+                    .map(c -> ((ValuesNode) c).getValues())
+                    .flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toList());
+
+            // Retrieve the Values Node variables - we know at least one Values Node is present
+            ImmutableList<Variable> orderedVariables = liftedChildren.stream()
+                    .filter(c -> c instanceof ValuesNode)
+                    .map(c -> ((ValuesNode) c))
+                    .map(ValuesNode::getOrderedVariables)
+                    .findFirst().get();
+
+            ValuesNode newValuesNode = iqFactory.createValuesNode(orderedVariables, mergedValuesNodes);
+            
+            return liftedChildren.stream().allMatch(c -> c instanceof ValuesNode)
+                    // If all children are values nodes, just return the new node
+                    ? newValuesNode
+                    // Otherwise mwerge new Values Node with the other non-Values Nodes remaining
+                    : iqFactory.createNaryIQTree(this,
+                        Stream.concat(
+                            Stream.of(newValuesNode),
+                            liftedChildren.stream().filter(c -> !(c instanceof ValuesNode))).collect(ImmutableCollectors.toList()));
+        }
+
         /*
          * Cannot lift anything if some children do not have a construction node
          */
