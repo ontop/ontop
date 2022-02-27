@@ -257,7 +257,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         //this function is required in case at least one of the children is
         // SelectFromWhereWithModifiers expression
-        private QuerySerialization getSQLSerializationForChild(SQLExpression expression) {
+        protected QuerySerialization getSQLSerializationForChild(SQLExpression expression) {
             if (expression instanceof SelectFromWhereWithModifiers) {
                 QuerySerialization serialization = expression.acceptVisitor(this);
                 RelationID alias = generateFreshViewAlias();
@@ -341,8 +341,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             return new QuerySerializationImpl(sql, columnIDs);
         }
-    }
 
+        @Override
+        public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
+            throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
+        }
+    }
 
     protected static class QuerySerializationImpl implements QuerySerialization {
 

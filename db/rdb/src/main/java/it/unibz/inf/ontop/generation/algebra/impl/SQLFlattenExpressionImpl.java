@@ -6,11 +6,11 @@ import it.unibz.inf.ontop.generation.algebra.SQLExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 
 public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
-
 
     private final SQLExpression subExpression;
     private final Variable flattenendVar;
@@ -33,9 +33,21 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
         return subExpression;
     }
 
+
     @Override
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
+    public Variable getFlattenendVar() {
+        return flattenendVar;
+    }
+
+    public Variable getOutputVar() {
+        return outputVar;
+    }
+
+    public Optional<Variable> getIndexVar() {
+        return indexVar;
+    }
 }
