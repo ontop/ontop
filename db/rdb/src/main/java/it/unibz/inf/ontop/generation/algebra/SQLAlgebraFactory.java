@@ -24,7 +24,6 @@ public interface SQLAlgebraFactory {
                                                        boolean isDistinct,
                                                        @Assisted("limit") Optional<Long> limit,
                                                        @Assisted("offset") Optional<Long> offset,
-                                                       @Assisted("flatten") Optional<ImmutableSubstitution> flattenSubstitution,
                                                        @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions);
 
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, QuotedID> columnNames);
@@ -38,6 +37,8 @@ public interface SQLAlgebraFactory {
     SQLNaryJoinExpression createSQLNaryJoinExpression(ImmutableList<SQLExpression> joinedExpressions);
 
     SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
+
+    SQLFlattenExpression createSQLFlattenExpression(SQLExpression subExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar);
 
     SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
 

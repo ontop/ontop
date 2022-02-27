@@ -61,11 +61,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n);
 
-        Optional<FlattenNode> flattenNode = Optional.of(firstNonSliceDistinctTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof FlattenNode)
-                .map(n -> (FlattenNode) n);
-
         IQTree firstNonSliceDistinctConstructionTree = constructionNode
                 .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
                 .orElse(firstNonSliceDistinctTree);
@@ -131,8 +126,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 sliceNode
                         .map(SliceNode::getOffset)
                         .filter(o -> o > 0),
-                flattenNode
-                        .map(f -> f.getSubstitution()),
                 comparators);
     }
 
@@ -229,6 +222,19 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof ValuesNode) {
             ValuesNode valuesNode = (ValuesNode) rootNode;
             return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
+        }
+        else if (rootNode instanceof FlattenNode) {
+            FlattenNode flattenNode = (FlattenNode) rootNode;
+            IQTree subtree = tree.getChildren().get(0);
+            return sqlAlgebraFactory.createSQLFlattenExpression(
+                    convert(
+                            subtree,
+                            ImmutableSortedSet.copyOf(subtree.getVariables())
+                    ),
+                    flattenNode.getFlattenedVariable(),
+                    flattenNode.getOutputVariable(),
+                    flattenNode.getIndexVariable()
+            );
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
