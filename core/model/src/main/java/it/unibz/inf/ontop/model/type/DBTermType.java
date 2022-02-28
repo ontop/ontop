@@ -56,6 +56,8 @@ public interface DBTermType extends TermType {
         DATE,
         DATETIME,
         UUID,
+        JSON,
+        ARRAY,
         OTHER
     }
 }

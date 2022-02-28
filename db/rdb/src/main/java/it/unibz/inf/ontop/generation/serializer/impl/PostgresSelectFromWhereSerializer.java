@@ -9,13 +9,17 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -47,13 +51,13 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 new DefaultSelectFromWhereSerializer.DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
                     /**
                      * https://www.postgresql.org/docs/8.1/queries-limit.html
-                     *
+                     * <p>
                      * [LIMIT { number | ALL }] [OFFSET number]
-                     *
+                     * <p>
                      * If a limit count is given, no more than that many rows will be returned
                      * (but possibly less, if the query itself yields less rows).
                      * LIMIT ALL is the same as omitting the LIMIT clause.
-                     *
+                     * <p>
                      * OFFSET says to skip that many rows before beginning to return rows.
                      * OFFSET 0 is the same as omitting the OFFSET clause. If both OFFSET and LIMIT
                      * appear, then OFFSET rows are skipped before starting to count the LIMIT rows
@@ -61,7 +65,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                      */
 
                     // serializeLimit and serializeOffset are standard
-
                     @Override
                     protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d\nOFFSET %d", limit, offset);
@@ -71,10 +74,10 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
 
                         QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        String sql = getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenendVar().inferType()) +
-                                " ( "+
+                        String sql = getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenendVar()) +
+                                " ( " +
                                 subQuerySerialization.getString() +
-                                " ) "+
+                                " ) " +
                                 getFlattenIndexInString(sqlFlattenExpression.getIndexVar());
 
                         ImmutableMap<Variable, QualifiedAttributeID> columnIDs = buildFlattenColumIDMap(
@@ -94,7 +97,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
                                         e -> e.getKey(),
-                                        e -> new QualifiedAttributeID(null,e.getValue())
+                                        e -> new QualifiedAttributeID(null, e.getValue())
                                 ));
 
                         ImmutableMap<Variable, QualifiedAttributeID> retainedVariableAliases = subQuerySerialization.getColumnIDs().entrySet().stream()
@@ -115,14 +118,32 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     }
 
                     private String getFlattenIndexInString(Optional<Variable> flattenendVar) {
-
-
+                        return flattenendVar.isPresent()?
+                                "WITH ORDINALITY AS ";
                     }
 
-                    private String getFlattenFunctionSymbolString(Optional<TermTypeInference> inferType) {
-
+                    private String getFlattenFunctionSymbolString(Variable flattenedVar) {
+                        DBTermType termType = getTermType(flattenedVar);
+                        switch (termType.getCategory()) {
+                            case JSON:
+                                return "json_array_elements";
+                            case ARRAY:
+                                return "unnest";
+                            default:
+                                throw new SQLSerializationException("Unexpected type for the flattened variable " + flattenedVar);
+                        }
                     }
 
+                    private DBTermType getTermType(Variable flattenedVar) {
+                        TermType termType = flattenedVar.inferType()
+                                .flatMap(t -> t.getTermType())
+                                .orElseThrow(
+                                        () -> new SQLSerializationException("Unable to infer term type for flattened variable " + flattenedVar));
+                        if (termType instanceof DBTermType) {
+                            return (DBTermType) termType;
+                        }
+                        throw new SQLSerializationException("The type of the flattened variable " + flattenedVar + " should be an instance of DBTermType");
+                    }
                 });
-    }
+        }
 }
