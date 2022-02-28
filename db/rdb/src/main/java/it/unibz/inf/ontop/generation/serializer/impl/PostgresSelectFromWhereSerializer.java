@@ -74,16 +74,17 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
 
                         QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        String sql = getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenendVar()) +
-                                " ( " +
-                                subQuerySerialization.getString() +
-                                " ) " +
-                                getFlattenIndexInString(sqlFlattenExpression.getIndexVar());
-
                         ImmutableMap<Variable, QualifiedAttributeID> columnIDs = buildFlattenColumIDMap(
                                 sqlFlattenExpression,
                                 subQuerySerialization
                         );
+
+                        String sql = getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenendVar()) +
+                                "( " +
+                                subQuerySerialization.getString() +
+                                " ) AS " +
+                                columnIDs.get(sqlFlattenExpression.getOutputVar()).getSQLRendering() + " "+
+                                getFlattenIndexInString(sqlFlattenExpression.getIndexVar(), columnIDs);
 
                         return new QuerySerializationImpl(sql, columnIDs);
 
@@ -117,9 +118,10 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         return builder.build();
                     }
 
-                    private String getFlattenIndexInString(Optional<Variable> flattenendVar) {
-                        return flattenendVar.isPresent()?
-                                "WITH ORDINALITY AS ";
+                    private String getFlattenIndexInString(Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+                        return indexVar.isPresent()?
+                                "WITH ORDINALITY AS " + columnIDs.get(indexVar.get()).getSQLRendering()+" ":
+                                "";
                     }
 
                     private String getFlattenFunctionSymbolString(Variable flattenedVar) {
