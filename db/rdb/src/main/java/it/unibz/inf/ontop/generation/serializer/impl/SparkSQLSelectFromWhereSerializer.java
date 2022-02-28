@@ -64,7 +64,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs = fromQuerySerialization.getColumnIDs();
                 String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
-                        variableAliases, selectFromWhere.getSubstitution(), selectFromWhere.getFlattenSubstitution(), columnIDs);
+                        variableAliases, selectFromWhere.getSubstitution(), columnIDs);
 
                 String fromString = fromQuerySerialization.getString();
 
@@ -86,32 +86,11 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
             }
 
-            //this function is required in case at least one of the children is
-            // SelectFromWhereWithModifiers expression
-            private QuerySerialization getSQLSerializationForChild(SQLExpression expression) {
-                if (expression instanceof SelectFromWhereWithModifiers) {
-                    QuerySerialization serialization = expression.acceptVisitor(this);
-                    RelationID alias = generateFreshViewAlias();
-                    String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
-                    return new QuerySerializationImpl(sql,
-                            replaceRelationAlias(alias, serialization.getColumnIDs()));
-                }
-                return expression.acceptVisitor(this);
-            }
-
             private ImmutableMap<Variable, QualifiedAttributeID> replaceRelationAlias(RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
                 return columnIDs.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
                                 e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
-            }
-
-            private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
-                AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
-                return variables.stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Function.identity(),
-                                v -> aliasFactory.createAttributeAlias(v.getName())));
             }
 
             ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
