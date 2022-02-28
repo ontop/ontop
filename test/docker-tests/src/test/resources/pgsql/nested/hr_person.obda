@@ -10,8 +10,8 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person-tags
-target		:person/{"id"} a :Person ; :fullName {"fullName"} ; :ssn {"ssn"} ; :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int.
-source		SELECT "id", "fullName", "ssn", "tag_str", "tag_int" FROM "hr"."persons-tags";
+target		:person/{"id"} a :Person ; :fullName {"fullName"} ; :ssn {"ssn"}^^xsd:int ; :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int.
+source		SELECT "id", "fullName", "ssn", "tag_str", "tag_int" FROM "hr"."person-tags";
 ]]
 
 [MappingDeclaration] @collection [[

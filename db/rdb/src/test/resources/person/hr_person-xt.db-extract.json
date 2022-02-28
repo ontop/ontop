@@ -29,7 +29,7 @@
         "isNullable" : true
       }
     ],
-    "name": ["\"hr\"","\"persons-xt\""]
+    "name": ["\"hr\"","\"person-xt\""]
   }],
   "metadata" : {
     "dbmsProductName" : "POSTGRESQL"

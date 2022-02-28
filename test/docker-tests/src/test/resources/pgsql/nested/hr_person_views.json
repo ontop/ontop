@@ -1,8 +1,8 @@
 {
   "relations": [
     {
-      "name": ["\"hr\"","\"persons-tags\""],
-      "baseRelation": ["\"hr\"","\"persons-xt\""],
+      "name": ["\"hr\"","\"person-tags\""],
+      "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": "\"tags\"",
       "columns": {
         "kept": [
@@ -35,7 +35,7 @@
     },
     {
       "name": ["\"hr\"","\"persons-friends\""],
-      "baseRelation": ["\"hr\"","\"persons-xt\""],
+      "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": "\"friends\"",
       "columns": {
         "kept": [
