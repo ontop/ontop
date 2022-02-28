@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -15,6 +17,7 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import javax.annotation.Nonnull;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +73,17 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
 
         if (options.mappingOntologyOptions.ontologyFile.isPresent()) {
             owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(options.mappingOntologyOptions.ontologyFile.get()));
+        }
+        else if (options.mappingOntologyOptions.ontologyReader.isPresent()) {
+            try {
+                InputStream inputStream = new ByteArrayInputStream(
+                        CharStreams.toString(options.mappingOntologyOptions.ontologyReader.get())
+                        .getBytes(Charsets.UTF_8));
+                owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(inputStream));
+            } catch (IOException e) {
+                throw new OWLOntologyCreationException(e.getMessage());
+            }
+
         }
 
         /*

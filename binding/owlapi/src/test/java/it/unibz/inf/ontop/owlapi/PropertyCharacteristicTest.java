@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -96,7 +97,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
+				.ontologyReader(new FileReader(owlFile))
 				.nativeOntopMappingFile(obdaFile)
 				.jdbcUrl(url)
 				.jdbcUser(username)

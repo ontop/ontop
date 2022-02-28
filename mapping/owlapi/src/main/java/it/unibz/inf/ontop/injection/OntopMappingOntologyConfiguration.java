@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.Reader;
 import java.net.URL;
 
 /**
@@ -18,6 +19,8 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
         B ontologyFile(@Nonnull URL url);
 
         B ontologyFile(@Nonnull File owlFile);
+
+        B ontologyReader(@Nonnull Reader reader);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingOntologyBuilderFragment<B>,

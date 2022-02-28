@@ -39,6 +39,34 @@ public class ValuesNodeQueryTest extends AbstractRDF4JTest {
         int count = runQueryAndCount("SELECT * WHERE {\n" +
                 "\t?s ?p ?o\n" +
                 "}");
-        assertEquals(count, 12);
+        assertEquals(count, 16);
+    }
+
+    @Test
+    public void testBGP1() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "  ?c a <http://te.st/ValuesNodeTest#Course> ." +
+                "  ?t a <http://te.st/ValuesNodeTest#Teacher>.\n" +
+                "  ?t <http://te.st/ValuesNodeTest#teaches> ?c " +
+                "}");
+        assertEquals(count, 3);
+    }
+
+    @Test
+    public void testBGP2() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "  ?s a <http://te.st/ValuesNodeTest#Student>.\n" +
+                "  ?s <http://te.st/ValuesNodeTest#attends> ?c " +
+                "}");
+        assertEquals(count, 2);
+    }
+
+    @Test
+    public void testBGP3() {
+        int count = runQueryAndCount("SELECT ?c WHERE {\n" +
+                "  ?s a ?c \n" +
+                "  FILTER (?c = <http://te.st/ValuesNodeTest#Student>)" +
+                "}");
+        assertEquals(count, 2);
     }
 }
