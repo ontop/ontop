@@ -710,9 +710,34 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void not_regexp_MySQL_match_infix_NOT_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE  X NOT REGEXP BINARY 'A.*B'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+                TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
+                        v,
+                        TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
+    }
+
+    @Test
     public void not_regexp_MySQL_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X REGEXP 'A.*B'", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+                TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
+                        v,
+                        TERM_FACTORY.getDBStringConstant("A.*B"),
+                        TERM_FACTORY.getDBStringConstant("i"))), translation.get(0));
+    }
+
+    @Test
+    public void not_regexp_MySQL_match_ignore_case_infix_NOT_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE  X NOT REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
@@ -1179,6 +1204,11 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
+                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getDBStringConstant("i"),
+                TERM_FACTORY.getDBStringConstant("")), translation);
     }
 
     @Test
@@ -1204,34 +1234,47 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
-    /**
-     * Not recognized ????
-     */
     @Test
     public void function_REGEXP_REPLACE_6_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
+                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getDBStringConstant(""),
+                TERM_FACTORY.getDBIntegerConstant(1),
+                TERM_FACTORY.getDBIntegerConstant(0),
+                TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
-    /**
-     * Not recognized ????
-     */
     @Test
     public void function_REGEXP_REPLACE_6a_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 2, 0, 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
+                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getDBStringConstant(""),
+                TERM_FACTORY.getDBIntegerConstant(2),
+                TERM_FACTORY.getDBIntegerConstant(0),
+                TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
-    /**
-     * Not recognized ????
-     */
     @Test
     public void function_REGEXP_REPLACE_7_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i', '')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 7), v,
+                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getDBStringConstant(""),
+                TERM_FACTORY.getDBIntegerConstant(1),
+                TERM_FACTORY.getDBIntegerConstant(0),
+                TERM_FACTORY.getDBStringConstant("i"),
+                TERM_FACTORY.getDBStringConstant("")), translation);
     }
 
     @Test
