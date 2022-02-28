@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
+@Ignore
 public class LevelUpOptimizerTest {
 
 

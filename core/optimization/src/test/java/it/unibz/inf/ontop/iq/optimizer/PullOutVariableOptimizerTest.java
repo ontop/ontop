@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -432,6 +433,7 @@ public class PullOutVariableOptimizerTest {
     }
 
     @Test
+    @Ignore
     public void testFlattenOutputVariable() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
 
@@ -468,6 +470,7 @@ public class PullOutVariableOptimizerTest {
     }
 
     @Test
+    @Ignore
     public void testFlattenOutputVariable2()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -504,6 +507,7 @@ public class PullOutVariableOptimizerTest {
     }
 
     @Test
+    @Ignore
     public void testFlattenIndexVariable() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
@@ -540,6 +544,7 @@ public class PullOutVariableOptimizerTest {
     }
 
     @Test
+    @Ignore
     public void testFlattenIndexAndOutputVariable() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());

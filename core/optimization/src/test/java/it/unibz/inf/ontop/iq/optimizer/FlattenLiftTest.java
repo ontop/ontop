@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
+@Ignore
 public class FlattenLiftTest {
 
     private final static NamedRelationDefinition TABLE1;
