@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class NestedJsonTest extends AbstractVirtualModeTest {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
