@@ -38,7 +38,7 @@ public interface SQLAlgebraFactory {
 
     SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
 
-    SQLFlattenExpression createSQLFlattenExpression(SQLExpression subExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar);
+    SQLFlattenExpression createSQLFlattenExpression(@Assisted SQLExpression subExpression, @Assisted("flattenedVar") Variable flattenedVar, @Assisted("outputVar") Variable outputVar, @Assisted Optional<Variable> indexVar);
 
     SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
 

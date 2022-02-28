@@ -21,7 +21,7 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
     private SQLFlattenExpressionImpl(@Assisted SQLExpression subExpression,
                                      @Assisted("flattenedVar") Variable flattenendVar,
                                      @Assisted("outputVar") Variable outputVar,
-                                     @Assisted("indexVar") Optional<Variable> indexVar) {
+                                     @Assisted Optional<Variable> indexVar) {
         this.subExpression = subExpression;
         this.flattenendVar = flattenendVar;
         this.outputVar = outputVar;
