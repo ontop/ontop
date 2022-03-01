@@ -152,7 +152,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return rootNode instanceof FlattenNode?
                 Stream.concat(
                         childVariables.stream(),
-                        rootNode.getLocalVariables().stream())
+                        rootNode.getLocallyDefinedVariables().stream())
                         .collect(ImmutableCollectors.toSet()):
                 childVariables;
     }

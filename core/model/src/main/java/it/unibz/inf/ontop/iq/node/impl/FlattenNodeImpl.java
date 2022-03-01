@@ -280,14 +280,12 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        throw new FlattenNodeException("This method should not be called");
+        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+        builder.add(outputVariable);
+        indexVariable.ifPresent(v -> builder.add(v));
+        return builder.build();
     }
 
-    private static class FlattenNodeException extends OntopInternalBugException {
-        FlattenNodeException(String message) {
-            super(message);
-        }
-    }
 
 //    @Override
 //    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {

@@ -33,20 +33,24 @@ public abstract class AbstractVirtualModeTest {
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
     protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
-        return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty());
+        return createReasoner(owlFile,obdaFile, propertiesFile, Optional.empty(), Optional.empty());
     }
 
     protected static OntopOWLReasoner createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile) throws OWLOntologyCreationException {
-        return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile));
+        return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile), Optional.empty());
     }
 
-    private static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> implicitConstraintsFile) throws OWLOntologyCreationException {
+    protected static OntopOWLReasoner createReasonerWithViews(String owlFile, String obdaFile, String propertiesFile, String viewFile) throws OWLOntologyCreationException {
+        return createReasoner(owlFile,obdaFile,propertiesFile, Optional.empty(), Optional.of(viewFile));
+    }
+
+    private static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> implicitConstraintsFile, Optional<String> viewFile) throws OWLOntologyCreationException {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, implicitConstraintsFile, Optional.empty());
+        OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, implicitConstraintsFile, viewFile);
         return factory.createReasoner(config);
     }
 

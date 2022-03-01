@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
@@ -79,15 +80,26 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 subQuerySerialization
                         );
 
-                        String sql = getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenendVar()) +
-                                "( " +
-                                subQuerySerialization.getString() +
-                                " ) AS " +
-                                columnIDs.get(sqlFlattenExpression.getOutputVar()).getSQLRendering() + " "+
-                                getFlattenIndexInString(sqlFlattenExpression.getIndexVar(), columnIDs);
-
-                        return new QuerySerializationImpl(sql, columnIDs);
-
+                        Variable flattenedVar = sqlFlattenExpression.getFlattenendVar();
+                        Variable outputVar = sqlFlattenExpression.getOutputVar();
+                        Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
+                        RelationID relationAlias = generateFreshViewAlias();
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(String.format(
+                                        "%s %s %s(%s) AS %s %s",
+                                        subQuerySerialization.getString(),
+                                        relationAlias.getSQLRendering(),
+                                        getFlattenFunctionSymbolString(flattenedVar),
+                                        columnIDs.get(flattenedVar).getSQLRendering(),
+                                        columnIDs.get(outputVar).getSQLRendering()
+                        ));
+                        indexVar.ifPresent(
+                                v -> builder.append(String.format(
+                                        " WITH ORDINALITY AS %s",
+                                        columnIDs.get(v).getSQLRendering()
+                                )
+                        ));
+                        return new QuerySerializationImpl(builder.toString(), columnIDs);
                     }
 
                     private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
@@ -116,12 +128,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         builder.add(sqlFlattenExpression.getOutputVar());
                         sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
                         return builder.build();
-                    }
-
-                    private String getFlattenIndexInString(Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
-                        return indexVar.isPresent()?
-                                "WITH ORDINALITY AS " + columnIDs.get(indexVar.get()).getSQLRendering()+" ":
-                                "";
                     }
 
                     private String getFlattenFunctionSymbolString(Variable flattenedVar) {

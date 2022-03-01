@@ -13,6 +13,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 
 public class NestedJsonTest extends AbstractVirtualModeTest {
@@ -29,7 +31,7 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+        REASONER = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
         CONNECTION = REASONER.getConnection();
     }
 

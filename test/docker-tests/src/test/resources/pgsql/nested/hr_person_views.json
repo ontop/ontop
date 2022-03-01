@@ -8,7 +8,7 @@
         "kept": [
           "\"id\"",
           "\"ssn\"",
-          "\"fullName\""
+          "\"fullname\""
         ],
         "position": "\"pos\"",
         "extracted": [
