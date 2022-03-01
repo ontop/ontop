@@ -42,15 +42,12 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final SQLQueryParser sqlQueryParser;
-    private final RAExpression2IQConverter raExpression2IQConverter;
 
     @Inject
-    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser,
-                                      RAExpression2IQConverter raExpression2IQConverter) {
+    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
-        this.raExpression2IQConverter = raExpression2IQConverter;
     }
 
     @Override
@@ -59,7 +56,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
             RAExpression re = getRAExpression(assertion, metadataLookup);
-            IQTree tree = raExpression2IQConverter.convert(re);
+            IQTree tree = sqlQueryParser.convert(re);
 
             Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 

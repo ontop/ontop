@@ -152,7 +152,7 @@
         <javax-inject.version>1</javax-inject.version>
         <javax-json.version>1.0.4</javax-json.version>
         <jgrapht.version>0.9.3</jgrapht.version>
-        <jsqlparser.version>3.1</jsqlparser.version>
+        <jsqlparser.version>4.3</jsqlparser.version>
         <jsr305.version>3.0.2</jsr305.version>
         <junit.version>4.13.1</junit.version>
         <logback.version>1.2.9</logback.version>
