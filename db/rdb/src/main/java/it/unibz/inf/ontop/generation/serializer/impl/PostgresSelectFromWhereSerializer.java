@@ -77,7 +77,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
                         StringBuilder builder = new StringBuilder();
                         builder.append(String.format(
-                                        "%s %s(%s) ",
+                                        "%s JOIN LATERAL %s(%s) ",
                                         subQuerySerialization.getString(),
                                         getFlattenFunctionSymbolString(flattenedVar),
                                         allColumnIDs.get(flattenedVar).getSQLRendering()
