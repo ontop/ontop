@@ -226,10 +226,11 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof FlattenNode) {
             FlattenNode flattenNode = (FlattenNode) rootNode;
             IQTree subtree = tree.getChildren().get(0);
+            ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(subtree.getVariables());
             return sqlAlgebraFactory.createSQLFlattenExpression(
-                    convertIntoOrdinaryExpression(
-                            subtree
-//                            ImmutableSortedSet.copyOf(subtree.getVariables())
+                    convert(
+                            subtree,
+                            signature
                     ),
                     flattenNode.getFlattenedVariable(),
                     flattenNode.getOutputVariable(),

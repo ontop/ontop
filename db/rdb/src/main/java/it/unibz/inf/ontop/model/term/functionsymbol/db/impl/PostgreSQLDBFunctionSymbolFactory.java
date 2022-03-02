@@ -178,7 +178,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                                 "json_typeof(%s) = \'"+ t+ "\'",
                                 termConverter.apply(terms.get(0))
                         ))
-                        .collect(Collectors.joining(" OR"))
+                        .collect(Collectors.joining(" OR "))
                 );
     }
 

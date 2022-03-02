@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Singleton
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -66,7 +67,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
 
                         QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        ImmutableMap<Variable, QualifiedAttributeID> columnIDs = buildFlattenColumIDMap(
+                        ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
                                 sqlFlattenExpression,
                                 subQuerySerialization
                         );
@@ -74,29 +75,46 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
                         Variable outputVar = sqlFlattenExpression.getOutputVar();
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
-                        RelationID relationAlias = generateFreshViewAlias();
                         StringBuilder builder = new StringBuilder();
                         builder.append(String.format(
-                                        "%s %s %s(%s) AS %s %s",
+                                        "%s %s(%s) ",
                                         subQuerySerialization.getString(),
-                                        relationAlias.getSQLRendering(),
                                         getFlattenFunctionSymbolString(flattenedVar),
-                                        columnIDs.get(flattenedVar).getSQLRendering(),
-                                        columnIDs.get(outputVar).getSQLRendering()
+                                        allColumnIDs.get(flattenedVar).getSQLRendering()
                         ));
                         indexVar.ifPresent(
                                 v -> builder.append(String.format(
-                                        " WITH ORDINALITY AS %s",
-                                        columnIDs.get(v).getSQLRendering()
+                                        " WITH ORDINALITY ",
+                                        allColumnIDs.get(v).getSQLRendering()
                                 )
                         ));
-                        return new QuerySerializationImpl(builder.toString(), columnIDs);
+                        builder.append(
+                                String.format(
+                                        "AS %s ON TRUE",
+                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)
+                                )
+                        );
+                        return new QuerySerializationImpl(
+                                builder.toString(),
+                                allColumnIDs.entrySet().stream()
+                                        .filter(e -> e.getKey() != flattenedVar)
+                                        .collect(ImmutableCollectors.toMap())
+                        );
+                    }
+
+                    private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+                        String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
+                        return indexVar.isPresent()?
+                                String.format(
+                                        "a(%s, %s)",
+                                        outputVarString,
+                                        allColumnIDs.get(indexVar.get()).getSQLRendering()):
+                                outputVarString;
                     }
 
                     private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
                                                                                                 QuerySerialization subQuerySerialization) {
 
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
 
                         ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
@@ -104,13 +122,9 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                         e -> new QualifiedAttributeID(null, e.getValue())
                                 ));
 
-                        ImmutableMap<Variable, QualifiedAttributeID> retainedVariableAliases = subQuerySerialization.getColumnIDs().entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap());
-
                         return ImmutableMap.<Variable, QualifiedAttributeID>builder()
                                 .putAll(freshVariableAliases)
-                                .putAll(retainedVariableAliases)
+                                .putAll(subQuerySerialization.getColumnIDs())
                                 .build();
                     }
 
