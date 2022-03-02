@@ -88,8 +88,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
                 renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
                 flattenNode.getFlattenedVariable(),
                 flattenNode.getIndexVariable()
-                        .map(v -> renamingSubstitution.applyToVariable(v)),
-                flattenNode.isStrict()
+                        .map(v -> renamingSubstitution.applyToVariable(v))
         );
     }
 

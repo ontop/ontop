@@ -79,8 +79,6 @@ public interface FlattenNode extends UnaryOperatorNode {
 
     Optional<Variable> getIndexVariable();
 
-    boolean isStrict();
-
     Optional<TermType> inferOutputType(Optional<TermType> extractSingleTermType);
 
     Optional<TermType> getIndexVariableType();

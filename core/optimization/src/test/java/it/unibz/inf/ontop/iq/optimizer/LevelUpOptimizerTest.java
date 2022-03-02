@@ -196,7 +196,7 @@ public class LevelUpOptimizerTest {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE2, ImmutableList.of(X, B));
-        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, N, Optional.empty(), true);
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, N, Optional.empty());
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(X, N, C));
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
@@ -270,7 +270,7 @@ public class LevelUpOptimizerTest {
                         ImmutableList.of(X1, C1)
                 ));
 
-        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, N, Optional.empty(), true);
+        FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, N, Optional.empty());
         ExtensionalDataNode dataNode2 = createExtensionalDataNodeFromView(baseView);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
@@ -322,8 +322,8 @@ public class LevelUpOptimizerTest {
                 ));
 
 
-        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(O2, N1, Optional.empty(), true);
-        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(O11, M, Optional.empty(), true);
+        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(O2, N1, Optional.empty());
+        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(O11, M, Optional.empty());
         ExtensionalDataNode dataNode2 = createExtensionalDataNodeFromView(baseView);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
@@ -547,7 +547,7 @@ public class LevelUpOptimizerTest {
                                                      ImmutableSet<QuotedID> nonNullAttributes) {
 
             RelationID id = getQuotedIDFactory().createRelationID("FLATTEN_" + parentView.getID().toString());
-            IQ iq = createNestedViewIQ(parentView, isStrictFlatten, flattenedVariable, outputVariable, retainedVariables, freshVariables);
+            IQ iq = createNestedViewIQ(parentView, flattenedVariable, outputVariable, retainedVariables, freshVariables);
             RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, nonNullAttributes);
 
             OntopViewDefinition view = new OntopViewDefinitionImpl(
@@ -565,7 +565,6 @@ public class LevelUpOptimizerTest {
          * TODO: add projectionNode
          */
         private IQ createNestedViewIQ(OntopViewDefinition parentView,
-                                      boolean isStrictFlatten,
                                       Variable flattenedVariable,
                                       Variable outputVariable,
                                       ImmutableList<Variable> retainedVariables,
@@ -583,7 +582,7 @@ public class LevelUpOptimizerTest {
                     getJSONSubstitution(retainedVariables, renamedRetainedVariables)
             );
 
-            FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, flattenedVariable, Optional.empty(), isStrictFlatten);
+            FlattenNode flattenNode = IQ_FACTORY.createFlattenNode(O, flattenedVariable, Optional.empty());
             return IQ_FACTORY.createIQ(
                     projectionAtom,
                     IQ_FACTORY.createUnaryIQTree(

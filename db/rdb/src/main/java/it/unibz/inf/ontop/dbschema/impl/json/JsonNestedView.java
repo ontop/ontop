@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -109,6 +110,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
+        TermFactory termFactory = cs.getTermFactory();
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
@@ -157,9 +159,15 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
                 flattenedColumnVariable,
-                positionVariable,
-                true
+                positionVariable
         );
+
+        FilterNode filterNode = iqFactory.createFilterNode(
+                termFactory.getConjunction(
+                        ImmutableList.of(
+                                termFactory.getDBJsonIsArray(flattenedColumnVariable),
+                                termFactory.getDBIsNotNull(flattenedColumnVariable)
+        )));
 
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
@@ -168,8 +176,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                         extractionConstructionNode,
                         iqFactory.createUnaryIQTree(
                                 flattennode,
+                                iqFactory.createUnaryIQTree(
+                                filterNode,
                                 dataNode
-                        )));
+                        ))));
     }
 
     private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable,

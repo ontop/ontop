@@ -33,19 +33,15 @@ import java.util.stream.Stream;
 public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNode {
 
 
-    private static final String RELAXED_FLATTEN_PREFIX = "FLATTEN";
-    private static final String STRICT_FLATTEN_PREFIX = "FLATTEN STRICT";
 
     private final Variable flattenedVariable;
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
-    private final boolean isStrict;
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
                             @Assisted("flattenedVariable") Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
-                            @Assisted boolean isStrict,
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory) {
@@ -53,7 +49,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.outputVariable = outputVariable;
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
-        this.isStrict = isStrict;
     }
 
     @Override
@@ -69,11 +64,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public Optional<Variable> getIndexVariable() {
         return indexVariable;
-    }
-
-    @Override
-    public boolean isStrict() {
-        return isStrict;
     }
 
     @Override
@@ -117,11 +107,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public String toString() {
-        String prefix = isStrict ?
-                STRICT_FLATTEN_PREFIX :
-                RELAXED_FLATTEN_PREFIX;
-
-        return prefix + " [" +
+        return "FLATTEN  [" +
                 outputVariable + "/flatten(" + flattenedVariable + ")" +
                 (indexVariable.isPresent() ?
                         ", " + indexVariable.get() + "/indexIn(" + flattenedVariable + ")" :
@@ -294,7 +280,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FlattenNodeImpl that = (FlattenNodeImpl) o;
-        return isStrict == that.isStrict &&
+        return
                 flattenedVariable.equals(that.flattenedVariable) &&
                 outputVariable.equals(that.outputVariable) &&
                 indexVariable.equals(that.indexVariable);
@@ -302,7 +288,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public int hashCode() {
-        return Objects.hash(flattenedVariable, outputVariable, indexVariable, isStrict);
+        return Objects.hash(flattenedVariable, outputVariable, indexVariable);
     }
 
     @Override
@@ -313,7 +299,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public FlattenNode clone() {
-        return iqFactory.createFlattenNode(flattenedVariable, outputVariable, indexVariable, isStrict);
+        return iqFactory.createFlattenNode(flattenedVariable, outputVariable, indexVariable);
     }
 
     @Override
@@ -345,8 +331,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 iqFactory.createFlattenNode(
                         sFlattenedVar,
                         sOutputVar,
-                        sIndexVar,
-                        isStrict
+                        sIndexVar
                 );
     }
 
