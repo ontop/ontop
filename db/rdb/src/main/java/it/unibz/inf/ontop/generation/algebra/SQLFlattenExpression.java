@@ -8,7 +8,7 @@ public interface SQLFlattenExpression extends SQLExpression {
 
     SQLExpression getSubExpression();
 
-    Variable getFlattenendVar();
+    Variable getFlattenedVar();
 
     Variable getOutputVar();
 

@@ -227,9 +227,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             FlattenNode flattenNode = (FlattenNode) rootNode;
             IQTree subtree = tree.getChildren().get(0);
             return sqlAlgebraFactory.createSQLFlattenExpression(
-                    convert(
-                            subtree,
-                            ImmutableSortedSet.copyOf(subtree.getVariables())
+                    convertIntoOrdinaryExpression(
+                            subtree
+//                            ImmutableSortedSet.copyOf(subtree.getVariables())
                     ),
                     flattenNode.getFlattenedVariable(),
                     flattenNode.getOutputVariable(),

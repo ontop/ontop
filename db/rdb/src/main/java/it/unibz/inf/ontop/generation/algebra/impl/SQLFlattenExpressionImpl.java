@@ -39,7 +39,7 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
         return visitor.visit(this);
     }
 
-    public Variable getFlattenendVar() {
+    public Variable getFlattenedVar() {
         return flattenendVar;
     }
 

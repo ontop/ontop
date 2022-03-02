@@ -1,32 +1,23 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -80,7 +71,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 subQuerySerialization
                         );
 
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenendVar();
+                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
                         Variable outputVar = sqlFlattenExpression.getOutputVar();
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
                         RelationID relationAlias = generateFreshViewAlias();
@@ -105,7 +96,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
                                                                                                 QuerySerialization subQuerySerialization) {
 
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenendVar();
+                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
 
                         ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
@@ -131,15 +122,16 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     }
 
                     private String getFlattenFunctionSymbolString(Variable flattenedVar) {
-                        DBTermType termType = getTermType(flattenedVar);
-                        switch (termType.getCategory()) {
-                            case JSON:
                                 return "json_array_elements";
-                            case ARRAY:
-                                return "unnest";
-                            default:
-                                throw new SQLSerializationException("Unexpected type for the flattened variable " + flattenedVar);
-                        }
+//                        DBTermType termType = getTermType(flattenedVar);
+//                        switch (termType.getCategory()) {
+//                            case JSON:
+//                                return "json_array_elements";
+//                            case ARRAY:
+//                                return "unnest";
+//                            default:
+//                                throw new SQLSerializationException("Unexpected type for the flattened variable " + flattenedVar);
+//                        }
                     }
 
                     private DBTermType getTermType(Variable flattenedVar) {
