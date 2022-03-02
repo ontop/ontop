@@ -209,11 +209,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 dbStringType,
                 false,
                 (terms, termConverter, termFactory) ->
-                        "\'{"+
+                        "{"+
                         terms.stream()
                                 .map(termConverter::apply)
+                                .map(s -> s.replaceAll("\'", ""))
                                 .collect(Collectors.joining(","))
-                        +"}\'"
+                        +"}"
                 );
     }
 

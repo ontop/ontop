@@ -281,7 +281,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
-        ImmutableFunctionalTerm retrieveJsonElt = termFactory.getDBJsonElement(path, sourceVar);
+        ImmutableFunctionalTerm retrieveJsonElt = termFactory.getDBJsonElement(sourceVar, path);
 
         switch (extractedColumnType) {
             case JSON:

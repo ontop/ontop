@@ -630,7 +630,7 @@ public interface TermFactory {
 
 
 	// JSON
-	ImmutableFunctionalTerm getDBJsonElement(ImmutableList<DBConstant> path, ImmutableTerm arg);
+	ImmutableFunctionalTerm getDBJsonElement(ImmutableTerm arg, ImmutableList<DBConstant> path);
 	ImmutableFunctionalTerm getDBBuildJsonPath(ImmutableList<DBConstant> path);
 	ImmutableExpression getDBJsonIsBoolean(ImmutableTerm arg);
 	ImmutableExpression getDBJsonIsNumber(ImmutableTerm arg);
