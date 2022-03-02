@@ -48,8 +48,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     @Nonnull
     private final String flattenedColumn;
 
-    private final String position;
-
     public final UniqueConstraints uniqueConstraints;
 
     public final OtherFunctionalDependencies otherFunctionalDependencies;
@@ -63,7 +61,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
             @JsonProperty("name") List<String> name,
             @JsonProperty("baseRelation") List<String> baseRelation,
             @JsonProperty("flattenedColumn") String flattenedColumn,
-            @JsonProperty("position") String position,
             @JsonProperty("columns") Columns columns,
             @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
             @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
@@ -74,7 +71,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         this.columns = columns;
         this.baseRelation = baseRelation;
         this.flattenedColumn = flattenedColumn;
-        this.position = position;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
@@ -120,9 +116,9 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
 
-        Optional<Variable> positionVariable = (position == null)?
+        Optional<Variable> positionVariable = (columns.position == null)?
                 Optional.empty():
-                Optional.ofNullable(variableGenerator.generateNewVariable(position));
+                Optional.ofNullable(variableGenerator.generateNewVariable(columns.position));
 
         ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, idFactory);
 
@@ -419,8 +415,8 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     private ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
         ImmutableSet.Builder<QuotedID> builder = ImmutableSet.builder();
-        if(position != null) {
-            builder.add(idFactory.createAttributeID(position));
+        if(columns.position != null) {
+            builder.add(idFactory.createAttributeID(columns.position));
         }
         builder.addAll(
                 columns.extracted.stream()
@@ -536,7 +532,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         }
     }
 
-    private static enum ExtractedColumnType {
+    private enum ExtractedColumnType {
         TEXT("text"),
         INTEGER("integer"),
         DECIMAL("decimal"),
@@ -547,7 +543,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         String label;
 
-        private ExtractedColumnType(String label) {
+        ExtractedColumnType(String label) {
             this.label = label;
         }
 
