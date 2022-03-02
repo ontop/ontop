@@ -52,7 +52,7 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
     public void testFlattenTags() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
                 "\n" +
-                "SELECT  ?person ?ssn ?v" +
+                "SELECT  ?person ?ssn ?v " +
                 "WHERE {" +
                 "?person  :ssn ?ssn . " +
                 "?person  :tag_str ?v . " +
