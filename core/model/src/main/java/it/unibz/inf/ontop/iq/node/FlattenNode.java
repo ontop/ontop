@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
@@ -80,7 +81,7 @@ public interface FlattenNode extends UnaryOperatorNode {
 
     boolean isStrict();
 
-    // The substitution does not carry extra information:
-    // it can be generated out of the output variable, flattened variable and optional index variable
-    ImmutableSubstitution<Variable> getSubstitution();
+    Optional<TermType> inferOutputType(Optional<TermType> extractSingleTermType);
+
+    Optional<TermType> getIndexVariableType();
 }

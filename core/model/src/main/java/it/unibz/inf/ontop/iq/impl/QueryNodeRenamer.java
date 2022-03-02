@@ -85,11 +85,10 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FlattenNode transform(FlattenNode flattenNode) {
         return iqFactory.createFlattenNode(
-                flattenNode.getFlattenedVariable(),
                 renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
-                flattenNode.getIndexVariable().isPresent()?
-                        Optional.of(renamingSubstitution.applyToVariable(flattenNode.getIndexVariable().get())):
-                        Optional.empty(),
+                flattenNode.getFlattenedVariable(),
+                flattenNode.getIndexVariable()
+                        .map(v -> renamingSubstitution.applyToVariable(v)),
                 flattenNode.isStrict()
         );
     }

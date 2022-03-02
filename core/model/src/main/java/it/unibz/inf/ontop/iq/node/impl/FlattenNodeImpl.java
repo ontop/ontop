@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -39,9 +41,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Optional<Variable> indexVariable;
     private final boolean isStrict;
 
-    // generated if needed: the substitution does not carry extra information
-    private Optional<ImmutableSubstitution> substitution;
-
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
                             @Assisted("flattenedVariable") Variable flattenedVariable,
@@ -55,16 +54,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
         this.isStrict = isStrict;
-    }
-
-    private ImmutableSubstitution<Variable> generateSubstitution() {
-        ImmutableMap.Builder<Variable, ImmutableFunctionalTerm> builder = ImmutableMap.builder();
-        builder.put(outputVariable, termFactory.getDBFlatten(flattenedVariable));
-        indexVariable.ifPresent(
-                v -> builder.put(v, termFactory.getDBIndexIn(flattenedVariable))
-        );
-        this.substitution = Optional.of(substitutionFactory.getSubstitution(builder.build()));
-        return this.substitution.get();
     }
 
     @Override
@@ -88,8 +77,32 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public ImmutableSubstitution getSubstitution() {
-       return substitution.orElse(generateSubstitution());
+    public Optional<TermType> inferOutputType(Optional<TermType> flattenedVarType) {
+        Optional<DBTermType> optTermType = flattenedVarType
+                .filter(t -> t instanceof DBTermType)
+                .map(t -> (DBTermType) t);
+        if(optTermType.isPresent()){
+            DBTermType type = optTermType.get();
+            switch (type.getCategory()){
+                case JSON:
+                    return flattenedVarType;
+                case ARRAY:
+                    throw new FlattenedVariableTypeException("Array DBType not yet implemented");
+                default:
+                    throw new FlattenedVariableTypeException(
+                            String.format(
+                                    "Unexpected Datatype %s for flattened variable %s",
+                                    type,
+                                    flattenedVariable
+                            ));
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<TermType> getIndexVariableType() {
+        return Optional.empty();
     }
 
     @Override
@@ -111,7 +124,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return prefix + " [" +
                 outputVariable + "/flatten(" + flattenedVariable + ")" +
                 (indexVariable.isPresent() ?
-                        indexVariable.get() + "/IndexIn(" + flattenedVariable + ")" :
+                        ", " + indexVariable.get() + "/indexIn(" + flattenedVariable + ")" :
                         ""
                 ) +
                 "]";
@@ -205,57 +218,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
         if (!child.getVariables().contains(flattenedVariable)) {
-            throw new InvalidIntermediateQueryException("The variable flattened by node " + this + "is not projected by its child");
+            throw new InvalidIntermediateQueryException(
+                    String.format( "Variable %s is flattened by Node %s but is not projected by its child",
+                            flattenedVariable,
+                            this
+                    ));
         }
     }
-
-//    @Override
-//    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-//        IQTree newChild = child.liftIncompatibleDefinitions(variable);
-//        QueryNode newChildRoot = newChild.getRootNode();
-//
-//        /*
-//         * Lift the union above the filter
-//         */
-//        if ((newChildRoot instanceof UnionNode)
-//                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-//            UnionNode unionNode = (UnionNode) newChildRoot;
-//            ImmutableList<IQTree> grandChildren = newChild.getChildren();
-//
-//            ImmutableList<IQTree> newChildren = grandChildren.stream()
-//                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
-//                    .collect(ImmutableCollectors.toList());
-//
-//            return iqFactory.createNaryIQTree(unionNode, newChildren);
-//        }
-//        return iqFactory.createUnaryIQTree(this, newChild);
-//    }
-
-//    @Override
-//    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-//        IQTree newChild = childIQTree.liftBinding(variableGenerator);
-//        QueryNode newChildRoot = newChild.getRootNode();
-//
-//        IQProperties liftedProperties = currentIQProperties.declareLifted();
-//
-//        if (newChildRoot instanceof ConstructionNode)
-//            return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
-//        else if (newChildRoot instanceof EmptyNode)
-//            return newChild;
-//        return iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
-//    }
-
-//    /**
-//     * Lifts the construction node above and applies its substitution
-//     */
-//    private IQTree liftChildConstructionNode(ConstructionNode liftedNode, UnaryIQTree newChild, IQProperties liftedProperties) {
-//        UnaryIQTree newFlattenTree = iqFactory.createUnaryIQTree(
-//                applySubstitution(liftedNode.getSubstitution()),
-//                newChild.getChild(),
-//                liftedProperties
-//        );
-//        return iqFactory.createUnaryIQTree(liftedNode, newFlattenTree, liftedProperties);
-//    }
 
     /**
      * Assumption: a flattened array can contain null values.
@@ -286,24 +255,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return builder.build();
     }
 
-
-//    @Override
-//    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-//        if (indexVariable.isPresent() && variable.equals(indexVariable.get()))
-//            return isStrict;
-//        if (variable.equals(outputVariable)) {
-//            return false;
-//        }
-//        return query.getFirstChild(this)
-//                .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
-//                .isVariableNullable(query, variable);
-//    }
-
-
-    /**
-     * Without further information about the flattened arrays, we cannot assume that distinctness is preserved after flattening.
-     * It would be the case if we knew that each flattened array contains distinct values (i.e. is a set)
-     */
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
         return false;
@@ -397,5 +348,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                         sIndexVar,
                         isStrict
                 );
+    }
+
+    private class FlattenedVariableTypeException extends OntopInternalBugException {
+        protected FlattenedVariableTypeException (String message) {
+            super(message);
+        }
     }
 }

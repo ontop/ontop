@@ -349,11 +349,6 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSecondsBetweenFromDateTime();
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
 
-    //NRA
-    DBFunctionSymbol getDBFlatten();
-    DBFunctionSymbol getDBIndexIn();
-
-
     //JSON
     DBFunctionSymbol getDBJsonElt();
     DBBooleanFunctionSymbol getDBJsonIsNumber();

@@ -118,7 +118,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         Optional<Variable> positionVariable = (columns.position == null)?
                 Optional.empty():
-                Optional.ofNullable(variableGenerator.generateNewVariable(columns.position));
+                Optional.ofNullable(variableGenerator.generateNewVariable(normalizeAttributeName(
+                        columns.position,
+                        idFactory
+                )));
 
         ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, idFactory);
 

@@ -1115,16 +1115,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBSTMakePoint() { return getRegularDBFunctionSymbol(ST_MAKEPOINT, 2); }
 
-    @Override
-    public DBFunctionSymbol getDBFlatten() {
-        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBIndexIn() {
-        throw new UnsupportedOperationException("Array flattening unavailable for this DBMS");
-    }
-
     /**
      * Time extension - duration arithmetic
      */
