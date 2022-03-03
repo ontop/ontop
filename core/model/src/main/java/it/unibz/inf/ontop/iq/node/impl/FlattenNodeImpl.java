@@ -329,8 +329,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 sIndexVar.equals(indexVariable) ?
                 this :
                 iqFactory.createFlattenNode(
-                        sFlattenedVar,
                         sOutputVar,
+                        sFlattenedVar,
                         sIndexVar
                 );
     }

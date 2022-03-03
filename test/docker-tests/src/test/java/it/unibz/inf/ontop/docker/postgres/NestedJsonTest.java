@@ -66,4 +66,21 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
 
     }
 
+    @Test
+    public void testFlattenFriends() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>" +
+                "\n" +
+                "SELECT  ?person ?v " +
+                "WHERE {" +
+                "?person  :hasFriend ?f . " +
+                "?f  :city ?v ." +
+                "}";
+        ImmutableList<String> expectedValues =
+                ImmutableList.of( "Bolzano", "Merano");
+
+        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
+
+        LOGGER.debug("SQL Query: \n" + sql);
+
+    }
 }
