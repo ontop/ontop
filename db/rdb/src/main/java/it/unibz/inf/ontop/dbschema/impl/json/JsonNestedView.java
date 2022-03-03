@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -118,28 +117,30 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
 
-        Optional<Variable> positionVariable = (columns.position == null)?
+        Optional<Variable> indexVariable = (columns.position == null)?
                 Optional.empty():
                 Optional.ofNullable(variableGenerator.generateNewVariable(normalizeAttributeName(
                         columns.position,
                         idFactory
                 )));
 
-        ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, positionVariable, idFactory);
 
-        Variable flattenedColumnVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn, idFactory));
-        if(flattenedColumnVariable == null){
+        ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable, idFactory);
+
+        Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn, idFactory));
+
+        if(flattenedVariable == null){
             throw new InvalidOntopViewException("The flattened column "+flattenedColumn+ " is not present in the base relation");
         }
 
+        Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
         ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
                 flattenOutputVariable,
                 buildVar2ExtractedColumnMap(variableGenerator, idFactory),
                 cs,
-                dbParameters.getDBTypeFactory(),
-                idFactory
+                dbParameters.getDBTypeFactory()
         );
 
         ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, extractionSubstitution.getImmutableMap().keySet()));
@@ -158,18 +159,19 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
-                flattenedColumnVariable,
-                positionVariable
+                flattenedIfArrayVariable,
+                indexVariable
         );
 
-        FilterNode filterNode = iqFactory.createFilterNode(
-                termFactory.getConjunction(
-                        ImmutableList.of(
-                                termFactory.getDBJsonIsArray(flattenedColumnVariable),
-                                termFactory.getDBIsNotNull(flattenedColumnVariable)
-        )));
-
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
+
+        ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
+                getProjectedVars(dataNode.getVariables(), flattenedVariable, flattenedIfArrayVariable),
+                getCheckIfArraySubstitution(
+                        flattenedVariable,
+                        flattenedIfArrayVariable,
+                        cs
+                ));
 
         return iqFactory.createIQ(projectionAtom,
                 iqFactory.createUnaryIQTree(
@@ -177,9 +179,18 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                         iqFactory.createUnaryIQTree(
                                 flattennode,
                                 iqFactory.createUnaryIQTree(
-                                filterNode,
-                                dataNode
-                        ))));
+                                        checkArrayConstructionNode,
+                                        dataNode
+                                ))));
+    }
+
+    private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable replacedVar, Variable freshVar) {
+        return ImmutableSet.<Variable>builder()
+                .addAll(subtreeVars.stream()
+                        .filter(v -> v != replacedVar).iterator()
+                )
+                .add(freshVar)
+                .build();
     }
 
     private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable,
@@ -247,8 +258,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,
                                                                            ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
-                                                                           CoreSingletons cs, DBTypeFactory typeFactory,
-                                                                           QuotedIDFactory idFactory){
+                                                                           CoreSingletons cs, DBTypeFactory typeFactory){
 
         return cs.getSubstitutionFactory().getSubstitution(
                 extractColumnsMap.entrySet().stream()
@@ -262,6 +272,18 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                         typeFactory
                                 ))));
     }
+
+    private ImmutableSubstitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, Variable flattenedIfArrayVar, CoreSingletons cs){
+
+        TermFactory termFactory = cs.getTermFactory();
+        return cs.getSubstitutionFactory().getSubstitution(ImmutableMap.of(
+                        flattenedIfArrayVar,
+                        termFactory.getIfElseNull(
+                                termFactory.getDBJsonIsArray(flattenedVar),
+                                flattenedVar
+                        )));
+    }
+
 
     private ImmutableList<DBConstant> getPathAsDBConstants(List<String> path, TermFactory termFactory) {
         return (path == null)?
