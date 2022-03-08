@@ -106,7 +106,8 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
                         return indexVar.isPresent()?
                                 String.format(
-                                        "a(%s, %s)",
+                                        "%s(%s, %s)",
+                                        generateFreshViewAlias(),
                                         outputVarString,
                                         allColumnIDs.get(indexVar.get()).getSQLRendering()):
                                 outputVarString;
