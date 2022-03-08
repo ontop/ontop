@@ -86,11 +86,8 @@ import java.util.stream.Stream;
  *
  * - left join:
  * . the explicit join condition is never lifted.
- * . flatten nodes from the left-hand-side are lifted if they do not define a variable used in the left join condition
- * . flatten nodes from the right-hand-side:
- *        . non-strict flatten: same solution as for the left-hand-side
- *        . strict flatten: lifting the flatten node would affect the semantics, so it is kept as it is.
- *
+ * . flatten nodes from both child operands are lifted if they do not define a variable used in the left join condition
+ *  TODO: refine
  *
  * - construction node:
  * . flatten nodes are lifted if they do not define a variable used in the substitution's range.

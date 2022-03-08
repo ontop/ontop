@@ -109,7 +109,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
-        TermFactory termFactory = cs.getTermFactory();
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
@@ -166,7 +165,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
         ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                getProjectedVars(dataNode.getVariables(), flattenedVariable, flattenedIfArrayVariable),
+                getProjectedVars(dataNode.getVariables(), flattenedIfArrayVariable),
                 getCheckIfArraySubstitution(
                         flattenedVariable,
                         flattenedIfArrayVariable,
@@ -184,11 +183,9 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                 ))));
     }
 
-    private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable replacedVar, Variable freshVar) {
+    private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {
         return ImmutableSet.<Variable>builder()
-                .addAll(subtreeVars.stream()
-                        .filter(v -> v != replacedVar).iterator()
-                )
+                .addAll(subtreeVars)
                 .add(freshVar)
                 .build();
     }
@@ -200,7 +197,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 columns.kept.stream()
                         .map(k -> getVarForAttribute(k, parentVariableMap, quotedIDFactory)).iterator()
         );
-        positionVariable.ifPresent(p -> builder.add(p));
+        positionVariable.ifPresent(builder::add);
         return builder.build();
     }
 

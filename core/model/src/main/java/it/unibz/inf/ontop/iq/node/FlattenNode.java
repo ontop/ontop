@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -82,4 +83,6 @@ public interface FlattenNode extends UnaryOperatorNode {
     Optional<TermType> inferOutputType(Optional<TermType> extractSingleTermType);
 
     Optional<TermType> getIndexVariableType();
+
+    ImmutableSet<Variable> getProjectedVariables(ImmutableSet<Variable> variablesProjectedByChildren);
 }

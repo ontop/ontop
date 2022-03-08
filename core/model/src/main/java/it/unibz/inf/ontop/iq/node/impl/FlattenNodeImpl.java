@@ -96,6 +96,15 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
+    public ImmutableSet<Variable> getProjectedVariables(ImmutableSet<Variable> variablesProjectedByChildren) {
+        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+        builder.addAll(variablesProjectedByChildren)
+                .add(outputVariable);
+        indexVariable.ifPresent(builder::add);
+        return builder.build();
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }

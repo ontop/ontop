@@ -19,7 +19,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
-@Ignore
+//@Ignore
 public class FlattenLiftTest {
 
     private final static NamedRelationDefinition TABLE1;
@@ -29,21 +29,21 @@ public class FlattenLiftTest {
     private final static NamedRelationDefinition TABLE5;
 
 
-    private final static Variable A = TERM_FACTORY.getVariable("A");
-    private final static Variable B = TERM_FACTORY.getVariable("B");
-    private final static Variable C = TERM_FACTORY.getVariable("C");
-    private final static Variable D = TERM_FACTORY.getVariable("D");
-    private final static Variable N1 = TERM_FACTORY.getVariable("N1");
-    private final static Variable N2 = TERM_FACTORY.getVariable("N2");
-    private final static Variable N4 = TERM_FACTORY.getVariable("N4");
-    private final static Variable N5 = TERM_FACTORY.getVariable("N5");
-    private final static Variable O1 = TERM_FACTORY.getVariable("O1");
-    private final static Variable O2 = TERM_FACTORY.getVariable("O2");
-    private final static Variable O3 = TERM_FACTORY.getVariable("O3");
-    private final static Variable O4 = TERM_FACTORY.getVariable("O4");
-    private final static Variable O5 = TERM_FACTORY.getVariable("O5");
-    private final static Variable X1 = TERM_FACTORY.getVariable("X1");
-    private final static Variable X2 = TERM_FACTORY.getVariable("X2");
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
+    private final static Variable D = TERM_FACTORY.getVariable("d");
+    private final static Variable N1 = TERM_FACTORY.getVariable("n1");
+    private final static Variable N2 = TERM_FACTORY.getVariable("n2");
+    private final static Variable N4 = TERM_FACTORY.getVariable("n4");
+    private final static Variable N5 = TERM_FACTORY.getVariable("n5");
+    private final static Variable O1 = TERM_FACTORY.getVariable("o1");
+    private final static Variable O2 = TERM_FACTORY.getVariable("o2");
+    private final static Variable O3 = TERM_FACTORY.getVariable("o3");
+    private final static Variable O4 = TERM_FACTORY.getVariable("o4");
+    private final static Variable O5 = TERM_FACTORY.getVariable("o5");
+    private final static Variable X1 = TERM_FACTORY.getVariable("x1");
+    private final static Variable X2 = TERM_FACTORY.getVariable("x2");
 
     private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
@@ -98,7 +98,7 @@ public class FlattenLiftTest {
     public void testLiftFlatten1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X1, O, B);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X1, O, B);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(X1_EQ_X2);
@@ -136,7 +136,7 @@ public class FlattenLiftTest {
     @Test
     public void testLiftFlatten2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X, O, B);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X1, O, B);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(X1_EQ_X2_AND_C_EQ_ONE);
@@ -241,7 +241,7 @@ public class FlattenLiftTest {
                                         )))));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(O_EQ_ONE);
-        InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(X1_EQ_X2);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -307,7 +307,7 @@ public class FlattenLiftTest {
     public void testLiftFlattenAndJoinCondition2() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(3), X, O1, O2);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X1, O1, O2);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         ImmutableExpression O1_EQ_ONE = TERM_FACTORY.getStrictEquality(O1, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(X1_EQ_X2, O1_EQ_ONE));
@@ -333,7 +333,7 @@ public class FlattenLiftTest {
 
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(O1_EQ_ONE);
-        InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(X1_EQ_X2);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(
@@ -447,7 +447,7 @@ public class FlattenLiftTest {
     public void testLiftRightFlattenWithLeftJoin() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getRDFAnswerPredicate(2), X1, O1, O2);
+                ATOM_FACTORY.getRDFAnswerPredicate(3), X1, O1, O2);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(X1_EQ_X2);
         FlattenNode leftFlattenNode = IQ_FACTORY.createFlattenNode(O1, N1, Optional.empty());
