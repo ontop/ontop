@@ -34,7 +34,6 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -82,7 +81,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
         NamedRelationDefinition parentDefinition = extractParentDefinition(dbParameters, parentCacheMetadataLookup);
 
-        Integer parentLevel = (parentDefinition instanceof OntopViewDefinition)?
+        int parentLevel = (parentDefinition instanceof OntopViewDefinition)?
                 ((OntopViewDefinition) parentDefinition).getLevel():
                 0;
 
@@ -263,12 +262,19 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                 Map.Entry::getKey,
                                 e -> getCheckDatatypeExtractAndCastFromJson(
                                         flattenOutputVariable,
-                                        getPathAsDBConstants(e.getValue().key, cs.getTermFactory()),
+                                        getPath(e.getValue()),
                                         getExtractedColumnType(e.getValue().datatype, e.getValue().name),
                                         cs,
                                         typeFactory
                                 ))));
     }
+
+    private ImmutableList<String> getPath(ExtractedColumn col) {
+        return col.key == null ?
+            ImmutableList.of():
+            ImmutableList.copyOf(col.key);
+    }
+
 
     private ImmutableSubstitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, Variable flattenedIfArrayVar, CoreSingletons cs){
 
@@ -279,15 +285,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                                 termFactory.getDBJsonIsArray(flattenedVar),
                                 flattenedVar
                         )));
-    }
-
-
-    private ImmutableList<DBConstant> getPathAsDBConstants(List<String> path, TermFactory termFactory) {
-        return (path == null)?
-                ImmutableList.of(termFactory.getDBStringConstant("")):
-                path.stream()
-                        .map(termFactory::getDBStringConstant)
-                        .collect(ImmutableCollectors.toList());
     }
 
     private ExtractedColumnType getExtractedColumnType(String datatype, String columnName) {
@@ -306,22 +303,62 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
     /**
      * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
      */
-    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, ImmutableList<DBConstant> path, ExtractedColumnType extractedColumnType,
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, ImmutableList<String> path, ExtractedColumnType extractedColumnType,
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
-        ImmutableFunctionalTerm retrieveJsonElt = termFactory.getDBJsonElement(sourceVar, path);
+        ImmutableFunctionalTerm cast = getCast(extractedColumnType, dbTypeFactory, sourceVar, path, termFactory);
 
         switch (extractedColumnType) {
             case JSON:
             case JSONB:
-                return getCast(retrieveJsonElt, extractedColumnType, cs, dbTypeFactory);
+                return cast;
             default:
                 return termFactory.getIfElseNull(
-                        getDatatypeCondition(retrieveJsonElt, extractedColumnType, cs),
-                        getCast(retrieveJsonElt, extractedColumnType, cs, dbTypeFactory)
+                        getDatatypeCondition(
+                                termFactory.getDBJsonElement(
+                                        sourceVar,
+                                        path
+                                ),
+                                extractedColumnType,
+                                cs
+                        ),
+                        cast
                 );
         }
+    }
+
+    private ImmutableFunctionalTerm getCast(ExtractedColumnType extractedColumnType, DBTypeFactory typeFactory, Variable sourceVar, ImmutableList<String> path, TermFactory termFactory) {
+
+        DBTermType termType;
+        ImmutableFunctionalTerm retrieveEltAsText = termFactory.getDBJsonElementAsText(sourceVar, path);
+
+        switch (extractedColumnType){
+            case TEXT:
+                return retrieveEltAsText;
+            case BOOLEAN:
+                termType = typeFactory.getDBBooleanType();
+                break;
+            case INTEGER:
+                termType = typeFactory.getDBLargeIntegerType();
+                break;
+            case FLOAT:
+            case DECIMAL:
+                termType = typeFactory.getDBDoubleType();
+                break;
+            case JSON:
+                termType = typeFactory.getDBJsonType();
+                break;
+            case JSONB:
+                termType = typeFactory.getDBJsonBType();
+                break;
+            default:
+                throw new JsonNestedViewException("Unexpected datatype");
+        }
+        return termFactory.getDBCastFunctionalTerm(
+                termType,
+                retrieveEltAsText
+        );
     }
 
     private ImmutableExpression getDatatypeCondition(ImmutableFunctionalTerm arg, ExtractedColumnType extractedColumnType, CoreSingletons cs) {
@@ -336,36 +373,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                 return cs.getTermFactory().getDBJsonIsNumber(arg);
             default:
                 throw new JsonNestedViewException("Unexpected extracted column type");
-        }
-    }
-
-    private ImmutableFunctionalTerm getCast(ImmutableFunctionalTerm arg, ExtractedColumnType extractedColumnType,
-                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
-        TermFactory termFactory = cs.getTermFactory();
-
-        return termFactory.getDBCastFunctionalTerm(
-                getDefaultDBType(extractedColumnType, dbTypeFactory),
-                arg
-        );
-    }
-
-    private DBTermType getDefaultDBType(ExtractedColumnType extractedColumnType, DBTypeFactory typeFactory) {
-        switch (extractedColumnType){
-            case BOOLEAN:
-                return typeFactory.getDBBooleanType();
-            case TEXT:
-                return typeFactory.getDBStringType();
-            case INTEGER:
-                return typeFactory.getDBLargeIntegerType();
-            case FLOAT:
-            case DECIMAL:
-                return typeFactory.getDBDoubleType();
-            case JSON:
-                return typeFactory.getDBJsonType();
-            case JSONB:
-                return typeFactory.getDBJsonBType();
-            default:
-                throw new JsonNestedViewException("Unexpected datatype");
         }
     }
 
@@ -421,8 +428,8 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
 
         return baseRelation.getUniqueConstraints().stream()
-                        .map(uc -> uc.getAttributes())
-                        .map(attributes -> toQuotedIDs(attributes))
+                        .map(UniqueConstraint::getAttributes)
+                        .map(this::toQuotedIDs)
                         .map(attributes -> getInferredFD(attributes, keptColumns))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
@@ -441,7 +448,7 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     private ImmutableSet<QuotedID> toQuotedIDs(ImmutableList<Attribute> attributes) {
         return attributes.stream()
-                .map(a -> a.getID())
+                .map(Attribute::getID)
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -589,7 +596,6 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
                     ));
 
     private static String listAdmissibleTypes (){
-        return extractedColumnTypeMap.keySet().stream()
-                .collect(Collectors.joining(", "));
+        return String.join(", ", extractedColumnTypeMap.keySet());
     }
 }

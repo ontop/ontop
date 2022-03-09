@@ -95,6 +95,45 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+        return new DBFunctionSymbolWithSerializerImpl(
+                "JSON_GET_ELT_AS_TEXT",
+                ImmutableList.of(
+                        dbJsonType
+                ),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s::json#>>%s",
+                        termConverter.apply(terms.get(0)),
+                        buildPath(path)
+                ));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        return new DBFunctionSymbolWithSerializerImpl(
+                "JSON_GET_ELT",
+                ImmutableList.of(
+                        dbJsonType
+                ),
+                dbJsonType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s::json#>%s",
+                        termConverter.apply(terms.get(0)),
+                        buildPath(path)
+                ));
+    }
+
+    private String buildPath(ImmutableList<String> path) {
+        return "\'{"+
+                path.stream()
+                        .collect(Collectors.joining(","))
+                +"}\'";
+    }
+
+    @Override
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
                 (terms, termConverter, termFactory) -> String.format(
@@ -173,54 +212,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 dbBooleanType,
                 false,
                 (terms, termConverter, termFactory) ->
-                        types.stream()
-                        .map(t -> String.format(
-                                "json_typeof(%s) = \'"+ t+ "\'",
-                                termConverter.apply(terms.get(0))
-                        ))
-                        .collect(Collectors.joining(" OR "))
-                );
+                        String.format(
+                                "json_typeof(%s) IN (%s) ",
+                                termConverter.apply(terms.get(0)),
+                                types.stream()
+                                        .map(t -> "\'"+ t+ "\'")
+                                        .collect(Collectors.joining(","))
+                        ));
     }
-
-    @Override
-    protected DBFunctionSymbol createJsonGetElt() {
-        return new DBFunctionSymbolWithSerializerImpl(
-                "JSON_GET_ELT",
-                ImmutableList.of(
-                        dbJsonType,
-                        dbStringType
-                ),
-                dbStringType,
-                false,
-                (terms, termConverter, termFactory) -> String.format(
-                        "%s::json#>'%s'",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1))
-                ));
-    }
-
-    @Override
-    protected DBFunctionSymbol createJsonBuildPath(int arity) {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(
-                "JSON_BUILD_PATH",
-                IntStream.range(0, arity)
-                        .mapToObj(i -> dbStringType)
-                        .collect(ImmutableCollectors.toList()),
-                dbStringType,
-                false,
-                (terms, termConverter, termFactory) ->
-                        "{"+
-                        terms.stream()
-                                .map(termConverter::apply)
-                                .map(s -> s.replaceAll("\'", ""))
-                                .collect(Collectors.joining(","))
-                        +"}"
-                );
-    }
-
-
-
-
 
     /**
      * TODO: find a way to use the stored TZ instead of the local one

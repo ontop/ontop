@@ -556,7 +556,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getDBJsonElt() {
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
@@ -577,11 +582,6 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBBooleanFunctionSymbol getDBJsonIsArray() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBBuildJsonPath(int arity) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

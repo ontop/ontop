@@ -16,6 +16,6 @@ source		SELECT "id", "fullname", "ssn", "tag_str", "tag_int" FROM "hr"."person-t
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person-friend
-target		:person/{"id"} a :Person ; :hasFriend :person/{"id"}_{"pos"} . :person/{"id"}_{"pos"} a :Friend ; :fistName {"firstName"} ; :nickName {"nickName_str"} ; :city {"city"} .
+target		:person/{"id"} a :Person ; :hasFriend :person/{"id"}/{"pos"} . :person/{"id"}/{"pos"} a :Friend ; :fistName {"firstName"} ; :nickName {"nickName_str"} ; :city {"city"} .
 source  	SELECT "id", "pos", "firstName", "nickName_str", "city" FROM "hr"."persons-friends";
 ]]

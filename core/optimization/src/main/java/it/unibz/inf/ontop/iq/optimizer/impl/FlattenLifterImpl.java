@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Arrays;
@@ -129,13 +128,12 @@ public class FlattenLifterImpl implements FlattenLifter {
 
             child = discardRootFlattenNodes(child, flattens.iterator());
 
-            ImmutableList<QueryNode> seq = liftRec(
+            ImmutableList<QueryNode> seq = lift(
                     concat(
                             flattens.reverse().stream(),
                             Stream.of(filter)
                     ),
                     flattens.size(),
-                    child.getVariables(),
                     ImmutableSet.of()
             );
             return buildUnaryTreeRec(
@@ -154,13 +152,12 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .collect(ImmutableCollectors.toList());
 
             child = discardRootFlattenNodes(child, flattens.iterator());
-            ImmutableList<QueryNode> seq = liftRec(
+            ImmutableList<QueryNode> seq = lift(
                     concat(
                             flattens.reverse().stream(),
                             Stream.of(cn)
                     ),
                     flattens.size(),
-                    child.getVariables(),
                     ImmutableSet.of()
             );
             return buildUnaryTreeRec(
@@ -181,13 +178,12 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .collect(ImmutableCollectors.toList());
 
             leftChild = discardRootFlattenNodes(leftChild, flattens.iterator());
-            ImmutableList<QueryNode> seq = liftRec(
+            ImmutableList<QueryNode> seq = lift(
                     concat(
                             flattens.reverse().stream(),
                             Stream.of(lj)
                     ),
                     flattens.size(),
-                    leftChild.getVariables(),
                     implicitJoinVariables
             );
 
@@ -219,21 +215,19 @@ public class FlattenLifterImpl implements FlattenLifter {
             children = children.stream()
                     .map(t -> discardRootFlattenNodes(t, it.next().iterator()))
                     .collect(ImmutableCollectors.toList());
+
             ImmutableList flattens = flattenLists.stream()
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toList());
 
             if (join.getOptionalFilterCondition().isPresent()) {
                 FilterNode filter = iqFactory.createFilterNode(join.getOptionalFilterCondition().get());
-                ImmutableList<QueryNode> seq = liftRec(
+                ImmutableList<QueryNode> seq = lift(
                         concat(
                                 flattens.reverse().stream(),
                                 Stream.of(filter)
                         ),
                         flattens.size(),
-                        children.stream()
-                                .flatMap(t -> t.getVariables().stream())
-                                .collect(ImmutableCollectors.toSet()),
                         ImmutableSet.of()
                 );
                 // avoid a consecutive join+filter
@@ -286,15 +280,15 @@ public class FlattenLifterImpl implements FlattenLifter {
             return Stream.of();
         }
 
-        private ImmutableList<QueryNode> liftRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars, ImmutableSet blockingVars) {
+        private ImmutableList<QueryNode> lift(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet blockingVars) {
             if (parentIndex == 0) {
                 return seq;
             }
-            seq = liftAboveParentRec(seq, parentIndex, subtreeVars, blockingVars);
-            return liftRec(seq, parentIndex - 1, subtreeVars, blockingVars);
+            seq = liftAboveParent(seq, parentIndex, blockingVars);
+            return lift(seq, parentIndex - 1, blockingVars);
         }
 
-        private ImmutableList<QueryNode> liftAboveParentRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars, ImmutableSet<Variable> blockingVars) {
+        private ImmutableList<QueryNode> liftAboveParent(ImmutableList<QueryNode> seq, int parentIndex,  ImmutableSet<Variable> blockingVars) {
             if (parentIndex == seq.size()) {
                 return seq;
             }
@@ -311,13 +305,12 @@ public class FlattenLifterImpl implements FlattenLifter {
             }
             ImmutableList<QueryNode> init = seq.subList(0, parentIndex - 1);
             ImmutableList<QueryNode> tail = seq.subList(parentIndex + 1, seq.size());
-            return liftAboveParentRec(
+            return liftAboveParent(
                     concat(
                             init.stream(),
                             lift.stream(),
                             tail.stream()),
                     parentIndex + 1,
-                    subTreeVars,
                     blockingVars
             );
         }

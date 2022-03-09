@@ -1294,13 +1294,13 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
-	public ImmutableFunctionalTerm getDBJsonElement(ImmutableTerm arg, ImmutableList<DBConstant> path) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonElt(), arg, getDBBuildJsonPath(path));
+	public ImmutableFunctionalTerm getDBJsonElement(ImmutableTerm arg, ImmutableList<String> path) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonElt(path), arg);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDBBuildJsonPath(ImmutableList<DBConstant> path) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuildJsonPath(path.size()), path);
+	public ImmutableFunctionalTerm getDBJsonElementAsText(ImmutableTerm arg, ImmutableList<String> path) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonEltAsText(path), arg);
 	}
 
 	@Override

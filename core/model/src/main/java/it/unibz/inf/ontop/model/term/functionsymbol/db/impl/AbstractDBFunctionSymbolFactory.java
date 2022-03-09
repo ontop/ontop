@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -121,8 +122,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
 
-    // Created in init()
-    private DBFunctionSymbol jsonGetElt;
     // Created in init()
     private DBBooleanFunctionSymbol jsonIsScalar;
     // Created in init()
@@ -268,8 +267,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBFunctionSymbol> minMap;
     private final Map<DBTermType, DBFunctionSymbol> maxMap;
 
-    private final Map<Integer, DBFunctionSymbol> jsonBuildPathMap;
-
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
@@ -336,8 +333,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
-
-        this.jsonBuildPathMap = Maps.newConcurrentMap();
     }
 
     /**
@@ -400,7 +395,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
 
-        jsonGetElt = createJsonGetElt();
         jsonIsArray = createJsonIsArray();
         jsonIsNumber = createJsonIsNumber();
         jsonIsBoolean = createJsonIsBoolean();
@@ -1040,10 +1034,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBJsonElt() {
-        if(jsonGetElt == null)
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
             throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonGetElt;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
     }
 
     @Override
@@ -1072,12 +1069,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         if(jsonIsArray == null)
             throw new UnsupportedOperationException("Json support unavailable for this DBMS");
         return jsonIsArray;
-    }
-
-    @Override
-    public DBFunctionSymbol getDBBuildJsonPath(int arity) {
-        return jsonBuildPathMap
-                .computeIfAbsent(arity, a -> createJsonBuildPath(arity));
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
@@ -1511,15 +1502,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBBooleanFunctionSymbol createJsonIsScalar() {
         return null;
     }
-
-    protected DBFunctionSymbol createJsonGetElt(){
-        return null;
-    }
-
-    protected DBFunctionSymbol createJsonBuildPath(int arity){
-        throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-    }
-
 
     /**
      * By default, uses the row number

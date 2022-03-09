@@ -70,7 +70,7 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
     public void testFlattenFriends() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
                 "\n" +
-                "SELECT  ?person ?v " +
+                "SELECT  ?person ?f ?v " +
                 "WHERE {" +
                 "?person  :hasFriend ?f . " +
                 "?f  :city ?v ." +
