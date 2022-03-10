@@ -12,7 +12,7 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "SQLViewDefinition"
+      "type": "SQLLens"
     }
   ]
 }
