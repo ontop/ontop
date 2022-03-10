@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
+import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -17,16 +19,22 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     private final UnionBasedQueryMerger unionBasedQueryMerger;
     private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
     private final OntopOptimizationSettings settings;
+    private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
+    private final JoinLikeOptimizer joinLikeOptimizer;
 
     @Inject
     protected OptimizationSingletonsImpl(OptimizerFactory optimizerFactory, CoreSingletons coreSingletons,
-                                         UnionBasedQueryMerger unionBasedQueryMerger, RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor,
-                                         OntopOptimizationSettings settings) {
+                                         UnionBasedQueryMerger unionBasedQueryMerger,
+                                         RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor,
+                                         GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
+                                         JoinLikeOptimizer joinLikeOptimizer, OntopOptimizationSettings settings) {
         this.optimizerFactory = optimizerFactory;
         this.coreSingletons = coreSingletons;
         this.unionBasedQueryMerger = unionBasedQueryMerger;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.settings = settings;
+        this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
+        this.joinLikeOptimizer = joinLikeOptimizer;
     }
 
     @Override
@@ -52,5 +60,15 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     @Override
     public RequiredExtensionalDataNodeExtractor getRequiredExtensionalDataNodeExtractor() {
         return requiredExtensionalDataNodeExtractor;
+    }
+
+    @Override
+    public GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer() {
+        return generalStructuralAndSemanticIQOptimizer;
+    }
+
+    @Override
+    public JoinLikeOptimizer getJoinLikeOptimizer() {
+        return joinLikeOptimizer;
     }
 }
