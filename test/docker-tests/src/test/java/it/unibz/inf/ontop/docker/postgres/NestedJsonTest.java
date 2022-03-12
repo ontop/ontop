@@ -58,7 +58,7 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
                 "?person  :tag_str ?v . " +
                 "}";
         ImmutableList<String> expectedValues =
-                ImmutableList.of( "111", "222", "333" );
+                ImmutableList.of( "111", "111", "222", "222", "333");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
