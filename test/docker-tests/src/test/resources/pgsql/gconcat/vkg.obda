@@ -1,0 +1,8 @@
+[PrefixDeclaration]
+ex:           ex:
+
+[MappingDeclaration] @collection [[
+mappingId   tom
+target      ex:tom ex:hasName "Tom"@en , "Tommaso"@it .
+source      SELECT 1
+]]
