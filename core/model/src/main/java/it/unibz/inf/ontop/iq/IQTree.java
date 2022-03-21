@@ -69,11 +69,6 @@ public interface IQTree {
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     /**
-     * Identical to applyFreshRenaming, but also applies to non projected variables
-     */
-    IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution);
-
-    /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
      *
      * Designed to be called AFTER the "structural/semantic optimization" phase.
