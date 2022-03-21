@@ -109,7 +109,7 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "     schema:name ?o .\n" +
                 "  { SELECT DISTINCT ?h {\n" +
                 "    ?h a schema:Campground ;\n" +
-                "      schema:geo ?o " +
+                "      schema:name ?o " +
                 "  }}\n" +
                 "}\n" +
                 "LIMIT 1\n");

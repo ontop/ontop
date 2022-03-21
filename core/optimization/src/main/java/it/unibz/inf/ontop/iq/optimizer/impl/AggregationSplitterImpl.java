@@ -11,9 +11,12 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSplitter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -55,12 +58,14 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         private final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
+        private final AtomFactory atomFactory;
 
         protected AggregationUnionLifterTransformer(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
             super(coreSingletons);
             this.variableGenerator = variableGenerator;
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
+            this.atomFactory = coreSingletons.getAtomFactory();
         }
 
         @Override
@@ -278,7 +283,13 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                                     v -> v,
                                     variableGenerator::generateNewVariableFromVar)));
 
-            return tree.applyFreshRenamingToAllVariables(renaming);
+            if (!renaming.isEmpty()) {
+                QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory);
+                HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
+                return iqTransformer.transform(tree);
+            }
+            else
+                return tree;
         }
     }
 
