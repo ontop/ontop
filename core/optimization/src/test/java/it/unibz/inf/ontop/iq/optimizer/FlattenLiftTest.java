@@ -444,6 +444,7 @@ public class FlattenLiftTest {
 
 
     @Test
+    @Ignore
     public void testLiftRightFlattenWithLeftJoin() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -489,6 +490,7 @@ public class FlattenLiftTest {
     }
 
     @Test
+    @Ignore
     public void testConsecutiveFlatten1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -548,6 +550,7 @@ public class FlattenLiftTest {
 
 
     @Test
+    @Ignore
     public void testConsecutiveFlatten2() {
 
         ImmutableExpression exp1 = TERM_FACTORY.getStrictEquality(O1, ONE);

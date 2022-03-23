@@ -46,8 +46,6 @@ public class OptimizationTestingTools {
     public static final GeneralStructuralAndSemanticIQOptimizer GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final FlattenLifter FLATTEN_LIFTER;
-    public static final LevelUpOptimizer LEVEL_UP_OPTIMIZER;
-    public static final NRAJoinLikeOptimizer NRA_JOIN_LIKE_OPTIMIZER;
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
@@ -117,8 +115,6 @@ public class OptimizationTestingTools {
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
-        LEVEL_UP_OPTIMIZER = injector.getInstance(LevelUpOptimizer.class);
-        NRA_JOIN_LIKE_OPTIMIZER = injector.getInstance(NRAJoinLikeOptimizer.class);
 
 
         NULL = TERM_FACTORY.getNullConstant();

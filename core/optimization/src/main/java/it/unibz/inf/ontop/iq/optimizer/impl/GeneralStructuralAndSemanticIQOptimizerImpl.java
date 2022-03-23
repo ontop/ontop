@@ -48,8 +48,8 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
-            queryAfterJoinLikeAndViewUnfolding = flattenLifter.optimize(queryAfterJoinLikeAndViewUnfolding);
-            LOGGER.debug("New query after flatten lift:\n{}\n", queryAfterJoinLikeAndViewUnfolding);
+//            queryAfterJoinLikeAndViewUnfolding = flattenLifter.optimize(queryAfterJoinLikeAndViewUnfolding);
+//            LOGGER.debug("New query after flatten lift:\n{}\n", queryAfterJoinLikeAndViewUnfolding);
 
             long beginningJoinLike = System.currentTimeMillis();
             queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
