@@ -202,9 +202,9 @@ public class FlattenLiftTest {
                 IQ_FACTORY.createUnaryIQTree(
                         rootNode,
                         IQ_FACTORY.createUnaryIQTree(
-                                rightFlattenNode,
+                                leftFlattenNode,
                                 IQ_FACTORY.createUnaryIQTree(
-                                        leftFlattenNode,
+                                        rightFlattenNode,
                                         IQ_FACTORY.createNaryIQTree(
                                                 joinNode,
                                                 ImmutableList.of(
