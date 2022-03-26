@@ -1,22 +1,20 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.stream.Stream;
+import java.util.Optional;
 
 public class FilterLifterImpl implements FilterLifter {
 
@@ -53,18 +51,19 @@ public class FilterLifterImpl implements FilterLifter {
                 return iqFactory.createUnaryIQTree(cn, child);
             }
 
-            QueryNode childRoot = child.getRootNode();
-            if(childRoot instanceof FilterNode){
+            Optional<FilterNode> rootFilter = getOptionalRootFilter(child);
+            if (rootFilter.isPresent()) {
+                FilterNode filter = rootFilter.get();
                 ConstructionNode updatedCn = updateConstructionNode(
                         cn,
-                        ((FilterNode) childRoot).getFilterCondition()
+                        filter.getFilterCondition()
                 );
                 return iqFactory.createUnaryIQTree(
-                        (UnaryOperatorNode) childRoot,
+                        filter,
                         iqFactory.createUnaryIQTree(
                                 updatedCn,
-                                child
-                ));
+                                discardOptionalRootFilter(child)
+                        ));
             }
             return iqFactory.createUnaryIQTree(
                     cn,
@@ -72,16 +71,69 @@ public class FilterLifterImpl implements FilterLifter {
             );
         }
 
-
-        private ConstructionNode updateConstructionNode(ConstructionNode cn, ImmutableExpression filteringCondition) {
-
-                // add the variable that appear in the expression to ones projected by the cn
-                ImmutableSet<Variable> projectedVars = ImmutableSet.<Variable>builder()
-                        .addAll(filteringCondition.getVariables())
-                        .addAll(cn.getVariables())
-                        .build();
-
-                return iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
-            }
+        private Optional<FilterNode> getOptionalRootFilter(IQTree tree) {
+            return Optional.of(tree.getRootNode())
+                    .filter(n -> n instanceof FilterNode)
+                    .map(n -> (FilterNode) n);
         }
+
+        private IQTree discardOptionalRootFilter(IQTree tree) {
+            return tree.getRootNode() instanceof FilterNode ?
+                    tree.getChildren().get(0) :
+                    tree;
+        }
+
+        @Override
+        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
+
+            children = children.stream()
+                    .map(c -> c.acceptTransformer(this))
+                    .collect(ImmutableCollectors.toList());
+
+            Optional<ImmutableExpression> childrenExpression =
+                    termFactory.getConjunction(
+                            children.stream()
+                                    .map(t -> getOptionalRootFilter(t))
+                                    .filter(o -> o.isPresent())
+                                    .map(o -> o.get().getFilterCondition())
+                    );
+
+            Optional<ImmutableExpression> explicitJoinCondition = joinNode.getOptionalFilterCondition();
+
+            if (childrenExpression.isPresent()) {
+                children = children.stream()
+                        .map(t -> discardOptionalRootFilter(t))
+                        .collect(ImmutableCollectors.toList());
+            }
+
+            ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
+            childrenExpression.ifPresent(e -> builder.add(e));
+            explicitJoinCondition.ifPresent(e -> builder.add(e));
+
+            ImmutableList<ImmutableExpression> conjuncts = builder.build();
+
+            if (conjuncts.isEmpty()) {
+                return tree;
+            }
+
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createFilterNode(termFactory.getConjunction(conjuncts)),
+                    iqFactory.createNaryIQTree(
+                            iqFactory.createInnerJoinNode(),
+                            children
+                    ));
+        }
+
     }
+
+    private ConstructionNode updateConstructionNode(ConstructionNode cn, ImmutableExpression filteringCondition) {
+
+        // add the variable that appear in the expression to ones projected by the cn
+        ImmutableSet<Variable> projectedVars = ImmutableSet.<Variable>builder()
+                .addAll(filteringCondition.getVariables())
+                .addAll(cn.getVariables())
+                .build();
+
+        return iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
+    }
+}
