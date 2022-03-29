@@ -24,14 +24,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class FlattenLifterImpl implements FlattenLifter {
+public class BasicFlattenLifterImpl implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
 
 
     @Inject
-    private FlattenLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+    private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
     }
