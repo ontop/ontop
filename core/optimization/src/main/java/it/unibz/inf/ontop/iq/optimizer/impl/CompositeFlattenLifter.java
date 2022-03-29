@@ -4,18 +4,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.BasicFlattenLifter;
-import it.unibz.inf.ontop.iq.optimizer.FilterLifter;
-import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
-import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.*;
 
 public class CompositeFlattenLifter implements FlattenLifter {
 
     private final ImmutableList<IQOptimizer> optimizers;
 
     @Inject
-    private CompositeFlattenLifter(FilterLifter filterLifter, BasicFlattenLifter flattenLifter){
-        this.optimizers = ImmutableList.of(filterLifter,flattenLifter);
+    private CompositeFlattenLifter(FilterLifter filterLifter,
+                                   BasicFlattenLifter flattenLifter,
+                                   BooleanExpressionPushDownOptimizer pushDownOptimizer
+
+    ){
+        this.optimizers = ImmutableList.of(filterLifter,flattenLifter, pushDownOptimizer);
     }
 
     @Override
