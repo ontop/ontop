@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -9,12 +10,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.BasicFlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -22,18 +21,18 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BasicFlattenLifterImpl implements FlattenLifter {
+public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
 
 
     @Inject
-    private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+    private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
     }
 
     @Override
@@ -51,7 +50,55 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
             super(iqFactory);
         }
 
-//        @Override
+        @Override
+        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+            child = child.acceptTransformer(this);
+
+            ImmutableList<FlattenNode> flattenNodes = getRootFlattenNodes(child);
+            if (flattenNodes.isEmpty()) {
+                return iqFactory.createUnaryIQTree(
+                        rootNode,
+                        child
+                );
+            }
+            child = discardRootFlattenNodes(child, flattenNodes.iterator());
+            return liftAboveConjunct(
+                    rootNode.getFilterCondition().flattenAND()
+                            .collect(Collectors.toCollection(LinkedList::new)),
+                    flattenNodes,
+                    child
+            );
+//            Stream<ImmutableExpression> conjuncts = rootNode.getFilterCondition().flattenAND();
+//            return liftAbove
+//            ImmutableList<>
+//            FilterNode
+//            ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(child)
+//                    .collect(ImmutableCollectors.toList());
+//            rootNode.getFilterCondition().flattenAND()
+
+        }
+
+        private IQTree liftAboveConjunct(LinkedList<ImmutableExpression> conjuncts, List<FlattenNode> flattenNodes, IQTree child) {
+            if (conjuncts.isEmpty()) {
+                return buildUnaryTree(flattenNodes.iterator(), child);
+            }
+
+            ImmutableExpression conjunct = conjuncts.removeFirst();
+            SplitFlattenSequence split = splitFlattenSequence(flattenNodes, conjunct.getVariables());
+            child = iqFactory.createUnaryIQTree(
+                    iqFactory.createFilterNode(conjunct),
+                    buildUnaryTree(
+                            split.nonLiftableFlatten.iterator(),
+                            child
+                    ));
+            return liftAboveConjunct(
+                    conjuncts,
+                    split.liftableFlatten,
+                    child
+            );
+        }
+
+        //        @Override
 //        public IQTree transformFilter(IQTree tree, FilterNode filter, IQTree child) {
 //            child = child.acceptTransformer(this);
 //
@@ -81,8 +128,7 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
                 return iqFactory.createUnaryIQTree(cn, child);
             }
 
-            ImmutableList<FlattenNode> flattenNodes = getRootFlattenNodes(child)
-                    .collect(ImmutableCollectors.toList());
+            ImmutableList<FlattenNode> flattenNodes = getRootFlattenNodes(child);
 
             child = discardRootFlattenNodes(child, flattenNodes.iterator());
 
@@ -118,12 +164,12 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
             return cn;
         }
 
-        private SplitFlattenSequence splitFlattenSequence(ImmutableList<FlattenNode> flattenNodes, ImmutableSet<Variable> blockingVars) {
+        private SplitFlattenSequence splitFlattenSequence(List<FlattenNode> flattenNodes, ImmutableSet<Variable> blockingVars) {
             return split(new SplitFlattenSequence(), flattenNodes.iterator(), blockingVars);
         }
 
         private SplitFlattenSequence split(SplitFlattenSequence splitFlattenSequence,
-                                           UnmodifiableIterator<FlattenNode> it,
+                                           Iterator<FlattenNode> it,
                                            ImmutableSet<Variable> blockingVars) {
             if (it.hasNext()) {
                 FlattenNode flattenNode = it.next();
@@ -197,7 +243,7 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<ImmutableList<FlattenNode>> flattenLists = children.stream()
-                    .map(t -> getRootFlattenNodes(t).collect(ImmutableCollectors.toList()))
+                    .map(BasicFlattenLifterImpl.this::getRootFlattenNodes)
                     .collect(ImmutableCollectors.toList());
 
             ImmutableSet<Variable> blockingVars = retrieveImplicitJoinCondition(children);
@@ -239,7 +285,7 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
                     .collect(ImmutableCollectors.toMultiset())
                     .entrySet().stream()
                     .filter(e -> e.getCount() > 1)
-                    .map(e -> e.getElement())
+                    .map(Multiset.Entry::getElement)
                     .collect(ImmutableCollectors.toSet());
         }
     }
@@ -258,15 +304,20 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
         return tree;
     }
 
-    private Stream<FlattenNode> getRootFlattenNodes(IQTree tree) {
+    private ImmutableList<FlattenNode> getRootFlattenNodes(IQTree tree) {
+        return getRootFlattenNodesRec(
+                tree,
+                ImmutableList.builder()
+        ).build();
+    }
+
+    private ImmutableList.Builder<FlattenNode> getRootFlattenNodesRec(IQTree tree, ImmutableList.Builder<FlattenNode> builder) {
         QueryNode n = tree.getRootNode();
         if (n instanceof FlattenNode) {
-            return Stream.concat(
-                    getRootFlattenNodes(((UnaryIQTree) tree).getChild()),
-                    Stream.of((FlattenNode) n)
-            );
+            builder.add((FlattenNode) n);
+            return getRootFlattenNodesRec(((UnaryIQTree) tree).getChild(), builder);
         }
-        return Stream.of();
+        return builder;
     }
 
 //        private ImmutableList<UnaryOperatorNode> lift(ImmutableList<UnaryOperatorNode> seq, int parentIndex, ImmutableSet blockingVars) {
@@ -523,7 +574,6 @@ public class BasicFlattenLifterImpl implements FlattenLifter {
 
         private void appendLiftable(FlattenNode flattenNode) {
             this.liftableFlatten.add(flattenNode);
-
         }
 
         private void appendNonLiftable(FlattenNode flattenNode) {

@@ -13,10 +13,8 @@ public class CompositeFlattenLifter implements FlattenLifter {
     @Inject
     private CompositeFlattenLifter(FilterLifter filterLifter,
                                    BasicFlattenLifter flattenLifter,
-                                   BooleanExpressionPushDownOptimizer pushDownOptimizer
-
-    ){
-        this.optimizers = ImmutableList.of(filterLifter,flattenLifter, pushDownOptimizer);
+                                   BooleanExpressionPushDownOptimizer pushDownOptimizer) {
+        this.optimizers = ImmutableList.of(filterLifter, flattenLifter, pushDownOptimizer);
     }
 
     @Override

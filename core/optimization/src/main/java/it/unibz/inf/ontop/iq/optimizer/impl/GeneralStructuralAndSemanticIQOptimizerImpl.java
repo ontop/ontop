@@ -20,7 +20,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final AggregationSimplifier aggregationSimplifier;
     private final OntopViewUnfolder viewUnfolder;
     private final AggregationSplitter aggregationSplitter;
-    private final FlattenLifter flattenLifter;
+//    private final FlattenLifter flattenLifter;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -28,15 +28,15 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
                                                         OntopViewUnfolder viewUnfolder,
-                                                        AggregationSplitter aggregationSplitter,
-                                                        FlattenLifter flattenLifter) {
+                                                        AggregationSplitter aggregationSplitter){
+//                                                        FlattenLifter flattenLifter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.viewUnfolder = viewUnfolder;
         this.aggregationSplitter = aggregationSplitter;
-        this.flattenLifter = flattenLifter;
+//        this.flattenLifter = flattenLifter;
     }
 
     @Override
