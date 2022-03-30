@@ -101,9 +101,20 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
         if (jsonTable == null) {
             RelationID mainId = otherNames.get(id);
 
-            if (mainId == null)
-                throw new IllegalArgumentException("The relation " + id.getSQLRendering()
-                        + " is unknown to the JsonSerializedMetadataProvider");
+            if (mainId == null) {
+                /*
+                 * Give a try to the parent provider (if available).
+                 * Useful in case of incomplete serialized metadata
+                 * (when metadata is extracted on-demand by an external program)
+                 */
+                Optional<MetadataLookup> optionalParentProvider = getParentProvider();
+                if (optionalParentProvider.isPresent()) {
+                    return optionalParentProvider.get().getRelation(id);
+                }
+                else
+                    throw new IllegalArgumentException("The relation " + id.getSQLRendering()
+                            + " is unknown to the JsonSerializedMetadataProvider");
+            }
 
             return getRelation(mainId);
         }
@@ -134,10 +145,23 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     @Override
     public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFk) throws MetadataExtractionException {
         JsonDatabaseTable jsonTable = relationMap.get(relation.getID());
-        if (jsonTable == null)
-            throw new IllegalArgumentException("The relation " + relation.getID().getSQLRendering()
+        if (jsonTable == null) {
+            /*
+             * Give a try to the parent provider (if available).
+             * Useful in case of incomplete serialized metadata
+             * (when metadata is extracted on-demand by an external program)
+             */
+            Optional<MetadataProvider> optionalParentProvider = getParentProvider()
+                    .filter(p -> p instanceof MetadataProvider)
+                    .map(p -> (MetadataProvider)p);
+            if (optionalParentProvider.isPresent()) {
+                optionalParentProvider.get().insertIntegrityConstraints(relation, metadataLookupForFk);
+                return;
+            }
+            else
+                throw new IllegalArgumentException("The relation " + relation.getID().getSQLRendering()
                     + " is unknown to the JsonSerializedMetadataProvider");
-
+        }
         jsonTable.insertIntegrityConstraints(relation, metadataLookupForFk);
     }
 
