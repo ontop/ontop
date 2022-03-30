@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -23,9 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
@@ -101,20 +100,26 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         else if ((newChildRoot instanceof ValuesNode) && (offset == 0 || !settings.isSliceOptimizationDisabled()))
             return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
                     ((ValuesNode) newChildRoot).getValues().subList((int) offset, (int) (offset+limit)));
-        // Only triggered if a VALUES node is present under the UNION
+        // Only triggered if a VALUES node is present directly under the UNION
         else if ((newChildRoot instanceof UnionNode)
                 && (offset == 0 || !settings.isSliceOptimizationDisabled())
                 && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
                 && !treeCache.isNormalizedForOptimization()
         )
-            return simplifyValues((UnionNode) newChildRoot, newChild, treeCache);
-            // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+            return simplifyUnionValues((UnionNode) newChildRoot, newChild, treeCache);
+        // Scenario: SLICE UNION [CONSTRUCT] [DISTINCT] UNION [VALUES NONVALUES] pattern scenario
+        else if ((newChildRoot instanceof UnionNode)
+                && (offset == 0 || !settings.isSliceOptimizationDisabled())
+                && calculateMaxTotalValues(newChild) >= (offset + limit)
+                && !treeCache.isNormalizedForOptimization())
+            return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild, treeCache);
+        // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
         else if ((newChildRoot instanceof DistinctNode) &&
                 (offset == 0 || !settings.isSliceOptimizationDisabled()) &&
                 newChild.getChildren().size() == 1 &&
                 newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode) &&
                 newChild.getChildren().get(0).getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
-                newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).filter(c -> c.isDistinct()).count()>0) {
+                newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).anyMatch(IQTree::isDistinct)) {
 
             // Retrieve size of Values Node
             long totalValues = newChild.getChildren().get(0).getChildren().stream()
@@ -166,7 +171,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
-    private IQTree simplifyValues(UnionNode newChildRoot, IQTree newChild, IQTreeCache treeCache) {
+    private IQTree simplifyUnionValues(UnionNode newChildRoot, IQTree newChild, IQTreeCache treeCache) {
 
         // Retrieve size of Values Node
         long totalValues = newChild.getChildren().stream()
@@ -176,9 +181,9 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .mapToLong(Collection::size)
                 .sum();
 
-        /**
-         * Only one Values Node should be present at this optimization step
-         * @see it.unibz.inf.ontop.iq.node.impl.UnionNodeImpl#liftBindingFromLiftedChildrenAndFlatten(ImmutableList, VariableGenerator, IQTreeCache)
+        /*
+          Only one Values Node should be present at this optimization step
+          @see it.unibz.inf.ontop.iq.node.impl.UnionNodeImpl#liftBindingFromLiftedChildrenAndFlatten(ImmutableList, VariableGenerator, IQTreeCache)
          */
         ValuesNode vNode = newChild.getChildren().stream()
                 .filter(c -> c instanceof ValuesNode)
@@ -225,6 +230,113 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                 )).stream())
                         .collect(ImmutableCollectors.toList()));
         }
+    }
+
+    private IQTree simplifyConstructUnionValues(UnionNode newChildRoot, IQTree newChild, IQTreeCache treeCache) {
+
+        // PATTERN 0: CONSTRUCT VALUES
+        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern0 = newChild.getChildren().stream()
+                .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .collect(ImmutableCollectors.toMap(
+                        IQTree::getRootNode,
+                        c -> c.getChildren().stream()
+                                .filter(c3 -> c3 instanceof ValuesNode)
+                                .map(c4 -> (ValuesNode) c4).findFirst()));
+
+        // PATTERN 1: CONSTRUCT UNION VALUES
+        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern1 = newChild.getChildren().stream()
+                .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .collect(ImmutableCollectors.toMap(
+                        IQTree::getRootNode,
+                        c -> c.getChildren().stream()
+                                .filter(c2 -> c2.getRootNode() instanceof UnionNode)
+                                .map(IQTree::getChildren)
+                                .flatMap(Collection::stream)
+                                .filter(c3 -> c3 instanceof ValuesNode)
+                                .map(c4 -> (ValuesNode) c4)
+                                .findFirst()));
+
+        // PATTERN 2: CONSTRUCT DISTINCT UNION VALUES
+        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern2 = newChild.getChildren().stream()
+                .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .collect(ImmutableCollectors.toMap(
+                        IQTree::getRootNode,
+                        c -> c.getChildren().stream()
+                                .filter(c5 -> c5.getRootNode() instanceof DistinctNode)
+                                .map(IQTree::getChildren)
+                                .flatMap(Collection::stream)
+                                .filter(c2 -> c2.getRootNode() instanceof UnionNode)
+                                .map(IQTree::getChildren)
+                                .flatMap(Collection::stream)
+                                .filter(c3 -> c3 instanceof ValuesNode)
+                                .map(c4 -> (ValuesNode) c4)
+                                .map(v -> iqFactory.createValuesNode(v.getOrderedVariables(),
+                                        v.getValues().stream().distinct().collect(ImmutableCollectors.toList())))
+                                .findFirst()));
+
+        // Drop CONSTRUCT without VALUES
+        ImmutableMap<QueryNode, Optional<ValuesNode>> allValuesNodes =
+                Stream.concat(treePattern0.entrySet().stream(),
+                        Stream.concat(treePattern1.entrySet().stream(),
+                        treePattern2.entrySet().stream()))
+                .filter(c -> c.getValue().isPresent())
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+
+        // Final CONSTRUCT VALUES IQtrees - Construct needed to keep track of all projected variables
+        ImmutableList<IQTree> vNodesList = allValuesNodes.entrySet().stream()
+                .map(v -> iqFactory.createUnaryIQTree((ConstructionNode) v.getKey(), v.getValue().get()))
+                        .collect(ImmutableCollectors.toList());
+
+        // Final pattern - SLICE UNION VALUES
+        return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(offset, limit),
+                iqFactory.createNaryIQTree(newChildRoot, vNodesList)
+        );
+    }
+
+    // Check if enough Values records are availale to simplify Slice
+    private long calculateMaxTotalValues(IQTree newChild) {
+
+        long directValuesNodes = newChild.getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> (ValuesNode) c)
+                .map(ValuesNode::getValues)
+                .mapToLong(Collection::size)
+                .sum();
+
+        long nonDistinctValuesNodes = newChild.getChildren().stream()
+                .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .map(IQTree::getChildren)
+                .flatMap(Collection::stream)
+                .filter(c -> c.getRootNode() instanceof UnionNode)
+                .map(IQTree::getChildren)
+                .flatMap(Collection::stream)
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> (ValuesNode) c)
+                .map(ValuesNode::getValues)
+                .mapToLong(Collection::size)
+                .sum();
+
+        long distinctValuesNodes = newChild.getChildren().stream()
+                .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .map(IQTree::getChildren)
+                .flatMap(Collection::stream)
+                .filter(c -> c.getRootNode() instanceof DistinctNode)
+                .map(IQTree::getChildren)
+                .flatMap(Collection::stream)
+                .filter(c -> c.getRootNode() instanceof UnionNode)
+                .map(IQTree::getChildren)
+                .flatMap(Collection::stream)
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> (ValuesNode) c)
+                .map(ValuesNode::getValues)
+                .distinct()
+                .mapToLong(Collection::size)
+                .sum();
+
+        return nonDistinctValuesNodes + distinctValuesNodes + directValuesNodes;
     }
 
     @Override

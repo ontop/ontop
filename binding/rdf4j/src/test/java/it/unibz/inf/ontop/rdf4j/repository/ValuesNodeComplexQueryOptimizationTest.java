@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -58,16 +57,16 @@ public class ValuesNodeComplexQueryOptimizationTest {
         release();
     }
 
-    @Ignore
     @Test
     public void testTranslatedSQLQuery1() throws OBDASpecificationException, OntopReformulationException, SQLException, IOException {
         String SPARQL_Query_String = "SELECT ?v WHERE {\n" +
                 "  ?v ?p ?o .\n" +
                 "}" +
-                "LIMIT 2";
+                "LIMIT 4";
 
-        String expectedSQLQueryTranslation = "SELECT V1.C1 AS \"v1m6\"\n" +
-                "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Anna'), ('http://te.st/ValuesNodeTest#student/Francis') AS V1 )\n";
+        String expectedSQLQueryTranslation = "SELECT V1.C1 AS \"v5m25\"\n" +
+                "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Francis'), ('http://te.st/ValuesNodeTest#student/Anna'), " +
+                "('http://te.st/ValuesNodeTest#teacher/Jane'), ('http://te.st/ValuesNodeTest#teacher/Joe') AS V1 )\n";
 
         assertEquals(expectedSQLQueryTranslation, generateSQLTranslation(SPARQL_Query_String));
     }
