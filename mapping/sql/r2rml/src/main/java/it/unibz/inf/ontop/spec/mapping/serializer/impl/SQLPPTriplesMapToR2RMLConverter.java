@@ -314,7 +314,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	 * TODO: shall we consider as an internal bug or differently?
 	 */
 	static class R2RMLSerializationException extends OntopInternalBugException {
-		private R2RMLSerializationException(String message) {
+		protected R2RMLSerializationException(String message) {
 			super(message);
 		}
 	}

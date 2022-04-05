@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.docker;
 
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.junit.AfterClass;
@@ -21,6 +22,7 @@ public class Issue461Test {
     private static final String propertiesFile = "src/test/resources/issue461/mapping.properties";
     private static final String databaseFile = "src/test/resources/issue461/database.sql";
     private static final String outputMappingFile = "src/test/resources/issue461/mapping.r2rml";
+    private static final String obdaFilewithDuplicates = "src/test/resources/issue461/mappingwithduplicates.obda";
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException, SQLException {
@@ -43,6 +45,28 @@ public class Issue461Test {
     public void testConvert() throws Exception {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
+                .enableTestMode()
+                .build();
+
+        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
+        converter.write(new File(outputMappingFile), config.loadProvidedPPMapping());
+
+        OntopSQLOWLAPIConfiguration config2 = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .r2rmlMappingFile(outputMappingFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
+                .enableTestMode()
+                .build();
+        config2.loadProvidedPPMapping();
+    }
+
+    // r2rml conversion will fail when the mapping file contains duplicates
+    @Test(expected = OntopInternalBugException.class)
+    public void testConvertwithDuplicates() throws Exception {
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdaFilewithDuplicates)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
                 .enableTestMode()
