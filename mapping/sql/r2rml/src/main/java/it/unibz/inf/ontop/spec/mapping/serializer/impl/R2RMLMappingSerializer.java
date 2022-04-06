@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
+import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.MappingSerializer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -43,7 +44,7 @@ public class R2RMLMappingSerializer implements MappingSerializer {
         if (!(ppMapping.getTripleMaps().stream()
                 .map(t -> t.getId())
                 .allMatch(new HashSet<>()::add)))
-            throw new SQLPPTriplesMapToR2RMLConverter.R2RMLSerializationException("Duplicate mapping IDs found in obda file");
+            throw new R2RMLSerializationException("Duplicate mapping IDs found in obda file");
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(rdfFactory, manager.getMappingFactory());

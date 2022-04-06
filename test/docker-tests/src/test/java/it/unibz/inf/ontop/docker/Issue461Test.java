@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -63,7 +64,7 @@ public class Issue461Test {
     }
 
     // r2rml conversion will fail when the mapping file contains duplicates
-    @Test(expected = OntopInternalBugException.class)
+    @Test(expected = R2RMLSerializationException.class)
     public void testConvertwithDuplicates() throws Exception {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFilewithDuplicates)
