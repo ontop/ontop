@@ -79,6 +79,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     @Override
     public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing) {
+        return generateSourceQuery(query, avoidPostProcessing, false);
+    }
+
+    @Override
+    public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes) {
         if (query.getTree().isDeclaredAsEmpty())
             return query;
 
@@ -96,7 +101,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             return iqFactory.createIQ(query.getProjectionAtom(),
                     iqFactory.createEmptyNode(query.getProjectionAtom().getVariables()));
 
-        NativeNode nativeNode = generateNativeNode(normalizedSubTree);
+        NativeNode nativeNode = generateNativeNode(normalizedSubTree, tolerateUnknownTypes);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
 
@@ -194,7 +199,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         }
     }
 
-    private NativeNode generateNativeNode(IQTree normalizedSubTree) {
-        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, false);
+    private NativeNode generateNativeNode(IQTree normalizedSubTree, boolean tolerateUnknownTypes) {
+        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, tolerateUnknownTypes);
     }
 }
