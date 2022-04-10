@@ -142,7 +142,7 @@
         <guava.version>30.1.1-jre</guava.version>
         <guice.version>5.0.1</guice.version>
         <h2gis.version>1.3.2</h2gis.version>
-        <h2.version>1.4.196</h2.version>
+        <h2.version>2.1.212</h2.version>
         <hamcrest.version>1.3</hamcrest.version>
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
@@ -154,7 +154,8 @@
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.3</jsqlparser.version>
         <jsr305.version>3.0.2</jsr305.version>
-        <junit.version>4.13.1</junit.version>
+        <junit.version>4.13.2</junit.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
         <opencsv.version>4.6</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
@@ -168,7 +169,7 @@
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
-        <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
         <thrift.version>[0.12.0,)</thrift.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -183,11 +184,11 @@
         <commons-logging.version>1.2</commons-logging.version>
         <errorprone.version>2.5.1</errorprone.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
-        <junit-jupiter-api.version>5.6.2</junit-jupiter-api.version>
         <osgi.version>6.0.0</osgi.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <sesame.version>2.7.16</sesame.version>
+        <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
     </properties>
 
@@ -1052,6 +1053,13 @@
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <!-- Hamcrest -->
             <dependency>
@@ -1114,11 +1122,6 @@
                 <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit-jupiter-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
                 <version>${tomcat-embed-core.version}</version>
@@ -1132,6 +1135,11 @@
                 <groupId>com.google.errorprone</groupId>
                 <artifactId>error_prone_annotations</artifactId>
                 <version>${errorprone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thymeleaf</groupId>
+                <artifactId>thymeleaf</artifactId>
+                <version>${thymeleaf.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
