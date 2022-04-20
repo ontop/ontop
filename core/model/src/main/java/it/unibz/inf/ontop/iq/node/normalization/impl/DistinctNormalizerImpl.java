@@ -78,8 +78,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     : iqFactory.createUnaryIQTree(distinctNode,
                     iqFactory.createNaryIQTree((UnionNode) newChildRoot,
                             Stream.concat(
-                                        vNodelist.stream()
-                                            .map(v -> iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), v)),
+                                        Stream.of(iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
+                                    ((ValuesNode) vNodelist.get(0)).getValues().stream().distinct().collect(ImmutableCollectors.toList()))),
                                         nonVnodeList.stream())
                                     .collect(ImmutableCollectors.toList())));
         }

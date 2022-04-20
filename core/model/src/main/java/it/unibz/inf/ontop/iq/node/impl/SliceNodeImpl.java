@@ -137,7 +137,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .map(v -> (ValuesNode) v)
                     .findFirst().get();
 
-            return totalValues > (offset + limit)
+            return totalValues >= (offset + limit)
                     ? iqFactory.createValuesNode(vNode.getOrderedVariables(), vNode.getValues().subList((int) offset, (int) (offset+limit)))
                     : iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
         }
