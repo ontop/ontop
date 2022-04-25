@@ -150,4 +150,9 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROW_NUMBER() OVER (ORDER BY 1)";
     }
+
+    @Override
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new MySQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
+    }
 }
