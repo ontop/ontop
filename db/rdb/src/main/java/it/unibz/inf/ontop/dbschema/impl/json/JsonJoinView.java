@@ -42,7 +42,7 @@ public class JsonJoinView extends JsonBasicOrJoinView {
     }
 
     @Override
-    protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(
+    protected ImmutableList<ParentDefinition> extractParentDefinitions(
             DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
         QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
 
@@ -53,12 +53,12 @@ public class JsonJoinView extends JsonBasicOrJoinView {
         if (joinPart.relations.size() < 2)
             throw new MetadataExtractionException("At least two relations are expected");
 
-        ImmutableMap.Builder<NamedRelationDefinition, String> builder = ImmutableMap.builder();
+        ImmutableList.Builder<ParentDefinition> builder = ImmutableList.builder();
         for(int i=0 ; i < joinPart.relations.size(); i++) {
             NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
                     joinPart.relations.get(i).toArray(new String[0])));
 
-            builder.put(parentDefinition, joinPart.columnPrefixes.get(i));
+            builder.add(new ParentDefinition(parentDefinition, joinPart.columnPrefixes.get(i)));
         }
 
         return builder.build();

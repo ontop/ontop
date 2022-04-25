@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import eu.optique.r2rml.api.MappingFactory;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
@@ -20,6 +19,7 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -307,15 +307,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			else if (!datatype.getIRI().equals(RDFS.LITERAL))
 				objectMap.setDatatype(datatype.getIRI());
 			return objectMap;
-		}
-	}
-
-	/**
-	 * TODO: shall we consider as an internal bug or differently?
-	 */
-	static class R2RMLSerializationException extends OntopInternalBugException {
-		private R2RMLSerializationException(String message) {
-			super(message);
 		}
 	}
 }

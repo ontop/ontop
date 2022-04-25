@@ -54,6 +54,9 @@ public class OntopEndpointDownloadOntologyTest {
                 equalTo(HttpStatus.SC_OK)); // Should be disabled by default
     }
 
+    /**
+     * TODO: why a post if there is no payload and no side-effect?
+     */
     @Test
     public void testOntologyFetcherPost() throws IOException {
         HttpUriRequest request = new HttpPost("http://localhost:" + PORT + "/ontology");

@@ -6,26 +6,26 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
+
+import java.util.List;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
-public class SelectQueryParser extends FromItemParser<RAExpression> {
-    private final QuotedIDFactory idfac;
-    private final ExpressionParser expressionParser;
+public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAExpressionOperations> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
-        this.idfac = metadata.getQuotedIDFactory();
-        this.expressionParser = new ExpressionParser(idfac, coreSingletons);
+        super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
     }
 
-    public RAExpression parse(SelectBody selectBody) throws InvalidQueryException, UnsupportedSelectQueryException {
+    public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            return translateSelectBody(selectBody);
+            Select select = JSqlParserTools.parse(sql);
+            return translateSelect(select.getSelectBody(), select.getWithItemsList());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());
@@ -37,8 +37,11 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
 
     @Override
-    protected RAExpression translateSelectBody(SelectBody selectBody) {
-        PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
+    protected RAExpression translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
+        PlainSelect plainSelect = getPlainSelect(selectBody);
+
+        if (withItemsList != null && !withItemsList.isEmpty())
+            throw new UnsupportedSelectQueryRuntimeException("WITH is not supported in SELECT statements", withItemsList);
 
         if (plainSelect.getOracleHint() != null)
             throw new UnsupportedSelectQueryRuntimeException("Oracle hints are not supported", plainSelect);
@@ -120,10 +123,10 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
             throw new UnsupportedSelectQueryRuntimeException("WITHIN WINDOW is not supported", join);
 
         if ((join.isFull() || join.isRight() || (join.isLeft() && !join.isSemi()) || join.isOuter())
-            && (join.getUsingColumns() != null || join.getOnExpression() != null))
+            && (!join.getUsingColumns().isEmpty() || !join.getOnExpressions().isEmpty()))
             throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
-        if (join.isLeft() && join.isSemi() && join.getOnExpression() != null)
+        if (join.isLeft() && join.isSemi() && !join.getOnExpressions().isEmpty())
             throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
         return super.join(left, join);
@@ -136,11 +139,11 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     }
 
     @Override
-    public RAExpression create(NamedRelationDefinition relation) {
+    protected RAExpression create(NamedRelationDefinition relation) {
         return operations.create(relation, createAttributeVariables(relation));
     }
 
     public RAExpression translateParserView(RelationDefinition view) {
-        return ((RAExpressionOperations)operations).createWithoutName(view, createAttributeVariables(view));
+        return operations.createWithoutName(view, createAttributeVariables(view));
     }
 }
