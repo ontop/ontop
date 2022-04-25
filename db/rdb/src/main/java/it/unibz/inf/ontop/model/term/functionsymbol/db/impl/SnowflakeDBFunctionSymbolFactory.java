@@ -15,9 +15,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.*;
+
 public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UUID_STRING_STR = "UUID_STRING";
+    private static final String RANDOM_STR = "RANDOM";
 
     @Inject
     protected SnowflakeDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -41,7 +44,19 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
         builder.putAll(super.createNormalizationTable());
 
-        // TODO: consider normalization (like other systems)
+
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+
+        // NB: TIMESTAMP_TZ_STR is the default, already done.
+        for (String timestampTypeString : ImmutableList.of(TIMESTAMP_LOCAL_TZ_STR, TIMESTAMP_NO_TZ_STR)) {
+            DBTermType timestampType = dbTypeFactory.getDBTermType(timestampTypeString);
+
+            DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);
+            builder.put(timestampType, xsdDatetime, datetimeNormFunctionSymbol);
+            builder.put(timestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        }
 
         return builder.build();
     }
@@ -91,7 +106,8 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("TZ serialization is not yet supported");
+        String str = termConverter.apply(terms.get(0));
+        return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
     }
 
     @Override
@@ -121,7 +137,17 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     @Override
+    protected String getRandNameInDialect() {
+        return RANDOM_STR;
+    }
+
+    @Override
     protected String getUUIDNameInDialect() {
         return UUID_STRING_STR;
+    }
+
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER (ORDER BY 1)";
     }
 }

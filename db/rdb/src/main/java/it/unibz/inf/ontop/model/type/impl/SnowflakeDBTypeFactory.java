@@ -20,11 +20,13 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String NUMBER_STR = "NUMBER";
     public static final String NUMBER_19_STR = "NUMBER(19)";
-    public static final String BINARY_DOUBLE_STR = "BINARY_DOUBLE";
     public static final String TIMESTAMP_LOCAL_TZ_STR = "TIMESTAMP_LTZ";
+    public static final String TIMESTAMPLTZ_STR = "TIMESTAMPLTZ";
     public static final String TIMESTAMP_TZ_STR = "TIMESTAMP_TZ";
+    public static final String TIMESTAMPTZ_STR = "TIMESTAMPTZ";
 
     public static final String TIMESTAMP_NO_TZ_STR = "TIMESTAMP_NTZ";
+    public static final String TIMESTAMPNTZ_STR = "TIMESTAMPNTZ";
 
     @AssistedInject
     private SnowflakeDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -51,6 +53,9 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TIMESTAMP_LOCAL_TZ_STR, timestampLTZType);
         map.put(TIMESTAMP_TZ_STR, timestampTZType);
         map.put(TIMESTAMP_NO_TZ_STR, timestampNTZType);
+        map.put(TIMESTAMPLTZ_STR, timestampLTZType);
+        map.put(TIMESTAMPTZ_STR, timestampTZType);
+        map.put(TIMESTAMPNTZ_STR, timestampNTZType);
         return map;
     }
 
@@ -60,7 +65,7 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.HEXBINARY, BINARY_STR);
         map.put(DefaultTypeCode.DECIMAL, NUMBER_STR);
         map.put(DefaultTypeCode.LARGE_INTEGER, NUMBER_19_STR);
-        map.put(DefaultTypeCode.DOUBLE, BINARY_DOUBLE_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_TZ_STR);
         return ImmutableMap.copyOf(map);
     }
 }
