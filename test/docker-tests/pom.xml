@@ -23,6 +23,9 @@
         <docker.pgsql.password>postgres2</docker.pgsql.password>
         <docker.denodo.password>admin</docker.denodo.password>
         <docker.dremio.password>dremio123</docker.dremio.password>
+        <snowflake.account>fakeaccount</snowflake.account>
+        <snowflake.user>fake</snowflake.user>
+        <snowflake.password>fake</snowflake.password>
     </properties>
 
     <dependencies>
@@ -286,6 +289,12 @@
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
             <version>11.5.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.17</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
