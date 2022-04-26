@@ -26,7 +26,6 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * An OBDAModel is created for an ontology.
@@ -72,8 +71,6 @@ public class OBDAModel {
     public static final String PROPERTY_EXT = ".properties"; // The default property file extension.
     public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
     public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
-    public static final String CATALOG_PREFIX = "catalog";
-    public static final String CATALOG_EXT = ".xml";
 
     private final OWLOntology ontology;
 
@@ -96,9 +93,6 @@ public class OBDAModel {
 
     @Nullable
     private File dbMetadataFile;
-
-    @Nullable
-    private String catalogFilePath;
 
     private TypeFactory typeFactory;
 
@@ -202,21 +196,6 @@ public class OBDAModel {
                     ? dbMetadataFile
                     : null;
 
-            File owlFile = new File(URI.create(Objects.requireNonNull(getOwlFileName())));
-            if (owlFile.exists()) {
-                File parentDirectory = owlFile.getParentFile();
-                if (parentDirectory.exists()) {
-                    File[] catalogFiles = parentDirectory.listFiles(
-                            (dir, name) -> name.startsWith(CATALOG_PREFIX) && name.endsWith(CATALOG_EXT));
-
-                    if (catalogFiles != null) {
-                        this.catalogFilePath = Stream.of(catalogFiles)
-                                .map(File::getAbsolutePath)
-                                .findAny()
-                                .orElse(null);
-                    }
-                }
-            }
             datasource.load(fileOf(owlFileBaseName, PROPERTY_EXT));
             triplesMapManager.load(obdaFile, this); // can update datasource!
             queryManager.load(fileOf(owlFileBaseName, QUERY_EXT));
@@ -259,7 +238,6 @@ public class OBDAModel {
 
         return documentIRI.toString();
     }
-
 
     private static File fileOf(String owlFileName, String extension) {
         return new File(URI.create(owlFileName + extension));
@@ -324,9 +302,6 @@ public class OBDAModel {
 
         Optional.ofNullable(dbMetadataFile)
                 .ifPresent(builder::dbMetadataFile);
-
-        Optional.ofNullable(catalogFilePath)
-                .ifPresent(builder::xmlCatalogFile);
 
         return builder;
     }
