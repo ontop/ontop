@@ -107,7 +107,7 @@ public class ComplexWhereMappingTest {
 	private void runTests(OntopSQLOWLAPIConfiguration config) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = factory.createEngine(config);
 
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		try (OWLConnection conn = reasoner.getConnection();
@@ -123,7 +123,7 @@ public class ComplexWhereMappingTest {
 			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
 		}
 		finally {
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 

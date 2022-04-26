@@ -223,7 +223,7 @@ public class NPDUnfolderTest {
 	private String getNPDUnfolding(String query, Properties p) throws Exception {
         OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLEngine quest = fac.createEngine(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 
@@ -251,7 +251,7 @@ public class NPDUnfolderTest {
         OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         String rewriting;
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLEngine quest = fac.createEngine(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 

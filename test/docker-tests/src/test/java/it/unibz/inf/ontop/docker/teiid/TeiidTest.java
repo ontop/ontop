@@ -49,7 +49,7 @@ public class TeiidTest {
                 .propertyFile(propertyfile)
                 .enableTestMode()
                 .build();
-        res = factory.createReasoner(config);
+        res = factory.createEngine(config);
         ct = res.getConnection();
         st = ct.createStatement();
     }

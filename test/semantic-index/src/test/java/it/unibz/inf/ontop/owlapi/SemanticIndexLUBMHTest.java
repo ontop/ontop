@@ -175,7 +175,7 @@ public class SemanticIndexLUBMHTest {
 		p.setProperty(EXISTENTIAL_REASONING, "true");
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
-			OntopOWLReasoner reasoner = factory.createReasoner(loader.getConfiguration());
+			OntopOWLEngine reasoner = factory.createEngine(loader.getConfiguration());
 			OWLConnection connection = reasoner.getConnection();
 			OWLStatement st = connection.createStatement()) {
 

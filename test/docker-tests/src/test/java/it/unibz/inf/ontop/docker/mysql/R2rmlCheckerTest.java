@@ -80,7 +80,7 @@ public class R2rmlCheckerTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerOBDA = factory.createReasoner(config);
+		reasonerOBDA = factory.createEngine(config);
 
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
@@ -97,7 +97,7 @@ public class R2rmlCheckerTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerR2rml = factory1.createReasoner(config1);
+		reasonerR2rml = factory1.createEngine(config1);
 	}
 
 	@After
