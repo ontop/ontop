@@ -18,7 +18,9 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import org.protege.editor.core.ui.util.UIUtil;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,12 +281,17 @@ public class OBDAModel {
     }
 
     private Reader createOntologyReader() {
+        OWLOntologyMerger ontologyMerger = new OWLOntologyMerger(ontology.getOWLOntologyManager());
+
         try {
+            OWLOntology newOntology = ontologyMerger.createMergedOntology(OWLManager.createOWLOntologyManager(), null);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ontology.getOWLOntologyManager().saveOntology(ontology, outputStream);
+            newOntology.getOWLOntologyManager().saveOntology(newOntology, outputStream);
             return new InputStreamReader(new ByteArrayInputStream(outputStream.toByteArray()));
         } catch (OWLOntologyStorageException e) {
             // TODO: shall we throw a checked exception?
+            throw new RuntimeException(e);
+        } catch (OWLOntologyCreationException e) {
             throw new RuntimeException(e);
         }
     }
