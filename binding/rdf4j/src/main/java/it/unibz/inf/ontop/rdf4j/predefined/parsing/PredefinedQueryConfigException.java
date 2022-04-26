@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined.parsing;
 
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 
 /**
  * TODO: better think about it

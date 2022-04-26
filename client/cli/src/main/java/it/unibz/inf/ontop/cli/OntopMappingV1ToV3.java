@@ -18,9 +18,8 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
@@ -305,7 +304,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         nid += Joiner.on("-").join(ids.stream()
                                 .map(i -> i.toString().substring(i.toString().length() - 5, i.toString().length()))
                                 .collect(Collectors.toList()));
-                        URIImpl to = new URIImpl(nid);
+                        IRI to = SimpleValueFactory.getInstance().createIRI(nid);
                         Resource lt = logicalTable.get(id);
                         logicalTable.put(to, lt);
                         Resource sm = subjectMap.get(id);
@@ -323,7 +322,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                                     mergeBmapInto((Resource) object, sm);
                                     object = sm;
                                 }
-                                Statement st = new StatementImpl(to, statement.getPredicate(), object);
+                                Statement st = SimpleValueFactory.getInstance().createStatement(to, statement.getPredicate(), object);
                                 if (!lst.contains(st))
                                     lst.add(st);
                             }
@@ -362,10 +361,10 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         writer.write(System.lineSeparator());
 
                         Resource currentSubject = null;
-                        URI currentPredicate = null;
+                        IRI currentPredicate = null;
                         for (Statement statement : statements) {
                             Resource subject = statement.getSubject();
-                            URI predicate = statement.getPredicate();
+                            IRI predicate = statement.getPredicate();
                             if (subject.equals(currentSubject)) {
                                 if (predicate.equals(currentPredicate)) {
 
@@ -423,8 +422,8 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     if (template.startsWith("{") &&
                             template.endsWith("}") &&
                             !template.substring(1, template.length() - 1).contains("{")) {
-                        statement = new StatementImpl(statement.getSubject(),
-                                new URIImpl("http://www.w3.org/ns/r2rml#column"),
+                        statement = SimpleValueFactory.getInstance().createStatement(statement.getSubject(),
+                                SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/r2rml#column"),
                                 new LiteralImpl(template.substring(1, template.length() - 1)));
                     }
                 }
@@ -434,8 +433,8 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     String sql = statement.getObject().stringValue();
                     String table = extractSimpleTable(sql);
                     if (table != null)
-                        statement = new StatementImpl(statement.getSubject(),
-                                new URIImpl("http://www.w3.org/ns/r2rml#tableName"),
+                        statement = SimpleValueFactory.getInstance().createStatement(statement.getSubject(),
+                                SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/r2rml#tableName"),
                                 new LiteralImpl(table));
                 }
 
@@ -450,7 +449,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 Value object = statement.getObject();
                 Resource subject = statement.getSubject();
 
-                if (object instanceof URI &&
+                if (object instanceof IRI &&
                         object.toString().equals("http://www.w3.org/ns/r2rml#TriplesMap")) {
                     TripleMap.add(subject);
                 }
@@ -603,7 +602,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             }
 
             private String getO(Statement statement) {
-                URI predicate = statement.getPredicate();
+                IRI predicate = statement.getPredicate();
                 Value object;
 
                 // second pass - actual renaming
@@ -628,15 +627,15 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             }
 
             private String outID(Resource resource) {
-                if (resource instanceof URI)
+                if (resource instanceof IRI)
                     return out(resource);
                 else
                     return resource.toString();
             }
 
             private String out(Value value) {
-                if (value instanceof URI) {
-                    String uri = ((URI) value).toString();
+                if (value instanceof IRI) {
+                    String uri = ((IRI) value).toString();
                     if (uri.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
                         return "a";
                     for (Map.Entry<String, String> e : PREFIXES.entrySet())
@@ -650,7 +649,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         pref += "    ";
                         List<Statement> list = bmap.get(value);
                         boolean first = true;
-                        URI current_pred = null;
+                        IRI current_pred = null;
                         for (Statement st : list) {
                             if (current_pred == st.getPredicate()) {
                                 s += ", " + getO(st);

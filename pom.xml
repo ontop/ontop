@@ -165,7 +165,7 @@
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.8.0</r2rml-api.version>
-        <rdf4j.version>3.3.0</rdf4j.version>
+        <rdf4j.version>4.0.0</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
@@ -576,11 +576,11 @@
                 <artifactId>rdf4j-queryparser-sparql</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-util</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.eclipse.rdf4j</groupId>-->
+<!--                <artifactId>rdf4j-util</artifactId>-->
+<!--                <version>${rdf4j.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sparql-compliance</artifactId>
@@ -725,11 +725,6 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sail-memory</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-queryparser-serql</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
