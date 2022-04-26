@@ -191,6 +191,9 @@
         <sesame.version>2.7.16</sesame.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
+        
+        <!-- JDK version -->
+        <jdk.version>11</jdk.version>
     </properties>
 
     <dependencyManagement>
@@ -1218,8 +1221,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>${jdk.version}</source>
+                        <target>${jdk.version}</target>
                     </configuration>
                 </plugin>
                 <plugin>
