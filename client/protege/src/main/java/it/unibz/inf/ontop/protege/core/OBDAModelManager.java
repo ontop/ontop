@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OBDAModelManager implements Disposable {
 
@@ -34,9 +35,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 	private final OWLOntologyChangeListener ontologyManagerListener = new OntologyRefactoringListener();
-
 	private final Map<OWLOntologyID, OBDAModel> obdaModels = new HashMap<>();
-
 	@Nullable
 	private OBDAModel currentObdaModel;
 
@@ -274,7 +273,6 @@ public class OBDAModelManager implements Disposable {
 				queryManagerEventListeners.fire(l -> l.changed(query, indexInParent));
 			}
 		});
-		obdaModels.put(ontology.getOntologyID(), obdaModel);
 		return obdaModel;
 	}
 
