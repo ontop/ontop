@@ -46,8 +46,12 @@ public interface DBTypeFactory {
 
     DBTermType getDBArrayType();
 
+    //TODO: remove. The DB engine may support different JSON datatype
+    @Deprecated
     DBTermType getDBJsonType();
 
+    //TODO: remove. Postgres-specifc
+    @Deprecated
     DBTermType getDBJsonBType();
 
     /**

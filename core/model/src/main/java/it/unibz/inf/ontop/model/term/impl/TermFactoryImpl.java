@@ -1319,8 +1319,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getDBJsonIsArray(ImmutableTerm arg) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsArray(), arg);
+	public ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsArray(dbType), arg);
 	}
 
 }

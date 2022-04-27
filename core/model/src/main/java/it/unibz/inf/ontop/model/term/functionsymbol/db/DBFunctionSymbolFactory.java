@@ -355,6 +355,6 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBJsonIsNumber();
     DBBooleanFunctionSymbol getDBJsonIsBoolean();
     DBBooleanFunctionSymbol getDBJsonIsScalar();
-    DBBooleanFunctionSymbol getDBJsonIsArray();
+    DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
 }

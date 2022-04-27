@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -129,7 +128,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBBooleanFunctionSymbol jsonIsNumber;
     // Created in init()
-    private DBBooleanFunctionSymbol jsonIsArray;
+    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -333,6 +332,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
+
+        this.isArrayMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -395,7 +396,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
 
-        jsonIsArray = createJsonIsArray();
         jsonIsNumber = createJsonIsNumber();
         jsonIsBoolean = createJsonIsBoolean();
         jsonIsScalar = createJsonIsScalar();
@@ -1065,10 +1065,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsArray() {
-        if(jsonIsArray == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsArray;
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        return isArrayMap.computeIfAbsent(dbType, t -> createIsArray(t));
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
@@ -1487,8 +1485,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeMillisBetween);
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsArray() {
-        return null;
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported nested datatype: " + dbType.getName());
     }
 
     protected DBBooleanFunctionSymbol createJsonIsNumber() {

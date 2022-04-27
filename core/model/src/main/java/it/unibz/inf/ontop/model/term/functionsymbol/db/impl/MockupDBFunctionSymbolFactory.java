@@ -581,7 +581,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsArray() {
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

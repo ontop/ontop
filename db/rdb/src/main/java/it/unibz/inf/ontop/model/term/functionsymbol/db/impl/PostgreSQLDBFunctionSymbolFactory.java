@@ -28,11 +28,13 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     private static final String POSITION_STR = "POSITION";
 
     private final DBTermType dbJsonType;
+    private final DBTermType dbJsonBType;
 
     @Inject
     protected PostgreSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createPostgreSQLRegularFunctionTable(typeFactory), typeFactory);
-        this.dbJsonType = dbTypeFactory.getDBJsonType();
+        this.dbJsonType = dbTypeFactory.getDBTermType(JSON_STR);
+        this.dbJsonBType = dbTypeFactory.getDBTermType(JSONB_STR);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createPostgreSQLRegularFunctionTable(
@@ -182,16 +184,31 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createJsonIsArray() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(
-                "JSON_IS_ARRAY",
-                ImmutableList.of(dbJsonType),
-                dbBooleanType,
-                false,
-                (terms, termConverter, termFactory) -> String.format(
-                        "json_typeof(%s) = 'array'",
-                        termConverter.apply(terms.get(0))
-                ));
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbTermType) {
+        if (dbTermType.equals(dbJsonType)) {
+            return new DBBooleanFunctionSymbolWithSerializerImpl(
+                    "JSON_IS_ARRAY",
+                    ImmutableList.of(dbJsonType),
+                    dbBooleanType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "json_typeof(%s) = 'array'",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+
+        if (dbTermType.equals(dbJsonBType)) {
+            return new DBBooleanFunctionSymbolWithSerializerImpl(
+                    "JSONB_IS_ARRAY",
+                    ImmutableList.of(dbJsonBType),
+                    dbBooleanType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "jsonb_typeof(%s) = 'array'",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+        throw new UnsupportedOperationException("Unsupported nested datatype: " + dbTermType.getName());
     }
 
     @Override

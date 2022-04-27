@@ -126,6 +126,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable, idFactory);
 
         Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, idFactory));
+        DBTermType flattenedDBType = dbParameters.getDBTypeFactory().getDBTermType(flattenedColumn.datatype);
 
         if(flattenedVariable == null){
             throw new InvalidOntopViewException("The flattened column "+flattenedColumn+ " is not present in the base relation");
@@ -167,6 +168,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 getProjectedVars(dataNode.getVariables(), flattenedIfArrayVariable),
                 getCheckIfArraySubstitution(
                         flattenedVariable,
+                        flattenedDBType,
                         flattenedIfArrayVariable,
                         cs
                 ));
@@ -276,13 +278,14 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
 
-    private ImmutableSubstitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, Variable flattenedIfArrayVar, CoreSingletons cs){
+    private ImmutableSubstitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, DBTermType dbType,
+                                                                             Variable flattenedIfArrayVar, CoreSingletons cs){
 
         TermFactory termFactory = cs.getTermFactory();
         return cs.getSubstitutionFactory().getSubstitution(ImmutableMap.of(
                         flattenedIfArrayVar,
                         termFactory.getIfElseNull(
-                                termFactory.getDBJsonIsArray(flattenedVar),
+                                termFactory.getDBIsArray(dbType, flattenedVar),
                                 flattenedVar
                         )));
     }
