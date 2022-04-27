@@ -45,7 +45,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     @Nonnull
     public final List<String> baseRelation;
     @Nonnull
-    private final String flattenedColumn;
+    private final FlattenedColumn flattenedColumn;
 
     public final UniqueConstraints uniqueConstraints;
 
@@ -59,7 +59,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     public JsonFlattenLens(
             @JsonProperty("name") List<String> name,
             @JsonProperty("baseRelation") List<String> baseRelation,
-            @JsonProperty("flattenedColumn") String flattenedColumn,
+            @JsonProperty("flattenedColumn") FlattenedColumn flattenedColumn,
             @JsonProperty("columns") Columns columns,
             @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
             @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
@@ -125,7 +125,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
 
         ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable, idFactory);
 
-        Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn, idFactory));
+        Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, idFactory));
 
         if(flattenedVariable == null){
             throw new InvalidOntopViewException("The flattened column "+flattenedColumn+ " is not present in the base relation");
@@ -529,6 +529,24 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             this.name = name;
             this.datatype = datatype;
             this.key = key;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "name",
+            "datatype",
+    })
+    private static class FlattenedColumn extends JsonOpenObject {
+        @Nonnull
+        public final String name;
+        @Nonnull
+        public final String datatype;
+
+        @JsonCreator
+        public FlattenedColumn(@JsonProperty("name") String name,
+                               @JsonProperty("datatype") String datatype) {
+            this.name = name;
+            this.datatype = datatype;
         }
     }
 

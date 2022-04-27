@@ -3,7 +3,10 @@
     {
       "name": ["\"hr\"","\"person-tags\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
-      "flattenedColumn": "\"tags\"",
+      "flattenedColumn": {
+        "name": "\"tags\"",
+        "datatype": "json"
+      },
       "columns": {
         "kept": [
           "\"id\"",
@@ -36,7 +39,10 @@
     {
       "name": ["\"hr\"","\"persons-friends\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
-      "flattenedColumn": "\"friends\"",
+      "flattenedColumn": {
+        "name": "\"friends\"",
+        "datatype": "json"
+      },
       "columns": {
         "kept": [
           "\"id\""
