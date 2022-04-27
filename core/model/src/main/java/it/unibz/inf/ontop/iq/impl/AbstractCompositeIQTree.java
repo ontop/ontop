@@ -90,7 +90,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
         if(rootNode instanceof FlattenNode)
-            return ((FlattenNode)rootNode).getProjectedVariables(variablesProjectedByChildren);
+            return ((FlattenNode)rootNode).getVariables(variablesProjectedByChildren);
         return  variablesProjectedByChildren;
     }
 
