@@ -49,7 +49,7 @@ public interface IntermediateQueryFactory {
 
     FlattenNode createFlattenNode(@Assisted("outputVariable") Variable outputVariable,
                                   @Assisted("flattenedVariable") Variable flattenedVariable,
-                                  Optional<Variable> indexVariable);
+                                  Optional<Variable> indexVariable, DBTermType dbTermType);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
 

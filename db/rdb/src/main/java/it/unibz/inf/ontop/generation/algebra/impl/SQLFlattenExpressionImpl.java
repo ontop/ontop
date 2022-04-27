@@ -16,16 +16,19 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
     private final Variable flattenendVar;
     private final Variable outputVar;
     private final Optional<Variable> indexVar;
+    private final DBTermType flattenedType;
 
     @AssistedInject
     private SQLFlattenExpressionImpl(@Assisted SQLExpression subExpression,
                                      @Assisted("flattenedVar") Variable flattenendVar,
                                      @Assisted("outputVar") Variable outputVar,
-                                     @Assisted Optional<Variable> indexVar) {
+                                     @Assisted Optional<Variable> indexVar,
+                                     @Assisted DBTermType flattenedType) {
         this.subExpression = subExpression;
         this.flattenendVar = flattenendVar;
         this.outputVar = outputVar;
         this.indexVar = indexVar;
+        this.flattenedType = flattenedType;
     }
 
     @Override
@@ -49,5 +52,10 @@ public class SQLFlattenExpressionImpl implements SQLFlattenExpression {
 
     public Optional<Variable> getIndexVar() {
         return indexVar;
+    }
+
+    @Override
+    public DBTermType getFlattenedType() {
+        return flattenedType;
     }
 }

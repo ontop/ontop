@@ -159,7 +159,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
                 flattenedIfArrayVariable,
-                indexVariable
+                indexVariable,
+                flattenedDBType
         );
 
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));

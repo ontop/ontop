@@ -35,11 +35,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Variable flattenedVariable;
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
+    private final DBTermType flattenedType;
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
                             @Assisted("flattenedVariable") Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
+                            @Assisted DBTermType flattenedType,
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory) {
@@ -47,11 +49,17 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.outputVariable = outputVariable;
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
+        this.flattenedType = flattenedType;
     }
 
     @Override
     public Variable getFlattenedVariable() {
         return flattenedVariable;
+    }
+
+    @Override
+    public DBTermType getFlattenedType() {
+        return flattenedType;
     }
 
     @Override
@@ -326,7 +334,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 iqFactory.createFlattenNode(
                         sOutputVar,
                         sFlattenedVar,
-                        sIndexVar
+                        sIndexVar,
+                        flattenedType
                 );
     }
 

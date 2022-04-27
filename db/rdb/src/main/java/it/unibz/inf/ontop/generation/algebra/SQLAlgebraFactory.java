@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
@@ -38,7 +39,11 @@ public interface SQLAlgebraFactory {
 
     SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
 
-    SQLFlattenExpression createSQLFlattenExpression(@Assisted SQLExpression subExpression, @Assisted("flattenedVar") Variable flattenedVar, @Assisted("outputVar") Variable outputVar, @Assisted Optional<Variable> indexVar);
+    SQLFlattenExpression createSQLFlattenExpression(@Assisted SQLExpression subExpression,
+                                                    @Assisted("flattenedVar") Variable flattenedVar,
+                                                    @Assisted("outputVar") Variable outputVar,
+                                                    @Assisted Optional<Variable> indexVar,
+                                                    @Assisted DBTermType flattenedType);
 
     SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
 
