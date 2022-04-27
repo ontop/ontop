@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  *
  * See IntermediateQueryFactory for creating a new instance.
  */
-public interface IQ  {
+public interface IQ {
 
     DistinctVariableOnlyDataAtom getProjectionAtom();
 

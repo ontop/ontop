@@ -69,7 +69,7 @@
           "\"country\""
         ]
       },
-      "type": "JoinViewDefinition"
+      "type": "JoinLens"
     }
   ]
 }

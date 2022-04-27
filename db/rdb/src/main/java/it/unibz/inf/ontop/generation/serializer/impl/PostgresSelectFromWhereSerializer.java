@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -34,6 +35,19 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             @Override
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
+            }
+
+            @Override
+            protected String serializeBooleanConstant(DBConstant booleanConstant) {
+                String value = booleanConstant.getValue();
+                switch (value.toLowerCase()) {
+                    case "false":
+                    case "true":
+                        return value;
+                        // E.g. f and t need single quotes
+                    default:
+                        return "'" + value + "'";
+                }
             }
         });
     }

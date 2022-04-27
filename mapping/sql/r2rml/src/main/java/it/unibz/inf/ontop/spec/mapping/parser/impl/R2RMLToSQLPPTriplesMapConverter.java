@@ -395,8 +395,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					// Third try: datatype of the constant
 					.orElseGet(() -> Optional.ofNullable(om.getConstant())
 							.map(c -> (Literal) c)
-							.map(Literal::getDatatype)
-							.map(templateFactory::getDatatype)
+							.map(l -> templateFactory.extractDatatype(l.getLanguageTag(), Optional.of(l.getDatatype()))
+									.orElseThrow(() -> new MinorOntopInternalBugException("Minor bug: a datatype was expected")))
 							// Default case: RDFS.LITERAL (abstract, to be inferred later)
 							.orElseGet(templateFactory::getAbstractRDFSLiteral));
 

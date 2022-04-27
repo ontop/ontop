@@ -56,9 +56,9 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     }
 
     protected void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,
-                                         List<AddUniqueConstraints> addUniqueConstraints,
-                                         ImmutableList<NamedRelationDefinition> baseRelations,
-                                         CoreSingletons coreSingletons)
+                                           List<AddUniqueConstraints> addUniqueConstraints,
+                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                           CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
 
@@ -66,10 +66,10 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                 coreSingletons);
 
         for (AddUniqueConstraints addUC : list) {
-            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
+            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey)
+                LOGGER.warn("Primary key set in the view file for " + addUC.name);
 
             FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
-
             JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
             builder.build();
         }
@@ -121,15 +121,12 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
 
         ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = tree.inferUniqueConstraints();
 
-        ImmutableList<Attribute> attributes = relation.getAttributes();
         DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();
 
-        ImmutableMap<Variable, QuotedID> variableIds = IntStream.range(0, attributes.size())
-                .boxed()
+        ImmutableMap<Variable, QuotedID> variableIds = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(
-                        projectedAtom::getTerm,
-                        i -> attributes.get(i).getID()
-                ));
+                        a -> projectedAtom.getTerm(a.getIndex() - 1),
+                        Attribute::getID));
 
         return variableUniqueConstraints.stream()
                 .map(vs -> new AddUniqueConstraints(
@@ -182,16 +179,12 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                                 .map(idFactory::createAttributeID)
                                 .collect(ImmutableCollectors.toSet())));
 
-        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap =
-                Stream.of(
-                        declaredFdDependencies,
-                        inheritedFDConstructs,
-                        inferredFunctionalDependencies.stream()
-                ).flatMap(d -> d)
+        ImmutableMultimap<ImmutableSet<QuotedID>, FunctionalDependencyConstruct> fdMultimap = Stream.concat(
+                    Stream.concat(declaredFdDependencies, inheritedFDConstructs),
+                    inferredFunctionalDependencies.stream())
                 .collect(ImmutableCollectors.toMultimap(
                         FunctionalDependencyConstruct::getDeterminants,
-                        fd -> fd
-                ));
+                        fd -> fd));
 
         ImmutableSet<FunctionalDependencyConstruct> fdConstructs = fdMultimap.asMap().values().stream()
                 .map(fds -> fds.stream()
@@ -204,19 +197,10 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
 
         // Insert the FDs
         for (FunctionalDependencyConstruct fdConstruct : fdConstructs) {
-            addFunctionalDependency(relation, idFactory, fdConstruct);
+            addFunctionalDependency(relation, fdConstruct);
         }
     }
 
-    /**
-     * The selecting criteria could be relaxed in the future
-     */
-    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
-                                     ImmutableSet<QuotedID> addedColumns) {
-        return fd.getDeterminants().stream()
-                .map(Attribute::getID)
-                .noneMatch(d -> hiddenColumns.contains(d) || addedColumns.contains(d));
-    }
 
     /**
      * At the moment, only consider mirror attribute (same as in the parent)
@@ -226,14 +210,27 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     private Stream<QuotedID> extractNewDependents(QuotedID parentDependentId,
                                                   ImmutableSet<QuotedID> addedColumns,
                                                   ImmutableSet<QuotedID> hiddenColumns) {
-        return (addedColumns.contains(parentDependentId) || hiddenColumns.contains(parentDependentId))
-                ? Stream.empty()
-                : Stream.of(parentDependentId);
+        return isInherited(parentDependentId, addedColumns, hiddenColumns)
+                ? Stream.of(parentDependentId)
+                : Stream.empty();
     }
 
-    protected void addFunctionalDependency(NamedRelationDefinition viewDefinition,
-                                           QuotedIDFactory idFactory,
-                                           FunctionalDependencyConstruct fdConstruct) throws MetadataExtractionException {
+    /**
+     * The selecting criteria could be relaxed in the future
+     */
+    private boolean canFDBeInherited(FunctionalDependency fd, ImmutableSet<QuotedID> hiddenColumns,
+                                     ImmutableSet<QuotedID> addedColumns) {
+        return fd.getDeterminants().stream()
+                .map(Attribute::getID)
+                .allMatch(d -> isInherited(d, addedColumns, hiddenColumns));
+    }
+
+    private boolean isInherited(QuotedID id, ImmutableSet<QuotedID> addedColumns, ImmutableSet<QuotedID> hiddenColumns) {
+        return !addedColumns.contains(id) && !hiddenColumns.contains(id);
+    }
+
+    private void addFunctionalDependency(NamedRelationDefinition viewDefinition,
+                                         FunctionalDependencyConstruct fdConstruct) throws MetadataExtractionException {
 
         FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(viewDefinition);
 
@@ -264,10 +261,10 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     }
 
     private ImmutableList<AddForeignKey> extractForeignKeys(OntopViewDefinition relation, List<AddForeignKey> addForeignKeys,
-                                                   ImmutableList<NamedRelationDefinition> baseRelations) {
+                                                            ImmutableList<NamedRelationDefinition> baseRelations) {
         return Stream.concat(
-                    addForeignKeys.stream(),
-                    inferForeignKeys(relation, baseRelations))
+                        addForeignKeys.stream(),
+                        inferForeignKeys(relation, baseRelations))
                 .distinct()
                 .collect(ImmutableCollectors.toList());
     }
@@ -295,42 +292,43 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                                 new ForeignKeyPart(
                                         JsonMetadata.serializeRelationID(fk.getReferencedRelation().getID()),
                                         JsonMetadata.serializeAttributeList(
-                                        fk.getComponents().stream()
-                                                .map(ForeignKeyConstraint.Component::getReferencedAttribute))))));
+                                                fk.getComponents().stream()
+                                                        .map(ForeignKeyConstraint.Component::getReferencedAttribute))))));
 
     }
 
     protected void insertForeignKey(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
 
-        RelationID targetRelationId = JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation);
+        QuotedIDFactory idFactory = lookup.getQuotedIDFactory();;
+
+        RelationID targetRelationId = JsonMetadata.deserializeRelationID(idFactory, addForeignKey.to.relation);
         NamedRelationDefinition targetRelation;
         try {
             targetRelation = lookup.getRelation(targetRelationId);
         }
-        // If the target relation has not
         catch (MetadataExtractionException e) {
             LOGGER.info("Cannot find relation {} for FK {}", targetRelationId, addForeignKey.name);
-            return ;
+            return;
         }
 
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
 
         int columnCount = addForeignKey.to.columns.size();
         if (addForeignKey.from.size() != columnCount)
             throw new MetadataExtractionException("Not the same number of from and to columns in FK definition");
 
         try {
-            for (int i=0; i < columnCount; i++ ) {
+            ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
+            for (int i = 0; i < columnCount; i++) {
                 builder.add(
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from.get(i)),
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.to.columns.get(i)));
+                        idFactory.createAttributeID(addForeignKey.from.get(i)),
+                        idFactory.createAttributeID(addForeignKey.to.columns.get(i)));
             }
+
+            builder.build();
         }
         catch (AttributeNotFoundException e) {
             throw new MetadataExtractionException(e);
         }
-
-        builder.build();
     }
 
     /**

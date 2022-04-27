@@ -286,12 +286,18 @@ public abstract class JsonView extends JsonOpenObject {
 
             Class<? extends JsonView> instanceClass;
             switch (type) {
+                case "BasicLens":
+                // Deprecated
                 case "BasicViewDefinition":
                     instanceClass = JsonBasicView.class;
                     break;
+                case "SQLLens":
+                // Deprecated
                 case "SQLViewDefinition":
                     instanceClass = JsonSQLView.class;
                     break;
+                case "JoinLens":
+                // Deprecated
                 case "JoinViewDefinition":
                     instanceClass = JsonJoinView.class;
                     break;
