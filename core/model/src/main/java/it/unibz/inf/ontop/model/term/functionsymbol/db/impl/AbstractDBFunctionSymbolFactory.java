@@ -121,13 +121,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
 
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsScalar;
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsBoolean;
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsNumber;
-    // Created in init()
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
     private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
@@ -334,6 +330,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
 
         this.isArrayMap = new ConcurrentHashMap<>();
+        this.jsonIsNumberMap = new ConcurrentHashMap<>();
+        this.jsonIsBooleanMap = new ConcurrentHashMap<>();
+        this.jsonIsScalarMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -395,10 +394,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
-
-        jsonIsNumber = createJsonIsNumber();
-        jsonIsBoolean = createJsonIsBoolean();
-        jsonIsScalar = createJsonIsScalar();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -1044,29 +1039,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsScalar() {
-        if(jsonIsScalar == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsScalar;
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
+        return jsonIsScalarMap.computeIfAbsent(dbType, this::createJsonIsScalar);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsNumber() {
-        if(jsonIsNumber == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsNumber;
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
+        return jsonIsNumberMap.computeIfAbsent(dbType, this::createJsonIsNumber);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsBoolean() {
-        if(jsonIsBoolean == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsBoolean;
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
+        return jsonIsBooleanMap.computeIfAbsent(dbType, this::createJsonIsBoolean);
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
-        return isArrayMap.computeIfAbsent(dbType, t -> createIsArray(t));
+        return isArrayMap.computeIfAbsent(dbType, this::createIsArray);
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
@@ -1489,16 +1478,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         throw new UnsupportedOperationException("Unsupported nested datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsNumber() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsBoolean() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsScalar() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
     /**

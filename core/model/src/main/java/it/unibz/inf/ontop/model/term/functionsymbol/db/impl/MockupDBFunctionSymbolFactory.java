@@ -566,17 +566,17 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsNumber() {
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsBoolean() {
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsScalar() {
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

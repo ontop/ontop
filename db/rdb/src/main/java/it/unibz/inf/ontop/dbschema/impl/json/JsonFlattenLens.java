@@ -137,6 +137,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
 
         ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
                 flattenOutputVariable,
+                flattenedDBType,
                 buildVar2ExtractedColumnMap(variableGenerator, idFactory),
                 cs,
                 dbParameters.getDBTypeFactory()
@@ -256,6 +257,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
     private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,
+                                                                           DBTermType flattenedDBType,
                                                                            ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
                                                                            CoreSingletons cs, DBTypeFactory typeFactory){
 
@@ -265,6 +267,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                                 Map.Entry::getKey,
                                 e -> getCheckDatatypeExtractAndCastFromJson(
                                         flattenOutputVariable,
+                                        flattenedDBType,
                                         getPath(e.getValue()),
                                         getExtractedColumnType(e.getValue().datatype, e.getValue().name),
                                         cs,
@@ -307,7 +310,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     /**
      * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
      */
-    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, ImmutableList<String> path, ExtractedColumnType extractedColumnType,
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, DBTermType flattenedDBType,
+                                                                           ImmutableList<String> path, ExtractedColumnType extractedColumnType,
                                                                            CoreSingletons cs, DBTypeFactory dbTypeFactory) {
         TermFactory termFactory = cs.getTermFactory();
 
@@ -320,6 +324,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             default:
                 return termFactory.getIfElseNull(
                         getDatatypeCondition(
+                                flattenedDBType,
                                 termFactory.getDBJsonElement(
                                         sourceVar,
                                         path
@@ -365,16 +370,17 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         );
     }
 
-    private ImmutableExpression getDatatypeCondition(ImmutableFunctionalTerm arg, ExtractedColumnType extractedColumnType, CoreSingletons cs) {
+    private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType, ImmutableFunctionalTerm arg,
+                                                     ExtractedColumnType extractedColumnType, CoreSingletons cs) {
         switch (extractedColumnType){
             case BOOLEAN:
-                return cs.getTermFactory().getDBJsonIsBoolean(arg);
+                return cs.getTermFactory().getDBJsonIsBoolean(flattenedDBType, arg);
             case TEXT:
-                return cs.getTermFactory().getDBJsonIsScalar(arg);
+                return cs.getTermFactory().getDBJsonIsScalar(flattenedDBType, arg);
             case INTEGER:
             case FLOAT:
             case DECIMAL:
-                return cs.getTermFactory().getDBJsonIsNumber(arg);
+                return cs.getTermFactory().getDBJsonIsNumber(flattenedDBType, arg);
             default:
                 throw new JsonNestedViewException("Unexpected extracted column type");
         }

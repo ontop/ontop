@@ -106,7 +106,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 dbStringType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "%s::json#>>%s",
+                        "%s#>>%s",
                         termConverter.apply(terms.get(0)),
                         buildPath(path)
                 ));
@@ -122,7 +122,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 dbJsonType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "%s::json#>%s",
+                        "%s#>%s",
                         termConverter.apply(terms.get(0)),
                         buildPath(path)
                 ));
@@ -212,21 +212,31 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createJsonIsBoolean() {
-        return createJsonHasType("JSON_IS_BOOLEAN", ImmutableList.of("boolean"));
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_BOOLEAN", dbType, ImmutableList.of("boolean"));
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createJsonIsScalar() {
-        return createJsonHasType("JSON_IS_SCALAR", ImmutableList.of("boolean", "string", "number"));
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_SCALAR", dbType, ImmutableList.of("boolean", "string", "number"));
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createJsonIsNumber() {
-        return createJsonHasType("JSON_IS_NUMBER",  ImmutableList.of("number"));
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_NUMBER", dbType, ImmutableList.of("number"));
     }
 
-    private DBBooleanFunctionSymbol createJsonHasType(String functionName, ImmutableList<String> types) {
+    private DBBooleanFunctionSymbol createJsonHasType(String functionName, DBTermType jsonLikeType, ImmutableList<String> types) {
+        String typeOfFunctionString;
+        if (jsonLikeType.equals(dbJsonType)) {
+            typeOfFunctionString = "json_typeof";
+        }
+        else if (jsonLikeType.equals(dbJsonBType)) {
+            typeOfFunctionString = "jsonb_typeof";
+        }
+        else
+            throw new UnsupportedOperationException("Unsupported JSON-like type: " + jsonLikeType.getName());
+
         return new DBBooleanFunctionSymbolWithSerializerImpl(
                 functionName,
                 ImmutableList.of(dbJsonType),
@@ -234,7 +244,8 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 false,
                 (terms, termConverter, termFactory) ->
                         String.format(
-                                "json_typeof(%s) IN (%s) ",
+                                "%s(%s) IN (%s) ",
+                                typeOfFunctionString,
                                 termConverter.apply(terms.get(0)),
                                 types.stream()
                                         .map(t -> "\'"+ t+ "\'")
@@ -243,7 +254,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     /**
-     * TODO: find a way to use the stored TZ instead of the local one
+     * TODO: find a way to use the stored TZ instead of the local one
      */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
