@@ -86,12 +86,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        ImmutableSet<Variable> variablesProjectedByChildren = children.stream()
+        ImmutableSet<Variable> childVariables = children.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
-        if(rootNode instanceof FlattenNode)
-            return ((FlattenNode)rootNode).getVariables(variablesProjectedByChildren);
-        return  variablesProjectedByChildren;
+        if (rootNode instanceof FlattenNode)
+            return ((FlattenNode)rootNode).getVariables(childVariables);
+        return  childVariables;
     }
 
     @Override
