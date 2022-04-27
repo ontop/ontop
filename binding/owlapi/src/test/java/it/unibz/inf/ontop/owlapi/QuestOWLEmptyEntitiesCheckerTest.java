@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.apache.commons.rdf.api.IRI;
@@ -71,7 +72,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		onto = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify(owlfile);
 
 		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -80,7 +80,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-		reasoner = factory.createEngine(config);
+		reasoner = new SimpleOntopOWLEngine(config);
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 	}

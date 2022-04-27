@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -25,7 +26,6 @@ public class TMappingUOBMShortTest {
 		Properties pref = new Properties();
 		//pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
 				.ontologyFile("src/test/resources/tmapping-uobm/univ-bench-dl.owl")
@@ -36,6 +36,6 @@ public class TMappingUOBMShortTest {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = factory.createEngine(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 	}
 }

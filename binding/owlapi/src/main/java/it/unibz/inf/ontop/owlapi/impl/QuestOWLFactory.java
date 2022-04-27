@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -87,11 +88,6 @@ public class QuestOWLFactory implements OntopOWLFactory {
     public OntopOWLReasoner createReasoner(@Nonnull OWLOntology ontology,
                                            @Nonnull OntopSystemOWLAPIConfiguration config) throws IllegalConfigurationException {
         return createReasoner(ontology, new QuestOWLConfiguration(config));
-    }
-
-    @Override
-    public OntopOWLEngine createEngine(@Nonnull OntopSystemOWLAPIConfiguration config) throws IllegalConfigurationException {
-        return new SimpleOntopOWLEngine(config);
     }
 
     @Override

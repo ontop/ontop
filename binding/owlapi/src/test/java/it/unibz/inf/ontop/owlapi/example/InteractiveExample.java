@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 
 import java.io.BufferedReader;
@@ -43,7 +44,7 @@ public class InteractiveExample {
 				.ontologyFile(owlfile)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = factory.createEngine(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 
 	/*

@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
@@ -78,14 +79,13 @@ public class EmptyEntitiesTest {
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileName)
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createEngine(config);
+        reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

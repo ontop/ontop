@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -48,7 +49,7 @@ public class GeoSPARQLTest {
                 .build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        reasoner = factory.createEngine(config);
+        reasoner = new SimpleOntopOWLEngine(config);
         conn = reasoner.getConnection();
     }
 

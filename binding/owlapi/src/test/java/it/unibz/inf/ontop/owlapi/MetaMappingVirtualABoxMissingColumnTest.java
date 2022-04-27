@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -99,7 +100,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLEngine reasoner = factory.createEngine(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 	}
 
 

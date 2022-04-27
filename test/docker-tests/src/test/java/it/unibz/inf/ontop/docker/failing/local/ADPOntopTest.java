@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 
@@ -40,7 +41,7 @@ public class ADPOntopTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 		/*
 		 * Prepare the data connection for querying.

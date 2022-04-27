@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -48,12 +49,7 @@ public class CanonicalIRIUniversityTest {
                 .enableTestMode()
                 .build();
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        reasoner = factory.createEngine(config);
+        reasoner = new SimpleOntopOWLEngine(config);
         conn = reasoner.getConnection();
     }
 

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
@@ -28,7 +29,6 @@ public class AbstractBootstrapTest {
      */
     public static OWLStatement loadGeneratedFiles(String owlFile, String obdaFile, String propertyFile) {
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
@@ -36,7 +36,7 @@ public class AbstractBootstrapTest {
                 .enableTestMode()
                 .build();
         try {
-            OntopOWLEngine reasoner = factory.createEngine(config);
+            OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
             OWLConnection conn = reasoner.getConnection();
             return conn.createStatement();
         }

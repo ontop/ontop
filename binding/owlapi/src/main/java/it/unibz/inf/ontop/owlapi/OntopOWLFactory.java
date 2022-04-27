@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlapi;
 
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.impl.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -27,8 +28,6 @@ public interface OntopOWLFactory extends OWLReasonerFactory {
     @Nonnull
     OntopOWLReasoner createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
             throws IllegalConfigurationException, OWLOntologyCreationException;
-
-    OntopOWLEngine createEngine(@Nonnull OntopSystemOWLAPIConfiguration config) throws IllegalConfigurationException;
 
     static OntopOWLFactory defaultFactory() {
         return new QuestOWLFactory();

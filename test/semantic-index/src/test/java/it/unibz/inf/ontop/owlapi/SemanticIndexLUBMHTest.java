@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.Ignore;
@@ -173,9 +174,8 @@ public class SemanticIndexLUBMHTest {
 
 		Properties p = new Properties();
 		p.setProperty(EXISTENTIAL_REASONING, "true");
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
-			OntopOWLEngine reasoner = factory.createEngine(loader.getConfiguration());
+			OntopOWLEngine reasoner = new SimpleOntopOWLEngine(loader.getConfiguration());
 			OWLConnection connection = reasoner.getConnection();
 			OWLStatement st = connection.createStatement()) {
 

@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -72,7 +73,6 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 	private void runTests() throws Exception {
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -81,7 +81,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = factory.createEngine(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();

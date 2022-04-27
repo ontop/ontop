@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
@@ -64,7 +65,6 @@ public class OntologyTypesTest {
 	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFileName)
 				.enableTestMode()
@@ -76,7 +76,7 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		OntopOWLEngine reasoner = factory.createEngine(configBuilder.build());
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
@@ -246,7 +246,7 @@ public class OntologyTypesTest {
 					.enableTestMode()
 					.propertyFile(propertyFileName)
 					.build();
-			OntopOWLEngine reasoner = factory.createEngine(config);
+			OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 
 		} catch (Exception e) {

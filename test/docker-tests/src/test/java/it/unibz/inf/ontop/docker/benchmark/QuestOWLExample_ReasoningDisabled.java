@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -369,8 +370,6 @@ public class QuestOWLExample_ReasoningDisabled {
 
         TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(getClass().getResource(Settings.tMappingConfFile).getPath());
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(getClass().getResource(Settings.obdaFile).getPath()))
                 .ontologyFile(getClass().getResource(owlfile).getPath())
@@ -378,7 +377,7 @@ public class QuestOWLExample_ReasoningDisabled {
                 .tMappingExclusionConfig(tMapConfig)
                 //.enableIRISafeEncoding(false)
                 .build();
-        this.reasoner = factory.createEngine(config);
+        this.reasoner = new SimpleOntopOWLEngine(config);
 		/*
 		 * Prepare the data connection for querying.
 		 */

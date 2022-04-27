@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -521,10 +522,7 @@ public class CanonicalIRIOntowisTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         this.reasoner = reasoner;
 		/*

@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -58,7 +59,7 @@ public class QuestOWLExample {
                 .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 		/*
          * Get the book information that is stored in the database

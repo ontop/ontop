@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -285,7 +286,7 @@ public class SameAsOntowisTest {
 
 
 
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         this.reasoner = reasoner;
 		/*

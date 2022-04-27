@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
@@ -95,7 +96,6 @@ public class PropertyCharacteristicTest extends TestCase {
 	}
 	
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyReader(new FileReader(owlFile))
 				.nativeOntopMappingFile(obdaFile)
@@ -104,7 +104,7 @@ public class PropertyCharacteristicTest extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-		reasoner = factory.createEngine(config);
+		reasoner = new SimpleOntopOWLEngine(config);
 	}
 	
 	private TupleOWLResultSet  executeSelectQuery(String sparql) throws Exception {

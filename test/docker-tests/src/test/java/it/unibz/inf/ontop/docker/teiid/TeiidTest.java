@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -42,14 +43,13 @@ public class TeiidTest {
         obdafile =  TeiidTest.class.getResource(obdafile).toString();
         propertyfile  =  TeiidTest.class.getResource(propertyfile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertyfile)
                 .enableTestMode()
                 .build();
-        res = factory.createEngine(config);
+        res = new SimpleOntopOWLEngine(config);
         ct = res.getConnection();
         st = ct.createStatement();
     }

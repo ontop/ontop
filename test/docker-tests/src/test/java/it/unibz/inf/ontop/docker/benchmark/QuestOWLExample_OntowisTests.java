@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -226,7 +227,6 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 //		factory.setOBDAController(obdaModel);
 //		factory.setPreferenceHolder(preference);
 
@@ -254,7 +254,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		OntopOWLEngine reasoner = factory.createEngine(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 		this.reasoner = reasoner;
 		/*

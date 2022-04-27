@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.semanticweb.owlapi.model.OWLException;
@@ -59,8 +60,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 					.propertyFile(propertyFileUrl.toString())
 					.build();
 
-			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-			reasoner = factory.createEngine(configuration);
+			reasoner = new SimpleOntopOWLEngine(configuration);
 
 		} catch (Exception exc) {
 			reasoner.close();

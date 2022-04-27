@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -63,8 +64,7 @@ public class AbstractOWLAPITest {
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }
@@ -86,7 +86,7 @@ public class AbstractOWLAPITest {
                 .build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLEngine reasoner = factory.createEngine(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }

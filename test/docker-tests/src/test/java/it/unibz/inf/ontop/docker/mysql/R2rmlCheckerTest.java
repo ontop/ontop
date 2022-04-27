@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
@@ -80,7 +81,7 @@ public class R2rmlCheckerTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerOBDA = factory.createEngine(config);
+		reasonerOBDA = new SimpleOntopOWLEngine(config);
 
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
@@ -90,14 +91,13 @@ public class R2rmlCheckerTest {
 
 
 		log.info("Loading r2rml file");
-		OntopOWLFactory factory1 = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config1 = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerR2rml = factory1.createEngine(config1);
+		reasonerR2rml = new SimpleOntopOWLEngine(config1);
 	}
 
 	@After

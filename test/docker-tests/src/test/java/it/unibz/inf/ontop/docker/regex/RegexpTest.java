@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
@@ -136,13 +137,12 @@ public class RegexpTest extends TestCase {
 		final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(obdafile);
 		final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(propertyfile);
 		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileUrl.toString())
 				.propertyFile(propertyFileUrl.toString())
 				.ontologyFile(owlFileUrl)
 				.build();
-        reasoner = factory.createEngine(config);
+        reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

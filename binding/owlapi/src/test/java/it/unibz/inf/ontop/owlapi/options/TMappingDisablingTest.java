@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
@@ -65,15 +66,14 @@ public class TMappingDisablingTest extends TestCase {
 	}
 	
 	public void testDisableTMappings() throws Exception {
-		
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = factory.createEngine(configuration);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		OWLConnection conn = reasoner.getConnection();
 		
 		String sparqlQuery = 
@@ -98,7 +98,6 @@ public class TMappingDisablingTest extends TestCase {
 	
 	public void testDisableSelectedTMappings() throws Exception {
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -106,7 +105,7 @@ public class TMappingDisablingTest extends TestCase {
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = factory.createEngine(configuration);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		OWLConnection conn = reasoner.getConnection();
 
 		String sparqlQuery = 

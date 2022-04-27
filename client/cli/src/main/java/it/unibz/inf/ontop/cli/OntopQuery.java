@@ -9,10 +9,9 @@ import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -75,9 +74,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         if (dbDriver != null)
             configurationBuilder.jdbcDriver(dbDriver);
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        try (OntopOWLEngine engine = factory.createEngine(configurationBuilder.build());
+        try (OntopOWLEngine engine = new SimpleOntopOWLEngine(configurationBuilder.build());
              OWLConnection conn = engine.getConnection();
              OWLStatement st = conn.createStatement();
         ) {
