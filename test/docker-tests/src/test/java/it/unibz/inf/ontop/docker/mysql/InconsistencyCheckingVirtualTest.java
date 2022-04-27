@@ -58,7 +58,7 @@ public class InconsistencyCheckingVirtualTest {
 		assertTrue(reasoner.isConsistent());
 	}
 	
-	private void startReasoner() throws OWLOntologyCreationException, OWLOntologyStorageException {
+	private void startReasoner() throws OWLOntologyStorageException {
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
@@ -75,7 +75,7 @@ public class InconsistencyCheckingVirtualTest {
 				.enableTestMode()
 				.build();
 
-	    reasoner = factory.createReasoner(config);
+	    reasoner = factory.createReasoner(ontology, config);
 	}
 	
 	@Test
