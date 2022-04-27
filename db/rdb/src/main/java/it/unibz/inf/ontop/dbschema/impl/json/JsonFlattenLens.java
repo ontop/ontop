@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@JsonDeserialize(as = JsonNestedView.class)
-public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
+@JsonDeserialize(as = JsonFlattenLens.class)
+public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
 
     @Nonnull
     public final Columns columns;
@@ -53,10 +53,10 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
 
     public final ForeignKeys foreignKeys;
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonNestedView.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonFlattenLens.class);
 
     @JsonCreator
-    public JsonNestedView(
+    public JsonFlattenLens(
             @JsonProperty("name") List<String> name,
             @JsonProperty("baseRelation") List<String> baseRelation,
             @JsonProperty("flattenedColumn") String flattenedColumn,
@@ -485,37 +485,11 @@ public class JsonNestedView extends JsonBasicOrJoinOrNestedView {
         return ImmutableList.of();
     }
 
-//    @Override
-//    protected ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
-//
-//        ImmutableSet.Builder<QuotedID> builder =  ImmutableSet.<QuotedID>builder().addAll(
-//                columns.extracted.stream()
-//                        .map(e -> e.name)
-//                        .map(idFactory::createAttributeID)
-//                        .iterator()
-//        );
-//        if(position != null){
-//            builder.add(idFactory.createAttributeID(position));
-//        }
-//        return builder.build();
-//    }
-
-//    @Override
-//    protected ImmutableSet<QuotedID> getHiddenColumns(ImmutableList<NamedRelationDefinition> baseRelations, QuotedIDFactory idFactory) {
-//        if(baseRelations.size() != 1) {
-//            throw new JsonNestedViewException("A nested view should have exactly one parent");
-//        }
-//        return baseRelations.get(0).getAttributes().stream()
-//                .map(Attribute::getID)
-//                .collect(ImmutableCollectors.toSet());
-//    }
-
     @JsonPropertyOrder({
             "kept",
             "extracted",
             "position",
     })
-
     private static class Columns extends JsonOpenObject {
         @Nonnull
         public final List<String> kept;

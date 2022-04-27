@@ -7,15 +7,11 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,7 +22,7 @@ public class NestedJsonTest extends AbstractVirtualModeTest {
     final static String owlFile = "/pgsql/nested/hr_person.owl";
     final static String obdaFile = "/pgsql/nested/hr_person.obda";
     final static String propertyFile = "/pgsql/nested/hr_person.properties";
-    final static String viewFile = "/pgsql/nested/hr_person_views.json";
+    final static String viewFile = "/pgsql/nested/hr_person_lenses.json";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;

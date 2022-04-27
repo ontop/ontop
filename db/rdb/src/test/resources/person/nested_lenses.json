@@ -31,7 +31,7 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "FlattenedViewDefinition"
+      "type": "FlattenLens"
     },
     {
       "name": ["\"hr\"","\"persons-friends\""],
@@ -74,7 +74,7 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "FlattenedViewDefinition"
+      "type": "FlattenLens"
     }
   ]
 }
