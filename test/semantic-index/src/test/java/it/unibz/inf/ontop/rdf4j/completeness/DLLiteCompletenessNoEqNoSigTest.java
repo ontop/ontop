@@ -104,7 +104,7 @@ public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 
 		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
 			OntopRepository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
+			repository.init();
 			return repository;
 		}
 	}

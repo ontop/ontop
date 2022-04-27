@@ -22,9 +22,8 @@ package it.unibz.inf.ontop.docker;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.HashMap;
@@ -64,15 +63,15 @@ public class ResultSetInfo {
 
 	private static final String NAMESPACE = "http://ontop.inf.unibz.it/tests/rs-info#";
 
-	private static final URI RESULTSET_INFO;
-	private static final URI RESULTSET_SIZE;
-	private static final URI THROWN_EXCEPTION;
+	private static final IRI RESULTSET_INFO;
+	private static final IRI RESULTSET_SIZE;
+	private static final IRI THROWN_EXCEPTION;
 
 	static {
-		ValueFactory vf = ValueFactoryImpl.getInstance();
-		RESULTSET_INFO = vf.createURI(NAMESPACE, "ResultSetInfo");
-		RESULTSET_SIZE = vf.createURI(NAMESPACE, "size");
-		THROWN_EXCEPTION = vf.createURI(NAMESPACE, "thrownException");
+		ValueFactory vf = SimpleValueFactory.getInstance();
+		RESULTSET_INFO = vf.createIRI(NAMESPACE, "ResultSetInfo");
+		RESULTSET_SIZE = vf.createIRI(NAMESPACE, "size");
+		THROWN_EXCEPTION = vf.createIRI(NAMESPACE, "thrownException");
 	}
 
 

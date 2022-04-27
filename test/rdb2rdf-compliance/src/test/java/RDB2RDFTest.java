@@ -291,7 +291,7 @@ public class RDB2RDFTest {
 			configuration = bootstrapDMConfiguration();
 		}
 		OntopRepository repo = OntopRepository.defaultRepository(configuration);
-		repo.initialize();
+		repo.init();
 		return repo;
 	}
 

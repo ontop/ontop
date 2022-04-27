@@ -2,11 +2,6 @@ package it.unibz.inf.ontop.test.sparql;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-import org.eclipse.rdf4j.OpenRDFUtil;
-import org.eclipse.rdf4j.common.io.FileUtil;
-import org.eclipse.rdf4j.common.io.ZipUtil;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
@@ -24,16 +19,14 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
-import java.util.jar.JarFile;
 
 public class ManifestTestUtils {
+	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger LOGGER = LoggerFactory.getLogger(ManifestTestUtils.class);
 
@@ -46,7 +39,7 @@ public class ManifestTestUtils {
 					+ ".\nPlease make sure resources have been generated");
 
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		String manifestFile = url.toString();
@@ -56,7 +49,7 @@ public class ManifestTestUtils {
 				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
 				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
 		List<Object[]> testCaseParameters = Lists.newArrayList();
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
@@ -81,7 +74,7 @@ public class ManifestTestUtils {
 
 		// Read manifest and create declared test cases
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		ManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -119,20 +112,20 @@ public class ManifestTestUtils {
 		query.append("  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>, ");
 		query.append("  sd = <http://www.w3.org/ns/sparql-service-description#>, ");
 		query.append("  ent = <http://www.w3.org/ns/entailment/> ");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
 		query.setLength(0);
 		query.append(" SELECT graph ");
 		query.append(" FROM {action} qt:graphData {graph} ");
 		query.append(" USING NAMESPACE ");
 		query.append(" qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>");
-		TupleQuery namedGraphsQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		TupleQuery namedGraphsQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
 		query.setLength(0);
 		query.append("SELECT 1 ");
 		query.append(" FROM {testIRI} mf:resultCardinality {mf:LaxCardinality}");
 		query.append(" USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>");
-		TupleQuery laxCardinalityQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		TupleQuery laxCardinalityQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
 
 		LOGGER.debug("evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -217,7 +210,7 @@ public class ManifestTestUtils {
 			throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
 		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
+		TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
 		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
@@ -246,7 +239,6 @@ public class ManifestTestUtils {
 		InputStream in = url.openStream();
 
 		try {
-			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 

@@ -73,6 +73,8 @@ class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<GraphResultSet> impl
     }
 
     private static UnaryTupleOperator getFirstProjection(TupleExpr expr) {
+        if (expr instanceof QueryRoot)
+            return getFirstProjection(((QueryRoot) expr).getArg());
         if(expr instanceof Projection || expr instanceof MultiProjection)
             return (UnaryTupleOperator) expr;
         if (expr instanceof Reduced)

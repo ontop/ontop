@@ -602,15 +602,15 @@ public class OWL2QLTranslatorTest {
 		NaryAxiom<DataPropertyExpression> ax = axIt.next();
 		assertEquals(2, ax.getComponents().size()); // dpe2 (B) is empty
 		Iterator<DataPropertyExpression> it = ax.getComponents().iterator();
-		assertEquals("http://example/D", it.next().toString());
-		assertEquals("http://example/E", it.next().toString());
-		
+		assertEquals("http://example/B", it.next().toString());
+		assertEquals("http://example/B", it.next().toString());
+
 		ax = axIt.next();
 		assertEquals(2, ax.getComponents().size()); // dpe4, dpe5 (D, E) are disjoint
 		it = ax.getComponents().iterator();
-		assertEquals("http://example/B", it.next().toString());
-		assertEquals("http://example/B", it.next().toString());
-	}	
+		assertEquals("http://example/D", it.next().toString());
+		assertEquals("http://example/E", it.next().toString());
+	}
 
 	@Test
 	public void test_O2() throws Exception {
@@ -650,15 +650,15 @@ public class OWL2QLTranslatorTest {
 		NaryAxiom<ObjectPropertyExpression> ax = axIt.next();
 		assertEquals(2, ax.getComponents().size()); // dpe2 (B) is empty
 		Iterator<ObjectPropertyExpression> it = ax.getComponents().iterator();
-		assertEquals("http://example/D", it.next().toString());
-		assertEquals("http://example/E", it.next().toString());
-		
+		assertEquals("http://example/B", it.next().toString());
+		assertEquals("http://example/B", it.next().toString());
+
 		ax = axIt.next();
 		assertEquals(2, ax.getComponents().size()); // dpe4, dpe5 (D, E) are disjoint
 		it = ax.getComponents().iterator();
-		assertEquals("http://example/B", it.next().toString());
-		assertEquals("http://example/B", it.next().toString());
-	}	
+		assertEquals("http://example/D", it.next().toString());
+		assertEquals("http://example/E", it.next().toString());
+	}
 	
 	
 	@Test

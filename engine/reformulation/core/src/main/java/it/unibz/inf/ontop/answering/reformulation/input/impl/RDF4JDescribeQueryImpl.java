@@ -66,6 +66,9 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
     @Override
     public SelectQuery getSelectQuery() {
         TupleExpr root = originalParsedQuery.getTupleExpr();
+        if (root instanceof QueryRoot) {
+            root = ((QueryRoot) root).getArg();
+        }
         TupleExpr topNonDescribeExpression = Optional.of(root)
                 .filter(t -> t instanceof DescribeOperator)
                 .map(t -> ((DescribeOperator)t).getArg())

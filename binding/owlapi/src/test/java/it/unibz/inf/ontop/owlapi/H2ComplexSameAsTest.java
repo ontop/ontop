@@ -100,7 +100,7 @@ public class H2ComplexSameAsTest {
 				final OWLBindingSet bindingSet = rs.next();
 				for (String s : rs.getSignature()) {
                     OWLObject binding = bindingSet.getOWLObject(s);
-					String rendering = ToStringRenderer.getInstance().getRendering(binding);
+					String rendering = ToStringRenderer.getInstance().render(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
 				}

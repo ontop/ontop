@@ -81,7 +81,7 @@ public class RDF4JClassicABoxTest {
 				/*
 		 		* Repository must be always initialized first
 				 */
-			repo.initialize();
+			repo.init();
 		}
 
 	}

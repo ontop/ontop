@@ -46,7 +46,7 @@ public abstract class QuestVirtualParallelScenario extends QuestParallelScenario
 		}
 
         OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
-        repo.initialize();
+        repo.init();
         return repo;
 	}
 }

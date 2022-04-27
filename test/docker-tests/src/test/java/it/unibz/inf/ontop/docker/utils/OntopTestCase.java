@@ -57,7 +57,7 @@ public abstract class OntopTestCase extends TestCase {
         }
 
         OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
-        repo.initialize();
+        repo.init();
 
         registry.register(repo, owlFileURL, obdaFileURL, parameterFileURL);
         return repo;
