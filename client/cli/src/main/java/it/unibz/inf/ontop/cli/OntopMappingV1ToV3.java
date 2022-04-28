@@ -424,7 +424,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                             !template.substring(1, template.length() - 1).contains("{")) {
                         statement = SimpleValueFactory.getInstance().createStatement(statement.getSubject(),
                                 SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/r2rml#column"),
-                                new LiteralImpl(template.substring(1, template.length() - 1)));
+                                SimpleValueFactory.getInstance().createLiteral(template.substring(1, template.length() - 1)));
                     }
                 }
 
@@ -435,7 +435,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     if (table != null)
                         statement = SimpleValueFactory.getInstance().createStatement(statement.getSubject(),
                                 SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/r2rml#tableName"),
-                                new LiteralImpl(table));
+                                SimpleValueFactory.getInstance().createLiteral(table));
                 }
 
                 if (statement.getSubject() instanceof BNode) {
@@ -608,16 +608,16 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 // second pass - actual renaming
                 switch (predicate.toString()) {
                     case "http://www.w3.org/ns/r2rml#column":
-                        object = new LiteralImpl(column.get(statement.getSubject()));
+                        object = SimpleValueFactory.getInstance().createLiteral(column.get(statement.getSubject()));
                         break;
                     case "http://www.w3.org/ns/r2rml#template":
-                        object = new LiteralImpl(template.get(statement.getSubject()));
+                        object = SimpleValueFactory.getInstance().createLiteral(template.get(statement.getSubject()));
                         break;
                     case "http://www.w3.org/ns/r2rml#sqlQuery":
-                        object = new LiteralImpl(sqlQuery.get(statement.getSubject()));
+                        object = SimpleValueFactory.getInstance().createLiteral(sqlQuery.get(statement.getSubject()));
                         break;
                     case "http://www.w3.org/ns/r2rml#tableName":
-                        object = new LiteralImpl(tableName.get(statement.getSubject()));
+                        object = SimpleValueFactory.getInstance().createLiteral(tableName.get(statement.getSubject()));
                         break;
                     default:
                         object = statement.getObject();
