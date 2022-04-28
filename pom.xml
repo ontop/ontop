@@ -159,8 +159,8 @@
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
         <opencsv.version>4.6</opencsv.version>
-        <owlapi.version>4.5.19</owlapi.version>
-        <owlapi-osgi.version>4.5.9</owlapi-osgi.version>
+        <owlapi.version>5.1.20</owlapi.version>
+        <owlapi-osgi.version>5.1.20</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
@@ -710,6 +710,21 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-queryrender</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-trix</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-n3</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-hdt</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
