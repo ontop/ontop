@@ -12,7 +12,6 @@ import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -35,7 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
 @JsonDeserialize(as = JsonFlattenLens.class)
 public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
@@ -105,7 +105,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                     baseRelation.toArray(new String[0])));
     }
 
-    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
+    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) throws MetadataExtractionException {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
@@ -129,7 +129,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         DBTermType flattenedDBType = dbParameters.getDBTypeFactory().getDBTermType(flattenedColumn.datatype);
 
         if(flattenedVariable == null){
-            throw new InvalidOntopViewException("The flattened column "+flattenedColumn+ " is not present in the base relation");
+            throw new MetadataExtractionException("The flattened column "+ flattenedColumn + " is not present in the base relation");
         }
 
         Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
@@ -194,21 +194,20 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
     private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable,
-                                                            QuotedIDFactory quotedIDFactory) {
+                                                            QuotedIDFactory quotedIDFactory) throws MetadataExtractionException {
         ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-        builder.addAll(
-                columns.kept.stream()
-                        .map(k -> getVarForAttribute(k, parentVariableMap, quotedIDFactory)).iterator()
-        );
+        for(String keptColumn : columns.kept) {
+            builder.add(getVarForAttribute(keptColumn, parentVariableMap, quotedIDFactory));
+        }
         positionVariable.ifPresent(builder::add);
         return builder.build();
     }
 
-    private Variable getVarForAttribute(String name, ImmutableMap<String, Variable> parentVariableMap, QuotedIDFactory idFactory) {
+    private Variable getVarForAttribute(String name, ImmutableMap<String, Variable> parentVariableMap, QuotedIDFactory idFactory) throws MetadataExtractionException {
         String normalizedName = normalizeAttributeName(name, idFactory);
         Variable var = parentVariableMap.get(normalizedName);
         if (var == null){
-            throw new InvalidOntopViewException("Kept column "+normalizedName+" not found in base view definition");
+            throw new MetadataExtractionException("Kept column "+normalizedName+" not found in base view definition");
         }
         return var;
     }
@@ -231,7 +230,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         return parentAttributeMap.values().stream()
                 .collect(ImmutableCollectors.toMap(
                         s -> s,
-                        s -> variableGenerator.generateNewVariable(s)));
+                        variableGenerator::generateNewVariable));
     }
 
     private ImmutableMap<Integer, String> buildParentIndex2AttributeMap(NamedRelationDefinition parentRelation) {
@@ -259,20 +258,21 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     private ImmutableSubstitution<ImmutableTerm> getExtractionSubstitution(Variable flattenOutputVariable,
                                                                            DBTermType flattenedDBType,
                                                                            ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
-                                                                           CoreSingletons cs, DBTypeFactory typeFactory){
-
-        return cs.getSubstitutionFactory().getSubstitution(
-                extractColumnsMap.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> getCheckDatatypeExtractAndCastFromJson(
-                                        flattenOutputVariable,
-                                        flattenedDBType,
-                                        getPath(e.getValue()),
-                                        getExtractedColumnType(e.getValue().datatype, e.getValue().name),
-                                        cs,
-                                        typeFactory
-                                ))));
+                                                                           CoreSingletons cs, DBTypeFactory typeFactory)
+            throws MetadataExtractionException {
+        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
+        for (Map.Entry<Variable, JsonFlattenLens.ExtractedColumn> entry : extractColumnsMap.entrySet()) {
+            builder.put(entry.getKey(), getCheckDatatypeExtractAndCastFromJson(
+                    flattenOutputVariable,
+                    flattenedDBType,
+                    getPath(entry.getValue()),
+                    entry.getValue().datatype,
+                    entry.getValue().name,
+                    cs,
+                    typeFactory
+            ));
+        }
+        return cs.getSubstitutionFactory().getSubstitution(builder.build());
     }
 
     private ImmutableList<String> getPath(ExtractedColumn col) {
@@ -294,95 +294,71 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                         )));
     }
 
-    private ExtractedColumnType getExtractedColumnType(String datatype, String columnName) {
-        ExtractedColumnType extractedColumnType = extractedColumnTypeMap.get(datatype.toLowerCase());
-        if(extractedColumnType == null){
-            throw new InvalidOntopViewException("Incorrect datatype " + datatype + " for column " + columnName + ".\n " +
-                    "One of " +
-                    listAdmissibleTypes() +
-                    " is expected"
-            );
-        }
-        return extractedColumnType;
-    }
-
 
     /**
      * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
      */
     private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, DBTermType flattenedDBType,
-                                                                           ImmutableList<String> path, ExtractedColumnType extractedColumnType,
-                                                                           CoreSingletons cs, DBTypeFactory dbTypeFactory) {
+                                                                           ImmutableList<String> path,
+                                                                           String datatypeString, String columnName,
+                                                                           CoreSingletons cs, DBTypeFactory dbTypeFactory)
+            throws MetadataExtractionException {
         TermFactory termFactory = cs.getTermFactory();
 
-        ImmutableFunctionalTerm cast = getCast(extractedColumnType, dbTypeFactory, sourceVar, path, termFactory);
+        DBTermType termType = dbTypeFactory.getDBTermType(datatypeString);
 
-        switch (extractedColumnType) {
-            case JSON:
-            case JSONB:
-                return cast;
-            default:
-                return termFactory.getIfElseNull(
-                        getDatatypeCondition(
-                                flattenedDBType,
-                                termFactory.getDBJsonElement(
-                                        sourceVar,
-                                        path
-                                ),
-                                extractedColumnType,
-                                cs
-                        ),
-                        cast
-                );
+        ImmutableFunctionalTerm cast = getCast(termType, sourceVar, path, termFactory);
+
+        if (termType.getCategory() == JSON) {
+            return cast;
         }
+        return termFactory.getIfElseNull(
+                getDatatypeCondition(
+                        flattenedDBType,
+                        termFactory.getDBJsonElement(
+                                sourceVar,
+                                path
+                        ),
+                        termType,
+                        columnName,
+                        cs
+                ),
+                cast
+        );
     }
 
-    private ImmutableFunctionalTerm getCast(ExtractedColumnType extractedColumnType, DBTypeFactory typeFactory, Variable sourceVar, ImmutableList<String> path, TermFactory termFactory) {
+    private ImmutableFunctionalTerm getCast(DBTermType columnTermType, Variable sourceVar, ImmutableList<String> path, TermFactory termFactory) {
 
-        DBTermType termType;
         ImmutableFunctionalTerm retrieveEltAsText = termFactory.getDBJsonElementAsText(sourceVar, path);
 
-        switch (extractedColumnType){
-            case TEXT:
-                return retrieveEltAsText;
-            case BOOLEAN:
-                termType = typeFactory.getDBBooleanType();
-                break;
-            case INTEGER:
-                termType = typeFactory.getDBLargeIntegerType();
-                break;
-            case FLOAT:
-            case DECIMAL:
-                termType = typeFactory.getDBDoubleType();
-                break;
-            case JSON:
-                termType = typeFactory.getDBJsonType();
-                break;
-            case JSONB:
-                termType = typeFactory.getDBJsonBType();
-                break;
-            default:
-                throw new JsonNestedViewException("Unexpected datatype");
-        }
+        // TODO: consider the input type as well (could enable more simplification, e.g. no cast when same datatype)
         return termFactory.getDBCastFunctionalTerm(
-                termType,
+                columnTermType,
                 retrieveEltAsText
         );
     }
 
     private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType, ImmutableFunctionalTerm arg,
-                                                     ExtractedColumnType extractedColumnType, CoreSingletons cs) {
-        switch (extractedColumnType){
+                                                     DBTermType columnTermType, String columnName, CoreSingletons cs)
+            throws MetadataExtractionException {
+        TermFactory termFactory = cs.getTermFactory();
+
+        switch (columnTermType.getCategory()){
             case BOOLEAN:
-                return cs.getTermFactory().getDBJsonIsBoolean(flattenedDBType, arg);
-            case TEXT:
-                return cs.getTermFactory().getDBJsonIsScalar(flattenedDBType, arg);
+                return termFactory.getDBJsonIsBoolean(flattenedDBType, arg);
             case INTEGER:
-            case FLOAT:
+            case FLOAT_DOUBLE:
             case DECIMAL:
-                return cs.getTermFactory().getDBJsonIsNumber(flattenedDBType, arg);
+                return termFactory.getDBJsonIsNumber(flattenedDBType, arg);
+            // By default, treat it as a string
+            case ARRAY:
+                // TODO: remove this restriction
+                throw new MetadataExtractionException(
+                        "Array datatypes are currently not supported for extracted column from a flatten lens. Column: "
+                                + columnName);
+            case STRING:
             default:
-                throw new JsonNestedViewException("Unexpected extracted column type");
+                return termFactory.getDBJsonIsScalar(flattenedDBType, arg);
         }
     }
 
@@ -396,7 +372,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         CoreSingletons cs = dbParameters.getCoreSingletons();
 
         if(baseRelations.size() != 1){
-            throw new JsonNestedViewException("A nested view should have exactly one base relation");
+            throw new MetadataExtractionException("A nested view should have exactly one base relation");
         }
         NamedRelationDefinition baseRelation = baseRelations.get(0);
 
@@ -558,46 +534,5 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             this.name = name;
             this.datatype = datatype;
         }
-    }
-
-    protected static class JsonNestedViewException extends OntopInternalBugException {
-
-        protected JsonNestedViewException(String message) {
-            super(message);
-        }
-    }
-
-    private static class InvalidOntopViewException extends RuntimeException {
-        public InvalidOntopViewException(String message) {
-            super(message);
-        }
-    }
-
-    private enum ExtractedColumnType {
-        TEXT("text"),
-        INTEGER("integer"),
-        DECIMAL("decimal"),
-        FLOAT("float"),
-        BOOLEAN("boolean"),
-        JSON("json"),
-        JSONB("jsonb");
-
-        String label;
-
-        ExtractedColumnType(String label) {
-            this.label = label;
-        }
-
-    }
-
-    private static ImmutableMap<String, ExtractedColumnType> extractedColumnTypeMap =
-            Stream.of(ExtractedColumnType.values())
-                    .collect(ImmutableCollectors.toMap(
-                            e -> e.label,
-                            e -> e
-                    ));
-
-    private static String listAdmissibleTypes (){
-        return String.join(", ", extractedColumnTypeMap.keySet());
     }
 }

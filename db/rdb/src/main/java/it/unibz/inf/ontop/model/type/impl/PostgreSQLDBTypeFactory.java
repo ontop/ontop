@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
 public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -119,10 +118,9 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
         /*
-         * JSON
+         * JSON: JSONB is more efficient than JSON
          */
-        map.put(DefaultTypeCode.JSON, JSON_STR);
-        map.put(DefaultTypeCode.JSONB, JSONB_STR);
+        map.put(DefaultTypeCode.JSON, JSONB_STR);
 
         return ImmutableMap.copyOf(map);
     }
@@ -144,11 +142,6 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsJson() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsJsonB() {
         return true;
     }
 }

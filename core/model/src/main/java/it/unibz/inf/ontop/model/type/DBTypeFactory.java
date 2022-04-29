@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model.type;
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.DBConstant;
 
 import java.util.Optional;
 
@@ -38,21 +36,17 @@ public interface DBTypeFactory {
 
     boolean supportsJson();
 
-    boolean supportsJsonB();
-
     boolean supportsArrayType();
 
     DBTermType getDBHexBinaryType();
 
     DBTermType getDBArrayType();
 
-    //TODO: remove. The DB engine may support different JSON datatype
-    @Deprecated
+    /**
+     * Default JSON datatype.
+     * Note that there might be more than 1 (e.g. Postgres has 2)
+     */
     DBTermType getDBJsonType();
-
-    //TODO: remove. Postgres-specifc
-    @Deprecated
-    DBTermType getDBJsonBType();
 
     /**
      * Returns an abstract type
