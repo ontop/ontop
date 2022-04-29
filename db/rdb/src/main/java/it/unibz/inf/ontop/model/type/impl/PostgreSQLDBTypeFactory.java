@@ -95,6 +95,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         /*
          * POSTGIS types
+         *
          */
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
         map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
@@ -102,8 +103,8 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         /*
          * JSON
          */
-        map.put(JSON_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(JSON_STR, rootAncestry, xsdString));
-        map.put(JSONB_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(JSONB_STR, rootAncestry, xsdString));
+        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry));
+        map.put(JSONB_STR, new JsonDBTermTypeImpl(JSONB_STR, rootAncestry));
 
         return map;
     }

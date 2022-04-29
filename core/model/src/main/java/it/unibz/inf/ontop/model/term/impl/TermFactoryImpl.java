@@ -37,10 +37,6 @@ public class TermFactoryImpl implements TermFactory {
 	private final CoreUtilsFactory coreUtilsFactory;
 	private final DBConstant valueTrue, valueFalse, lexicalTrue, lexicalFalse;
 	private final Constant valueNull;
-	private final DBTermType dbBooleanType;
-	private final DBTermType dbStringType;
-	private final DBTermType dbDoubleType;
-
 	@Nullable
 	private final DBConstant doubleNaN;
 	private final DBConstant provenanceConstant;
@@ -62,9 +58,7 @@ public class TermFactoryImpl implements TermFactory {
 
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
-		this.dbBooleanType = dbTypeFactory.getDBBooleanType();
-		this.dbStringType = dbTypeFactory.getDBStringType();
-		this.dbDoubleType = dbTypeFactory.getDBDoubleType();
+		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
