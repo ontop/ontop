@@ -67,9 +67,9 @@
     "type": "Boolean",
     "description": "Since 4.2.0. Default value: `true`. If `false`, no additional facts on superclasses for rdfs:domain/range are integrated in addition to the explicit ontology facts."
   },
-  "ontop.disableSliceOptimization": {
+  "ontop.disableLimitOptimization": {
     "type": "Boolean",
-    "description": "Since 4.3.0. Default value: `false`. If `true` use cases are when query contains Order By or Offset clauses; risk of getting different results on unordered queries and still be semantically correct"
+    "description": "Since 4.3.0. Default value: `false`. If `true` use cases are when query contains Order By clauses; risk of getting different results on unordered queries and still be semantically correct"
   },
   "mapping.baseIri": {
     "type": "IRI",

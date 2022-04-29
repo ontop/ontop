@@ -17,18 +17,34 @@ public class ValuesNodeOptimizationTest {
     public void test1normalizationSlice() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(1, 1),
+                IQ_FACTORY.createSliceNode(0, 1),
                 IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
 
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(TWO_STR)));
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
+    // Offset > 0 --> No optimization
+    @Test
+    public void test2normalizationSlice() {
+        // Create initial node
+        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createSliceNode(1, 1),
+                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
+
+        // Create expected Tree
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createSliceNode(1, 1),
+                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
     @Test
-    public void test2normalizationDistinct() {
+    public void test3normalizationDistinct() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createDistinctNode(),
@@ -43,10 +59,10 @@ public class ValuesNodeOptimizationTest {
 
     // Union node with values to be merged
     @Test
-    public void test3normalizationSliceUnionValuesValues() {
+    public void test4normalizationSliceUnionValuesValues() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
+                IQ_FACTORY.createSliceNode(0, 4),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                         ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
@@ -60,19 +76,20 @@ public class ValuesNodeOptimizationTest {
 
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR), ImmutableList.of(ONE_STR)));
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR),
+                        ImmutableList.of(THREE_STR), ImmutableList.of(ONE_STR)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
     // Values Node records fully cover limit
     @Test
-    public void test4normalizationSliceUnionValuesNonValues() {
+    public void test5normalizationSliceUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(1, 2),
+                IQ_FACTORY.createSliceNode(0, 2),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                         ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
@@ -83,7 +100,7 @@ public class ValuesNodeOptimizationTest {
 
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR)));
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
@@ -95,7 +112,7 @@ public class ValuesNodeOptimizationTest {
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
+                IQ_FACTORY.createSliceNode(0, 4),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                         ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
@@ -110,44 +127,20 @@ public class ValuesNodeOptimizationTest {
 
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR), ImmutableList.of(ONE_STR)));
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR),
+                        ImmutableList.of(THREE_STR), ImmutableList.of(ONE_STR)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // Values Node records cover only part of limit, remainder is single non-values node
+    // Values Node records cover only part of limit, remainder is single non-values nodes
     @Test
     public void test6normalizationSliceUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(
-                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR))),
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1), dataNode)));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    @Test
-    public void test6normalizationSliceUnionValuesNonValues2() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 2),
+                IQ_FACTORY.createSliceNode(0, 4),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                         ImmutableList.of(
@@ -161,7 +154,8 @@ public class ValuesNodeOptimizationTest {
         IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                 ImmutableList.of(
-                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR))),
+                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR),
+                                ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))),
                         IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1), dataNode)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
@@ -174,7 +168,7 @@ public class ValuesNodeOptimizationTest {
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(2, 3),
+                IQ_FACTORY.createSliceNode(0, 4),
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                         ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
@@ -188,54 +182,11 @@ public class ValuesNodeOptimizationTest {
         IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                 ImmutableList.of(
-                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(THREE_STR))),
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 2),
+                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR),
+                                ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))),
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1),
                                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                                         ImmutableList.of(dataNode, dataNode)))));;
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Offset is too high - no optimization
-    @Test
-    public void test8normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(4, 2),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = initialTree;
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
-    // Offset is equal to size of values node - no optimization
-    @Test
-    public void test9normalizationSliceUnionValuesNonValues() {
-        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(3, 1),
-                IQ_FACTORY.createNaryIQTree(
-                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
-                                        ImmutableList.of(ImmutableList.of(ONE_STR),
-                                                ImmutableList.of(TWO_STR),
-                                                ImmutableList.of(THREE_STR))),
-                                dataNode)));
-
-        // Create expected Tree
-        IQTree expectedTree = initialTree;
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
@@ -243,7 +194,7 @@ public class ValuesNodeOptimizationTest {
     // Distinct union - DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...]
     // Values Node is distinct, thus Distinct Node not pushed down
     @Test
-    public void test10normalizationDistinctUnionValuesNonValues() {
+    public void test8normalizationDistinctUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
@@ -275,7 +226,7 @@ public class ValuesNodeOptimizationTest {
     // Distinct union - DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...]
     // Since the Values Node is NOT distinct, we push another Distinct Node down
     @Test
-    public void test11normalizationDistinctUnionValuesNonValues() {
+    public void test9normalizationDistinctUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
@@ -307,7 +258,7 @@ public class ValuesNodeOptimizationTest {
     // Case where T1 is NOT distinct - i.e. no optimization for slice
     // However, this is the scenario where Distinct-Union is optimized, so it gets pushed down from the different rule
     @Test
-    public void test12normalizationLimitDistinctUnionValuesNonValues() {
+    public void test10normalizationLimitDistinctUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
@@ -335,7 +286,7 @@ public class ValuesNodeOptimizationTest {
     // Case where T1 is distinct - i.e. push down limit
     // Since limit is covered by the Values Node, we only produce the Values Node as output
     @Test
-    public void test13normalizationLimitDistinctUnionValuesNonValues() {
+    public void test11normalizationLimitDistinctUnionValuesNonValues() {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node

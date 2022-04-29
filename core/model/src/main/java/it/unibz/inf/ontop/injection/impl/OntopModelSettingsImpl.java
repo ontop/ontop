@@ -18,7 +18,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     private final Properties properties;
     private final CardinalityPreservationMode cardinalityMode;
     private final boolean testMode;
-    private final boolean dsiableSliceOptimization;
+    private final boolean dsiableLimitOptimization;
 
     /**
      * Beware: immutable class!
@@ -40,7 +40,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
 
         cardinalityMode = extractCardinalityMode(properties);
         testMode = extractBoolean(properties, OntopModelSettings.TEST_MODE);
-        dsiableSliceOptimization = extractBoolean(properties, OntopModelSettings.DISABLE_SLICE_OPTIMIZATION);
+        dsiableLimitOptimization = extractBoolean(properties, OntopModelSettings.DISABLE_LIMIT_OPTIMIZATION);
     }
 
     private static CardinalityPreservationMode extractCardinalityMode(Properties properties)
@@ -108,8 +108,8 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     }
 
     @Override
-    public boolean isSliceOptimizationDisabled() {
-        return dsiableSliceOptimization;
+    public boolean isLimitOptimizationDisabled() {
+        return dsiableLimitOptimization;
     }
 
     /**
