@@ -350,13 +350,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             case FLOAT_DOUBLE:
             case DECIMAL:
                 return termFactory.getDBJsonIsNumber(flattenedDBType, arg);
-            // By default, treat it as a string
             case ARRAY:
                 // TODO: remove this restriction
                 throw new MetadataExtractionException(
                         "Array datatypes are currently not supported for extracted column from a flatten lens. Column: "
                                 + columnName);
             case STRING:
+            // By default, treat it as a string
             default:
                 return termFactory.getDBJsonIsScalar(flattenedDBType, arg);
         }
