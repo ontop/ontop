@@ -188,7 +188,6 @@
         <osgi.version>6.0.0</osgi.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
-        <sesame.version>2.7.16</sesame.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
         
@@ -1095,16 +1094,6 @@
             </dependency>
 
             <!-- Indirectly used & pinned (for maven-enforcer-plugin) -->
-            <dependency>
-                <groupId>org.openrdf.sesame</groupId>
-                <artifactId>sesame-model</artifactId>
-                <version>${sesame.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openrdf.sesame</groupId>
-                <artifactId>sesame-rio-api</artifactId>
-                <version>${sesame.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>

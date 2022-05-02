@@ -50,7 +50,6 @@ import java.nio.file.Files;
 import java.util.jar.JarFile;
 
 public class QuestDatatypeTestUtils {
-	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeTestUtils.class);
 
@@ -107,11 +106,11 @@ public class QuestDatatypeTestUtils {
 
 		addTurtle(con, new URL(manifestFile), manifestFile);
 
-		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
-				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
+		String query = "PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> \n"
+				+ "PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> \n"
+				+ "SELECT DISTINCT ?manifestFile WHERE { ?x rdf:first ?manifestFile . } ";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SPARQL, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();

@@ -19,7 +19,6 @@ import java.util.List;
 import static it.unibz.inf.ontop.docker.ScenarioManifestTestUtils.addTurtle;
 
 public class ManifestTestUtils {
-    private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
     static final Logger LOGGER = LoggerFactory.getLogger(ManifestTestUtils.class);
 
@@ -40,11 +39,11 @@ public class ManifestTestUtils {
         String manifestFile = url.toString();
         addTurtle(con, url, manifestFile);
 
-        String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-                + "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
-                + "  qt = <http://obda.org/quest/tests/test-query#>";
+        String query = "PREFIX mf: <http://obda.org/quest/tests/test-manifest#> \n"
+                + "PREFIX qt: <http://obda.org/quest/tests/test-query#> \n"
+                + "SELECT DISTINCT ?manifestFile WHERE { ?x rdf:first ?manifestFile .} ";
 
-        TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
+        TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SPARQL, query, manifestFile).evaluate();
         List<Object[]> testCaseParameters = Lists.newArrayList();
         while (manifestResults.hasNext()) {
             BindingSet bindingSet = manifestResults.next();
@@ -86,22 +85,22 @@ public class ManifestTestUtils {
         // Extract test case information from the manifest file. Note that we only
         // select those test cases that are mentioned in the list.
         StringBuilder query = new StringBuilder(512);
-        query.append(" SELECT DISTINCT testURI, testName, resultFile, queryFile, owlFile, obdaFile, parameterFile \n");
-        query.append(" FROM {} rdf:first {testURI} \n");
+        query.append(" PREFIX mf: <http://obda.org/quest/tests/test-manifest#> \n");
+        query.append(" PREFIX obdat: <http://obda.org/quest/tests/test-scenario#> \n");
+        query.append(" PREFIX qt: <http://obda.org/quest/tests/test-query#> \n");
+        query.append(" SELECT DISTINCT ?testIRI ?testName ?resultFile ?queryFile ?owlFile ?obdaFile ?parameterFile \n");
+        query.append(" WHERE { [] rdf:first ?testIRI . \n");
         if (approvedOnly) {
-            query.append("    obdat:approval {obdat:Approved}; \n");
+            query.append(" ?testIRI obdat:approval obdat:Approved . \n");
         }
-        query.append("    mf:name {testName}; \n");
-        query.append("    mf:result {resultFile}; \n");
-        query.append("    mf:knowledgebase {owlFile}; \n");
-        query.append("    mf:mappings {obdaFile}; \n");
-        query.append("    [ mf:parameters {parameterFile} ]; \n");
-        query.append("    mf:action {action} qt:query {queryFile} \n");
-        query.append(" USING NAMESPACE \n");
-        query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
-        query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
-        query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-        TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
+        query.append(" ?testIRI mf:name ?testName; \n");
+        query.append("    mf:result ?resultFile; \n");
+        query.append("    mf:knowledgebase ?owlFile; \n");
+        query.append("    mf:mappings ?obdaFile . \n");
+        query.append(" OPTIONAL { ?testIRI mf:parameters ?parameterFile . } \n");
+        query.append(" ?testIRI mf:action ?action . \n");
+        query.append(" ?action qt:query ?queryFile . } \n");
+        TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
         LOGGER.debug("Evaluating query..");
         TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -136,8 +135,8 @@ public class ManifestTestUtils {
             throws QueryEvaluationException, RepositoryException, MalformedQueryException
     {
         // Try to extract suite name from manifest file
-        TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
-                "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
+        TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+                "SELECT ?ManifestName WHERE { ?ManifestURL rdfs:label ?ManifestName .}");
         manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
         TupleQueryResult manifestNames = manifestNameQuery.evaluate();
         try {

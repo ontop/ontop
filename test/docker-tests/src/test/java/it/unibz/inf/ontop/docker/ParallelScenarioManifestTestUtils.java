@@ -51,7 +51,6 @@ import java.nio.file.Files;
 import java.util.jar.JarFile;
 
 public class ParallelScenarioManifestTestUtils {
-	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger logger = LoggerFactory.getLogger(ParallelScenarioManifestTestUtils.class);
 
@@ -105,11 +104,11 @@ public class ParallelScenarioManifestTestUtils {
 
 		addTurtle(con, new URL(manifestFile), manifestFile);
 
-		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
-				+ "  qt = <http://obda.org/quest/tests/test-query#>";
+		String query = "PREFIX mf: <http://obda.org/quest/tests/test-manifest#> \n"
+				+ "PREFIX qt: <http://obda.org/quest/tests/test-query#> \n"
+				+ "SELECT DISTINCT ?manifestFile WHERE { ?x rdf:first ?manifestFile } ";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SPARQL, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();

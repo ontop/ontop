@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class ManifestTestUtils {
-	private static final QueryLanguage SERQL_QUERY_LANGUAGE = QueryLanguage.valueOf("SERQL");
 
 	static final Logger LOGGER = LoggerFactory.getLogger(ManifestTestUtils.class);
 
@@ -45,11 +44,11 @@ public class ManifestTestUtils {
 		String manifestFile = url.toString();
 		addTurtle(con, url, manifestFile);
 
-		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
-				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
+		String query = "PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>\n" +
+						"PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>\n" +
+  						"SELECT DISTINCT ?manifestFile WHERE {[] rdf:first ?manifestFile}";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SPARQL, query, manifestFile).evaluate();
 		List<Object[]> testCaseParameters = Lists.newArrayList();
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
@@ -84,48 +83,49 @@ public class ManifestTestUtils {
 		// Extract test case information from the manifest file. Note that we only
 		// select those test cases that are mentioned in the list.
 		StringBuilder query = new StringBuilder(512);
-		query.append(" SELECT DISTINCT testIRI, testName, resultFile, action, queryFile, defaultGraph, ordered ");
-		query.append(" FROM {} rdf:first {testIRI} ");
+		query.append("PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> \n");
+		query.append("PREFIX dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> \n");
+		query.append("PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> \n");
+		query.append("PREFIX sd: <http://www.w3.org/ns/sparql-service-description#> \n");
+		query.append("PREFIX ent: <http://www.w3.org/ns/entailment/> \n");
+		query.append(" SELECT DISTINCT ?testIRI ?testName ?resultFile ?action ?queryFile ?defaultGraph ?ordered \n");
+		query.append(" WHERE {[] rdf:first ?testIRI . \n");
 		if (approvedOnly) {
-			query.append("                          dawgt:approval {dawgt:Approved}; ");
+			query.append(" ?testIRI dawgt:approval dawgt:Approved . \n");
 		}
-		query.append("                             mf:name {testName}; ");
-		query.append("                             mf:result {resultFile}; ");
-		query.append("                             [ mf:checkOrder {ordered} ]; ");
-		query.append("                             [ mf:requires {Requirement} ];");
-		query.append("                             mf:action {action} qt:query {queryFile}; ");
-		query.append("                                               [qt:data {defaultGraph}]; ");
-		query.append("                                               [sd:entailmentRegime {Regime} ]");
+		query.append(" ?testIRI mf:name ?testName; \n");
+		query.append("          mf:result ?resultFile; \n");
+		query.append(" OPTIONAL { ?testIRI mf:checkOrder ?ordered . } \n");
+		query.append(" OPTIONAL { ?testIRI mf:requires ?Requirement . } \n");
+		query.append(" ?testIRI mf:action ?action . \n");
+		query.append(" ?action qt:query ?queryFile . \n");
+		query.append(" OPTIONAL { ?action qt:data ?defaultGraph . } \n");
+		query.append(" OPTIONAL { ?action sd:entailmentRegime ?Regime . }\n");
 
 		// skip tests involving CSV result files, these are not query tests
-		query.append(" WHERE NOT resultFile LIKE \"*.csv\" ");
+		query.append(" FILTER(!REGEX(LCASE(STR(?resultFile)), \"csv\") &&");
 		// skip tests involving JSON, sesame currently does not have a SPARQL/JSON
 		// parser.
-		query.append(" AND NOT resultFile LIKE \"*.srj\" ");
+		query.append(" !STRENDS(LCASE(STR(?resultFile)), \"srj\") &&");
 		// skip tests involving entailment regimes
-		query.append(" AND NOT BOUND(Regime) ");
+		query.append(" !BOUND(?Regime) &&  \n");
 		// skip test involving basic federation, these are tested separately.
-		query.append(" AND (NOT BOUND(Requirement) OR (Requirement != mf:BasicFederation)) ");
-		query.append(" USING NAMESPACE ");
-		query.append("  mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, ");
-		query.append("  dawgt = <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#>, ");
-		query.append("  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>, ");
-		query.append("  sd = <http://www.w3.org/ns/sparql-service-description#>, ");
-		query.append("  ent = <http://www.w3.org/ns/entailment/> ");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
+		query.append(" (!BOUND(?Requirement) || (?Requirement != mf:BasicFederation))) }");
+		//query.append(" }");
+		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
 		query.setLength(0);
-		query.append(" SELECT graph ");
-		query.append(" FROM {action} qt:graphData {graph} ");
-		query.append(" USING NAMESPACE ");
-		query.append(" qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>");
-		TupleQuery namedGraphsQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
+		query.append(" PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>\n");
+		query.append(" SELECT ?graph \n");
+		query.append(" WHERE {?action qt:graphData ?graph .} ");
+		TupleQuery namedGraphsQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
 		query.setLength(0);
-		query.append("SELECT 1 ");
-		query.append(" FROM {testIRI} mf:resultCardinality {mf:LaxCardinality}");
-		query.append(" USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>");
-		TupleQuery laxCardinalityQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE, query.toString());
+		query.append(" PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>\n");
+		query.append(" SELECT ?x \n");
+		query.append(" WHERE {?testIRI mf:resultCardinality mf:LaxCardinality . \n");
+		query.append(" VALUES ?x { 1 } . }\n");
+		TupleQuery laxCardinalityQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
 		LOGGER.debug("evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -210,8 +210,8 @@ public class ManifestTestUtils {
 			throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
 		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(SERQL_QUERY_LANGUAGE,
-				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
+		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+				"SELECT ?ManifestName WHERE {?ManifestURL rdfs:label ?ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
 		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
 		try {
