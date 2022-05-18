@@ -501,7 +501,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return liftedChildren.stream().allMatch(c -> c instanceof ValuesNode)
                     // If all children are values nodes, just return the new node
                     ? newValuesNode
-                    // Otherwise mwerge new Values Node with the other non-Values Nodes remaining
+                    // Otherwise, merge new Values Node with the other non-Values Nodes remaining
                     : iqFactory.createNaryIQTree(this,
                         Stream.concat(
                             Stream.of(newValuesNode),

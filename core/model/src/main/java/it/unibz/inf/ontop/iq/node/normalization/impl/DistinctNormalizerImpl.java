@@ -50,9 +50,9 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
                     ((ValuesNode) newChildRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
         }
-        // DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...] scenario
+        // DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...] pattern
         else if ((newChildRoot instanceof UnionNode) &&
-                // Check for Values Nodes present otherwise no optimization
+                // Check for Values Nodes present otherwise no optimization needed
                 newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
                 // Ensure tree not already optimized
                 !treeCache.isNormalizedForOptimization()) {
@@ -78,8 +78,9 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     : iqFactory.createUnaryIQTree(distinctNode,
                     iqFactory.createNaryIQTree((UnionNode) newChildRoot,
                             Stream.concat(
-                                        Stream.of(iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
-                                    ((ValuesNode) vNodelist.get(0)).getValues().stream().distinct().collect(ImmutableCollectors.toList()))),
+                                        Stream.of(
+                                            iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
+                                            ((ValuesNode) vNodelist.get(0)).getValues().stream().distinct().collect(ImmutableCollectors.toList()))),
                                         nonVnodeList.stream())
                                     .collect(ImmutableCollectors.toList())));
         }
