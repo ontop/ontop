@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 public class NestedViewsPersonTest {
 
-    private static final String VIEW_FILE = "src/test/resources/person/nested_views.json";
+    private static final String VIEW_FILE = "src/test/resources/person/nested_lenses.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/hr_person-xt.db-extract.json";
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);

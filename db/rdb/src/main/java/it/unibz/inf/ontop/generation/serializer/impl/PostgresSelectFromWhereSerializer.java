@@ -5,20 +5,21 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
 @Singleton
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -34,6 +35,19 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             @Override
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
+            }
+
+            @Override
+            protected String serializeBooleanConstant(DBConstant booleanConstant) {
+                String value = booleanConstant.getValue();
+                switch (value.toLowerCase()) {
+                    case "false":
+                    case "true":
+                        return value;
+                        // E.g. f and t need single quotes
+                    default:
+                        return "'" + value + "'";
+                }
             }
         });
     }
@@ -79,7 +93,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         builder.append(String.format(
                                         "%s JOIN LATERAL %s(%s) ",
                                         subQuerySerialization.getString(),
-                                        getFlattenFunctionSymbolString(flattenedVar),
+                                        getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
                                         allColumnIDs.get(flattenedVar).getSQLRendering()
                         ));
                         indexVar.ifPresent(
@@ -136,28 +150,20 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         return builder.build();
                     }
 
-                    private String getFlattenFunctionSymbolString(Variable flattenedVar) {
-                                return "json_array_elements";
-//                        DBTermType termType = getTermType(flattenedVar);
-//                        switch (termType.getCategory()) {
-//                            case JSON:
-//                                return "json_array_elements";
-//                            case ARRAY:
-//                                return "unnest";
-//                            default:
-//                                throw new SQLSerializationException("Unexpected type for the flattened variable " + flattenedVar);
-//                        }
-                    }
+                    private String getFlattenFunctionSymbolString(DBTermType dbType) {
+                        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
 
-                    private DBTermType getTermType(Variable flattenedVar) {
-                        TermType termType = flattenedVar.inferType()
-                                .flatMap(t -> t.getTermType())
-                                .orElseThrow(
-                                        () -> new SQLSerializationException("Unable to infer term type for flattened variable " + flattenedVar));
-                        if (termType instanceof DBTermType) {
-                            return (DBTermType) termType;
+                        if (dbTypeFactory.getDBTermType(JSON_STR).equals(dbType)) {
+                            return "json_array_elements";
                         }
-                        throw new SQLSerializationException("The type of the flattened variable " + flattenedVar + " should be an instance of DBTermType");
+                        if (dbTypeFactory.getDBTermType(JSONB_STR).equals(dbType)) {
+                            return "jsonb_array_elements";
+                        }
+                        if (dbTypeFactory.getDBTermType(ARRAY_STR).equals(dbType)) {
+                            return "unnest";
+                        }
+
+                        throw new SQLSerializationException("Unsupported nested type for flattening: " + dbType.getName());
                     }
                 });
         }

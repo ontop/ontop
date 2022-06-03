@@ -11,7 +11,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -245,13 +247,21 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                 ),
                                 iqFactory.createBinaryNonCommutativeIQTree(
                                         iqFactory.createLeftJoinNode(ljCond),
-                                        leftTranslation.iqTree
-                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
-                                        rightTranslation.iqTree
-                                                .applyDescendingSubstitutionWithoutOptimizing(sub)
-                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
+                                        applyInDepthRenaming(leftTranslation.iqTree, nonProjVarsRenamings.left),
+                                        applyInDepthRenaming(
+                                                rightTranslation.iqTree
+                                                        .applyDescendingSubstitutionWithoutOptimizing(sub),
+                                                nonProjVarsRenamings.right)
                                 ))),
                 leftTranslation.nullableVariables);
+    }
+
+    private IQTree applyInDepthRenaming(IQTree tree, InjectiveVar2VarSubstitution renaming) {
+        if (renaming.isEmpty())
+            return tree;
+        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory);
+        HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
+        return iqTransformer.transform(tree);
     }
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
@@ -677,11 +687,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         IQTree joinTree = getJoinTree(
                 joinNode,
-                leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution)
-                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming.left),
-                rightQuery
-                        .applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution)
-                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming.right)
+                applyInDepthRenaming(
+                        leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
+                        nonProjVarsRenaming.left),
+                applyInDepthRenaming(
+                        rightQuery.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution),
+                        nonProjVarsRenaming.right)
         );
 
         return topSubstitution.isEmpty() ?
@@ -821,14 +832,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         iqFactory.createNaryIQTree(
                                 unionNode,
                                 ImmutableList.of(
-                                        iqFactory.createUnaryIQTree(
-                                                leftCn,
-                                                leftQuery
-                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
-                                        iqFactory.createUnaryIQTree(
-                                                rightCn,
-                                                rightQuery
-                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
+                                        applyInDepthRenaming(
+                                                iqFactory.createUnaryIQTree(leftCn, leftQuery),
+                                                nonProjVarsRenamings.left),
+                                        applyInDepthRenaming(
+                                                iqFactory.createUnaryIQTree(rightCn, rightQuery),
+                                                nonProjVarsRenamings.right)
                                 ))),
                 allNullable
         );

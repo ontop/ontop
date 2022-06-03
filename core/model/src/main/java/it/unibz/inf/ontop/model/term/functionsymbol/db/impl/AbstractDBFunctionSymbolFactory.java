@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -122,14 +121,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
 
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsScalar;
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsBoolean;
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsNumber;
-    // Created in init()
-    private DBBooleanFunctionSymbol jsonIsArray;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -333,6 +328,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
+
+        this.isArrayMap = new ConcurrentHashMap<>();
+        this.jsonIsNumberMap = new ConcurrentHashMap<>();
+        this.jsonIsBooleanMap = new ConcurrentHashMap<>();
+        this.jsonIsScalarMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -394,11 +394,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
-
-        jsonIsArray = createJsonIsArray();
-        jsonIsNumber = createJsonIsNumber();
-        jsonIsBoolean = createJsonIsBoolean();
-        jsonIsScalar = createJsonIsScalar();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -1044,31 +1039,23 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsScalar() {
-        if(jsonIsScalar == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsScalar;
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
+        return jsonIsScalarMap.computeIfAbsent(dbType, this::createJsonIsScalar);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsNumber() {
-        if(jsonIsNumber == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsNumber;
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
+        return jsonIsNumberMap.computeIfAbsent(dbType, this::createJsonIsNumber);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsBoolean() {
-        if(jsonIsBoolean == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsBoolean;
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
+        return jsonIsBooleanMap.computeIfAbsent(dbType, this::createJsonIsBoolean);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBJsonIsArray() {
-        if(jsonIsArray == null)
-            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
-        return jsonIsArray;
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        return isArrayMap.computeIfAbsent(dbType, this::createIsArray);
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
@@ -1487,20 +1474,20 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeMillisBetween);
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsArray() {
-        return null;
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported nested datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsNumber() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsBoolean() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
-    protected DBBooleanFunctionSymbol createJsonIsScalar() {
-        return null;
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
     /**

@@ -3,12 +3,15 @@
     {
       "name": ["\"hr\"","\"person-tags\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
-      "flattenedColumn": "\"tags\"",
+      "flattenedColumn": {
+        "name": "\"tags\"",
+        "datatype": "json"
+      },
       "columns": {
         "kept": [
           "\"id\"",
           "\"ssn\"",
-          "\"fullName\""
+          "\"fullname\""
         ],
         "position": "\"pos\"",
         "extracted": [
@@ -31,12 +34,15 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "FlattenedViewDefinition"
+      "type": "FlattenLens"
     },
     {
       "name": ["\"hr\"","\"persons-friends\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
-      "flattenedColumn": "\"friends\"",
+      "flattenedColumn": {
+        "name": "\"friends\"",
+        "datatype": "json"
+      },
       "columns": {
         "kept": [
           "\"id\""
@@ -74,7 +80,7 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "FlattenedViewDefinition"
+      "type": "FlattenLens"
     }
   ]
 }

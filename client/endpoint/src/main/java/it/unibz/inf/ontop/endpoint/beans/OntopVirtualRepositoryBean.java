@@ -23,7 +23,6 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
                                                              @Value("${db-url:#{null}}") String dbUrl,
-                                                             @Value("${db-name:#{null}}") String dbName,
                                                              @Value("${db-driver:#{null}}") String dbDriver) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 

@@ -86,12 +86,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        ImmutableSet<Variable> variablesProjectedByChildren = children.stream()
+        ImmutableSet<Variable> childVariables = children.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
-        if(rootNode instanceof FlattenNode)
-            return ((FlattenNode)rootNode).getProjectedVariables(variablesProjectedByChildren);
-        return  variablesProjectedByChildren;
+        if (rootNode instanceof FlattenNode)
+            return ((FlattenNode)rootNode).getVariables(childVariables);
+        return  childVariables;
     }
 
     @Override
@@ -175,11 +175,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         return applyFreshRenaming(freshRenamingSubstitution, false);
-    }
-
-    @Override
-    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution, true);
     }
 
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,

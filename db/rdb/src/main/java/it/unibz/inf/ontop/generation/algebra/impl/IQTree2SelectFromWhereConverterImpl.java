@@ -234,7 +234,8 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     ),
                     flattenNode.getFlattenedVariable(),
                     flattenNode.getOutputVariable(),
-                    flattenNode.getIndexVariable()
+                    flattenNode.getIndexVariable(),
+                    flattenNode.getFlattenedType()
             );
         }
         else

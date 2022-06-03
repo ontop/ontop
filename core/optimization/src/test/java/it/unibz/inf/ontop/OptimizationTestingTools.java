@@ -49,6 +49,8 @@ public class OptimizationTestingTools {
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
+    public final static DBTermType JSON_TYPE;
+
     public static final Variable X;
     public static final Variable XF0;
     public static final Variable Y;
@@ -115,6 +117,8 @@ public class OptimizationTestingTools {
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
+
+        JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
 
 
         NULL = TERM_FACTORY.getNullConstant();

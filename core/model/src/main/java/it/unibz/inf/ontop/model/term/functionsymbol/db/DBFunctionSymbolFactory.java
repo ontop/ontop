@@ -352,9 +352,9 @@ public interface DBFunctionSymbolFactory {
     //JSON
     DBFunctionSymbol getDBJsonElt(ImmutableList<String> path);
     DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path);
-    DBBooleanFunctionSymbol getDBJsonIsNumber();
-    DBBooleanFunctionSymbol getDBJsonIsBoolean();
-    DBBooleanFunctionSymbol getDBJsonIsScalar();
-    DBBooleanFunctionSymbol getDBJsonIsArray();
+    DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
 }

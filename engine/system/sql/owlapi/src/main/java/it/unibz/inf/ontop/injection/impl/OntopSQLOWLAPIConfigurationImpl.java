@@ -14,6 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Optional;
 
@@ -90,6 +91,11 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
             return ontologyBuilderFragment.ontologyFile(owlFile);
+        }
+
+        @Override
+        public B ontologyReader(@Nonnull Reader reader) {
+            return ontologyBuilderFragment.ontologyReader(reader);
         }
 
         void declareOntologyDefined() {

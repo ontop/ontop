@@ -29,14 +29,14 @@ public class JsonBasicView extends JsonBasicOrJoinView {
     }
 
     @Override
-    protected ImmutableMap<NamedRelationDefinition, String> extractParentDefinitions(DBParameters dbParameters,
+    protected ImmutableList<ParentDefinition> extractParentDefinitions(DBParameters dbParameters,
                                                                                      MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {
         QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
         NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
                 baseRelation.toArray(new String[0])));
 
-        return ImmutableMap.of(parentDefinition, "");
+        return ImmutableList.of(new ParentDefinition(parentDefinition,""));
     }
 
     /**

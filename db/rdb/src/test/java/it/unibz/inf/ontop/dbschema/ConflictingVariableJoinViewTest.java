@@ -21,7 +21,7 @@ public class ConflictingVariableJoinViewTest {
         } catch (ConflictingVariableInJoinViewException e) {
             assertEquals(
                     e.getConflictingAttributeIds().stream().map(
-                            id -> id.getAttribute().getName()).collect(ImmutableCollectors.toSet()),
+                            QuotedID::getName).collect(ImmutableCollectors.toSet()),
                     ImmutableSet.of("c_id"));
             return;
         }

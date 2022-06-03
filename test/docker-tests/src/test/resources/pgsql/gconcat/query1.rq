@@ -1,0 +1,4 @@
+PREFIX ex: <ex:>
+SELECT (GROUP_CONCAT(DISTINCT ?name; separator="; ") AS ?v) {
+    ex:tom ex:hasName ?name FILTER (LANG(?name) = "en")
+}
