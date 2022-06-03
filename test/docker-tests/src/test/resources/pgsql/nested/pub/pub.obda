@@ -10,7 +10,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person
 target		:person/{"id"} a :Person ; :name {"name"}.
-source		SELECT "id", "name", FROM "pub"."person";
+source		SELECT "id", "name" FROM "pub"."person";
 ]]
 
 [MappingDeclaration] @collection [[

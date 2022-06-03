@@ -7,6 +7,7 @@
         "name": "\"publication\"",
         "datatype": "json"
       },
+
       "columns": {
         "kept": [
           "\"id\""
@@ -52,61 +53,6 @@
       ]
     },
     "type": "FlattenLens"
-    },
-    {
-      "name": ["\"pub\"","\"publication\""],
-      "baseRelation": ["\"pub\"","\"person\""],
-      "flattenedColumn": {
-        "name": "\"publication\"",
-        "datatype": "json"
-      },
-      "columns": {
-        "kept": [
-        ],
-        "extracted": [
-          {
-            "name": "\"id_pub\"",
-            "key": ["id"],
-            "datatype": "integer"
-          },
-          {
-            "name": "\"title\"",
-            "key": ["title"],
-            "datatype": "text"
-          },
-          {
-            "name": "\"year\"",
-            "key": ["year"],
-            "datatype": "integer"
-          },
-          {
-            "name": "\"venue\"",
-            "key": ["venue"],
-            "datatype": "text"
-          },
-          {
-            "name": "\"editor\"",
-            "key": ["editor"],
-            "datatype": "json"
-          }
-        ]
-      },
-      "uniqueConstraints": {
-        "added": [
-          {
-            "name": "\"pub_pk\"",
-            "determinants" : [ "\"id_pub\""],
-            "isPrimaryKey" : true
-          }
-        ]
-      },
-      "otherFunctionalDependencies": {
-        "added": []
-      },
-      "foreignKeys": {
-        "added": []
-      },
-      "type": "FlattenLens"
     }
   ]
 }
