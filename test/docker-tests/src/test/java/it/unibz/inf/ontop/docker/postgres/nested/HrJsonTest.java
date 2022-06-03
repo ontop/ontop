@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.postgres;
+package it.unibz.inf.ontop.docker.postgres.nested;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
@@ -15,14 +15,14 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 
-public class NestedJsonTest extends AbstractVirtualModeTest {
+public class HrJsonTest extends AbstractVirtualModeTest {
 
     Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    final static String owlFile = "/pgsql/nested/hr_person.owl";
-    final static String obdaFile = "/pgsql/nested/hr_person.obda";
-    final static String propertyFile = "/pgsql/nested/hr_person.properties";
-    final static String viewFile = "/pgsql/nested/hr_person_lenses.json";
+    final static String owlFile = "/pgsql/nested/hr/hr.owl";
+    final static String obdaFile = "/pgsql/nested/hr/hr.obda";
+    final static String propertyFile = "/pgsql/nested/hr/hr.properties";
+    final static String viewFile = "/pgsql/nested/hr/hr_lenses.json";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;

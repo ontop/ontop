@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://person.example.org"
+     xml:base="http://person.example.org"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://person.example.org"/>
+
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+
+
+    <!-- ttp://person.example.org/hasFriend -->
+
+    <owl:ObjectProperty rdf:about="http://person.example.org/hasFriend">
+        <rdfs:range rdf:resource="http://person.example.org/Friend"/>
+    </owl:ObjectProperty>
+
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <!-- ttp://person.example.org/firstName -->
+
+    <owl:DatatypeProperty rdf:about="http://person.example.org/firstName">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+    <!-- ttp://person.example.org/nickName -->
+
+    <owl:DatatypeProperty rdf:about="http://person.example.org/nickName">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+
+    <!-- ttp://person.example.org/fullname -->
+
+    <owl:DatatypeProperty rdf:about="http://person.example.org/fullname">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+
+    <!-- ttp://person.example.org/tag_str -->
+
+    <owl:DatatypeProperty rdf:about="http://person.example.org/tag_str">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+    <!-- ttp://person.example.org/tag_int -->
+
+    <owl:DatatypeProperty rdf:about="http://person.example.org/tag_int">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <!-- ttp://person.example.org/Person -->
+
+    <owl:Class rdf:about="http://person.example.org/Person"/>
+
+    <!-- ttp://person.example.org/Friend -->
+
+    <owl:Class rdf:about="http://person.example.org/Friend">
+        <rdfs:subClassOf rdf:resource="http://person.example.org/Person"/>
+    </owl:Class>
+
+</rdf:RDF>
