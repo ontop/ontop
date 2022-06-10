@@ -150,10 +150,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         ImmutableSet<Variable> childVariables = getChild().getVariables();
         return rootNode instanceof FlattenNode?
-                Stream.concat(
-                        childVariables.stream(),
-                        rootNode.getLocallyDefinedVariables().stream())
-                        .collect(ImmutableCollectors.toSet()):
+                ((FlattenNode) rootNode).getVariables(childVariables):
+//                Stream.concat(
+//                        childVariables.stream(),
+//                        rootNode.getLocallyDefinedVariables().stream())
+//                        .collect(ImmutableCollectors.toSet()):
                 childVariables;
     }
 
