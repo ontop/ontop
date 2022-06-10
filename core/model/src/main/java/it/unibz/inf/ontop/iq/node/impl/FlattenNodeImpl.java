@@ -104,8 +104,10 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables) {
         ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-        builder.addAll(childVariables)
-                .add(outputVariable);
+        childVariables.stream()
+                .filter(v -> v != flattenedVariable)
+                .forEach(builder::add);
+        builder.add(outputVariable);
         indexVariable.ifPresent(builder::add);
         return builder.build();
     }

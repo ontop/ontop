@@ -20,7 +20,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final AggregationSimplifier aggregationSimplifier;
     private final OntopViewUnfolder viewUnfolder;
     private final AggregationSplitter aggregationSplitter;
-//    private final FlattenLifter flattenLifter;
+    private final FlattenLifter flattenLifter;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
@@ -28,15 +28,15 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
                                                         OntopViewUnfolder viewUnfolder,
-                                                        AggregationSplitter aggregationSplitter){
-//                                                        FlattenLifter flattenLifter) {
+                                                        AggregationSplitter aggregationSplitter,
+                                                        FlattenLifter flattenLifter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.viewUnfolder = viewUnfolder;
         this.aggregationSplitter = aggregationSplitter;
-//        this.flattenLifter = flattenLifter;
+        this.flattenLifter = flattenLifter;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
-//            queryAfterJoinLikeAndViewUnfolding = flattenLifter.optimize(queryAfterJoinLikeAndViewUnfolding);
+            queryAfterJoinLikeAndViewUnfolding = flattenLifter.optimize(queryAfterJoinLikeAndViewUnfolding);
             LOGGER.debug("New query after flatten lift:\n{}\n", queryAfterJoinLikeAndViewUnfolding);
 
             long beginningJoinLike = System.currentTimeMillis();
@@ -61,6 +61,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
             IQ queryBeforeUnfolding = queryAfterJoinLikeAndViewUnfolding;
             // Unfolds Ontop views one level at a time (hence the loop)
             queryAfterJoinLikeAndViewUnfolding = viewUnfolder.optimize(queryBeforeUnfolding);
+            LOGGER.debug("New query after view unfolding:\n{}\n",
+                    queryAfterJoinLikeAndViewUnfolding
+            );
+
 
             if (queryBeforeUnfolding.equals(queryAfterJoinLikeAndViewUnfolding))
                 break;
