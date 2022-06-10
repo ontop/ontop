@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.docker.postgres.nested;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -12,6 +14,8 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertTrue;
 
 public class PubJsonTest extends AbstractVirtualModeTest {
 
@@ -47,18 +51,22 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     public void testSelfJoinElimination() throws Exception {
         String query = "PREFIX : <http://pub.example.org/>" +
                 "\n" +
-                "SELECT  ?person ?name ?title" +
+                "SELECT  ?person ?name ?title " +
                 "WHERE {" +
                 "?person  :name ?name . " +
                 "?person  :author ?pub . " +
                 "?pub  :title ?title . " +
                 "}";
-        ImmutableList<String> expectedValues =
-                ImmutableList.of( "111", "111", "222", "222", "333");
 
-        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        checkContainsAllSetSemanticsWithErrorMessage(
+                query,
+                ImmutableSet.of(
+                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "The Google file system"),
+                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "MapReduce: Simplified Data Processing on Large Clusters"),
+                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "Bigtable: A Distributed Storage System for Structured Data"),
+                        ImmutableMap.of("person", "<http://pub.example.org/person/2>", "name", "Jeffrey Dean", "title", "Bigtable: A Distributed Storage System for Structured Data"),
+                        ImmutableMap.of("person", "<http://pub.example.org/person/2>", "name", "Jeffrey Dean", "title", "MapReduce: Simplified Data Processing on Large Clusters")
+                ));
 
     }
 }

@@ -40,14 +40,6 @@
               "columns": ["\"id\""],
               "relation": ["\"person\""]
             }
-          },
-          {
-            "name": "author_pub_fk_pub",
-            "from": "\"id_pub\"",
-            "to": {
-              "columns": ["\"id_pub\""],
-              "relation": ["\"publication\""]
-            }
           }
       ]
     },
@@ -92,16 +84,16 @@
         ]
       },
       "uniqueConstraints": {
-        "added": [
-          {
-            "name": "\"pub_pk\"",
-            "determinants" : [ "\"id_pub\""],
-            "isPrimaryKey" : true
-          }
-        ]
+        "added": []
       },
       "otherFunctionalDependencies": {
-        "added": []
+        "added": [
+          {
+            "name": "\"pub_fd\"",
+            "determinants" : [ "\"id_pub\""],
+            "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
+          }
+        ]
       },
       "foreignKeys": {
         "added": []
