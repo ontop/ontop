@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -49,6 +50,7 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     }
 
     @Test
+    @Ignore
     public void testSelfJoinElimination() throws Exception {
         String query = "PREFIX : <http://pub.example.org/>" +
                 "\n" +
