@@ -22,8 +22,8 @@
       "uniqueConstraints": {
         "added": [
           {
-            "name": "\"author_pub_pk\"",
-            "determinants" : [ "\"id\"", "\"id_pub\""],
+            "name": "author_pub_pk",
+            "determinants" : ["\"id\"", "\"id_pub\""],
             "isPrimaryKey" : true
           }
         ]
@@ -45,6 +45,7 @@
     },
     "type": "FlattenLens"
     },
+
     {
       "name": ["\"pub\"","\"publication\""],
       "baseRelation": ["\"pub\"","\"person\""],
@@ -90,7 +91,7 @@
         "added": [
           {
             "name": "\"pub_fd\"",
-            "determinants" : [ "\"id_pub\""],
+            "determinants" : ["\"id_pub\""],
             "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
           }
         ]

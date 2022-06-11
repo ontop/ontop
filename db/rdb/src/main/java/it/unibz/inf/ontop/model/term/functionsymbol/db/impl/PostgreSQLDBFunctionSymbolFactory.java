@@ -97,7 +97,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
         return new DBFunctionSymbolWithSerializerImpl(
-                "JSON_GET_ELT_AS_TEXT",
+                "JSON_GET_ELT_AS_TEXT:"+printPath(path),
                 ImmutableList.of(
                         dbJsonType
                 ),
@@ -106,14 +106,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 (terms, termConverter, termFactory) -> String.format(
                         "%s#>>%s",
                         termConverter.apply(terms.get(0)),
-                        buildPath(path)
+                        serializePath(path)
                 ));
     }
 
     @Override
     public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
         return new DBFunctionSymbolWithSerializerImpl(
-                "JSON_GET_ELT",
+                "JSON_GET_ELT:"+printPath(path),
                 ImmutableList.of(
                         dbJsonType
                 ),
@@ -122,15 +122,20 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 (terms, termConverter, termFactory) -> String.format(
                         "%s#>%s",
                         termConverter.apply(terms.get(0)),
-                        buildPath(path)
+                        serializePath(path)
                 ));
     }
 
-    private String buildPath(ImmutableList<String> path) {
+    private String serializePath(ImmutableList<String> path) {
         return "\'{"+
                 path.stream()
                         .collect(Collectors.joining(","))
                 +"}\'";
+    }
+
+    private String printPath(ImmutableList<String> path) {
+        return path.stream()
+                        .collect(Collectors.joining("."));
     }
 
     @Override

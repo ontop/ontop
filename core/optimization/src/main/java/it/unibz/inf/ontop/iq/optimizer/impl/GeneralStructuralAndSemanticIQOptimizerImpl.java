@@ -46,32 +46,36 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         LOGGER.debug("New lifted query:\n{}\n", liftedQuery);
 
-        IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
+        IQ current = liftedQuery;
         do {
-            queryAfterJoinLikeAndViewUnfolding = flattenLifter.optimize(queryAfterJoinLikeAndViewUnfolding);
-            LOGGER.debug("New query after flatten lift:\n{}\n", queryAfterJoinLikeAndViewUnfolding);
 
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
+            current = joinLikeOptimizer.optimize(current);
 
             LOGGER.debug("New query after fixed point join optimization ({} ms):\n{}\n",
                         System.currentTimeMillis() - beginningJoinLike,
-                        queryAfterJoinLikeAndViewUnfolding);
+                        current);
 
-            IQ queryBeforeUnfolding = queryAfterJoinLikeAndViewUnfolding;
+            IQ queryBeforeUnfolding = current;
             // Unfolds Ontop views one level at a time (hence the loop)
-            queryAfterJoinLikeAndViewUnfolding = viewUnfolder.optimize(queryBeforeUnfolding);
+            current = viewUnfolder.optimize(queryBeforeUnfolding);
             LOGGER.debug("New query after view unfolding:\n{}\n",
-                    queryAfterJoinLikeAndViewUnfolding
+                    current
             );
 
-
-            if (queryBeforeUnfolding.equals(queryAfterJoinLikeAndViewUnfolding))
+            if (queryBeforeUnfolding.equals(current))
                 break;
+
+            current = flattenLifter.optimize(current);
+            LOGGER.debug("New query after flatten lift:\n{}\n", current);
+
+            current = bindingLiftOptimizer.optimize(current);
+            LOGGER.debug("New lifted query:\n{}\n", current);
+
 
         } while (true);
 
-        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
+        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(current);
         LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
 
         IQ queryAfterAggregationSplitting = aggregationSplitter.optimize(queryAfterAggregationSimplification);
