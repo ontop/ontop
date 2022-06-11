@@ -22,6 +22,6 @@ source		SELECT "id_pub", "title", "year", "venue" FROM "pub"."publication";
 [MappingDeclaration] @collection [[
 mappingId	MAPID-author
 target		:person/{"id"} :author :publication/{"id_pub"}.
-source		SELECT "id", "id_pub" FROM "pub"."publication";
+source		SELECT "id", "id_pub" FROM "pub"."author-pub";
 ]]
 
