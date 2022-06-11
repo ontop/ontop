@@ -305,7 +305,6 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
         }
     }
 
-
     private static class SplitFlattenSequence {
         private List<FlattenNode> liftableFlatten;
         private List<FlattenNode> nonLiftableFlatten;
@@ -326,12 +325,6 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
     private static class FlattenLifterException extends OntopInternalBugException {
         FlattenLifterException(String message) {
-            super(message);
-        }
-    }
-
-    private static class FlattenLiftException extends OntopInternalBugException {
-        FlattenLiftException(String message) {
             super(message);
         }
     }

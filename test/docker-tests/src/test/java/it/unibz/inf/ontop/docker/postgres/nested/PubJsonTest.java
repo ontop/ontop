@@ -52,11 +52,11 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     public void testSelfJoinElimination() throws Exception {
         String query = "PREFIX : <http://pub.example.org/>" +
                 "\n" +
-                "SELECT  ?person ?name ?title " +
+                "SELECT ?person ?name ?title " +
                 "WHERE {" +
-                "?person  :name ?name . " +
-                "?person  :author ?pub . " +
-                "?pub  :title ?title . " +
+                "?person :name ?name . " +
+                "?person :author ?pub . " +
+                "?pub :title ?title . " +
                 "}";
 
         checkContainsAllSetSemanticsWithErrorMessage(
