@@ -37,7 +37,6 @@ public class InteractiveExample {
 //		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(propertyFile)
 				.nativeOntopMappingFile(obdafile)

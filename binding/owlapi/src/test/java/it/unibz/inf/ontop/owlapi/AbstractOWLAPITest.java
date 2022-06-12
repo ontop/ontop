@@ -85,7 +85,6 @@ public class AbstractOWLAPITest {
                 .enableTestMode()
                 .build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         CONNECTION = reasoner.getConnection();

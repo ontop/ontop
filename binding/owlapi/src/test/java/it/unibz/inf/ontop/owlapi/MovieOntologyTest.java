@@ -40,16 +40,18 @@ public class MovieOntologyTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
-		reasoner.close();
+
+		//noinspection EmptyTryBlock
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config)) {
+
+		}
 
 		assertTrue(true);
 	}

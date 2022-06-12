@@ -239,7 +239,6 @@ public class OntologyTypesTest {
 	public void failedMapping()  throws Exception  {
 		try {
 			// Creating a new instance of the reasoner
-			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdaErroredFileName)
 					.ontologyFile(owlFileName)

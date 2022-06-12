@@ -74,7 +74,6 @@ public class R2rmlCheckerTest {
     @Before
 	public void setUp() throws Exception {
 		log.info("Loading obda file");
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)

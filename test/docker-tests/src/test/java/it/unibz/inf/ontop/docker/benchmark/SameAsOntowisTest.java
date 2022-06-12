@@ -273,7 +273,6 @@ public class SameAsOntowisTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 //        factory.setOBDAController(obdaModel);
 //        factory.setPreferenceHolder(preference);
 

@@ -95,7 +95,6 @@ public class QuestImplicitDBConstraintsTest {
 	public void testForeignKeysSelfJoinElimSameVar() throws Exception {
 		this.prepareDB(uc_create);
 		
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(uc_obdafile)
 				.ontologyFile(uc_owlfile)
@@ -124,8 +123,6 @@ public class QuestImplicitDBConstraintsTest {
 	public void testWithSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 
-
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
@@ -152,7 +149,6 @@ public class QuestImplicitDBConstraintsTest {
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
@@ -183,7 +179,6 @@ public class QuestImplicitDBConstraintsTest {
 	public void testForeignKeysTablesNOUc() throws Exception {
 		this.prepareDB(fk_create);
 		
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
@@ -215,7 +210,6 @@ public class QuestImplicitDBConstraintsTest {
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.prepareDB(fk_create);
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)

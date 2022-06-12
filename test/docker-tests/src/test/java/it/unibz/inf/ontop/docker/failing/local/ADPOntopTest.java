@@ -34,7 +34,6 @@ public class ADPOntopTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)

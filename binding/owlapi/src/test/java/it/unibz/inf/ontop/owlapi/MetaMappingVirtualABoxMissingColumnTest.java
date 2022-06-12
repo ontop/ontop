@@ -90,7 +90,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
         expectedEx.expect(IllegalConfigurationException.class);
         expectedEx.expectMessage("The placeholder(s) code1 in the target do(es) not occur in source query of the mapping assertion");
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -100,7 +99,9 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+		//noinspection EmptyTryBlock
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config)) {
+		}
 	}
 
 

@@ -48,7 +48,6 @@ public class GeoSPARQLTest {
                 .enableTestMode()
                 .build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         reasoner = new SimpleOntopOWLEngine(config);
         conn = reasoner.getConnection();
     }

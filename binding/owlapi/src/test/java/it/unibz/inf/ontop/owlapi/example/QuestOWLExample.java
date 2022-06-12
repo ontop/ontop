@@ -52,14 +52,12 @@ public class QuestOWLExample {
 		/*
          * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 		/*
          * Get the book information that is stored in the database
@@ -70,9 +68,7 @@ public class QuestOWLExample {
                 "         ?y a :Author; :name ?author. \n" +
                 "         ?z a :Edition; :editionNumber ?edition }";
 
-        try (/*
-              * Prepare the data connection for querying.
-		 	 */
+        try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement()) {
 
@@ -108,8 +104,6 @@ public class QuestOWLExample {
             System.out.println("=====================");
             System.out.println((t2 - t1) + "ms");
 
-        } finally {
-            reasoner.close();
         }
     }
 

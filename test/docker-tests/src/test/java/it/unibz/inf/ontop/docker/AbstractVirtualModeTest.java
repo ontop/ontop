@@ -77,7 +77,6 @@ public abstract class AbstractVirtualModeTest {
         r2rmlFile =  AbstractVirtualModeTest.class.getResource(r2rmlFile).toString();
         propertiesFile = AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(r2rmlFile)
                 .ontologyFile(owlFile)
