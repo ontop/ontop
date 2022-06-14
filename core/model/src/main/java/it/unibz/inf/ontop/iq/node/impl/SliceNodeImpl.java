@@ -79,63 +79,24 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
         if (newChildRoot instanceof ConstructionNode)
             return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
-        else if (newChildRoot instanceof SliceNode)
+        if (newChildRoot instanceof SliceNode)
             return mergeWithSliceChild((SliceNode) newChildRoot, (UnaryIQTree) newChild, treeCache);
-        else if (newChildRoot instanceof EmptyNode)
+        if (newChildRoot instanceof EmptyNode)
             return newChild;
-        else if ((newChildRoot instanceof TrueNode)
+        if ((newChildRoot instanceof TrueNode)
                 || ((newChildRoot instanceof AggregationNode)
                     && ((AggregationNode) newChildRoot).getGroupingVariables().isEmpty()))
             return offset > 0
                     ? iqFactory.createEmptyNode(child.getVariables())
                     : newChild;
-        else if ((newChildRoot instanceof DistinctNode)
-                && (offset == 0)
-                && getLimit()
-                    .filter(l -> l <= 1)
-                    .isPresent())
-            // Distinct can be eliminated
-            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
 
-        // Optimizations for Values Node will apply under the following conditions
-        // Rule 1: For offset > 0, we do not perform any Values Node optimizations
-        // Rule 2: The optimization of the Slice can be controlled via the configuration properties
-        // Rule 3: Limit must not be null
-        else if ((newChildRoot instanceof ValuesNode) && (offset == 0)
-                && limit != null
-                && !settings.isLimitOptimizationDisabled())
-            return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
-                    ((ValuesNode) newChildRoot).getValues().subList(0, limit.intValue()));
-        // Only triggered if a Values Node is present directly under the UNION
-        else if ((newChildRoot instanceof UnionNode)
-                && (offset == 0)
-                && limit != null
-                && !settings.isLimitOptimizationDisabled()
-                && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
-                && !treeCache.isNormalizedForOptimization()
-        )
-            return simplifyUnionValues((UnionNode) newChildRoot, newChild);
-        // Scenario: SLICE UNION [CONSTRUCT] [DISTINCT] UNION [VALUES NONVALUES] pattern
-        else if ((newChildRoot instanceof UnionNode)
-                && (offset == 0)
-                && limit != null
-                && !settings.isLimitOptimizationDisabled()
-                && calculateMaxTotalValues(newChild) >= limit.intValue()
-                && !treeCache.isNormalizedForOptimization())
-            return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild);
-        // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
-        else if ((newChildRoot instanceof DistinctNode)
-                && (offset == 0)
-                && limit != null
-                && !settings.isLimitOptimizationDisabled()
-                && newChild.getChildren().size() == 1
-                && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
-                && newChild.getChildren().get(0).getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
-                && newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).anyMatch(IQTree::isDistinct)) {
-            return simplifyDistinctUnionValues(newChild, treeCache);
-        }
-        else
-            return iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+        if ((offset == 0) && limit != null && !settings.isLimitOptimizationDisabled())
+            return normalizeLimitNoOffset(limit.intValue(), newChild, variableGenerator, child, treeCache);
+
+        return iqFactory.createUnaryIQTree(this, newChild,
+                newChild.equals(child)
+                        ? treeCache.declareAsNormalizedForOptimizationWithoutEffect()
+                        : treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
@@ -162,6 +123,47 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .orElseGet(() -> iqFactory.createSliceNode(newOffset));
 
         return iqFactory.createUnaryIQTree(newSliceNode, newChild.getChild(), treeCache.declareAsNormalizedForOptimizationWithEffect());
+    }
+
+    /**
+     * Limit > 0, no offset and limit optimization is enabled
+     */
+    private IQTree normalizeLimitNoOffset(int limit, IQTree newChild, VariableGenerator variableGenerator,
+                                          IQTree formerChild, IQTreeCache treeCache) {
+        QueryNode newChildRoot = newChild.getRootNode();
+        if ((newChildRoot instanceof DistinctNode) && limit <= 1)
+            // Distinct can be eliminated
+            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache);
+
+            // Optimizations for Values Node will apply under the following conditions
+            // Rule 1: For offset > 0, we do not perform any Values Node optimizations
+            // Rule 2: The optimization of the Slice can be controlled via the configuration properties
+            // Rule 3: Limit must not be null
+        if ((newChildRoot instanceof ValuesNode))
+            return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
+                    ((ValuesNode) newChildRoot).getValues().subList(0, limit));
+            // Only triggered if a Values Node is present directly under the UNION
+        if ((newChildRoot instanceof UnionNode)
+                && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
+                && !treeCache.isNormalizedForOptimization())
+            return simplifyUnionValues((UnionNode) newChildRoot, newChild);
+            // Scenario: SLICE UNION [CONSTRUCT] [DISTINCT] UNION [VALUES NONVALUES] pattern
+        if ((newChildRoot instanceof UnionNode)
+                && calculateMaxTotalValues(newChild) >= limit
+                && !treeCache.isNormalizedForOptimization())
+            return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild);
+            // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+        if ((newChildRoot instanceof DistinctNode)
+                && newChild.getChildren().size() == 1
+                && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
+                && newChild.getChildren().get(0).getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
+                && newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).anyMatch(IQTree::isDistinct)) {
+            return simplifyDistinctUnionValues(newChild, treeCache);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild,
+                newChild.equals(formerChild)
+                        ? treeCache.declareAsNormalizedForOptimizationWithoutEffect()
+                        : treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     private IQTree simplifyUnionValues(UnionNode newChildRoot, IQTree newChild) {
