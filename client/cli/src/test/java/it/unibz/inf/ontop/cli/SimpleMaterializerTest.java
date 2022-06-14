@@ -106,11 +106,10 @@ public class SimpleMaterializerTest {
     @Test
     public void runMaterializationWithoutReasoning() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.rdf";
-        String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
-        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
-                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
+        Ontop.main("materialize", "-m", mappingFile,
+                "-o", outFile, "-p", propertiesFile);
         assertEquals(3, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
     }
@@ -152,11 +151,10 @@ public class SimpleMaterializerTest {
      @Test
     public void runMaterializationWithoutReasoningNQuads() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning_named.nq";
-        String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping_named.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
-        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "nquads",
-                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
+        Ontop.main("materialize", "-m", mappingFile, "-f", "nquads",
+                "-o", outFile, "-p", propertiesFile);
         assertEquals(7, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
          // :P is treated as Annotaton property because the materialized RDF file is not a valid ontology
@@ -198,11 +196,10 @@ public class SimpleMaterializerTest {
     @Test
     public void runMaterializationWithoutReasoningTrig() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning_named.trig";
-        String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping_named.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
-        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
-                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
+        Ontop.main("materialize", "-m", mappingFile, "-f", "trig",
+                "-o", outFile, "-p", propertiesFile);
         assertEquals(7, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
         // :P is treated as Annotaton property because the materialized RDF file is not a valid ontology

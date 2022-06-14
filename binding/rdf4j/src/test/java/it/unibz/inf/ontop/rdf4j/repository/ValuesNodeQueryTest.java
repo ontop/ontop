@@ -60,4 +60,13 @@ public class ValuesNodeQueryTest extends AbstractRDF4JTest {
                 "}");
         assertEquals(count, 2);
     }
+
+    @Test
+    public void testBGP3() {
+        int count = runQueryAndCount("SELECT ?c WHERE {\n" +
+                "  ?s a ?c \n" +
+                "  FILTER (?c = <http://te.st/ValuesNodeTest#Student>)" +
+                "}");
+        assertEquals(count, 2);
+    }
 }

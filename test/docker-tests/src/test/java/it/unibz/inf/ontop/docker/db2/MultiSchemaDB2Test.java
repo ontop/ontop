@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.db2;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -27,7 +27,7 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 	private static final String obdafile = "/db2/schema/multischemadb2.obda";
 	private static final String propertiesfile = "/db2/db2-stock.properties";
 
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
@@ -42,9 +42,9 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 	}
 
 	@AfterClass
-	public static void after() throws OWLException {
+	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.dispose();
+		REASONER.close();
 	}
 
 	/**

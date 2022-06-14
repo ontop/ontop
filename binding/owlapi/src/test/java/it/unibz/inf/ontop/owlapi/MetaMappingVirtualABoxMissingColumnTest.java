@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -89,7 +90,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
         expectedEx.expect(IllegalConfigurationException.class);
         expectedEx.expectMessage("The placeholder(s) code1 in the target do(es) not occur in source query of the mapping assertion");
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -99,7 +99,9 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLReasoner reasoner = factory.createReasoner(config);
+		//noinspection EmptyTryBlock
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config)) {
+		}
 	}
 
 

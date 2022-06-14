@@ -13,4 +13,6 @@ public interface NativeQueryGenerator {
 	IQ generateSourceQuery(IQ query);
 
 	IQ generateSourceQuery(IQ query, boolean avoidPostProcessing);
+
+	IQ generateSourceQuery(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes);
 }

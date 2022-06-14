@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -19,7 +19,7 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     private static final String OBDA_FILE = "/redundant_join/redundant_join_fk_test.obda";
     private static final String PROPERTY_FILE = "/mssql/redundant_join_fk_test.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -34,9 +34,9 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override

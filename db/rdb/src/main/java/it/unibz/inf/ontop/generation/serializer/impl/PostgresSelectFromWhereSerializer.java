@@ -24,6 +24,19 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
             }
+
+            @Override
+            protected String serializeBooleanConstant(DBConstant booleanConstant) {
+                String value = booleanConstant.getValue();
+                switch (value.toLowerCase()) {
+                    case "false":
+                    case "true":
+                        return value;
+                        // E.g. f and t need single quotes
+                    default:
+                        return "'" + value + "'";
+                }
+            }
         });
     }
 

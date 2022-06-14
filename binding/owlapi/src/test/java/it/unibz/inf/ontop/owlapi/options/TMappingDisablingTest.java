@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.owlapi.options;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
@@ -64,15 +66,14 @@ public class TMappingDisablingTest extends TestCase {
 	}
 	
 	public void testDisableTMappings() throws Exception {
-		
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		OWLConnection conn = reasoner.getConnection();
 		
 		String sparqlQuery = 
@@ -91,13 +92,12 @@ public class TMappingDisablingTest extends TestCase {
 			rs.close();
 		}
 		finally {
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 	
 	public void testDisableSelectedTMappings() throws Exception {
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -105,7 +105,7 @@ public class TMappingDisablingTest extends TestCase {
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
 				.enableTestMode()
 				.build();
-		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		OWLConnection conn = reasoner.getConnection();
 
 		String sparqlQuery = 
@@ -125,7 +125,7 @@ public class TMappingDisablingTest extends TestCase {
 			rs.close();
 		}
 		finally {
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 }

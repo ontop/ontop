@@ -94,4 +94,26 @@ public class DestinationTest extends AbstractRDF4JTest {
                         "LIMIT 10");
     }
 
+    /**
+     * Reproducing https://github.com/ontop/ontop/issues/417 (re-opened issue)
+     */
+    @Test
+    public void testDistinctSubQuery() {
+        int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "\n" +
+                "SELECT ?o\n" +
+                "WHERE {\n" +
+                "  ?h a schema:LodgingBusiness ;\n" +
+                "     schema:name ?o .\n" +
+                "  { SELECT DISTINCT ?h {\n" +
+                "    ?h a schema:Campground ;\n" +
+                "      schema:name ?o " +
+                "  }}\n" +
+                "}\n" +
+                "LIMIT 1\n");
+        assertEquals(1, count);
+    }
+
 }

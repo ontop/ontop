@@ -252,8 +252,7 @@ public abstract class QuestStatement implements OntopStatement {
 			canceled = false;
 			throw new OntopQueryEvaluationException("Query execution was cancelled");
 		}
-		R resultSet = executionthread.getResultSet();
-		return resultSet;
+		return executionthread.getResultSet();
 	}
 
 
@@ -261,7 +260,7 @@ public abstract class QuestStatement implements OntopStatement {
 	public void cancel() throws OntopConnectionException {
 		canceled = true;
 		try {
-			QuestStatement.this.executionThread.cancel();
+			executionThread.cancel();
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}
@@ -275,12 +274,12 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
+	public <R extends OBDAResultSet> String getRewritingRendering(InputQuery<R> query) throws OntopReformulationException {
 		return engine.getRewritingRendering(query);
 	}
 
 	@Override
-	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(InputQuery<R> inputQuery) throws OntopReformulationException {
 		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 

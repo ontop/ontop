@@ -8,12 +8,16 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
+
 
 public class InconsistencyCheckingVirtualTest {
 
@@ -54,20 +58,24 @@ public class InconsistencyCheckingVirtualTest {
 		assertTrue(reasoner.isConsistent());
 	}
 	
-	private void startReasoner() throws OWLOntologyCreationException {
+	private void startReasoner() throws OWLOntologyStorageException {
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
+		OutputStream out = new ByteArrayOutputStream();
+		manager.saveOntology(ontology, out);
+		String ontologyString = out.toString();
 
         // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFileName)
-				.ontology(ontology)
+				.ontologyReader(new StringReader(ontologyString))
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 
-	    reasoner = factory.createReasoner(config);
+	    reasoner = factory.createReasoner(ontology, config);
 	}
 	
 	@Test

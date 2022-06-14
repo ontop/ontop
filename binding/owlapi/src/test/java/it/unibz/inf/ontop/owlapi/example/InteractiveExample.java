@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.owlapi.example;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 
 import java.io.BufferedReader;
@@ -35,14 +37,13 @@ public class InteractiveExample {
 //		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(propertyFile)
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.enableTestMode()
 				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 
 	/*

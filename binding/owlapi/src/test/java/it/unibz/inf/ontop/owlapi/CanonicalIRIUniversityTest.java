@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -24,7 +25,7 @@ public class CanonicalIRIUniversityTest {
     private static final String owlFile = "src/test/resources/canonicalIRI/university/univ-ontology.ttl";
     private static final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
     private OntopOWLConnection conn;
     private Connection sqlConnection;
 
@@ -48,19 +49,14 @@ public class CanonicalIRIUniversityTest {
                 .enableTestMode()
                 .build();
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        reasoner = factory.createReasoner(config);
+        reasoner = new SimpleOntopOWLEngine(config);
         conn = reasoner.getConnection();
     }
 
     @After
     public void tearDown() throws Exception {
         conn.close();
-        reasoner.dispose();
+        reasoner.close();
         if (!sqlConnection.isClosed()) {
             try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
@@ -71,7 +67,7 @@ public class CanonicalIRIUniversityTest {
         }
     }
 
-    private void runSelectQuery(String query) throws OWLException {
+    private void runSelectQuery(String query) throws Exception {
         ArrayList<String> retVal = new ArrayList<>();
         try (OWLStatement st = conn.createStatement()) {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
@@ -87,7 +83,7 @@ public class CanonicalIRIUniversityTest {
         }
         finally {
             conn.close();
-            reasoner.dispose();
+            reasoner.close();
         }
     }
 

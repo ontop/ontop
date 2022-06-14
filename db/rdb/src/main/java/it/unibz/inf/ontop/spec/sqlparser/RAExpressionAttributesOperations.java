@@ -25,15 +25,17 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     @Override
     public RAExpressionAttributes create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
-        return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs().stream()
-                .flatMap(id -> Stream.of(id, id.getTableOnlyID()))
-                .distinct()
-                .collect(ImmutableCollectors.toSet())),
+        return new RAExpressionAttributes(
+                attachAliases(map, relation.getAllIDs().stream()
+                        .flatMap(id -> Stream.of(id, id.getTableOnlyID()))
+                        .distinct()
+                        .collect(ImmutableCollectors.toSet())),
                 aoops.create(relation, variables));
     }
 
     public RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
-        return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, ImmutableSet.of()),
+        return new RAExpressionAttributes(
+                attachAliases(unqualifiedAttributes, ImmutableSet.of()),
                 aoops.create(unqualifiedAttributes.keySet(), ImmutableSet.of()));
     }
 
@@ -141,9 +143,9 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
      */
 
     private void checkRelationAliasesConsistency(RAExpressionAttributes re1, RAExpressionAttributes re2) throws IllegalJoinException {
-
         Sets.SetView<RelationID> intersection = Sets.intersection(
                 getRelationAliases(re1), getRelationAliases(re2));
+
         if (!intersection.isEmpty())
             throw new IllegalJoinException(re1, re2, intersection.stream()
                     .map(RelationID::getSQLRendering)

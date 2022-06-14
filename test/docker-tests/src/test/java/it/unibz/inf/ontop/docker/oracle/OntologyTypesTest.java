@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.docker.oracle;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
@@ -64,7 +65,6 @@ public class OntologyTypesTest {
 	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFileName)
 				.enableTestMode()
@@ -76,7 +76,7 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
@@ -95,7 +95,7 @@ public class OntologyTypesTest {
 		} finally {
 
 			conn.close();
-			reasoner.dispose();
+			reasoner.close();
 		}
 	}
 
@@ -239,14 +239,13 @@ public class OntologyTypesTest {
 	public void failedMapping()  throws Exception  {
 		try {
 			// Creating a new instance of the reasoner
-			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdaErroredFileName)
 					.ontologyFile(owlFileName)
 					.enableTestMode()
 					.propertyFile(propertyFileName)
 					.build();
-			OntopOWLReasoner reasoner = factory.createReasoner(config);
+			OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
 
 		} catch (Exception e) {

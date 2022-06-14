@@ -5,10 +5,11 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -347,7 +348,7 @@ public class QuestOWLExample_ReasoningDisabled {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws Exception {
 		/*
 		 * Close connection and resources
 		 */
@@ -355,7 +356,7 @@ public class QuestOWLExample_ReasoningDisabled {
         if (conn != null && !conn.isClosed()) {
             conn.close();
         }
-        this.reasoner.dispose();
+        this.reasoner.close();
     }
 
     private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException {
@@ -369,8 +370,6 @@ public class QuestOWLExample_ReasoningDisabled {
 
         TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(getClass().getResource(Settings.tMappingConfFile).getPath());
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(getClass().getResource(Settings.obdaFile).getPath()))
                 .ontologyFile(getClass().getResource(owlfile).getPath())
@@ -378,14 +377,14 @@ public class QuestOWLExample_ReasoningDisabled {
                 .tMappingExclusionConfig(tMapConfig)
                 //.enableIRISafeEncoding(false)
                 .build();
-        this.reasoner = factory.createReasoner(config);
+        this.reasoner = new SimpleOntopOWLEngine(config);
 		/*
 		 * Prepare the data connection for querying.
 		 */
         return reasoner.getConnection();
     }
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
 
 
     public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile, String propertyFile){
@@ -458,7 +457,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     private List<Long> runQueries(//QuestOWLConnection conn,
-                                  List<String> queries) throws OWLException, InvalidMappingException, IOException {
+                                  List<String> queries) throws Exception {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
