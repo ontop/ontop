@@ -55,8 +55,8 @@ target		:feature/{ID} a :Feature ; geo:hasGeometry :geomid/{GID} ; rdfs:label {N
 source		SELECT * FROM FEATURES
 
 mappingId	features
-target		:geomid/{GID} a :Geom ; geo:asWKT {THE_GEOM}^^geo:wktLiteral .
-source		SELECT * FROM FEATURES
+target		:geomid/{GID} a :Geom ; geo:asWKT {THE_NEW_GEOM}^^geo:wktLiteral .
+source		SELECT *, ST_SETSRID(THE_GEOM, '4326') AS THE_NEW_GEOM FROM FEATURES
 
 mappingId	rivers
 target		:rivers/{id} a :River ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT ({lon} {lat})"^^geo:wktLiteral .

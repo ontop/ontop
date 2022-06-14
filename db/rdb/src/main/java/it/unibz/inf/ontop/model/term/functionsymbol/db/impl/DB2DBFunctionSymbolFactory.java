@@ -15,14 +15,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.SMALLINT_STR;
-import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.NUMBER_STR;
 
 public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String CURRENT_TIMESTAMP_SPACE_STR = "CURRENT TIMESTAMP";
-    private static final String CHAR_STR = "CHAR";
+    private static final String VARCHAR_STR = "VARCHAR";
     private final DBFunctionSymbolSerializer numberToStringSerializer;
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for DB2";
@@ -32,7 +30,7 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     protected DB2DBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDB2RegularFunctionTable(typeFactory), typeFactory);
         this.numberToStringSerializer = (terms, termConverter, termFactory) ->
-                String.format("REPLACE(CHAR(%s),' ', '')", termConverter.apply(terms.get(0)));
+                String.format("REPLACE(VARCHAR(%s),' ', '')", termConverter.apply(terms.get(0)));
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDB2RegularFunctionTable(
@@ -228,7 +226,16 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     @Override
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
-                Serializers.getRegularSerializer(CHAR_STR));
+                Serializers.getRegularSerializer(VARCHAR_STR));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
+        if (targetType.equals(dbTypeFactory.getDBStringType())) {
+            return new DefaultSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), dbStringType,
+                    Serializers.getRegularSerializer(VARCHAR_STR));
+        }
+        return super.createSimpleCastFunctionSymbol(targetType);
     }
 
     @Override
