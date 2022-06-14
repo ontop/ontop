@@ -159,6 +159,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if ((newChildRoot instanceof UnionNode)
                 && calculateMaxTotalValues(newChild) >= limit)
             return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild);
+             // TODO: create another comment and implement the solution to the comment (not inline with implementation)
             // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
         if ((newChildRoot instanceof DistinctNode)
                 && newChild.getChildren().size() == 1
@@ -288,6 +289,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         );
     }
 
+    /**
+     * TODO: fix it: needs all the values nodes to be distinct!
+     * NB: they should normally have been merged together into one values node, so the code can be simplified.
+     */
     private IQTree simplifyDistinctUnionValues(IQTree newChild, IQTreeCache treeCache) {
         // Retrieve size of Values Node, first child node is the Distinct node
         long totalValues = newChild.getChildren().get(0).getChildren().stream()
