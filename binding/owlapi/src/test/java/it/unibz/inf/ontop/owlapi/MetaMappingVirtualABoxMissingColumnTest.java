@@ -69,7 +69,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
     public ExpectedException expectedEx = ExpectedException.none();
 
 
-    @Test
+	@Test
 	public void testViEqSig() throws Exception {
 
         expectedEx.expect(IllegalConfigurationException.class);

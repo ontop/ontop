@@ -136,6 +136,7 @@
         <commons-collections4.version>4.2</commons-collections4.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
+        <commons-text.version>1.9</commons-text.version>
         <functionaljava.version>4.8.1</functionaljava.version>
         <gson.version>2.8.6</gson.version>
         <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
@@ -165,7 +166,7 @@
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.8.0</r2rml-api.version>
-        <rdf4j.version>4.0.0</rdf4j.version>
+        <rdf4j.version>4.0.2</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
@@ -758,6 +759,16 @@
                 <artifactId>rdf4j-config</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-model-vocabulary</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-model-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
 
             <!-- Spring Boot -->
             <dependency>
@@ -964,6 +975,14 @@
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
             </dependency>
+
+            <!-- Apache Commons Text -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
+            </dependency>
+
 
             <!-- Javax JSON Processing API (JSR 353) -->
             <dependency>
