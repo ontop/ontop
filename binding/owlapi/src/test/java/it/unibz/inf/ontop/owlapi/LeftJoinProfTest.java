@@ -1273,6 +1273,26 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
         checkReturnedValues(querySelect, "v", expectedValues);
     }
 
+    @Test
+    public void testUnionLimit1() throws Exception {
+
+        String querySelect = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT * WHERE {\n" +
+                "  {SELECT * {\n" +
+                "  ?sub rdfs:range ?v .\n" +
+                "  } LIMIT 2 } \n" +
+                "  UNION\n" +
+                "  {SELECT * {\n" +
+                "  ?sub rdfs:range ?v .\n" +
+                "  } LIMIT 1 } \n" +
+                "} " ;
+
+        ImmutableList<String> expectedValues = ImmutableList.of("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab>");
+        checkReturnedValues(querySelect, "v", expectedValues);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
