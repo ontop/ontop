@@ -1287,9 +1287,9 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "  } LIMIT 1 } \n" +
                 "} " ;
 
-        ImmutableList<String> expectedValues = ImmutableList.of("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab>");
+        ImmutableList<String> expectedValues = ImmutableList.of("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Course>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Course>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Course>");
         checkReturnedValues(querySelect, "v", expectedValues);
     }
 
