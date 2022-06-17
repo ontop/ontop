@@ -50,7 +50,7 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testSelfJoinElimination() throws Exception {
         String query = "PREFIX : <http://pub.example.org/>" +
                 "\n" +

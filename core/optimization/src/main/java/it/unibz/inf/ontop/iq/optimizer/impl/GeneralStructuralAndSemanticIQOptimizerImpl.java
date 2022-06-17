@@ -69,8 +69,11 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
             current = flattenLifter.optimize(current);
             LOGGER.debug("New query after flatten lift:\n{}\n", current);
 
-            current = bindingLiftOptimizer.optimize(current);
-            LOGGER.debug("New lifted query:\n{}\n", current);
+            current = current.normalizeForOptimization();
+            LOGGER.debug("New query after extra normalization:\n{}\n", current);
+
+//            current = bindingLiftOptimizer.optimize(current);
+//            LOGGER.debug("New lifted query:\n{}\n", current);
 
 
         } while (true);

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -36,6 +37,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
     private final DBTermType flattenedType;
+    private final FlattenNormalizer normalizer;
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
@@ -44,12 +46,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                             @Assisted DBTermType flattenedType,
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
-                            TermFactory termFactory) {
+                            TermFactory termFactory,
+                            FlattenNormalizer normalizer) {
         super(substitutionFactory, termFactory, iqFactory);
         this.outputVariable = outputVariable;
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
         this.flattenedType = flattenedType;
+        this.normalizer = normalizer;
     }
 
     @Override
@@ -109,12 +113,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                         .filter(v -> v != flattenedVariable),
                 getLocallyDefinedVariables().stream()
         ).collect(ImmutableCollectors.toSet());
-//        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-//        childVariables.stream()
-//                .forEach(builder::add);
-//        builder.add(outputVariable);
-//        indexVariable.ifPresent(builder::add);
-//        return builder.build();
     }
 
     @Override
@@ -135,18 +133,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 "]";
     }
 
-
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of(flattenedVariable);
     }
 
-    /**
-     * TODO: see what is required here
-     */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        return iqFactory.createUnaryIQTree(this, child);
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     @Override
