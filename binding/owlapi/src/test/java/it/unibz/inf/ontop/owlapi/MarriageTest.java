@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -54,14 +55,13 @@ public class MarriageTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MarriageTest.class);
 
 	private static Connection CONNECTION;
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
 		CONNECTION = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 		executeFromFile(CONNECTION, CREATE_DB_FILE);
 
-		OntopOWLFactory owlFactory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(OBDA_FILE)
 				.ontologyFile(ONTOLOGY_FILE)
@@ -71,12 +71,12 @@ public class MarriageTest {
 				.enableTestMode()
 				.build();
 
-		REASONER = owlFactory.createReasoner(config);
+		REASONER = new SimpleOntopOWLEngine(config);
 	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		REASONER.dispose();
+		REASONER.close();
 		CONNECTION.close();
 	}
 

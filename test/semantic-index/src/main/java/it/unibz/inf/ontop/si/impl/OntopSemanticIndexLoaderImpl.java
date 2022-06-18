@@ -5,9 +5,13 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -40,7 +44,16 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
                 .jdbcDriver(repo.getJdbcDriver())
                 .keepPermanentDBConnection(true);
 
-        tbox.ifPresent(builder::ontology);
+        tbox.map(t -> {
+            try {
+                OutputStream out = new ByteArrayOutputStream();
+                t.getOWLOntologyManager().saveOntology(t, out);
+                return out.toString();
+            } catch (OWLOntologyStorageException e) {
+                throw new RuntimeException(e);
+            }
+        })
+        .ifPresent(o -> builder.ontologyReader(new StringReader(o)));
 
         this.configuration = builder.build();
     }

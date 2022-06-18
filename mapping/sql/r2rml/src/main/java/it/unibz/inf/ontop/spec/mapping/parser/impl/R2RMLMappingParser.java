@@ -10,8 +10,10 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.model.Namespace;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.*;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -53,7 +55,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         try (InputStream in = new FileInputStream(mappingFile)) {
             URL documentUrl = new URL("file://" + mappingFile);
             parser.parse(in, documentUrl.toString());
-            return parse(new RDF4J().asGraph(rdf4jGraph));
+            return parse(new RDF4J().asGraph(rdf4jGraph), extractPrefixes(rdf4jGraph));
         }
         catch (IOException e) {
             throw new MappingIOException(e);
@@ -73,7 +75,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         try (Reader r = reader) {
             // TODO: get the base IRI in a proper way
             parser.parse(r, "http://example.org/baseIRI/");
-            return parse(new RDF4J().asGraph(rdf4jGraph));
+            return parse(new RDF4J().asGraph(rdf4jGraph), extractPrefixes(rdf4jGraph));
         }
         catch (IOException e) {
             throw new MappingIOException(e);
@@ -83,15 +85,25 @@ public class R2RMLMappingParser implements SQLMappingParser {
         }
     }
 
+    private ImmutableMap<String, String> extractPrefixes(LinkedHashModel rdf4jGraph) {
+        return rdf4jGraph.getNamespaces().stream()
+                .collect(ImmutableCollectors.toMap(
+                        namespace -> namespace.getPrefix() + ":",
+                        Namespace::getName));
+    }
+
     @Override
     public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException {
+        return parse(mappingGraph, ImmutableMap.of());
+    }
+
+    protected SQLPPMapping parse(Graph mappingGraph, ImmutableMap<String, String> prefixes) throws InvalidMappingException {
         try {
             Collection<TriplesMap> tripleMaps = manager.importMappings(mappingGraph);
 
             ImmutableList<SQLPPTriplesMap> sourceMappings = transformer.convert(tripleMaps);
 
-            //TODO: try to extract prefixes from the R2RML mappings
-            PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+            PrefixManager prefixManager = specificationFactory.createPrefixManager(prefixes);
 
             return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, prefixManager);
         }

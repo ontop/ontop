@@ -4,10 +4,12 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -63,7 +65,7 @@ public class CanonicalURIOntowisTest {
 
 
     // Internal Modifiable State
-    OntopOWLReasoner reasoner ;
+    OntopOWLEngine reasoner;
 
     public CanonicalURIOntowisTest(String obdaFile){
         this.obdaFile = obdaFile;
@@ -255,7 +257,7 @@ public class CanonicalURIOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws Exception {
 		/*
 		 * Close connection and resources
 		 */
@@ -263,7 +265,7 @@ public class CanonicalURIOntowisTest {
         if (conn != null && !conn.isClosed()) {
             conn.close();
         }
-        this.reasoner.dispose();
+        this.reasoner.close();
     }
 
     private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
@@ -277,10 +279,7 @@ public class CanonicalURIOntowisTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         this.reasoner = reasoner;
 		/*

@@ -25,6 +25,7 @@ import java.sql.DriverManager;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,6 @@ public class MappingAnalyzerTest {
 	}
 
 	private void runTests(String obdaFileName) throws Exception {
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
@@ -70,7 +70,7 @@ public class MappingAnalyzerTest {
 				.enableTestMode()
 				.build();
 
-		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
+		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		reasoner.close();
 	}
 

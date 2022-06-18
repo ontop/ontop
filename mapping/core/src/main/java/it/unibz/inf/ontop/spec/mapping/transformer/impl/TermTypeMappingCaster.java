@@ -32,7 +32,6 @@ public class TermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final SingleTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
     private final DBTermType dBStringType;
@@ -43,7 +42,6 @@ public class TermTypeMappingCaster implements MappingCaster {
                                   SingleTermTypeExtractor typeExtractor) {
         this.functionSymbolFactory = functionSymbolFactory;
         this.iqFactory = coreSingletons.getIQFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.typeExtractor = typeExtractor;
         this.termFactory = coreSingletons.getTermFactory();
         this.dBStringType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();

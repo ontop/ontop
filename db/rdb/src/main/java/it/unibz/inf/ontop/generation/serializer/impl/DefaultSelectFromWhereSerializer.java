@@ -113,7 +113,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
-        private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
+        protected ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
             AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(
@@ -421,8 +421,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     // TODO: handle the special case of not-a-number!
                     return castFloatingConstant(constant.getValue(), dbType);
                 case INTEGER:
-                case BOOLEAN:
                     return constant.getValue();
+                case BOOLEAN:
+                    return serializeBooleanConstant(constant);
                 case DATE:
                 case DATETIME:
                     return serializeDatetimeConstant(constant.getValue(), dbType);
@@ -442,6 +443,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
             return serializeStringConstant(datetime);
+        }
+
+        protected String serializeBooleanConstant(DBConstant booleanConstant) {
+            return booleanConstant.getValue();
         }
     }
 }

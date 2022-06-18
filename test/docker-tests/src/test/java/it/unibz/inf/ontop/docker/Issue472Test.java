@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,7 +41,7 @@ public class Issue472Test {
     }
 
     @Test
-    public void test_load() throws Exception {
+    public void test_load() {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
@@ -48,7 +49,6 @@ public class Issue472Test {
                 .enableTestMode()
                 .build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        factory.createReasoner(config);
+        new SimpleOntopOWLEngine(config);
     }
 }

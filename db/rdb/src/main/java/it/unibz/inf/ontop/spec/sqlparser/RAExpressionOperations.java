@@ -43,6 +43,20 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                 aops.create(relation, variables));
     }
 
+    public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
+        return new RAExpression(
+                createExtensionalDataNodes(relation, variables),
+                ImmutableList.of(),
+                aops.create(aops.getAttributesMap(relation, variables)));
+    }
+
+    private ImmutableList<ExtensionalDataNode> createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
+        ImmutableMap<Integer, Variable> terms = IntStream.range(0, variables.size()).boxed()
+                .collect(ImmutableCollectors.toMap(Function.identity(), variables::get));
+
+        return ImmutableList.of(iqFactory.createExtensionalDataNode(relation, terms));
+    }
+
 
     /**
      * (relational expression) AS A
@@ -146,17 +160,4 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                 attributes);
     }
 
-    public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
-        return new RAExpression(
-                createExtensionalDataNodes(relation, variables),
-                ImmutableList.of(),
-                aops.create(aops.getAttributesMap(relation, variables)));
-    }
-
-    private ImmutableList<ExtensionalDataNode> createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
-        ImmutableMap<Integer, Variable> terms = IntStream.range(0, variables.size()).boxed()
-                .collect(ImmutableCollectors.toMap(Function.identity(), variables::get));
-
-        return ImmutableList.of(iqFactory.createExtensionalDataNode(relation, terms));
-    }
 }

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.*;
@@ -40,7 +41,7 @@ import java.util.Properties;
  */
 public class OWLConstructDescribeTest {
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private OWLConnection conn;
 	private OWLStatement st;
 	private static final String owlFile = "src/test/resources/describeConstruct.owl";
@@ -51,8 +52,7 @@ public class OWLConstructDescribeTest {
 		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "true");
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, properties)) {
-			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-			reasoner = factory.createReasoner(loader.getConfiguration());
+			reasoner = new SimpleOntopOWLEngine(loader.getConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
 		}
@@ -62,7 +62,7 @@ public class OWLConstructDescribeTest {
 	public void tearDown() throws Exception {
 		st.close();
 		conn.close();
-		reasoner.dispose();	
+		reasoner.close();
 	}
 	
 	@Test

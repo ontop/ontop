@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
@@ -15,29 +17,57 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 
-public abstract class FromItemParser<T> {
+public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
     protected final ExpressionParser expressionParser;
-    protected final QuotedIDFactory idfac;
     protected final TermFactory termFactory;
 
+    protected final QuotedIDFactory idfac;
     private final MetadataLookup metadata;
 
-    protected final RAOperations<T> operations;
+    protected final O operations;
 
     private int relationIndex = 0;
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected abstract T translateSelectBody(SelectBody selectBody);
-
-    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata, TermFactory termFactory, RAOperations<T> operations) {
-        this.expressionParser = expressionParser;
-        this.idfac = idfac;
+    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, O operations) {
+        this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
+        this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;
-        this.termFactory = termFactory;
+        this.termFactory = coreSingletons.getTermFactory();
         this.operations = operations;
     }
+
+
+    protected abstract T translateSelect(SelectBody selectBody, List<WithItem> withItemsList);
+
+    /**
+     *
+     * @param selectBody
+     * @return
+     * @throws UnsupportedSelectQueryRuntimeException
+     * @throws InvalidSelectQueryRuntimeException
+     */
+
+    protected PlainSelect getPlainSelect(SelectBody selectBody) {
+        // other subclasses of SelectBody are
+        //      SelectOperationList (INTERSECT, EXCEPT, MINUS, UNION),
+        //      ValuesStatement (VALUES)
+        //      WithItem ([RECURSIVE]...)
+
+        if (!(selectBody instanceof PlainSelect))
+            throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
+
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+
+        if (plainSelect.getIntoTables() != null)
+            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
+
+        return plainSelect;
+    }
+
+
 
     /**
      * main method for analysing FROM clauses
@@ -66,10 +96,10 @@ public abstract class FromItemParser<T> {
     /**
      * can be overridden to add additional checks
      *
-     * @param left
-     * @param join
-     * @return
-     * @throws IllegalJoinException
+     * @param left expression
+     * @param join JSQLParser's Join
+     * @return resulting expression
+     * @throws IllegalJoinException if incorrect combination of modifiers is used
      */
     protected T join(T left, Join join) throws IllegalJoinException {
 
@@ -83,7 +113,7 @@ public abstract class FromItemParser<T> {
             | CROSS
             | OUTER ]
           (   JOIN
-            | "," (OUTER)?
+            | simple "," (OUTER)?
             | STRAIGHT_JOIN
             | APPLY )
          */
@@ -97,7 +127,7 @@ public abstract class FromItemParser<T> {
             // a table-valued function that takes column values from the left_table_source as one of its arguments.
             if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi()
                     || join.isInner() || join.isNatural()
-                    || join.getOnExpression() != null || join.getUsingColumns() != null)
+                    || !join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("Invalid APPLY join", join);
 
             if (!join.isCross() && !join.isOuter())
@@ -113,35 +143,44 @@ public abstract class FromItemParser<T> {
             if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
                     || join.isInner() || join.isNatural() || join.isCross())
                 throw new InvalidSelectQueryRuntimeException("Invalid STRAIGHT_JOIN", join);
+
+            // covered below
         }
 
         if (join.isSimple()) {
-            // JSQLParser apparently allows weird combinations like SELECT * FROM P LEFT, Q
-            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
-                    || join.isInner() || join.isNatural() || join.isCross())
+            // JSQLParser apparently allows weird combinations like SELECT * FROM P, LEFT Q
+            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi()
+                    || join.isInner() || join.isNatural() || join.isCross()
+                    || !join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
 
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
-                throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
+            // but FROM P, OUTER Q is supported by Informix
+            // https://www.oninit.com/manual/informix/100/sqlt/sqltmst104.htm
+            // SELECT c.customer_num, c.lname, c.company,
+            //     c.phone, u.call_dtime, u.call_descr
+            //   FROM customer c, OUTER cust_calls u
+            //   WHERE c.customer_num = u.customer_num
+            if (join.isOuter())
+                throw new UnsupportedSelectQueryRuntimeException("Simple OUTER join is not supported", join);
 
             return operations.crossJoin(left, right);
         }
         else if (join.isCross()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
 
             return operations.crossJoin(left, right);
         }
         else if (join.isNatural()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
 
             return operations.naturalJoin(left, right);
         }
         else {
             // also covers STRAIGHT_JOIN
-            if (join.getOnExpression() != null) {
-                if (join.getUsingColumns() !=null)
+            if (!join.getOnExpressions().isEmpty()) {
+                if (!join.getUsingColumns().isEmpty())
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 if (join.isSemi()) {
@@ -152,24 +191,41 @@ public abstract class FromItemParser<T> {
                 }
 
                 return operations.joinOn(left, right,
-                        (attributes -> expressionParser.parseBooleanExpression(
-                                join.getOnExpression(), attributes)));
+                        attributes -> join.getOnExpressions().stream()
+                                .flatMap(exp -> expressionParser.parseBooleanExpression(exp, attributes).stream())
+                                .collect(ImmutableCollectors.toList()));
             }
-            else if (join.getUsingColumns() != null) {
+            else if (!join.getUsingColumns().isEmpty()) {
                 if (join.isSemi())
                     throw new InvalidSelectQueryRuntimeException("Invalid SEMI JOIN", join);
 
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
-                return operations.joinUsing(left, right,
-                        join.getUsingColumns().stream()
-                                .map(p -> idfac.createAttributeID(p.getColumnName()))
-                                .collect(ImmutableCollectors.toSet()));
+                ImmutableSet<QuotedID> using = join.getUsingColumns().stream()
+                        .map(p -> idfac.createAttributeID(p.getColumnName()))
+                        .collect(ImmutableCollectors.toSet());
+
+                if (join.isLeft())
+                    return leftJoinUsing(left, right, using, join);
+                if (join.isRight())
+                    return leftJoinUsing(right, left, using, join);
+                if (join.isFull())
+                    return fullJoinUsing(right, left, using, join);
+
+                return operations.joinUsing(left, right, using);
             }
             else
                 throw new InvalidSelectQueryRuntimeException("[INNER|OUTER] JOIN requires either ON or USING", join);
         }
+    }
+
+    protected T leftJoinUsing(T left, T right, ImmutableSet<QuotedID> using, Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("[LEFT|RIGHT] OUTER join is not supported", join);
+    }
+
+    protected T fullJoinUsing(T left, T right, ImmutableSet<QuotedID> using, Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
     }
 
     public ImmutableList<Variable> createAttributeVariables(RelationDefinition relation) {
@@ -216,13 +272,10 @@ public abstract class FromItemParser<T> {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
-            if (subSelect.getWithItemsList() != null)
-                throw new UnsupportedSelectQueryRuntimeException("WITH is not supported", subSelect);
-
             if (subSelect.getPivot() != null || subSelect.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subSelect);
 
-            T rae = translateSelectBody(subSelect.getSelectBody());
+            T rae = translateSelect(subSelect.getSelectBody(), subSelect.getWithItemsList());
             result = alias(rae, subSelect.getAlias());
         }
 

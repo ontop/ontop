@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
@@ -67,20 +68,19 @@ public class R2rmlCheckerTest {
 	private final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 	private ClassifiedTBox onto;
-	private OntopOWLReasoner reasonerOBDA;
-	private OntopOWLReasoner reasonerR2rml;
+	private OntopOWLEngine reasonerOBDA;
+	private OntopOWLEngine reasonerR2rml;
 
     @Before
 	public void setUp() throws Exception {
 		log.info("Loading obda file");
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerOBDA = factory.createReasoner(config);
+		reasonerOBDA = new SimpleOntopOWLEngine(config);
 
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
@@ -90,22 +90,21 @@ public class R2rmlCheckerTest {
 
 
 		log.info("Loading r2rml file");
-		OntopOWLFactory factory1 = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config1 = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerR2rml = factory1.createReasoner(config1);
+		reasonerR2rml = new SimpleOntopOWLEngine(config1);
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		if (reasonerOBDA != null)
-			reasonerOBDA.dispose();
+			reasonerOBDA.close();
 		if (reasonerR2rml != null)
-			reasonerR2rml.dispose();
+			reasonerR2rml.close();
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects

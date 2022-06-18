@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -21,7 +21,7 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     private static final String obdafile = "/mssql/sparqlBindSqlServer.obda";
     private static final String propertiesfile = "/mssql/sparqlBindSqlServer.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsSqlServerTest() throws OWLOntologyCreationException {
@@ -31,9 +31,9 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override

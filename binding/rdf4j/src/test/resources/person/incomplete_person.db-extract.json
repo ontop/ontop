@@ -1,0 +1,73 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_S",
+      "determinants" : [ "\"status\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"status_id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"description\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    } ],
+    "name" : ["\"statuses\""]
+  },
+    {
+      "uniqueConstraints" : [ {
+        "name" : "CONSTRAINT_D",
+        "determinants" : [ "\"id\"" ],
+        "isPrimaryKey" : true
+      } ],
+      "otherFunctionalDependencies" : [ ],
+      "foreignKeys" : [ ],
+      "columns" : [ {
+        "name" : "\"id\"",
+        "datatype" : "INTEGER",
+        "isNullable" : false
+      }],
+      "name" : ["\"entity\""]
+    },
+    {
+      "uniqueConstraints" : [ {
+        "name" : "CONSTRAINT_CNAME",
+        "determinants" : [ "\"name\"" ],
+        "isPrimaryKey" : true
+      },
+        {
+          "name" : "CONSTRAINT_ACRO",
+          "determinants" : [ "\"acronym\"" ],
+          "isPrimaryKey" : false
+        }],
+      "otherFunctionalDependencies" : [ ],
+      "foreignKeys" : [ ],
+      "columns" : [ {
+        "name" : "\"name\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }, {
+        "name" : "\"acronym\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }, {
+        "name" : "\"continent\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }],
+      "name" : ["\"country\""]
+    }
+  ],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\"",
+    "extractionTime" : "2020-11-12T17:24:30"
+  }
+}
