@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FlattenLifterImpl implements FlattenLifter {
+public class BasicFlattenLifter implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
 
 
     @Inject
-    private FlattenLifterImpl(IntermediateQueryFactory iqFactory) {
+    private BasicFlattenLifter(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
