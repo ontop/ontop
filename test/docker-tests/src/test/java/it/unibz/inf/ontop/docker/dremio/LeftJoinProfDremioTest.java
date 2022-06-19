@@ -3,7 +3,8 @@ package it.unibz.inf.ontop.docker.dremio;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.docker.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
@@ -29,7 +30,7 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     private static final String propertyFileName = "/dremio/redundant_join/redundant_join_fk_test.properties";
     private static final String constraintFileName = "/dremio/redundant_join/keys.lst";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -44,9 +45,9 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override

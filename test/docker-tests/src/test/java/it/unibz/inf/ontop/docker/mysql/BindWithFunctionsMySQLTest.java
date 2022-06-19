@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -23,7 +23,7 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
     private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsMySQLTest() throws OWLOntologyCreationException {
@@ -33,9 +33,9 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
     
 

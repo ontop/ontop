@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
@@ -20,7 +22,7 @@ import java.nio.file.Paths;
 
 public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualModeTest {
 
-    protected static OntopOWLReasoner REASONER;
+    protected static OntopOWLEngine REASONER;
     protected static OntopOWLConnection CONNECTION;
 
     protected static final String owlFile = "/distinctInAggregates/university.ttl";
@@ -32,19 +34,18 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     protected static final String groupConcatDistinctQueryFile = "/distinctInAggregates/groupConcatDistinct.rq";
 
 
-    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        return factory.createReasoner(config);
+        return new SimpleOntopOWLEngine(config);
     }
 
     @Override
@@ -53,9 +54,9 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Test

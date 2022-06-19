@@ -48,15 +48,6 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 	}
 
 	@Override
-	public int getFetchSize() throws OWLException {
-		try {
-			return res.getFetchSize();
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
     public void close() throws OWLException {
 		try {
 			res.close();

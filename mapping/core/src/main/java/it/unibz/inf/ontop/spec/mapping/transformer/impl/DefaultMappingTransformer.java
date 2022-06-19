@@ -35,7 +35,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final SpecificationFactory specificationFactory;
     private final RDF rdfFactory;
 
-    private MappingDistinctTransformer mappingDistinctTransformer;
+    private final MappingDistinctTransformer mappingDistinctTransformer;
     private final TermFactory termFactory;
 
     @Inject

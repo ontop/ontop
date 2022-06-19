@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -24,7 +24,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/oracle/bindTest/sparqlBindOracle.obda";
     private static final String propertiesfile = "/oracle/oracle.properties";
     
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsOracleTest() throws OWLOntologyCreationException {
@@ -34,9 +34,9 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override

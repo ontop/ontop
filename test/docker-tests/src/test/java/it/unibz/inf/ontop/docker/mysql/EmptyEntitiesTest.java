@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
@@ -66,7 +67,7 @@ public class EmptyEntitiesTest {
 	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
 	private Set<Description> emptyProperties = new HashSet<>();
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private ClassifiedTBox onto;
 
 	@Before
@@ -78,14 +79,13 @@ public class EmptyEntitiesTest {
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileName)
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+        reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
@@ -97,7 +97,7 @@ public class EmptyEntitiesTest {
 	@After
 	public void tearDown() throws Exception {
 //			dropTables();
-			reasoner.dispose();
+			reasoner.close();
 //			connection.close();
 	}
 

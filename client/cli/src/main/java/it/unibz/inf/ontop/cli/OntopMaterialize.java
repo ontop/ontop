@@ -117,30 +117,19 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         RDF4JMaterializer materializer;
         try {
-            OWLOntology ontology = loadOntology();
-            OntopSQLOWLAPIConfiguration materializerConfiguration = createAndInitConfigurationBuilder()
-                    .ontology(ontology)
-                    .build();
+            Builder<? extends Builder<?>> configurationBuilder = createAndInitConfigurationBuilder();
+            if (owlFile != null)
+                configurationBuilder.ontologyFile(owlFile);
+
             materializer = RDF4JMaterializer.defaultMaterializer(
-                    materializerConfiguration,
+                    configurationBuilder.build(),
                     MaterializationParams.defaultBuilder()
                             .build()
             );
-        } catch (OBDASpecificationException | OWLOntologyCreationException e) {
+        } catch (OBDASpecificationException e) {
             throw new RuntimeException(e);
         }
         return materializer;
-    }
-
-    private OWLOntology loadOntology() throws OWLOntologyCreationException {
-        if (owlFile != null) {
-            OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(owlFile));
-            if (disableReasoning) {
-                return extractDeclarations(ontology.getOWLOntologyManager(), ontology);
-            }
-            return ontology;
-        }
-        return OWLManager.createOWLOntologyManager().createOntology();
     }
 
     private void runWithSingleFile(RDF4JMaterializer materializer, OutputSpec outputSpec) {

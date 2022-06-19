@@ -8,6 +8,7 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -86,7 +87,6 @@ public class LeftJoinMultipleMatchingTest {
     private void executeSelectQuery(String query) throws Exception {
 
         // Creating a new instance of the reasoner
-    	OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
@@ -95,10 +95,10 @@ public class LeftJoinMultipleMatchingTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
-        try (OWLConnection conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement()) {
+        try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+                OWLConnection conn = reasoner.getConnection();
+                OWLStatement st = conn.createStatement()) {
 
             log.debug("Executing query: ");
             log.debug("Query: \n{}", query);
@@ -115,9 +115,6 @@ public class LeftJoinMultipleMatchingTest {
             log.debug("Total result: {}", count);
             assertEquals(2, count);
             log.debug("Elapsed time: {} ms", (end - start) / 1_000_000);
-        }
-        finally {
-            reasoner.dispose();
         }
     }
 }

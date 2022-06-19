@@ -1,22 +1,18 @@
 package it.unibz.inf.ontop.docker.postgres.nested;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertTrue;
 
 public class PubJsonTest extends AbstractVirtualModeTest {
 
@@ -29,13 +25,13 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     final static String viewFile = "/pgsql/nested/pub/pub_lenses.json";
 //    final static String viewFile = "/pgsql/nested/pub/er/pub_lenses_er.json";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine ENGINE;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
-        CONNECTION = REASONER.getConnection();
+        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
+        CONNECTION = ENGINE.getConnection();
     }
 
     @Override
@@ -44,9 +40,9 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        ENGINE.close();
     }
 
     @Test

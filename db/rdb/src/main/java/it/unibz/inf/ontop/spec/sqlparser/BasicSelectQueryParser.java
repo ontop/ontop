@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -201,14 +202,30 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
-                return operations.joinUsing(left, right,
-                        join.getUsingColumns().stream()
-                                .map(p -> idfac.createAttributeID(p.getColumnName()))
-                                .collect(ImmutableCollectors.toSet()));
+                ImmutableSet<QuotedID> using = join.getUsingColumns().stream()
+                        .map(p -> idfac.createAttributeID(p.getColumnName()))
+                        .collect(ImmutableCollectors.toSet());
+
+                if (join.isLeft())
+                    return leftJoinUsing(left, right, using, join);
+                if (join.isRight())
+                    return leftJoinUsing(right, left, using, join);
+                if (join.isFull())
+                    return fullJoinUsing(right, left, using, join);
+
+                return operations.joinUsing(left, right, using);
             }
             else
                 throw new InvalidSelectQueryRuntimeException("[INNER|OUTER] JOIN requires either ON or USING", join);
         }
+    }
+
+    protected T leftJoinUsing(T left, T right, ImmutableSet<QuotedID> using, Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("[LEFT|RIGHT] OUTER join is not supported", join);
+    }
+
+    protected T fullJoinUsing(T left, T right, ImmutableSet<QuotedID> using, Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
     }
 
     public ImmutableList<Variable> createAttributeVariables(RelationDefinition relation) {
