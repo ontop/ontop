@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.BasicFlattenLifter;
+import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BasicFlattenLifterImpl implements BasicFlattenLifter {
+public class FlattenLifterImpl implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
 
 
     @Inject
-    private BasicFlattenLifterImpl(IntermediateQueryFactory iqFactory) {
+    private FlattenLifterImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
