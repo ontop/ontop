@@ -673,7 +673,12 @@ public class ExpressionParser {
 
         private ImmutableExpression getExpression(Expression expression) {
             ImmutableTerm term = getTerm(expression);
-            return (ImmutableExpression)term;
+            if (term instanceof ImmutableExpression)
+                return (ImmutableExpression)term;
+            if (term instanceof NonFunctionalTerm)
+                return termFactory.getIsTrue((NonFunctionalTerm) term);
+            throw new UnsupportedSelectQueryRuntimeException(
+                    "Non-boolean functional terms are not supported as conditions", expression);
         }
 
         @Override
