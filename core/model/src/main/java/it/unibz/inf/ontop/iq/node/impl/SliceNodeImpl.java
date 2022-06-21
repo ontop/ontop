@@ -159,14 +159,22 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         if ((newChildRoot instanceof UnionNode)
                 && calculateMaxTotalValues(newChild) >= limit)
             return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild);
-             // TODO: create another comment and implement the solution to the comment (not inline with implementation)
-            // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+            // Scenario: SLICE DISTINCT UNION [VALUES ...] -> VALUES if VALUES is distinct
         if ((newChildRoot instanceof DistinctNode)
                 && newChild.getChildren().size() == 1
                 && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
                 && newChild.getChildren().get(0).getChildren().stream().anyMatch(c -> c instanceof ValuesNode)
                 && newChild.getChildren().get(0).getChildren().stream().filter(c -> c instanceof ValuesNode).anyMatch(IQTree::isDistinct)) {
             return simplifyDistinctUnionValues(newChild, treeCache);
+        }
+            // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+        if ((newChildRoot instanceof DistinctNode)
+                && newChild.getChildren().size() == 1
+                && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
+                && newChild.getChildren().get(0).getChildren().stream().allMatch(IQTree::isDistinct)) {
+            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(offset, limit),
+                    iqFactory.createNaryIQTree((UnionNode) newChild.getChildren().get(0).getRootNode(), newChild.getChildren()));
+            //return simplifyLimitDistinctUnion(newChild, treeCache);
         }
         return iqFactory.createUnaryIQTree(this, newChild,
                 hasChildChanged.get()
@@ -307,6 +315,32 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(IQTree::getRootNode)
                 .map(v -> (ValuesNode) v)
                 .findFirst().get();
+
+        // If total values is higher than limit, get only Values Node
+        // Otherwise do nothing due to the distinct in the pattern, we cannot know if non-values nodes are distinct or not
+        // Offset = 0
+        return totalValues >= limit
+                ? iqFactory.createValuesNode(vNode.getOrderedVariables(), vNode.getValues().subList(0, limit.intValue()))
+                : iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+    }
+
+    // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
+    private IQTree simplifyLimitDistinctUnion(IQTree newChild, IQTreeCache treeCache) {
+        // Retrieve size of Values Node, first child node is the Distinct node
+        long totalValues = newChild.getChildren().get(0).getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(c -> (ValuesNode) c)
+                .map(ValuesNode::getValues)
+                .mapToLong(Collection::size)
+                .sum();
+
+        ValuesNode vNode = newChild.getChildren().get(0).getChildren().stream()
+                .filter(c -> c instanceof ValuesNode)
+                .map(IQTree::getRootNode)
+                .map(v -> (ValuesNode) v)
+                .findFirst().get();
+
+
 
         // If total values is higher than limit, get only Values Node
         // Otherwise do nothing due to the distinct in the pattern, we cannot know if non-values nodes are distinct or not
