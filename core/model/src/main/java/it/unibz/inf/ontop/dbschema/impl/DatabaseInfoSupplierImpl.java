@@ -24,9 +24,10 @@ public class DatabaseInfoSupplierImpl implements DatabaseInfoSupplier {
 
     @Override
     public synchronized void setDatabaseVersion(String version) throws IllegalStateException {
+        // No strict requirement to re-set the database version more than once
+        // In settings such as incomplete serialized metadata (when metadata is extracted on-demand by an external
+        // program) the database version setter may be called twice.
         if (this.dbVersion == null)
             this.dbVersion = version;
-        else
-            throw new IllegalStateException("The database version can only be set once");
     }
 }
