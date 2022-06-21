@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
@@ -16,6 +17,8 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
@@ -190,10 +193,19 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
                     return left;
                 }
 
-                return operations.joinOn(left, right,
+                Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression =
                         attributes -> join.getOnExpressions().stream()
                                 .flatMap(exp -> expressionParser.parseBooleanExpression(exp, attributes).stream())
-                                .collect(ImmutableCollectors.toList()));
+                                .collect(ImmutableCollectors.toList());
+
+                if (join.isLeft())
+                    return leftJoinOn(left, right, getAtomOnExpression, join);
+                if (join.isRight())
+                    return leftJoinOn(right, left, getAtomOnExpression, join);
+                if (join.isFull())
+                    return fullJoinOn(right, left, getAtomOnExpression, join);
+
+                return operations.joinOn(left, right, getAtomOnExpression);
             }
             else if (!join.getUsingColumns().isEmpty()) {
                 if (join.isSemi())
@@ -225,6 +237,18 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
     }
 
     protected T fullJoinUsing(T left, T right, ImmutableSet<QuotedID> using, Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
+    }
+
+    protected T leftJoinOn(T left, T right,
+                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Join join) {
+        throw new UnsupportedSelectQueryRuntimeException("[LEFT|RIGHT] OUTER join is not supported", join);
+    }
+
+    protected T fullJoinOn(T left, T right,
+                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Join join) {
         throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
     }
 
