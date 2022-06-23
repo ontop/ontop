@@ -43,10 +43,10 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
 public class ExpressionParser {
 
-    private final QuotedIDFactory idfac;
-    private final TermFactory termFactory;
-    private final DBTypeFactory dbTypeFactory;
-    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+    protected final QuotedIDFactory idfac;
+    protected final TermFactory termFactory;
+    protected final DBTypeFactory dbTypeFactory;
+    protected final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     public ExpressionParser(QuotedIDFactory idfac, CoreSingletons coreSingletons) {
         this.idfac = idfac;
@@ -80,11 +80,11 @@ public class ExpressionParser {
             .put("RAND", this::getRAND) // to make it deterministic
             .put("CONVERT", this::getCONVERT)
             // Aggregate functions
-            .put("COUNT", this::reject)
-            .put("MIN", this::reject)
-            .put("MAX", this::reject)
-            .put("SUM", this::reject)
-            .put("AVG", this::reject)
+            .put("COUNT", this::getCount)
+            .put("MIN", this::getMin)
+            .put("MAX", this::getMax)
+            .put("SUM", this::getSum)
+            .put("AVG", this::getAvg)
             // Array functions (PostgreSQL) change cardinality
             .put("UNNEST", this::reject)
             .put("JSON_EACH", this::reject)
@@ -94,7 +94,7 @@ public class ExpressionParser {
             .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
 
-    private ImmutableFunctionalTerm getGenericDBFunction(Function expression, TermVisitor termVisitor) {
+    protected ImmutableFunctionalTerm getGenericDBFunction(Function expression, TermVisitor termVisitor) {
         if (expression.isDistinct())
             throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function: DISTINCT", expression);
 
@@ -154,7 +154,27 @@ public class ExpressionParser {
         return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
     }
 
-    private ImmutableFunctionalTerm reject(Function expression, TermVisitor termVisitor) {
+    protected ImmutableFunctionalTerm getCount(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getSum(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getAvg(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getMin(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getMax(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm reject(Function expression, TermVisitor termVisitor) {
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
