@@ -192,7 +192,7 @@ public class ExpressionParser {
      *                  the input cannot be converted into a CQ and needs to be wrapped
      *
      */
-    private class TermVisitor implements ExpressionVisitor {
+    protected class TermVisitor implements ExpressionVisitor {
 
         private final RAExpressionAttributes attributes;
 
