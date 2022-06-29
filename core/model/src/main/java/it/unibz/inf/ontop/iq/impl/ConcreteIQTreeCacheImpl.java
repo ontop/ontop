@@ -234,4 +234,10 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 newVariableNullability, newVariables, newNotInternallyRequiredVariables, newPossibleDefinitions,
                 newUniqueConstraints, isDistinct);
     }
+
+    @Override
+    public IQTreeCache createFreshCache(boolean isNormalizedForOptimization) {
+        return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, false,
+                null, null, null, null, null, null);
+    }
 }

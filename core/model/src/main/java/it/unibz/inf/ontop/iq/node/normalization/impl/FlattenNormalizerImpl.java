@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -24,8 +23,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                  SubstitutionFactory substitutionFactory) {
+    private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
     }
@@ -42,34 +40,51 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                     flattenNode.getFlattenedVariable()
             );
 
-            IQTree grandChild = normalizedChild.getChildren().get(0);
+            IQTreeCache rootTreeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+
+            // if nothing can be lifted
+            if(splitSub.get(false).isEmpty()){
+                return iqFactory.createUnaryIQTree(
+                        flattenNode,
+                        normalizedChild,
+                        rootTreeCache
+                );
+            }
+
             ConstructionNode newParent = getParent(flattenNode, cn, splitSub.get(false));
-            IQTree flattenTree = getFlattenTree(flattenNode, splitSub.get(true), newParent, grandChild);
+
+            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParent, normalizedChild.getChildren().get(0), treeCache);
+
             return iqFactory.createUnaryIQTree(
                     newParent,
-                    flattenTree
+                    iqFactory.createUnaryIQTree(
+                            flattenNode,
+                            updatedChild,
+                            treeCache.createFreshCache(true)
+                    ),
+                    rootTreeCache
             );
         }
+
         return iqFactory.createUnaryIQTree(
                 flattenNode,
-                child
+                normalizedChild,
+                treeCache.declareAsNormalizedForOptimizationWithoutEffect()
         );
     }
 
-    private IQTree getFlattenTree(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild) {
-        return iqFactory.createUnaryIQTree(
-                fn,
-                flattenedVarDef.isEmpty() ?
-                        grandChild :
-                        iqFactory.createUnaryIQTree(
-                                getChildCn(
-                                        flattenedVarDef,
-                                        parentCn,
-                                        fn
-                                ),
-                                grandChild
-                        ));
-
+    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, IQTreeCache treeCache) {
+            return flattenedVarDef.isEmpty() ?
+                    grandChild:
+                    iqFactory.createUnaryIQTree(
+                            getChildCn(
+                                    flattenedVarDef,
+                                    parentCn,
+                                    fn
+                            ),
+                            grandChild,
+                            treeCache.createFreshCache(true)
+                    );
     }
 
     private ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
@@ -79,10 +94,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         ImmutableCollectors.toMap(
                                 ImmutableMap.Entry::getKey,
                                 ImmutableMap.Entry::getValue
-                        ))
-        )
-                ;
-
+                        )));
     }
 
     /**
