@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
@@ -112,9 +114,10 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
      *    (V \ {f}) union {o}
      */
     private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
+
         return iqFactory.createConstructionNode(
                 Stream.concat(
-                        Stream.of(fn.getOutputVariable()),
+                        fn.getLocallyDefinedVariables().stream(),
                         cn.getVariables().stream()
                                 .filter(v -> !v.equals(fn.getFlattenedVariable()))
                 ).collect(ImmutableCollectors.toSet()),
