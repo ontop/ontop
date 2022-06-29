@@ -32,25 +32,25 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     @Override
     public IQTree normalizeForOptimization(FlattenNode flattenNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode newChildRoot = normalizedChild.getRootNode();
+        QueryNode newChildNode = normalizedChild.getRootNode();
 
-        if (newChildRoot instanceof ConstructionNode) {
-            ConstructionNode cn = (ConstructionNode) newChildRoot;
+        // Among the trees that are created, the outermost (aka output) tree is declared as normalized.
+        // The other ones (if any) are normalized immediately after they are created.
+        IQTreeCache outputTreeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+
+        if (newChildNode instanceof ConstructionNode) {
+            ConstructionNode cn = (ConstructionNode) newChildNode;
             ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
                     cn,
                     flattenNode.getFlattenedVariable()
             );
 
-            // Among the trees that are created, only the outermost tree is declared as normalized.
-            // The other ones (if any) must be normalized immediately after they are created.
-            IQTreeCache rootTreeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
-
-            // if nothing can be lifted
+            // Nothing can be lifted, declare the new tree normalized
             if(splitSub.get(false).isEmpty()){
                 return iqFactory.createUnaryIQTree(
                         flattenNode,
                         normalizedChild,
-                        rootTreeCache
+                        outputTreeCache
                 );
             }
 
@@ -64,14 +64,15 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                             flattenNode,
                             updatedChild
                     ).normalizeForOptimization(variableGenerator),
-                    rootTreeCache
+                    outputTreeCache
             );
         }
 
+        // Nothing can be lifted, declare the new tree normalized
         return iqFactory.createUnaryIQTree(
                 flattenNode,
                 normalizedChild,
-                treeCache.declareAsNormalizedForOptimizationWithoutEffect()
+                outputTreeCache
         );
     }
 
