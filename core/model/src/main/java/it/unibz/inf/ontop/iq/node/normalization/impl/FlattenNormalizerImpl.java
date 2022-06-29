@@ -41,6 +41,8 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                     flattenNode.getFlattenedVariable()
             );
 
+            // Among the trees that are created, only the outermost tree is declared as normalized.
+            // The other ones (if any) must be normalized immediately after they are created.
             IQTreeCache rootTreeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
 
             // if nothing can be lifted
@@ -52,16 +54,16 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                 );
             }
 
-            ConstructionNode newParent = getParent(flattenNode, cn, splitSub.get(false));
+            ConstructionNode newParentCn = getParent(flattenNode, cn, splitSub.get(false));
 
-            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParent, normalizedChild.getChildren().get(0));
+            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParentCn, normalizedChild.getChildren().get(0), variableGenerator);
 
             return iqFactory.createUnaryIQTree(
-                    newParent,
+                    newParentCn,
                     iqFactory.createUnaryIQTree(
                             flattenNode,
                             updatedChild
-                    ),
+                    ).normalizeForOptimization(variableGenerator),
                     rootTreeCache
             );
         }
@@ -73,7 +75,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
         );
     }
 
-    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild) {
+    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, VariableGenerator variableGenerator) {
             return flattenedVarDef.isEmpty() ?
                     grandChild:
                     iqFactory.createUnaryIQTree(
@@ -83,7 +85,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                                     fn
                             ),
                             grandChild
-                    );
+                    ).normalizeForOptimization(variableGenerator);
     }
 
     private ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
