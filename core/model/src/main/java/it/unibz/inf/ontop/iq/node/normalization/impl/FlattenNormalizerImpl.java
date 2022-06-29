@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
@@ -33,10 +32,10 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     @Override
     public IQTree normalizeForOptimization(FlattenNode flattenNode, IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode childRoot = normalizedChild.getRootNode();
+        QueryNode newChildRoot = normalizedChild.getRootNode();
 
-        if (childRoot instanceof ConstructionNode) {
-            ConstructionNode cn = (ConstructionNode) childRoot;
+        if (newChildRoot instanceof ConstructionNode) {
+            ConstructionNode cn = (ConstructionNode) newChildRoot;
             ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
                     cn,
                     flattenNode.getFlattenedVariable()
@@ -55,14 +54,13 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
 
             ConstructionNode newParent = getParent(flattenNode, cn, splitSub.get(false));
 
-            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParent, normalizedChild.getChildren().get(0), treeCache);
+            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParent, normalizedChild.getChildren().get(0));
 
             return iqFactory.createUnaryIQTree(
                     newParent,
                     iqFactory.createUnaryIQTree(
                             flattenNode,
-                            updatedChild,
-                            treeCache.createFreshCache(true)
+                            updatedChild
                     ),
                     rootTreeCache
             );
@@ -75,7 +73,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
         );
     }
 
-    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, IQTreeCache treeCache) {
+    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild) {
             return flattenedVarDef.isEmpty() ?
                     grandChild:
                     iqFactory.createUnaryIQTree(
@@ -84,8 +82,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                                     parentCn,
                                     fn
                             ),
-                            grandChild,
-                            treeCache.createFreshCache(true)
+                            grandChild
                     );
     }
 
@@ -127,12 +124,13 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
 
     private ConstructionNode getChildCn(ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn,
                                         FlattenNode fn) {
+        ImmutableSet<Variable> fnDefinedVars = fn.getLocallyDefinedVariables();
         return iqFactory.createConstructionNode(
                 Stream.concat(
                         Stream.of(fn.getFlattenedVariable()),
                         parentCn.getLocallyRequiredVariables().stream()
-                                .filter(v -> !v.equals(fn.getOutputVariable())))
-                        .collect(ImmutableCollectors.toSet()),
+                                .filter(v -> !fnDefinedVars.contains(v))
+                ).collect(ImmutableCollectors.toSet()),
                 substitutionFactory.getSubstitution(flattenedVarDef)
         );
     }

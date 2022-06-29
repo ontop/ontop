@@ -32,9 +32,4 @@ public interface IQTreeCache {
     IQTreeCache declareDistinctRemoval(boolean noEffect);
 
     IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution);
-
-    /**
-     * TODO: make it static (requires Java >= 8)?
-     */
-    IQTreeCache createFreshCache(boolean isNormalizedForOptimization);
 }
