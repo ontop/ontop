@@ -965,6 +965,31 @@ public class ExpressionParserTest {
                 translation);
     }
 
+    @Test
+    public void boolean_column_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+                DB_FS_FACTORY.getIsTrue(),
+                v), translation.get(0));
+    }
+
+    @Test
+    public void not_boolean_column_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+                DB_FS_FACTORY.getDBNot(),
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getIsTrue(),
+                        v)),
+                translation.get(0));
+    }
+
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void subSelect_Test() throws JSQLParserException {
@@ -1438,7 +1463,6 @@ public class ExpressionParserTest {
         DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
         Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
     }
-
 
     private ImmutableTerm parseTerm(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
