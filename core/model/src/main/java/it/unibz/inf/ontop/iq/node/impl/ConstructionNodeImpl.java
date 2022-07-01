@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -31,7 +32,7 @@ import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -304,7 +305,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return false;
 
         VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
-        return functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator)
+        Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
+        return analysis
+                .map(FunctionalTermDecomposition::getLiftableTerm)
+                .filter(t -> t.getVariableStream()
+                        .collect(Collectors.toSet())
+                        .containsAll(childConstraint))
                 .isPresent();
     }
 
