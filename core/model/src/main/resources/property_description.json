@@ -35,6 +35,10 @@
     "type": "String",
     "description": "DEPRECATED. This value is ignored."
   },
+  "jdbc.fetchSize": {
+    "type": "Integer",
+    "description": "If more than 1, fetch the results by batches of the specified size. Otherwise, relies on the default configuration of the JDBC driver. Default value: 500 for query answering, 50000 for materialization."
+  },
   "ontop.queryOntologyAnnotation": {
     "type": "Boolean",
     "description": "Default value: `false`. If true, includes annotations about classes and properties in the virtual graph."
