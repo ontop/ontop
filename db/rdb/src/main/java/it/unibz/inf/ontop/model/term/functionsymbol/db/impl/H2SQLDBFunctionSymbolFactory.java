@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
@@ -25,11 +26,12 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     private static final String LISTAGG_STR = "LISTAGG";
 
     private static final String UNSUPPORTED_MSG = "Not supported by H2";
-;
+    private final DatabaseInfoSupplier databaseInfoSupplier;
 
     @Inject
-    private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
+    private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory, DatabaseInfoSupplier databaseInfoSupplier) {
         super(createH2RegularFunctionTable(typeFactory), typeFactory);
+        this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(

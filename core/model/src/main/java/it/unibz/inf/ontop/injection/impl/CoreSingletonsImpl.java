@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
@@ -35,6 +36,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
     private final NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
+    private final DatabaseInfoSupplier databaseInfoSupplier;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
@@ -46,7 +48,8 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
                                QueryTransformerFactory queryTransformerFactory,
-                               NotYetTypedEqualityTransformer notYetTypedEqualityTransformer) {
+                               NotYetTypedEqualityTransformer notYetTypedEqualityTransformer,
+                               DatabaseInfoSupplier databaseInfoSupplier) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -61,6 +64,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
         this.notYetTypedEqualityTransformer = notYetTypedEqualityTransformer;
+        this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
     @Override
@@ -131,5 +135,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public NotYetTypedEqualityTransformer getNotYetTypedEqualityTransformer() {
         return notYetTypedEqualityTransformer;
+    }
+
+    @Override
+    public DatabaseInfoSupplier getDatabaseInfoSupplier() {
+        return databaseInfoSupplier;
     }
 }
