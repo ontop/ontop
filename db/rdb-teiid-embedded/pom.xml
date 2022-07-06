@@ -121,4 +121,30 @@
 
      </dependencies>
 
+     <!-- JDBC driver configuration (draft)
+     <build>
+          <plugins>
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <executions>
+                         <execution>
+                              <phase>package</phase>
+                              <goals>
+                                   <goal>shade</goal>
+                              </goals>
+                              <configuration>
+                                   <finalName>ontop-teiid-jdbc-driver-${version}</finalName>
+                                   <shadedArtifactAttached>false</shadedArtifactAttached>
+                                   <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                   </transformers>
+                              </configuration>
+                         </execution>
+                    </executions>
+               </plugin>
+          </plugins>
+     </build>
+     -->
+
 </project>
