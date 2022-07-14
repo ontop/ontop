@@ -169,12 +169,21 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         }
             // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
         if ((newChildRoot instanceof DistinctNode)
+                // Applies only to LIMIT i.e. not SLICE with OFFSET
+                && offset == 0
                 && newChild.getChildren().size() == 1
                 && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
-                && newChild.getChildren().get(0).getChildren().stream().allMatch(IQTree::isDistinct)) {
+                // If any subtree Ti is distinct we proceed with the optimization
+                && newChild.getChildren().get(0).getChildren().stream().anyMatch(IQTree::isDistinct)) {
+            ImmutableList<IQTree> childTrees = newChild.getChildren().get(0).getChildren().stream()
+                    .map(c -> c.isDistinct()
+                            ? iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, limit), c)
+                            : c)
+                    .collect(ImmutableCollectors.toList());
             return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(offset, limit),
-                    iqFactory.createNaryIQTree((UnionNode) newChild.getChildren().get(0).getRootNode(), newChild.getChildren()));
-            //return simplifyLimitDistinctUnion(newChild, treeCache);
+                    iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                        iqFactory.createNaryIQTree((UnionNode) newChild.getChildren().get(0).getRootNode(),
+                                childTrees)));
         }
         return iqFactory.createUnaryIQTree(this, newChild,
                 hasChildChanged.get()
@@ -315,32 +324,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(IQTree::getRootNode)
                 .map(v -> (ValuesNode) v)
                 .findFirst().get();
-
-        // If total values is higher than limit, get only Values Node
-        // Otherwise do nothing due to the distinct in the pattern, we cannot know if non-values nodes are distinct or not
-        // Offset = 0
-        return totalValues >= limit
-                ? iqFactory.createValuesNode(vNode.getOrderedVariables(), vNode.getValues().subList(0, limit.intValue()))
-                : iqFactory.createUnaryIQTree(this, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
-    }
-
-    // Scenario: LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ...] if T1 is distinct
-    private IQTree simplifyLimitDistinctUnion(IQTree newChild, IQTreeCache treeCache) {
-        // Retrieve size of Values Node, first child node is the Distinct node
-        long totalValues = newChild.getChildren().get(0).getChildren().stream()
-                .filter(c -> c instanceof ValuesNode)
-                .map(c -> (ValuesNode) c)
-                .map(ValuesNode::getValues)
-                .mapToLong(Collection::size)
-                .sum();
-
-        ValuesNode vNode = newChild.getChildren().get(0).getChildren().stream()
-                .filter(c -> c instanceof ValuesNode)
-                .map(IQTree::getRootNode)
-                .map(v -> (ValuesNode) v)
-                .findFirst().get();
-
-
 
         // If total values is higher than limit, get only Values Node
         // Otherwise do nothing due to the distinct in the pattern, we cannot know if non-values nodes are distinct or not

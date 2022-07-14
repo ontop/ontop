@@ -509,6 +509,40 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
 
         /*
+         * If multiple TRUE nodes are present, merge them into a VALUES node
+         */
+        if (liftedChildren.stream().filter(c -> c.getRootNode() instanceof ConstructionNode)
+                .map(c -> c.getChildren())
+                .filter(ch -> ch.get(0).getRootNode() instanceof TrueNode)
+                .count()>1)
+        {
+
+            // Merge all Values Nodes
+            ImmutableList<ImmutableList<Constant>> mergedValuesNodes = liftedChildren.stream()
+                    .filter(c -> c.getRootNode() instanceof ConstructionNode && c.getChildren().size() == 1
+                            && c.getChildren().get(0).getRootNode() instanceof TrueNode)
+                    .map(c -> ((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap().values())
+                    .flatMap(Collection::stream)
+                    .map(v -> ImmutableList.of((Constant) v))
+                    .collect(ImmutableCollectors.toList());
+
+            ValuesNode newValuesNode = iqFactory.createValuesNode(this.getVariables().asList(), mergedValuesNodes);
+
+            return liftedChildren.stream().allMatch(c -> c.getRootNode() instanceof ConstructionNode
+            && c.getChildren().size()==1 && c.getChildren().get(0) instanceof TrueNode)
+                    // If all children are true nodes, just return the new node
+                    ? newValuesNode
+                    // Otherwise, merge new Values Node with the other non-Values Nodes remaining
+                    : iqFactory.createNaryIQTree(this,
+                    Stream.concat(
+                            Stream.of(newValuesNode),
+                            liftedChildren.stream().filter(c -> !(c.getRootNode() instanceof ConstructionNode
+                                    && c.getChildren().size()==1
+                                    && c.getChildren().get(0) instanceof TrueNode)))
+                            .collect(ImmutableCollectors.toList()));
+        }
+
+        /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
