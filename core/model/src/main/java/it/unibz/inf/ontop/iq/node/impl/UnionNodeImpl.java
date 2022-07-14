@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -514,22 +513,22 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (liftedChildren.stream().filter(c -> c.getRootNode() instanceof ConstructionNode)
                 .map(c -> c.getChildren())
                 .filter(ch -> ch.get(0).getRootNode() instanceof TrueNode)
-                .count()>1)
+                .count() > 1)
         {
 
-            // Merge all Values Nodes
-            ImmutableList<ImmutableList<Constant>> mergedValuesNodes = liftedChildren.stream()
+            // Merge all True Nodes into a Values Node
+            ImmutableList<ImmutableList<Constant>> mergedTrueNodes = liftedChildren.stream()
                     .filter(c -> c.getRootNode() instanceof ConstructionNode && c.getChildren().size() == 1
                             && c.getChildren().get(0).getRootNode() instanceof TrueNode)
                     .map(c -> ((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap().values())
-                    .flatMap(Collection::stream)
-                    .map(v -> ImmutableList.of((Constant) v))
+                    .map(v -> v.stream().map(vv -> (Constant) vv).collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
 
-            ValuesNode newValuesNode = iqFactory.createValuesNode(this.getVariables().asList(), mergedValuesNodes);
+            ValuesNode newValuesNode = iqFactory.createValuesNode(this.getVariables().asList(),
+                    mergedTrueNodes);
 
             return liftedChildren.stream().allMatch(c -> c.getRootNode() instanceof ConstructionNode
-            && c.getChildren().size()==1 && c.getChildren().get(0) instanceof TrueNode)
+            && c.getChildren().size()==1 && c.getChildren().get(0).getRootNode() instanceof TrueNode)
                     // If all children are true nodes, just return the new node
                     ? newValuesNode
                     // Otherwise, merge new Values Node with the other non-Values Nodes remaining
@@ -538,7 +537,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                             Stream.of(newValuesNode),
                             liftedChildren.stream().filter(c -> !(c.getRootNode() instanceof ConstructionNode
                                     && c.getChildren().size()==1
-                                    && c.getChildren().get(0) instanceof TrueNode)))
+                                    && c.getChildren().get(0).getRootNode() instanceof TrueNode)))
                             .collect(ImmutableCollectors.toList()));
         }
 

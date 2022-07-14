@@ -314,7 +314,7 @@ public class ValuesNodeOptimizationTest {
     }
 
     // Limit Distinct Union - LIMIT DISTINCT UNION [T1 ...] -> LIMIT DISTINCT UNION [LIMIT T1 ... ]
-    // Case where T1 and T2 are distinct - Limit gets pushed down only for T1
+    // Case where T1 and T2 are distinct - Limit gets pushed down for both
     @Test
     public void test12normalizationLimitDistinctUnionDistinctTree() {
         ExtensionalDataNode dataNode0 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE1_AR1, ImmutableMap.of(0, X));
@@ -385,9 +385,9 @@ public class ValuesNodeOptimizationTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // CONSTRUCT [TRUE TRUE] --> CONSTRUCT VALUES
+    // UNION [CONSTRUCT TRUE] [CONSTRUCT TRUE] --> CONSTRUCT VALUES
     @Test
-    public void test14normalizationConstructionUnionTrueTrue1() {
+    public void test14normalizationConstructionUnionTrueTrue() {
         ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR));
         IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
@@ -407,21 +407,28 @@ public class ValuesNodeOptimizationTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // CONSTRUCT [TRUE TRUE] --> CONSTRUCT VALUES
+    // UNION [CONSTRUCT TRUE] [CONSTRUCT TRUE] T1 --> UNION [VALUES T1]
     @Test
-    public void test15normalizationConstructionUnionTrueTrue2() {
+    public void test15normalizationConstructionUnionTrueTrueDataNode() {
         ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR));
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO_STR));
         IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
+        IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
+        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree0)
+                ImmutableList.of(tree0, tree1, dataNode0)
         );
 
-        IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(ONE_STR)));
+        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                    ImmutableList.of(IQ_FACTORY.createValuesNode(
+                                ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR))),
+                            dataNode0));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }

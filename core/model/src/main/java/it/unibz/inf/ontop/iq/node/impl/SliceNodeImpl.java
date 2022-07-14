@@ -176,7 +176,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 // If any subtree Ti is distinct we proceed with the optimization
                 && newChild.getChildren().get(0).getChildren().stream().anyMatch(IQTree::isDistinct)) {
             ImmutableList<IQTree> childTrees = newChild.getChildren().get(0).getChildren().stream()
-                    .map(c -> c.isDistinct()
+                    // No stacking up of slices over one another
+                    .map(c -> c.isDistinct() && !(c.getRootNode() instanceof SliceNode)
                             ? iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, limit), c)
                             : c)
                     .collect(ImmutableCollectors.toList());
