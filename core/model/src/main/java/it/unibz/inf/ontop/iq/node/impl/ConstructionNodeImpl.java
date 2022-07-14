@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -26,9 +27,12 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -255,9 +259,59 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
-        return child.inferUniqueConstraints().stream()
+        ImmutableSet<ImmutableSet<Variable>> childConstraints = child.inferUniqueConstraints();
+
+        if (childConstraints.isEmpty())
+            return ImmutableSet.of();
+
+        ImmutableSet<ImmutableSet<Variable>> preservedConstraints = childConstraints.stream()
                 .filter(projectedVariables::containsAll)
                 .collect(ImmutableCollectors.toSet());
+
+        VariableNullability variableNullability = getVariableNullability(child);
+
+        ImmutableSet<ImmutableSet<Variable>> transformedConstraints = childConstraints.stream()
+                .flatMap(childConstraint -> extractTransformedUniqueConstraint(childConstraint, variableNullability))
+                .collect(ImmutableCollectors.toSet());
+
+        return transformedConstraints.isEmpty()
+                ? preservedConstraints
+                : preservedConstraints.isEmpty()
+                    ? transformedConstraints
+                    : Sets.union(preservedConstraints, transformedConstraints).immutableCopy();
+    }
+
+    /**
+     * TODO: consider variable equality?
+     *
+     * TODO: consider producing composite constraints?
+     *
+     */
+    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
+                                                                              VariableNullability variableNullability) {
+        Stream<ImmutableSet<Variable>> atomicConstraints = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm)e.getValue(), childConstraint, variableNullability))
+                .map(Map.Entry::getKey)
+                .map(ImmutableSet::of);
+
+        return atomicConstraints;
+    }
+
+    private boolean isAtomicConstraint(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> childConstraint,
+                                       VariableNullability variableNullability) {
+
+        if (!functionalTerm.getVariables().containsAll(childConstraint))
+            return false;
+
+        VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
+        Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
+        return analysis
+                .map(FunctionalTermDecomposition::getLiftableTerm)
+                .filter(t -> t.getVariableStream()
+                        .collect(Collectors.toSet())
+                        .containsAll(childConstraint))
+                .isPresent();
     }
 
     /**
