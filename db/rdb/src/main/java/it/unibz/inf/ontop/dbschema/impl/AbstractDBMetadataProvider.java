@@ -108,7 +108,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected boolean isRelationExcluded(RelationID id) { return false; }
 
     protected ResultSet getRelationIDsResultSet() throws SQLException {
-        return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
+        return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW" });
     }
 
     @Override
