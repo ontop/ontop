@@ -30,8 +30,8 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
@@ -494,9 +494,37 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("ALL is not supported in this context", expression);
         }
 
+        /**
+         * See for instance https://wiki.postgresql.org/wiki/Is_distinct_from
+         */
         @Override
         public void visit(IsDistinctExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("IS DISTINCT FROM is not supported in this context", expression);
+            process(expression, expression.isNot(),
+                    (t1, t2) -> {
+                        ImmutableExpression isNotNullT1 = termFactory.getDBIsNotNull(t1);
+                        ImmutableExpression isNotNullT2 = termFactory.getDBIsNotNull(t2);
+                        ImmutableExpression isNullT1 = termFactory.getDBIsNull(t1);
+                        ImmutableExpression isNullT2 = termFactory.getDBIsNull(t2);
+                        ImmutableExpression trueExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(true));
+                        ImmutableExpression falseExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(false));
+
+                        return termFactory.getDBBooleanCase(
+                                ImmutableMap.of(
+                                                termFactory.getConjunction(isNotNullT1, isNotNullT2),
+                                                termFactory.getDBNot(termFactory.getNotYetTypedEquality(t1, t2)),
+                                                termFactory.getConjunction(isNotNullT1, isNullT2),
+                                                trueExpression,
+                                                // Added for optimization purposes (if one argument is null while the other is nullable)
+                                                termFactory.getConjunction(isNullT1, isNotNullT2),
+                                                trueExpression,
+                                                termFactory.getConjunction(isNullT1, isNullT2),
+                                                falseExpression)
+                                        .entrySet().stream(),
+                                // Will never be reached
+                                trueExpression,
+                                false
+                        );
+                    });
         }
 
         @Override
