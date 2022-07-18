@@ -56,7 +56,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
             throw new UnsupportedSelectQueryRuntimeException("TOP is not supported", plainSelect);
 
         if (plainSelect.getMySqlSqlCacheFlag() != null)
-            throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_NO_CACHE is not supported", plainSelect);
+            throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_NO_CACHE/SQL_CACHE is not supported", plainSelect);
 
         if (plainSelect.getMySqlSqlCalcFoundRows())
             throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_CALC_FOUND_ROWS is not supported", plainSelect);
@@ -84,6 +84,9 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
 
         if (plainSelect.getForXmlPath() != null)
             throw new UnsupportedSelectQueryRuntimeException("FOR XML PATH is not supported", plainSelect);
+
+        if (plainSelect.getWithIsolation() != null)
+            throw new UnsupportedSelectQueryRuntimeException("WITH isolation is not supported", plainSelect);
 
         RAExpression rae;
         try {
