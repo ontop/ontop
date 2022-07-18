@@ -55,7 +55,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         if (plainSelect.getTop() != null)
             throw new UnsupportedSelectQueryRuntimeException("TOP is not supported", plainSelect);
 
-        if (plainSelect.getMySqlSqlNoCache())
+        if (plainSelect.getMySqlSqlCacheFlag() != null)
             throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_NO_CACHE is not supported", plainSelect);
 
         if (plainSelect.getMySqlSqlCalcFoundRows())

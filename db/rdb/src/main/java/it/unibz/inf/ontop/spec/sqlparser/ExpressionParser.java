@@ -494,6 +494,16 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("ALL is not supported in this context", expression);
         }
 
+        @Override
+        public void visit(IsDistinctExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("IS DISTINCT FROM is not supported in this context", expression);
+        }
+
+        @Override
+        public void visit(GeometryDistance expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Geometry distance is not supported in this context", expression);
+        }
+
 
         // ------------------------------------------
         // RELATIONAL OPERATIONS
