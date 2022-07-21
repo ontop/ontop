@@ -213,7 +213,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     // Where T1 could be e.g. VALUES or EXTENSIONAL as introduced by SliceNode optimizations
                     .map(v -> (v.getLimit().isPresent())
                             ? sqlAlgebraFactory.createSelectFromWhere(
-                            v.getProjectedVariables(), v.getSubstitution(), v, Optional.empty(),
+                            v.getProjectedVariables(), substitutionFactory.getSubstitution(), v, Optional.empty(),
                             ImmutableSet.of(), Optional.empty().isPresent(), Optional.empty(),
                             Optional.empty(), ImmutableList.of())
                             : v)
