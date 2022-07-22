@@ -126,7 +126,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<DBTermType, DBTypeConversionFunctionSymbol> castMap;
     /**
-     *  For conversion function symbols that implies a NORMALIZATION as RDF lexical term
+     *  For conversion function symbols that implies a NORMALIZATION as specified in R2RML
+     *
+     *  Created in init()
+     */
+    private ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> normalizationMap;
+
+    /**
+     *  For NORMALIZATION as RDF lexical term where the RDF datatype matters.
+     *  Most functions are going to the map, not the table.
      *
      *  Created in init()
      */
@@ -330,6 +338,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     @Inject
     protected void init() {
+        normalizationMap = createNormalizationMap();
         normalizationTable = createNormalizationTable();
         deNormalizationTable = createDenormalizationTable();
         countTable = createDBCountTable();
@@ -386,21 +395,22 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowNumberFct = createDBRowNumber();
     }
 
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
 
         // Date time
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
         DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
-        builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        builder.put(defaultDBDateTimestampType, datetimeNormFunctionSymbol);
         // Boolean
-        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
+        builder.put(dbBooleanType, createBooleanNormFunctionSymbol(dbBooleanType));
 
         return builder.build();
+    }
+
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        return ImmutableTable.of();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
@@ -1455,8 +1465,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
                 .flatMap(t -> Optional.ofNullable(normalizationTable.get(inputType, t)))
-                // Fallback to simple cast
-                .orElseGet(() -> getDBCastFunctionSymbol(inputType, dbStringType));
+                .orElseGet(() -> Optional.ofNullable(normalizationMap.get(inputType))
+                        // Fallback to simple cast
+                        .orElseGet(() -> getDBCastFunctionSymbol(inputType, dbStringType)));
     }
 
     @Override

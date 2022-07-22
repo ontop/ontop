@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -50,14 +47,13 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+        builder.putAll(super.createNormalizationMap());
 
         // SMALLINT boolean normalization
-        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType smallIntType = dbTypeFactory.getDBTermType(SMALLINT_STR);
-        builder.put(smallIntType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
+        builder.put(smallIntType, new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
 
         return builder.build();
     }

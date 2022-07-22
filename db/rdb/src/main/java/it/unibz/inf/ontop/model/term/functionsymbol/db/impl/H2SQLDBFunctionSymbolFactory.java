@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -47,27 +44,38 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return ImmutableTable.copyOf(table);
     }
 
+    @Override
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+
+        // Date time
+        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
+        builder.put(defaultDBDateTimestampType, datetimeNormFunctionSymbol);
+
+        return builder.build();
+    }
+
     /**
-     * Ensure geometries are recast back from text
+     * Ensure geometries are recast back from text.
+     *
+     * At moment only WKT is supported, but in the future GML could also be.
+     * It is therefore important to consider the target datatype for choosing the right normalization.
+     *
      */
     @Override
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
 
-        // Date time
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
-        builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
-        // Boolean
+        // TODO: move it to the map!
         builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
 
         //GEOMETRY
         DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
         DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        // For WKT
         builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
 
         return builder.build();

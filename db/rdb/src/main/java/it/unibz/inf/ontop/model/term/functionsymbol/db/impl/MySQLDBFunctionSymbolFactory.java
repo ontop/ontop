@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -19,6 +16,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
@@ -58,31 +57,27 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
      * TODO: how to inform the user? In a mapping it would be invalid, but what about a cast in a SPARQL query?
      */
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
-        table.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap();
+        map.putAll(super.createNormalizationMap());
 
         // TIMESTAMP is not the default
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
         DBTermType timestamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
 
         DBTypeConversionFunctionSymbol timestampNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestamp);
-        table.put(timestamp, xsdDatetime, timestampNormFunctionSymbol);
-        table.put(timestamp, xsdDatetimeStamp, timestampNormFunctionSymbol);
+        map.put(timestamp, timestampNormFunctionSymbol);
 
         // BIT(1) boolean normalization
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType bitOne = dbTypeFactory.getDBTermType(BIT_STR, 1);
-        table.put(bitOne, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(bitOne, dbStringType));
+        map.put(bitOne, new DefaultNumberNormAsBooleanFunctionSymbol(bitOne, dbStringType));
 
         // Forbids the post-processing of YEAR_TO_TEXT as the JDBC driver converts strangely the YEAR
-        RDFDatatype xsdYear = typeFactory.getDatatype(XSD.GYEAR);
         DBTermType year = dbTypeFactory.getDBTermType(YEAR_STR);
-        table.put(year, xsdYear, new NonPostProcessedSimpleDBCastFunctionSymbol(year, dbStringType,
+        map.put(year, new NonPostProcessedSimpleDBCastFunctionSymbol(year, dbStringType,
                 Serializers.getCastSerializer(dbStringType)));
 
-        return ImmutableTable.copyOf(table);
+        return ImmutableMap.copyOf(map);
     }
 
     @Override
