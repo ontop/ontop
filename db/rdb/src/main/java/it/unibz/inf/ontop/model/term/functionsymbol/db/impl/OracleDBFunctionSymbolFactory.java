@@ -114,15 +114,14 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
-        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
-        table.putAll(super.createDenormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createDenormalizationMap() {
+        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap<>(super.createDenormalizationMap());
 
         DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
         DBTypeConversionFunctionSymbol dateDenormFunctionSymbol = new OracleDateDenormFunctionSymbol(dbStringType, dbDateType);
-        table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateDenormFunctionSymbol);
+        map.put(dbDateType, dateDenormFunctionSymbol);
 
-        return ImmutableTable.copyOf(table);
+        return ImmutableMap.copyOf(map);
     }
 
     @Override
