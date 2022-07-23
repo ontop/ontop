@@ -68,7 +68,6 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         map.put(timestamp, timestampNormFunctionSymbol);
 
         // BIT(1) boolean normalization
-        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType bitOne = dbTypeFactory.getDBTermType(BIT_STR, 1);
         map.put(bitOne, new DefaultNumberNormAsBooleanFunctionSymbol(bitOne, dbStringType));
 

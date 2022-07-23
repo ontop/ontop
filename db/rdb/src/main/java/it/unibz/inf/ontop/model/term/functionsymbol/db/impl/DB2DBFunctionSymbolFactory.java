@@ -51,11 +51,19 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
         ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
         builder.putAll(super.createNormalizationMap());
 
+        return builder.build();
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
+        table.putAll(super.createNormalizationTable());
+
         // SMALLINT boolean normalization
         DBTermType smallIntType = dbTypeFactory.getDBTermType(SMALLINT_STR);
-        builder.put(smallIntType, new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
-
-        return builder.build();
+        table.put(smallIntType, typeFactory.getXsdBooleanDatatype(),
+                new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
+        return ImmutableTable.copyOf(table);
     }
 
     @Override
