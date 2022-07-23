@@ -44,19 +44,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return ImmutableTable.copyOf(table);
     }
 
-    @Override
-    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
-
-        // Date time
-        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
-        builder.put(defaultDBDateTimestampType, datetimeNormFunctionSymbol);
-
-        return builder.build();
-    }
-
     /**
      * Ensure geometries are recast back from text.
      *
@@ -68,9 +55,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        // TODO: move it to the map!
-        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
 
         //GEOMETRY
         DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
