@@ -1031,7 +1031,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
+	public ImmutableFunctionalTerm getPartiallyDefinedConversionToString(Variable variable) {
 		return getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getTemporaryConversionToDBStringFunctionSymbol(),
 				variable);

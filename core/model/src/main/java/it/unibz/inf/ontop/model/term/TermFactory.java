@@ -357,7 +357,7 @@ public interface TermFactory {
 	 *
 	 * This functional term must not appear in the final mapping
 	 */
-	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
+	ImmutableFunctionalTerm getPartiallyDefinedConversionToString(Variable variable);
 
 	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
 
