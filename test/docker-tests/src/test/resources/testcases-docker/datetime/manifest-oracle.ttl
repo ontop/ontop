@@ -10,7 +10,7 @@
     mf:entries
     ( 
       :date :date-bgp
-      :date-str2-oracle
+      #:date-str2-oracle # Strange test, aim not clear
       :timestamp
 	  :timestamp-str
 	  :timestamptz

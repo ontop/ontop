@@ -12,7 +12,8 @@
       :dateLiteral :date :date-str :date-bgp
       :timeLiteral :time :time-str :time-bgp
       :datetime :datetime-str
-      :timestamp :timestamp-str
+      :timestamp
+      # :timestamp-str ## currently depending on the user TZ! To be implemented seriously first
       :year :yearLiteral :year-str :year-bgp
     ) .
 
@@ -148,7 +149,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <timestamp-str.rq> ] ;
+            [ qt:query <timestamp-str-mysql.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> ;

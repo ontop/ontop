@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -62,8 +63,8 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
      * This mockup does not provide any denormalization function symbol
      */
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
-        return ImmutableTable.of();
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createDenormalizationMap() {
+        return ImmutableMap.of();
     }
 
     @Override
