@@ -746,7 +746,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return termConverter.apply(
-                termFactory.getDBLower(
+                termFactory.getDBUpper(
                         termFactory.getDBCastFunctionalTerm(dbStringType, terms.get(0))));
     }
 
