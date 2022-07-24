@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -302,7 +301,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
-        return new DefaultSQLTimestampISONormFunctionSymbol(
+        // TODO: check conditions for decomposing
+        return new NoDecompositionStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
                 (terms, converter, factory) -> serializeDateTimeNorm(dbDateTimestampType, terms, converter));
@@ -363,11 +363,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TRUNC(EXTRACT(DAY FROM %s - %s) / 7)",
                 termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+                termConverter.apply(terms.get(1)));
     }
 
     @Override

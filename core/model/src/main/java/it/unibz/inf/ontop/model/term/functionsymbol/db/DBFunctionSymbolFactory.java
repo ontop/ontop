@@ -59,6 +59,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType, RDFTermType rdfType);
 
+    /**
+     * From a possibly "normalized" DB string to another DB type
+     */
+    DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType);
+
 
     /**
      * A regular function symbol if a function symbol that can be identified by its name in the DB dialect.

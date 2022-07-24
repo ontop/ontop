@@ -1503,9 +1503,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
                 .flatMap(t -> Optional.ofNullable(deNormalizationTable.get(targetDBType, t)))
-                .orElseGet(() -> Optional.ofNullable(deNormalizationMap.get(targetDBType))
-                        // Fallback to simple cast
-                        .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType)));
+                .orElseGet(() -> getConversionFromRDFLexical2DBFunctionSymbol(targetDBType));
+    }
+
+    @Override
+    public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType) {
+        return Optional.ofNullable(deNormalizationMap.get(targetDBType))
+                // Fallback to simple cast
+                .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
 
 }
