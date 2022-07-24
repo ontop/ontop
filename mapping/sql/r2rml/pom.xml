@@ -1,16 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-mapping-sql</artifactId>
-        <version>4.1.0-beta-1-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
+
     <artifactId>ontop-mapping-r2rml</artifactId>
+
     <dependencies>
         <dependency>
-            <artifactId>ontop-mapping-sql-core</artifactId>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <artifactId>ontop-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-obda-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-sql-core</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -19,27 +35,29 @@
             </exclusions>
         </dependency>
         <dependency>
-            <artifactId>ontop-mapping-native</artifactId>
-            <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <scope>test</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-rdf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-util</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-model</artifactId>
@@ -48,32 +66,16 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-turtle</artifactId>
-        </dependency>
 
         <!-- Optique R2RML API -->
         <dependency>
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-rdf4j-binding</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.owlapi</groupId>
-            <artifactId>owlapi-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.owlapi</groupId>
-            <artifactId>owlapi-apibinding</artifactId>
-        </dependency>
-
-
     </dependencies>
 
 </project>

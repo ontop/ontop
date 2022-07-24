@@ -164,7 +164,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private class QueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, transformerFactory);
+                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
             }
 
             @Override

@@ -22,13 +22,15 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
@@ -43,10 +45,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -68,43 +68,43 @@ public class R2rmlCheckerTest {
 	private final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 	private ClassifiedTBox onto;
-	private OntopOWLReasoner reasonerOBDA;
-	private OntopOWLReasoner reasonerR2rml;
+	private OntopOWLEngine reasonerOBDA;
+	private OntopOWLEngine reasonerR2rml;
 
     @Before
 	public void setUp() throws Exception {
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
-		Ontology onto1 = OWLAPI_TRANSLATOR.translateAndClassify(owl);
-		onto = onto1.tbox();
-
 		log.info("Loading obda file");
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerOBDA = factory.createReasoner(config);
+		reasonerOBDA = new SimpleOntopOWLEngine(config);
+
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
+		Ontology onto1 = config.getInjector().getInstance(OWLAPITranslatorOWL2QL.class)
+				.translateAndClassify(owl);
+		onto = onto1.tbox();
+
 
 		log.info("Loading r2rml file");
-		OntopOWLFactory factory1 = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config1 = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		reasonerR2rml = factory1.createReasoner(config1);
+		reasonerR2rml = new SimpleOntopOWLEngine(config1);
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		if (reasonerOBDA != null)
-			reasonerOBDA.dispose();
+			reasonerOBDA.close();
 		if (reasonerR2rml != null)
-			reasonerR2rml.dispose();
+			reasonerR2rml.close();
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects
@@ -159,21 +159,18 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testOBDAEmpties()  {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
-		log.info(empties.toString());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
 
 		List<IRI> emptyConceptsObda = new ArrayList<>();
-		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()) {
-			emptyConceptsObda.add(iteratorC.next());
+		for (IRI iri : empties.emptyClasses()) {
+			emptyConceptsObda.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
 		List<IRI> emptyRolesObda = new ArrayList<>();
-		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()) {
-			emptyRolesObda.add(iteratorR.next());
+		for (IRI iri : empties.emptyProperties()) {
+			emptyRolesObda.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesObda);
 		assertEquals(46, emptyRolesObda.size());
@@ -187,21 +184,18 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testR2rmlEmpties() {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
-		log.info(empties.toString());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
 
 		List<IRI> emptyConceptsR2rml = new ArrayList<>();
-		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()) {
-			emptyConceptsR2rml.add(iteratorC.next());
+		for (IRI iri : empties.emptyClasses()) {
+			emptyConceptsR2rml.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
 		List<IRI> emptyRolesR2rml = new ArrayList<>();
-		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()) {
-			emptyRolesR2rml.add(iteratorR.next());
+		for (IRI iri : empties.emptyProperties()) {
+			emptyRolesR2rml.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesR2rml);
 		assertEquals(46, emptyRolesR2rml.size());

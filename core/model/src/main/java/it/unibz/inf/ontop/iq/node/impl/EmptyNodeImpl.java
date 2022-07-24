@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -18,6 +19,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Objects;
 
 
 public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
@@ -54,27 +57,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getVariables().contains(variable))
-            return true;
-        else
-            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof EmptyNode) {
-            return projectedVariables.equals(((EmptyNode) node).getVariables());
-        }
-        return false;
-    }
-
-    @Override
-    public EmptyNode clone() {
-        return iqFactory.createEmptyNode(projectedVariables);
-    }
-
-    @Override
     public String toString() {
         return PREFIX + projectedVariables;
     }
@@ -87,6 +69,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformEmpty(this);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformEmpty(this, context);
     }
 
     @Override
@@ -103,11 +90,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
         return newVariables.equals(projectedVariables)
                 ? this
                 : iqFactory.createEmptyNode(newVariables);
-    }
-
-    @Override
-    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution);
     }
 
     @Override
@@ -157,19 +139,20 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof EmptyNode))
-            return false;
-        return projectedVariables.equals(((EmptyNode) queryNode).getVariables());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmptyNodeImpl emptyNode = (EmptyNodeImpl) o;
+        return projectedVariables.equals(emptyNode.projectedVariables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables);
     }
 }

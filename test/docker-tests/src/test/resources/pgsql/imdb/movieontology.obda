@@ -291,5 +291,9 @@ source		select id, title, production_year from title
 mappingId	Company has country code
 target		imdb:company/{cid} mo2:countryCode {country_code} . 
 source		select company_name.id as cid, company_name.country_code as country_code from company_name
+
+mappingId	Person birth name contains 'z'
+target		imdb:name/{person_id} :birthNameContainsZ {res}^^xsd:boolean .
+source		select id as person_id, CASE WHEN (position('z' in name) > 0) THEN true ELSE false END as res from name
 ]]
 

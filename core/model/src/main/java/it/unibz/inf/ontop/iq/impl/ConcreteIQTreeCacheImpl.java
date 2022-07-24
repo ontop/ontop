@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.ConcreteIQTreeCache;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -40,13 +41,16 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Nullable
     private Boolean isDistinct;
 
-    /**
-     * Initial constructor
-     */
     @Inject
-    protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
+    @AssistedInject
+    private ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
+        this(false, coreSingletons);
+    }
+
+    @AssistedInject
+    private ConcreteIQTreeCacheImpl(@Assisted boolean isNormalizedForOptimization, CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.isNormalizedForOptimization = false;
+        this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = false;
     }
 
@@ -138,7 +142,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved,
-                variableNullability, variables, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     /**
@@ -150,23 +154,21 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 null, variables, null, null, null, null);
     }
 
-    @Override
-    public IQTreeCache declareDistinctRemovalWithoutEffect() {
-        return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
-                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
-    }
-
     /**
      * TODO: explicit assumptions about the effects
      */
+
     @Override
-    public IQTreeCache declareDistinctRemovalWithEffect() {
-        return new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
+    public IQTreeCache declareDistinctRemoval(boolean noEffect) {
+        return noEffect
+                ? new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
+                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct)
+                : new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
                 variableNullability, variables, null, possibleVariableDefinitions, null, null);
     }
 
     @Override
-    public synchronized void setVariableNullability(VariableNullability variableNullability) {
+    public synchronized void setVariableNullability(@Nonnull VariableNullability variableNullability) {
         if (this.variableNullability != null)
             throw new IllegalStateException("Variable nullability already present. Only call this method once");
         this.variableNullability = variableNullability;
@@ -180,7 +182,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     }
 
     @Override
-    public void setUniqueConstraints(ImmutableSet<ImmutableSet<Variable>> uniqueConstraints) {
+    public void setUniqueConstraints(@Nonnull ImmutableSet<ImmutableSet<Variable>> uniqueConstraints) {
         if (this.uniqueConstraints != null)
             throw new IllegalStateException("Unique constraints already present. Only call this method once");
         this.uniqueConstraints = uniqueConstraints;
@@ -193,18 +195,6 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         this.isDistinct = isDistinct;
     }
 
-    @Override
-    public IQProperties convertIntoIQProperties() {
-        // Non-final
-        IQProperties properties = coreSingletons.getIQFactory().createIQProperties();
-        if (areDistinctAlreadyRemoved)
-            properties = properties.declareDistinctRemovalWithoutEffect();
-        if (isNormalizedForOptimization)
-            properties = properties.declareNormalizedForOptimization();
-
-        return properties;
-    }
-
     /**
      * TODO: explicit assumptions about the effects
      */
@@ -213,6 +203,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         VariableNullability newVariableNullability = variableNullability == null
                 ? null
                 : variableNullability.applyFreshRenaming(renamingSubstitution);
+
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
                 : variables.stream()

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -20,7 +20,7 @@ public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
     private final static String obdaFile = "/pgsql/EPNet.obda";
     private final static String propertyFile = "/pgsql/EPNet.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -35,40 +35,20 @@ public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Test
     public void testQuery() throws Exception {
-
-        /*
-		 * Get the book information that is stored in the database
-		 */
-//        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
-//                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-//                "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
-//                "select *\n" +
-//                "where {\n" +
-//                "?x rdf:type :Amphora .\n" +
-//                "?x :hasProductionPlace ?pl .\n" +
-//                "?pl rdf:type :Place .\n" +
-//                "?pl dcterms:title \"La Corregidora\" .\n" +
-//                "?pl :hasLatitude ?lat .\n" +
-//                "?pl :hasLongitude ?long\n" +
-//                "}\n" +
-//                "limit 50\n";
-        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
+        countResults(1, "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
                 "select ?x\n" +
                 "where {\n" +
                 "?x rdf:type :AmphoraSection4-4 .\n" +
                 "}\n" +
-                "limit 5\n";
-
-        runQuery(sparqlQuery);
-
-        }
+                "limit 5\n");
+    }
 }

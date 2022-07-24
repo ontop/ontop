@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -119,20 +120,11 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .map(n -> (ConstructionNode)n)
                 .map(ConstructionNode::getSubstitution)
                 .filter(s -> !s.isEmpty())
-                .map(this::replaceTypeTermConstants)
+                .map(s -> s.transform(this::replaceTypeTermConstants))
                 .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                 .filter(n -> !n.equals(child.getRootNode()))
                 .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
                 .orElse(child);
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> replaceTypeTermConstants(ImmutableSubstitution<ImmutableTerm> substitution) {
-        return substitutionFactory.getSubstitution(
-                substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> replaceTypeTermConstants(e.getValue())
-                )));
     }
 
     /**
@@ -162,8 +154,8 @@ public class DefaultTermTypeTermVisitingTreeTransformer
             return term;
     }
 
-    private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree unionChild) {
-        return Optional.of(unionChild.getRootNode())
+    private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree child) {
+        return Optional.of(child.getRootNode())
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
                 .flatMap(c -> Optional.ofNullable(c.getSubstitution().get(variable)));
@@ -203,18 +195,14 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = initialConstructionNode.getSubstitution().getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> Optional.ofNullable(typeFunctionSymbolMap.get(e.getKey()))
-                                // RDF type definition
-                                .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(e.getValue(), functionSymbol))
-                                // Regular definition
-                                .orElse(e.getValue())));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().transform(
+                (k, v) -> Optional.ofNullable(typeFunctionSymbolMap.get(k))
+                        // RDF type definition
+                        .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(v, functionSymbol))
+                        // Regular definition
+                        .orElse(v));
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                tree.getVariables(),
-                substitutionFactory.getSubstitution(newSubstitutionMap));
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(tree.getVariables(),newSubstitution);
 
         return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree)tree).getChild());
     }
@@ -231,6 +219,93 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 String.format("Was expecting a functional term with a RDFTermTypeFunctionSymbol, not %s.\n" +
                         "Some simplifications might be missing", definition));
     }
+
+    /**
+     * Used to change out any RDFTermTypeConstants appearing in ValuesNodes to DBConstants.
+     */
+    @Override
+    public IQTree transformValues(ValuesNode valuesNode) {
+        // TODO: Currently we walk through all values three times in calling the below three methods. Is there a better way?
+        ImmutableSet<Variable> metaTermTypeVariables = getMetaTermTypeVariables(valuesNode);
+
+        if (metaTermTypeVariables.isEmpty())
+                return transformLeaf(valuesNode);
+
+        ImmutableSet<RDFTermTypeConstant> possibleConstants = getPossibleConstants(valuesNode);
+
+        return createConstructionValuesTree(valuesNode, metaTermTypeVariables, possibleConstants);
+    }
+
+    private ImmutableSet<Variable> getMetaTermTypeVariables(ValuesNode valuesNode) {
+        return valuesNode.getOrderedVariables().stream()
+                .filter(variable -> valuesNode.getValueStream(variable)
+                                            .anyMatch(constant -> constant instanceof RDFTermTypeConstant))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<RDFTermTypeConstant> getPossibleConstants(ValuesNode valuesNode) {
+        ImmutableList<ImmutableList<Constant>>  values = valuesNode.getValues();
+        return values.stream()
+                .map(tuple -> tuple.stream()
+                        .filter(constant -> constant instanceof RDFTermTypeConstant)
+                        .map(constant -> (RDFTermTypeConstant) constant)
+                        .collect(ImmutableCollectors.toSet()))
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    IQTree createConstructionValuesTree(ValuesNode valuesNode,
+                                        ImmutableSet<Variable> metaTermTypeVariables,
+                                        ImmutableSet<RDFTermTypeConstant> possibleConstants) {
+
+        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+        ImmutableList<ImmutableList<Constant>> values = valuesNode.getValues();
+
+        ImmutableMap<Variable, Variable> generatedVariableNamesMap = orderedVariables.stream().collect(ImmutableCollectors.toMap(
+                key -> key,
+                key -> variableGenerator.generateNewVariable()));
+
+        ValuesNode newValuesNode = iqFactory.createValuesNode(
+                orderedVariables.stream()
+                        .map(variable -> metaTermTypeVariables.contains(variable)
+                                            ? generatedVariableNamesMap.get(variable)
+                                            : variable)
+                        .collect(ImmutableCollectors.toList()),
+                values.stream()
+                        .map(tuple -> tuple.stream()
+                                .map(this::replaceTypeTermConstantWithFunctionalTerm)
+                                .collect(ImmutableCollectors.toList()))
+                        .collect(ImmutableCollectors.toList()));
+
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
+                ImmutableSet.copyOf(orderedVariables),
+                substitutionFactory.getSubstitution(
+                        metaTermTypeVariables.stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        variable -> variable,
+                                        variable -> termFactory.getRDFTermTypeFunctionalTerm(
+                                                        generatedVariableNamesMap.get(variable),
+                                                        dictionary,
+                                                        possibleConstants,
+                                                        false)))));
+
+        return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);
+    }
+
+
+    private Constant replaceTypeTermConstantWithFunctionalTerm(Constant constant) {
+        if (constant instanceof RDFTermTypeConstant) {
+            RDFTermTypeConstant typeConstant = (RDFTermTypeConstant) constant;
+            return dictionary.convert(typeConstant);
+        }
+        else
+            return constant;
+    }
+
+
+
+
+
 
     @Override
     public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {

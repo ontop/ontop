@@ -106,27 +106,6 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                     .map(indexes -> new SelectedNode(indexes, rightDataNode));
         }
 
-        /**
-         * Temporary restriction to avoid overlap with the existing LJ optimization techniques
-         *
-         * Ignores the case where a single extensional data node appears on the right.
-         *
-         * TODO: remove this restriction (after releasing 4.1)
-         */
-        @Override
-        protected Stream<ExtensionalDataNode> extractRightDataNodes(IQTree rightChild) {
-            IQTree rightChildAfterConstructionNode = Optional.of(rightChild)
-                    .filter(c -> c.getRootNode() instanceof ConstructionNode)
-                    .map(c -> ((UnaryIQTree) c).getChild())
-                    .orElse(rightChild);
-
-            if (rightChildAfterConstructionNode instanceof ExtensionalDataNode)
-                return Stream.empty();
-
-            return super.extractRightDataNodes(rightChild);
-        }
-
-
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,

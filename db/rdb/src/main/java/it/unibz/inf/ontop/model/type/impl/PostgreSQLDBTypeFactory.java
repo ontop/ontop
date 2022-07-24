@@ -62,6 +62,9 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
+        DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.DATE));
+
         DBTermType byteAType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BYTEA_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.HEXBINARY), SAME_TYPE_NO_CONSTANT);
 
@@ -87,6 +90,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(NAME_STR, nameType);
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
+        map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
         map.put(BYTEA_STR, byteAType);
@@ -121,6 +125,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBGeographyType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBDistanceSphere() {
         return true;
     }
 }

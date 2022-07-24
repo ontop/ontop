@@ -39,5 +39,8 @@ public interface SQLAlgebraFactory {
 
     SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
 
+    SQLValuesExpression createSQLValues(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
+                                        @Assisted("values") ImmutableList<ImmutableList<Constant>> values);
+
     SQLOrderComparator createSQLOrderComparator(NonConstantTerm term, boolean isAscending);
 }

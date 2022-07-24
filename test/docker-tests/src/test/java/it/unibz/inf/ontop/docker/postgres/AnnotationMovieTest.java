@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -19,13 +19,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class AnnotationMovieTest extends AbstractVirtualModeTest{
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    private final static String owlFile = "/pgsql/annotation/movieontology.owl";
+    private final static String obdaFile = "/pgsql/annotation/newSyntaxMovieontology.obda";
+    private final static String propertyFile = "/pgsql/annotation/newSyntaxMovieontology.properties";
 
-    final static String owlFile = "/pgsql/annotation/movieontology.owl";
-    final static String obdaFile = "/pgsql/annotation/newSyntaxMovieontology.obda";
-    final static String propertyFile = "/pgsql/annotation/newSyntaxMovieontology.properties";
-
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -40,9 +38,9 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
 
@@ -50,115 +48,72 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
     public void testAnnotationInOntology() throws Exception {
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 "WHERE {<http://dbpedia.org/ontology/birthDate> rdfs:label ?r . \n" +
-
                 "}";
 
-
-
         countResults(4, queryBind);
-
     }
 
 
     @Test
     public void testAnnotationIRI() throws Exception {
-
-
-
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 " ?movie \n" +
                 "WHERE {?movie dc:description ?r . \n" +
-
                 "}";
 
-
-
         countResults(444090, queryBind);
-
     }
 
     @Test
     public void testAnnotationLiteral() throws Exception {
-
-
-
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 " ?movie \n" +
                 "WHERE {?movie dc:date ?r . \n" +
-
                 "}";
 
-
-
         countResults(443300, queryBind);
-
     }
 
     @Test
     public void testAnnotationString() throws Exception {
-
-
-
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 " ?movie \n" +
                 "WHERE {?movie dbpedia:gross ?r . \n" +
-
                 "}";
 
-
-
         countResults(112576, queryBind);
-
     }
 
 
     @Test
     public void testAnnotationDatabaseValue() throws Exception {
-
-
-
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 " ?movie \n" +
                 "WHERE {?movie mo:belongsToGenre ?r . \n" +
 
                 "}";
 
-
-        // TODO: double-check this number (obtained after inserting DISTINCT)
         countResults(546032, queryBind);
-
     }
 
     @Test //no check is executed to verify that the value is a valid uri
     public void testNewSyntaxUri() throws Exception {
-
-
-
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 " ?movie \n" +
                 "WHERE {?movie mo:hasMaleActor ?r . \n" +
-
                 "} LIMIT 100000";
-
-
 
         // value without LIMIT
         // countResults(queryBind, 7530011);
@@ -168,15 +123,10 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
     @Test //no class in the ontology
     public void testClassUndefined() throws Exception {
-
-
-
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 "WHERE {?r a mo:Vip . \n" +
-
                 "} LIMIT 100000";
 
         // value without LIMIT
@@ -187,44 +137,24 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
     @Test //no dataproperty in the ontology
     public void testDataPropertyUndefined() throws Exception {
 
-
-
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 "WHERE {?company mo:companyId ?r . \n" +
-
                 "}";
 
-        // TODO: double-check this number (obtained after inserting DISTINCT)
         countResults(131645, queryBind);
-//        countResults(queryBind, 10000);
-
     }
 
     @Test //no objectproperty in the ontology
     public void testObjectPropertyUndefined() throws Exception {
-
-
-
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
-                "\n" +
                 "SELECT  ?r " +
                 "WHERE {?movie mo:idTitle ?r . \n" +
-
                 "}";
 
-
-
         countResults(444090, queryBind);
-//        countResults(queryBind, 10000);
-
-
     }
-
-
-
 }
 

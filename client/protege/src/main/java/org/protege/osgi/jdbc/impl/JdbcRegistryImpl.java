@@ -1,7 +1,7 @@
 package org.protege.osgi.jdbc.impl;
 
 import org.protege.osgi.jdbc.JdbcRegistry;
-import org.protege.osgi.jdbc.RegistryException;
+import org.protege.osgi.jdbc.JdbcRegistryException;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -12,10 +12,10 @@ import java.util.List;
 
 public class JdbcRegistryImpl implements JdbcRegistry {
 
-	private List<Driver> drivers = new ArrayList<>();
+	private final List<Driver> drivers = new ArrayList<>();
 
-	public void addJdbcDriver(String className, URL location)
-			throws RegistryException {
+	@Override
+	public void addJdbcDriver(String className, URL location) throws JdbcRegistryException {
 		try {
 			URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader());
 			Class<?> driverClass = classLoader.loadClass(className);
@@ -23,10 +23,11 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 			drivers.add(driver);
 		}
 		catch (InstantiationException | ClassNotFoundException | IllegalAccessException ie) {
-			throw new RegistryException(ie);
+			throw new JdbcRegistryException(ie);
 		}
     }
 
+    @Override
     public void removeJdbcDriver(String className) {
 		Driver found = null;
 		for (Driver driver : drivers) {
@@ -40,8 +41,8 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 		}
 	}
 
+	@Override
 	public List<Driver> getJdbcDrivers() {
 		return Collections.unmodifiableList(drivers);
 	}
-
 }

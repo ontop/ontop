@@ -7,6 +7,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -15,7 +17,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.sqlparser.*;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -41,24 +42,21 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final SQLQueryParser sqlQueryParser;
-    private final RAExpression2IQConverter raExpression2IQConverter;
 
     @Inject
-    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser,
-                                      RAExpression2IQConverter raExpression2IQConverter) {
+    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
-        this.raExpression2IQConverter = raExpression2IQConverter;
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
 
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
             RAExpression re = getRAExpression(assertion, metadataLookup);
-            IQTree tree = raExpression2IQConverter.convert(re);
+            IQTree tree = sqlQueryParser.convert(re);
 
             Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 
@@ -91,7 +89,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().apply(v))
+                    .map(v -> target.getSubstitution().applyToVariable(v))
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
                     .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
@@ -115,7 +113,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetRenamingPart.applyToTarget(target.getSubstitution());
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = target.getSubstitution().transform(targetRenamingPart::apply);
 
         ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
                 targetMap.entrySet().stream() // getNonVariableFragment
@@ -133,12 +131,12 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
-    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         try {
             return sqlQueryParser.getRAExpression(sourceQuery, metadataLookup);
         }
-        catch (InvalidSelectQueryException e) {
+        catch (InvalidQueryException e) {
             throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
                     + " \nProblem location: source query of triplesMap \n["
                     +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");

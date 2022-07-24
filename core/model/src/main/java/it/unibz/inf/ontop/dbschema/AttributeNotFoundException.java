@@ -13,4 +13,12 @@ public class AttributeNotFoundException extends Exception {
     public QuotedID getAttributeID() { return attributeId; }
 
     public RelationDefinition getRelation() { return relation; }
+
+    @Override
+    public String toString() {
+        return "AttributeNotFoundException{" +
+                "relation=" + relation +
+                ", attributeId=" + attributeId +
+                '}';
+    }
 }

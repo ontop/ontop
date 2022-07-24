@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -30,18 +29,23 @@ import java.util.stream.Stream;
 
 /**
  * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
- *
+ * <p>
  * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union.
  *
+ *
  * Example:
+ * <pre>
  *   JOIN
  *     T1(x,y)
  *     UNION(x,z)
  *       T2(x,z)
  *       T3(x,z)
  *     T4(w)
- *
+ * </pre>
+ *  
  *  becomes
+ *  
+ *  <pre>
  *    JOIN
  *      UNION(x,z)
  *        JOIN
@@ -51,14 +55,14 @@ import java.util.stream.Stream;
  *          T3(x,z)
  *          T1(x,y)
  *      T4(w)
- *
+ * </pre>
  * TODO: shall we consider also the joining condition for pushing more siblings?
- *
  */
 @Singleton
 public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvoidJoinAboveUnionPlanner.class);
+    
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final AvoidJoinAboveUnionTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
@@ -77,12 +81,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
      * If something has been pushed, it re-applies the structural and semantic optimizations.
      */
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         IQ liftedQuery = lift(query);
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
-                : generalOptimizer.optimize(liftedQuery, executorRegistry);
+                : generalOptimizer.optimize(liftedQuery);
     }
 
     protected IQ lift(IQ query) {
@@ -92,8 +96,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         IQ newIQ = newTree.equals(tree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug(String.format("Planned IQ: %s\n", newIQ));
+
+        LOGGER.debug("Planned IQ:\n{}\n", newIQ);
         return newIQ;
     }
 
@@ -152,11 +156,11 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
             ImmutableSet<Variable> unionVariables = unionTree.getVariables();
 
             ImmutableList<Integer> pushableSiblings = IntStream.range(0, children.size())
-                    .boxed()
                     // Leaf siblings ...
                     .filter(i -> (children.get(i) instanceof LeafIQTree)
                             // ... that naturally joins (i.e. share a variable) with the union
                             && !Sets.intersection(unionVariables, children.get(i).getVariables()).isEmpty())
+                    .boxed()
                     .collect(ImmutableCollectors.toList());
 
             return pushableSiblings.isEmpty()
@@ -191,13 +195,10 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                     newUnionChildren);
 
             return IntStream.range(0, children.size())
-                    .boxed()
                     .filter(i -> !pushableSiblingIndexes.contains(i))
-                    .map(children::get)
+                    .mapToObj(children::get)
                     .map(c -> (c == unionTree) ? newUnionTree : c)
                     .collect(ImmutableCollectors.toList());
         }
     }
-
-
 }

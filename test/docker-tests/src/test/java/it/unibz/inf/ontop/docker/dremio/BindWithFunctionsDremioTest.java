@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.docker.dremio;
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -22,7 +23,7 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/dremio/bind/sparqlBindDremio.obda";
     private static final String propertyfile = "/dremio/bind/sparqlBindDremio.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsDremioTest() throws OWLOntologyCreationException {
@@ -32,9 +33,9 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override
@@ -150,5 +151,71 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Test
     @Override
     public void testStrUuid() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testWeeksBetweenDate() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDate() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testWeeksBetweenDateTime() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateTime() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateTimeMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testHoursBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testMinutesBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testSecondsBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testSecondsBetweenMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testMilliSeconds() {
     }
 }

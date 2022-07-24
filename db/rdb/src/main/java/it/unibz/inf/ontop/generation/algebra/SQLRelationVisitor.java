@@ -18,4 +18,6 @@ public interface SQLRelationVisitor<T> {
     T visit(SQLLeftJoinExpression sqlLeftJoinExpression);
 
     T visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression);
+
+    T visit(SQLValuesExpression sqlValuesExpression);
 }

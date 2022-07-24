@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
@@ -21,7 +22,7 @@ public class QuotedAliasTableTest extends AbstractVirtualModeTest {
     static final String obdafile = "/pgsql/npd-v2.obda";
 	static final String propertiesfile = "/pgsql/npd-v2.properties";
 
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
@@ -36,9 +37,9 @@ public class QuotedAliasTableTest extends AbstractVirtualModeTest {
 	}
 
 	@AfterClass
-	public static void after() throws OWLException {
+	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.dispose();
+		REASONER.close();
 	}
 
 

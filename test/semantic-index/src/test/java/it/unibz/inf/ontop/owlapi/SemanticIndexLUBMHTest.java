@@ -22,14 +22,11 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import it.unibz.inf.ontop.querymanager.QueryIOManager;
-import junit.framework.TestCase;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -43,19 +40,19 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.injection.OntopReformulationSettings.EXISTENTIAL_REASONING;
+
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
  * created by the SemanticIndexManager.
  */
 @Ignore("Failing on most of the queries")
-public class SemanticIndexLUBMHTest extends TestCase {
+public class SemanticIndexLUBMHTest {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	private static final String owlFilePath = "src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
-	public SemanticIndexLUBMHTest() throws Exception {
-	}
-
+	@Test
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 
@@ -66,7 +63,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 		axioms.addAll(mainOntology.getABoxAxioms(Imports.INCLUDED));
 
 		long end = System.nanoTime();
-		double init_time = (end - start) / 1000000;
+		long init_time = (end - start) / 1_000_000;
 		start = System.nanoTime();
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
 		axioms.addAll(manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"))
@@ -168,60 +165,59 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 
-		// V1
-		// quest.getQuestInstance().getOptionalSemanticIndexRepository().createIndexes(qconn.getConnection());
-		// END V1
 		end = System.nanoTime();
 
 		OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
 		OWLOntology completeOntology = newManager.createOntology(axioms);
 
-		double insert_time = (end - start) / 1000000;
+		long insert_time = (end - start) / 1_000_000;
 
 		Properties p = new Properties();
-
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		p.setProperty(EXISTENTIAL_REASONING, "true");
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
-			OntopOWLReasoner reasoner = factory.createReasoner(loader.getConfiguration());
+			OntopOWLEngine reasoner = new SimpleOntopOWLEngine(loader.getConfiguration());
 			OWLConnection connection = reasoner.getConnection();
 			OWLStatement st = connection.createStatement()) {
 
-            QueryController qc = new QueryController();
-            QueryIOManager qman = new QueryIOManager(qc);
-            qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
+			/**
+			 *  @see src/test/resources/test/treewitness/LUBM-ex-20.q for queries
+			 */
 
-            for (QueryControllerEntity e : qc.getElements()) {
-                if (!(e instanceof QueryControllerQuery)) {
-                    continue;
-                }
-                QueryControllerQuery query = (QueryControllerQuery) e;
-                log.debug("Executing query: {}", query.getID());
-                log.debug("Query: \n{}", query.getQuery());
+            //QueryController qc = new QueryController();
+            //QueryIOManager qman = new QueryIOManager(qc);
+            // qman.load(new File(""));
 
-                // String query =
-                // "PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
-                // + " SELECT ?student ?staff ?course" + " WHERE { "
-                // + "	?student a lubm:Student ." +
-                // "	?student lubm:advisor ?staff ." + "	?staff a lubm:Faculty ."
-                // + "	?student lubm:takesCourse ?course ." +
-                // "	?staff lubm:teacherOf ?course ." + "	?course a lubm:Course . "
-                // + " }";
+            //for (QueryControllerEntity e : qc.getElements()) {
+            //    if (e instanceof QueryControllerQuery) {
+			//		QueryControllerQuery query = (QueryControllerQuery) e;
+			//		log.debug("Executing query: {}", query.getID());
+			//		log.debug("Query: \n{}", query.getQuery());
 
-                start = System.nanoTime();
-                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
-                end = System.nanoTime();
+					// String query =
+					// "PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
+					// + " SELECT ?student ?staff ?course" + " WHERE { "
+					// + "	?student a lubm:Student ." +
+					// "	?student lubm:advisor ?staff ." + "	?staff a lubm:Faculty ."
+					// + "	?student lubm:takesCourse ?course ." +
+					// "	?staff lubm:teacherOf ?course ." + "	?course a lubm:Course . "
+					// + " }";
 
-                double time = (end - start) / 1000000;
+					start = System.nanoTime();
+			//		TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
+					end = System.nanoTime();
 
-                int count = 0;
-                while (res.hasNext()) {
-                    count += 1;
-                }
-                log.debug("Total result: {}", count);
-                log.debug("Initialization time: {} ms", init_time);
-                log.debug("Data insertion time: {} ms", insert_time);
-                log.debug("Query execution time: {} ms", time);
-            }
+					long time = (end - start) / 1_000_000;
+
+					int count = 0;
+			//		while (res.hasNext()) {
+			//			count += 1;
+			//		}
+					log.debug("Total result: {}", count);
+					log.debug("Initialization time: {} ms", init_time);
+					log.debug("Data insertion time: {} ms", insert_time);
+					log.debug("Query execution time: {} ms", time);
+			//	}
+            //}
 		}
 	}
 }

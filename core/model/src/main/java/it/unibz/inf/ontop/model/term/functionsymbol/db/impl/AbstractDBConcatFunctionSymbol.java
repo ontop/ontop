@@ -25,8 +25,7 @@ public abstract class AbstractDBConcatFunctionSymbol extends AbstractTypedDBFunc
         super(nameInDialect + arity,
                 // No restriction on the input types TODO: check if OK
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> (TermType) rootDBTermType)
+                        .mapToObj(i -> (TermType) rootDBTermType)
                         .collect(ImmutableCollectors.toList()), dbStringType);
         this.serializer = serializer;
     }

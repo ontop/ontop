@@ -7,9 +7,12 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     boolean isExistentialReasoningEnabled();
 
-    boolean isDistinctPostProcessingEnabled();
-
     boolean isPostProcessingAvoided();
+
+    /**
+     * If false, makes the query fail when an invalid triple is detected.
+     */
+    boolean areInvalidTriplesExcludedFromResultSet();
 
     boolean isQueryLoggingEnabled();
     boolean isQueryTemplateExtractionEnabled();
@@ -39,8 +42,8 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     //--------------------------
 
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
-    String DISTINCT_RESULTSET = "ontop.distinctResultSet";
     String AVOID_POST_PROCESSING = "ontop.avoidPostProcessing";
+    String EXCLUDE_INVALID_TRIPLES_FROM_RESULT_SET = "ontop.excludeInvalidTriplesFromResultSet";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";
     String QUERY_LOGGING = "ontop.queryLogging";
     // Needed for logging

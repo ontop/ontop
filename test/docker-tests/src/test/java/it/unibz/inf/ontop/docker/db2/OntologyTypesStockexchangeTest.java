@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.db2;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -25,7 +25,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 	static final String obdaFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
     static final String propertyFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -40,9 +40,9 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
 
@@ -153,6 +153,13 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\" . }";
 
         countResults(0, query1);
+    }
+
+    // The ontology contains three facts (Joe, Jane, Bane are Investors), the database contains three more.
+    @Test
+    public void testAbox() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Investor. }";
+        countResults(6, query1);
     }
 
     @Ignore("Consider updating the DB2 instance as its TZ behavior does not seem to be compliant with the docs")

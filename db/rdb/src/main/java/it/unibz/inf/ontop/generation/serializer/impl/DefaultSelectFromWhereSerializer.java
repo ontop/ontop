@@ -84,7 +84,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
             String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
-            String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
+            String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset(),
+                    selectFromWhere.getSortConditions().isEmpty());
 
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, groupByString, orderByString, sliceString);
@@ -98,7 +99,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return idFactory.createRelationID(VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
-        private ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
+        ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
             return variableAliases.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
@@ -112,7 +113,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
-        private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
+        protected ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
             AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(
@@ -172,31 +173,32 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         /**
          * There is no standard for these three methods (may not work with many DB engines).
          */
-        protected String serializeLimitOffset(long limit, long offset) {
+        protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
             return String.format("LIMIT %d, %d", offset, limit);
         }
 
-        protected String serializeLimit(long limit) {
+        //sortConditions added to handle cases of LIMIT without ORDER BY, which need a dummy ORDER BY
+        protected String serializeLimit(long limit, boolean noSortCondition) {
             return String.format("LIMIT %d", limit);
         }
 
-        protected String serializeOffset(long offset) {
+        protected String serializeOffset(long offset, boolean noSortCondition) {
             return String.format("OFFSET %d", offset);
         }
 
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
+        private String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
             if (limit.isPresent() && offset.isPresent())
-                return serializeLimitOffset(limit.get(), offset.get());
+                return serializeLimitOffset(limit.get(), offset.get(), noSortCondition);
 
             if (limit.isPresent())
-                return serializeLimit(limit.get());
+                return serializeLimit(limit.get(), noSortCondition);
 
-            return serializeOffset(offset.get());
+            return serializeOffset(offset.get(), noSortCondition);
         }
 
 
@@ -314,6 +316,30 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
+
+        @Override
+        public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
+            ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
+            ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
+            // Leaf node
+            ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs = ImmutableMap.of();
+
+            String tuplesSerialized = sqlValuesExpression.getValues().stream()
+                    .map(tuple -> tuple.stream()
+                            .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
+                            .collect(Collectors.joining(",", " (", ")")))
+                    .collect(Collectors.joining(","));
+            RelationID alias = generateFreshViewAlias();
+            String internalColumnNames = orderedVariables.stream()
+                    .map(variableAliases::get)
+                    .map(QuotedID::toString)
+                    .collect(Collectors.joining(",", " (", ")"));
+            String sql = "(VALUES " + tuplesSerialized + ") AS " + alias + internalColumnNames;
+
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(alias, variableAliases);
+
+            return new QuerySerializationImpl(sql, columnIDs);
+        }
     }
 
 
@@ -395,8 +421,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     // TODO: handle the special case of not-a-number!
                     return castFloatingConstant(constant.getValue(), dbType);
                 case INTEGER:
-                case BOOLEAN:
                     return constant.getValue();
+                case BOOLEAN:
+                    return serializeBooleanConstant(constant);
+                case DATE:
+                case DATETIME:
+                    return serializeDatetimeConstant(constant.getValue(), dbType);
                 default:
                     return serializeStringConstant(constant.getValue());
             }
@@ -409,6 +439,14 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected String serializeStringConstant(String constant) {
             // duplicates single quotes, and adds outermost quotes
             return "'" + constant.replace("'", "''") + "'";
+        }
+
+        protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
+            return serializeStringConstant(datetime);
+        }
+
+        protected String serializeBooleanConstant(DBConstant booleanConstant) {
+            return booleanConstant.getValue();
         }
     }
 }

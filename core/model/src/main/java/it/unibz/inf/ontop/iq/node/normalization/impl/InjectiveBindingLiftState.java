@@ -160,7 +160,7 @@ public class InjectiveBindingLiftState {
 
         // Nothing lifted
         if (newChildConstructionNode
-                .filter(n -> n.isEquivalentTo(childConstructionNode))
+                .filter(n -> n.equals(childConstructionNode))
                 .isPresent()) {
             if (liftedConstructionNode.isPresent())
                 throw new MinorOntopInternalBugException("Unexpected lifted construction node");

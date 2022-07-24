@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -47,24 +48,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof TrueNode) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        throw new IllegalArgumentException("A true node does not project any variable");
-    }
-
-    @Override
-    public TrueNode clone() {
-        return iqFactory.createTrueNode();
-    }
-
-    @Override
     public String toString() {
         return PREFIX;
     }
@@ -75,18 +58,19 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof TrueNode);
+    public int hashCode() {
+        return 12398;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
@@ -100,6 +84,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformTrue(this, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitTrue(this);
     }
@@ -107,11 +96,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         return this;
-    }
-
-    @Override
-    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution);
     }
 
     @Override

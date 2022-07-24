@@ -24,8 +24,7 @@ public class SimpleTypedDBFunctionSymbolImpl extends AbstractTypedDBFunctionSymb
                                               DBTermType rootDBTermType,
                                               DBFunctionSymbolSerializer serializer) {
         super(nameWithoutArity + arity, IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> (TermType) rootDBTermType)
+                        .mapToObj(i -> (TermType) rootDBTermType)
                         .collect(ImmutableCollectors.toList()),
                 targetType);
         this.isInjective = isInjective;

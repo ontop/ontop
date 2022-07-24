@@ -28,20 +28,18 @@
 
 		<VSNode splits="1.0">
 			<CNode>
-				<Component label="Datasource manager">
+				<Component label="Connection parameters">
 					<Property id="pluginId"
 						value="it.unibz.inf.ontop.protege.DatasourcesManagerViewComponent" />
+				</Component>
+				<Component label="Ontop properties">
+					<Property id="pluginId"
+							  value="it.unibz.inf.ontop.protege.OntopPropertiesViewComponent" />
 				</Component>
 				<Component label="Mapping manager">
 					<Property id="pluginId"
 						value="it.unibz.inf.ontop.protege.MappingsManagerViewComponent" />
 				</Component>
-				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
-					value="it.unibz.infobda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
-<!--				<Component label="Mapping Assistant - BETA">-->
-<!--					<Property id="pluginId"-->
-<!--						value="it.unibz.inf.ontop.protege.MappingAssistantViewComponent" />-->
-<!--				</Component>-->
 			</CNode>
 		</VSNode>
 	</VSNode>

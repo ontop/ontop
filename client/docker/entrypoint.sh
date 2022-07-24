@@ -31,8 +31,6 @@ fi
 
 if [ "${ONTOP_PROPERTIES_FILE+x}" ]; then
   args_array+=("--properties=${ONTOP_PROPERTIES_FILE}")
-else
-  echo "ERROR: environment variable ONTOP_PROPERTIES_FILE is not set" && exit 1
 fi
 
 if [ "${ONTOP_DB_USER+x}" ]; then
@@ -66,6 +64,10 @@ if [ "${ONTOP_DB_URL_FILE+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_URL and ONTOP_DB_URL_FILE are conflicting. Please choose one of the two." && exit 1
   fi
   args_array+=("--db-url=$(< "${ONTOP_DB_URL_FILE}")")
+fi
+
+if [ "${ONTOP_DB_DRIVER+x}" ]; then
+  args_array+=("--db-driver=${ONTOP_DB_DRIVER}")
 fi
 
 if [ "${ONTOP_XML_CATALOG_FILE+x}" ]; then
@@ -112,6 +114,14 @@ if [ "${ONTOP_LAZY_INIT+x}" ]; then
   args_array+=("--lazy")
 fi
 
+if [ "${ONTOP_DISABLE_PORTAL_PAGE+x}" ]; then
+  args_array+=("--disable-portal-page")
+fi
+
+if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY+x}" ]; then
+  args_array+=("--enable-download-ontology")
+fi
+
 if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then
   ONTOP_JAVA_ARGS="-Xmx512m"
 fi
@@ -125,6 +135,9 @@ fi
 if [ -z "${ONTOP_FILE_ENCODING}" ]; then
   ONTOP_FILE_ENCODING="UTF-8"
 fi
+
+# echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+# it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
 
 java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
  it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"

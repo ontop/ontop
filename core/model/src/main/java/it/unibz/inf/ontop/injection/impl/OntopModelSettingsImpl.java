@@ -109,7 +109,11 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
      * Returns the boolean value of the given key.
      */
     Optional<Boolean> getBoolean(String key) {
-        Object value = get(key);
+        return getBoolean(properties, key);
+    }
+
+    static Optional<Boolean> getBoolean(Properties properties, String key) {
+        Object value = properties.get(key);
 
         if (value == null) {
             return Optional.empty();

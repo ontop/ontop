@@ -20,11 +20,10 @@ package it.unibz.inf.ontop.owlapi.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
@@ -61,6 +60,7 @@ public class QuestOWLFactory implements OntopOWLFactory {
     /**
      * TODO: should we really support this method?
      */
+    @Nonnull
     @Override
     public OWLReasoner createReasoner(@Nonnull OWLOntology ontology) {
         throw new UnsupportedOperationException("A configuration is required");
@@ -80,17 +80,10 @@ public class QuestOWLFactory implements OntopOWLFactory {
         return new QuestOWL(ontology, (QuestOWLConfiguration)config);
     }
 
-    @Override
     @Nonnull
-    public OntopOWLReasoner createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
-            throws IllegalConfigurationException, OWLOntologyCreationException {
-
-        QuestOWLConfiguration owlConfiguration = new QuestOWLConfiguration(config);
-
-        OWLOntology ontology = config.loadInputOntology()
-                .orElseThrow(() -> new IllegalConfigurationException("QuestOWL requires an ontology", owlConfiguration));
-
-        return createReasoner(ontology, owlConfiguration);
+    @Override
+    public OntopOWLReasoner createReasoner(@Nonnull OWLOntology ontology,
+                                           @Nonnull OntopSystemConfiguration config) throws IllegalConfigurationException {
+        return createReasoner(ontology, new QuestOWLConfiguration(config));
     }
-
 }

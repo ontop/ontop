@@ -8,11 +8,13 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -28,26 +30,32 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * See TranslationFactory for creating a new instance.
+ * See {@link TranslationFactory} for creating a new instance.
  */
 public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
+    private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreUtilsFactory coreUtilsFactory;
 
+    /**
+     * See {@link TranslationFactory#create(Mapping)}
+     */
     @AssistedInject
     private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory) {
+                               UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
+                               AtomFactory atomFactory) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.atomFactory = atomFactory;
     }
 
     @Override
@@ -58,7 +66,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     protected class BasicQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
         protected BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, transformerFactory);
+            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
         }
 
         @Override

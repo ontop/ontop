@@ -21,10 +21,6 @@ public interface OrderByNode extends QueryModifierNode {
 
     Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution);
 
-    @Override
-    OrderByNode clone();
-
-
     interface OrderComparator {
 
         boolean isAscending();

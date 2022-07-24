@@ -2,11 +2,7 @@
   "relations": [
     {
       "name": ["\"hr\"", "\"persons\""],
-      "query": "SELECT r.\"id\", r.\"status\" FROM \"person\" AS r WHERE r.\"status\" = 1",
-      "columns": {
-        "added": [],
-        "hidden": []
-      },
+      "query": "SELECT r.\"id\" AS \"rid\", r.\"id\" AS \"idd\", CONCAT(r.\"status\", '') AS \"s\" FROM \"person\" AS r WHERE r.\"status\" = 1",
       "uniqueConstraints": {
         "added": []
       },
@@ -16,7 +12,7 @@
       "foreignKeys": {
         "added": []
       },
-      "type": "SQLViewDefinition"
+      "type": "SQLLens"
     }
   ]
 }

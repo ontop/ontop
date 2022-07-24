@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
@@ -93,7 +93,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		OntopSystemOWLAPIConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
+		OntopSystemConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
 		/*
 		 * Validates the preferences
@@ -228,7 +228,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		try {
 			OntopConnection conn = queryEngine.getConnection();
 			return new DefaultOntopOWLConnection(conn, inputQueryFactory);
-		} catch (OntopConnectionException e) {
+		}
+		catch (OntopConnectionException e) {
 			// TODO: find a better exception?
 			throw new ReasonerInternalException(e);
 		}

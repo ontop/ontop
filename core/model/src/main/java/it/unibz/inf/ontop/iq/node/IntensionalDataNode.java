@@ -17,9 +17,6 @@ public interface IntensionalDataNode extends LeafIQTree {
     DataAtom<AtomPredicate> getProjectionAtom();
 
     @Override
-    IntensionalDataNode clone();
-
-    @Override
     IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom);

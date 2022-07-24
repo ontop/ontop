@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import it.unibz.inf.ontop.answering.resultset.*;
 
+import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.BNodeGenerator;
@@ -37,8 +38,8 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory) {
-		iterator = new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory);
+			RDF rdfFactory, boolean excludeInvalidTriples) {
+		iterator = new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, excludeInvalidTriples);
 	}
 
 	@Override
@@ -68,16 +69,18 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
 		private final Queue<RDFFact> statementBuffer;
 		private ImmutableMap<String, ValueExpr> extMap;
+		private final boolean excludeInvalidTriples;
 
 		private ResultSetIterator(
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
-				org.apache.commons.rdf.api.RDF rdfFactory) {
+				RDF rdfFactory, boolean excludeInvalidTriples) {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
+			this.excludeInvalidTriples = excludeInvalidTriples;
 			intExtMap();
 			this.statementBuffer = new LinkedList<>();
 		}
@@ -114,7 +117,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 		}
 
-		private void addStatementFromResultSet() {
+		private void addStatementFromResultSet() throws OntopConnectionException, OntopResultConversionException {
 			try {
 				OntopBindingSet bindingSet = resultSet.next();
 				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
@@ -132,8 +135,10 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 						}
 					}
 				}
-			} catch (OntopResultConversionException | OntopConnectionException e) {
-				e.printStackTrace();
+			} catch (OntopResultConversionException e) {
+				if (!excludeInvalidTriples)
+					throw e;
+				// TODO: inform the query logger that a triple has been excluded
 			}
 		}
 

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
@@ -13,7 +14,6 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * TODO: find a better name!
@@ -47,26 +47,28 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
             RDFTermType firstType = ((RDFTermTypeConstant) subTerm).getRDFTermType();
             return termFactory.getDBBooleanConstant(firstType.isA(baseType));
         }
-        else if ((subTerm instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) subTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol) {
-            ImmutableFunctionalTerm functionalTerm = ((ImmutableFunctionalTerm) subTerm);
+        else if (subTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) subTerm;
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-            ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap = ((RDFTermTypeFunctionSymbol)
-                    functionalTerm.getFunctionSymbol()).getConversionMap();
+            if (functionSymbol instanceof RDFTermTypeFunctionSymbol) {
+                ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap = ((RDFTermTypeFunctionSymbol)
+                        functionalTerm.getFunctionSymbol()).getConversionMap();
 
-            return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory, variableNullability);
-
+                return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory, variableNullability);
+            }
         }
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     private ImmutableTerm simplifyIntoConjunction(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap,
                                                   ImmutableTerm term, TermFactory termFactory, VariableNullability variableNullability) {
-        ImmutableSet<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
+        ImmutableList<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
                 .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
                 .map(Map.Entry::getKey)
                 .map(n -> termFactory.getStrictNEquality(term, n))
-                .collect(ImmutableCollectors.toSet());
+                .distinct()
+                .collect(ImmutableCollectors.toList());
 
         if (excludedMagicNumbers.size() == conversionMap.size())
             return termFactory.getFalseOrNullFunctionalTerm(
@@ -78,8 +80,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                     ImmutableList.of(termFactory.getDBIsNotNull(term)))
                     .simplify(variableNullability);
 
-        return termFactory.getConjunction(excludedMagicNumbers.stream())
-                .orElseThrow(() -> new MinorOntopInternalBugException("The empty case should have already captured"))
+        return termFactory.getConjunction(excludedMagicNumbers)
                 .simplify(variableNullability);
     }
 

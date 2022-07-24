@@ -136,8 +136,7 @@ public class QueryTemplateExtractor {
                         .forEach(t -> parameterMap.computeIfAbsent(t, g -> variableGenerator.generateNewVariable()));
 
                 ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, arguments.size())
-                        .boxed()
-                        .map(i -> Optional.ofNullable(groundTermIndex.get(i))
+                        .mapToObj(i -> Optional.ofNullable(groundTermIndex.get(i))
                                 .map(parameterMap::get)
                                 .map(t -> (VariableOrGroundTerm)t)
                                 .orElseGet(() -> arguments.get(i)))

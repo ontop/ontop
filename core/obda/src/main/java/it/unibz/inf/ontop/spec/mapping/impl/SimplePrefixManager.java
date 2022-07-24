@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -29,6 +28,7 @@ import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
@@ -42,7 +42,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
     	if (!prefixToIriMap.keySet().stream().allMatch(p -> p.endsWith(":")))
 			throw new IllegalArgumentException("Prefix names must end with a colon (:)");
 
-        this.prefixToIriMap = Streams.concat(
+        this.prefixToIriMap = Stream.concat(
         			prefixToIriMap.entrySet().stream(),
 					standardIriPrefixes.entrySet().stream())
 				.distinct()

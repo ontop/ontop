@@ -1,0 +1,24 @@
+{
+  "relations": [
+    {
+      "name" : ["\"views\"", "\"roles\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"ROLES\""],
+      "columns" : {
+        "added" : [
+        ],
+        "hidden" : [
+        ]
+      },
+      "uniqueConstraints" : {
+        "added" : []
+      },
+      "otherFunctionalDependencies" : {
+        "added" : []
+      },
+      "foreignKeys" : {
+        "added" : []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

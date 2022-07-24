@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -39,7 +41,7 @@ public interface CoreSingletons {
      */
     QueryTransformerFactory getQueryTransformerFactory();
 
-    UniqueTermTypeExtractor getUniqueTermTypeExtractor();
+    SingleTermTypeExtractor getUniqueTermTypeExtractor();
 
     OntopModelSettings getSettings();
 
@@ -48,5 +50,9 @@ public interface CoreSingletons {
     ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer();
 
     NotYetTypedEqualityTransformer getNotYetTypedEqualityTransformer();
+
+    PartiallyTypedSimpleCastTransformer getPartiallyTypeSimpleCastTransformer();
+
+    DatabaseInfoSupplier getDatabaseInfoSupplier();
     // TODO: complete
 }

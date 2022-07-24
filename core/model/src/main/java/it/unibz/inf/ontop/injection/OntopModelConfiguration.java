@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -19,8 +18,6 @@ import java.util.Properties;
 public interface OntopModelConfiguration {
 
     OntopModelSettings getSettings();
-
-    ExecutorRegistry getExecutorRegistry();
 
     Injector getInjector();
 

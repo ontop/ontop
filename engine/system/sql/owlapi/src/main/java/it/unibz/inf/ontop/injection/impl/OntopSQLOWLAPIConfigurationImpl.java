@@ -4,8 +4,6 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.OntopMappingOWLAPIOptions;
-import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.StandardMappingOWLAPIBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -14,6 +12,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Optional;
 
@@ -22,11 +21,11 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         implements OntopSQLOWLAPIConfiguration {
 
 
-    private final OntopMappingOWLAPIConfigurationImpl mappingOWLConfiguration;
+    private final OntopMappingOntologyConfigurationImpl mappingOWLConfiguration;
 
     OntopSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings, OntopSQLOWLAPIOptions options) {
         super(settings, options.sqlOptions);
-        mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlOptions);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
     }
 
     @Override
@@ -41,11 +40,11 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
 
     static class OntopSQLOWLAPIOptions {
         final OntopStandaloneSQLOptions sqlOptions;
-        final OntopMappingOWLAPIOptions owlOptions;
+        final OntopMappingOntologyOptions ontologyOptions;
 
-        OntopSQLOWLAPIOptions(OntopStandaloneSQLOptions sqlOptions, OntopMappingOWLAPIOptions owlOptions) {
+        OntopSQLOWLAPIOptions(OntopStandaloneSQLOptions sqlOptions, OntopMappingOntologyOptions ontologyOptions) {
             this.sqlOptions = sqlOptions;
-            this.owlOptions = owlOptions;
+            this.ontologyOptions = ontologyOptions;
         }
     }
 
@@ -53,23 +52,14 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
             extends OntopStandaloneSQLBuilderMixin<B>
             implements OntopSQLOWLAPIConfiguration.Builder<B> {
 
-        private final StandardMappingOWLAPIBuilderFragment<B> owlBuilderFragment;
         private final StandardMappingOntologyBuilderFragment<B> ontologyBuilderFragment;
         private boolean isOntologyDefined = false;
 
         OntopSQLOWLAPIBuilderMixin() {
             B builder = (B) this;
-            owlBuilderFragment = new StandardMappingOWLAPIBuilderFragment<>(builder,
-                    this::declareOntologyDefined
-                    );
             ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>(builder,
                     this::declareOntologyDefined
                     );
-        }
-
-        @Override
-        public B ontology(@Nonnull OWLOntology ontology) {
-            return owlBuilderFragment.ontology(ontology);
         }
 
         @Override
@@ -92,6 +82,11 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
             return ontologyBuilderFragment.ontologyFile(owlFile);
         }
 
+        @Override
+        public B ontologyReader(@Nonnull Reader reader) {
+            return ontologyBuilderFragment.ontologyReader(reader);
+        }
+
         void declareOntologyDefined() {
             if (isOntologyDefined) {
                 throw new InvalidOntopConfigurationException("Ontology already defined!");
@@ -104,8 +99,7 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
             OntopMappingOntologyOptions mappingOntologyOptions = ontologyBuilderFragment.generateMappingOntologyOptions(
                     standaloneSQLOptions.mappingOptions.mappingSQLOptions.mappingOptions);
 
-            OntopMappingOWLAPIOptions owlOptions = owlBuilderFragment.generateOntologyOWLAPIOptions(mappingOntologyOptions);
-            return new OntopSQLOWLAPIOptions(standaloneSQLOptions, owlOptions);
+            return new OntopSQLOWLAPIOptions(standaloneSQLOptions, mappingOntologyOptions);
         }
     }
 

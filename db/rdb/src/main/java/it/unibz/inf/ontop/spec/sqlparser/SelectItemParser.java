@@ -16,7 +16,6 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,12 +23,12 @@ public class SelectItemParser {
 
     private final QuotedIDFactory idfac;
     private final RAExpressionAttributes attributes;
-    private final Function<Expression, ImmutableTerm> expressionParser;
+    private final BiFunction<Expression, RAExpressionAttributes, ImmutableTerm> expressionParser;
 
     SelectItemParser(RAExpressionAttributes attributes, BiFunction<Expression, RAExpressionAttributes, ImmutableTerm> expressionParser, QuotedIDFactory idfac) {
         this.idfac = idfac;
         this.attributes = attributes;
-        this.expressionParser = e -> expressionParser.apply(e, attributes);
+        this.expressionParser = expressionParser;
     }
 
     public RAExpressionAttributes parseSelectItems(List<SelectItem> selectItems) {
@@ -100,7 +99,7 @@ public class SelectItemParser {
                 alias = Optional.empty();
             }
             stream = alias.map(a -> Stream.of(Maps.immutableEntry(
-                        idfac.createAttributeID(a), expressionParser.apply(expr))))
+                        idfac.createAttributeID(a), expressionParser.apply(expr, attributes))))
                     .orElse(Stream.of());
         }
     }

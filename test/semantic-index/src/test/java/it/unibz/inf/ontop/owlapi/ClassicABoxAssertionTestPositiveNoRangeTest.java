@@ -21,17 +21,23 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This test check proper handling of ABox assertions, including handling of the
@@ -40,11 +46,11 @@ import java.util.Properties;
  * important in that although all data will be entered, not all data
  * participates in all queries.
  */
-public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
+public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClassicABoxAssertionTestPositiveNoRangeTest.class);
 
-	private OWLConnection conn;
+	private final OWLConnection conn;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
@@ -52,17 +58,28 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
-		OntopOWLReasoner reasoner;
+		OntopOWLEngine reasoner;
 		try(OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-			reasoner = factory.createReasoner(siLoader.getConfiguration());
+
+			OntopSQLOWLAPIConfiguration configuration = siLoader.getConfiguration();
+
+			OWLOntology ontology = configuration.loadInputOntology()
+					.orElseThrow(() -> new RuntimeException("Was expecting an ontology"));
+
+			reasoner = factory.createReasoner(ontology, configuration);
 		}
 
 		conn = reasoner.getConnection();
 	}
 
+	private static final String prefix =
+			"PREFIX : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> \n"
+					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+					+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n"
+					+"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+
 	private int executeQuery(String q) throws OWLException {
-		String prefix = "PREFIX : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
 		try(OWLStatement st = conn.createStatement();
@@ -78,24 +95,28 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testClassAssertions() throws OWLException {
 		String query = "SELECT ?x WHERE {?x a :class}";
 		int count = executeQuery(query);
 		assertEquals(1, count);
 	}
 
+	@Test
 	public void testObjectPropertyAssertions() throws OWLException{
 		String query = "SELECT ?x ?y WHERE {?x :oproperty ?y}";
 		int count = executeQuery(query);
 		assertEquals(1, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsLiteral() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uliteral ?y}";
 		int count = executeQuery(query);
 		assertEquals(2, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsBoolean() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uboolean ?y}";
 		int count = executeQuery(query);
@@ -106,18 +127,21 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		assertEquals(2, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :udateTime ?y}";
 		int count = executeQuery(query);
 		assertEquals(5, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsDecimal() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :udecimal ?y}";
 		int count = executeQuery(query);
 		assertEquals(8, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsDouble() throws OWLException{
 		String query = "SELECT ?y WHERE {?x :udouble ?y}";
 		int count = executeQuery(query);
@@ -125,6 +149,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		assertEquals(6, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsFloat() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :ufloat ?y}";
 		int count = executeQuery(query);
@@ -132,6 +157,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		assertEquals(6, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsInt() throws OWLException{
 		String query = "SELECT ?x ?y WHERE {?x :uint ?y}";
 		int count = executeQuery(query);
@@ -142,12 +168,14 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		assertEquals(3, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsInteger()throws OWLException {
 		String query = "SELECT ?y WHERE {?x :uinteger ?y}";
 		int count = executeQuery(query);
 		assertEquals(4, count);
 	}
 
+	@Test
 	public void testDataPropertyAssertionsLong() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :ulong ?y}";
 		int count = executeQuery(query);

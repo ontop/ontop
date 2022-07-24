@@ -22,13 +22,15 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,8 +41,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 
 /***
  * Test returns  empty concepts and roles, based on the mappings.
@@ -67,7 +67,7 @@ public class EmptyEntitiesTest {
 	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
 	private Set<Description> emptyProperties = new HashSet<>();
 
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private ClassifiedTBox onto;
 
 	@Before
@@ -79,25 +79,25 @@ public class EmptyEntitiesTest {
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileName)
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        reasoner = factory.createReasoner(config);
+        reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPI_TRANSLATOR.translateAndClassify(config.loadProvidedInputOntology()).tbox();
+		onto = config.getInjector().getInstance(OWLAPITranslatorOWL2QL.class)
+				.translateAndClassify(config.loadProvidedInputOntology()).tbox();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 //			dropTables();
-			reasoner.dispose();
+			reasoner.close();
 //			connection.close();
 	}
 

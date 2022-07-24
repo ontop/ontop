@@ -1,13 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
@@ -17,6 +14,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
@@ -28,18 +26,16 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     private static final String LISTAGG_STR = "LISTAGG";
 
     private static final String UNSUPPORTED_MSG = "Not supported by H2";
-;
+    private final DatabaseInfoSupplier databaseInfoSupplier;
 
     @Inject
-    private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
+    private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory, DatabaseInfoSupplier databaseInfoSupplier) {
         super(createH2RegularFunctionTable(typeFactory), typeFactory);
+        this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(
             TypeFactory typeFactory) {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
-        DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
@@ -48,12 +44,41 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+
+        // Date time
+        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
+        builder.put(defaultDBDateTimestampType, datetimeNormFunctionSymbol);
 
         DBTermType varBinary = dbTypeFactory.getDBTermType(VARBINARY_STR);
-        builder.put(varBinary, typeFactory.getDatatype(XSD.HEXBINARY), createHexBinaryNormFunctionSymbol(varBinary));
+        builder.put(varBinary, createHexBinaryNormFunctionSymbol(varBinary));
+
+        return builder.build();
+    }
+
+    /**
+     * Ensure geometries are recast back from text.
+     *
+     * At moment only WKT is supported, but in the future GML could also be.
+     * It is therefore important to consider the target datatype for choosing the right normalization.
+     *
+     */
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // TODO: move it to the map!
+        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
+
+        //GEOMETRY
+        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
+        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        // For WKT
+        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
 
         return builder.build();
     }
@@ -146,24 +171,26 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
-        return new UnaryDBFunctionSymbolWithSerializerImpl(CEIL_STR, dbTermType, dbTermType, false,
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(CEIL_STR, dbTermType, dbTermType, false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "CAST(CEIL(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+                        "CAST(CEIL(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
     }
 
     @Override
-    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
-        return new UnaryDBFunctionSymbolWithSerializerImpl(FLOOR_STR, dbTermType, dbTermType, false,
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check term type
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(FLOOR_STR, dbTermType, dbTermType, false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "CAST(FLOOR(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+                        "CAST(FLOOR(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
-        return new UnaryDBFunctionSymbolWithSerializerImpl(ROUND_STR, dbTermType, dbTermType, false,
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
+        // TODO: check term type
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(ROUND_STR, dbTermType, dbTermType, false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "CAST(ROUND(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+                        "CAST(ROUND(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
     }
 
     /**

@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractCompositeIQTree<N extends QueryNode> implements CompositeIQTree<N> {
@@ -45,12 +44,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     private final TermFactory termFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
-                                      IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
-        this(rootNode, children, convertIQProperties(iqProperties), iqTreeTools, iqFactory, termFactory);
-    }
-
-    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqTreeTools = iqTreeTools;
@@ -66,10 +59,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         // To be computed on-demand
         knownVariables = null;
         hasBeenSuccessfullyValidate = false;
-    }
-
-    private static IQTreeCache convertIQProperties(IQProperties iqProperties) {
-        return iqProperties.convertIQTreeCache();
     }
 
     @Override
@@ -134,28 +123,15 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || ((o instanceof CompositeIQTree)
-                && isEquivalentTo((CompositeIQTree) o));
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractCompositeIQTree<N> other = (AbstractCompositeIQTree<N>) o;
+        return rootNode.equals(other.rootNode) && children.equals(other.children);
     }
 
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }
-
-    @Override
-    public boolean isEquivalentTo(IQTree tree) {
-        if (!getRootNode().isEquivalentTo(tree.getRootNode()))
-            return false;
-
-        ImmutableList<IQTree> otherChildren = tree.getChildren();
-        return (children.size() == otherChildren.size())
-                && IntStream.range(0, children.size())
-                    .allMatch(i -> children.get(i).isEquivalentTo(otherChildren.get(i)));
-    }
-
-    protected IQProperties getProperties() {
-        return treeCache.convertIntoIQProperties();
     }
 
     protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
@@ -198,25 +174,19 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return applyFreshRenaming(freshRenamingSubstitution, false);
     }
 
-    @Override
-    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution, true);
-    }
-
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
                                                               ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         if (!constraint.isPresent())
             return constraint;
 
         ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(descendingSubstitution::apply)
+                .map(descendingSubstitution::applyToVariable)
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());
 
         return termFactory.getConjunction(constraint.get().flattenAND()
-                .filter(e -> e.getVariableStream()
-                        .anyMatch(newVariables::contains)));
+                .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
     }
 
     protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);

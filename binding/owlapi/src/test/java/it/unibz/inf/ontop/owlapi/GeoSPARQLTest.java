@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -20,6 +21,7 @@ import java.sql.DriverManager;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.*;
+import static org.junit.Assert.assertEquals;
 
 public class GeoSPARQLTest {
 
@@ -27,7 +29,7 @@ public class GeoSPARQLTest {
     private static final String obdaFile = "src/test/resources/geosparql/geosparql-h2.obda";
     private static final String propertyFile = "src/test/resources/geosparql/geosparql-h2.properties";
 
-    private OntopOWLReasoner reasoner;
+    private OntopOWLEngine reasoner;
     private OWLConnection conn;
     private Connection sqlConnection;
 
@@ -47,15 +49,14 @@ public class GeoSPARQLTest {
                 .enableTestMode()
                 .build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        reasoner = factory.createReasoner(config);
+        reasoner = new SimpleOntopOWLEngine(config);
         conn = reasoner.getConnection();
     }
 
     @After
     public void tearDown() throws Exception {
         conn.close();
-        reasoner.dispose();
+        reasoner.close();
         if (!sqlConnection.isClosed()) {
             try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
@@ -64,20 +65,6 @@ public class GeoSPARQLTest {
             }
         }
     }
-
-    /*@Test
-    public void testSelectWithin() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "SELECT ?x ?y WHERE {\n" +
-                "?x a :Geom; geo:asWKT ?xWkt.\n" +
-                "?y a :Geom; geo:asWKT ?yWkt.\n" +
-                "FILTER (geof:sfWithin(?xWkt, ?yWkt) && ?x != ?y)\n" +
-                "}\n";
-        String val = runQueryReturnIndividual(query);
-        assertEquals("<http://ex.org/1>", val);
-    }*/
 
     @Test // Polygon within polygon
     public void testAskWithin() throws Exception {
@@ -334,6 +321,42 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
+
+    @Test // Case when WKT is from a template  "POINT ({longitude} {latitude})"^^geo:wktLiteral
+    public void testSelectDistance_long_lat() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/point/3> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/point/4> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "FILTER(?x < 350000) .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Case when WKT is from template "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral
+    public void testSelectDistance_Metre_EPSG3044_long_lat() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg3044/21> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/epsg3044/26> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(1.41, val, 0.1);
+    }
+    
     @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
@@ -1015,7 +1038,6 @@ public class GeoSPARQLTest {
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:difference(?xWkt, 'POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
@@ -1032,7 +1054,6 @@ public class GeoSPARQLTest {
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:difference(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
@@ -1293,61 +1314,6 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-   /* @Test // Geocollection with point vs polygon
-    public void testAskRcc8Tppi2() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "ASK WHERE {\n" +
-                ":17 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":16 a :Geom; geo:asWKT ?yWkt.\n" +
-                "FILTER (geof:rcc8tppi(?xWkt, ?yWkt))\n" +
-                "}\n";
-        boolean val = runQueryAndReturnBooleanX(query);
-        assertTrue(val);
-    }*/
-
-    /*@Test // Polygon vs point
-    public void testAskRcc8Tppi3() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "ASK WHERE {\n" +
-                ":17 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":15 a :Geom; geo:asWKT ?yWkt.\n" +
-                "FILTER (geof:rcc8tppi(?xWkt, ?yWkt))\n" +
-                "}\n";
-        boolean val = runQueryAndReturnBooleanX(query);
-        assertTrue(val);
-    }*/
-
-    /*@Test // No geometry self intersections
-    public void testAskIsSimple() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "ASK WHERE {\n" +
-                ":15 a :Geom; geo:isSimple ?x.\n" +
-                "FILTER ((?x))\n" +
-                "}\n";
-        boolean val = runQueryAndReturnBooleanX(query);
-        assertFalse(val);
-    }
-
-    @Test // Empty
-    public void testAskIsEmpty() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "ASK WHERE {\n" +
-                ":18 a :Geom; geo:isEmpty ?xWkt.\n" +
-                "BIND(?xWkt as ?x)\n" +
-                "FILTER ((?x))\n" +
-                "}\n";
-        boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(true, val);
-    }*/
-
     @Test // ST_SRID retrieves an integer
     public void testSelectGetSRID() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -1401,6 +1367,55 @@ public class GeoSPARQLTest {
         String val = runQueryAndReturnString(query);
         // val has type "xsd:anyURI"
         assertEquals("http://www.opengis.net/def/crs/EPSG/0/3044", val);
+    }
+
+    @Test // geo:hasGeometry format test
+    public void testAskIntersectHasGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/feature/1> a :Feature; geo:hasGeometry/geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/feature/2> a :Feature; geo:hasGeometry/geo:asWKT ?yWkt.\n" +
+                "BIND(geof:buffer(?yWkt, 10, uom:degree) AS ?bWkt) .\n" +
+                "FILTER (geof:sfIntersects(?xWkt, ?bWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Select Distance with Limit 1, {Lon} {Lat} template example
+    public void testSelectDistance_Lon_Lat_WithLimit() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "SELECT ?x WHERE {\n" +
+                "?lake a :Lake ;\n" +
+                "geo:asWKT ?w1 .\n" +
+                "?river a :River ;\n" +
+                "geo:asWKT ?w2 .\n" +
+                "BIND(geof:distance(?w1,?w2,uom:metre) as ?x) .\n" +
+                "} LIMIT 1\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(111657.03929352836, val, 1);
+    }
+
+    @Test // ST_BUFFER as sub-argument of ST_WITHIN
+    public void testAskWithinBuffer() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/feature/1> a :Feature; geo:hasGeometry/geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/feature/2> a :Feature; geo:hasGeometry/geo:asWKT ?yWkt.\n" +
+                "BIND(geof:buffer(?yWkt, 3500000, uom:metre) AS ?bWkt) .\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?bWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
     }
 
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.answering.connection.JDBCStatementFinalizer;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -118,7 +119,7 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
+    public  <R extends OBDAResultSet>  int getTupleCount(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
         IQ targetQuery = getExecutableQuery(inputQuery);
         try {
             String sql = extractSQLQuery(targetQuery);
@@ -196,10 +197,7 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 queryLogger.declareResultSetUnblockedAndSerialize();
-                return settings.isDistinctPostProcessingEnabled()
-                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode,
-                            executableQuery.getProjectionAtom(), queryLogger, statementClosingCB, termFactory, substitutionFactory)
-                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(),
+                return new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(),
                             queryLogger, statementClosingCB, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
@@ -239,7 +237,8 @@ public class SQLQuestStatement extends QuestStatement {
             queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
-        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory);
+        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory,
+                settings.areInvalidTriplesExcludedFromResultSet());
     }
 
     private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {

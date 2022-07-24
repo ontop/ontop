@@ -7,17 +7,15 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import it.unibz.inf.ontop.querymanager.QueryIOManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -36,22 +34,21 @@ public abstract class AbstractVirtualModeTest {
 
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
-    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
         return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty());
     }
 
-    protected static OntopOWLReasoner createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile) throws OWLOntologyCreationException {
         return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile));
     }
 
-    private static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) throws OWLOntologyCreationException {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) throws OWLOntologyCreationException {
+        owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
+        obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
+        propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile);
-        return factory.createReasoner(config);
+        return new SimpleOntopOWLEngine(config);
     }
 
     private static OntopSQLOWLAPIConfiguration createConfig(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) {
@@ -62,7 +59,7 @@ public abstract class AbstractVirtualModeTest {
                     .ontologyFile(owlFile)
                     .propertyFile(propertiesFile)
                     .basicImplicitConstraintFile(
-                            AbstractBindTestWithFunctions.class.getResource(optionalImplicitConstraintsFile.get()).toString())
+                            AbstractVirtualModeTest.class.getResource(optionalImplicitConstraintsFile.get()).toString())
                     .enableTestMode()
                     .build();
         }
@@ -75,19 +72,18 @@ public abstract class AbstractVirtualModeTest {
                 .build();
     }
 
-    protected static OntopOWLReasoner createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        r2rmlFile =  AbstractBindTestWithFunctions.class.getResource(r2rmlFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+    protected static OntopOWLEngine createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
+        owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
+        r2rmlFile =  AbstractVirtualModeTest.class.getResource(r2rmlFile).toString();
+        propertiesFile = AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(r2rmlFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        return factory.createReasoner(config);
+        return new SimpleOntopOWLEngine(config);
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws OWLException {
@@ -179,10 +175,7 @@ public abstract class AbstractVirtualModeTest {
                 String errorMessageSuffix = returnedAnswers.size() > 10 ?
                         "none was returned" :
                         "the query returned " + returnedAnswers;
-                assertTrue(
-                        "One of " + expectedTuples + " was expected among the answers, but " + errorMessageSuffix,
-                        false
-                );
+                fail("One of " + expectedTuples + " was expected among the answers, but " + errorMessageSuffix);
             }
         }
     }
@@ -287,72 +280,6 @@ public abstract class AbstractVirtualModeTest {
 
             // May be null
             return sql;
-        }
-    }
-
-    protected void runQueries(String queryFileName) throws Exception {
-
-        try (OWLStatement st = createStatement()) {
-            QueryController qc = new QueryController();
-            QueryIOManager qman = new QueryIOManager(qc);
-            qman.load(queryFileName);
-
-            for (QueryControllerGroup group : qc.getGroups()) {
-                for (QueryControllerQuery query : group.getQueries()) {
-
-                    log.debug("Executing query: {}", query.getID());
-                    log.debug("Query: \n{}", query.getQuery());
-
-                    long start = System.nanoTime();
-                    try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
-                        long end = System.nanoTime();
-                        long time = (end - start) / 1000;
-
-                        int count = 0;
-                        while (res.hasNext()) {
-                            count += 1;
-                        }
-                        log.debug("Total result: {}", count);
-                        assertNotEquals(0, count);
-                        log.debug("Elapsed time: {} ms", time);
-                    }
-                }
-            }
-        }
-    }
-
-    protected void runQuery(String query) throws Exception {
-        try (OntopOWLStatement st = createStatement()) {
-            long t1 = System.nanoTime();
-            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
-                while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
-                    log.debug(bindingSet.toString());
-                }
-            }
-            long t2 = System.nanoTime();
-
-            /*
-             * Print the query summary
-             */
-            IQ iq = st.getExecutableQuery(query);
-            String sqlQuery = Optional.of(iq.getTree())
-                    .filter(t -> t instanceof UnaryIQTree)
-                    .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
-                    .filter(n -> n instanceof NativeNode)
-                    .map(n -> ((NativeNode) n).getNativeQueryString())
-                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query: " + iq));
-            log.info("");
-            log.info("The input SPARQL query:");
-            log.info("=======================");
-            log.info(query);
-            log.info("");
-            log.info("The output SQL query:");
-            log.info("=====================");
-            log.info(sqlQuery);
-            log.info("Query Execution Time:");
-            log.info("=====================");
-            log.info((t2 - t1)/1000 + "ms");
         }
     }
 

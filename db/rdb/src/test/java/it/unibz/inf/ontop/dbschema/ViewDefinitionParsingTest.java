@@ -25,15 +25,6 @@ public class ViewDefinitionParsingTest {
                 "src/test/resources/prof/prof.db-extract.json");
     }
 
-    /**
-     * Multiple primary keys defined in view
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testValidProfBasicViews_DuplicatePK() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-duplicate-constraintPK.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
-    }
-
      /**
      * Hidden attribute present in newly added FD
      */
@@ -52,7 +43,7 @@ public class ViewDefinitionParsingTest {
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
-    protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
+    public static ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
             throws Exception {
 

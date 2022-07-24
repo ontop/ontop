@@ -29,8 +29,7 @@ public abstract class AbstractSimpleMultitypedDBFunctionSymbol extends AbstractT
 
     protected AbstractSimpleMultitypedDBFunctionSymbol(String nameInDialect, int arity, DBTermType targetType, boolean isInjective) {
         super(nameInDialect + targetType + arity, IntStream.range(0, arity)
-                    .boxed()
-                    .map(i -> (TermType) targetType)
+                    .mapToObj(i -> (TermType) targetType)
                     .collect(ImmutableCollectors.toList()),
                 targetType);
         this.nameInDialect = nameInDialect;

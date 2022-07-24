@@ -1,0 +1,20 @@
+@prefix : <http://example.org/voc#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:MAPID-professor> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, last_name FROM professors;"
+    ];
+   rr:predicateObjectMap [ a rr:PredicateObjectMap;
+          rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+              rr:constant "Professore"@it
+            ];
+          rr:predicate :label
+        ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :Professor;
+      rr:template "http://example.org/professor/{prof_id}";
+      rr:termType rr:IRI
+    ] .

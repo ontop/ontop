@@ -50,11 +50,6 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return systemSettings.isDistinctPostProcessingEnabled();
-    }
-
-    @Override
     public boolean isKeepAliveEnabled() {
         return getRequiredBoolean(KEEP_ALIVE);
     }
@@ -95,27 +90,17 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
-    public Optional<Integer> getHttpMaxAge() {
-        return systemSettings.getHttpMaxAge();
+    public Optional<String> getHttpCacheControl() {
+        return systemSettings.getHttpCacheControl();
     }
 
     @Override
-    public Optional<Integer> getHttpStaleWhileRevalidate() {
-        return systemSettings.getHttpStaleWhileRevalidate();
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleIfError() {
-        return systemSettings.getHttpStaleIfError();
-    }
-
-    @Override
-    public String getJdbcUser() {
+    public Optional<String> getJdbcUser() {
         return sqlCredentialSettings.getJdbcUser();
     }
 
     @Override
-    public String getJdbcPassword() {
+    public Optional<String> getJdbcPassword() {
         return sqlCredentialSettings.getJdbcPassword();
     }
 }

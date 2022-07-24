@@ -10,8 +10,6 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -59,20 +57,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     public OntopMappingSettings getSettings() {
         return settings;
     }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
-
-        return internalExecutorMapBuilder.build();
-    }
+    
 
     /**
      * Can be overloaded.
@@ -129,8 +114,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
 
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
         }
 
         /*
@@ -140,8 +124,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -151,8 +134,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -162,8 +144,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         throw new MissingInputMappingException();

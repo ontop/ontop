@@ -9,13 +9,13 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
-import java.util.Optional;
+import java.util.Objects;
 
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
@@ -86,22 +86,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        return variableNullability.isPossiblyNullable(variable);
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return ImmutableSet.of();
     }
 
@@ -111,10 +96,16 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof NativeNode)
-                && ((NativeNode) queryNode).getVariables().equals(variables)
-                && ((NativeNode) queryNode).getNativeQueryString().equals(nativeQueryString);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NativeNodeImpl that = (NativeNodeImpl) o;
+        return nativeQueryString.equals(that.nativeQueryString) && variables.equals(that.variables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nativeQueryString, variables);
     }
 
     @Override
@@ -133,6 +124,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitNative(this);
     }
@@ -140,11 +136,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
-    }
-
-    @Override
-    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyFreshRenaming(freshRenamingSubstitution);
     }
 
     @Override

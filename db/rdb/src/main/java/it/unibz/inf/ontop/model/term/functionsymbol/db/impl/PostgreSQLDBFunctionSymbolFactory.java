@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,7 +9,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -25,6 +21,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String RANDOM_STR = "RANDOM";
+    private static final String POSITION_STR = "POSITION";
 
     @Inject
     protected PostgreSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -39,6 +36,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
+        DBFunctionSymbol positionFunctionSymbol = new SimpleTypedDBFunctionSymbolImpl(POSITION_STR, 2,
+                dbTypeFactory.getDBLargeIntegerType(), false, abstractRootDBType,
+                (terms, termConverter, termFactory) -> String.format("position(%s in %s)",
+                        termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1))));
+        table.put(POSITION_STR, 2, positionFunctionSymbol);
+
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
@@ -50,17 +53,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+        builder.putAll(super.createNormalizationMap());
 
         //TIMESTAMP
         DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
-        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        builder.put(timeStamp, datetimeNormFunctionSymbol);
 
         //TIMETZ
         DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
@@ -69,7 +69,25 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 timeTZType, dbStringType,
                 (terms, termConverter, termFactory) -> String.format(
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
-        builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
+        builder.put(timeTZType, timeTZNormFunctionSymbol);
+
+        return builder.build();
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        builder.putAll(super.createNormalizationTable());
+
+        //GEOMETRY
+        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
+        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
+
+        //GEOGRAPHY - Data type exclusive to PostGIS
+        DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
+        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeographyType);
+        builder.put(defaultDBGeographyType,typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
         return builder.build();
     }
@@ -78,9 +96,13 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
                 (terms, termConverter, termFactory) -> String.format(
-                        "array_to_string(array_agg(%s%s),%s)",
+                        "string_agg(%s%s,%s)",
                         isDistinct ? "DISTINCT " : "",
-                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(
+                                termFactory.getDBCastFunctionalTerm(
+                                        dbTypeFactory.getDBStringType(),
+                                        terms.get(0)
+                                )),
                         termConverter.apply(terms.get(1))
                 ));
     }
@@ -270,5 +292,57 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 // Implicit cast
                 return super.createStringToStringCastFunctionSymbol(inputType, targetType);
         }
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/604800)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/86400)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/3600)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/60)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s)))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))*1000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 }

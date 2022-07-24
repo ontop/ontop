@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -80,7 +81,6 @@ public class SubLiftTest {
 
     private String execute(String query, int expectedCardinality) throws Exception {
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(MAPPING_FILE)
                 .ontologyFile(OWL_FILE)
@@ -89,7 +89,7 @@ public class SubLiftTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
@@ -123,7 +123,7 @@ public class SubLiftTest {
         }
         finally {
             conn.close();
-            reasoner.dispose();
+            reasoner.close();
         }
         return sql;
     }

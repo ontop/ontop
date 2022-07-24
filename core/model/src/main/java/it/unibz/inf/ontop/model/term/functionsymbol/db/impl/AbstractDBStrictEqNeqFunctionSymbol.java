@@ -21,8 +21,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     protected AbstractDBStrictEqNeqFunctionSymbol(String name, int arity, boolean isEq,
                                                   TermType rootTermType, DBTermType dbBooleanTermType) {
         super(name + arity, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> rootTermType)
+                .mapToObj(i -> rootTermType)
                 .collect(ImmutableCollectors.toList()), dbBooleanTermType);
         this.isEq = isEq;
     }
@@ -35,6 +34,15 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
+    }
+
+    /**
+     * Here all sorts of data types are accepted as arguments, so it is clearly not safe to decompose it.
+     * Concrete problems already experienced.
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        return false;
     }
 
     @Override

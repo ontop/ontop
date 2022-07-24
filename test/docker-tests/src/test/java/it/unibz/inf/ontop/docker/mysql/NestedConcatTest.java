@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -17,7 +17,7 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
     private static final String obdafile = "/mysql/nestedconcat/test.obda";
     private static final String propertyfile = "/mysql/nestedconcat/test.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -32,31 +32,18 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Test
     public void testConcat() throws Exception {
-
-		/*
-		 * Get the book information that is stored in the database
-		 */
-        String sparqlQuery =
-//                "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-//                        "SELECT ?per ?yS\n" +
-//                        "WHERE{\n" +
-//                        "?per a :Period ; :yStart ?yS \n" +
-//                        "}\n" +
-//                        "LIMIT 1";
-                "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-                            "SELECT ?per ?yS ?yE\n" +
-                            "WHERE{\n" +
-                            "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
-                            "}\n" +
-                            "LIMIT 1";
-
-        runQuery(sparqlQuery);
+        countResults(1, "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
+                "SELECT ?per ?yS ?yE\n" +
+                "WHERE{\n" +
+                "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
+                "}\n" +
+                "LIMIT 1");
     }
 }

@@ -22,8 +22,7 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
     protected ReplaceSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
         super("SP_REPLACE_" + arity, XPathFunction.REPLACE,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> xsdStringType)
+                        .mapToObj(i -> xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
 
@@ -80,13 +79,14 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
 
         RDFTermTypeConstant xsdStringConstant = termFactory.getRDFTermTypeConstant(xsdStringType);
 
-        Stream<ImmutableExpression> conditionStream = Stream.concat(
+        ImmutableList<ImmutableExpression> conditions = Stream.concat(
                 Stream.of(termFactory.getIsAExpression(typeTerms.get(0), xsdStringType)),
                 typeTerms.stream()
                         .skip(1)
-                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)));
+                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)))
+                .collect(ImmutableCollectors.toList());
 
-        return termFactory.getConjunction(conditionStream).get()
+        return termFactory.getConjunction(conditions)
                 .evaluate(variableNullability);
     }
 }

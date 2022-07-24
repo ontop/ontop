@@ -24,9 +24,10 @@ import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
@@ -67,7 +68,7 @@ public class RegexpTest extends TestCase {
 	private String obdafile;
 	private String propertyfile;
 	
-	private OntopOWLReasoner reasoner;
+	private OntopOWLEngine reasoner;
 	private Connection sqlConnection;
 	private boolean isH2;
 	private final boolean acceptFlags;
@@ -136,13 +137,12 @@ public class RegexpTest extends TestCase {
 		final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(obdafile);
 		final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(propertyfile);
 		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileUrl.toString())
 				.propertyFile(propertyFileUrl.toString())
 				.ontologyFile(owlFileUrl)
 				.build();
-        reasoner = factory.createReasoner(config);
+        reasoner = new SimpleOntopOWLEngine(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
@@ -153,7 +153,7 @@ public class RegexpTest extends TestCase {
 	@After
 	public void tearDown() throws Exception{
 		conn.close();
-		reasoner.dispose();
+		reasoner.close();
 		if(this.isH2)
 			deleteH2Database();
 	}

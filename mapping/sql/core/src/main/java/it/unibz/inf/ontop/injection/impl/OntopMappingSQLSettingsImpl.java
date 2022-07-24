@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.impl.OntopSQLCoreSettingsImpl.loadSQLCoreProperties;
@@ -35,17 +36,12 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     @Override
-    public String getJdbcName() {
-        return sqlSettings.getJdbcName();
-    }
-
-    @Override
-    public String getJdbcUser() {
+    public Optional<String> getJdbcUser() {
         return sqlSettings.getJdbcUser();
     }
 
     @Override
-    public String getJdbcPassword() {
+    public Optional<String> getJdbcPassword() {
         return sqlSettings.getJdbcPassword();
     }
 

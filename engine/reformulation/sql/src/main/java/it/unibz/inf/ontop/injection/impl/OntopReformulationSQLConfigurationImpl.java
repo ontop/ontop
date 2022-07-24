@@ -114,11 +114,6 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         }
 
         @Override
-        public B jdbcName(String dbName) {
-            return sqlBuilderFragment.jdbcName(dbName);
-        }
-
-        @Override
         public B jdbcUrl(String jdbcUrl) {
             return sqlBuilderFragment.jdbcUrl(jdbcUrl);
         }

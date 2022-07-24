@@ -17,6 +17,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.rio.jsonld.JSONLDWriter;
 import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
@@ -72,6 +73,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final String NQUADS = "nquads";
     private static final String TRIG = "trig";
 
+    private static final String JSONLD = "jsonld";
+
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
             title = "output", description = "output file (default) or prefix (only for --separate-files)")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
@@ -81,7 +84,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS, TRIG})
+    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS, TRIG, JSONLD})
     public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -114,30 +117,19 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         RDF4JMaterializer materializer;
         try {
-            OWLOntology ontology = loadOntology();
-            OntopSQLOWLAPIConfiguration materializerConfiguration = createAndInitConfigurationBuilder()
-                    .ontology(ontology)
-                    .build();
+            Builder<? extends Builder<?>> configurationBuilder = createAndInitConfigurationBuilder();
+            if (owlFile != null)
+                configurationBuilder.ontologyFile(owlFile);
+
             materializer = RDF4JMaterializer.defaultMaterializer(
-                    materializerConfiguration,
+                    configurationBuilder.build(),
                     MaterializationParams.defaultBuilder()
                             .build()
             );
-        } catch (OBDASpecificationException | OWLOntologyCreationException e) {
+        } catch (OBDASpecificationException e) {
             throw new RuntimeException(e);
         }
         return materializer;
-    }
-
-    private OWLOntology loadOntology() throws OWLOntologyCreationException {
-        if (owlFile != null) {
-            OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(owlFile));
-            if (disableReasoning) {
-                return extractDeclarations(ontology.getOWLOntologyManager(), ontology);
-            }
-            return ontology;
-        }
-        return OWLManager.createOWLOntologyManager().createOntology();
     }
 
     private void runWithSingleFile(RDF4JMaterializer materializer, OutputSpec outputSpec) {
@@ -352,6 +344,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     return  ".nq";
                 case TRIG:
                     return ".trig";
+                case JSONLD:
+                    return ".jsonld";
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
@@ -376,6 +370,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 case TRIG:
                     TriGWriter ntw = new TriGWriter(writer);
                     return ntw;
+                case JSONLD:
+                    return new JSONLDWriter(writer);
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }

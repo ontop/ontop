@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
@@ -21,6 +22,9 @@ public class QueryRenamerImpl implements QueryRenamer {
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
 
+    /**
+     * See {@link QueryTransformerFactory#createRenamer(InjectiveVar2VarSubstitution)}
+     */
     @AssistedInject
     private QueryRenamerImpl(@Assisted InjectiveVar2VarSubstitution injectiveVar2VarSubstitution,
                              IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
