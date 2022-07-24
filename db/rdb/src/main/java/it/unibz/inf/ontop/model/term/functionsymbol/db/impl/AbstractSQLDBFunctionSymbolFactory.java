@@ -723,7 +723,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
-        return new DefaultSQLTimestampISONormFunctionSymbol(
+        // TODO: check if it is safe to allow the decomposition
+        return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
                 this::serializeDateTimeNorm);

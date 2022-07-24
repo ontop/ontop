@@ -1024,6 +1024,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getConversionFromRDFLexical2DBFunctionSymbol(targetDBType),
+				dbTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType) {
 		return getConversionFromRDFLexical2DB(
 				rdfType.getClosestDBType(typeFactory.getDBTypeFactory()),
