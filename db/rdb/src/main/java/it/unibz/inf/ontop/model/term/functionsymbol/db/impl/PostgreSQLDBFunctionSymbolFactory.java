@@ -345,4 +345,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
+
+    @Override
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("upper(encode(%s, 'hex'))", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("decode(%s, 'hex')", termConverter.apply(terms.get(0)));
+    }
 }
