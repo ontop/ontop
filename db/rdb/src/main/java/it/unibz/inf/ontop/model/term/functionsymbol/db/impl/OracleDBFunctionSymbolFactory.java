@@ -301,8 +301,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
-        // TODO: check if it is safe to allow the decomposition
-        return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(
+        // TODO: check conditions for decomposing
+        return new NoDecompositionStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
                 (terms, converter, factory) -> serializeDateTimeNorm(dbDateTimestampType, terms, converter));
@@ -363,11 +363,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TRUNC(EXTRACT(DAY FROM %s - %s) / 7)",
                 termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
