@@ -746,8 +746,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return termConverter.apply(
-                termFactory.getDBUpper(
+                termFactory.getDBLower(
                         termFactory.getDBCastFunctionalTerm(dbStringType, terms.get(0))));
+    }
+
+    protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms,
+                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return termConverter.apply(
+                        termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBHexBinaryType(), terms.get(0)));
     }
 
     @Override
@@ -766,8 +772,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol() {
-        throw new RuntimeException("TODO: implement createHexBinaryDenormFunctionSymbol");
+    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
+        return new DefaultHexBinaryDenormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryDenorm);
     }
 
     @Override

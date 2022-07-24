@@ -446,7 +446,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         builder.put(booleanType, createBooleanDenormFunctionSymbol());
 
         // Binary
-        DBTypeConversionFunctionSymbol hexBinaryDenormFunctionSymbol = createHexBinaryDenormFunctionSymbol();
+        DBTypeConversionFunctionSymbol hexBinaryDenormFunctionSymbol = createHexBinaryDenormFunctionSymbol(binaryType);
         builder.put(binaryType, hexBinaryDenormFunctionSymbol);
 
         return builder.build();
@@ -1076,7 +1076,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
     protected abstract DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType);
-    protected abstract DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
