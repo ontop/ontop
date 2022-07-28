@@ -347,6 +347,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
 														   RDFTermType rdfType);
 
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm);
+
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType);
 
 
@@ -357,7 +359,7 @@ public interface TermFactory {
 	 *
 	 * This functional term must not appear in the final mapping
 	 */
-	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
+	ImmutableFunctionalTerm getPartiallyDefinedConversionToString(Variable variable);
 
 	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
 

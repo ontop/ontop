@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -416,6 +417,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         builder.put(defaultDBDateTimestampType, datetimeNormFunctionSymbol);
         // Boolean
         builder.put(dbBooleanType, createBooleanNormFunctionSymbol(dbBooleanType));
+        // Binary
+        DBTermType defaultBinaryType = dbTypeFactory.getDBHexBinaryType();
+        DBTypeConversionFunctionSymbol hexBinaryNormFunctionSymbol = createHexBinaryNormFunctionSymbol(defaultBinaryType);
+        builder.put(defaultBinaryType, hexBinaryNormFunctionSymbol);
 
         return builder.build();
     }
@@ -429,6 +434,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
         DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+        DBTermType binaryType = dbTypeFactory.getDBHexBinaryType();
 
         ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
 
@@ -438,6 +444,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         // Boolean
         builder.put(booleanType, createBooleanDenormFunctionSymbol());
+
+        // Binary
+        DBTypeConversionFunctionSymbol hexBinaryDenormFunctionSymbol = createHexBinaryDenormFunctionSymbol(binaryType);
+        builder.put(binaryType, hexBinaryDenormFunctionSymbol);
 
         return builder.build();
     }
@@ -1062,9 +1072,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
+    protected abstract DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
     protected abstract DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType);
+    protected abstract DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
@@ -1491,9 +1503,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
                 .flatMap(t -> Optional.ofNullable(deNormalizationTable.get(targetDBType, t)))
-                .orElseGet(() -> Optional.ofNullable(deNormalizationMap.get(targetDBType))
-                        // Fallback to simple cast
-                        .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType)));
+                .orElseGet(() -> getConversionFromRDFLexical2DBFunctionSymbol(targetDBType));
+    }
+
+    @Override
+    public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType) {
+        return Optional.ofNullable(deNormalizationMap.get(targetDBType))
+                // Fallback to simple cast
+                .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
 
 }

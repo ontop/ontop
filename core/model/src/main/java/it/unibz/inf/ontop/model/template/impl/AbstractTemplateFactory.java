@@ -5,8 +5,6 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
 
-import java.util.stream.Collectors;
-
 public abstract class AbstractTemplateFactory implements TemplateFactory {
     protected final TermFactory termFactory;
 
@@ -18,7 +16,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
         if (id.contains("."))
             throw new IllegalArgumentException("Fully qualified columns as " + id + " are not accepted.\nPlease, use an alias instead.");
 
-        return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(id));
+        return termFactory.getPartiallyDefinedConversionToString(termFactory.getVariable(id));
     }
 
 
