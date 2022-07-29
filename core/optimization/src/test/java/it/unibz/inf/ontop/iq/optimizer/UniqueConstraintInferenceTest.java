@@ -124,4 +124,15 @@ public class UniqueConstraintInferenceTest {
         assertEquals(ImmutableSet.of(ImmutableSet.of(X, B), ImmutableSet.of(A, B),
                 ImmutableSet.of(A, Y), ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
     }
+
+    @Test
+    public void testDuplicateColumn4() {
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y, A),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, A, Y, A)),
+                DATA_NODE_1);
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X), ImmutableSet.of(Y), ImmutableSet.of(A)), tree.inferUniqueConstraints());
+    }
 }
