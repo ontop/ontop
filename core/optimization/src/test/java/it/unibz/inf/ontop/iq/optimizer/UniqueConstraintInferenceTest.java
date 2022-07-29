@@ -90,4 +90,38 @@ public class UniqueConstraintInferenceTest {
                 IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
         assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
     }
+
+    @Test
+    public void testDuplicateColumn1() {
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, A)),
+                DATA_NODE_1);
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X), ImmutableSet.of(A)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testDuplicateColumn2() {
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, A)),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, B), ImmutableSet.of(A, B)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testDuplicateColumn3() {
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, A, Y, B)),
+                IQ_FACTORY.createExtensionalDataNode(COMPOSITE_PK_REL, ImmutableMap.of(0, A, 1, B)));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, B), ImmutableSet.of(A, B),
+                ImmutableSet.of(A, Y), ImmutableSet.of(X, Y)), tree.inferUniqueConstraints());
+    }
 }
