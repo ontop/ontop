@@ -59,4 +59,21 @@ public class DenormalizedShippingTest extends AbstractOWLAPITest {
                 .toLowerCase();
         assertFalse(loweredSQL.contains("distinct"));
     }
+
+    @Test
+    public void testShipmentCountries3() throws Exception {
+        String sparqlQuery = "PREFIX : <http://example.org/shipping/voc#>\n" +
+                "SELECT * {\n" +
+                "  ?s a :Shipment ; :from ?fromCountry ; :to ?toCountry . \n" +
+                "  ?fromCountry a :Country ; :name ?fromCountryName . \n" +
+                "  ?toCountry a :Country ; :name ?toCountryName . \n" +
+                "} ORDER BY ?s";
+
+        String loweredSQL = checkReturnedValuesAndReturnSql(sparqlQuery, "s", ImmutableList.of(
+                "<http://example.com/shipment/1>",
+                "<http://example.com/shipment/2>"))
+                .toLowerCase();
+        assertFalse(loweredSQL.contains("union"));
+        assertFalse(loweredSQL.contains("distinct"));
+    }
 }

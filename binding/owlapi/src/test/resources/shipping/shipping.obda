@@ -12,7 +12,7 @@ target		<http://example.com/shipment/{id}> a :Shipment ; :name {name} ; :from <h
 source		SELECT * FROM "shipping"
 
 mappingId	countries
-target		<http://example.com/country/{"sourceCountry"}>  a :Country . <http://example.com/country/{"destCountry"}> a :Country .
+target		<http://example.com/country/{"sourceCountry"}>  a :Country ; :name {"sourceCountry"} . <http://example.com/country/{"destCountry"}> a :Country ; :name {"destCountry"} .
 source		SELECT * FROM "shipping"
 
 ]]
