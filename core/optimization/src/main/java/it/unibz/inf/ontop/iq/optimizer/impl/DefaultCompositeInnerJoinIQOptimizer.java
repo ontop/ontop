@@ -16,12 +16,14 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
             SelfJoinUCIQOptimizer selfJoinUCIQOptimizer,
             SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer,
             ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
-            RedundantJoinFKOptimizer fkOptimizer) {
+            RedundantJoinFKOptimizer fkOptimizer,
+            BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer) {
         this.optimizers = ImmutableList.of(
                 selfJoinUCIQOptimizer,
                 fdIQOptimizer,
                 selfJoinSameTermIQOptimizer,
-                fkOptimizer);
+                fkOptimizer,
+                belowDistinctClassUnionOptimizer);
     }
 
     @Override

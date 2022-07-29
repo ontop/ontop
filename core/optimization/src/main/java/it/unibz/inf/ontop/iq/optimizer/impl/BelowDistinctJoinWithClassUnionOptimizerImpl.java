@@ -6,37 +6,26 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.TrueNode;
-import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@Singleton
-public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimizer {
+public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistinctJoinWithClassUnionOptimizer {
 
     private final IQTreeTransformer lookForDistinctTransformer;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+    protected BelowDistinctJoinWithClassUnionOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
-                SameTermSelfJoinTransformer::new,
+                JoinWithClassUnionTransformer::new,
                 optimizationSingletons);
     }
 
@@ -47,16 +36,13 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
         return (newTree.equals(initialTree))
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                    .normalizeForOptimization();
+                .normalizeForOptimization();
     }
 
-    /**
-     * TODO: explain
-     */
-    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
+    protected static class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
-        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
+        protected JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer,
                                               OptimizationSingletons optimizationSingletons) {
             super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
             requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
@@ -64,16 +50,24 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
 
         /**
          * Should not return any false positive
+         *
          */
-        @Override
-        protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildren) {
-            return Optional.of(child)
-                    .filter(c -> c instanceof ExtensionalDataNode)
-                    .map(c -> (ExtensionalDataNode) c)
-                    .filter(d1 -> otherChildren
+        protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildrenStream) {
+            ImmutableSet<IQTree> otherChildren = otherChildrenStream.collect(ImmutableCollectors.toSet());
+
+            return Stream.of(child)
+                    .filter(c -> c.getRootNode() instanceof UnionNode)
+                    .flatMap(c -> c.getChildren().stream())
+                    .flatMap(c -> Optional.of(c)
+                            .map(t -> (t.getRootNode() instanceof FilterNode) ? t.getChildren().get(0) : t)
+                            .filter(t -> t instanceof ExtensionalDataNode)
+                            .map(t -> (ExtensionalDataNode) t)
+                            .map(Stream::of)
+                            .orElseGet(Stream::empty))
+                    .anyMatch(c -> otherChildren.stream()
                             .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
-                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2)))
-                    .isPresent();
+                            .anyMatch(o -> isDetectedAsRedundant(c, o)));
         }
+
     }
 }
