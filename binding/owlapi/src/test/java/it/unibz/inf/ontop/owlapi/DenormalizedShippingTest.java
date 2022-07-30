@@ -42,6 +42,16 @@ public class DenormalizedShippingTest extends AbstractOWLAPITest {
         assertFalse(loweredSQL.contains("distinct"));
     }
 
+    @Test
+    public void testValues() throws Exception {
+        String sparqlQuery = "PREFIX : <http://example.org/shipping/voc#>\n" +
+                "SELECT * {\n" +
+                "  VALUES ?year { 2019 2019 }\n" +
+                "}";
+
+        checkReturnedValues(sparqlQuery, "year", ImmutableList.of("\"2019\"^^xsd:integer", "\"2019\"^^xsd:integer"));
+    }
+
     @Ignore("We need to be more robust to VALUES")
     @Test
     public void testShipmentCountries2() throws Exception {
