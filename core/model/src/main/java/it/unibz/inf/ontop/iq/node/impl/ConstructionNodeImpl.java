@@ -261,6 +261,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        if (child instanceof TrueNode) {
+            return projectedVariables.stream()
+                    .map(ImmutableSet::of)
+                    .collect(ImmutableCollectors.toSet());
+        }
+
         ImmutableSet<ImmutableSet<Variable>> childConstraints = child.inferUniqueConstraints();
 
         if (childConstraints.isEmpty())

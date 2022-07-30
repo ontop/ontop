@@ -52,7 +52,6 @@ public class DenormalizedShippingTest extends AbstractOWLAPITest {
         checkReturnedValues(sparqlQuery, "year", ImmutableList.of("\"2019\"^^xsd:integer", "\"2019\"^^xsd:integer"));
     }
 
-    @Ignore("We need to be more robust to VALUES")
     @Test
     public void testShipmentCountries2() throws Exception {
         String sparqlQuery = "PREFIX : <http://example.org/shipping/voc#>\n" +
