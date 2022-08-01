@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlapi;
 import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -97,5 +98,21 @@ public class DenormalizedShippingTest extends AbstractOWLAPITest {
 
         checkReturnedValuesAndReturnSql(sparqlQuery, "s", ImmutableList.of(
                 "<http://example.com/shipment/1>"));
+    }
+
+    @Ignore("TODO: support lifting the common filter above the union")
+    @Test
+    public void testShipmentCountries5() throws Exception {
+        String sparqlQuery = "PREFIX : <http://example.org/shipping/voc#>\n" +
+                "SELECT * {\n" +
+                "  ?s a :Shipment ; :from ?fromCountry ; :to ?toCountry . \n" +
+                "  ?fromCountry a :Country . \n" +
+                "  ?toCountry a :EuropeanCountry . \n" +
+                "} ORDER BY ?s";
+
+        String loweredSQL = checkReturnedValuesAndReturnSql(sparqlQuery, "s", ImmutableList.of(
+                "<http://example.com/shipment/1>"));
+        assertFalse(loweredSQL.contains("union"));
+        assertFalse(loweredSQL.contains("distinct"));
     }
 }
