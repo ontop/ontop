@@ -87,12 +87,6 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
                 .map(t -> t.getTerm(0))
                 .collect(ImmutableCollectors.toList());
 
-        if (!subTerms.stream().allMatch(t -> t instanceof Variable)) {
-            throw new MinorOntopInternalBugException(
-                    "Was expecting RDF term type functional terms to have a variable as argument\n" + otherTerms);
-        }
-        ImmutableList<Variable> subVariables = (ImmutableList<Variable>) subTerms;
-
         ImmutableSet<ImmutableList<RDFTermTypeConstant>> possibleCombinations = extractPossibleCombinations(otherTerms);
 
         TypeConstantDictionary dictionary = otherTerms.stream()
@@ -112,7 +106,7 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
 
         ImmutableFunctionalTerm caseTerm = termFactory.getDBCaseElseNull(validCombinations.entrySet().stream()
                 .map(e -> Maps.immutableEntry(
-                        convertIntoConjunction(e.getKey(), subVariables, dictionary, termFactory),
+                        convertIntoConjunction(e.getKey(), subTerms, dictionary, termFactory),
                         dictionary.convert(e.getValue()))),
                 false);
 
@@ -150,10 +144,10 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
     }
 
     private ImmutableExpression convertIntoConjunction(ImmutableList<RDFTermTypeConstant> constants,
-                                                       ImmutableList<Variable> subVariables,
+                                                       ImmutableList<? extends ImmutableTerm> subTerms,
                                                        TypeConstantDictionary dictionary, TermFactory termFactory) {
         return termFactory.getConjunction(IntStream.range(0, constants.size())
-                .mapToObj(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i))))
+                .mapToObj(i -> termFactory.getStrictEquality(subTerms.get(i), dictionary.convert(constants.get(i))))
                 .collect(ImmutableCollectors.toList()));
     }
 
