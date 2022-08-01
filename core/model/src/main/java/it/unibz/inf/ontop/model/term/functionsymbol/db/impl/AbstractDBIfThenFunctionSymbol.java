@@ -93,7 +93,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                     case TRUE:
                         ImmutableTerm possibleValue = simplifyValue(terms.get(i+1),variableNullability, termFactory);
                         if (newWhenPairs.isEmpty())
-                            return possibleValue;
+                            return possibleValue.simplify(variableNullability);
                         else
                             return termFactory.getDBCase(newWhenPairs.stream(), possibleValue, doOrderingMatter)
                                     .simplify(variableNullability);
