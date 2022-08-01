@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.owlapi;
 import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -12,6 +11,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DenormalizedShippingTest extends AbstractOWLAPITest {
 
@@ -84,5 +84,18 @@ public class DenormalizedShippingTest extends AbstractOWLAPITest {
                 .toLowerCase();
         assertFalse(loweredSQL.contains("union"));
         assertFalse(loweredSQL.contains("distinct"));
+    }
+
+    @Test
+    public void testShipmentCountries4() throws Exception {
+        String sparqlQuery = "PREFIX : <http://example.org/shipping/voc#>\n" +
+                "SELECT * {\n" +
+                "  ?s a :Shipment ; :from ?fromCountry ; :to ?toCountry . \n" +
+                "  ?fromCountry a :Country . \n" +
+                "  ?toCountry a :EuropeanCountry . \n" +
+                "} ORDER BY ?s";
+
+        checkReturnedValuesAndReturnSql(sparqlQuery, "s", ImmutableList.of(
+                "<http://example.com/shipment/1>"));
     }
 }

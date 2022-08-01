@@ -15,5 +15,13 @@ mappingId	countries
 target		<http://example.com/country/{"sourceCountry"}>  a :Country ; :name {"sourceCountry"} . <http://example.com/country/{"destCountry"}> a :Country ; :name {"destCountry"} .
 source		SELECT * FROM "shipping"
 
+mappingId	from european country
+target		<http://example.com/country/{"sourceCountry"}>  a :EuropeanCountry .
+source		SELECT * FROM "shipping" WHERE "sourceCountry" IN ('France', 'Germany')
+
+mappingId	to european country
+target		<http://example.com/country/{"destCountry"}>  a :EuropeanCountry .
+source		SELECT * FROM "shipping" WHERE "destCountry" IN ('France', 'Germany')
+
 ]]
 

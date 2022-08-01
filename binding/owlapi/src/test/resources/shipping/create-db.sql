@@ -8,5 +8,5 @@ CREATE TABLE "shipping" (
 INSERT INTO "shipping"
 ("id","name","sourceCountry", "destCountry") VALUES
 (1, 'computer', 'Italy','France'),
-(2, 'car', 'Germany', 'Italy'),
+(2, 'car', 'Germany', 'Japan'),
 (3, 'bike', 'Belgium', null);
