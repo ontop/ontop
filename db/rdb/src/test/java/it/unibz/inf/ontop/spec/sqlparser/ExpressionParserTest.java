@@ -429,7 +429,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS DISTINCT FROM NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getIsTrue(TERM_FACTORY.getDBBooleanConstant(true)), translation.get(0).simplify());
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
     }
 
     @Test
@@ -438,7 +438,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM 2", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getIsTrue(TERM_FACTORY.getDBBooleanConstant(true)), translation.get(0).simplify());
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
     }
 
     @Test
@@ -447,7 +447,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getIsTrue(TERM_FACTORY.getDBBooleanConstant(false)), translation.get(0).simplify());
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(false), translation.get(0).simplify());
     }
 
     @Test
