@@ -33,11 +33,12 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
+                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
-                SameTermSelfJoinTransformer::new,
-                optimizationSingletons);
+                t -> new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
+                coreSingletons);
     }
 
     @Override
@@ -57,9 +58,10 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
         protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                              OptimizationSingletons optimizationSingletons) {
-            super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
-            requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
+                                              CoreSingletons coreSingletons,
+                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+            super(lookForDistinctTransformer, coreSingletons);
+            this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         }
 
         /**

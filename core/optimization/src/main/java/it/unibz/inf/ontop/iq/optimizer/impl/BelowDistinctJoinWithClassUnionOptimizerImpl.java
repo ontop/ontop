@@ -23,11 +23,12 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected BelowDistinctJoinWithClassUnionOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+    protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
+                                                           RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
-                JoinWithClassUnionTransformer::new,
-                optimizationSingletons);
+                t -> new JoinWithClassUnionTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
+                coreSingletons);
     }
 
     @Override
@@ -44,9 +45,10 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
         protected JoinWithClassUnionTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                              OptimizationSingletons optimizationSingletons) {
-            super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
-            requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
+                                                CoreSingletons coreSingletons,
+                                                RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+            super(lookForDistinctTransformer, coreSingletons);
+            this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         }
 
         /**
