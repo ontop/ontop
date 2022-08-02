@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BelowDistinctJoinWithClassUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
@@ -59,9 +60,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                     .filter(c -> c.getRootNode() instanceof UnionNode)
                     .flatMap(c -> c.getChildren().stream())
                     .flatMap(c -> Optional.of(c)
-                            .map(t -> (t.getRootNode() instanceof FilterNode) ? t.getChildren().get(0) : t)
-                            .filter(t -> t instanceof ExtensionalDataNode)
-                            .map(t -> (ExtensionalDataNode) t)
+                            .flatMap(this::extractExtensionalNode)
                             .map(Stream::of)
                             .orElseGet(Stream::empty))
                     .anyMatch(c -> otherChildren.stream()
@@ -69,5 +68,30 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
                             .anyMatch(o -> isDetectedAsRedundant(c, o)));
         }
 
+        private Optional<ExtensionalDataNode> extractExtensionalNode(IQTree unionChild) {
+            QueryNode rootNode = unionChild.getRootNode();
+
+            /*
+             * Filters just make much the variables are non-null can be eliminating,
+             * because we are interested in cases where we join over these variables
+             */
+            if (rootNode instanceof FilterNode) {
+                VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
+                        .createEmptyVariableNullability(unionChild.getVariables());
+
+                ImmutableExpression filterCondition = ((FilterNode) rootNode).getFilterCondition();
+
+
+                return filterCondition.evaluate2VL(variableNullability)
+                        .getValue()
+                        .filter(b -> b.equals(ImmutableExpression.Evaluation.BooleanValue.TRUE))
+                        // Continue to the child
+                        .flatMap(b -> extractExtensionalNode(unionChild.getChildren().get(0)));
+            }
+            else if (rootNode instanceof ExtensionalDataNode)
+                return Optional.of((ExtensionalDataNode) rootNode);
+            else
+                return Optional.empty();
+        }
     }
 }
