@@ -535,6 +535,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowUniqueStr());
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getDBRowNumber() {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumber());
+	}
+
     @Override
     public ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIriStringResolver(baseIRI), argLexical);
