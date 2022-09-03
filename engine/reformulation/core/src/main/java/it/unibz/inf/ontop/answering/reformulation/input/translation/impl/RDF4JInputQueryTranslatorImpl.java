@@ -736,14 +736,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ImmutableSubstitution<Variable> substitution =
                 substitutionFactory.getSubstitution(projectionElems.stream()
-                        .filter(pe -> !pe.getTargetName().equals(pe.getSourceName()))
+                        .filter(pe -> !pe.getProjectionAlias().orElse(pe.getName()).equals(pe.getName()))
                         .collect(ImmutableCollectors.toMap(
-                                pe -> termFactory.getVariable(pe.getSourceName()),
-                                pe -> termFactory.getVariable(pe.getTargetName())
-                        )));
+                                pe -> termFactory.getVariable(pe.getName()),
+                                pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
+                        ));
 
         ImmutableSet<Variable> projectedVars = projectionElems.stream()
-                .map(pe -> termFactory.getVariable(pe.getTargetName()))
+                .map(pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
                 .collect(ImmutableCollectors.toSet());
 
         if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
@@ -752,7 +752,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution);
         projectedVars = projectionElems.stream()
-                .map(pe -> termFactory.getVariable(pe.getTargetName()))
+                .map(pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
                 .collect(ImmutableCollectors.toSet());
         ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
 
