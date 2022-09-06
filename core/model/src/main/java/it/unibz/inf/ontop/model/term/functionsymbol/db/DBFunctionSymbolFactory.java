@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -263,6 +264,11 @@ public interface DBFunctionSymbolFactory {
      * Returns a different number for each row (e.g. ROWNUM of Oracle)
      */
     DBFunctionSymbol getDBRowNumber();
+
+    /**
+     * Considers OrderBy when handling ROW_NUM() for pre 2012 versions of SQL Server
+     */
+    DBFunctionSymbol getDBRowNumberWithOrderBy();
 
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
