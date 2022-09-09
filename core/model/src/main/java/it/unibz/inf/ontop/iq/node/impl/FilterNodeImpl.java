@@ -110,7 +110,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
             // TODO: also consider the constraint for simplifying the condition
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
-                    .simplifyCondition(getFilterCondition(), extendedChildVariableNullability);
+                    .simplifyCondition(getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     conditionSimplificationResults, extendedChildVariableNullability);
@@ -236,7 +236,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 newlyProjectedVariables.stream());
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, simplifiedFutureChildVariableNullability);
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
+                    unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
             VariableNullability extendedVariableNullability = constraint
                     .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))

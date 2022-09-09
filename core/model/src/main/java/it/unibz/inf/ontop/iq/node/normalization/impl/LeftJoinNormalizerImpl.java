@@ -378,7 +378,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             try {
                 ConditionSimplifier.ExpressionAndSubstitution simplificationResults = conditionSimplifier.simplifyCondition(
-                        ljCondition, leftVariables,
+                        ljCondition, leftVariables, ImmutableList.of(rightChild),
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
                 ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
