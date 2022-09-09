@@ -114,6 +114,11 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
+        ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
+                .filter(v -> children.stream().anyMatch(c ->
+                        c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
+                .collect(ImmutableCollectors.toSet());
+
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
                         // Expressions that are not function-free equalities
@@ -123,7 +128,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
                         // Equalities that must remain
                         normalizedUnifier.getImmutableMap().entrySet().stream()
-                                .filter(e -> nonLiftableVariables.contains(e.getKey()))
+                                .filter(e -> nonLiftableVariables.contains(e.getKey())
+                                        || rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
                                 .sorted(Map.Entry.comparingByKey())
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
@@ -145,6 +151,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 Stream.concat(
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> !nonLiftableVariables.contains(e.getKey()))
+                                .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
                                 .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e),
                         groundFunctionalSubstitution
                                 .map(s -> s.getImmutableMap().entrySet().stream()
@@ -239,7 +246,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 // Filter out ground terms that would be "rejected" by a child
                                 .filter(e -> children.stream()
                                             .noneMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(
-                                                    e.getKey(), e.getValue() instanceof Constant)))
+                                                    e.getKey(), false)))
                                 .collect(ImmutableCollectors.toMap())))
                 .filter(s -> !s.isEmpty());
     }
