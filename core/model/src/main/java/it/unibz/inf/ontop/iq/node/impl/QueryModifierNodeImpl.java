@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 
 public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements QueryModifierNode {
@@ -28,8 +29,8 @@ public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements Que
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint));
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
+        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint, variableGenerator));
     }
 
     @Override

@@ -267,9 +267,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             ImmutableList<IQTree> newChildren = IntStream.range(0, liftedChildren.size())
                     .mapToObj(i -> i == selectedChildPosition
-                            ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
-                            : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
-                    .map(normalization::updateChild)
+                            ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator)
+                            : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
+                    .map(c -> normalization.updateChild(c, variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
             return newParent
@@ -390,11 +390,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
                         .map(s -> children.stream()
-                                .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition))
+                                .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition, variableGenerator))
                                 .collect(ImmutableCollectors.toList()))
                         .orElseGet(() -> newJoiningCondition
                                 .map(s -> children.stream()
-                                        .map(child -> child.propagateDownConstraint(s))
+                                        .map(child -> child.propagateDownConstraint(s, variableGenerator))
                                         .collect(ImmutableCollectors.toList()))
                                 .orElse(children));
 

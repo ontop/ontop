@@ -69,15 +69,16 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     protected IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        Optional<ImmutableExpression> constraint) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
+                                                        Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild(), variableGenerator);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         try {
             return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChild()))
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChild(), variableGenerator))
                     .orElse(this);
 
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
@@ -102,8 +103,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
-        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChild());
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChild(), variableGenerator);
         return newTree.equals(this) ? this : newTree;
     }
 

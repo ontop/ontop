@@ -57,7 +57,8 @@ public interface IQTree {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint);
+            Optional<ImmutableExpression> constraint,
+            VariableGenerator variableGenerator);
 
     /**
      * Particular type of descending substitution: only renaming some variables by external ones.
@@ -73,7 +74,8 @@ public interface IQTree {
      *
      * Designed to be called AFTER the "structural/semantic optimization" phase.
      */
-    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
+    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                        VariableGenerator variableGenerator);
 
     /**
      * Variables present in the tree
@@ -105,7 +107,7 @@ public interface IQTree {
      * a parent tree.
      *
      */
-    IQTree propagateDownConstraint(ImmutableExpression constraint);
+    IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
 
     /**
      * TODO: find a better name

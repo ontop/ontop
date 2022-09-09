@@ -26,11 +26,12 @@ public interface NaryOperatorNode extends QueryNode {
                                     IQTreeCache treeCache);
 
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                       Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children);
+                                       Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
+                                       VariableGenerator variableGenerator);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableList<IQTree> children);
+            ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
                              IQTreeCache treeCache);
@@ -44,7 +45,7 @@ public interface NaryOperatorNode extends QueryNode {
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
-    IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children);
+    IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children);
 

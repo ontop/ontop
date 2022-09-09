@@ -27,10 +27,10 @@ public interface UnaryOperatorNode extends QueryNode {
     IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache);
 
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                       Optional<ImmutableExpression> constraint, IQTree child);
+                                       Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                       IQTree child);
+                                       IQTree child, VariableGenerator variableGenerator);
 
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache);
 
@@ -43,7 +43,7 @@ public interface UnaryOperatorNode extends QueryNode {
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator);
 
-    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
+    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator);
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child);
 
