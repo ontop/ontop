@@ -115,8 +115,9 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 nonLiftableVariables);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
-                .filter(v -> children.stream().anyMatch(c ->
-                        c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
+                .filter(v -> children.stream()
+                        .filter(c -> c.getVariables().contains(v))
+                        .allMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
                 .collect(ImmutableCollectors.toSet());
 
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
@@ -211,7 +212,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      *
      * Treated differently from non-functional terms because functional terms are not robust to unification.
      *
-     * Does not include in the substitution ground terms that are "rejected" by at least one child
+     * Does not include in the substitution ground terms that are "rejected" by all the children using the variable
      *
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -243,9 +244,10 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         m.entrySet().stream()
                                 // Picks one of the ground functional term
                                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().iterator().next()))
-                                // Filter out ground terms that would be "rejected" by a child
+                                // Filter out ground terms that would be "rejected" by all the children using the variable
                                 .filter(e -> children.stream()
-                                            .noneMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(
+                                            .filter(c -> c.getVariables().contains(e.getKey()))
+                                            .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(
                                                     e.getKey(), false)))
                                 .collect(ImmutableCollectors.toMap())))
                 .filter(s -> !s.isEmpty());
