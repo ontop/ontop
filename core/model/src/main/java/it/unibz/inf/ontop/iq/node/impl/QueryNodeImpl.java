@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.term.Variable;
 
 public abstract class QueryNodeImpl implements QueryNode {
 
@@ -16,4 +17,12 @@ public abstract class QueryNodeImpl implements QueryNode {
 
     @Override
     public abstract boolean equals(Object obj);
+
+    /**
+     * Default value, to be overridden
+     */
+    @Override
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return false;
+    }
 }
