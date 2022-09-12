@@ -262,6 +262,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return substitution.isDefining(variable);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(groupingVariables, substitution);
     }
