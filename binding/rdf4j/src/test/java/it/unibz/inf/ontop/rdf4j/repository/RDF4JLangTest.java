@@ -118,7 +118,6 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results, bindings);
     }
 
-    @Ignore("TODO: solve the infinite loop due to some filters above aggrs")
     @Test
     public void testExternalBinding5() {
         String query = "SELECT (SUM(?n) AS ?v)\n" +
@@ -130,7 +129,7 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
         ImmutableList<String> results = ImmutableList.of("2");
         MapBindingSet bindings = new MapBindingSet();
-        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral(2));
+        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("2", XSD.INTEGER));
 
         runQueryAndCompare(query, results, bindings);
     }

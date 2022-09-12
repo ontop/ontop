@@ -381,8 +381,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return this;
 
             try {
+
                 ConditionSimplifier.ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        joiningCondition.get(), childrenVariableNullability);
+                        joiningCondition.get(), children, childrenVariableNullability);
 
                 Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
                 // TODO: build a proper constraint (more than just the joining condition)

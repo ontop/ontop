@@ -243,7 +243,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 // TODO: also consider the constraint for simplifying the condition
                 ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        condition.get(), childVariableNullability);
+                        condition.get(), ImmutableList.of(child), childVariableNullability);
 
                 Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
                         conditionSimplificationResults, childVariableNullability);
