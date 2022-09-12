@@ -424,7 +424,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
             Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
 
-            IQTree updatedChild = normalization.updateChild(shrunkChild);
+            IQTree updatedChild = normalization.updateChild(shrunkChild, variableGenerator);
             IQTree newChild = newTopConstructionNode
                     .map(c -> notRequiredVariableRemover.optimize(updatedChild, c.getChildVariables(), variableGenerator))
                     .orElse(updatedChild)
@@ -479,7 +479,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
 
-        IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild);
+        IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild, variableGenerator);
         IQTree newGrandChild = notRequiredVariableRemover.optimize(updatedGrandChild,
                 newConstructionNode.getChildVariables(), variableGenerator)
                 .normalizeForOptimization(variableGenerator);

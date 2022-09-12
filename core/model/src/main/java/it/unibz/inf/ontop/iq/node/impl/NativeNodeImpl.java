@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 
@@ -139,7 +140,9 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException("NativeNode does not support descending substitutions (too late)");
     }
 

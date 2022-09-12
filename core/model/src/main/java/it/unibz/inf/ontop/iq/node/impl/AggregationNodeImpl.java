@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -70,20 +69,22 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+                                              Optional<ImmutableExpression> constraint, IQTree child,
+                                              VariableGenerator variableGenerator) {
         return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitution(s, constraint, child));
+                s -> super.applyDescendingSubstitution(s, constraint, child, variableGenerator), variableGenerator);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child) {
+                                                               IQTree child, VariableGenerator variableGenerator) {
         return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitutionWithoutOptimizing(s, child));
+                s -> super.applyDescendingSubstitutionWithoutOptimizing(s, child, variableGenerator), variableGenerator);
     }
 
     private IQTree applyDescendingSubstitutionOrBlock(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                      Function<ImmutableSubstitution<? extends VariableOrGroundTerm>, IQTree> applyNonBlockedSubstitutionFct) {
+                                                      Function<ImmutableSubstitution<? extends VariableOrGroundTerm>, IQTree> applyNonBlockedSubstitutionFct,
+                                                      VariableGenerator variableGenerator) {
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
@@ -118,7 +119,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 filterNode.getLocalVariables().stream(),
-                v -> termFactory.getVariable("v" + UUID.randomUUID()));
+                variableGenerator::generateNewVariableFromVar);
 
         IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
                 .applyFreshRenaming(renamingSubstitution);

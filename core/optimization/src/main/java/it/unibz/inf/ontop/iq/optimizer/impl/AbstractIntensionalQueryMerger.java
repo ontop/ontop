@@ -101,7 +101,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                     dataNode.getProjectionAtom());
 
             return renamedIQ.getTree()
-                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
+                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator)
                     .normalizeForOptimization(variableGenerator);
         }
 
