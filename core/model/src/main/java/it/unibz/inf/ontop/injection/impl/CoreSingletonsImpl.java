@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -36,6 +37,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
     private final NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
+    private final PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer;
     private final DatabaseInfoSupplier databaseInfoSupplier;
 
     @Inject
@@ -49,6 +51,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
                                QueryTransformerFactory queryTransformerFactory,
                                NotYetTypedEqualityTransformer notYetTypedEqualityTransformer,
+                               PartiallyTypedSimpleCastTransformer partiallyTypedSimpleCastTransformer,
                                DatabaseInfoSupplier databaseInfoSupplier) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
@@ -64,6 +67,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
         this.notYetTypedEqualityTransformer = notYetTypedEqualityTransformer;
+        this.partiallyTypedSimpleCastTransformer = partiallyTypedSimpleCastTransformer;
         this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
@@ -135,6 +139,11 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public NotYetTypedEqualityTransformer getNotYetTypedEqualityTransformer() {
         return notYetTypedEqualityTransformer;
+    }
+
+    @Override
+    public PartiallyTypedSimpleCastTransformer getPartiallyTypeSimpleCastTransformer() {
+        return partiallyTypedSimpleCastTransformer;
     }
 
     @Override

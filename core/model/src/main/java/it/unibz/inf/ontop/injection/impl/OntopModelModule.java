@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -61,6 +62,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(AggregationNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(NotYetTypedEqualityTransformer.class);
+        bindFromSettings(PartiallyTypedSimpleCastTransformer.class);
         bindFromSettings(RDF.class);
         bindFromSettings(SingleTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);

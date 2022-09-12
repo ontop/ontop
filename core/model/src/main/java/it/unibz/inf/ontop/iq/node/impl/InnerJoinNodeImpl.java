@@ -165,7 +165,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         try {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of(), simplifiedChildFutureVariableNullability);
+                    unoptimizedExpression, ImmutableSet.of(), children, simplifiedChildFutureVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
@@ -395,7 +395,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), extendedChildrenVariableNullability);
+                    getOptionalFilterCondition(), ImmutableSet.of(), children, extendedChildrenVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     conditionSimplificationResults, extendedChildrenVariableNullability);

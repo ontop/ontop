@@ -412,11 +412,11 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<ImmutableMap<Variable, ImmutableTerm>> maps = StreamSupport.stream(
+        ImmutableList<ImmutableMap<Variable, ImmutableTerm>> maps = StreamSupport.stream(
                 node.getBindingSets().spliterator(),
                 false
         ).map(bs -> getBsMap(bs, nullConstant))
-                .collect(ImmutableCollectors.toSet());
+                .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> nullableVars = maps.iterator().next().keySet().stream()
                 .filter(v -> maps.stream().anyMatch(m -> m.get(v).equals(nullConstant)))

@@ -68,7 +68,7 @@ public class JoinLikeChildBindingLifter {
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
-                nonLiftableVariables, variableNullability);
+                nonLiftableVariables, children, variableNullability);
         Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied

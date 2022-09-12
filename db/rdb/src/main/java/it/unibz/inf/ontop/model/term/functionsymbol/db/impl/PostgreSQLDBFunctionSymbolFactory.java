@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,7 +9,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -57,17 +53,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+        builder.putAll(super.createNormalizationMap());
 
         //TIMESTAMP
         DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
-        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        builder.put(timeStamp, datetimeNormFunctionSymbol);
 
         //TIMETZ
         DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
@@ -76,7 +69,15 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 timeTZType, dbStringType,
                 (terms, termConverter, termFactory) -> String.format(
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
-        builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
+        builder.put(timeTZType, timeTZNormFunctionSymbol);
+
+        return builder.build();
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        builder.putAll(super.createNormalizationTable());
 
         //GEOMETRY
         DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
@@ -343,5 +344,15 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return String.format("CEIL((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))*1000)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("upper(encode(%s, 'hex'))", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("decode(%s, 'hex')", termConverter.apply(terms.get(0)));
     }
 }

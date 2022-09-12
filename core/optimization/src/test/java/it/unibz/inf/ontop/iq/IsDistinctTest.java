@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import org.junit.Test;
@@ -191,6 +192,23 @@ public class IsDistinctTest {
         IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
                 dataNode1, dataNode2);
+
+        assertTrue(tree.isDistinct());
+    }
+
+    @Test
+    public void testUnionConstants() {
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                                        SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, ONE))),
+                                IQ_FACTORY.createTrueNode()),
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                                        SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, TWO))),
+                                IQ_FACTORY.createTrueNode())));
 
         assertTrue(tree.isDistinct());
     }

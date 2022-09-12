@@ -182,6 +182,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return projectedVariables.contains(variable) && (!isConstant);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(projectedVariables, values);
     }

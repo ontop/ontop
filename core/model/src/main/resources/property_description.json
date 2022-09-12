@@ -145,7 +145,7 @@
   },
   "ontop.query.defaultTimeout": {
     "type": "Integer",
-    "description": "Query timeout assigned to the DB engine. Has no effect if negative or equal to 0."
+    "description": "Query timeout (in seconds) assigned to the DB engine. Has no effect if negative or equal to 0."
   },
   "ontop.permanentConnection": {
     "type": "Boolean",

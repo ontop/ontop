@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -17,28 +17,25 @@ public class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisiti
     @Nullable
     private final IQTreeTransformer subTransformer;
     @Nullable
-    private final CardinalityFreeTransformerConstructor3 transformerConstructor3;
-    private final OptimizationSingletons optimizationSingletons;
+    private final CardinalityFreeTransformerConstructor2 transformerConstructor3;
 
-    public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor2 transformerConstructor,
-                                          OptimizationSingletons optimizationSingletons) {
-        super(optimizationSingletons.getCoreSingletons());
-        this.subTransformer = transformerConstructor.create(this, optimizationSingletons);
-        this.optimizationSingletons = optimizationSingletons;
+    public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor1 transformerConstructor,
+                                          CoreSingletons coreSingletons) {
+        super(coreSingletons);
+        this.subTransformer = transformerConstructor.create(this);
         this.transformerConstructor3 = null;
     }
 
-    public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor3 transformerConstructor3,
-                                          OptimizationSingletons optimizationSingletons) {
-        super(optimizationSingletons.getCoreSingletons());
+    public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor2 transformerConstructor3,
+                                          CoreSingletons coreSingletons) {
+        super(coreSingletons);
         this.transformerConstructor3 = transformerConstructor3;
-        this.optimizationSingletons = optimizationSingletons;
         this.subTransformer = null;
     }
 
     private IQTreeTransformer getSubTransformer(IQTree child) {
         return subTransformer == null
-                ? transformerConstructor3.create(child, this, optimizationSingletons)
+                ? transformerConstructor3.create(child, this)
                 : subTransformer;
     }
 
@@ -51,13 +48,12 @@ public class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisiti
     }
 
     @FunctionalInterface
-    public interface CardinalityFreeTransformerConstructor2 {
-        IQTreeTransformer create(IQTreeTransformer parentTransformer, OptimizationSingletons optimizationSingletons);
+    public interface CardinalityFreeTransformerConstructor1 {
+        IQTreeTransformer create(IQTreeTransformer parentTransformer);
     }
 
     @FunctionalInterface
-    public interface CardinalityFreeTransformerConstructor3 {
-        IQTreeTransformer create(IQTree childOfDistinct, IQTreeTransformer parentTransformer,
-                                 OptimizationSingletons optimizationSingletons);
+    public interface CardinalityFreeTransformerConstructor2 {
+        IQTreeTransformer create(IQTree childOfDistinct, IQTreeTransformer parentTransformer);
     }
 }

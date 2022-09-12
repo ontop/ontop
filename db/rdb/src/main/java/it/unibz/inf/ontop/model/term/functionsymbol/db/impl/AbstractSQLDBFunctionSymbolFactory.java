@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -723,7 +724,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
-        return new DefaultSQLTimestampISONormFunctionSymbol(
+        // TODO: check if it is safe to allow the decomposition
+        return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
                 this::serializeDateTimeNorm);
@@ -739,6 +741,24 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType) {
+        return new DefaultHexBinaryNormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryNorm);
+    }
+
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return termConverter.apply(
+                termFactory.getDBUpper(
+                        termFactory.getDBCastFunctionalTerm(dbStringType, terms.get(0))));
+    }
+
+    protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms,
+                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return termConverter.apply(
+                        termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBHexBinaryType(), terms.get(0)));
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
@@ -751,6 +771,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
         return new DefaultSimpleDBCastFunctionSymbol(geoType, geoType, Serializers.getCastSerializer(geoType));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
+        return new DefaultHexBinaryDenormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryDenorm);
     }
 
     @Override
@@ -1205,6 +1230,17 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROW_NUMBER() OVER ()";
+    }
+
+    @Override
+    protected String serializeDBRowNumberWithOrderBy(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        String conditionString = IntStream.range(0, terms.size())
+                .boxed()
+                .map(i -> converter.apply(terms.get(i)))
+                .collect(Collectors.joining(","));
+        return String.format("ROW_NUMBER() OVER (ORDER BY %s)",
+                conditionString);
     }
 
 }

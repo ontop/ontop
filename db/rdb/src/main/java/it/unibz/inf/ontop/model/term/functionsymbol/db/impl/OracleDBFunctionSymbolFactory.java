@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,8 +9,9 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -78,48 +76,51 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      * TODO: shall we alert the user when TIMESTAMP is used with a XSD.DATETIMESTAMP?
      */
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
-        table.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap<>();
+        map.putAll(super.createNormalizationMap());
 
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
         DBTermType timestampLTzType = dbTypeFactory.getDBTermType(TIMESTAMP_LOCAL_TZ_STR);
         DBTypeConversionFunctionSymbol datetimeLTZNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampLTzType);
-        table.put(timestampLTzType, xsdDatetime, datetimeLTZNormFunctionSymbol);
-        table.put(timestampLTzType, xsdDatetimeStamp, datetimeLTZNormFunctionSymbol);
+        map.put(timestampLTzType, datetimeLTZNormFunctionSymbol);
 
         DBTermType timestampType = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);
-        table.put(timestampType, xsdDatetime, datetimeNormFunctionSymbol);
+        map.put(timestampType, datetimeNormFunctionSymbol);
         // No TZ for TIMESTAMP --> incompatible with XSD.DATETIMESTAMP
 
         // Date column in Oracle does include time information, too
         DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbolWoTz = createDateTimeNormFunctionSymbol(dbDateType);
-        table.put(dbDateType, xsdDatetime, datetimeNormFunctionSymbolWoTz);
+        map.put(dbDateType, datetimeNormFunctionSymbolWoTz);
         DBTypeConversionFunctionSymbol dateNormFunctionSymbol = new OracleDateNormFunctionSymbol(dbDateType, dbStringType);
-        table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateNormFunctionSymbol);
+        map.put(dbDateType, dateNormFunctionSymbol);
+
+        return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
+        table.putAll(super.createNormalizationTable());
 
         // NUMBER boolean normalization
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType numberType = dbTypeFactory.getDBTermType(NUMBER_STR);
         table.put(numberType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(numberType, dbStringType));
 
-
         return ImmutableTable.copyOf(table);
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
-        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
-        table.putAll(super.createDenormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createDenormalizationMap() {
+        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap<>(super.createDenormalizationMap());
 
         DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
         DBTypeConversionFunctionSymbol dateDenormFunctionSymbol = new OracleDateDenormFunctionSymbol(dbStringType, dbDateType);
-        table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateDenormFunctionSymbol);
+        map.put(dbDateType, dateDenormFunctionSymbol);
 
-        return ImmutableTable.copyOf(table);
+        return ImmutableMap.copyOf(map);
     }
 
     @Override
@@ -300,7 +301,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
-        return new DefaultSQLTimestampISONormFunctionSymbol(
+        // TODO: check conditions for decomposing
+        return new NoDecompositionStrictEqualitySQLTimestampISONormFunctionSymbol(
                 dbDateTimestampType,
                 dbStringType,
                 (terms, converter, factory) -> serializeDateTimeNorm(dbDateTimestampType, terms, converter));
@@ -361,11 +363,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TRUNC(EXTRACT(DAY FROM %s - %s) / 7)",
                 termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
