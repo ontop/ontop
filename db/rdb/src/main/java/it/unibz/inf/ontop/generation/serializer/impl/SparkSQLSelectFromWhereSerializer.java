@@ -106,14 +106,6 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
             }
 
-            private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
-                AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
-                return variables.stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Function.identity(),
-                                v -> aliasFactory.createAttributeAlias(v.getName())));
-            }
-
             ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
                 return variableAliases.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(

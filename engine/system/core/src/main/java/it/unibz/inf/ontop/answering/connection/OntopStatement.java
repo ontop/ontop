@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
@@ -20,11 +21,11 @@ import it.unibz.inf.ontop.iq.IQ;
  */
 public interface OntopStatement extends OBDAStatement {
 
-    int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException;
+    <R extends OBDAResultSet> int getTupleCount(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException;
 
-    String getRewritingRendering(InputQuery inputQuery) throws OntopReformulationException;
+    <R extends OBDAResultSet> String getRewritingRendering(InputQuery<R> inputQuery) throws OntopReformulationException;
 
-    IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException;
+    <R extends OBDAResultSet> IQ getExecutableQuery(InputQuery<R> inputQuery) throws OntopReformulationException;
 
     TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException;

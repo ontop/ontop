@@ -61,13 +61,9 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     }
 
     private void reasonerSetup() {
-        try {
-            reasoner = factory.createReasoner(configuration.getOntopConfiguration(getRootOntology()));
-            owlConnection = reasoner.getConnection();
-        }
-        catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        }
+        OWLOntology rootOntology = getRootOntology();
+        reasoner = factory.createReasoner(rootOntology, configuration.getOntopConfiguration(rootOntology));
+        owlConnection = reasoner.getConnection();
     }
 
     @Override

@@ -149,7 +149,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
             Iterator<IQTree> it = children.iterator();
             return substitutions.stream().sequential()
-                    .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s))
+                    .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .collect(ImmutableCollectors.toList());
         }
 

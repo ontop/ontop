@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.junit.After;
@@ -38,7 +39,6 @@ public class CanonicalEntitiesTest {
 
     @Test
     public void test_canonical_entities() throws Exception {
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
@@ -49,7 +49,7 @@ public class CanonicalEntitiesTest {
                 .enableExistentialReasoning(true)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT ?S ?P ?O WHERE { ?S ?S ?P }";
         try (OWLConnection conn = reasoner.getConnection();

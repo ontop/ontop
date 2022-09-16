@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.denodo;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -26,7 +26,7 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/denodo/bind/sparqlBindDenodo.obda";
     private static final String propertyfile = "/denodo/bind/sparqlBindDenodo.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsDenodoTest() throws OWLOntologyCreationException {
@@ -36,9 +36,9 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Override

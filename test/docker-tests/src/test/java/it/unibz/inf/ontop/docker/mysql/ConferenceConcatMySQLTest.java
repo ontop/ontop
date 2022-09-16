@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
@@ -30,7 +30,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
     private static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
 	private static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
 
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
@@ -45,9 +45,9 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 	}
 
 	@AfterClass
-	public static void after() throws OWLException {
+	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.dispose();
+		REASONER.close();
 	}
 
 	private void runTests(String query1) throws Exception {

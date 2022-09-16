@@ -559,6 +559,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowUniqueStr());
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getDBRowNumber() {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumber());
+	}
+
     @Override
     public ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIriStringResolver(baseIRI), argLexical);
@@ -1024,6 +1029,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getConversionFromRDFLexical2DBFunctionSymbol(targetDBType),
+				dbTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType) {
 		return getConversionFromRDFLexical2DB(
 				rdfType.getClosestDBType(typeFactory.getDBTypeFactory()),
@@ -1031,7 +1043,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
+	public ImmutableFunctionalTerm getPartiallyDefinedConversionToString(Variable variable) {
 		return getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getTemporaryConversionToDBStringFunctionSymbol(),
 				variable);

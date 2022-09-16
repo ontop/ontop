@@ -4,7 +4,6 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
-import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.OntopMappingOWLAPIOptions;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -18,12 +17,12 @@ import java.util.Optional;
 public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAllConfigurationImpl
         implements OntopMappingSQLAllOWLAPIConfiguration {
 
-    private final OntopMappingOWLAPIConfigurationImpl mappingOWLConfiguration;
+    private final OntopMappingOntologyConfigurationImpl mappingOWLConfiguration;
 
     OntopMappingSQLAllOWLAPIConfigurationImpl(OntopMappingSQLAllSettings settings,
                                               OntopMappingSQLAllOWLAPIOptions options) {
         super(settings, options.sqlOptions);
-        mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlapiOptions);
+        mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
     }
 
     @Override
@@ -38,11 +37,11 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
     static class OntopMappingSQLAllOWLAPIOptions {
 
         final OntopMappingSQLAllOptions sqlOptions;
-        final OntopMappingOWLAPIOptions owlapiOptions;
+        final OntopMappingOntologyBuilders.OntopMappingOntologyOptions ontologyOptions;
 
-        OntopMappingSQLAllOWLAPIOptions(OntopMappingSQLAllOptions sqlOptions, OntopMappingOWLAPIOptions owlapiOptions) {
+        OntopMappingSQLAllOWLAPIOptions(OntopMappingSQLAllOptions sqlOptions, OntopMappingOntologyBuilders.OntopMappingOntologyOptions ontologyOptions) {
             this.sqlOptions = sqlOptions;
-            this.owlapiOptions = owlapiOptions;
+            this.ontologyOptions = ontologyOptions;
         }
     }
 
@@ -50,23 +49,14 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopMappingSQLAllOWLAPIConfiguration.Builder<B> {
 
-        private final OntopMappingOWLAPIConfigurationImpl.StandardMappingOWLAPIBuilderFragment<B> owlBuilderFragment;
         private final OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment<B> ontologyBuilderFragment;
         private boolean isOntologyDefined = false;
 
         OntopMappingSQLAllOWLAPIBuilderMixin() {
             B builder = (B) this;
-            owlBuilderFragment = new OntopMappingOWLAPIConfigurationImpl.StandardMappingOWLAPIBuilderFragment<>(builder,
-                    this::declareOntologyDefined
-            );
             ontologyBuilderFragment = new OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment<>(builder,
                     this::declareOntologyDefined
             );
-        }
-
-        @Override
-        public B ontology(@Nonnull OWLOntology ontology) {
-            return owlBuilderFragment.ontology(ontology);
         }
 
         @Override
@@ -110,8 +100,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
                     ontologyBuilderFragment.generateMappingOntologyOptions(
                     sqlOptions.mappingSQLOptions.mappingOptions);
 
-            OntopMappingOWLAPIOptions owlOptions = owlBuilderFragment.generateOntologyOWLAPIOptions(mappingOntologyOptions);
-            return new OntopMappingSQLAllOWLAPIOptions(sqlOptions, owlOptions);
+            return new OntopMappingSQLAllOWLAPIOptions(sqlOptions, mappingOntologyOptions);
         }
     }
 

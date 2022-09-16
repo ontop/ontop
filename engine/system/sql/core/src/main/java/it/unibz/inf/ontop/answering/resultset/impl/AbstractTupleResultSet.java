@@ -54,15 +54,6 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     }
 
     @Override
-    public int getFetchSize() throws OntopConnectionException {
-        try {
-            return rs.getFetchSize();
-        } catch (Exception e) {
-            throw buildConnectionException(e);
-        }
-    }
-
-    @Override
     public ImmutableList<String> getSignature() {
         return signature.stream()
                 .map(Variable::getName)

@@ -4,8 +4,9 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.exception.OntologyException;
-import it.unibz.inf.ontop.injection.OntopMappingOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopMappingOntologyConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.OntopOntologyOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
@@ -26,14 +27,14 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 
-public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurationImpl
-        implements OntopMappingOWLAPIConfiguration {
+public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigurationImpl
+        implements OntopMappingOntologyConfiguration, OntopOntologyOWLAPIConfiguration {
 
-    private final OntopMappingOWLAPIOptions options;
+    private final OntopMappingOntologyOptions options;
     private Optional<OWLOntology> owlOntology;
 
-    protected OntopMappingOWLAPIConfigurationImpl(OntopMappingSettings settings, OntopMappingOWLAPIOptions options) {
-        super(settings, options.mappingOntologyOptions.mappingOptions);
+    protected OntopMappingOntologyConfigurationImpl(OntopMappingSettings settings, OntopMappingOntologyOptions options) {
+        super(settings, options.mappingOptions);
         this.options = options;
         this.owlOntology = Optional.empty();
     }
@@ -43,9 +44,6 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
      */
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
-        if (options.ontology.isPresent()) {
-            return options.ontology;
-        }
         if (owlOntology.isPresent()){
             return owlOntology;
         }
@@ -60,10 +58,10 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
          */
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-        if (options.mappingOntologyOptions.xmlCatalogFile.isPresent()) {
+        if (options.xmlCatalogFile.isPresent()) {
             OWLOntologyIRIMapper iriMapper;
             try {
-                iriMapper = new XMLCatalogIRIMapper(new File(options.mappingOntologyOptions.xmlCatalogFile.get()));
+                iriMapper = new XMLCatalogIRIMapper(new File(options.xmlCatalogFile.get()));
             }
             catch (IOException e) {
                 throw new OWLOntologyCreationException(e.getMessage());
@@ -71,13 +69,13 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
             manager.setIRIMappers(ImmutableSet.of(iriMapper));
         }
 
-        if (options.mappingOntologyOptions.ontologyFile.isPresent()) {
-            owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(options.mappingOntologyOptions.ontologyFile.get()));
+        if (options.ontologyFile.isPresent()) {
+            owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(options.ontologyFile.get()));
         }
-        else if (options.mappingOntologyOptions.ontologyReader.isPresent()) {
+        else if (options.ontologyReader.isPresent()) {
             try {
                 InputStream inputStream = new ByteArrayInputStream(
-                        CharStreams.toString(options.mappingOntologyOptions.ontologyReader.get())
+                        CharStreams.toString(options.ontologyReader.get())
                         .getBytes(Charsets.UTF_8));
                 owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(inputStream));
             } catch (IOException e) {
@@ -89,7 +87,7 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         /*
          * URL
          */
-        Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
+        Optional<URL> optionalURL = options.ontologyURL;
         if (optionalURL.isPresent()) {
             try (InputStream is = optionalURL.get().openStream()) {
                 owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(is));
@@ -124,37 +122,6 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         OntopMappingOWLAPIOptions(Optional<OWLOntology> ontology, OntopMappingOntologyOptions mappingOntologyOptions) {
             this.ontology = ontology;
             this.mappingOntologyOptions = mappingOntologyOptions;
-        }
-    }
-
-    protected static class StandardMappingOWLAPIBuilderFragment<B extends OntopMappingOWLAPIConfiguration.Builder<B>>
-            implements OntopMappingOWLAPIBuilderFragment<B> {
-
-        private final B builder;
-        private final Runnable declareOntologyDefinedCB;
-        private Optional<OWLOntology> ontology = Optional.empty();
-
-        StandardMappingOWLAPIBuilderFragment(B builder, Runnable declareOntologyDefinedCB) {
-            this.builder = builder;
-            this.declareOntologyDefinedCB = declareOntologyDefinedCB;
-        }
-
-        @Override
-        public B ontology(@Nonnull OWLOntology ontology) {
-            declareOntologyDefinedCB.run();
-            this.ontology = Optional.of(ontology);
-            return builder;
-        }
-
-        protected final OntopMappingOWLAPIOptions generateOntologyOWLAPIOptions(
-                OntopMappingOntologyOptions mappingOntologyOptions) {
-            return new OntopMappingOWLAPIOptions(ontology, mappingOntologyOptions);
-        }
-
-        protected Properties generateProperties() {
-            Properties p = new Properties();
-            // Does not create new property entries
-            return p;
         }
     }
 }

@@ -5,9 +5,10 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
 
 @Ignore("A proper Docker-compose env needs to added")
 public class TeiidTest {
-    public static OntopOWLReasoner res;
+    public static OntopOWLEngine res;
     public static OntopOWLConnection ct;
     public static OntopOWLStatement st;
     public static TupleOWLResultSet rs;
@@ -42,14 +43,13 @@ public class TeiidTest {
         obdafile =  TeiidTest.class.getResource(obdafile).toString();
         propertyfile  =  TeiidTest.class.getResource(propertyfile).toString();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertyfile)
                 .enableTestMode()
                 .build();
-        res = factory.createReasoner(config);
+        res = new SimpleOntopOWLEngine(config);
         ct = res.getConnection();
         st = ct.createStatement();
     }

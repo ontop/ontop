@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +72,12 @@ public class InconsistencyCheckingTest {
 
 		try (OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontology, properties)) {
 			OntopOWLFactory ontopOWLFactory = OntopOWLFactory.defaultFactory();
-			reasoner = ontopOWLFactory.createReasoner(siLoader.getConfiguration());
+			OntopSQLOWLAPIConfiguration configuration = siLoader.getConfiguration();
+
+			OWLOntology ontology = configuration.loadInputOntology()
+					.orElseThrow(() -> new RuntimeException("Was expecting an ontology"));
+
+			reasoner = ontopOWLFactory.createReasoner(ontology, configuration);
 		}
 	}
 	

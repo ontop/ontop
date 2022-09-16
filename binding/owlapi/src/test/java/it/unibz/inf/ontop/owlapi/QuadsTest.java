@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -81,7 +82,6 @@ public class QuadsTest {
     properties.setProperty(QUERY_LOGGING, "true");
     properties.setProperty(REFORMULATED_INCLUDED_QUERY_LOGGING, "true");
 
-    OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
             .nativeOntopMappingFile(MAPPING_FILE)
             .ontologyFile(OWL_FILE)
@@ -91,7 +91,7 @@ public class QuadsTest {
             .properties(properties)
             .enableTestMode()
             .build();
-    OntopOWLReasoner reasoner = factory.createReasoner(config);
+    OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
     // Now we are ready for querying
     OntopOWLConnection conn = reasoner.getConnection();
@@ -124,7 +124,7 @@ public class QuadsTest {
     }
     finally {
       conn.close();
-      reasoner.dispose();
+      reasoner.close();
     }
     return sql;
   }

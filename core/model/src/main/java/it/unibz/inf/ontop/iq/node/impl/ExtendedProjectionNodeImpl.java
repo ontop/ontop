@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.List;
 import java.util.Map;
@@ -39,10 +40,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree child) {
+            Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         return applyDescendingSubstitution(descendingSubstitution, child,
-                (c, r) -> propagateDescendingSubstitutionToChild(c, r, constraint));
+                (c, r) -> propagateDescendingSubstitutionToChild(c, r, constraint, variableGenerator));
     }
 
     /**
@@ -53,7 +54,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
      */
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
-                                                          Optional<ImmutableExpression> constraint) throws EmptyTreeException {
+                                                          Optional<ImmutableExpression> constraint,
+                                                          VariableGenerator variableGenerator) throws EmptyTreeException {
 
         Optional<ImmutableExpression> descendingConstraint;
         if (constraint.isPresent()) {
@@ -70,17 +72,17 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
-                .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
+                .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint, variableGenerator))
                 .orElse(child);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
         return applyDescendingSubstitution(descendingSubstitution, child,
                 (c, r) -> Optional.of(r.delta)
                         .filter(delta -> !delta.isEmpty())
-                        .map(c::applyDescendingSubstitutionWithoutOptimizing)
+                        .map(d -> c.applyDescendingSubstitutionWithoutOptimizing(d, variableGenerator))
                         .orElse(c));
     }
 
@@ -220,12 +222,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
         try {
             Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), constraint,
                     child.getVariableNullability().extendToExternalVariables(constraint.getVariableStream()));
             IQTree newChild = childConstraint
-                    .map(child::propagateDownConstraint)
+                    .map(c -> child.propagateDownConstraint(c, variableGenerator))
                     .orElse(child);
             return iqFactory.createUnaryIQTree(this, newChild);
 

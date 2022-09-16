@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.db2;
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -21,7 +21,7 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
 	private static final String obdafile = "/db2/bind/sparqlBindDb2.obda";
     private static final String propertiesfile = "/db2/bind/db2-smallbooks.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsDb2Test() throws OWLOntologyCreationException {
@@ -31,9 +31,9 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     @Ignore("Not yet supported")

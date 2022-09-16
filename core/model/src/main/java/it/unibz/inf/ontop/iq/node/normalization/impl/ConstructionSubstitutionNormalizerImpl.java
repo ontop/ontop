@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,7 +28,8 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory,
+                                                   SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
     }
@@ -88,10 +90,10 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         }
 
         @Override
-        public IQTree updateChild(IQTree child) {
+        public IQTree updateChild(IQTree child, VariableGenerator variableGenerator) {
             return downRenamingSubstitution.isEmpty()
                     ? child
-                    : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty());
+                    : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty(), variableGenerator);
         }
 
         @Override

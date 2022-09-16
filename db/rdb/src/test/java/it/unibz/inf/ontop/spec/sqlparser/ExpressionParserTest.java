@@ -413,6 +413,57 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void is_distinct_from_test1() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS DISTINCT FROM 1", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getDBNot(
+                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getDBConstant("1", dbLongType),
+                        TERM_FACTORY.getDBConstant("1", dbLongType))), translation.get(0).simplify());
+    }
+
+    @Test
+    public void is_distinct_from_test2() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS DISTINCT FROM NULL", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
+    }
+
+    @Test
+    public void is_distinct_from_test3() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM 2", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
+    }
+
+    @Test
+    public void is_distinct_from_test4() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM NULL", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(false), translation.get(0).simplify());
+    }
+
+    @Test
+    public void is_not_distinct_from_test1() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS NOT DISTINCT FROM 1", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getDBConstant("1", dbLongType),
+                        TERM_FACTORY.getDBConstant("1", dbLongType)),
+                translation.get(0).simplify());
+    }
+
+    @Test
     public void in_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IN (1, 3)", ImmutableMap.of(
@@ -965,6 +1016,31 @@ public class ExpressionParserTest {
                 translation);
     }
 
+    @Test
+    public void boolean_column_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+                DB_FS_FACTORY.getIsTrue(),
+                v), translation.get(0));
+    }
+
+    @Test
+    public void not_boolean_column_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+                DB_FS_FACTORY.getDBNot(),
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getIsTrue(),
+                        v)),
+                translation.get(0));
+    }
+
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void subSelect_Test() throws JSQLParserException {
@@ -1438,7 +1514,6 @@ public class ExpressionParserTest {
         DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
         Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
     }
-
 
     private ImmutableTerm parseTerm(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);

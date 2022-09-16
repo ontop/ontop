@@ -33,11 +33,12 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
+                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
-                SameTermSelfJoinTransformer::new,
-                optimizationSingletons);
+                t -> new SameTermSelfJoinTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
+                coreSingletons);
     }
 
     @Override
@@ -53,63 +54,21 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     /**
      * TODO: explain
      */
-    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctTransformer {
-
-        private final IntermediateQueryFactory iqFactory;
-        private final TermFactory termFactory;
+    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctInnerJoinTransformer {
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
         protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                              OptimizationSingletons optimizationSingletons) {
-            super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
-            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            iqFactory = coreSingletons.getIQFactory();
-            termFactory = coreSingletons.getTermFactory();
-            requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
-        }
-
-        /**
-         * TODO: explain
-         *
-         * Only removes some children that are extensional data nodes
-         */
-        @Override
-        protected Optional<IQTree> furtherSimplifyInnerJoinChildren(Optional<ImmutableExpression> optionalFilterCondition,
-                                                                    ImmutableList<IQTree> partiallySimplifiedChildren) {
-            //Mutable
-            final List<IQTree> currentChildren = Lists.newArrayList(partiallySimplifiedChildren);
-            IntStream.range(0, partiallySimplifiedChildren.size())
-                    .boxed()
-                    .filter(i -> isDetectedAsRedundant(
-                            currentChildren.get(i),
-                            IntStream.range(0, partiallySimplifiedChildren.size())
-                                    .filter(j -> j!= i)
-                                    .mapToObj(currentChildren::get)))
-                    // SIDE-EFFECT
-                    .forEach(i -> currentChildren.set(i, iqFactory.createTrueNode()));
-
-            ImmutableSet<Variable> variablesToFilterNulls = IntStream.range(0, partiallySimplifiedChildren.size())
-                    .filter(i -> currentChildren.get(i).getRootNode() instanceof TrueNode)
-                    .mapToObj(i -> partiallySimplifiedChildren.get(i).getVariables())
-                    .flatMap(Collection::stream)
-                    .collect(ImmutableCollectors.toSet());
-
-            Optional<ImmutableExpression> expression = termFactory.getConjunction(optionalFilterCondition,
-                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull));
-
-            InnerJoinNode innerJoinNode = expression
-                    .map(iqFactory::createInnerJoinNode)
-                    .orElseGet(iqFactory::createInnerJoinNode);
-
-            // NB: will be normalized later on
-            return Optional.of(iqFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(currentChildren)));
-
+                                              CoreSingletons coreSingletons,
+                                              RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+            super(lookForDistinctTransformer, coreSingletons);
+            this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         }
 
         /**
          * Should not return any false positive
          */
-        boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildren) {
+        @Override
+        protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildren) {
             return Optional.of(child)
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
@@ -117,24 +76,6 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                             .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
                             .anyMatch(d2 -> isDetectedAsRedundant(d1, d2)))
                     .isPresent();
-        }
-
-        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode) {
-            if (!dataNode.getRelationDefinition().equals(otherDataNode.getRelationDefinition()))
-                return false;
-
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> otherArgumentMap = otherDataNode.getArgumentMap();
-
-            ImmutableSet<Integer> firstIndexes = argumentMap.keySet();
-            ImmutableSet<Integer> otherIndexes = otherArgumentMap.keySet();
-
-            Sets.SetView<Integer> allIndexes = Sets.union(firstIndexes, otherIndexes);
-            Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
-
-            return allIndexes.stream()
-                    .filter(i -> !(commonIndexes.contains(i) && argumentMap.get(i).equals(otherArgumentMap.get(i))))
-                    .noneMatch(argumentMap::containsKey);
         }
     }
 }

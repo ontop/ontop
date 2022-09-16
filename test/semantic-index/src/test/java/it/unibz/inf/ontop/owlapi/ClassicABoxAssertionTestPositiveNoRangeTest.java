@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -29,6 +30,8 @@ import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +58,16 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
-		OntopOWLReasoner reasoner;
+		OntopOWLEngine reasoner;
 		try(OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-			reasoner = factory.createReasoner(siLoader.getConfiguration());
+
+			OntopSQLOWLAPIConfiguration configuration = siLoader.getConfiguration();
+
+			OWLOntology ontology = configuration.loadInputOntology()
+					.orElseThrow(() -> new RuntimeException("Was expecting an ontology"));
+
+			reasoner = factory.createReasoner(ontology, configuration);
 		}
 
 		conn = reasoner.getConnection();

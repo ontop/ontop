@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.docker.failing.local;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -28,14 +29,13 @@ public class MonetDBTest {
             /* 
             * Create the instance of Quest OWL reasoner. 
             */
-            OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(obdaFileName)
                     .ontologyFile(owlFileName)
                     .propertyFile(propertyFileName)
                     .enableTestMode()
                     .build();
-            OntopOWLReasoner reasoner = factory.createReasoner(config);
+            OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
             /* 
             * Prepare the data connection for querying. 
@@ -98,7 +98,7 @@ public class MonetDBTest {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
             }
-            reasoner.dispose();
+            reasoner.close();
         }
         }
 /** 

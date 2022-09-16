@@ -65,12 +65,18 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             this.escape = metadata.getSearchStringEscape();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
+
+            String dbVersion = metadata.getDatabaseProductVersion();
+
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
                     metadata.getDriverVersion(),
                     metadata.getDatabaseProductName(),
-                    metadata.getDatabaseProductVersion(),
+                    dbVersion,
                     idFactory,
                     coreSingletons);
+
+            coreSingletons.getDatabaseInfoSupplier().setDatabaseVersion(dbVersion);
+
             this.coreSingletons = coreSingletons;
             this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
 

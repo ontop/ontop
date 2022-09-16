@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -32,7 +31,6 @@ public class TermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final SingleTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
     private final DBTermType dBStringType;
@@ -43,7 +41,6 @@ public class TermTypeMappingCaster implements MappingCaster {
                                   SingleTermTypeExtractor typeExtractor) {
         this.functionSymbolFactory = functionSymbolFactory;
         this.iqFactory = coreSingletons.getIQFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.typeExtractor = typeExtractor;
         this.termFactory = coreSingletons.getTermFactory();
         this.dBStringType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();
@@ -79,7 +76,7 @@ public class TermTypeMappingCaster implements MappingCaster {
             Optional<DBTermType> dbType = extractInputDBType(uncastLexicalTerm, childTree);
             RDFTermType rdfType = extractRDFTermType(rdfTypeTerm);
 
-            ImmutableTerm newLexicalTerm = transformNestedTemporaryCasts(
+            ImmutableTerm newLexicalTerm = transformNestedTemporaryToStringConversions(
                     transformTopOfLexicalTerm(uncastLexicalTerm, dbType, rdfType), childTree);
 
             return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm).simplify();
@@ -125,18 +122,18 @@ public class TermTypeMappingCaster implements MappingCaster {
     /**
      * For dealing with arguments of templates (which are always cast as strings)
      *
-     * Either remove the casting function (if not needed), replace it by a casting function
+     * Either remove the conversion function (if not needed), replace it by a conversion function
      * knowing its input type or, in the "worst" case, by a replace it by a casting function
      * NOT knowing the input type.
      *
      */
-    private ImmutableTerm transformNestedTemporaryCasts(ImmutableTerm term, IQTree childTree) {
+    private ImmutableTerm transformNestedTemporaryToStringConversions(ImmutableTerm term, IQTree childTree) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
             if (DBTypeConversionFunctionSymbol.isTemporary(functionSymbol)) {
-                DBTypeConversionFunctionSymbol castFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
+                DBTypeConversionFunctionSymbol conversionFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
                 if (functionSymbol.getArity() != 1)
                     throw new MinorOntopInternalBugException("The casting function was expected to be unary");
 
@@ -145,10 +142,13 @@ public class TermTypeMappingCaster implements MappingCaster {
 
                 Optional<DBTermType> inputType = extractInputDBType(childTerm, childTree);
 
-                return Optional.of(castFunctionSymbol.getTargetType())
+                return Optional.of(conversionFunctionSymbol.getTargetType())
                         .filter(targetType -> !inputType.filter(targetType::equals).isPresent())
                         .map(targetType -> inputType
-                                .map(i -> termFactory.getDBCastFunctionalTerm(i, targetType, childTerm))
+                                .map(i -> targetType.getCategory().equals(DBTermType.Category.STRING)
+                                        ? termFactory.getConversion2RDFLexical(i, childTerm, termFactory.getTypeFactory().getXsdStringDatatype())
+                                        // Should not happen. TODO: simplify
+                                        : termFactory.getDBCastFunctionalTerm(i, targetType, childTerm))
                                 .orElseGet(() -> termFactory.getDBCastFunctionalTerm(targetType, childTerm)))
                         .map(t -> (ImmutableTerm) t)
                         .orElse(childTerm);
@@ -157,7 +157,7 @@ public class TermTypeMappingCaster implements MappingCaster {
                 // Recursive
                 return termFactory.getImmutableFunctionalTerm(functionSymbol,
                         functionalTerm.getTerms().stream()
-                                .map(t -> transformNestedTemporaryCasts(t, childTree))
+                                .map(t -> transformNestedTemporaryToStringConversions(t, childTree))
                                 .collect(ImmutableCollectors.toList()));
             }
         }

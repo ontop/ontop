@@ -30,8 +30,8 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
@@ -43,10 +43,10 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
 public class ExpressionParser {
 
-    private final QuotedIDFactory idfac;
-    private final TermFactory termFactory;
-    private final DBTypeFactory dbTypeFactory;
-    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+    protected final QuotedIDFactory idfac;
+    protected final TermFactory termFactory;
+    protected final DBTypeFactory dbTypeFactory;
+    protected final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     public ExpressionParser(QuotedIDFactory idfac, CoreSingletons coreSingletons) {
         this.idfac = idfac;
@@ -80,11 +80,11 @@ public class ExpressionParser {
             .put("RAND", this::getRAND) // to make it deterministic
             .put("CONVERT", this::getCONVERT)
             // Aggregate functions
-            .put("COUNT", this::reject)
-            .put("MIN", this::reject)
-            .put("MAX", this::reject)
-            .put("SUM", this::reject)
-            .put("AVG", this::reject)
+            .put("COUNT", this::getCount)
+            .put("MIN", this::getMin)
+            .put("MAX", this::getMax)
+            .put("SUM", this::getSum)
+            .put("AVG", this::getAvg)
             // Array functions (PostgreSQL) change cardinality
             .put("UNNEST", this::reject)
             .put("JSON_EACH", this::reject)
@@ -94,7 +94,7 @@ public class ExpressionParser {
             .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
 
-    private ImmutableFunctionalTerm getGenericDBFunction(Function expression, TermVisitor termVisitor) {
+    protected ImmutableFunctionalTerm getGenericDBFunction(Function expression, TermVisitor termVisitor) {
         if (expression.isDistinct())
             throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function: DISTINCT", expression);
 
@@ -154,7 +154,27 @@ public class ExpressionParser {
         return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
     }
 
-    private ImmutableFunctionalTerm reject(Function expression, TermVisitor termVisitor) {
+    protected ImmutableFunctionalTerm getCount(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getSum(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getAvg(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getMin(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm getMax(Function function, TermVisitor termVisitor) {
+        return reject(function, termVisitor);
+    }
+
+    protected ImmutableFunctionalTerm reject(Function expression, TermVisitor termVisitor) {
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
@@ -172,7 +192,7 @@ public class ExpressionParser {
      *                  the input cannot be converted into a CQ and needs to be wrapped
      *
      */
-    private class TermVisitor implements ExpressionVisitor {
+    protected class TermVisitor implements ExpressionVisitor {
 
         private final RAExpressionAttributes attributes;
 
@@ -474,6 +494,44 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("ALL is not supported in this context", expression);
         }
 
+        /**
+         * See for instance https://wiki.postgresql.org/wiki/Is_distinct_from
+         */
+        @Override
+        public void visit(IsDistinctExpression expression) {
+            process(expression, expression.isNot(),
+                    (t1, t2) -> {
+                        ImmutableExpression isNotNullT1 = termFactory.getDBIsNotNull(t1);
+                        ImmutableExpression isNotNullT2 = termFactory.getDBIsNotNull(t2);
+                        ImmutableExpression isNullT1 = termFactory.getDBIsNull(t1);
+                        ImmutableExpression isNullT2 = termFactory.getDBIsNull(t2);
+                        ImmutableExpression trueExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(true));
+                        ImmutableExpression falseExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(false));
+
+                        return termFactory.getDBBooleanCase(
+                                ImmutableMap.of(
+                                                termFactory.getConjunction(isNotNullT1, isNotNullT2),
+                                                termFactory.getDBNot(termFactory.getNotYetTypedEquality(t1, t2)),
+                                                termFactory.getConjunction(isNotNullT1, isNullT2),
+                                                trueExpression,
+                                                // Added for optimization purposes (if one argument is null while the other is nullable)
+                                                termFactory.getConjunction(isNullT1, isNotNullT2),
+                                                trueExpression,
+                                                termFactory.getConjunction(isNullT1, isNullT2),
+                                                falseExpression)
+                                        .entrySet().stream(),
+                                // Will never be reached
+                                trueExpression,
+                                false
+                        );
+                    });
+        }
+
+        @Override
+        public void visit(GeometryDistance expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Geometry distance is not supported in this context", expression);
+        }
+
 
         // ------------------------------------------
         // RELATIONAL OPERATIONS
@@ -673,7 +731,12 @@ public class ExpressionParser {
 
         private ImmutableExpression getExpression(Expression expression) {
             ImmutableTerm term = getTerm(expression);
-            return (ImmutableExpression)term;
+            if (term instanceof ImmutableExpression)
+                return (ImmutableExpression)term;
+            if (term instanceof NonFunctionalTerm)
+                return termFactory.getIsTrue((NonFunctionalTerm) term);
+            throw new UnsupportedSelectQueryRuntimeException(
+                    "Non-boolean functional terms are not supported as conditions", expression);
         }
 
         @Override

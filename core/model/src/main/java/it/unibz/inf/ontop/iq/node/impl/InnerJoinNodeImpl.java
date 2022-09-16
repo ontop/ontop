@@ -151,7 +151,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
+                                              VariableGenerator variableGenerator) {
 
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression);
@@ -165,7 +166,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         try {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of(), simplifiedChildFutureVariableNullability);
+                    unoptimizedExpression, ImmutableSet.of(), children, simplifiedChildFutureVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
@@ -175,7 +176,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                             .composeWith2(expressionAndSubstitution.getSubstitution());
 
             ImmutableList<IQTree> newChildren = children.stream()
-                    .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint))
+                    .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
             IQTree joinTree = iqFactory.createNaryIQTree(
@@ -197,7 +198,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
+            VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression)
@@ -205,7 +207,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .orElseGet(iqFactory::createInnerJoinNode);
 
         ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createNaryIQTree(newJoinNode, newChildren);
@@ -389,13 +391,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
+                                          VariableGenerator variableGenerator) {
         VariableNullability extendedChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children)
                 .extendToExternalVariables(constraint.getVariableStream());
 
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), extendedChildrenVariableNullability);
+                    getOptionalFilterCondition(), ImmutableSet.of(), children, extendedChildrenVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     conditionSimplificationResults, extendedChildrenVariableNullability);
@@ -405,12 +408,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
                     .map(s -> children.stream()
-                            .map(child -> child.applyDescendingSubstitution(s, downConstraint))
+                            .map(child -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
                             .collect(ImmutableCollectors.toList())
                     )
                     .orElseGet(() -> downConstraint
                             .map(s -> children.stream()
-                                    .map(child -> child.propagateDownConstraint(s))
+                                    .map(child -> child.propagateDownConstraint(s, variableGenerator))
                                     .collect(ImmutableCollectors.toList()))
                             .orElse(children));
 

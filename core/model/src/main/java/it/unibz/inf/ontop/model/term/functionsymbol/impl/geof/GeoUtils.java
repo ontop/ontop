@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultSimpleDBCastFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -50,7 +51,9 @@ public class GeoUtils {
                 .orElseGet(
                         // If template then
                         () -> tryExtractGeometryFromTemplate(termFactory, wktLiteralTerm)
-                                .orElse(wktLiteralTerm)
+                                // If nested geosparql expression e.g. ST_WITHIN(geom0, ST_BUFFER(geom1))
+                                .orElseGet(() -> tryExtractNestedGeoSPARQLExpression(wktLiteralTerm)
+                                        .orElse(wktLiteralTerm))
                 );
 
         return new WKTLiteralValue(srid, geometry);
@@ -168,6 +171,31 @@ public class GeoUtils {
                                             .collect(ImmutableCollectors.toList()));
                     }
                 });
+    }
+
+    /**
+     * Method extracts geosparql expression when nested inside another geosparql expression.
+     * Non-topological expressions such as ST_BUFFER, ST_INTERSECTION etc. get wrapped with ST_ASTEXT to yield a wkt.
+     * If that expression is an argument of another geosparql function, SRID information is lost since ST_ASTEXT yields SRID=0
+     * Method extracts geosparql expression from BOOLEANtoTEXT(ST_ASTEXT(geosparql_expression))
+     *
+     * @param wktLiteralTerm
+     * @return geosparql expression which preserves the SRID
+     */
+    private static Optional<ImmutableTerm> tryExtractNestedGeoSPARQLExpression(ImmutableTerm wktLiteralTerm) {
+
+        return Optional.of(wktLiteralTerm)
+                // GeoSPARQL expression can be either NonGroundFunctionalTerm or GroundFunctionalTerm
+                .filter(t -> t instanceof ImmutableFunctionalTerm).map(t -> (ImmutableFunctionalTerm) t)
+                // template uses DefaultDBCastFunctionSymbol as the functional symbol i.e. BOOLEANtoTEXT
+                .filter(t -> t.getFunctionSymbol() instanceof DefaultSimpleDBCastFunctionSymbol)
+                // check only one argument present i.e. ST_ASTEXT
+                .filter(t -> t.getTerms().size()==1)
+                .map(t -> t.getTerm(0))
+                // extract the geosparql expression inside ST_ASTEXT which preserves the SRID
+                .filter(t -> t instanceof ImmutableFunctionalTerm).map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol().toString().startsWith("ST_ASTEXT"))
+                .map(t -> t.getTerm(0));
     }
 
     /**
