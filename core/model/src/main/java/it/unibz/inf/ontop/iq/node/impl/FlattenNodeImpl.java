@@ -145,12 +145,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+                                              Optional<ImmutableExpression> constraint, IQTree child,
+                                              VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(
                 applySubstitution(descendingSubstitution),
                 child.applyDescendingSubstitution(
                         descendingSubstitution,
-                        constraint
+                        constraint,
+                        variableGenerator
                 ));
     }
 
@@ -166,11 +168,12 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               IQTree child, VariableGenerator variableGenerator) {
 
         return iqFactory.createUnaryIQTree(
                 applySubstitution(descendingSubstitution),
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
@@ -238,8 +241,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint));
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
+        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint, variableGenerator));
     }
 
     @Override
@@ -319,6 +322,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitFlatten(this, child);
+    }
+
+    @Override
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return variable.equals(outputVariable) || indexVariable
+                .filter(variable::equals)
+                .isPresent();
     }
 
     /**

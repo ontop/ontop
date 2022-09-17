@@ -244,16 +244,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
+            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
+            VariableGenerator variableGenerator) {
 
         if (constraint
                 .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
                 .isPresent()
                 || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
-                .applyDescendingSubstitution(descendingSubstitution, constraint);
+                .applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
-        IQTree updatedLeftChild = leftChild.applyDescendingSubstitution(descendingSubstitution, constraint);
+        IQTree updatedLeftChild = leftChild.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
         Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
         if (initialExpression.isPresent()) {
@@ -265,7 +266,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         expressionAndCondition.getSubstitution().composeWith2(descendingSubstitution);
 
-                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty());
+                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty(), variableGenerator);
 
                 return updatedRightChild.isDeclaredAsEmpty()
                         ? updatedLeftChild
@@ -277,7 +278,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, Optional.empty());
+            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, Optional.empty(),
+                    variableGenerator);
             if (updatedRightChild.isDeclaredAsEmpty()) {
                 ImmutableSet<Variable> leftVariables = updatedLeftChild.getVariables();
                 ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
@@ -301,13 +303,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              IQTree leftChild, IQTree rightChild) {
+                                              IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
         if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
-                    .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+                    .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
-        IQTree newLeftChild = leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
-        IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        IQTree newLeftChild = leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
+        IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         LeftJoinNode newLJNode = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression)
@@ -377,8 +379,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
-        return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild,
+                                          VariableGenerator variableGenerator) {
+        return propagateDownCondition(Optional.of(constraint), leftChild, rightChild, variableGenerator);
     }
 
     @Override
@@ -417,16 +420,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      *
      * Transforms the left join into an inner join when the constraint is rejecting nulls from the right
      */
-    private IQTree propagateDownCondition(Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
+    private IQTree propagateDownCondition(Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
+                                          VariableGenerator variableGenerator) {
 
         if (constraint
                 .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
                 .isPresent())
             return transformIntoInnerJoinTree(leftChild, rightChild)
-                    .propagateDownConstraint(constraint.get());
+                    .propagateDownConstraint(constraint.get(), variableGenerator);
 
         IQTree newLeftChild = constraint
-                .map(leftChild::propagateDownConstraint)
+                .map(c -> leftChild.propagateDownConstraint(c, variableGenerator))
                 .orElse(leftChild);
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }

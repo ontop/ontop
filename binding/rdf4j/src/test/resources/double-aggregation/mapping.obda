@@ -1,0 +1,10 @@
+[PrefixDeclaration]
+:    http://foobar.abc/ontology/demo#
+
+[MappingDeclaration] @collection [[
+
+mappingId  mytable
+target     :data_{id} :type {type} ; :length {length}^^xsd:decimal .
+source     SELECT * FROM mytable
+
+]]

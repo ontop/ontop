@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class PostgresDialectExtraNormalizer implements DialectExtraNormalizer {
 
-    private final TypingNullsDialectExtraNormalizer typingNullNormalizer;
+    private final TypingNullsInUnionDialectExtraNormalizer typingNullNormalizer;
     private final OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer;
 
     @Inject
-    protected PostgresDialectExtraNormalizer(TypingNullsDialectExtraNormalizer typingNullNormalizer,
-                                          OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer) {
+    protected PostgresDialectExtraNormalizer(TypingNullsInUnionDialectExtraNormalizer typingNullNormalizer,
+                                             OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectionNormalizer) {
         this.typingNullNormalizer = typingNullNormalizer;
         this.projectionNormalizer = projectionNormalizer;
     }

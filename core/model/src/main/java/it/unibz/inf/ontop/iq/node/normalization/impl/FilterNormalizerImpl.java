@@ -53,7 +53,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             State stateBeforeSimplification = state.liftBindingsAndDistinct()
                     .mergeWithChild();
 
-            State newState = stateBeforeSimplification.simplifyAndPropagateDownConstraint()
+            State newState = stateBeforeSimplification.simplifyAndPropagateDownConstraint(variableGenerator)
                     .normalizeChild(variableGenerator);
 
             // Convergence
@@ -233,7 +233,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             return this;
         }
 
-        public State simplifyAndPropagateDownConstraint() {
+        public State simplifyAndPropagateDownConstraint(VariableGenerator variableGenerator) {
             if (!condition.isPresent()) {
                 return this;
             }
@@ -243,16 +243,16 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 // TODO: also consider the constraint for simplifying the condition
                 ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        condition.get(), childVariableNullability);
+                        condition.get(), ImmutableList.of(child), childVariableNullability);
 
                 Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
                         conditionSimplificationResults, childVariableNullability);
 
                 IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> child.applyDescendingSubstitution(s, downConstraint))
+                        .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
                         .orElseGet(() -> downConstraint
-                                .map(child::propagateDownConstraint)
+                                .map(c -> child.propagateDownConstraint(c, variableGenerator))
                                 .orElse(child));
 
                 Optional<ConstructionNode> parentConstructionNode = Optional.of(conditionSimplificationResults.getSubstitution())

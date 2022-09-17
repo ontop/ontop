@@ -30,12 +30,10 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     @Inject
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
                                                  SingleTermTypeExtractor typeExtractor,
-                                                 TermFactory termFactory,
-                                                 SubstitutionFactory substitutionFactory) {
+                                                 TermFactory termFactory) {
         this.expressionTransformer = new ExpressionTransformer(iqFactory,
                                                                 typeExtractor,
-                                                                termFactory,
-                                                                substitutionFactory);
+                                                                termFactory);
     }
 
     @Override
@@ -44,165 +42,27 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
     }
 
 
-    protected static class ExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final SingleTermTypeExtractor typeExtractor;
-        private final TermFactory termFactory;
-        private final SubstitutionFactory substitutionFactory;
+    protected static class ExpressionTransformer extends AbstractExpressionTransformer {
 
         protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
                                         SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory,
-                                        SubstitutionFactory substitutionFactory) {
-            super(iqFactory);
-            this.typeExtractor = typeExtractor;
-            this.termFactory = termFactory;
-            this.substitutionFactory = substitutionFactory;
+                                        TermFactory termFactory) {
+            super(iqFactory, typeExtractor, termFactory);
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            IQTree newChild = transform(child);
-
-            ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.transform(v -> transformTerm(v, child));
-
-            return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
-                    ? tree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
-                            newChild);
-        }
-
-        @Override
-        public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
-            IQTree newChild = transform(child);
-
-            ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
-            ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.transform(v -> transformFunctionalTerm(v, child));
-
-            return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
-                    ? tree
-                    : iqFactory.createUnaryIQTree(
-                        iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution),
-                        newChild);
-        }
-
-        @Override
-        public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree newChild = transform(child);
-            ImmutableExpression initialExpression = rootNode.getFilterCondition();
-            ImmutableExpression newExpression = transformExpression(initialExpression, tree);
-
-            FilterNode newFilterNode = newExpression.equals(initialExpression)
-                    ? rootNode
-                    : rootNode.changeFilterCondition(newExpression);
-
-            return (newFilterNode.equals(rootNode) && newChild.equals(child))
-                    ? tree
-                    : iqFactory.createUnaryIQTree(newFilterNode, newChild);
-        }
-
-        @Override
-        public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
-            IQTree newChild = transform(child);
-
-            ImmutableList<OrderByNode.OrderComparator> initialComparators = rootNode.getComparators();
-
-            ImmutableList<OrderByNode.OrderComparator> newComparators = initialComparators.stream()
-                    .map(c -> iqFactory.createOrderComparator(
-                            transformNonGroundTerm(c.getTerm(), tree),
-                            c.isAscending()))
-                    .collect(ImmutableCollectors.toList());
-
-            return (newComparators.equals(initialComparators) && newChild.equals(child))
-                    ? tree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createOrderByNode(newComparators),
-                            newChild);
-        }
-
-        @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = transform(leftChild);
-            IQTree newRightChild = transform(rightChild);
-            Optional<ImmutableExpression> initialExpression = rootNode.getOptionalFilterCondition();
-            Optional<ImmutableExpression> newExpression = initialExpression
-                    .map(e -> transformExpression(e, tree));
-
-            LeftJoinNode newLeftJoinNode = newExpression.equals(initialExpression)
-                    ? rootNode
-                    : rootNode.changeOptionalFilterCondition(newExpression);
-
-            return (newLeftJoinNode.equals(rootNode) && newLeftChild.equals(leftChild) && newRightChild.equals(rightChild))
-                    ? tree
-                    : iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild);
-        }
-
-        @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(this::transform)
-                    .collect(ImmutableCollectors.toList());
-
-            Optional<ImmutableExpression> initialExpression = rootNode.getOptionalFilterCondition();
-            Optional<ImmutableExpression> newExpression = initialExpression
-                    .map(e -> transformExpression(e, tree));
-
-            InnerJoinNode newJoinNode = newExpression.equals(initialExpression)
-                    ? rootNode
-                    : rootNode.changeOptionalFilterCondition(newExpression);
-
-            return (newJoinNode.equals(rootNode) && newChildren.equals(children))
-                    ? tree
-                    : iqFactory.createNaryIQTree(newJoinNode, newChildren);
-        }
-
-        protected ImmutableTerm transformTerm(ImmutableTerm term, IQTree tree) {
-            return (term instanceof ImmutableFunctionalTerm)
-                    ? transformFunctionalTerm((ImmutableFunctionalTerm)term, tree)
-                    : term;
-        }
-
-        protected NonGroundTerm transformNonGroundTerm(NonGroundTerm term, IQTree tree) {
-            return (term instanceof ImmutableFunctionalTerm)
-                    ? (NonGroundTerm) transformFunctionalTerm((ImmutableFunctionalTerm)term, tree)
-                    : term;
-        }
-
-        protected ImmutableExpression transformExpression(ImmutableExpression expression, IQTree tree) {
-            return (ImmutableExpression) transformFunctionalTerm(expression, tree);
-        }
-
-        /**
-         * Recursive
-         */
-        protected ImmutableFunctionalTerm transformFunctionalTerm(ImmutableFunctionalTerm functionalTerm, IQTree tree) {
-            ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
-            ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                    .map(t -> (t instanceof ImmutableFunctionalTerm)
-                            // Recursive
-                            ? transformFunctionalTerm((ImmutableFunctionalTerm) t, tree)
-                            : t)
-                    .collect(ImmutableCollectors.toList());
-
-            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-
-            if (functionSymbol instanceof NotYetTypedEqualityFunctionSymbol) {
-                return transformEquality(newTerms, tree);
-            }
-            else
-                return newTerms.equals(initialTerms)
-                        ? functionalTerm
-                        : termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms);
+        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
+            return functionSymbol instanceof NotYetTypedEqualityFunctionSymbol;
         }
 
         /**
          * NB: It tries to reduce equalities into strict equalities.
-         * 
+         *
          * Essential for integers and strings as these kinds of types are often used to build IRIs.
          */
-        protected ImmutableExpression transformEquality(ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
+        @Override
+        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+                                                                ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (newTerms.size() != 2)
                 throw new MinorOntopInternalBugException("Was expecting the not yet typed equalities to be binary");
 
@@ -309,7 +169,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
 
 
         /*
-         * TODO: make it robust so make sure the term does not depend on a constant introduced in the mapping.
+         * TODO: make it robust so as to make sure the term does not depend on a constant introduced in the mapping.
          *
          * Constants in the mapping are indeed uncontrolled and may have a different lexical value
          * that the ones returned by the DB, which would make the test fail.

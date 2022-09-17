@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -146,7 +147,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+            Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
         try {
             Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
@@ -158,13 +159,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                     // Fresh renaming
                     .map(s -> applyFreshRenaming(s, true))
                     .map(t -> newConstraint
-                            .map(t::propagateDownConstraint)
+                            .map(c -> t.propagateDownConstraint(c, variableGenerator))
                             .orElse(t))
                     // Regular substitution
                     .orElseGet(() -> normalizedSubstitution
-                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint))
+                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint, variableGenerator))
                             .orElseGet(() -> newConstraint
-                                    .map(this::propagateDownConstraint)
+                                    .map(c -> propagateDownConstraint(c, variableGenerator))
                                     .orElse(this)));
 
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
@@ -195,7 +196,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);
 
     protected abstract IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                                 Optional<ImmutableExpression> constraint);
+                                                                 Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
 
     private Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {

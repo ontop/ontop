@@ -7,7 +7,7 @@
 	dcterms:title "One table, one primary key, ten columns, three rows with sql datatypes" ;
 	dcterms:identifier "D016-1table1primarykey10columns3rowsSQLdatatypes" ;
 	rdb2rdftest:sqlScriptFile "create.sql";
-	rdb2rdftest:relatedTestCase <dg0016>, <tc0016a>, <tc0016b>, <tc0016b-modified>, <tc0016c>, <tc0016d>, <tc0016e>, <tc0016e-modified> ;
+	rdb2rdftest:relatedTestCase <dg0016>, <tc0016a>, <tc0016b>, <tc0016b-modified>, <tc0016c>, <tc0016d>, <tc0016e> ;
 .
 
 <dg0016> a rdb2rdftest:DirectMapping ;	
@@ -91,18 +91,5 @@
 	rdb2rdftest:database <d016> ;
 	rdb2rdftest:hasExpectedOutput true ;
 	rdb2rdftest:output "mappede.nq" ;
-	rdb2rdftest:mappingDocument "r2rmle.ttl" ;
-.
-
-# MODIFIED VERSION
-<tc0016e-modified> a rdb2rdftest:R2RML ;
-	dcterms:title "Table with datatypes, binary column -- MODIFIED" ;
-	dcterms:identifier "R2RMLTC0016e-modified" ;
-	test:purpose "Tests the rr:termtype and datatype conversions: binary" ;
-	test:specificationReference "#datatype-conversions" ;
-	test:reviewStatus test:unreviewed ;
-	rdb2rdftest:database <d016> ;
-	rdb2rdftest:hasExpectedOutput true ;
-	rdb2rdftest:output "mappede-modified.nq" ;
 	rdb2rdftest:mappingDocument "r2rmle.ttl" ;
 .

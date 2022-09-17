@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -28,20 +29,23 @@ import java.util.stream.Stream;
 @Singleton
 public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
 
-    private final SelfJoinUCTransformer selfJoinUCTransformer;
     private final IntermediateQueryFactory iqFactory;
+    private final SelfJoinUCSimplifier simplifier;
+    private final CoreSingletons coreSingletons;
 
     @Inject
     public SelfJoinUCIQOptimizerImpl(IntermediateQueryFactory iqFactory,
-                                     SelfJoinUCTransformer selfJoinUCTransformer) {
+                                     SelfJoinUCSimplifier simplifier,
+                                     CoreSingletons coreSingletons) {
         this.iqFactory = iqFactory;
-        this.selfJoinUCTransformer = selfJoinUCTransformer;
+        this.simplifier = simplifier;
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
-        IQTree newTree = selfJoinUCTransformer.transform(initialTree);
+        IQTree newTree = new SelfJoinUCTransformer(coreSingletons, simplifier, query.getVariableGenerator()).transform(initialTree);
         return (newTree.equals(initialTree))
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
@@ -53,12 +57,14 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
     private static class SelfJoinUCTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final SelfJoinUCSimplifier simplifier;
+        private final VariableGenerator variableGenerator;
 
-        @Inject
         protected SelfJoinUCTransformer(CoreSingletons coreSingletons,
-                                        SelfJoinUCSimplifier simplifier) {
+                                        SelfJoinUCSimplifier simplifier,
+                                        VariableGenerator variableGenerator) {
             super(coreSingletons);
             this.simplifier = simplifier;
+            this.variableGenerator = variableGenerator;
         }
 
         @Override
@@ -68,7 +74,7 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .map(t -> t.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables())
+            return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables(), variableGenerator)
                     .orElseGet(() -> children.equals(liftedChildren)
                             ? tree
                             : iqFactory.createNaryIQTree(rootNode, liftedChildren));

@@ -38,12 +38,17 @@ public class AbstractOWLAPITest {
     private static Connection SQL_CONNECTION;
     private static OntopOWLConnection CONNECTION;
 
-    protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile)
+    protected static void initOBDA(String createDbFile, String obdaFile)
+            throws SQLException, IOException, OWLOntologyCreationException {
+        initOBDA(createDbFile, obdaFile, null, null);
+    }
+
+    protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile)
             throws SQLException, IOException, OWLOntologyCreationException {
         initOBDA(createDbFile, obdaFile, ontologyFile, null);
     }
 
-    protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile,
+    protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile,
                                    @Nullable String propertiesFile)
             throws SQLException, IOException, OWLOntologyCreationException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
@@ -53,11 +58,13 @@ public class AbstractOWLAPITest {
 
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractOWLAPITest.class.getResource(obdaFile).getPath())
-                .ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
                 .enableTestMode();
+
+        if (ontologyFile != null)
+            builder.ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath());
 
         if (propertiesFile != null)
             builder.propertyFile(AbstractOWLAPITest.class.getResource(propertiesFile).getPath());
@@ -70,8 +77,8 @@ public class AbstractOWLAPITest {
     }
 
     protected static void initR2RML(String createDbFile, String r2rmlFile, String ontologyFile)
-            throws SQLException, IOException, OWLOntologyCreationException {
-        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+            throws SQLException, IOException {
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
         executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());

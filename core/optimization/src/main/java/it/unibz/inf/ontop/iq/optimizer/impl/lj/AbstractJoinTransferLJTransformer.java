@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -40,7 +39,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     protected final VariableGenerator variableGenerator;
     protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     protected final RightProvenanceNormalizer rightProvenanceNormalizer;
-    protected final OptimizationSingletons optimizationSingletons;
+    protected final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -49,14 +48,13 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                                                 VariableGenerator variableGenerator,
                                                 RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                 RightProvenanceNormalizer rightProvenanceNormalizer,
-                                                OptimizationSingletons optimizationSingletons) {
+                                                CoreSingletons coreSingletons) {
         this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
 
-        this.optimizationSingletons = optimizationSingletons;
-        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();

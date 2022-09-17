@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryExcepti
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import net.sf.jsqlparser.JSQLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,9 +139,13 @@ public class JsonSQLView extends JsonView {
 
         ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 
-        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
+        VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(
+                Sets.union(initialChild.getKnownVariables(), projectedVariables));
 
-        IQTree updatedChild = normalization.updateChild(initialChild);
+                ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
+
+
+        IQTree updatedChild = normalization.updateChild(initialChild, variableGenerator);
 
         IQTree iqTree = iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(projectedVariables, normalization.getNormalizedSubstitution()),

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.*;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -61,11 +63,13 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(AggregationNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(NotYetTypedEqualityTransformer.class);
+        bindFromSettings(PartiallyTypedSimpleCastTransformer.class);
         bindFromSettings(RDF.class);
         bindFromSettings(SingleTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
         bindFromSettings(IQTreeCache.class);
+        bindFromSettings(DatabaseInfoSupplier.class);
 
         bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
 
