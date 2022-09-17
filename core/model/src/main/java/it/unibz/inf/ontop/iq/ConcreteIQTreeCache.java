@@ -64,10 +64,4 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
      * Can only be set ONCE!
      */
     void setIsDistinct(@Nonnull Boolean isDistinct);
-
-    /**
-     * Temporary
-     */
-    @Deprecated
-    IQProperties convertIntoIQProperties();
 }

@@ -66,7 +66,13 @@ public class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercent
                 while (rs.next()) {
                     String[] values = new String[numcols];
                     for (int i = 1; i <= numcols; i++)
-                        values[i - 1] = rs.getString(i);
+                        try {
+                            values[i - 1] = rs.getString(i);
+                        } catch (Exception ex) {
+                            // E.g., Teiid cannot display the geometry value as a BLOB
+                            // Such values normally should not be used directly in the mapping target
+                            values[i - 1] = "[[NON-PRINTABLE]]";
+                        }
                     tableModel.addRow(values);
                     tick();
                 }

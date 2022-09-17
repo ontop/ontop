@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.*;
@@ -29,19 +30,33 @@ public class CachingMetadataLookup implements MetadataLookup {
         return retrievedRelation;
     }
 
+    /**
+     * At the moment, black-box views are not cached
+     */
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
+        return provider.getBlackBoxView(query);
+    }
+
     @Override
     public QuotedIDFactory getQuotedIDFactory() {
         return provider.getQuotedIDFactory();
     }
 
 
+    public ImmutableMetadataLookup extractImmutableMetadataLookup() {
+        return new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
+    }
+
     public ImmutableMetadata extractImmutableMetadata() throws MetadataExtractionException {
 
-        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
+        ImmutableMetadataLookup lookup = extractImmutableMetadataLookup();
         ImmutableList<NamedRelationDefinition> list = lookup.getRelations();
 
         for (NamedRelationDefinition relation : list)
             provider.insertIntegrityConstraints(relation, lookup);
+
+        provider.normalizeAndOptimizeRelations(list);
 
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
@@ -54,10 +55,10 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     public static final String DATE_STR = "DATE";
     public static final String TIME_STR = "TIME";
     public static final String TIMESTAMP_STR = "TIMESTAMP";
-    protected static final String BINARY_STR = "BINARY";
-    protected static final String BINARY_VAR_STR = "BINARY VARYING";
-    protected static final String VARBINARY_STR = "VARBINARY";
-    protected static final String BINARY_LARGE_STR = "BINARY LARGE OBJECT";
+    public static final String BINARY_STR = "BINARY";
+    public static final String BINARY_VAR_STR = "BINARY VARYING";
+    public static final String VARBINARY_STR = "VARBINARY";
+    public static final String BINARY_LARGE_STR = "BINARY LARGE OBJECT";
     protected static final String BLOB_STR = "BLOB";
     protected final NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport defaultStrictEqSupport;
 
@@ -72,7 +73,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         TIME,
         DATETIMESTAMP,
         GEOMETRY,
-        GEOGRAPHY
+        GEOGRAPHY,
+        ARRAY,
+        JSON
     }
 
     // MUTABLE
@@ -296,12 +299,54 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
+    public boolean supportsDBDistanceSphere() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsJson() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsArrayType() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.HEXBINARY));
+    }
+
+    @Override
+    public DBTermType getDBArrayType() {
+        if(supportsArrayType()){
+            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.ARRAY));
+        }
+        throw new UnsupportedDBTypeException("DBType Array not supported for this DBMS");
+    }
+
+    @Override
+    public DBTermType getDBJsonType() {
+        if(supportsJson()){
+            return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.JSON));
+        }
+        throw new UnsupportedDBTypeException("DBType JSON not supported for this DBMS");
     }
 
     @Override
     public DBTermType getAbstractRootDBType() {
         return sqlTypeMap.get(ABSTRACT_DB_TYPE_STR);
     }
+
+
+    private static class UnsupportedDBTypeException extends OntopInternalBugException {
+
+        public UnsupportedDBTypeException(String message) {
+            super(message);
+        }
+    }
+
 }
+
+

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -90,8 +91,8 @@ public class AtomFactoryImpl implements AtomFactory {
 
     @Override
     public AtomPredicate getRDFAnswerPredicate(int arity) {
-        ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
-                .map(i -> typeFactory.getAbstractRDFTermType())
+        ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity)
+                .mapToObj(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
         return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, defaultBaseTypes);
     }

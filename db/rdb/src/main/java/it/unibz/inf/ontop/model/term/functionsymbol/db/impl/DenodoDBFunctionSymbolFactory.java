@@ -196,6 +196,11 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new LowerCaseDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
+
     /**
      * Supported in the WHERE clause.
      * Fails in the SELECT clause (e.g. fails for unit test AbstractBindTestWithFunctions.testREGEX())
@@ -231,4 +236,55 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new UnsupportedOperationException(REGEXP_REPLACE_STR + "4: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))/604800000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))/86400000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))/3600000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))/60000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))/1000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
 }

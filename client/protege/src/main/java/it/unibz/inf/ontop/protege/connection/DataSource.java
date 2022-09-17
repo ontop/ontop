@@ -21,17 +21,20 @@ package it.unibz.inf.ontop.protege.connection;
  */
 
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URI;
-import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -45,21 +48,41 @@ public class DataSource {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
 	
 	private final Properties properties = new Properties();
-	private final JDBCConnectionManager connectionManager;
 
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
 	private final EventListenerList<DataSourceListener> listeners = new EventListenerList<>();
 
+	private Connection connection;
+
+	/*  TODO: default parameters for creating statements (to be enforced?)
+			JDBC_AUTOCOMMIT, false
+			JDBC_FETCHSIZE, 100
+			JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY
+			JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY
+		 */
+
+
 	public DataSource() {
-		this.connectionManager = new JDBCConnectionManager();
 		this.id = URI.create(UUID.randomUUID().toString());
 	}
 
+	/**
+	 * Closes the connection quietly
+	 */
 	public void dispose() {
-		connectionManager.dispose();
+		try {
+			if (connection != null) {
+				connection.close();
+				connection = null;
+			}
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
 	}
+
 
 	@Nonnull
 	public String getDriver() {
@@ -95,18 +118,26 @@ public class DataSource {
 		this.password = password;
 		this.driver = driver;
 
-		if (changed)
-			listeners.fire(l -> l.dataSourceChanged(this));
+		if (changed) {
+			dispose();
+			listeners.fire(l -> l.changed(this));
+		}
 	}
 
+	/**
+	 * Retrieves the connection object.
+	 * If the connection doesn't exist or is dead, it will create a new connection.
+	 */
 	public Connection getConnection() throws SQLException {
-		return connectionManager.getConnection(url, username, password);
+		if (connection == null || connection.isClosed())
+			connection = DriverManager.getConnection(url, username, password);
+
+		return connection;
 	}
 
 	public Properties asProperties() {
 		Properties p = new Properties();
 		p.putAll(properties);
-		p.put(OntopSQLCoreSettings.JDBC_NAME, id.toString());
 		p.put(OntopSQLCoreSettings.JDBC_URL, url);
 		p.put(OntopSQLCredentialSettings.JDBC_USER, username);
 		p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, password);
@@ -114,12 +145,49 @@ public class DataSource {
 		return p;
 	}
 
+	public static final ImmutableSet<String> CONNECTION_PARAMETER_NAMES = ImmutableSet.of(
+			OntopSQLCoreSettings.JDBC_URL,
+			OntopSQLCredentialSettings.JDBC_USER,
+			OntopSQLCredentialSettings.JDBC_PASSWORD,
+			OntopSQLCoreSettings.JDBC_DRIVER);
+
 	public void clear() {
 		properties.clear();
 		driver = "";
 		url = "";
 		username = "";
 		password = "";
+		connection = null;
+	}
+
+	public ImmutableSet<String> getPropertyKeys() {
+		return properties.keySet().stream()
+				.map(Object::toString)
+				.filter(k -> !CONNECTION_PARAMETER_NAMES.contains(k))
+				.collect(ImmutableCollectors.toSet());
+	}
+
+	public Object getProperty(@Nonnull String key) {
+		return properties.getProperty(key);
+	}
+
+	public void setProperty(@Nonnull String key, @Nonnull Object value) {
+		if (CONNECTION_PARAMETER_NAMES.contains(key))
+			throw new IllegalArgumentException("Cannot change reserved " + key);
+
+		Object oldValue = properties.get(key); // can be null
+		if (!value.equals(oldValue)) {
+			properties.put(key, value);
+			listeners.fire(l -> l.changed(this));
+		}
+	}
+
+	public void removeProperty(@Nonnull String key) {
+		if (CONNECTION_PARAMETER_NAMES.contains(key))
+			throw new IllegalArgumentException("Cannot remove reserved " + key);
+
+		properties.remove(key);
+		listeners.fire(l -> l.changed(this));
 	}
 
 	/**
@@ -162,19 +230,12 @@ public class DataSource {
 
 	public void store(File propertyFile) throws IOException {
 		Properties properties = asProperties();
+		boolean nonEmpty = !properties.isEmpty();
 
-		// Generate a property file iff there is at least one property that is not "jdbc.name"
-		if (properties.entrySet().stream()
-				.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
-						!e.getValue().equals(""))) {
+		DialogUtils.saveFileOrDeleteEmpty(!nonEmpty, propertyFile, file -> {
 			try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
 				properties.store(outputStream, null);
 			}
-			LOGGER.info("Property file saved to {}", propertyFile.toPath());
-		}
-		else {
-			Files.deleteIfExists(propertyFile.toPath());
-		}
+		}, LOGGER);
 	}
-
 }

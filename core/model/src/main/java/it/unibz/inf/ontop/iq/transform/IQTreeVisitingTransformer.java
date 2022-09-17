@@ -17,10 +17,12 @@ public interface IQTreeVisitingTransformer extends IQTreeTransformer {
     IQTree transformExtensionalData(ExtensionalDataNode rootNode);
     IQTree transformEmpty(EmptyNode rootNode);
     IQTree transformTrue(TrueNode rootNode);
+    IQTree transformValues(ValuesNode valuesNode);
     IQTree transformNonStandardLeafNode(LeafIQTree rootNode);
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
     IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child);
+    IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child);
     IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child);
     IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
     IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child);

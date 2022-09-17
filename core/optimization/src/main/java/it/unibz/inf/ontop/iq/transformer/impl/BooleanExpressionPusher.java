@@ -92,6 +92,16 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     }
 
     @Override
+    public Optional<IQTree> visitFlatten(FlattenNode rootNode, IQTree child) {
+        Optional<Variable> indexVariable = rootNode.getIndexVariable();
+        return expressionToPushDown.getVariableStream()
+                    .anyMatch(v -> v.equals(rootNode.getOutputVariable()) ||
+                            (indexVariable.isPresent() && v.equals(indexVariable.get())))?
+                Optional.empty():
+                visitPassingUnaryNode(rootNode, child);
+    }
+
+    @Override
     public Optional<IQTree> visitDistinct(DistinctNode rootNode, IQTree child) {
         return visitPassingUnaryNode(rootNode, child);
     }
@@ -217,6 +227,11 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
 
     @Override
     public Optional<IQTree> visitNative(NativeNode nativeNode) {
+        return visitLeafNode();
+    }
+
+    @Override
+    public Optional<IQTree> visitValues(ValuesNode valuesNode) {
         return visitLeafNode();
     }
 

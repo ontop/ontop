@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -9,6 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -24,7 +26,7 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 	static final String obdafile = "/pgsql/imdb/ontologyIMDBSimplify.obda";
 	static final String propertyfile = "/pgsql/imdb/movieontology.properties";
 
-	private static OntopOWLReasoner REASONER;
+	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
@@ -39,9 +41,9 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 	}
 
 	@AfterClass
-	public static void after() throws OWLException {
+	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.dispose();
+		REASONER.close();
 	}
 
 	@Test
@@ -49,5 +51,47 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.seriology.org/seriology#>\n" +
 				"SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
 		countResults(10, query);
+	}
+
+	@Test
+	public void testSubStr2WrongArgument() throws OWLException {
+		countResults(2, "SELECT * WHERE {\n" +
+				"  {\n" +
+				"    SELECT DISTINCT ?b {\n" +
+				"      {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { 2 }\n" +
+				"        }\n" +
+				"      }\n" +
+				"      UNION {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { \"aa\" \"aa\" }\n" +
+				"        }\n" +
+				"      }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  BIND (SUBSTR(\"yyy\", ?b) AS ?v)\n" +
+				"}");
+	}
+
+	@Test
+	public void testSubStr3WrongArgument() throws OWLException {
+		countResults(2, "SELECT * WHERE {\n" +
+				"  {\n" +
+				"    SELECT DISTINCT ?b {\n" +
+				"      {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { 2 }\n" +
+				"        }\n" +
+				"      }\n" +
+				"      UNION {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { \"aa\" \"aa\" }\n" +
+				"        }\n" +
+				"      }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  BIND (SUBSTR(\"yyy\", ?b, ?b) AS ?v)\n" +
+				"}");
 	}
 }

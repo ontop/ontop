@@ -13,40 +13,40 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements ConstructionNode {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
-    @SuppressWarnings("FieldCanBeLocal")
+    private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
 
-    private final IntermediateQueryFactory iqFactory;
-
-    private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
-    private final Constant nullValue;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
@@ -58,12 +58,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
+                                 NotRequiredVariableRemover notRequiredVariableRemover) {
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.nullValue = termFactory.getNullConstant();
-        this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
@@ -71,6 +69,22 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         if (settings.isTestModeEnabled())
             validateNode();
     }
+
+    /**
+     * Without substitution.
+     */
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                 OntopModelSettings settings,
+                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
+                                 NotRequiredVariableRemover notRequiredVariableRemover) {
+        this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools, constructionNodeTools,
+                substitutionTools, substitutionFactory, termFactory, iqFactory, settings, substitutionNormalizer, notRequiredVariableRemover);
+    }
+
 
     /**
      * Validates the node independently of its child
@@ -103,29 +117,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
     }
 
-    /**
-     * Without substitution.
-     */
-    @AssistedInject
-    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 ImmutableUnificationTools unificationTools,
-                                 ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
-        this.projectedVariables = projectedVariables;
-        this.substitution = substitutionFactory.getSubstitution();
-        this.iqFactory = iqFactory;
-        this.nullValue = termFactory.getNullConstant();
-        this.childVariables = extractChildVariables(projectedVariables, substitution);
-        this.substitutionNormalizer = substitutionNormalizer;
-        this.notRequiredVariableRemover = notRequiredVariableRemover;
-
-        validateNode();
-    }
-
     private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
                                                           ImmutableSubstitution<ImmutableTerm> substitution) {
         ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
@@ -147,14 +138,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
         return substitution;
-    }
-
-    /**
-     * Immutable fields, can be shared.
-     */
-    @Override
-    public ConstructionNode clone() {
-        return iqFactory.createConstructionNode(projectedVariables, substitution);
     }
 
     @Override
@@ -187,16 +170,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         return collectedVariableBuilder.build();
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (getChildVariables().contains(variable))
-            return isChildVariableNullable(query, variable);
-
-        return Optional.ofNullable(substitution.get(variable))
-                .map(t -> isTermNullable(query, t))
-                .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
     }
 
     @Override
@@ -237,6 +210,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformConstruction(tree,this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitConstruction(this, child);
     }
@@ -269,27 +247,113 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return childDefs.stream()
                 .map(childDef -> childDef.composeWith(substitution))
-                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(s -> s.filter(projectedVariables::contains))
                 .map(s -> s.getFragment(NonVariableTerm.class))
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
-        return child.inferUniqueConstraints().stream()
+        if (child instanceof TrueNode) {
+            return projectedVariables.stream()
+                    .map(ImmutableSet::of)
+                    .collect(ImmutableCollectors.toSet());
+        }
+
+        ImmutableSet<ImmutableSet<Variable>> childConstraints = child.inferUniqueConstraints();
+
+        if (childConstraints.isEmpty())
+            return ImmutableSet.of();
+
+        ImmutableSet<ImmutableSet<Variable>> preservedConstraints = childConstraints.stream()
                 .filter(projectedVariables::containsAll)
                 .collect(ImmutableCollectors.toSet());
+
+        VariableNullability variableNullability = getVariableNullability(child);
+
+        ImmutableSet<ImmutableSet<Variable>> transformedConstraints = childConstraints.stream()
+                .flatMap(childConstraint -> extractTransformedUniqueConstraint(childConstraint, variableNullability))
+                .collect(ImmutableCollectors.toSet());
+
+        return transformedConstraints.isEmpty()
+                ? preservedConstraints
+                : preservedConstraints.isEmpty()
+                    ? transformedConstraints
+                    : Sets.union(preservedConstraints, transformedConstraints).immutableCopy();
+    }
+
+    /**
+     * TODO: consider variable equality?
+     *
+     * TODO: consider producing composite constraints?
+     *
+     */
+    private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
+                                                                              VariableNullability variableNullability) {
+        Stream<ImmutableSet<Variable>> atomicConstraints = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm)e.getValue(), childConstraint, variableNullability))
+                .map(Map.Entry::getKey)
+                .map(ImmutableSet::of);
+
+        Stream<ImmutableSet<Variable>> duplicatedConstraints = extractDuplicatedConstraints(childConstraint);
+
+        return Stream.concat(atomicConstraints, duplicatedConstraints);
+    }
+
+    private boolean isAtomicConstraint(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> childConstraint,
+                                       VariableNullability variableNullability) {
+
+        if (!functionalTerm.getVariables().containsAll(childConstraint))
+            return false;
+
+        VariableGenerator uselessVariableGenerator = new VariableGeneratorImpl(ImmutableSet.of(), termFactory);
+        Optional<FunctionalTermDecomposition> analysis = functionalTerm.analyzeInjectivity(ImmutableSet.of(), variableNullability, uselessVariableGenerator);
+        return analysis
+                .map(FunctionalTermDecomposition::getLiftableTerm)
+                .filter(t -> t.getVariableStream()
+                        .collect(Collectors.toSet())
+                        .containsAll(childConstraint))
+                .isPresent();
+    }
+
+    private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
+        ImmutableSubstitution<Variable> fullRenaming = getSubstitution()
+                .filter((k, v) -> childConstraint.contains(v))
+                .transform((k, v) -> (Variable) v);
+
+        if (fullRenaming.isEmpty())
+            return Stream.empty();
+
+        ImmutableSet<Variable> fullRenamingDomain = fullRenaming.getDomain();
+
+        //noinspection UnstableApiUsage
+        return IntStream.range(1, fullRenamingDomain.size() + 1)
+                .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
+                .flatMap(Collection::stream)
+                .map(comb -> fullRenaming.filter(comb::contains))
+                // Remove non-injective substitutions
+                .filter(s -> {
+                    ImmutableCollection<Variable> values = s.getImmutableMap().values();
+                    return values.size() == ImmutableSet.copyOf(values).size();
+                })
+                // Inverse
+                .map(s -> substitutionFactory.getInjectiveVar2VarSubstitution(
+                        s.getImmutableMap().entrySet().stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        Map.Entry::getValue,
+                                        Map.Entry::getKey))))
+                .map(s -> childConstraint.stream()
+                            .map(s::applyToVariable)
+                            .collect(ImmutableCollectors.toSet()))
+                .filter(projectedVariables::containsAll);
     }
 
     /**
@@ -300,50 +364,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return getVariables();
     }
 
-    private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
-        return query.getFirstChild(this)
-                .map(c -> c.isVariableNullable(query, variable))
-                .orElseThrow(() -> new InvalidIntermediateQueryException(
-                        "A construction node with child variables must have a child"));
-    }
-
-    private boolean isTermNullable(IntermediateQuery query, ImmutableTerm substitutionValue) {
-        if (substitutionValue instanceof ImmutableFunctionalTerm) {
-            ImmutableSet<Variable> nullableVariables = substitutionValue.getVariableStream()
-                    .filter(v -> isChildVariableNullable(query, v))
-                    .collect(ImmutableCollectors.toSet());
-            return substitutionValue.isNullable(nullableVariables);
-
-        }
-        else if (substitutionValue instanceof Constant) {
-            return substitutionValue.equals(nullValue);
-        }
-        else if (substitutionValue instanceof Variable) {
-            return isChildVariableNullable(query, (Variable)substitutionValue);
-        }
-        else {
-            throw new IllegalStateException("Unexpected immutable term");
-        }
-    }
-
-    @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return Optional.of(node)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .filter(n -> n.getVariables().equals(projectedVariables))
-                .filter(n -> n.getSubstitution().equals(substitution))
-                .isPresent();
-    }
-
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getLocallyRequiredVariables();
     }
 
     @Override
@@ -352,8 +375,16 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return isSyntacticallyEquivalentTo(queryNode);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConstructionNodeImpl that = (ConstructionNodeImpl) o;
+        return projectedVariables.equals(that.projectedVariables) && substitution.equals(that.substitution);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectedVariables, substitution);
     }
 
     @Override
@@ -372,14 +403,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      *  - Removes itself if useless
      */
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
         IQTree shrunkChild = notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
         QueryNode shrunkChildRoot = shrunkChild.getRootNode();
         if (shrunkChildRoot instanceof ConstructionNode)
-            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, currentIQProperties,
-                    variableGenerator);
+            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, treeCache, variableGenerator);
         else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
@@ -390,11 +420,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return shrunkChild;
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    substitution.simplifyValues(shrunkChild.getVariableNullability()), projectedVariables);
+                    substitution.transform(v -> v.simplify(shrunkChild.getVariableNullability())), projectedVariables);
 
             Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
 
-            IQTree updatedChild = normalization.updateChild(shrunkChild);
+            IQTree updatedChild = normalization.updateChild(shrunkChild, variableGenerator);
             IQTree newChild = newTopConstructionNode
                     .map(c -> notRequiredVariableRemover.optimize(updatedChild, c.getChildVariables(), variableGenerator))
                     .orElse(updatedChild)
@@ -402,7 +432,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
             return newTopConstructionNode
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
-                            currentIQProperties.declareNormalizedForOptimization()))
+                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
                             ? newChild
                             : iqFactory.createUnaryIQTree(
@@ -435,13 +465,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
     }
 
-    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties,
-                                  VariableGenerator variableGenerator) {
+    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQTreeCache treeCache, VariableGenerator variableGenerator) {
 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                childConstructionNode.getSubstitution().composeWith(substitution).simplifyValues(grandChild.getVariableNullability()),
+                childConstructionNode.getSubstitution().composeWith(substitution).transform(v -> v.simplify(grandChild.getVariableNullability())),
                 projectedVariables
         );
 
@@ -450,14 +479,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
 
-        IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild);
+        IQTree updatedGrandChild = substitutionNormalization.updateChild(grandChild, variableGenerator);
         IQTree newGrandChild = notRequiredVariableRemover.optimize(updatedGrandChild,
                 newConstructionNode.getChildVariables(), variableGenerator)
                 .normalizeForOptimization(variableGenerator);
 
         return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
                 ? newGrandChild
-                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, currentIQProperties.declareNormalizedForOptimization());
+                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     public static class PropagationResults<T extends VariableOrGroundTerm> {

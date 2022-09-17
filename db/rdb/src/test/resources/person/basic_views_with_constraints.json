@@ -55,6 +55,14 @@
             }
           },
           {
+            "name": "status_desc_fkey",
+            "from": ["\"status\"", "\"statusDescription\"" ],
+            "to": {
+              "columns": ["\"status_id\"", "\"description\""],
+              "relation": ["\"statuses\""]
+            }
+          },
+          {
             "name": "unavailable_table_fkey",
             "from": "\"status\"",
             "to": {
@@ -62,6 +70,11 @@
               "relation": ["\"unavailable_table\""]
             }
           }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
         ]
       },
       "type": "BasicViewDefinition"

@@ -16,15 +16,18 @@ public class OntopVirtualRepositoryBean {
     private OntopSystemConfiguration setupOntopConfiguration(@Value("${mapping}") String mappings,
                                                              @Value("${ontology:#{null}}") String ontology,
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
-                                                             @Value("${properties}") String properties,
+                                                             @Value("${properties:#{null}}") String properties,
                                                              @Value("${constraint:#{null}}") String constraint,
                                                              @Value("${db-metadata:#{null}}") String dbMetadata,
                                                              @Value("${ontop-views:#{null}}") String ontopViews,
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
-                                                             @Value("${db-url:#{null}}") String dbUrl) throws RepositoryException {
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .propertyFile(properties);
+                                                             @Value("${db-url:#{null}}") String dbUrl,
+                                                             @Value("${db-driver:#{null}}") String dbDriver) throws RepositoryException {
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+
+        if (properties != null && !properties.isEmpty())
+            builder.propertyFile(properties);
 
         if (mappings.endsWith(".obda"))
             builder.nativeOntopMappingFile(mappings);
@@ -55,6 +58,10 @@ public class OntopVirtualRepositoryBean {
 
         if (dbUrl != null && !dbUrl.isEmpty())
             builder.jdbcUrl(dbUrl);
+
+        //TODO Can this be empty?
+        if (dbDriver != null && !dbDriver.isEmpty())
+            builder.jdbcDriver(dbDriver);
 
         return builder.build();
     }

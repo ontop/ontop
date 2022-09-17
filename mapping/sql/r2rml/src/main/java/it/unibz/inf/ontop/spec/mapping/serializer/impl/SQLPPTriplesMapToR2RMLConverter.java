@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import eu.optique.r2rml.api.MappingFactory;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
@@ -20,6 +19,7 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -68,25 +68,26 @@ public class SQLPPTriplesMapToR2RMLConverter {
 
 		// check if mapping id is an iri
 		String mapping_id = triplesMap.getId();
-		String mainNodeURLPrefix = !mapping_id.contains(":")
+		String mainNodeIriPrefix = !mapping_id.contains(":")
 				? baseIRIString + mapping_id
 				: mapping_id;
 
-		LogicalTable logicalTable = mappingFactory.createR2RMLView(triplesMap.getSourceQuery().getSQL());
-
-		ImmutableList<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms = triplesMap.getTargetAtoms().stream()
+		ImmutableMap<ImmutableTerm, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> subjectMap = triplesMap.getTargetAtoms().stream()
 				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
 				.map(t -> Maps.immutableEntry((RDFAtomPredicate)t.getProjectionAtom().getPredicate(), t))
-				.collect(ImmutableCollectors.toList());
-
-		ImmutableMap<ImmutableTerm, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> subjectMap = targetAtoms.stream()
 				.collect(ImmutableCollectors.toMultimap(
 						e -> e.getKey().getSubject(e.getValue().getSubstitutedTerms()),
 						e -> e))
 				.asMap();
 
+		String sql = triplesMap.getSourceQuery().getSQL();
+
 		return subjectMap.entrySet().stream()
-				.flatMap(e -> processSameSubjectGroup(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix));
+				.flatMap(e -> processSameSubjectGroup(mappingFactory.createR2RMLView(sql), e.getKey(), e.getValue(),
+						// do not create triples map with the same name in case of multiple subjects
+						subjectMap.size() == 1
+								? mainNodeIriPrefix
+								: mainNodeIriPrefix + "-" + UUID.randomUUID()));
 	}
 
 	private Stream<TriplesMap> processSameSubjectGroup(LogicalTable logicalTable,
@@ -110,9 +111,9 @@ public class SQLPPTriplesMapToR2RMLConverter {
 													Collection<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms,
 													String mainNodeIriPrefix) {
 
-		// Make sure we don't create triples map with the same name in case of multiple named graphs
+		// do not create triples map with the same name in case of multiple named graphs
 		IRI iri = rdfFactory.createIRI(
-				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID().toString())
+				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID())
 						.orElse(mainNodeIriPrefix));
 
 		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, getTermMap(subject, subjectTermMapFactorySupplier), iri);
@@ -306,15 +307,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			else if (!datatype.getIRI().equals(RDFS.LITERAL))
 				objectMap.setDatatype(datatype.getIRI());
 			return objectMap;
-		}
-	}
-
-	/**
-	 * TODO: shall we consider as an internal bug or differently?
-	 */
-	static class R2RMLSerializationException extends OntopInternalBugException {
-		private R2RMLSerializationException(String message) {
-			super(message);
 		}
 	}
 }

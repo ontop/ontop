@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.view.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
@@ -110,21 +111,25 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
                     : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
             ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
-                    renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedDefinition.getProjectionAtom()),
+                    renamingSubstitution.applyToVariableArguments(renamedDefinition.getProjectionAtom().getArguments()),
                     dataNode.getArgumentMap());
 
-            return renamedDefinition.getTree()
-                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
+            IQTree substitutedDefinition = renamedDefinition.getTree()
+                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
+
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dataNode.getVariables()),
+                    substitutedDefinition)
                     .normalizeForOptimization(variableGenerator);
         }
 
         protected ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(
-                DistinctVariableOnlyDataAtom sourceAtom,
+                ImmutableList<Variable> sourceAtomArguments,
                 ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap) {
 
             ImmutableMap<Variable, VariableOrGroundTerm> newMap = targetArgumentMap.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
-                            e -> sourceAtom.getTerm(e.getKey()),
+                            e -> sourceAtomArguments.get(e.getKey()),
                             Map.Entry::getValue
                     ));
 

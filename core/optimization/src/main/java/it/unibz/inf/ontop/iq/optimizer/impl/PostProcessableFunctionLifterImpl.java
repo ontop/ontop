@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -99,7 +99,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
 
             // Fix-point before pursing (recursive, potentially dangerous!)
-            if (!normalizedTree.isEquivalentTo(tree)) {
+            if (!normalizedTree.equals(tree)) {
                 return normalizedTree.acceptTransformer(this);
             }
 
@@ -177,7 +177,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final IntermediateQueryFactory iqFactory;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
-        private final UniqueTermTypeExtractor typeExtractor;
+        private final SingleTermTypeExtractor typeExtractor;
         private final CoreSingletons coreSingletons;
 
         /**
@@ -228,8 +228,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     : childIdVariable;
 
             ImmutableList<ChildDefinitionLift> childDefinitionLifts = IntStream.range(0, children.size())
-                    .boxed()
-                    .map(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
+                    .mapToObj(i -> liftDefinition(children.get(i), i, variable, unionVariables, idVariable))
                     .collect(ImmutableCollectors.toList());
 
             ImmutableFunctionalTerm newDefinition = mergeDefinitions(idVariable, childDefinitionLifts);
@@ -280,10 +279,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                     originalDefinition.getVariableStream()
                             .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
-                            .distinct()
-                            .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    variableGenerator::generateNewVariableFromVar)));
+                            .distinct(),
+                    variableGenerator::generateNewVariableFromVar);
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 
@@ -300,7 +297,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
                     .flatMap(s -> s.union(positionSubstitution))
-                    .map(s -> s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
+                    .map(s -> s.filter(projectedVariablesBeforeRenaming::contains))
                     .orElse(positionSubstitution);
 
 
@@ -313,7 +310,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     iqFactory.createConstructionNode(projectedVariablesBeforeRenaming, substitutionBeforeRenaming),
                     childOfConstruction);
 
-            IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty());
+            IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
             ImmutableTerm liftedDefinition = renamingSubstitution.apply(originalDefinition);
             ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(renamingSubstitution.getImmutableMap().values());
 
@@ -334,7 +331,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(ChildDefinitionLift::getPartiallyPaddedChild)
                     .filter(c -> c.getVariables().contains(variable))
                     .findAny()
-                    .flatMap(t -> typeExtractor.extractUniqueTermType(variable, t))
+                    .flatMap(t -> typeExtractor.extractSingleTermType(variable, t))
                     .filter(t -> t instanceof DBTermType)
                     .map(t -> (DBTermType) t);
         }

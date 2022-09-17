@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -30,17 +27,17 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
-    private final OptimizationSingletons optimizationSingletons;
+    private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected CardinalitySensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                           RightProvenanceNormalizer rightProvenanceNormalizer,
-                                                       OptimizationSingletons optimizationSingletons) {
+                                                          CoreSingletons coreSingletons) {
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-        this.optimizationSingletons = optimizationSingletons;
-        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
+        this.coreSingletons = coreSingletons;
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -51,7 +48,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                 query.getVariableGenerator(),
                 requiredDataNodeExtractor,
                 rightProvenanceNormalizer,
-                optimizationSingletons);
+                coreSingletons);
 
         IQTree newTree = initialTree.acceptTransformer(transformer);
 
@@ -65,8 +62,8 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                               RightProvenanceNormalizer rightProvenanceNormalizer,
-                              OptimizationSingletons optimizationSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, optimizationSingletons);
+                              CoreSingletons coreSingletons) {
+            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, coreSingletons);
         }
 
 
@@ -106,31 +103,10 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                     .map(indexes -> new SelectedNode(indexes, rightDataNode));
         }
 
-        /**
-         * Temporary restriction to avoid overlap with the existing LJ optimization techniques
-         *
-         * Ignores the case where a single extensional data node appears on the right.
-         *
-         * TODO: remove this restriction (after releasing 4.1)
-         */
-        @Override
-        protected Stream<ExtensionalDataNode> extractRightDataNodes(IQTree rightChild) {
-            IQTree rightChildAfterConstructionNode = Optional.of(rightChild)
-                    .filter(c -> c.getRootNode() instanceof ConstructionNode)
-                    .map(c -> ((UnaryIQTree) c).getChild())
-                    .orElse(rightChild);
-
-            if (rightChildAfterConstructionNode instanceof ExtensionalDataNode)
-                return Stream.empty();
-
-            return super.extractRightDataNodes(rightChild);
-        }
-
-
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, optimizationSingletons);
+                    rightProvenanceNormalizer, coreSingletons);
             return tree.acceptTransformer(newTransformer);
         }
     }

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -61,8 +63,8 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
      * This mockup does not provide any denormalization function symbol
      */
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
-        return ImmutableTable.of();
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createDenormalizationMap() {
+        return ImmutableMap.of();
     }
 
     @Override
@@ -160,6 +162,15 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol("BOOL_COALESCE", arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    throw new UnsupportedOperationException("Not serialization for a mockup coalesce");
+                });
+    }
+
+    @Override
     protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
@@ -184,11 +195,18 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     /**
      * Too simplistic!
-     * @param booleanType
      */
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBBooleanType(), dbStringType);
+    }
+
+    /**
+     * Too simplistic!
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType) {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBHexBinaryType(), dbStringType);
     }
 
     @Override
@@ -199,6 +217,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBGeometryType(), dbStringType);
     }
 
     @Override
@@ -242,22 +270,22 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createAbsFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
@@ -359,6 +387,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeDBRowNumberWithOrderBy(ImmutableList<? extends ImmutableTerm> terms,
+            Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
@@ -540,6 +574,36 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
     // Topological functions
     @Override
     public DBBooleanFunctionSymbol getDBSTWithin() {
@@ -621,6 +685,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBSTGeomFromText() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTMakePoint() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBFunctionSymbol getDBSTFlipCoordinates() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
@@ -687,6 +761,49 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+    @Override
+    public String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeDaysBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

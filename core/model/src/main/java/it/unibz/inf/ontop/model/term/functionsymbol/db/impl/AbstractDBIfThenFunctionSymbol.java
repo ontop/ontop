@@ -39,8 +39,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
 
     private static ImmutableList<TermType> computeBaseTypes(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
         Stream<DBTermType> regularConditions = IntStream.range(0, arity - (arity % 2))
-                .boxed()
-                .map(i -> (i % 2 == 0) ? dbBooleanType : rootDBTermType);
+                .mapToObj(i -> (i % 2 == 0) ? dbBooleanType : rootDBTermType);
 
         Stream<DBTermType> typeStream = (arity % 2 == 0)
                 ? regularConditions
@@ -54,12 +53,19 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         return false;
     }
 
+    /**
+     * Due to the presence of boolean expressions, seems better to avoid decomposing it (can be revisited)
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        return false;
+    }
+
     @Override
     public Stream<ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
         return IntStream.range(1, terms.size())
                 .filter(i -> i % 2 == 1)
-                .boxed()
-                .map(terms::get);
+                .mapToObj(terms::get);
     }
 
 
@@ -87,7 +93,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                     case TRUE:
                         ImmutableTerm possibleValue = simplifyValue(terms.get(i+1),variableNullability, termFactory);
                         if (newWhenPairs.isEmpty())
-                            return possibleValue;
+                            return possibleValue.simplify(variableNullability);
                         else
                             return termFactory.getDBCase(newWhenPairs.stream(), possibleValue, doOrderingMatter)
                                     .simplify(variableNullability);
@@ -275,8 +281,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
             ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
         return IntStream.range(0, arguments.size())
-                .boxed()
-                .map(i -> i % 2 == 0
+                .mapToObj(i -> i % 2 == 0
                         ? termFactory.getIsTrue(arguments.get(i))
                         : arguments.get(i))
                 .collect(ImmutableCollectors.toList());
@@ -318,8 +323,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
         Stream<Map.Entry<ImmutableExpression, T>> whenPairs = IntStream.range(0, ifThenArguments.size() / 2)
-                .boxed()
-                .map(i -> Maps.immutableEntry(
+                .mapToObj(i -> Maps.immutableEntry(
                         (ImmutableExpression) ifThenArguments.get(2 * i),
                         functionalTermCst.apply(functionSymbol,
                                 updateArguments(ifThenArguments.get(2 * i + 1), indexOfDBIfThenFunctionSymbol, expressionArguments))));
@@ -334,8 +338,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     private ImmutableList<? extends ImmutableTerm> updateArguments(ImmutableTerm subTerm, int index,
                                                                    ImmutableList<? extends ImmutableTerm> expressionArguments) {
         return IntStream.range(0, expressionArguments.size())
-                .boxed()
-                .map(i -> i == index ? subTerm : expressionArguments.get(i))
+                .mapToObj(i -> i == index ? subTerm : expressionArguments.get(i))
                 .collect(ImmutableCollectors.toList());
     }
 }

@@ -30,7 +30,7 @@ public interface BooleanFunctionSymbol extends FunctionSymbol {
                               VariableNullability variableNullability) {
         ImmutableTerm newTerm = simplify(terms, termFactory, variableNullability);
 
-        // Makes sure that the returned expression has been inform that "2VL simplifications" can be applied
+        // Makes sure that the returned expression has been informed that "2VL simplifications" can be applied
         // Prevents an infinite loop
         if (newTerm instanceof ImmutableExpression) {
             ImmutableExpression newExpression = (ImmutableExpression) newTerm;

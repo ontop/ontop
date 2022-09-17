@@ -28,9 +28,13 @@ public interface QueryNodeVisitor {
 
     void visit(TrueNode trueNode);
 
+    void visit(ValuesNode valuesNode);
+
     void visit(DistinctNode distinctNode);
 
     void visit(SliceNode sliceNode);
 
     void visit(OrderByNode orderByNode);
+
+    void visit(FlattenNode flattenNode);
 }

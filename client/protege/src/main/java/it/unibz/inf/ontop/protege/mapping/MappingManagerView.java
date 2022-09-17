@@ -48,12 +48,12 @@ public class MappingManagerView extends AbstractOWLViewComponent implements OWLS
 
 		obdaModelManager.addListener(panel);
 		getOWLWorkspace().getOWLSelectionModel().addListener(this);
-		obdaModelManager.addMappingListener(panel.getTriplesMapCollectionListener());
+		obdaModelManager.addMappingListener(panel.getTriplesMapManagerListener());
 	}
 
 	@Override
 	protected void disposeOWLView() {
-		obdaModelManager.removeMappingListener(panel.getTriplesMapCollectionListener());
+		obdaModelManager.removeMappingListener(panel.getTriplesMapManagerListener());
 		getOWLWorkspace().getOWLSelectionModel().removeListener(this);
 		obdaModelManager.removeListener(panel);
 	}

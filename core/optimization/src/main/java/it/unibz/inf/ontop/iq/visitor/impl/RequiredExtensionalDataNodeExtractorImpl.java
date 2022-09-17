@@ -44,6 +44,11 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     @Override
+    public Stream<ExtensionalDataNode> visitValues(ValuesNode valuesNode) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<ExtensionalDataNode> visitNonStandardLeafNode(LeafIQTree leafNode) {
         return Stream.empty();
     }
@@ -63,6 +68,11 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
 
     @Override
     public Stream<ExtensionalDataNode> visitFilter(FilterNode rootNode, IQTree child) {
+        return child.acceptVisitor(this);
+    }
+
+    @Override
+    public Stream<ExtensionalDataNode> visitFlatten(FlattenNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
 

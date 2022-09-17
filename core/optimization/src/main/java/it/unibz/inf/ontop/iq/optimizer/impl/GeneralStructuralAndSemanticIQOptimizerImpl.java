@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,59 +13,72 @@ import javax.inject.Singleton;
 public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStructuralAndSemanticIQOptimizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStructuralAndSemanticIQOptimizerImpl.class);
+
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final OntopViewUnfolder viewUnfolder;
+    private final AggregationSplitter aggregationSplitter;
+    private final FlattenLifter flattenLifter;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
-                                                        OntopViewUnfolder viewUnfolder) {
+                                                        OntopViewUnfolder viewUnfolder,
+                                                        AggregationSplitter aggregationSplitter,
+                                                        FlattenLifter flattenLifter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.viewUnfolder = viewUnfolder;
+        this.aggregationSplitter = aggregationSplitter;
+        this.flattenLifter = flattenLifter;
     }
 
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
-        boolean isLogDebugEnabled = LOGGER.isDebugEnabled();
-        if (isLogDebugEnabled)
-            LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
+        LOGGER.debug("New lifted query:\n{}\n", liftedQuery);
 
-        IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
+        IQ current = liftedQuery;
         do {
+
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding, executorRegistry);
+            current = joinLikeOptimizer.optimize(current);
 
-            if (isLogDebugEnabled)
-                LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
+            LOGGER.debug("New query after fixed point join optimization ({} ms):\n{}\n",
                         System.currentTimeMillis() - beginningJoinLike,
-                        queryAfterJoinLikeAndViewUnfolding.toString()));
+                        current);
 
-            IQ queryBeforeUnfolding = queryAfterJoinLikeAndViewUnfolding;
+            IQ queryBeforeUnfolding = current;
             // Unfolds Ontop views one level at a time (hence the loop)
-            queryAfterJoinLikeAndViewUnfolding = viewUnfolder.optimize(queryBeforeUnfolding);
+            current = viewUnfolder.optimize(queryBeforeUnfolding);
+            LOGGER.debug("New query after view unfolding:\n{}\n",
+                    current
+            );
 
-            if (queryBeforeUnfolding.equals(queryAfterJoinLikeAndViewUnfolding))
+            if (queryBeforeUnfolding.equals(current))
                 break;
+
+            current = flattenLifter.optimize(current);
+            LOGGER.debug("New query after flatten lift:\n{}\n", current);
 
         } while (true);
 
-        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
-        if (isLogDebugEnabled)
-            LOGGER.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
-        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
-        if (isLogDebugEnabled)
-            LOGGER.debug("New query after simplifying the order by node: \n" + optimizedQuery);
+        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(current);
+        LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
+
+        IQ queryAfterAggregationSplitting = aggregationSplitter.optimize(queryAfterAggregationSimplification);
+        LOGGER.debug("New query after trying to split the aggregation node:\n{}\n", queryAfterAggregationSplitting);
+
+        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSplitting);
+        LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
         return optimizedQuery;
     }

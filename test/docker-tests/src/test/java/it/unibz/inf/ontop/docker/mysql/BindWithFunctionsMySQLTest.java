@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -23,7 +23,7 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
     private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
     public BindWithFunctionsMySQLTest() throws OWLOntologyCreationException {
@@ -33,9 +33,9 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
     
 
@@ -122,6 +122,38 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     public void testBNODE1() throws Exception {
         super.testBNODE1();
+    }
+
+    @Override
+    protected List<String> getDaysExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"1352\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"1351\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413511200\"^^xsd:long");
+        expectedValues.add("\"1492154272\"^^xsd:long");
+        expectedValues.add("\"1532987586\"^^xsd:long");
+        expectedValues.add("\"116803200\"^^xsd:long");
+
+        return expectedValues;
     }
 
 }

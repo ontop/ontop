@@ -12,18 +12,22 @@ public class SQLServerExtraNormalizer implements DialectExtraNormalizer {
 
     private final DialectExtraNormalizer projectOrderByTermsNormalizer;
     private final DialectExtraNormalizer projectionWrapper;
+    private final DialectExtraNormalizer limitOffsetOldVersionNormalizer;
 
     @Inject
     protected SQLServerExtraNormalizer(AlwaysProjectOrderByTermsNormalizer projectOrderByTermsNormalizer,
-                                       WrapProjectedOrOrderByExpressionNormalizer projectionWrapper) {
+                                       WrapProjectedOrOrderByExpressionNormalizer projectionWrapper,
+                                       SQLServerLimitOffsetOldVersionNormalizer limitOffsetOldVersionNormalizer) {
         this.projectOrderByTermsNormalizer = projectOrderByTermsNormalizer;
         this.projectionWrapper = projectionWrapper;
+        this.limitOffsetOldVersionNormalizer = limitOffsetOldVersionNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return projectOrderByTermsNormalizer.transform(
+        return limitOffsetOldVersionNormalizer.transform(
+                projectOrderByTermsNormalizer.transform(
                 projectionWrapper.transform(tree, variableGenerator),
-                variableGenerator);
+                variableGenerator),variableGenerator);
     }
 }

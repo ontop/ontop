@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -59,7 +58,6 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public UnionNode transform(UnionNode unionNode){
         return iqFactory.createUnionNode(renameProjectedVars(unionNode.getVariables()));
-//        return unionNode.clone();
     }
 
     @Override
@@ -84,19 +82,39 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
                 renameSubstitution(aggregationNode.getSubstitution()));
     }
 
+    @Override
+    public FlattenNode transform(FlattenNode flattenNode) {
+        return iqFactory.createFlattenNode(
+                renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
+                renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
+                flattenNode.getIndexVariable()
+                        .map(v -> renamingSubstitution.applyToVariable(v)),
+                flattenNode.getFlattenedType()
+        );
+    }
+
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
         return projectedVariables.stream()
                 .map(renamingSubstitution::applyToVariable)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public EmptyNode transform(EmptyNode emptyNode) {
-        return emptyNode.clone();
+        return iqFactory.createEmptyNode(emptyNode.getVariables());
     }
 
     public TrueNode transform(TrueNode trueNode) {
-        return trueNode.clone();
+        return iqFactory.createTrueNode();
+    }
+
+    @Override
+    public ValuesNode transform(ValuesNode valuesNode) throws QueryNodeTransformationException {
+        ImmutableList<Variable> newOrderedVariables = valuesNode.getOrderedVariables().stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createValuesNode(newOrderedVariables, valuesNode.getValues());
     }
 
     @Override
@@ -106,14 +124,16 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public SliceNode transform(SliceNode sliceNode) {
-        return sliceNode.clone();
+        return sliceNode.getLimit()
+                .map(l -> iqFactory.createSliceNode(sliceNode.getOffset(), l))
+                .orElseGet(() -> iqFactory.createSliceNode(sliceNode.getOffset()));
     }
 
     @Override
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
-                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        renamingSubstitution.applyToTerm(c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 

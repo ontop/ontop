@@ -51,7 +51,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
     @Override
     public IQTree normalizeForOptimization(InnerJoinNode innerJoinNode, ImmutableList<IQTree> children,
-                                           VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+                                           VariableGenerator variableGenerator, IQTreeCache treeCache) {
         // Non-final
         State state = new State(children, innerJoinNode.getOptionalFilterCondition(), variableGenerator);
 
@@ -62,7 +62,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .liftConditionAndMergeJoins();
 
             if (newState.equals(state))
-                return newState.liftLeftJoinAndCreateNormalizedTree(currentIQProperties);
+                return newState.liftLeftJoinAndCreateNormalizedTree(treeCache);
             state = newState;
         }
 
@@ -176,12 +176,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             State other = (State) o;
 
             return joiningCondition.equals(other.joiningCondition)
-                    && children.size() == other.children.size()
-                    && IntStream.range(0, children.size())
-                        .allMatch(i -> children.get(i).isEquivalentTo(other.children.get(i)))
-                    && ancestors.size() == other.ancestors.size()
-                    && IntStream.range(0, ancestors.size())
-                    .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)))
+                    && children.equals(other.children)
+                    && ancestors.equals(other.ancestors)
                     && projectedVariables.equals(other.projectedVariables);
         }
 
@@ -242,8 +238,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                     IntStream.range(0, liftedChildren.size())
-                            .boxed()
-                            .map(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : liftedChildren.get(i))
+                            .mapToObj(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : liftedChildren.get(i))
                             .collect(ImmutableCollectors.toList()));
 
             try {
@@ -271,11 +266,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             Optional<ConstructionNode> newParent = normalization.generateTopConstructionNode();
 
             ImmutableList<IQTree> newChildren = IntStream.range(0, liftedChildren.size())
-                    .boxed()
-                    .map(i -> i == selectedChildPosition
-                            ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
-                            : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
-                    .map(normalization::updateChild)
+                    .mapToObj(i -> i == selectedChildPosition
+                            ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator)
+                            : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition, variableGenerator))
+                    .map(c -> normalization.updateChild(c, variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
             return newParent
@@ -283,10 +277,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .orElseGet(() -> updateConditionAndChildren(newCondition, newChildren));
         }
 
-        public IQTree liftLeftJoinAndCreateNormalizedTree(IQProperties currentIQProperties) {
-            IQProperties normalizedIQProperties = currentIQProperties.declareNormalizedForOptimization();
+        public IQTree liftLeftJoinAndCreateNormalizedTree(IQTreeCache treeCache) {
+            IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
-            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedIQProperties);
+            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedTreeCache);
 
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
@@ -327,7 +321,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
 
-        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQProperties normalizedIQProperties) {
+        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQTreeCache normalizedTreeCache) {
             switch (children.size()) {
                 case 0:
                     return iqFactory.createTrueNode();
@@ -340,7 +334,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     return liftLeftJoin()
                             .orElseGet(()-> iqFactory.createNaryIQTree(
                                     iqFactory.createInnerJoinNode(joiningCondition),
-                                    children, normalizedIQProperties));
+                                    children, normalizedTreeCache));
             }
         }
 
@@ -348,15 +342,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          * Puts the LJ above the inner join if possible
          */
         protected Optional<IQTree> liftLeftJoin() {
-            Optional<Integer> ljChildToLiftIndex = IntStream.range(0, children.size())
+            OptionalInt ljChildToLiftIndex = IntStream.range(0, children.size())
                     .filter(this::isLeftJoinToLiftAboveJoin)
-                    .boxed()
                     .findFirst();
 
             if (!ljChildToLiftIndex.isPresent())
                 return Optional.empty();
 
-            int index = ljChildToLiftIndex.get();
+            int index = ljChildToLiftIndex.getAsInt();
             BinaryNonCommutativeIQTree ljChild = (BinaryNonCommutativeIQTree) children.get(index);
 
             NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
@@ -365,8 +358,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             Stream.of(ljChild.getLeftChild()),
                             IntStream.range(0, children.size())
                                     .filter(i -> i != index)
-                                    .boxed()
-                                    .map(children::get))
+                                    .mapToObj(children::get))
                             .collect(ImmutableCollectors.toList()));
 
             BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,
@@ -389,8 +381,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return this;
 
             try {
+
                 ConditionSimplifier.ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        joiningCondition.get(), childrenVariableNullability);
+                        joiningCondition.get(), children, childrenVariableNullability);
 
                 Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
                 // TODO: build a proper constraint (more than just the joining condition)
@@ -398,11 +391,11 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
                         .map(s -> children.stream()
-                                .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition))
+                                .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition, variableGenerator))
                                 .collect(ImmutableCollectors.toList()))
                         .orElseGet(() -> newJoiningCondition
                                 .map(s -> children.stream()
-                                        .map(child -> child.propagateDownConstraint(s))
+                                        .map(child -> child.propagateDownConstraint(s, variableGenerator))
                                         .collect(ImmutableCollectors.toList()))
                                 .orElse(children));
 
@@ -462,12 +455,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             Stream<ImmutableExpression> conditions = conditionAndTrees.stream()
                     .map(ct -> ct.condition)
                     .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .flatMap(ImmutableExpression::flattenAND);
+                    .map(Optional::get);
 
-            Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition
-                    .map(c -> Stream.concat(c.flattenAND(), conditions))
-                    .orElse(conditions));
+            Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition, conditions);
 
             ImmutableList<IQTree> newChildren = conditionAndTrees.stream()
                     .flatMap(ct -> ct.trees)

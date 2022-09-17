@@ -33,7 +33,7 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 	}
 	
 	@Override
-	protected Repository createRepository() throws Exception {
+	protected Repository createRepository() {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.enableTestMode()

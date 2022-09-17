@@ -3,27 +3,32 @@ package it.unibz.inf.ontop.protege.utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+/**
+ * the sequence of the calls on the worker thread should be as follows:
+ * start - startLoop - (tick* | notifyProgressMonitor)* - endLoop - end
+ *
+ * @param <T>
+ * @param <V>
+ */
+
 public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
 
-    protected final AbstractProgressMonitor progressMonitor;
+    protected final BasicProgressMonitor progressMonitor;
     protected final long startTime;
 
-    private PropertyChangeListener listener;
     private Supplier<String> statusSupplier;
     private Supplier<Integer> progressSupplier;
 
     protected SwingWorkerWithMonitor(Component parent, Object message, boolean indeterminate) {
-        this(new DialogProgressMonitor(parent, message, indeterminate));
+        this(new ProgressMonitorDialogComponent(parent, message, indeterminate));
     }
 
-    protected SwingWorkerWithMonitor(AbstractProgressMonitor progressMonitor) {
-        this.progressMonitor = progressMonitor;
+    protected SwingWorkerWithMonitor(ProgressMonitorComponent component) {
+        this.progressMonitor = new BasicProgressMonitor(component);
         this.startTime = System.currentTimeMillis();
     }
 
@@ -31,46 +36,74 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
         return System.currentTimeMillis() - startTime;
     }
 
-    protected void start(String startProgressNote) {
-        progressMonitor.open(startProgressNote);
+
+    /**
+     * called on the worker thread
+     * @param status
+     */
+    protected void start(String status) {
+        progressMonitor.open(status);
     }
 
+    /**
+     * called on the worker thread
+     *
+     * @param progressSupplier
+     * @param statusSupplier
+     * @throws CancelActionException
+     */
     protected void startLoop(Supplier<Integer> progressSupplier, Supplier<String> statusSupplier) throws CancelActionException {
         terminateIfCancelled();
         this.statusSupplier = statusSupplier;
         this.progressSupplier = progressSupplier;
-        this.listener = evt -> {
-            if ("progress".equals(evt.getPropertyName())) {
-                progressMonitor.setProgress(progressSupplier.get(), statusSupplier.get());
-            }
-        };
-        addPropertyChangeListener(listener);
         notifyProgressMonitor();
     }
 
-    protected void notifyProgressMonitor() {
-        SwingUtilities.invokeLater(() ->
-                progressMonitor.setProgress(progressSupplier.get(), statusSupplier.get()));
+    /**
+     * called on the worker thread
+     *
+     * @throws CancelActionException
+     */
+    protected void tick() throws CancelActionException {
+        terminateIfCancelled();
     }
 
+    /**
+     * called on the worker thread
+     */
+    protected void notifyProgressMonitor() {
+        progressMonitor.setProgress(progressSupplier.get(), statusSupplier.get());
+    }
+
+
+    /**
+     * called on the worker thread
+     *
+     * @param endLoopMessage
+     * @throws CancelActionException
+     */
     protected void endLoop(String endLoopMessage) throws CancelActionException {
-        removePropertyChangeListener(listener);
-        try {
-            SwingUtilities.invokeAndWait(() -> progressMonitor.prepareClosing(endLoopMessage));
-        }
-        catch (InterruptedException | InvocationTargetException e) {
-            /* NO-OP */
-        }
+        progressMonitor.makeFinal(endLoopMessage);
         if (progressMonitor.isCancelled())
             throw new CancelActionException();
     }
 
+    /**
+     * called on the worker thread
+     */
     protected void end() {
-        closeProgressMonitorAndWait();
+        progressMonitor.close();
     }
 
+    /**
+     * called on the event dispatch thread
+     *
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+
     protected T complete() throws ExecutionException, InterruptedException {
-        progressMonitor.close(); // in case doInBackground threw an exception
         try {
             return get();
         }
@@ -79,29 +112,18 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
                 throw new CancellationException();
             throw e;
         }
-    }
-
-    protected void tick() throws CancelActionException {
-        terminateIfCancelled();
+        finally {
+            progressMonitor.close(); // in case doInBackground threw an exception
+        }
     }
 
     private void terminateIfCancelled() throws CancelActionException {
         if (progressMonitor.isCancelled()) {
-            closeProgressMonitorAndWait();
+            progressMonitor.close();
             throw new CancelActionException();
         }
     }
 
     public static class CancelActionException extends Exception { }
 
-    private void closeProgressMonitorAndWait() {
-        try {
-            // waiting allows Protege to update UI with any ontology changes
-            // the Protege updates in the queue precede the closing event
-            SwingUtilities.invokeAndWait(progressMonitor::close);
-        }
-        catch (InterruptedException | InvocationTargetException e) {
-            /* NO-OP */
-        }
-    }
 }

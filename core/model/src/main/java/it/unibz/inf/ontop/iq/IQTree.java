@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -27,6 +28,8 @@ public interface IQTree {
     ImmutableSet<Variable> getVariables();
 
     IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
+
+    <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor);
 
@@ -54,7 +57,8 @@ public interface IQTree {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint);
+            Optional<ImmutableExpression> constraint,
+            VariableGenerator variableGenerator);
 
     /**
      * Particular type of descending substitution: only renaming some variables by external ones.
@@ -66,16 +70,12 @@ public interface IQTree {
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     /**
-     * Identical to applyFreshRenaming, but also applies to non projected variables
-     */
-    IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution);
-
-    /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
      *
      * Designed to be called AFTER the "structural/semantic optimization" phase.
      */
-    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
+    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                        VariableGenerator variableGenerator);
 
     /**
      * Variables present in the tree
@@ -100,8 +100,6 @@ public interface IQTree {
 
     VariableNullability getVariableNullability();
 
-    boolean isEquivalentTo(IQTree tree);
-
     /**
      * TODO: explain
      *
@@ -109,7 +107,7 @@ public interface IQTree {
      * a parent tree.
      *
      */
-    IQTree propagateDownConstraint(ImmutableExpression constraint);
+    IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
 
     /**
      * TODO: find a better name
@@ -154,5 +152,4 @@ public interface IQTree {
      * Variables that are the tree proposes for removal if the ancestor trees do not need them.
      */
     ImmutableSet<Variable> getNotInternallyRequiredVariables();
-
 }

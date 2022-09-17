@@ -287,7 +287,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	private OntopQuerySwingWorker<?, ?> getExecuteWorker(OntopProtegeReasoner ontop) {
 		String query = queryTextPane.getText();
 		if (query.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+			showPrettyMessageDialog(this, "Query editor cannot be empty.", "Error");
 			return null;
 		}
 		try {
@@ -302,10 +302,10 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			if (parsedQuery instanceof ParsedBooleanQuery)
 				return getAskQueryWorker(ontop);
 
-			JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
+			showPrettyMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error");
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			showPrettyMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error");
 		}
 		return null;
 	}

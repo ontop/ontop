@@ -1,18 +1,28 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-
+import it.unibz.inf.ontop.model.term.Variable;
 
 public abstract class QueryNodeImpl implements QueryNode {
 
-    protected QueryNodeImpl() {
+    protected final IntermediateQueryFactory iqFactory;
+
+    QueryNodeImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
+
     /**
-     * See https://stackoverflow.com/questions/6837362/
+     * Default value, to be overridden
      */
     @Override
-    public QueryNode clone() {
-        throw new UnsupportedOperationException("This method must be override. Tricks the compiler");
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return false;
     }
 }

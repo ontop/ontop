@@ -32,6 +32,11 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return node;
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return leafNode;
     }
@@ -63,6 +68,11 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
 
     @Override
     public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        return tree;
+    }
+
+    @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
         return tree;
     }
 

@@ -21,20 +21,17 @@ import java.util.Set;
  */
 public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseable {
 
-    private OntopOWLReasoner reasoner;
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-    private final OntopConfigurationManager configurationManager;
+    private final OntopProtegeOWLConfiguration configuration;
+
+    private OntopOWLReasoner reasoner;
     private OntopOWLConnection owlConnection;
-    private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
+        this.configuration = configuration;
 
-        owlapiTranslator = configuration.getOntopConfiguration().getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
-
-        reasoner = factory.createReasoner(rootOntology, configuration);
-        configurationManager = configuration.getOntopConfigurationManager();
-        owlConnection = reasoner.getConnection();
+        reasonerSetup();
     }
 
     public OntopOWLStatement getStatement() throws OWLException {
@@ -60,12 +57,13 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     @Override
     public void flush() {
         super.flush();
-        try {
-            reasoner = factory.createReasoner(configurationManager.buildOntopSQLOWLAPIConfiguration(getRootOntology()));
-        }
-        catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        }
+        reasonerSetup();
+    }
+
+    private void reasonerSetup() {
+        OWLOntology rootOntology = getRootOntology();
+        reasoner = factory.createReasoner(rootOntology, configuration.getOntopConfiguration(rootOntology));
+        owlConnection = reasoner.getConnection();
     }
 
     @Override
@@ -317,11 +315,11 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * Methods to get the empty concepts and roles in the ontology using the given mappings.
      * It generates SPARQL queries to check for entities.
      * @return OntopOWLEmptyEntitiesChecker class to get empty concepts and roles
-     * @throws Exception
      */
     public OntopOWLEmptyEntitiesChecker getEmptyEntitiesChecker() {
-        OWLOntology rootOntology = getRootOntology();
-        Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
+        OWLAPITranslatorOWL2QL owlapiTranslator = configuration.getOntopConfiguration(getRootOntology())
+                .getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
+        Ontology mergeOntology = owlapiTranslator.translateAndClassify(getRootOntology());
         ClassifiedTBox tBox = mergeOntology.tbox();
 
         return new OntopOWLEmptyEntitiesChecker(tBox, owlConnection);

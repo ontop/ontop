@@ -1,5 +1,11 @@
 package it.unibz.inf.ontop.protege.core;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
+
 /*
  * #%L
  * ontop-protege
@@ -10,7 +16,7 @@ package it.unibz.inf.ontop.protege.core;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,18 +28,18 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
+
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.StreamSupport;
+import it.unibz.inf.ontop.protege.utils.OWLAPIAdapter;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
 
 /**
@@ -43,16 +49,16 @@ import java.util.stream.StreamSupport;
 
 public class OntologyPrefixManager extends AbstractPrefixManager {
 
-    private final PrefixDocumentFormat owlmapper;
+	private final OWLOntology ontology;
 
 	private final boolean hasExplicitDefaultPrefixNamespace;
 
 	public OntologyPrefixManager(@Nonnull OWLOntology ontology) {
-		this.owlmapper = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
+		this.ontology = ontology;
 
 		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
 				ontology,
-				Objects.requireNonNull(ontology.getOWLOntologyManager().getOntologyFormat(ontology)));
+				getPrefixManager());
 
 		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
 				.anyMatch(p -> p.equals(""))) {
@@ -66,6 +72,10 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 		}
 	}
 
+	private PrefixDocumentFormat getPrefixManager() {
+		return PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
+	}
+
 	public void updateOntologyID(OWLOntologyID newID) {
 		if (!hasExplicitDefaultPrefixNamespace)
 			generateDefaultPrefixNamespaceIfPossible(newID);
@@ -73,7 +83,7 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 	public String generateUniquePrefixForBootstrapper(String baseIri) {
 		String prefix = "g:";
-		Map<String, String> map = owlmapper.getPrefixName2PrefixMap();
+		Map<String, String> map = getPrefixManager().getPrefixName2PrefixMap();
 		while (map.containsKey(prefix))
 			prefix = "g" + prefix;
 
@@ -83,10 +93,13 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-		if (!ontologyID.getOntologyIRI().isPresent())
+		
+		final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
+
+		if (ontologyIri == null)
 			return;
 
-		String prefixUri = ontologyID.getOntologyIRI().get().toString();
+		String prefixUri = ontologyIri.toString();
 		if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
 			String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
 			if (!prefixUri.endsWith(defaultSeparator))  {
@@ -99,20 +112,20 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 	@Override
 	protected Optional<String> getIriDefinition(String prefix) {
-		return Optional.ofNullable(owlmapper.getPrefix(prefix));
+		return Optional.ofNullable(getPrefixManager().getPrefix(prefix));
 	}
 
 	@Override
 	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
-		return orderMap(owlmapper.getPrefixName2PrefixMap());
+		return orderMap(getPrefixManager().getPrefixName2PrefixMap());
 	}
 
 	@Override
 	public ImmutableMap<String, String> getPrefixMap() {
-		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
+		return ImmutableMap.copyOf(getPrefixManager().getPrefixName2PrefixMap());
 	}
 
 	public void addPrefix(String name, String uri) {
-		owlmapper.setPrefix(name, uri);
+		getPrefixManager().setPrefix(name, uri);
 	}
 }

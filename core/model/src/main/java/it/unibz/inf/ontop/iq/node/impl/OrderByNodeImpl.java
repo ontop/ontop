@@ -6,13 +6,12 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -23,6 +22,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -66,16 +66,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+                                              Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
         return newOrderByNode
                 .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
@@ -84,10 +84,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
 
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         return newOrderByNode
                 .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
@@ -116,6 +116,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformOrderBy(tree, this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitOrderBy(this, child);
     }
@@ -129,14 +134,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.equals(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChild.equals(child));
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
@@ -174,17 +175,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return isEquivalentTo(node);
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getLocalVariables();
     }
 
@@ -194,14 +185,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof OrderByNode
-                && ((OrderByNode) queryNode).getComparators().equals(comparators);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderByNodeImpl that = (OrderByNodeImpl) o;
+        return comparators.equals(that.comparators);
     }
 
     @Override
-    public OrderByNode clone() {
-        return iqFactory.createOrderByNode(comparators);
+    public int hashCode() {
+        return Objects.hash(comparators);
     }
 
     @Override

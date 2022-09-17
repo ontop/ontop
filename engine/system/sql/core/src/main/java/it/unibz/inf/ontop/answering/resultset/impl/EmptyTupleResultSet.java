@@ -56,12 +56,7 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-	public int getFetchSize() {
-		return 0;
-	}
-
-	@Override
-	public boolean isConnectionAlive() throws OntopConnectionException {
+	public boolean isConnectionAlive() {
 		return false;
 	}
 

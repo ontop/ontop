@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -18,14 +17,16 @@ import java.util.Optional;
 
 public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
 
-    private static final ImmutableList<IQTree> EMPTY_LIST = ImmutableList.of();
     private final IQTreeTools iqTreeTools;
-    protected final IntermediateQueryFactory iqFactory;
 
     protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
-        super();
+        super(iqFactory);
         this.iqTreeTools = iqTreeTools;
-        this.iqFactory = iqFactory;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return true;
     }
 
     @Override
@@ -35,7 +36,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
 
     @Override
     public ImmutableList<IQTree> getChildren() {
-        return EMPTY_LIST;
+        return ImmutableList.of();
     }
 
     @Override
@@ -48,22 +49,17 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
         return false;
     }
 
-    @Override
-    public boolean isEquivalentTo(IQTree tree) {
-        return (tree instanceof LeafIQTree)
-                && isEquivalentTo((QueryNode) tree);
-    }
-
     /**
      * NB: the constraint is irrelevant here
      */
     @Override
     public final IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+            Optional<ImmutableExpression> constraint,
+            VariableGenerator variableGenerator) {
         try {
             return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution)
-                    .map(this::applyDescendingSubstitutionWithoutOptimizing)
+                    .map(s -> applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .orElse(this);
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
@@ -71,7 +67,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         return this;
     }
 

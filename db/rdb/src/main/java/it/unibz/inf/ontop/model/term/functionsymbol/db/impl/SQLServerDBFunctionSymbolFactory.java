@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -17,8 +14,11 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.NTEXT_STR;
@@ -79,23 +79,18 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+        builder.putAll(super.createNormalizationMap());
 
         // Other DB datetimes
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-
         DBTermType datetime = dbTypeFactory.getDBTermType(SQLServerDBTypeFactory.DATETIME_STR);
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetime);
-        builder.put(datetime, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(datetime, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        builder.put(datetime, datetimeNormFunctionSymbol);
 
         DBTermType datetimeOffset = dbTypeFactory.getDBTermType(SQLServerDBTypeFactory.DATETIMEOFFSET_STR);
         DBTypeConversionFunctionSymbol datetimeOffsetNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetimeOffset);
-        builder.put(datetimeOffset, xsdDatetime, datetimeOffsetNormFunctionSymbol);
-        builder.put(datetimeOffset, xsdDatetimeStamp, datetimeOffsetNormFunctionSymbol);
+        builder.put(datetimeOffset, datetimeOffsetNormFunctionSymbol);
 
         return builder.build();
     }
@@ -348,13 +343,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     @Override
-    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
-        return new SQLServerRoundFunctionSymbol(dbTermType);
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
+        return Optional.of(new SQLServerRoundFunctionSymbol(dbTermType));
     }
 
     @Override
-    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEILING_STR, 1, dbTermType, false);
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
+        return Optional.of(
+                new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEILING_STR, 1, dbTermType, false));
     }
 
     @Override
@@ -392,10 +388,85 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    String parameterString = terms.stream()
+                            .map(termConverter)
+                            .collect(Collectors.joining(","));
+                    return String.format("COALESCE(%s) = 1", parameterString);
+                });
+    }
+
     protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,
                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String start = termConverter.apply(terms.get(1));
         return String.format("SUBSTRING(%s,%s,LEN(%s))", str, start, str);
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(WEEK, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * We do not consider midnight as the threshold for an additional day but 24 hrs
+     */
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(DAY, %s, %s) - IIF(CAST(%s AS TIME) > CAST(%s AS TIME), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(HOUR, %s, %s) - IIF(DATEPART(MINUTE, %s) > DATEPART(MINUTE, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(MINUTE, %s, %s) - IIF(DATEPART(SECOND, %s) > DATEPART(SECOND, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(SECOND, %s, %s) - IIF(DATEPART(MILLISECOND, %s) > DATEPART(MILLISECOND, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEDIFF(MILLISECOND, %s, %s)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
     }
 }

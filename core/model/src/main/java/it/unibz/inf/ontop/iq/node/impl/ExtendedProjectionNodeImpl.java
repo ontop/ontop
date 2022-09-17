@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -12,9 +13,10 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -24,29 +26,24 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private final ImmutableUnificationTools unificationTools;
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    protected final TermFactory termFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                       ImmutableUnificationTools unificationTools,
                                       ConstructionNodeTools constructionNodeTools,
-                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                      CoreUtilsFactory coreUtilsFactory) {
-        super(substitutionFactory, iqFactory);
+                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory) {
+        super(substitutionFactory, termFactory, iqFactory);
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
-        this.termFactory = termFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree child) {
+            Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         return applyDescendingSubstitution(descendingSubstitution, child,
-                (c, r) -> propagateDescendingSubstitutionToChild(c, r, constraint));
+                (c, r) -> propagateDescendingSubstitutionToChild(c, r, constraint, variableGenerator));
     }
 
     /**
@@ -57,7 +54,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
      */
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
-                                                          Optional<ImmutableExpression> constraint) throws EmptyTreeException {
+                                                          Optional<ImmutableExpression> constraint,
+                                                          VariableGenerator variableGenerator) throws EmptyTreeException {
 
         Optional<ImmutableExpression> descendingConstraint;
         if (constraint.isPresent()) {
@@ -74,17 +72,17 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
-                .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
+                .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint, variableGenerator))
                 .orElse(child);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
         return applyDescendingSubstitution(descendingSubstitution, child,
                 (c, r) -> Optional.of(r.delta)
                         .filter(delta -> !delta.isEmpty())
-                        .map(c::applyDescendingSubstitutionWithoutOptimizing)
+                        .map(d -> c.applyDescendingSubstitutionWithoutOptimizing(d, variableGenerator))
                         .orElse(c));
     }
 
@@ -144,13 +142,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = substitutionFactory.getSubstitution(
-                newEta.getImmutableMap().entrySet().stream()
-                        .filter(e -> vC.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.filter(vC::contains);
 
-        ImmutableSubstitution<NonFunctionalTerm> deltaC = extractDescendingSubstitution(newEta,
-                v -> v, thetaC, thetaCBar, projectedVariables);
+        ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta
+                .filter((k, v) -> !thetaC.isDefining(k) && ((!thetaCBar.isDefining(k)) || projectedVariables.contains(k)));
 
         /* ---------------
          * deltaC to thetaF
@@ -160,7 +155,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> deltaC.apply(e.getKey()),
+                        e -> deltaC.applyToVariable(e.getKey()),
                         e -> deltaC.applyToFunctionalTerm(e.getValue())));
 
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(
@@ -172,23 +167,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                 e -> e.getValue().iterator().next()
                         )));
 
+        ImmutableSubstitution<ImmutableTerm> gamma = deltaC
+                .filter((k, v) -> !thetaF.isDefining(k) && ((!thetaFBar.isDefining(k)) || projectedVariables.contains(k)))
+                .transform(thetaFBar::apply);
 
-        ImmutableSubstitution<ImmutableTerm> gamma = extractDescendingSubstitution(deltaC,
-                thetaFBar::apply,
-                thetaF, thetaFBar,
-                projectedVariables);
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
-
-        Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
-
-        return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
-
-    }
-
-    private Optional<ImmutableExpression> computeF(ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m,
-                                                   ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
-                                                   ImmutableSubstitution<ImmutableTerm> gamma,
-                                                   ImmutableSubstitution<NonFunctionalTerm> newDeltaC) {
 
         ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.getImmutableMap().entrySet();
 
@@ -200,7 +183,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
-        return termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+        Optional<ImmutableExpression> f = Optional.of(Stream.concat(thetaFRelatedExpressions, blockedExpressions)
+                        .collect(ImmutableCollectors.toList()))
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction);
+
+        return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
+
     }
 
     private ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> propagateTauF(ImmutableSubstitution<GroundFunctionalTerm> tauF,
@@ -208,20 +197,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
-        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.getSubstitution(
-                tauF.getImmutableMap().entrySet().stream()
-                        .filter(e -> !thetaBar.isDefining(e.getKey()))
-                        .filter(e -> !tauCPropagationResults.delta.isDefining(e.getKey()))
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> (VariableOrGroundTerm)e.getValue()
-                        )))
+        ImmutableSubstitution<VariableOrGroundTerm> delta = tauF
+                .filter((k, v) -> !thetaBar.isDefining(k)  && !tauCPropagationResults.delta.isDefining(k))
+                .transform(v -> (VariableOrGroundTerm)v)
                 .composeWith2(tauCPropagationResults.delta);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = substitutionFactory.getSubstitution(
-                thetaBar.getImmutableMap().entrySet().stream()
-                        .filter(e -> !tauF.isDefining(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.filter(k -> !tauF.isDefining(k));
 
         Stream<ImmutableExpression> newConditionStream =
                 Stream.concat(
@@ -235,22 +216,18 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                 .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));
 
-        Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
-                tauCPropagationResults.filter
-                        .map(ImmutableExpression::flattenAND)
-                        .orElseGet(Stream::empty),
-                newConditionStream));
+        Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 
         return new ConstructionNodeImpl.PropagationResults<>(newTheta, delta, newF);
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
         try {
             Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), constraint,
                     child.getVariableNullability().extendToExternalVariables(constraint.getVariableStream()));
             IQTree newChild = childConstraint
-                    .map(child::propagateDownConstraint)
+                    .map(c -> child.propagateDownConstraint(c, variableGenerator))
                     .orElse(child);
             return iqFactory.createUnaryIQTree(this, newChild);
 
@@ -265,36 +242,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             throws EmptyTreeException {
 
         ImmutableExpression.Evaluation descendingConstraintResults = theta.applyToBooleanExpression(initialConstraint)
-                .evaluate(variableNullabilityForConstraint);
+                .evaluate2VL(variableNullabilityForConstraint);
 
         if (descendingConstraintResults.isEffectiveFalse())
             throw new EmptyTreeException();
 
         return descendingConstraintResults.getExpression();
-    }
-
-    /**
-     * TODO: find a better name
-     *
-     */
-    private <T extends ImmutableTerm> ImmutableSubstitution<T> extractDescendingSubstitution(
-            ImmutableSubstitution<? extends NonFunctionalTerm> substitution,
-            java.util.function.Function<NonFunctionalTerm, T> valueTransformationFct,
-            ImmutableSubstitution<? extends ImmutableTerm> partialTheta,
-            ImmutableSubstitution<? extends ImmutableTerm> newPartialTheta,
-            ImmutableSet<Variable> originalProjectedVariables) {
-
-        return substitutionFactory.getSubstitution(
-                substitution.getImmutableMap().entrySet().stream()
-                        .filter(e -> {
-                            Variable v = e.getKey();
-                            return (!partialTheta.isDefining(v))
-                                    && ((!newPartialTheta.isDefining(v)) || originalProjectedVariables.contains(v));
-                        })
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> valueTransformationFct.apply(e.getValue())
-                        )));
     }
 
     @Override
@@ -316,6 +269,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     }
 
-    protected class EmptyTreeException extends Exception {
+    protected static class EmptyTreeException extends Exception {
     }
 }

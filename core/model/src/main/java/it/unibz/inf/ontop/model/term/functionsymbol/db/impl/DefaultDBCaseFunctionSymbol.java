@@ -30,8 +30,7 @@ public class DefaultDBCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol 
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String whenClauseString = IntStream.range(0, terms.size() / 2)
-                .boxed()
-                .map(i -> String.format(WHEN_THEN_TEMPLATE,
+                .mapToObj(i -> String.format(WHEN_THEN_TEMPLATE,
                         termConverter.apply(terms.get(2*i)),
                         termConverter.apply(terms.get(2*i + 1))))
                 .collect(Collectors.joining());

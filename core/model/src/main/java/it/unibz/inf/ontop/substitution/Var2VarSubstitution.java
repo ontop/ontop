@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.substitution;
 
-import java.util.Optional;
-
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
 /**
@@ -18,12 +15,5 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      * Guarantees that the term type is preserved
      */
     <T extends ImmutableTerm> T applyToTerm(T term);
-
-    NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
-
-    /**
-     * Applies the current substitution to the "target" part of another substitution
-     */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> applyToTarget(ImmutableSubstitution<T> otherSubstitution);
 
 }

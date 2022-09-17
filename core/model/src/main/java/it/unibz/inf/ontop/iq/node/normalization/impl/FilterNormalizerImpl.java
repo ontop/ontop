@@ -6,8 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -44,8 +44,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
      *  (so as to reduce the recursive pressure)
      */
     @Override
-    public IQTree normalizeForOptimization(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(FilterNode initialFilterNode, IQTree initialChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         //Non-final
         State state = new State(initialFilterNode, initialChild)
                 .normalizeChild(variableGenerator);
@@ -54,12 +53,12 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             State stateBeforeSimplification = state.liftBindingsAndDistinct()
                     .mergeWithChild();
 
-            State newState = stateBeforeSimplification.simplifyAndPropagateDownConstraint()
+            State newState = stateBeforeSimplification.simplifyAndPropagateDownConstraint(variableGenerator)
                     .normalizeChild(variableGenerator);
 
             // Convergence
-            if (newState.child.isEquivalentTo(state.child))
-                return newState.createNormalizedTree(variableGenerator, currentIQProperties);
+            if (newState.child.equals(state.child))
+                return newState.createNormalizedTree(variableGenerator, treeCache);
 
             state = newState;
         }
@@ -152,14 +151,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         /**
          * Returns a tree in which the "filter-level" sub-tree is declared as normalized.
          */
-        public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        public IQTree createNormalizedTree(VariableGenerator variableGenerator, IQTreeCache treeCache) {
 
             if (child.isDeclaredAsEmpty())
                 return iqFactory.createEmptyNode(projectedVariables);
 
             IQTree filterLevelTree = condition
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), child,
-                            currentIQProperties.declareNormalizedForOptimization()))
+                            treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElse(child);
 
             if (ancestors.isEmpty())
@@ -234,7 +233,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             return this;
         }
 
-        public State simplifyAndPropagateDownConstraint() {
+        public State simplifyAndPropagateDownConstraint(VariableGenerator variableGenerator) {
             if (!condition.isPresent()) {
                 return this;
             }
@@ -244,16 +243,16 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 // TODO: also consider the constraint for simplifying the condition
                 ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        condition.get(), childVariableNullability);
+                        condition.get(), ImmutableList.of(child), childVariableNullability);
 
                 Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
                         conditionSimplificationResults, childVariableNullability);
 
                 IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> child.applyDescendingSubstitution(s, downConstraint))
+                        .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
                         .orElseGet(() -> downConstraint
-                                .map(child::propagateDownConstraint)
+                                .map(c -> child.propagateDownConstraint(c, variableGenerator))
                                 .orElse(child));
 
                 Optional<ConstructionNode> parentConstructionNode = Optional.of(conditionSimplificationResults.getSubstitution())

@@ -1,0 +1,38 @@
+{
+  "relations": [
+    {
+      "name" : ["\"views\"", "\"profs\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"PROFESSORS\""],
+      "columns" : {
+        "added" : [
+          {
+            "name" : "\"upper_last_name\"",
+            "expression" : "UPPER(\"LAST_NAME\")"
+          },
+          {
+            "name" : "\"upper_first_name\"",
+            "expression" : "CASE WHEN (CAST(\"LAST_NAME\" AS TEXT) = 'Smith') THEN CAST(\"first_name\" AS TEXT) ELSE CAST(UPPER(\"first_name\") AS TEXT) END"
+          },
+          {
+            "name" : "\"valid_nick_name\"",
+            "expression" : "CASE WHEN SUBSTRING(CAST(\"LAST_NAME\" AS TEXT),1,CHAR_LENGTH('Pi')) = 'Pi' THEN CAST(LOWER(NULLIF(\"NICKNAME\",'Rog')) AS TEXT) ELSE NULLIF(\"NICKNAME\",'Rog') END"
+          }
+        ],
+        "hidden" : [
+          "\"first_name\"",
+          "\"LAST_NAME\""
+        ]
+      },
+      "uniqueConstraints" : {
+        "added" : []
+      },
+      "otherFunctionalDependencies" : {
+        "added" : []
+      },
+      "foreignKeys" : {
+        "added" : []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

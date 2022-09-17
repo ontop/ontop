@@ -12,9 +12,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNode {
 
     @Override
-    FilterNode clone();
-
-    @Override
     FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     /**

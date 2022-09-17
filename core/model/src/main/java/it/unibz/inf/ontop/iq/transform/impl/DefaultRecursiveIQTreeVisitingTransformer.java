@@ -45,6 +45,11 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return transformLeaf(node);
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return transformLeaf(leafNode);
     }
@@ -76,6 +81,11 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     @Override
     public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode, child);
+    }
+
+    @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode, child);
     }
 

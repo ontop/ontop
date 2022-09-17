@@ -1,0 +1,98 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_D",
+      "determinants" : [ "\"PROF_ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"PROF_ID\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"first_name\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"LAST_NAME\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"NICKNAME\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : true
+    } ],
+    "name" : ["\"PROFESSORS\""],
+    "otherNames": [["\"PUBLIC\"","\"PROFESSORS\""]]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_7",
+      "determinants" : [ "\"COURSE_ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"COURSE_ID\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"NB_STUDENTS\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"DURATION\"",
+      "datatype" : "DECIMAL",
+      "isNullable" : false
+    } ],
+    "name" : ["\"COURSE\""]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"COURSE_ID\"", "\"PROF_ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ {
+      "name" : "CONSTRAINT_CAA",
+      "from" : {
+        "relation" : ["\"TEACHING\""],
+        "columns" : [ "\"COURSE_ID\"" ]
+      },
+      "to" : {
+        "relation" : ["\"COURSE\""],
+        "columns" : [ "\"COURSE_ID\"" ]
+      }
+    }, {
+      "name" : "CONSTRAINT_CA",
+      "from" : {
+        "relation" : ["\"TEACHING\""],
+        "columns" : [ "\"PROF_ID\"" ]
+      },
+      "to" : {
+        "relation" : ["\"PROFESSORS\""],
+        "columns" : [ "\"PROF_ID\"" ]
+      }
+    } ],
+    "columns" : [ {
+      "name" : "\"COURSE_ID\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"PROF_ID\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    } ],
+    "name" : ["\"TEACHING\""],
+    "otherNames": [["\"PUBLIC\"","\"TEACHING\""]]
+  } ],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\""
+  }
+}

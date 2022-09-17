@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
+
 import java.util.Optional;
 
 /**
@@ -31,9 +32,21 @@ public interface DBTypeFactory {
 
     boolean supportsDBGeographyType();
 
+    boolean supportsDBDistanceSphere();
+
+    boolean supportsJson();
+
+    boolean supportsArrayType();
+
     DBTermType getDBHexBinaryType();
 
+    DBTermType getDBArrayType();
 
+    /**
+     * Default JSON datatype.
+     * Note that there might be more than 1 (e.g. Postgres has 2)
+     */
+    DBTermType getDBJsonType();
 
     /**
      * Returns an abstract type
@@ -51,8 +64,6 @@ public interface DBTypeFactory {
      * Is empty if the DB does not support (and therefore does not store) not-a-number values
      */
     Optional<String> getDBNaNLexicalValue();
-
-
 
     /**
      * TODO: find a better name

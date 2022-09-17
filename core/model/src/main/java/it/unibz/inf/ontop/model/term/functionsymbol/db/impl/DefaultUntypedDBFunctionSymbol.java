@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Function symbols of each we don't know the return type.
+ * Function symbols of which we don't know the return type.
  *
  * By default, it is treated as non-injective and non-postprocessable.
  * They also may not reject NULLs and produce NULLs without having NULLs as input.
@@ -35,8 +35,7 @@ public class DefaultUntypedDBFunctionSymbol extends FunctionSymbolImpl implement
 
     protected DefaultUntypedDBFunctionSymbol(@Nonnull String nameInDialect, int arity, DBTermType rootDBTermType) {
         super(nameInDialect + arity, IntStream.range(0, arity)
-                .boxed()
-                .map(i -> (TermType) rootDBTermType)
+                .mapToObj(i -> (TermType) rootDBTermType)
                 .collect(ImmutableCollectors.toList()));
         this.serializer = Serializers.getRegularSerializer(nameInDialect);
     }

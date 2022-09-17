@@ -95,7 +95,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s2 -> s2.composeWith(c.getSubstitution()).reduceDomainToIntersectionWith(c.getVariables()))
+                        .map(s2 -> s2.composeWith(c.getSubstitution()).filter(c.getVariables()::contains))
                         .orElseGet(c::getSubstitution))
                 .orElseGet(() -> aggregationNode
                         .map(AggregationNode::getSubstitution)
@@ -209,6 +209,13 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
                     .map(e-> convert(e, signature))
+                    // Special case: UNION [SLICE VALUES] additional SelectFromWhereWithModifiers wrapping needed
+                    .map(v -> (v.getLimit().isPresent() && v.getFromSQLExpression() instanceof SQLValuesExpression)
+                            ? sqlAlgebraFactory.createSelectFromWhere(
+                            v.getProjectedVariables(), v.getSubstitution(), v, Optional.empty(),
+                            ImmutableSet.of(), Optional.empty().isPresent(), Optional.empty(),
+                            Optional.empty(), ImmutableList.of())
+                            : v)
                     .collect(ImmutableCollectors.toList());
             return sqlAlgebraFactory.createSQLUnionExpression(subExpressions,unionNode.getVariables());
         }
@@ -218,6 +225,24 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof ExtendedProjectionNode || rootNode instanceof QueryModifierNode){
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             return convert(tree, signature);
+        }
+        else if (rootNode instanceof ValuesNode) {
+            ValuesNode valuesNode = (ValuesNode) rootNode;
+            return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
+        }
+        else if (rootNode instanceof FlattenNode) {
+            FlattenNode flattenNode = (FlattenNode) rootNode;
+            IQTree subtree = tree.getChildren().get(0);
+            return sqlAlgebraFactory.createSQLFlattenExpression(
+                    convert(
+                            subtree,
+                            ImmutableSortedSet.copyOf(subtree.getVariables())
+                    ),
+                    flattenNode.getFlattenedVariable(),
+                    flattenNode.getOutputVariable(),
+                    flattenNode.getIndexVariable(),
+                    flattenNode.getFlattenedType()
+            );
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

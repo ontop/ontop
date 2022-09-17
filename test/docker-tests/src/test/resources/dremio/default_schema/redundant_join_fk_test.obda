@@ -40,5 +40,9 @@ mappingId	MAPID-course
 target		:course/{course_id} a :Course ; :duration {duration} ; :nbStudents {nb_students} .
 source		SELECT * FROM course;
 
+mappingId	MAPID-prof-student-count
+target		:professor/{prof_id} :nbStudents {stud_count} .
+source		SELECT t.prof_id, sum(c.nb_students) AS stud_count FROM teaching t, course c WHERE t.course_id = c.course_id GROUP BY prof_id
+
 ]]
 

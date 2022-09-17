@@ -26,8 +26,7 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
     protected AbstractDBBooleanConnectorFunctionSymbol(String name, int arity, DBTermType dbBooleanTermType) {
         super(name + arity,
                 IntStream.range(0, arity)
-                        .boxed()
-                        .map(i -> dbBooleanTermType)
+                        .mapToObj(i -> dbBooleanTermType)
                         .collect(ImmutableCollectors.toList()),
                 dbBooleanTermType);
     }
@@ -85,8 +84,7 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
 
         // { index -> termToNullify }
         ImmutableMap<Integer, ImmutableTerm> termToNullifyMap = IntStream.range(0, distinctTerms.size())
-                .boxed()
-                .map(i -> Maps.immutableEntry(i, Optional.of(distinctTerms.get(i))
+                .mapToObj(i -> Maps.immutableEntry(i, Optional.of(distinctTerms.get(i))
                         .filter(t -> t instanceof ImmutableExpression)
                         .map(t -> (ImmutableExpression) t)
                         .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
@@ -100,8 +98,7 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
         return termToNullifyMap.entrySet().stream()
                 .reduce(distinctTerms,
                         (ts, e) -> IntStream.range(0, distinctTerms.size())
-                                .boxed()
-                                .map(i -> e.getKey().equals(i)
+                                .mapToObj(i -> e.getKey().equals(i)
                                         ? ts.get(i)
                                         // Only tries to nullify other entries.
                                         // NB: nullifying only replaces the same syntactic term by NULL

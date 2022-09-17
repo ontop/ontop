@@ -50,11 +50,6 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return systemSettings.isDistinctPostProcessingEnabled();
-    }
-
-    @Override
     public boolean isKeepAliveEnabled() {
         return getRequiredBoolean(KEEP_ALIVE);
     }
@@ -100,12 +95,12 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
-    public String getJdbcUser() {
+    public Optional<String> getJdbcUser() {
         return sqlCredentialSettings.getJdbcUser();
     }
 
     @Override
-    public String getJdbcPassword() {
+    public Optional<String> getJdbcPassword() {
         return sqlCredentialSettings.getJdbcPassword();
     }
 }

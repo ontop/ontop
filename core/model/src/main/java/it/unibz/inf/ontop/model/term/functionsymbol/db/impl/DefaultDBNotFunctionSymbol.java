@@ -58,8 +58,14 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
                     ? newTerm
                     : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(false)));
 
-        if (newTerm instanceof ImmutableExpression)
-            return ((ImmutableExpression) newTerm).negate(termFactory);
+        if (newTerm instanceof ImmutableExpression) {
+            ImmutableExpression newExpression = ((ImmutableExpression) newTerm);
+            ImmutableExpression negatedTerm = newExpression.negate(termFactory);
+            return newExpression.getFunctionSymbol().blocksNegation()
+                    // Avoids infinite loop
+                    ? negatedTerm
+                    : negatedTerm.simplify(variableNullability);
+        }
         else if (newTerm instanceof Variable)
             // TODO: shall we use NOT(IS_TRUE(...) instead)?
             return termFactory.getStrictEquality(newTerm, termFactory.getDBBooleanConstant(false));

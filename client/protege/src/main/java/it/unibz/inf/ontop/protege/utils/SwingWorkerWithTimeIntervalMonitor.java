@@ -9,11 +9,11 @@ public abstract class SwingWorkerWithTimeIntervalMonitor<T, V> extends SwingWork
     private int count;
 
     protected SwingWorkerWithTimeIntervalMonitor(Component parent, Object message, long monitorUpdateInterval) {
-        this(new DialogProgressMonitor(parent, message, true), monitorUpdateInterval);
+        this(new ProgressMonitorDialogComponent(parent, message, true), monitorUpdateInterval);
     }
 
-    protected SwingWorkerWithTimeIntervalMonitor(AbstractProgressMonitor progressMonitor, long monitorUpdateInterval) {
-        super(progressMonitor);
+    protected SwingWorkerWithTimeIntervalMonitor(ProgressMonitorComponent component, long monitorUpdateInterval) {
+        super(component);
         this.monitorUpdateInterval = monitorUpdateInterval;
         this.previousTime = startTime;
     }

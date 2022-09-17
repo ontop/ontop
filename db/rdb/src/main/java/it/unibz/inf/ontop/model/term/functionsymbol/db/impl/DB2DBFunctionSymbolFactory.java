@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -15,14 +12,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.SMALLINT_STR;
-import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.NUMBER_STR;
 
 public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String CURRENT_TIMESTAMP_SPACE_STR = "CURRENT TIMESTAMP";
-    private static final String CHAR_STR = "CHAR";
+    private static final String VARCHAR_STR = "VARCHAR";
     private final DBFunctionSymbolSerializer numberToStringSerializer;
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for DB2";
@@ -32,7 +27,7 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     protected DB2DBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDB2RegularFunctionTable(typeFactory), typeFactory);
         this.numberToStringSerializer = (terms, termConverter, termFactory) ->
-                String.format("REPLACE(CHAR(%s),' ', '')", termConverter.apply(terms.get(0)));
+                String.format("REPLACE(VARCHAR(%s),' ', '')", termConverter.apply(terms.get(0)));
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDB2RegularFunctionTable(
@@ -52,16 +47,23 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     }
 
     @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
-
-        // SMALLINT boolean normalization
-        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-        DBTermType smallIntType = dbTypeFactory.getDBTermType(SMALLINT_STR);
-        builder.put(smallIntType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
+    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
+        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
+        builder.putAll(super.createNormalizationMap());
 
         return builder.build();
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
+        table.putAll(super.createNormalizationTable());
+
+        // SMALLINT boolean normalization
+        DBTermType smallIntType = dbTypeFactory.getDBTermType(SMALLINT_STR);
+        table.put(smallIntType, typeFactory.getXsdBooleanDatatype(),
+                new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
+        return ImmutableTable.copyOf(table);
     }
 
     @Override
@@ -228,7 +230,16 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     @Override
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
-                Serializers.getRegularSerializer(CHAR_STR));
+                Serializers.getRegularSerializer(VARCHAR_STR));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
+        if (targetType.equals(dbTypeFactory.getDBStringType())) {
+            return new DefaultSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), dbStringType,
+                    Serializers.getRegularSerializer(VARCHAR_STR));
+        }
+        return super.createSimpleCastFunctionSymbol(targetType);
     }
 
     @Override
@@ -238,5 +249,57 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
             return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
 
         return super.createDBAvg(inputType, isDistinct);
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(WEEKS_BETWEEN(%s, %s)) AS INTEGER)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(DAYS_BETWEEN(%s, %s)) AS INTEGER)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(HOURS_BETWEEN(%s, %s)) AS INTEGER)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(MINUTES_BETWEEN(%s, %s)) AS INTEGER)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(SECONDS_BETWEEN(%s, %s)) AS INTEGER)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(TRUNC(SECONDS_BETWEEN(%s, %s),3) AS INTEGER)*1000",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-test</artifactId>
-        <version>4.1.0</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-docker-tests</artifactId>
@@ -23,12 +23,70 @@
         <docker.pgsql.password>postgres2</docker.pgsql.password>
         <docker.denodo.password>admin</docker.denodo.password>
         <docker.dremio.password>dremio123</docker.dremio.password>
+        <snowflake.account>fakeaccount</snowflake.account>
+        <snowflake.user>fake</snowflake.user>
+        <snowflake.password>fake</snowflake.password>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-model</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-obda-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-rdb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-ontology-owlapi</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-r2rml</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-native</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-owlapi</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-sql-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-sql-owlapi</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-reformulation-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-system-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -46,6 +104,79 @@
             <artifactId>ontop-owlapi</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-apibinding</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-model</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-turtle</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-ntriples</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-rdfxml</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-query</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryresultio-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-sail-memory</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-repository-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-repository-sail</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-sparql-testsuite</artifactId>
@@ -56,15 +187,39 @@
             <artifactId>rdf4j-queryparser-serql</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>madgik.adp</groupId>
-            <artifactId>adp-jdbc</artifactId>
-            <version>0.1.2</version>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,11 +247,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.dremio.jdbc</groupId>
-            <artifactId>dremio-jdbc</artifactId>
-            <version>1.4.4</version>
+            <groupId>com.dremio.distribution</groupId>
+            <artifactId>dremio-jdbc-driver</artifactId>
+            <version>22.0.0-202206221430090603-1fa4049f</version>
             <scope>test</scope>
         </dependency>
+        <!-- teiid JDBC Driver-->
+        <dependency>
+            <groupId>org.teiid</groupId>
+            <artifactId>teiid</artifactId>
+            <version>15.0.1</version>
+            <classifier>jdbc</classifier>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
@@ -118,7 +282,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.14.jre7</version>
+            <version>42.3.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -127,30 +291,33 @@
             <version>11.5.4.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.17</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <!-- for 3rd party JDBC drivers -->
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>bolzano-nexus-public</id>
-            <url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+            <id>dremio-free</id>
+            <url>https://maven.dremio.com/free/</url>
         </repository>
         <repository>
-            <!-- for monetdb -->
+            <!--
+                For 3rd party JDBC drivers:
+                - madgit.adp:adp-jdbc:0.1.2
+                - monetdb:monetdb-jdbc:11.19.15
+            -->
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>clojars.org</id>
-            <url>http://clojars.org/repo</url>
+            <id>ontop-3rd-party-maven-repo</id>
+            <url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</url>
         </repository>
     </repositories>
 

@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -35,9 +34,8 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator,
-                                           IQProperties currentIQProperties) {
-        return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     /**
@@ -51,16 +49,18 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+                                              Optional<ImmutableExpression> constraint, IQTree child,
+                                              VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitution(descendingSubstitution, constraint));
+                child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
+            VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override
@@ -81,6 +81,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformDistinct(tree, this, child, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
         return visitor.visitDistinct(this, child);
     }
@@ -90,7 +95,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+    public IQTree removeDistincts(IQTree child, IQTreeCache treeCache) {
         return child.removeDistincts();
     }
 
@@ -125,17 +130,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return node instanceof DistinctNode;
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return ImmutableSet.of();
     }
 
@@ -145,17 +140,18 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof DistinctNode;
+    public int hashCode() {
+        return 238723871;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
     public String toString() {
         return DISTINCT_NODE_STR;
-    }
-
-    @Override
-    public DistinctNode clone() {
-        return iqFactory.createDistinctNode();
     }
 }

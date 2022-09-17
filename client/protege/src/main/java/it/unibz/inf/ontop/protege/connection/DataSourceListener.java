@@ -2,6 +2,6 @@ package it.unibz.inf.ontop.protege.connection;
 
 public interface DataSourceListener {
 
-    void dataSourceChanged(DataSource source);
+    void changed(DataSource source);
 
 }

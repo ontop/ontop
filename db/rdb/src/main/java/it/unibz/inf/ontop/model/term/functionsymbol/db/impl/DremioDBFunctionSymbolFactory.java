@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -21,6 +24,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.SERIAL_
 public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not supported by Dremio yet";
+    private static final String POSITION_STR = "POSITION";
 
     @Inject
     protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -29,7 +33,18 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDremioRegularFunctionTable(
             TypeFactory typeFactory) {
-        return createDefaultRegularFunctionTable(typeFactory);
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+
+        Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
+                createDefaultRegularFunctionTable(typeFactory));
+
+        DBFunctionSymbol positionFunctionSymbol = new SimpleTypedDBFunctionSymbolImpl(POSITION_STR, 2,
+                dbTypeFactory.getDBLargeIntegerType(), false, abstractRootDBType,
+                (terms, termConverter, termFactory) -> String.format("POSITION(%s IN %s)",
+                        termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1))));
+        table.put(POSITION_STR, 2, positionFunctionSymbol);
+        return ImmutableTable.copyOf(table);
     }
 
     @Override
@@ -73,7 +88,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
-        return (DBConcatFunctionSymbol) getRegularDBFunctionSymbol(CONCAT_STR, arity);
+        return createDBConcatOperator(arity);
     }
 
     @Override
@@ -84,7 +99,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return new NullRejectingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
@@ -139,4 +154,9 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
             return new NonSimplifiableTypedNullFunctionSymbol(termType);
     }
 
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException(NOT_YET_SUPPORTED_MSG);
+    }
 }

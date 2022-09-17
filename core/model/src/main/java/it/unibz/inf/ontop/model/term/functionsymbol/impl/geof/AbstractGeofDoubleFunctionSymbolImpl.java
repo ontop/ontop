@@ -38,7 +38,7 @@ public abstract class AbstractGeofDoubleFunctionSymbolImpl extends ReduciblePosi
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         return termFactory.getConversion2RDFLexical(
-                dbTypeFactory.getDBBooleanType(),
+                dbTypeFactory.getDBDoubleType(),
                 computeDBTerm(subLexicalTerms, typeTerms, termFactory),
                 xsdDoubleType);
     }

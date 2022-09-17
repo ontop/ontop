@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -8,6 +9,7 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
@@ -36,6 +38,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final ImmutableList<Template.Component> components;
     private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
     private final IRISafeEnDecoder enDecoder;
+    private final Pattern patternForInteger;
+    private final Pattern patternForDecimalFloat;
+    private final Pattern patternForUuid;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
         super(getTemplateString(components), createBaseTypes(components, typeFactory));
@@ -45,6 +50,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // must not produce false positives
         this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
         this.enDecoder = new IRISafeEnDecoder();
+
+        this.patternForInteger = Pattern.compile("^[0-9]+$");
+        this.patternForDecimalFloat = Pattern.compile("^[0-9.+\\-eE]+$");
+        this.patternForUuid = Pattern.compile("^[0-9a-fA-F\\-]+$");
     }
 
     private boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
@@ -172,8 +181,17 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbolImpl) {
             ObjectStringTemplateFunctionSymbolImpl other = (ObjectStringTemplateFunctionSymbolImpl) otherFunctionSymbol;
 
-            if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments))
-                return IncrementalEvaluation.declareIsFalse();
+            if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments)) {
+                // 3VL: needs to check for term nullability (null: if at least one is null, false otherwise)
+                Optional<ImmutableExpression> newExpression = termFactory.getDisjunction(
+                                Stream.concat(terms.stream(), otherTerm.getTerms().stream())
+                                        .map(termFactory::getDBIsNull))
+                        .map(e -> termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(e)));
+
+                return newExpression
+                        .map(e -> e.evaluate(variableNullability, true))
+                        .orElseGet(IncrementalEvaluation::declareIsFalse);
+            }
 
             if (!other.equals(this))
                 return tryToSimplifyCompatibleTemplates(other, terms, otherTerm, termFactory, variableNullability);
@@ -194,22 +212,20 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         UnmodifiableIterator<? extends ImmutableTerm> subTermIterator = subTerms.iterator();
         UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator = otherTerm.getTerms().iterator();
 
-        Stream<ImmutableExpression> expressionStream = IntStream.range(0, safeSeparatorFragments.size())
+        ImmutableList<ImmutableExpression> expressions = IntStream.range(0, safeSeparatorFragments.size())
                 // Sequential execution is essential
                 .mapToObj(i -> convertToEquality(
                         safeSeparatorFragments.get(i), subTermIterator,
                         other.safeSeparatorFragments.get(i), otherSubTermIterator, termFactory))
                 .filter(Optional::isPresent)
-                .map(Optional::get);
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
 
-        Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
-        if (expression.isPresent()) {
-            ImmutableExpression nonNull = termFactory.getConjunction(
-                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream())
-                            .map(termFactory::getDBIsNotNull))
-                    .get(); // this conjunction cannot be empty because
-                            // there is at least one variable in the templates (taken together)
-            ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, expression.get());
+        if (!expressions.isEmpty()) {
+            ImmutableExpression nonNull = termFactory.getDBIsNotNull(
+                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("cannot be empty because there is at least one variable in the templates (taken together)"));
+            ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, termFactory.getConjunction(expressions));
             return ifElseNull.evaluate(variableNullability, true);
         }
         else
@@ -244,8 +260,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 return Optional.empty();
         }
 
-        if (!components.get(components.size() - 1).isColumnNameReference()
-                && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
+        if (components.size() > 0 && !components.get(components.size() - 1).isColumnNameReference()
+                && otherComponents.size() > 0 && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
             String last = components.get(components.size() - 1).getComponent();
             String otherLast = otherComponents.get(otherComponents.size() - 1).getComponent();
             if (last.endsWith(otherLast)) {
@@ -287,11 +303,110 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         : termFactory.getDBStringConstant(enDecoder.decode(c.getComponent())))
                 .collect(ImmutableCollectors.toList());
 
-        return args.size() == 1
-                ? args.get(0)
-                : termFactory.getNullRejectingDBConcatFunctionalTerm(args);
+        switch (args.size()) {
+            case 0:
+                return termFactory.getDBStringConstant("");
+            case 1:
+                return args.get(0);
+            default:
+                return termFactory.getNullRejectingDBConcatFunctionalTerm(args);
+        }
     }
 
+    @Override
+    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+        if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+
+        ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
+                .filter(i -> components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        // Needs to have a separator between variables
+        if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
+            return false;
+
+        ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
+                .filter(i -> !components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        // TODO: remove this restriction and tolerates consecutive separators
+        if (IntStream.range(0, components.size() - 1)
+                .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
+            return false;
+
+        if (separatorPositions.stream()
+                // Only those separating columns
+                .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
+                .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+        }
+
+        return false;
+    }
+
+    private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,
+                                       ImmutableList<? extends ImmutableTerm> otherTerms) {
+        String separatorString = components.get(separatorIndex).getComponent();
+
+        if (separatorString.isEmpty())
+            return false;
+
+        int previousTermIndex = components.get(separatorIndex - 1).getIndex();
+        int nextTermIndex = components.get(separatorIndex + 1).getIndex();
+
+        return Stream.of(terms.get(previousTermIndex), otherTerms.get(previousTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, true))
+                || Stream.of(terms.get(nextTermIndex), otherTerms.get(nextTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, false));
+    }
+
+    /**
+     * Must not return false negative
+     */
+    private boolean couldContain(ImmutableTerm term, String separatorString, boolean isTermBefore) {
+        if (term instanceof Variable)
+            return true;
+
+        if (term instanceof Constant) {
+            Constant constant = (Constant) term;
+
+            // Should normally not happen
+            return term.isNull()
+                    || (isTermBefore
+                        ? constant.getValue().endsWith(separatorString)
+                        : constant.getValue().startsWith(separatorString));
+        }
+        else {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+
+            if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+                boolean isSafelySeparating = ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
+                        .filter(t -> { switch(t.getCategory()) {
+                            case INTEGER:
+                                return !patternForInteger.matcher(separatorString).find();
+                            case DECIMAL:
+                            case FLOAT_DOUBLE:
+                                return !patternForDecimalFloat.matcher(separatorString).find();
+                            case UUID:
+                                return !patternForUuid.matcher(separatorString).find();
+                            default:
+                                return false;
+                        }
+                        })
+                        .isPresent();
+
+                return !isSafelySeparating;
+            }
+
+            return true;
+        }
+    }
 
     @Nullable
     private Pattern injectivePattern; // lazy initalization
@@ -327,9 +442,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         IntStream.range(0, getArity())
                                 .mapToObj(i -> termFactory.getStrictEquality(
                                         termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)),
-                                        termFactory.getDBStringConstant(matcher.group(i + 1)))))
-                        .orElseThrow(() -> new MinorOntopInternalBugException(
-                                "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
+                                        termFactory.getDBStringConstant(matcher.group(i + 1))))
+                                .collect(ImmutableCollectors.toList()));
 
                 return newExpression.evaluate(variableNullability, true);
             }

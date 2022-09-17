@@ -43,6 +43,10 @@ public interface TypeFactory {
 		return (ConcreteNumericRDFDatatype) getDatatype(XSD.INTEGER);
 	}
 
+	default ConcreteNumericRDFDatatype getXsdLongDatatype() {
+		return (ConcreteNumericRDFDatatype) getDatatype(XSD.LONG);
+	}
+
 	default ConcreteNumericRDFDatatype getXsdDecimalDatatype() {
 		return (ConcreteNumericRDFDatatype) getDatatype(XSD.DECIMAL);
 	}

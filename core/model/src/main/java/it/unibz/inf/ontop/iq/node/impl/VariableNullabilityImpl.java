@@ -26,8 +26,8 @@ import java.util.stream.Stream;
 public class VariableNullabilityImpl implements VariableNullability {
 
     private final ImmutableSet<ImmutableSet<Variable>> nullableGroups;
-
     private final ImmutableSet<Variable> scope;
+
     private final CoreUtilsFactory coreUtilsFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -48,7 +48,6 @@ public class VariableNullabilityImpl implements VariableNullability {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.nullableVariables = null;
     }
 
     /**
@@ -98,6 +97,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return (!scope.contains(variable)) || getNullableVariables().contains(variable);
     }
 
+    @Override
     public ImmutableSet<Variable> getNullableVariables() {
         if (nullableVariables == null)
             nullableVariables = nullableGroups.stream()
@@ -152,8 +152,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                         Map.Entry::getKey));
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = IntStream.range(0, groupCount.get())
-                .boxed()
-                .map(i -> i < groupList.size()
+                .mapToObj(i -> i < groupList.size()
                         ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i)))
                             .immutableCopy()
                         : ImmutableSet.copyOf(newVariableMultimap.get(i)))
@@ -241,8 +240,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                     ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
                     return IntStream.range(0, subTerms.size())
                             .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
-                            .boxed()
-                            .map(i -> Maps.immutableEntry(e.getKey(), i));
+                            .mapToObj(i -> Maps.immutableEntry(e.getKey(), i));
                 })
                 .collect(ImmutableCollectors.toMultimap());
 
@@ -261,8 +259,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                                     Variable v = e.getKey();
                                     ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
                                     ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                            .boxed()
-                                            .map(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
+                                            .mapToObj(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
                                                     .orElseGet(() -> def.getTerm(i)))
                                             .collect(ImmutableCollectors.toList());
 

@@ -340,12 +340,12 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							.map(j -> Maps.immutableEntry(CHILD_PREFIX + "." + j.getChild(), PARENT_PREFIX + "." + j.getParent())));
 		}
 
-		Var2VarSubstitution sub = substitutionFactory.getVar2VarSubstitution(childMap);
+		Var2VarSubstitution sub = substitutionFactory.getInjectiveVar2VarSubstitution(childMap);
 		ImmutableTerm subject = sub.apply(extractedSubject);
 		ImmutableList<ImmutableTerm>  graphs = extractedGraphs.stream()
 				.map(sub::apply)
 				.collect(ImmutableCollectors.toList());
-		Var2VarSubstitution ob = substitutionFactory.getVar2VarSubstitution(parentMap);
+		Var2VarSubstitution ob = substitutionFactory.getInjectiveVar2VarSubstitution(parentMap);
 		ImmutableTerm object = ob.apply(extractedObject);
 
 		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(sub::apply)
@@ -504,8 +504,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					// Third try: datatype of the constant
 					.orElseGet(() -> Optional.ofNullable(om.getConstant())
 							.map(c -> (Literal) c)
-							.map(Literal::getDatatype)
-							.map(templateFactory::getDatatype)
+							.map(l -> templateFactory.extractDatatype(l.getLanguageTag(), Optional.of(l.getDatatype()))
+									.orElseThrow(() -> new MinorOntopInternalBugException("Minor bug: a datatype was expected")))
 							// Default case: RDFS.LITERAL (abstract, to be inferred later)
 							.orElseGet(templateFactory::getAbstractRDFSLiteral));
 

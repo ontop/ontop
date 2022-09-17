@@ -18,7 +18,8 @@ public class EventListenerList<T> {
     public void add(T listener) {
         Objects.requireNonNull(listener);
         if (listeners.contains(listener))
-            throw new IllegalArgumentException("ListenerList " + listeners + " already contains " + listener);
+            //throw new IllegalArgumentException("ListenerList " + listeners + " already contains " + listener);
+            return;
 
         listeners.add(listener);
     }

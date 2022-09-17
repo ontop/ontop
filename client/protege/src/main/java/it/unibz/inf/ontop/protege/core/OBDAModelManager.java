@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.protege.core;
 
+import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
-import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapManager;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapManagerListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -92,14 +93,14 @@ public class OBDAModelManager implements Disposable {
 		queryManagerEventListeners.remove(listener);
 	}
 
-	// TriplesMapCollectionListener
-	private final EventListenerList<TriplesMapCollectionListener> triplesMapCollectionListeners = new EventListenerList<>();
+	// TriplesMapManagerListener
+	private final EventListenerList<TriplesMapManagerListener> triplesMapCollectionListeners = new EventListenerList<>();
 
-	public void addMappingListener(TriplesMapCollectionListener listener) {
+	public void addMappingListener(TriplesMapManagerListener listener) {
 		triplesMapCollectionListeners.add(listener);
 	}
 
-	public void removeMappingListener(TriplesMapCollectionListener listener) {
+	public void removeMappingListener(TriplesMapManagerListener listener) {
 		triplesMapCollectionListeners.remove(listener);
 	}
 
@@ -170,13 +171,13 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			for (Map.Entry<OWLOntologyID, Map<OWLDeclarationAxiom, OWLDeclarationAxiom>> o : rename.entrySet()) {
-				TriplesMapCollection tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapCollection();
+				TriplesMapManager tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapManager();
 				for (Map.Entry<OWLDeclarationAxiom, OWLDeclarationAxiom> e : o.getValue().entrySet())
 					tiplesMaps.renamePredicate(getIRI(e.getKey()), getIRI(e.getValue()));
 			}
 
 			for (Map.Entry<OWLOntologyID, Set<OWLDeclarationAxiom>> o : remove.entrySet()) {
-				TriplesMapCollection tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapCollection();
+				TriplesMapManager tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapManager();
 				for (OWLDeclarationAxiom axiom : o.getValue())
 					tiplesMaps.removePredicate(getIRI(axiom));
 			}
@@ -187,43 +188,62 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	public DisposableProperties getStandardProperties() {
-		return OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
-	}
-
-
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
 		@Override
 		public void handleChange(OWLModelManagerChangeEvent event) {
-			LOGGER.debug(event.getType().name());
-			switch (event.getType()) {
-				case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
-					ontologyCreated();
-					break;
-
-				case ACTIVE_ONTOLOGY_CHANGED:
-					activeOntologyChanged();
-					break;
-
-				case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
-				case ONTOLOGY_RELOADED:
-					ontologyLoadedReloaded();
-					break;
-
-				case ONTOLOGY_SAVED:
-					ontologySaved();
-					break;
-
-				case ABOUT_TO_CLASSIFY:
-				case ONTOLOGY_CLASSIFIED:
-				case ENTITY_RENDERER_CHANGED:
-				case REASONER_CHANGED:
-				case ONTOLOGY_VISIBILITY_CHANGED:
-				case ENTITY_RENDERING_CHANGED:
-					break;
+			try {
+				LOGGER.debug(event.getType().name());
+				setUpReasonerInfo();
+				switch (event.getType()) {
+					case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
+						ontologyCreated();
+						break;
+	
+					case ACTIVE_ONTOLOGY_CHANGED:
+						activeOntologyChanged();
+						break;
+	
+					case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
+					case ONTOLOGY_RELOADED:
+						ontologyLoadedReloaded();
+						break;
+	
+					case ONTOLOGY_SAVED:
+						ontologySaved();
+						break;
+	
+					case REASONER_CHANGED:
+					case ABOUT_TO_CLASSIFY:
+					case ONTOLOGY_CLASSIFIED:
+					case ENTITY_RENDERER_CHANGED:
+					case ONTOLOGY_VISIBILITY_CHANGED:
+					case ENTITY_RENDERING_CHANGED:
+						break;
+				}
+			} catch (Throwable ex) {
+				// Report the error, either using the logging system or by directly writing on
+				// STDERR (an error here will crash the Ontop Protégé plugin, so it's important to
+				// report it as otherwise there will be no debugging info to work on)
+				if (LOGGER.isErrorEnabled()) {
+					LOGGER.error("", ex);
+				} else {
+					ex.printStackTrace();
+				}
+				
+				// Propagate the error
+				Throwables.throwIfUnchecked(ex);
+				throw new RuntimeException(ex);
 			}
+		}
+	}
+
+	private void setUpReasonerInfo() {
+		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
+			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
+			reasonerInfo.setOBDAModelManager(this);
 		}
 	}
 
@@ -235,7 +255,7 @@ public class OBDAModelManager implements Disposable {
 	private OBDAModel createObdaModel(OWLOntology ontology) {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
 		//obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
-		obdaModel.getTriplesMapCollection().addListener(s -> triplesMapCollectionListeners.fire(l -> l.triplesMapCollectionChanged(s)));
+		obdaModel.getTriplesMapManager().addListener(s -> triplesMapCollectionListeners.fire(l -> l.changed(s)));
 		obdaModel.getQueryManager().addListener(new QueryManagerListener() {
 			@Override
 			public void inserted(QueryManager.Item entity, int indexInParent) {
@@ -267,12 +287,6 @@ public class OBDAModelManager implements Disposable {
 			return;
 
 		currentObdaModel = obdaModel;
-
-		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
-		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
-			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
-			reasonerInfo.setConfigurationGenerator(currentObdaModel.getConfigurationManager());
-		}
 
 		listeners.fire(l -> l.activeOntologyChanged(getCurrentOBDAModel()));
 	}

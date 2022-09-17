@@ -97,7 +97,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
         return false;
     }
 
-    /***
+    /**
      * MUST detect ALL the cases where the SPARQL function would produce an error (that is a NULL)
      * {@code ---> } the resulting condition must determine if the output of the SPARQL function is NULL (evaluates to FALSE or NULL)
      *      or not (evaluates to TRUE).
@@ -108,8 +108,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
-                .boxed()
-                .map(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
+                .mapToObj(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
                 .collect(ImmutableCollectors.toList());
 
          return termFactory.getConjunction(typeTestExpressions)

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -22,7 +22,7 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     private static final String obdaFileName = "/redundant_join/redundant_join_fk_test.obda";
     private static final String propertyFileName = "/oracle/oracle.properties";
 
-    private static OntopOWLReasoner REASONER;
+    private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
@@ -37,9 +37,9 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.dispose();
+        REASONER.close();
     }
 
     /**
@@ -60,6 +60,17 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Override
     public void testGroupConcat5() throws Exception {
         super.testGroupConcat5();
+    }
+
+    /**
+     * TODO: fix a bug of Oracle: using AVG in an ORDER BY condition may yield an incorrect order.
+     * Fix: compute the AVG in a subquery, and use the output variable in the ORDER BY clause
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testAvgStudents3() throws Exception {
+        super.testAvgStudents3();
     }
 
     /**
@@ -128,5 +139,10 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Override
     protected List<String> getExpectedValueSumStudents5() {
         return ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
+        return ImmutableList.of("12", "13", "21");
     }
 }

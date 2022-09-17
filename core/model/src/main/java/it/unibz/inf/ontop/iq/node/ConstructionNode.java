@@ -20,9 +20,6 @@ public interface ConstructionNode extends ExtendedProjectionNode {
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
 
     @Override
-    ConstructionNode clone();
-
-    @Override
     ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 }

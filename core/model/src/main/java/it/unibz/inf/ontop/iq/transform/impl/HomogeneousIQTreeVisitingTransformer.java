@@ -41,6 +41,11 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return node.acceptNodeTransformer(nodeTransformer);
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return leafNode.acceptNodeTransformer(nodeTransformer);
     }
@@ -72,6 +77,11 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
 
     @Override
     public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode.acceptNodeTransformer(nodeTransformer), child);
+    }
+
+    @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
         return transformUnaryNode(tree, rootNode.acceptNodeTransformer(nodeTransformer), child);
     }
 

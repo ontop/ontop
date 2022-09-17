@@ -9,12 +9,14 @@ import java.util.Optional;
 public class MockupDBTypeFactory implements DBTypeFactory {
 
     private final NonStringNonNumberNonBooleanNonDatetimeDBTermType rootDBType;
+    private final TypeFactory typeFactory;
     private final TermTypeAncestry rootAncestry;
 
     @AssistedInject
     private MockupDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
         rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType("AbstractDBType",
                 rootTermType.getAncestry(), true);
+        this.typeFactory = typeFactory;
         rootAncestry = rootDBType.getAncestry();
     }
 
@@ -25,7 +27,8 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBLargeIntegerType() {
-        return getDBTermType("LARGE_INT");
+        return new NumberDBTermType("LARGE_INT", rootAncestry, typeFactory.getXsdIntegerDatatype(),
+                DBTermType.Category.INTEGER);
     }
 
     @Override
@@ -79,8 +82,33 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public boolean supportsDBDistanceSphere() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsJson() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsArrayType() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return getDBTermType("HEXBINARY");
+    }
+
+    @Override
+    public DBTermType getDBArrayType() {
+        return getDBTermType("ARRAY");
+    }
+
+    @Override
+    public DBTermType getDBJsonType() {
+        throw new UnsupportedOperationException("No JSON datatype supported");
     }
 
     @Override
@@ -90,7 +118,12 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBTermType(String typeName) {
-        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        switch (typeName) {
+            case "UUID":
+                return new UUIDDBTermType("UUID", rootAncestry, typeFactory.getXsdStringDatatype());
+            default:
+                return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        }
     }
 
     @Override

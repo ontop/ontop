@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -57,6 +59,11 @@ public interface DBFunctionSymbolFactory {
      * From a possibly "normalized" DB string to another DB type
      */
     DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType, RDFTermType rdfType);
+
+    /**
+     * From a possibly "normalized" DB string to another DB type
+     */
+    DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType);
 
 
     /**
@@ -157,6 +164,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCoalesce(int arity);
 
+    /**
+     * Min arity is 1
+     */
+    DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity);
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
@@ -215,10 +227,10 @@ public interface DBFunctionSymbolFactory {
      */
     DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName);
 
-    DBFunctionSymbol getAbs(DBTermType dbTermType);
-    DBFunctionSymbol getCeil(DBTermType dbTermType);
-    DBFunctionSymbol getFloor(DBTermType dbTermType);
-    DBFunctionSymbol getRound(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getAbs(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getCeil(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getFloor(DBTermType dbTermType);
+    Optional<DBFunctionSymbol> getRound(DBTermType dbTermType);
 
     DBFunctionSymbol getDBYearFromDatetime();
     DBFunctionSymbol getDBYearFromDate();
@@ -253,7 +265,13 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBRowNumber();
 
+    /**
+     * Considers OrderBy when handling ROW_NUM() for pre 2012 versions of SQL Server
+     */
+    DBFunctionSymbol getDBRowNumberWithOrderBy();
+
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
+
 
     //-------------
     // Aggregation
@@ -315,6 +333,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSTDistanceSphere();
     DBFunctionSymbol getDBSTDistanceSpheroid();
     DBFunctionSymbol getDBSTTransform();
+    DBFunctionSymbol getDBSTGeomFromText();
+    DBFunctionSymbol getDBSTMakePoint();
     DBFunctionSymbol getDBSTSetSRID();
     FunctionSymbol getDBAsText();
     FunctionSymbol getDBSTFlipCoordinates();
@@ -329,5 +349,23 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRelate();
     FunctionSymbol getDBRelateMatrix();
     FunctionSymbol getDBGetSRID();
+
+    // Time extension - duration arithmetic
+    DBFunctionSymbol getDBWeeksBetweenFromDateTime();
+    DBFunctionSymbol getDBWeeksBetweenFromDate();
+    DBFunctionSymbol getDBDaysBetweenFromDateTime();
+    DBFunctionSymbol getDBDaysBetweenFromDate();
+    DBFunctionSymbol getDBHoursBetweenFromDateTime();
+    DBFunctionSymbol getDBMinutesBetweenFromDateTime();
+    DBFunctionSymbol getDBSecondsBetweenFromDateTime();
+    DBFunctionSymbol getDBMillisBetweenFromDateTime();
+
+    //JSON
+    DBFunctionSymbol getDBJsonElt(ImmutableList<String> path);
+    DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path);
+    DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
 }

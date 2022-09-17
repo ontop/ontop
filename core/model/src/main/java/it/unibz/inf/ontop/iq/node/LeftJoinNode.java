@@ -12,9 +12,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperatorNode {
 
     @Override
-    LeftJoinNode clone();
-
-    @Override
     LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 

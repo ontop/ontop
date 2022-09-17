@@ -36,7 +36,7 @@ public abstract class AbstractGeofWKTFunctionSymbolImpl extends ReduciblePositiv
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         return termFactory.getConversion2RDFLexical(
-                dbTypeFactory.getDBBooleanType(),
+                dbTypeFactory.getDBStringType(),
                 computeDBTerm(subLexicalTerms, typeTerms, termFactory),
                 wktLiteralType);
     }

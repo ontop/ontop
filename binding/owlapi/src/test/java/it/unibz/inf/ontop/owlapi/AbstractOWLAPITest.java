@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -37,12 +38,17 @@ public class AbstractOWLAPITest {
     private static Connection SQL_CONNECTION;
     private static OntopOWLConnection CONNECTION;
 
-    protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile)
+    protected static void initOBDA(String createDbFile, String obdaFile)
+            throws SQLException, IOException, OWLOntologyCreationException {
+        initOBDA(createDbFile, obdaFile, null, null);
+    }
+
+    protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile)
             throws SQLException, IOException, OWLOntologyCreationException {
         initOBDA(createDbFile, obdaFile, ontologyFile, null);
     }
 
-    protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile,
+    protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile,
                                    @Nullable String propertiesFile)
             throws SQLException, IOException, OWLOntologyCreationException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
@@ -52,26 +58,27 @@ public class AbstractOWLAPITest {
 
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractOWLAPITest.class.getResource(obdaFile).getPath())
-                .ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
                 .enableTestMode();
+
+        if (ontologyFile != null)
+            builder.ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath());
 
         if (propertiesFile != null)
             builder.propertyFile(AbstractOWLAPITest.class.getResource(propertiesFile).getPath());
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }
 
     protected static void initR2RML(String createDbFile, String r2rmlFile, String ontologyFile)
-            throws SQLException, IOException, OWLOntologyCreationException {
-        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+            throws SQLException, IOException {
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
         executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());
@@ -85,8 +92,7 @@ public class AbstractOWLAPITest {
                 .enableTestMode()
                 .build();
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
         CONNECTION = reasoner.getConnection();
     }

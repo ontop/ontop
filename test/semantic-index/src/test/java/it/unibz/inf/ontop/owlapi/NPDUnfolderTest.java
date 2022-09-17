@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.Test;
 
@@ -221,9 +222,8 @@ public class NPDUnfolderTest {
 	 */
 	
 	private String getNPDUnfolding(String query, Properties p) throws Exception {
-        OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLEngine quest = new SimpleOntopOWLEngine(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 
@@ -247,11 +247,9 @@ public class NPDUnfolderTest {
 	private String getRewriting(String query) throws Exception {
         Properties p = new Properties();
         p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
-
-        OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         String rewriting;
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLEngine quest = new SimpleOntopOWLEngine(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 

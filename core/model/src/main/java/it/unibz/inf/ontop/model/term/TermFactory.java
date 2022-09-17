@@ -53,6 +53,13 @@ public interface TermFactory {
 	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
 	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the of the optional expression, BUT not of expressionStream
+	 */
+	Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optionalExpression, Stream<ImmutableExpression> expressionStream);
+
+	/**
 	 * Must be non-empty
 	 */
 	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
@@ -340,6 +347,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
 														   RDFTermType rdfType);
 
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm);
+
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType);
 
 
@@ -350,7 +359,7 @@ public interface TermFactory {
 	 *
 	 * This functional term must not appear in the final mapping
 	 */
-	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
+	ImmutableFunctionalTerm getPartiallyDefinedConversionToString(Variable variable);
 
 	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
 
@@ -361,7 +370,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE
+	 * IF THEN, ELSE IF ..., ELSE
 	 *
 	 * whenPairs must not be empty
 	 *
@@ -371,7 +380,7 @@ public interface TermFactory {
 									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
 
 	/**
-	 * IF THEN, ELSE IF ..., ELSE NULL
+	 * IF THEN, ELSE IF ..., ELSE NULL
 	 *
 	 * whenPairs must not be empty
 	 */
@@ -384,6 +393,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
@@ -481,10 +492,14 @@ public interface TermFactory {
 	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
 	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
 
-    ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
+	Optional<ImmutableExpression> getDBIsNotNull(Stream<? extends ImmutableTerm> immutableTerms);
+
+	ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
+
+//	ImmutableFunctionalTerm getDBIndexIn(Variable arg);
 
 	ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1,
 																		ImmutableTerm rdfTypeTerm2);
@@ -513,11 +528,16 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
+
+	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm0,
+			ImmutableTerm inputRDFTypeTerm1, DBTermType targetType,
+			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);
 
 	/**
 	 * Using the SPARQL "=" operator
@@ -545,6 +565,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBNow();
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
+
+	ImmutableFunctionalTerm getDBRowNumber();
 
 	ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical);
 
@@ -579,6 +601,8 @@ public interface TermFactory {
 	// Non-topological and common form functions
 	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
 	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTGeomFromText(ImmutableTerm arg1);
+	ImmutableTerm getDBSTMakePoint(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
@@ -595,6 +619,26 @@ public interface TermFactory {
 	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	/**
+	 * Time extension - duration arithmetic
+	 */
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	// JSON
+	ImmutableFunctionalTerm getDBJsonElement(ImmutableTerm arg, ImmutableList<String> path);
+	ImmutableFunctionalTerm getDBJsonElementAsText(ImmutableTerm arg, ImmutableList<String> path);
+	ImmutableExpression getDBJsonIsBoolean(DBTermType dbType, ImmutableTerm arg);
+	ImmutableExpression getDBJsonIsNumber(DBTermType dbType, ImmutableTerm arg);
+	ImmutableExpression getDBJsonIsScalar(DBTermType dbType, ImmutableTerm arg);
+	ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg);
 
 	// RDF-Star
 	ImmutableFunctionalTerm getNestedTripleFunctionalTerm(NonVariableTerm subject, NonVariableTerm predicate, NonVariableTerm object);

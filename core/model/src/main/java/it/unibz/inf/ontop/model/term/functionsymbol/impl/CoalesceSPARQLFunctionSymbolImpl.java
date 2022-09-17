@@ -17,8 +17,8 @@ public class CoalesceSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
 
     protected CoalesceSPARQLFunctionSymbolImpl(int arity, RDFTermType rootRDFTermType) {
         super("SP_COALESCE" + arity, SPARQL.COALESCE,
-                IntStream.range(0, arity).boxed()
-                        .map(i -> rootRDFTermType)
+                IntStream.range(0, arity)
+                        .mapToObj(i -> rootRDFTermType)
                         .collect(ImmutableCollectors.toList()));
     }
 

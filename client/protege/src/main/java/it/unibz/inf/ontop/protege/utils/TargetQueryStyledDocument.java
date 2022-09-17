@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntologySignature;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.rdf.rdfxml.parser.RDFConstants;
 
@@ -19,6 +21,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 
 public class TargetQueryStyledDocument extends DefaultStyledDocument {
@@ -26,56 +29,21 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     public static final Font TARGET_QUERY_FONT = new Font("Lucida Grande", Font.PLAIN, 14);
 
     private final SimpleAttributeSet plainStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet punctuationStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet classStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet objectPropertyStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet dataPropertyStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet annotationPropertyStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet individualStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet templateArgumentStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet selectedTemplateArgumentStyle = new SimpleAttributeSet();
-    private final SimpleAttributeSet errorStyle = new SimpleAttributeSet();
 
     private final OBDAModelManager obdaModelManager;
+    private final ColorSettings colorSettings;
     private final Consumer<TargetQueryStyledDocument> validationCallback;
 
     private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
     private boolean isSelected = false;
 
-    public TargetQueryStyledDocument(OBDAModelManager obdaModelManager, Consumer<TargetQueryStyledDocument> validationCallback) {
+    public TargetQueryStyledDocument(OBDAModelManager obdaModelManager, ColorSettings colorSettings, Consumer<TargetQueryStyledDocument> validationCallback) {
         this.obdaModelManager = obdaModelManager;
+        this.colorSettings = colorSettings;
         this.validationCallback = validationCallback;
 
         StyleConstants.setFontFamily(plainStyle, TARGET_QUERY_FONT.getFamily());
         StyleConstants.setFontSize(plainStyle, TARGET_QUERY_FONT.getSize());
-
-        StyleConstants.setBold(punctuationStyle, true);
-        StyleConstants.setForeground(punctuationStyle, Color.GRAY);
-
-        StyleConstants.setForeground(annotationPropertyStyle, new Color(109, 159, 162));
-        StyleConstants.setBold(annotationPropertyStyle, true);
-
-        StyleConstants.setForeground(dataPropertyStyle, new Color(41, 167, 121));
-        StyleConstants.setBold(dataPropertyStyle, true);
-
-        StyleConstants.setForeground(objectPropertyStyle, new Color(41, 119, 167));
-        StyleConstants.setBold(objectPropertyStyle, true);
-
-        StyleConstants.setForeground(classStyle, new Color(199, 155, 41));
-        StyleConstants.setBold(classStyle, true);
-
-        StyleConstants.setForeground(individualStyle, new Color(83, 24, 82));
-        StyleConstants.setBold(individualStyle, true);
-
-        StyleConstants.setBold(templateArgumentStyle, true);
-        StyleConstants.setForeground(templateArgumentStyle, new Color(97, 66, 151));
-
-        StyleConstants.setBold(selectedTemplateArgumentStyle, true);
-        StyleConstants.setForeground(selectedTemplateArgumentStyle, Color.LIGHT_GRAY);
-
-        StyleConstants.setForeground(errorStyle, Color.RED);
-        StyleConstants.setBold(errorStyle, true);
-        StyleConstants.setUnderline(errorStyle, true);
     }
 
     @Override
@@ -100,9 +68,21 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
 
     public ImmutableSet<IRI> validate() throws TargetQueryParserException {
         ImmutableSet.Builder<IRI> unrecognisedIRIsBuilder = ImmutableSet.builder();
+        ImmutableMap<ColorSettings.Category, AttributeSet> styles =
+                Stream.of(ColorSettings.Category.values())
+                .filter(c -> c != ColorSettings.Category.BACKGROUND && c != ColorSettings.Category.PLAIN)
+                .collect(ImmutableCollectors.toMap(c -> c, c -> {
+                    SimpleAttributeSet a = new SimpleAttributeSet();
+                    StyleConstants.setBold(a, true);
+                    StyleConstants.setForeground(a, colorSettings.getForeground(isSelected, c));
+                    if (c == ColorSettings.Category.ERROR)
+                        StyleConstants.setUnderline(a, true);
+                    return a;
+                }));
+
         try {
             setCharacterAttributes(0, getLength(), plainStyle, true);
-
+            AttributeSet punctuationStyle = styles.get(ColorSettings.Category.PUNCTUATION);
             highlight("(", punctuationStyle);
             highlight(")", punctuationStyle);
             highlight("{", punctuationStyle);
@@ -113,15 +93,15 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
             highlight("a", punctuationStyle);
             highlight("GRAPH", punctuationStyle);
 
-            for (TargetAtom atom : getTargetAtoms())
-                unrecognisedIRIsBuilder.addAll(validateTargetAtom(atom));
+            for (TargetAtom atom : getTargetAtoms(styles))
+                unrecognisedIRIsBuilder.addAll(validateTargetAtom(atom, styles));
         }
         catch (BadLocationException ignore) {
         }
         return unrecognisedIRIsBuilder.build();
     }
 
-    private ImmutableSet<IRI> validateTargetAtom(TargetAtom atom) throws BadLocationException {
+    private ImmutableSet<IRI> validateTargetAtom(TargetAtom atom, ImmutableMap<ColorSettings.Category, AttributeSet> styles) throws BadLocationException {
         ImmutableSet.Builder<IRI> unrecognisedIRIsBuilder = ImmutableSet.builder();
         OntologySignature vocabulary = obdaModelManager.getCurrentOBDAModel().getOntologySignature();
 
@@ -129,12 +109,12 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
 
         ImmutableTerm term1 = atomPredicate.getSubject(substitutedTerms);
-        highlightTemplateArguments(term1);
+        highlightTemplateArguments(term1, styles);
         if (term1 instanceof IRIConstant)
-            highlight(((IRIConstant) term1).getIRI(), individualStyle);
+            highlight(((IRIConstant) term1).getIRI(), styles.get(ColorSettings.Category.INDIVIDUAL));
 
         ImmutableTerm term2 = atomPredicate.getProperty(substitutedTerms);
-        highlightTemplateArguments(term2);
+        highlightTemplateArguments(term2, styles);
         if (term2 instanceof IRIConstant) {
             IRI predicateIri = ((IRIConstant) term2).getIRI();
             if (predicateIri.getIRIString().equals(RDFConstants.RDF_TYPE)) {
@@ -142,51 +122,51 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
                 if (term3 instanceof IRIConstant) {
                     IRI classIri = ((IRIConstant) term3).getIRI();
                     if (vocabulary.containsClass(classIri))
-                        highlight(classIri, classStyle);
+                        highlight(classIri, styles.get(ColorSettings.Category.CLASS));
                     else {
-                        highlight(classIri, errorStyle);
+                        highlight(classIri, styles.get(ColorSettings.Category.ERROR));
                         unrecognisedIRIsBuilder.add(classIri);
                     }
                 }
             }
             else {
                 if (vocabulary.containsObjectProperty(predicateIri))
-                    highlight(predicateIri, objectPropertyStyle);
+                    highlight(predicateIri, styles.get(ColorSettings.Category.OBJECT_PROPERTY));
                 else if (vocabulary.containsDataProperty(predicateIri))
-                    highlight(predicateIri, dataPropertyStyle);
+                    highlight(predicateIri, styles.get(ColorSettings.Category.DATA_PROPERTY));
                 else if (vocabulary.containsAnnotationProperty(predicateIri))
-                    highlight(predicateIri, annotationPropertyStyle);
+                    highlight(predicateIri, styles.get(ColorSettings.Category.ANNOTATION_PROPERTY));
                 else if (vocabulary.isBuiltinProperty(predicateIri))
-                    highlight(predicateIri, punctuationStyle);
+                    highlight(predicateIri, styles.get(ColorSettings.Category.PUNCTUATION));
                 else {
-                    highlight(predicateIri, errorStyle);
+                    highlight(predicateIri, styles.get(ColorSettings.Category.ERROR));
                     unrecognisedIRIsBuilder.add(predicateIri);
                 }
 
                 ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
-                highlightTemplateArguments(term3);
+                highlightTemplateArguments(term3, styles);
                 if (term3 instanceof IRIConstant)
-                    highlight(((IRIConstant) term3).getIRI(), individualStyle);
+                    highlight(((IRIConstant) term3).getIRI(), styles.get(ColorSettings.Category.INDIVIDUAL));
             }
         }
         else {
             ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
-            highlightTemplateArguments(term3);
+            highlightTemplateArguments(term3, styles);
             if (term3 instanceof IRIConstant)
-                highlight(((IRIConstant) term3).getIRI(), individualStyle);
+                highlight(((IRIConstant) term3).getIRI(), styles.get(ColorSettings.Category.INDIVIDUAL));
         }
         Optional<ImmutableTerm> term4 = atomPredicate.getGraph(substitutedTerms);
         if (term4.isPresent())
-            highlightTemplateArguments(term4.get());
+            highlightTemplateArguments(term4.get(), styles);
 
         return unrecognisedIRIsBuilder.build();
     }
 
-    private ImmutableList<TargetAtom> getTargetAtoms() throws TargetQueryParserException, BadLocationException {
+    private ImmutableList<TargetAtom> getTargetAtoms(ImmutableMap<ColorSettings.Category, AttributeSet> styles) throws TargetQueryParserException, BadLocationException {
         try {
             String input = getText(0, getLength());
             if (!input.isEmpty())
-                return obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection().parseTargetQuery(input);
+                return obdaModelManager.getCurrentOBDAModel().getTriplesMapFactory().getTargetQuery(input);
         }
         catch (TargetQueryParserException e) {
             if (e.getLine() > 0) {
@@ -198,7 +178,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
                     lineStart = input.indexOf('\n', lineStart) + 1;
                 }
                 int pos = lineStart + column;
-                setCharacterAttributes(pos >= input.length() ? pos - 1 : pos, 1, errorStyle, false);
+                setCharacterAttributes(pos >= input.length() ? pos - 1 : pos, 1, styles.get(ColorSettings.Category.ERROR), false);
             }
             throw e;
         }
@@ -212,16 +192,16 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         return Optional.empty();
     }
 
-    private void highlightTemplateArguments(ImmutableTerm term) throws BadLocationException {
+    private void highlightTemplateArguments(ImmutableTerm term, ImmutableMap<ColorSettings.Category, AttributeSet> styles) throws BadLocationException {
         Optional<ImmutableFunctionalTerm> template = getTemplateImmutableFunctionalTerm(term);
 
         if (template.isPresent()) {
             String input = getText(0, getLength());
             for (Variable v : template.get().getVariables()) {
                 String arg = "{" + v.getName() + "}";
-                SimpleAttributeSet style = invalidPlaceholders.contains(v.getName())
-                        ? errorStyle
-                        : (isSelected ? selectedTemplateArgumentStyle : templateArgumentStyle);
+                AttributeSet style = invalidPlaceholders.contains(v.getName())
+                        ? styles.get(ColorSettings.Category.ERROR)
+                        : styles.get(ColorSettings.Category.TEMPLATE_ARGUMENT);
                 int p, po = 0;
                 while ((p = input.indexOf(arg, po)) != -1) {
                     setCharacterAttributes(p + 1, arg.length() - 2, style, false);
@@ -231,14 +211,14 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         }
     }
 
-    private void highlight(IRI iri, SimpleAttributeSet attributeSet) throws BadLocationException {
+    private void highlight(IRI iri, AttributeSet attributeSet) throws BadLocationException {
         PrefixManager prefixManager = obdaModelManager.getCurrentOBDAModel().getMutablePrefixManager();
         String rendered = prefixManager.getShortForm(iri.getIRIString());
         highlight(rendered, attributeSet);
     }
 
 
-    private void highlight(String s, SimpleAttributeSet attributeSet) throws BadLocationException {
+    private void highlight(String s, AttributeSet attributeSet) throws BadLocationException {
         String input = getText(0, getLength());
         int total = input.length();
         int len = s.length();

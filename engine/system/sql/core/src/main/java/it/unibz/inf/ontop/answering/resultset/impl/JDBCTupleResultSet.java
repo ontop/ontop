@@ -85,7 +85,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     }
 
     private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<ImmutableTerm> composition) {
-        Optional<RDFConstant> constant = evaluate(composition.apply(v));
+        Optional<RDFConstant> constant = evaluate(composition.applyToVariable(v));
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
     }
 

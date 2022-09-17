@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
@@ -27,9 +28,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap,
                                                TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        super(substitutionMap, atomFactory, termFactory, substitutionFactory);
+        super(substitutionMap, termFactory, substitutionFactory);
 
         if (!isInjective(substitutionMap))
             throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
@@ -42,7 +43,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
 
         ImmutableMap<Variable, T> substitutionMap = substitutionToRename.getImmutableMap().entrySet().stream()
                 // Substitutes the keys and values of the substitution to rename.
-                .map(e -> Maps.immutableEntry(applyToVariable(e.getKey()),applyToTerm(e.getValue())))
+                .map(e -> Maps.immutableEntry(applyToVariable(e.getKey()), applyToTerm(e.getValue())))
                 // Safe because the local substitution is injective
                 .filter(e -> !e.getValue().equals(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
@@ -51,11 +52,14 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
+    public ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments)
             throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
 
-        return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(),  (ImmutableList) newArguments);
+        if (!newArguments.stream().allMatch(t -> t instanceof Variable))
+            throw new ConversionException("The substitution applied to an argument map has produced some non-Variable arguments " + newArguments);
+
+        return (ImmutableList) newArguments;
     }
 
 
@@ -82,12 +86,10 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
-        if (restrictingDomain.containsAll(getDomain()))
-            return this;
+    public InjectiveVar2VarSubstitution filter(Predicate<Variable> filter) {
         return substitutionFactory.getInjectiveVar2VarSubstitution(
-                this.getImmutableMap().entrySet().stream()
-                        .filter(e -> restrictingDomain.contains(e.getKey()))
+                getImmutableMap().entrySet().stream()
+                        .filter(e -> filter.test(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
     }
 

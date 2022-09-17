@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -29,6 +29,10 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
+    public static final String JSON_STR = "JSON";
+    public static final String JSONB_STR = "JSONB";
+    public static final String ARRAY_STR = "ARRAY";
+    public static final String BYTEA_STR = "BYTEA";
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
     protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
@@ -62,6 +66,12 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
+        DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.DATE));
+
+        DBTermType byteAType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BYTEA_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.HEXBINARY), SAME_TYPE_NO_CONSTANT);
+
         DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
@@ -84,14 +94,23 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(NAME_STR, nameType);
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
+        map.put(DATE_STR, dateType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
+        map.put(BYTEA_STR, byteAType);
 
         /*
          * POSTGIS types
+         *
          */
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
         map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
+
+        /*
+         * JSON
+         */
+        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry));
+        map.put(JSONB_STR, new JsonDBTermTypeImpl(JSONB_STR, rootAncestry));
 
         return map;
     }
@@ -100,11 +119,16 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         /*
          * POSTGIS types
          */
         map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
+        /*
+         * JSON: JSONB is more efficient than JSON
+         */
+        map.put(DefaultTypeCode.JSON, JSONB_STR);
 
         return ImmutableMap.copyOf(map);
     }
@@ -116,6 +140,16 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBGeographyType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBDistanceSphere() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsJson() {
         return true;
     }
 }
