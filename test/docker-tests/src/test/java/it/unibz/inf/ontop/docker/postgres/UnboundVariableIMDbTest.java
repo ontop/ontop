@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * Test class to solve the bug that generates unbound variables in the mapping.
@@ -49,5 +51,47 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.seriology.org/seriology#>\n" +
 				"SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
 		countResults(10, query);
+	}
+
+	@Test
+	public void testSubStr2WrongArgument() throws OWLException {
+		countResults(2, "SELECT * WHERE {\n" +
+				"  {\n" +
+				"    SELECT DISTINCT ?b {\n" +
+				"      {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { 2 }\n" +
+				"        }\n" +
+				"      }\n" +
+				"      UNION {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { \"aa\" \"aa\" }\n" +
+				"        }\n" +
+				"      }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  BIND (SUBSTR(\"yyy\", ?b) AS ?v)\n" +
+				"}");
+	}
+
+	@Test
+	public void testSubStr3WrongArgument() throws OWLException {
+		countResults(2, "SELECT * WHERE {\n" +
+				"  {\n" +
+				"    SELECT DISTINCT ?b {\n" +
+				"      {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { 2 }\n" +
+				"        }\n" +
+				"      }\n" +
+				"      UNION {\n" +
+				"        SELECT * {\n" +
+				"          VALUES ?b { \"aa\" \"aa\" }\n" +
+				"        }\n" +
+				"      }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  BIND (SUBSTR(\"yyy\", ?b, ?b) AS ?v)\n" +
+				"}");
 	}
 }
