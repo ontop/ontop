@@ -10,8 +10,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
-import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
@@ -20,11 +18,9 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
@@ -142,21 +138,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return treeCache.areDistinctAlreadyRemoved()
             ? this
             : getRootNode().removeDistincts(getChild(), treeCache);
-    }
-
-    @Override
-    protected ImmutableSet<Variable> computeVariables() {
-        UnaryOperatorNode rootNode = getRootNode();
-        if (rootNode instanceof ExplicitVariableProjectionNode)
-            return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        ImmutableSet<Variable> childVariables = getChild().getVariables();
-        return rootNode instanceof FlattenNode?
-                ((FlattenNode) rootNode).getVariables(childVariables):
-//                Stream.concat(
-//                        childVariables.stream(),
-//                        rootNode.getLocallyDefinedVariables().stream())
-//                        .collect(ImmutableCollectors.toSet()):
-                childVariables;
     }
 
     @Override

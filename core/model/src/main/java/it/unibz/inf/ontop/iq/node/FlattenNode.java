@@ -67,7 +67,7 @@ import java.util.Optional;
  *  O the "output variable"
  *  I the "index variable"
  */
-public interface FlattenNode extends UnaryOperatorNode {
+public interface FlattenNode extends UnaryOperatorNode, VariableAppendingNode {
 
     @Override
     FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
@@ -83,9 +83,4 @@ public interface FlattenNode extends UnaryOperatorNode {
     Optional<TermType> inferOutputType(Optional<TermType> extractSingleTermType);
 
     Optional<TermType> getIndexVariableType();
-
-    /**
-     * Set of variables returned by a tree with this node as root, provided that the operand returns "childVariables"
-     */
-    ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
 }
