@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
@@ -139,15 +138,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return treeCache.areDistinctAlreadyRemoved()
             ? this
             : getRootNode().removeDistincts(getChild(), treeCache);
-    }
-
-    @Override
-    protected ImmutableSet<Variable> computeVariables() {
-        UnaryOperatorNode rootNode = getRootNode();
-        if (rootNode instanceof ExplicitVariableProjectionNode)
-            return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        else
-            return getChild().getVariables();
     }
 
     @Override

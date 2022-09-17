@@ -52,6 +52,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(BelowDistinctJoinWithClassUnionOptimizer.class);
         bindFromSettings(OntopViewUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
+        bindFromSettings(FlattenLifter.class);
+        bindFromSettings(FilterLifter.class);
+        bindFromSettings(BooleanExpressionPushDownOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

@@ -23,6 +23,7 @@ public interface IQTreeExtendedTransformer<T> {
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child, T context);
     IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child, T context);
+    IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child, T context);
     IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child, T context);
     IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child, T context);
     IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child, T context);

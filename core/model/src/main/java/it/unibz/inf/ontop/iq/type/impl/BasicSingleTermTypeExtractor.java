@@ -128,6 +128,21 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
+        public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
+            if (variable.equals(flattenNode.getOutputVariable())) {
+                return flattenNode.inferOutputType(
+                        typeExtractor.extractSingleTermType(
+                                flattenNode.getFlattenedVariable(),
+                                child
+                        ));
+            }
+            if(flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
+                return flattenNode.getIndexVariableType();
+            }
+            return child.acceptVisitor(this);
+        }
+
+        @Override
         public Optional<TermType> visitDistinct(DistinctNode rootNode, IQTree child) {
             return child.acceptVisitor(this);
         }

@@ -1,0 +1,71 @@
+{
+  "relations": [
+    {
+      "name": ["\"pub\"","\"publication\""],
+      "baseRelation": ["\"pub\"","\"person\""],
+      "flattenedColumn": {
+        "name": "\"publication\"",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "extracted": [
+          {
+            "name": "\"id_pub\"",
+            "key": ["id"],
+            "datatype": "integer"
+          },
+          {
+            "name": "\"title\"",
+            "key": ["title"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"year\"",
+            "key": ["year"],
+            "datatype": "integer"
+          },
+          {
+            "name": "\"venue\"",
+            "key": ["venue"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"editor\"",
+            "key": ["editor"],
+            "datatype": "json"
+          }
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "name": "\"pub_fd\"",
+            "determinants" : ["\"id_pub\""],
+            "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "pub_fk_author",
+            "from": "\"id\"",
+            "to": {
+              "columns": ["\"id\""],
+              "relation": ["\"person\""]
+            }
+          }
+      ]
+    },
+    "type": "FlattenLens"
+    }
+  ]
+}
+

@@ -45,8 +45,11 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final GeneralStructuralAndSemanticIQOptimizer GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final FlattenLifter FLATTEN_LIFTER;
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
+
+    public final static DBTermType JSON_TYPE;
 
     public static final Variable X;
     public static final Variable XF0;
@@ -56,37 +59,28 @@ public class OptimizationTestingTools {
     public static final Variable A;
     public static final Variable AF0;
     public static final Variable AF1;
-    public static final Variable AF1F3;
-    public static final Variable AF1F4;
-    public static final Variable AF2;
-    public static final Variable AF3;
     public static final Variable B;
     public static final Variable BF0;
     public static final Variable BF1;
-    public static final Variable BF2;
-    public static final Variable BF4F5;
     public static final Variable C;
     public static final Variable CF0;
-    public static final Variable CF1;
     public static final Variable D;
     public static final Variable E;
     public static final Variable F;
-    public static final Variable F6;
     public static final Variable F0;
     public static final Variable F1;
-    public static final Variable F0F2;
-    public static final Variable F0F3;
-    public static final Variable FF4;
+    public static final Variable F2;
+    public static final Variable F6;
     public static final Variable G;
     public static final Variable GF1;
     public static final Variable H;
     public static final Variable HF0;
     public static final Variable I;
-    public static final Variable IF7;
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
     public static final Variable NF0;
+    public static final Variable O;
     public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR, THREE_STR, FOUR_STR, FIVE_STR;
 
@@ -122,6 +116,11 @@ public class OptimizationTestingTools {
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
+        FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
+
+        JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
+
+
         NULL = TERM_FACTORY.getNullConstant();
         TRUE = TERM_FACTORY.getDBBooleanConstant(true);
         FALSE = TERM_FACTORY.getDBBooleanConstant(false);
@@ -135,36 +134,27 @@ public class OptimizationTestingTools {
         A = TERM_FACTORY.getVariable("a");
         AF0 = TERM_FACTORY.getVariable("af0");
         AF1 = TERM_FACTORY.getVariable("af1");
-        AF1F3 = TERM_FACTORY.getVariable("af1f3");
-        AF1F4 = TERM_FACTORY.getVariable("af1f4");
-        AF2 = TERM_FACTORY.getVariable("af2");
-        AF3 = TERM_FACTORY.getVariable("af3");
         B = TERM_FACTORY.getVariable("b");
         BF0 = TERM_FACTORY.getVariable("bf0");
         BF1 = TERM_FACTORY.getVariable("bf1");
-        BF2 = TERM_FACTORY.getVariable("bf2");
-        BF4F5 = TERM_FACTORY.getVariable("bf4f5");
         C = TERM_FACTORY.getVariable("c");
         CF0 = TERM_FACTORY.getVariable("cf0");
-        CF1 = TERM_FACTORY.getVariable("cf1");
         D = TERM_FACTORY.getVariable("d");
         E = TERM_FACTORY.getVariable("e");
         F = TERM_FACTORY.getVariable("f");
         F6 = TERM_FACTORY.getVariable("f6");
         F0 = TERM_FACTORY.getVariable("f0");
         F1 = TERM_FACTORY.getVariable("f1");
-        F0F2 = TERM_FACTORY.getVariable("f0f2");
-        F0F3 = TERM_FACTORY.getVariable("f0f3");
-        FF4 = TERM_FACTORY.getVariable("ff4");
+        F2 = TERM_FACTORY.getVariable("f2");
         G = TERM_FACTORY.getVariable("g");
         GF1 = TERM_FACTORY.getVariable("gf1");
         H = TERM_FACTORY.getVariable("h");
         HF0 = TERM_FACTORY.getVariable("hf0");
         I = TERM_FACTORY.getVariable("i");
-        IF7 = TERM_FACTORY.getVariable("if7");
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        O = TERM_FACTORY.getVariable("o");
         NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
@@ -234,7 +224,7 @@ public class OptimizationTestingTools {
         }
     }
 
-    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {
+    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<? extends VariableOrGroundTerm> arguments) {
         return IQ_FACTORY.createExtensionalDataNode(relation,
                 IntStream.range(0, arguments.size())
                         .boxed()

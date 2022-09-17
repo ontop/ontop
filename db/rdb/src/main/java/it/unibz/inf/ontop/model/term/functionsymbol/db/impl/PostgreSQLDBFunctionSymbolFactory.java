@@ -2,17 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
@@ -24,9 +21,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     private static final String RANDOM_STR = "RANDOM";
     private static final String POSITION_STR = "POSITION";
 
+    private final DBTermType dbJsonType;
+    private final DBTermType dbJsonBType;
+
     @Inject
     protected PostgreSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createPostgreSQLRegularFunctionTable(typeFactory), typeFactory);
+        this.dbJsonType = dbTypeFactory.getDBTermType(JSON_STR);
+        this.dbJsonBType = dbTypeFactory.getDBTermType(JSONB_STR);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createPostgreSQLRegularFunctionTable(
@@ -125,6 +127,50 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+        return new DBFunctionSymbolWithSerializerImpl(
+                "JSON_GET_ELT_AS_TEXT:"+printPath(path),
+                ImmutableList.of(
+                        dbJsonType
+                ),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s#>>%s",
+                        termConverter.apply(terms.get(0)),
+                        serializePath(path)
+                ));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        return new DBFunctionSymbolWithSerializerImpl(
+                "JSON_GET_ELT:"+printPath(path),
+                ImmutableList.of(
+                        dbJsonType
+                ),
+                dbJsonType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s#>%s",
+                        termConverter.apply(terms.get(0)),
+                        serializePath(path)
+                ));
+    }
+
+    private String serializePath(ImmutableList<String> path) {
+        return "\'{"+
+                path.stream()
+                        .collect(Collectors.joining(","))
+                +"}\'";
+    }
+
+    private String printPath(ImmutableList<String> path) {
+        return path.stream()
+                        .collect(Collectors.joining("."));
+    }
+
+    @Override
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
                 (terms, termConverter, termFactory) -> String.format(
@@ -149,8 +195,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
             return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
         else
             return new NonSimplifiableTypedNullFunctionSymbol(termType);
-
-
     }
 
     @Override
@@ -174,8 +218,78 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbTermType) {
+        if (dbTermType.equals(dbJsonType)) {
+            return new DBBooleanFunctionSymbolWithSerializerImpl(
+                    "JSON_IS_ARRAY",
+                    ImmutableList.of(dbJsonType),
+                    dbBooleanType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "json_typeof(%s) = 'array'",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+
+        if (dbTermType.equals(dbJsonBType)) {
+            return new DBBooleanFunctionSymbolWithSerializerImpl(
+                    "JSONB_IS_ARRAY",
+                    ImmutableList.of(dbJsonBType),
+                    dbBooleanType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "jsonb_typeof(%s) = 'array'",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+        throw new UnsupportedOperationException("Unsupported nested datatype: " + dbTermType.getName());
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_BOOLEAN", dbType, ImmutableList.of("boolean"));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_SCALAR", dbType, ImmutableList.of("boolean", "string", "number"));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_NUMBER", dbType, ImmutableList.of("number"));
+    }
+
+    private DBBooleanFunctionSymbol createJsonHasType(String functionName, DBTermType jsonLikeType, ImmutableList<String> types) {
+        String typeOfFunctionString;
+        if (jsonLikeType.equals(dbJsonType)) {
+            typeOfFunctionString = "json_typeof";
+        }
+        else if (jsonLikeType.equals(dbJsonBType)) {
+            typeOfFunctionString = "jsonb_typeof";
+        }
+        else
+            throw new UnsupportedOperationException("Unsupported JSON-like type: " + jsonLikeType.getName());
+
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                functionName,
+                ImmutableList.of(dbJsonType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) ->
+                        String.format(
+                                "%s(%s) IN (%s) ",
+                                typeOfFunctionString,
+                                termConverter.apply(terms.get(0)),
+                                types.stream()
+                                        .map(t -> "\'"+ t+ "\'")
+                                        .collect(Collectors.joining(","))
+                        ));
+    }
+
     /**
-     * TODO: find a way to use the stored TZ instead of the local one
+     * TODO: find a way to use the stored TZ instead of the local one
      */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
