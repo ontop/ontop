@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -32,6 +33,8 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbStringType = dbTypeFactory.getDBStringType();
+        DBTermType dbInt4 = dbTypeFactory.getDBTermType(INTEGER_STR);
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
@@ -46,6 +49,35 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        DBFunctionSymbol substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(
+                SUBSTR_STR + "2",
+                ImmutableList.of(dbStringType, dbInt4),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> {
+                    // PostgreSQL does not tolerate bigint as argument (int8), just int4 (integer)
+                    ImmutableTerm newTerm1 = termFactory.getDBCastFunctionalTerm(dbInt4, terms.get(1)).simplify();
+
+                    return String.format("substr(%s,%s)", termConverter.apply(terms.get(0)), termConverter.apply(newTerm1));
+                });
+        table.put(SUBSTR_STR, 2, substr2FunctionSymbol);
+
+        DBFunctionSymbol substr3FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(
+                SUBSTR_STR + "3",
+                ImmutableList.of(dbStringType, dbInt4, dbInt4),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> {
+                    // PostgreSQL does not tolerate bigint as argument (int8), just int4 (integer)
+                    ImmutableTerm newTerm1 = termFactory.getDBCastFunctionalTerm(dbInt4, terms.get(1)).simplify();
+                    ImmutableTerm newTerm2 = termFactory.getDBCastFunctionalTerm(dbInt4, terms.get(2)).simplify();
+
+                    return String.format("substr(%s,%s,%s)",
+                        termConverter.apply(terms.get(0)), termConverter.apply(newTerm1), termConverter.apply(newTerm2));
+                });
+        table.put(SUBSTR_STR, 3, substr3FunctionSymbol);
+
         table.remove(REGEXP_LIKE_STR, 2);
         table.remove(REGEXP_LIKE_STR, 3);
 
