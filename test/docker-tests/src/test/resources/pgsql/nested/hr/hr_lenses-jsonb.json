@@ -30,7 +30,8 @@
         "kept": [
           "\"id\"",
           "\"ssn\"",
-          "\"fullname\""
+          "\"fullname\"",
+          "\"tags\""
         ],
         "position": "\"pos\"",
         "extracted": [

@@ -8,13 +8,10 @@ obda:		https://w3id.org/obda/vocabulary#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
-mappingId	MAPID-person-tag-ids
-target		:person/{id} :tag_ids {tag_ids} .
-source		SELECT id, tags::text AS tag_ids FROM "hr"."person-xt";
 
 mappingId	MAPID-person-tags
-target		:person/{"id"} a :Person ; :fullName {"fullname"} ; :ssn {"ssn"}^^xsd:int ; :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int.
-source		SELECT "id", "fullname", "ssn", "tag_str", "tag_int" FROM "hr"."person-tags";
+target		:person/{"id"} a :Person ; :fullName {"fullname"} ; :ssn {"ssn"}^^xsd:int ; :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int ; :tag_ids {tag_ids} .
+source		SELECT "id", "fullname", "ssn", "tag_str", "tag_int", tags::text AS tag_ids FROM "hr"."person-tags";
 
 mappingId	MAPID-person-friend
 target		:person/{"id"} a :Person ; :hasFriend :person/{"id"}/{"pos"} . :person/{"id"}/{"pos"} a :Friend ; :firstName {"firstName"} ; :nickName {"nickName_str"} ; :city {"city"} .
