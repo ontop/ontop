@@ -8,10 +8,10 @@ import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-public class HrJsonTest extends AbstractHrJsonTest {
+public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
 
     final static String owlFile = "/pgsql/nested/hr/hr.owl";
-    final static String obdaFile = "/pgsql/nested/hr/hr.obda";
+    final static String obdaFile = "/pgsql/nested/hr/hr-denormalized.obda";
     final static String propertyFile = "/pgsql/nested/hr/hr.properties";
     final static String viewFile = "/pgsql/nested/hr/hr_lenses.json";
 
