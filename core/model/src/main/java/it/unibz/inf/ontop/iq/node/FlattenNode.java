@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -66,7 +67,7 @@ import java.util.Optional;
  *  O the "output variable"
  *  I the "index variable"
  */
-public interface FlattenNode extends UnaryOperatorNode, VariableAppendingNode {
+public interface FlattenNode extends UnaryOperatorNode {
 
     @Override
     FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
@@ -82,4 +83,9 @@ public interface FlattenNode extends UnaryOperatorNode, VariableAppendingNode {
     Optional<TermType> inferOutputType(Optional<TermType> extractSingleTermType);
 
     Optional<TermType> getIndexVariableType();
+
+    /**
+     * Set of variables returned by a tree with this node as root, given the variables provided by the children
+     */
+    ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
 }
