@@ -100,15 +100,18 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     protected IQTree applyRegularDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren(), variableGenerator);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            VariableGenerator variableGenerator) {
         try {
             return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChildren()))
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChildren(), variableGenerator))
                     .orElse(this);
 
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
@@ -135,8 +138,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
-        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChildren());
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
+        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChildren(), variableGenerator);
         return newTree.equals(this) ? this : newTree;
     }
 

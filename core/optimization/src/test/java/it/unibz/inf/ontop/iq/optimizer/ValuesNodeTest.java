@@ -211,7 +211,8 @@ public class ValuesNodeTest {
         System.out.println(substitution);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        IQTree resultingTree = initialTree.applyDescendingSubstitutionWithoutOptimizing(substitution);
+        IQTree resultingTree = initialTree.applyDescendingSubstitutionWithoutOptimizing(substitution,
+                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
         return resultingTree.equals(expectedTree);
@@ -223,7 +224,9 @@ public class ValuesNodeTest {
         System.out.println(initialTree);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        IQTree resultingTree = initialTree.propagateDownConstraint(((FilterNode) initialTree.getRootNode()).getFilterCondition());
+        IQTree resultingTree = initialTree.propagateDownConstraint(
+                ((FilterNode) initialTree.getRootNode()).getFilterCondition(),
+                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
         return resultingTree.equals(expectedTree);

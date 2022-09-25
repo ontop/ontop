@@ -182,6 +182,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
+    public boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant) {
+        return projectedVariables.contains(variable) && (!isConstant);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(projectedVariables, values);
     }
@@ -218,7 +223,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                               VariableGenerator variableGenerator) {
         if (descendingSubstitution.isEmpty())
             return this;
         ConstructionAndFilterAndValues constructionAndFilterAndValues =
@@ -232,7 +238,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         if (!functionalSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = addProjectedVariablesToConstruction(descendingSubstitution, constructionAndFilterAndValues);
-            constructionAndFilterAndValues = substituteGroundFunctionalTerms(functionalSubstitutionFragment, constructionAndFilterAndValues);
+            constructionAndFilterAndValues = substituteGroundFunctionalTerms(functionalSubstitutionFragment, constructionAndFilterAndValues, variableGenerator);
         }
         if (!constantSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
@@ -244,9 +250,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     private ConstructionAndFilterAndValues substituteGroundFunctionalTerms(ImmutableSubstitution<? extends GroundFunctionalTerm> substitution,
-                                                                           ConstructionAndFilterAndValues constructionAndFilterAndValues) {
+                                                                           ConstructionAndFilterAndValues constructionAndFilterAndValues,
+                                                                           VariableGenerator variableGenerator) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(valuesNode.getKnownVariables());
         InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
                         valuesNode.getVariables().stream(),
                         variableGenerator::generateNewVariableFromVar)
@@ -368,7 +374,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
         if (constraint.isGround())
             return this;
         getVariableNullability();

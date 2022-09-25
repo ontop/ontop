@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://person.example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId	MAPID-person-tags
+target		:person/{"id"} a :Person ; :fullName {"fullname"} ; :ssn {"ssn"}^^xsd:int ; :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int ; :tag_ids {tag_ids} .
+source		SELECT "id", "fullname", "ssn", "tag_str", "tag_int", tags::text AS tag_ids FROM "hr"."person-tags";
+
+mappingId	MAPID-person-friend
+target		:person/{"id"} a :Person ; :hasFriend :person/{"id"}/{"pos"} . :person/{"id"}/{"pos"} a :Friend ; :firstName {"firstName"} ; :nickName {"nickName_str"} ; :city {"city"} .
+source  	SELECT "id", "pos", "firstName", "nickName_str", "city" FROM "hr"."persons-friends";
+]]

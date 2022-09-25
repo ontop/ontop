@@ -85,7 +85,7 @@ public interface FlattenNode extends UnaryOperatorNode {
     Optional<TermType> getIndexVariableType();
 
     /**
-     * Set of variables returned by a tree with this node as root, provided that the operand returns "childVariables"
+     * Set of variables returned by a tree with this node as root, given the variables provided by the children
      */
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
 }

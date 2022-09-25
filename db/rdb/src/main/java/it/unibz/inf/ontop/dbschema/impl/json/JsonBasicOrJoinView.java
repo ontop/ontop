@@ -172,8 +172,8 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
         IQTree updatedParentDataNode = filterConditions.stream()
                 .reduce(termFactory::getConjunction)
                 .map(iqFactory::createFilterNode)
-                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree)))
-                .orElse(normalization.updateChild(parentTree));
+                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
+                .orElse(normalization.updateChild(parentTree, variableGenerator));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 

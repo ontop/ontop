@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ public interface ConstructionSubstitutionNormalizer {
 
         Optional<ConstructionNode> generateTopConstructionNode();
 
-        IQTree updateChild(IQTree child);
+        IQTree updateChild(IQTree child, VariableGenerator variableGenerator);
 
         ImmutableExpression updateExpression(ImmutableExpression expression);
 

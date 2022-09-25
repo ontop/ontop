@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
      * Returns an empty result to indicate that no optimization has been applied
      */
     public Optional<IQTree> transformInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children,
-                                     ImmutableSet<Variable> projectedVariables) {
+                                     ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
         ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = children.stream()
                 .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)
                         && hasConstraint((ExtensionalDataNode) n)));
@@ -112,7 +113,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 optimizationStates.stream()
                         .flatMap(s -> s.newExpressions.stream()));
 
-        return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables));
+        return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables, variableGenerator));
     }
 
     protected abstract boolean canEliminateNodes();
@@ -121,12 +122,13 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
     private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
                                 ImmutableSubstitution<VariableOrGroundTerm> unifier,
-                                ImmutableSet<Variable> projectedVariables) {
+                                ImmutableSet<Variable> projectedVariables,
+                                VariableGenerator variableGenerator) {
 
         ImmutableList<IQTree> newChildren = unifier.isEmpty()
                 ? children
                 : children.stream()
-                .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty()))
+                .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = expression
@@ -149,7 +151,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                 .normalizeSubstitution((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)unifier,
                         projectedVariables);
-        IQTree normalizedNewTree = normalization.updateChild(newTree);
+        IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
         ImmutableSubstitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
 

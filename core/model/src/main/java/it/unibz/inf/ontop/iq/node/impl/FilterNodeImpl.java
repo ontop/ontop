@@ -103,23 +103,23 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child, VariableGenerator variableGenerator) {
         try {
             VariableNullability extendedChildVariableNullability = child.getVariableNullability()
                     .extendToExternalVariables(constraint.getVariableStream());
 
             // TODO: also consider the constraint for simplifying the condition
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
-                    .simplifyCondition(getFilterCondition(), extendedChildVariableNullability);
+                    .simplifyCondition(getFilterCondition(), ImmutableList.of(child), extendedChildVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
                     conditionSimplificationResults, extendedChildVariableNullability);
 
             IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
-                    .map(s -> child.applyDescendingSubstitution(s, downConstraint))
+                    .map(s -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
                     .orElseGet(() -> downConstraint
-                            .map(child::propagateDownConstraint)
+                            .map(c -> child.propagateDownConstraint(c, variableGenerator))
                             .orElse(child));
 
             IQTree filterLevelTree = conditionSimplificationResults.getOptionalExpression()
@@ -225,7 +225,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree child) {
+            Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
 
@@ -236,7 +236,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 newlyProjectedVariables.stream());
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, simplifiedFutureChildVariableNullability);
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
+                    unoptimizedExpression, ImmutableList.of(child), simplifiedFutureChildVariableNullability);
 
             VariableNullability extendedVariableNullability = constraint
                     .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -249,7 +250,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
                             .composeWith2(expressionAndSubstitution.getSubstitution());
 
-            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint);
+            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
             IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()
                     .map(iqFactory::createFilterNode)
                     .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
@@ -268,12 +269,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
+            VariableGenerator variableGenerator) {
         FilterNode newFilterNode = iqFactory.createFilterNode(
                 descendingSubstitution.applyToBooleanExpression(getFilterCondition()));
 
         return iqFactory.createUnaryIQTree(newFilterNode,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
     }
 
     @Override

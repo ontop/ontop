@@ -129,7 +129,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         DBTermType flattenedDBType = dbParameters.getDBTypeFactory().getDBTermType(flattenedColumn.datatype);
 
         if(flattenedVariable == null){
-            throw new MetadataExtractionException("The flattened column "+ flattenedColumn + " is not present in the base relation");
+            throw new MetadataExtractionException("The flattened column "+ flattenedColumn.name + " is not present in the base relation");
         }
 
         Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);

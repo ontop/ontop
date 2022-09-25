@@ -52,7 +52,7 @@
 
     <!-- ttp://person.example.org/fullname -->
 
-    <owl:DatatypeProperty rdf:about="http://person.example.org/fullname">
+    <owl:DatatypeProperty rdf:about="http://person.example.org/fullName">
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     </owl:DatatypeProperty>
 

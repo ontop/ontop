@@ -55,4 +55,12 @@ public interface QueryNode {
      * Locally defined variables must not appear in the sub-tree
      */
     ImmutableSet<Variable> getLocallyDefinedVariables();
+
+    /**
+     * Some nodes like aggregation and values nodes do not handle some descending terms in their trees
+     * by externalize it a parent filter node.
+     * Important to know for nodes with filtering conditions when normalizing, so to guarantee convergence.
+     *
+     */
+    boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant);
 }

@@ -49,6 +49,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(RequiredExtensionalDataNodeExtractor.class);
         bindFromSettings(SelfJoinUCIQOptimizer.class);
         bindFromSettings(RedundantJoinFKOptimizer.class);
+        bindFromSettings(BelowDistinctJoinWithClassUnionOptimizer.class);
         bindFromSettings(OntopViewUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
         bindFromSettings(FlattenLifter.class);

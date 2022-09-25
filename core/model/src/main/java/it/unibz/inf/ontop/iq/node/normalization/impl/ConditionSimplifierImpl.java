@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -42,14 +43,16 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
 
     @Override
-    public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression, VariableNullability variableNullability)
+    public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression, ImmutableList<IQTree> children,
+                                                       VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
-        return simplifyCondition(Optional.of(expression), ImmutableSet.of(), variableNullability);
+        return simplifyCondition(Optional.of(expression), ImmutableSet.of(), children, variableNullability);
     }
 
     @Override
     public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
                                                        ImmutableSet<Variable> nonLiftableVariables,
+                                                       ImmutableList<IQTree> children,
                                                        VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
@@ -59,7 +62,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     variableNullability);
             if (optionalExpression.isPresent())
                 // May throw an exception if unification is rejected
-                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, variableNullability);
+                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, children, variableNullability);
             else
                 return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
         }
@@ -89,7 +92,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
                                                                            ImmutableSet<Variable> nonLiftableVariables,
-                                                                           VariableNullability variableNullability)
+                                                                           ImmutableList<IQTree> children, VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
@@ -111,6 +114,12 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
+        ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
+                .filter(v -> children.stream()
+                        .filter(c -> c.getVariables().contains(v))
+                        .allMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
+                .collect(ImmutableCollectors.toSet());
+
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
                         // Expressions that are not function-free equalities
@@ -120,13 +129,14 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
                         // Equalities that must remain
                         normalizedUnifier.getImmutableMap().entrySet().stream()
-                                .filter(e -> nonLiftableVariables.contains(e.getKey()))
+                                .filter(e -> nonLiftableVariables.contains(e.getKey())
+                                        || rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
                                 .sorted(Map.Entry.comparingByKey())
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
 
         Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
-                .flatMap(this::extractGroundFunctionalSubstitution);
+                .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
 
 
         Optional<ImmutableExpression> newExpression;
@@ -142,6 +152,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 Stream.concat(
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> !nonLiftableVariables.contains(e.getKey()))
+                                .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
                                 .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e),
                         groundFunctionalSubstitution
                                 .map(s -> s.getImmutableMap().entrySet().stream()
@@ -200,10 +211,13 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      * We can extract at most one equality ground-functional-term -> variable per variable.
      *
      * Treated differently from non-functional terms because functional terms are not robust to unification.
+     *
+     * Does not include in the substitution ground terms that are "rejected" by all the children using the variable
+     *
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Optional<ImmutableSubstitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
-            ImmutableExpression expression) {
+            ImmutableExpression expression, ImmutableList<IQTree> children) {
         ImmutableMap<Variable, Collection<GroundFunctionalTerm>> map = expression.flattenAND()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 // TODO: generalize it to non-binary equalities
@@ -228,10 +242,15 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .filter(m -> !m.isEmpty())
                 .map(m -> substitutionFactory.getSubstitution(
                         m.entrySet().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getKey,
-                                        // Picks one of the ground functional term
-                                        e -> e.getValue().iterator().next()))));
+                                // Picks one of the ground functional term
+                                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().iterator().next()))
+                                // Filter out ground terms that would be "rejected" by all the children using the variable
+                                .filter(e -> children.stream()
+                                            .filter(c -> c.getVariables().contains(e.getKey()))
+                                            .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(
+                                                    e.getKey(), false)))
+                                .collect(ImmutableCollectors.toMap())))
+                .filter(s -> !s.isEmpty());
     }
 
 
