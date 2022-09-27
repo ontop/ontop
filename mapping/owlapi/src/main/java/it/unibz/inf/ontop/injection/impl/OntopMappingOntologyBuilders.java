@@ -21,18 +21,25 @@ public class OntopMappingOntologyBuilders {
 
         final Optional<Reader> ontologyReader;
 
+        final Optional<File> sparqlRulesFile;
+
+        final Optional<Reader> sparqlRulesReader;
+
         final Optional<String> xmlCatalogFile;
 
         final OntopMappingOptions mappingOptions;
 
         private OntopMappingOntologyOptions(Optional<File> ontologyFile,
                                             Optional<URL> ontologyURL,
-                                            Optional<Reader> ontologyReader, Optional<String> xmlCatalogFile,
+                                            Optional<Reader> ontologyReader, Optional<File> sparqlRulesFile,
+                                            Optional<Reader> sparqlRulesReader, Optional<String> xmlCatalogFile,
                                             OntopMappingOptions mappingOptions) {
             this.ontologyFile = ontologyFile;
             this.ontologyReader = ontologyReader;
             this.xmlCatalogFile = xmlCatalogFile;
             this.ontologyURL = ontologyURL;
+            this.sparqlRulesFile = sparqlRulesFile;
+            this.sparqlRulesReader = sparqlRulesReader;
             this.mappingOptions = mappingOptions;
         }
     }
@@ -46,6 +53,10 @@ public class OntopMappingOntologyBuilders {
         private Optional<URL> ontologyURL = Optional.empty();
         private Optional<Reader> ontologyReader = Optional.empty();
         private Optional<String> xmlCatalogFile = Optional.empty();
+
+        private Optional<File> sparqlRulesFile = Optional.empty();
+
+        private Optional<Reader> sparqlRulesReader = Optional.empty();
 
         StandardMappingOntologyBuilderFragment(B builder,
                                                Runnable declareOntologyDefinedCB) {
@@ -101,8 +112,26 @@ public class OntopMappingOntologyBuilders {
             return builder;
         }
 
+        @Override
+        public B sparqlRulesFile(@Nonnull File file) {
+            this.sparqlRulesFile = Optional.of(file);
+            return builder;
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull String path) {
+            return sparqlRulesFile(new File(path));
+        }
+
+        @Override
+        public B sparqlRulesReader(@Nonnull Reader reader) {
+            this.sparqlRulesReader = Optional.of(reader);
+            return builder;
+        }
+
         OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
-            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, xmlCatalogFile, mappingOptions);
+            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, sparqlRulesFile,
+                    sparqlRulesReader, xmlCatalogFile, mappingOptions);
         }
     }
 }

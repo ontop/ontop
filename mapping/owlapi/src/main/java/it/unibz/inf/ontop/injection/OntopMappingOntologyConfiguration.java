@@ -21,6 +21,12 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
         B ontologyFile(@Nonnull File owlFile);
 
         B ontologyReader(@Nonnull Reader reader);
+
+        B sparqlRulesFile(@Nonnull File file);
+
+        B sparqlRulesFile(@Nonnull String path);
+
+        B sparqlRulesReader(@Nonnull Reader reader);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingOntologyBuilderFragment<B>,
