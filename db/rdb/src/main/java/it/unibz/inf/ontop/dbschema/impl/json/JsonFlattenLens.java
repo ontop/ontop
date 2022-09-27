@@ -134,7 +134,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             throw new MetadataExtractionException("The flattened column "+ flattenedColumn.name + " is not present in the base relation");
         }
 
-        Variable flattenedJsonVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
+        Variable renamedFlattenedVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
         ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
@@ -165,21 +165,25 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
 
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
-                flattenedJsonVariable,
+                renamedFlattenedVariable,
                 indexVariable,
                 flattenedDBType
         );
 
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
-        ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                getProjectedVars(dataNode.getVariables(), flattenedJsonVariable),
-                getCheckIfArraySubstitution(
-                        flattenedVariable,
-                        flattenedDBType,
-                        flattenedJsonVariable,
-                        cs
-                ));
+        ConstructionNode renameFlattenVarConstructionNode = iqFactory.createConstructionNode(
+                getProjectedVars(dataNode.getVariables(), renamedFlattenedVariable),
+                cs.getSubstitutionFactory().getSubstitution(ImmutableMap.of(
+                        renamedFlattenedVariable,
+                        flattenedVariable
+                )));
+//                getCheckIfArraySubstitution(
+//                        flattenedVariable,
+//                        flattenedDBType,
+//                        flattenedVariable,
+//                        cs
+//                ));
 
         return iqFactory.createIQ(projectionAtom,
                 iqFactory.createUnaryIQTree(
@@ -189,9 +193,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                                 iqFactory.createUnaryIQTree(
                                         flattennode,
                                         iqFactory.createUnaryIQTree(
-                                                checkArrayConstructionNode,
+                                                renameFlattenVarConstructionNode,
                                                 dataNode
-                                        )))));
+                        )))));
     }
 
     private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {

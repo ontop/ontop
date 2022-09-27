@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -40,6 +42,25 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
 
         if (newChildNode instanceof ConstructionNode) {
             ConstructionNode cn = (ConstructionNode) newChildNode;
+
+            /*
+             * Let c be the root of the child tree before lift, of the form CONSTRUCT[V, S].
+             * Let f be the flattened variable.
+             * Let o be the output variable of flattening.
+             * Let p be the (optional) index variable of flattening.
+             * <p>
+             * We split S into S_f and S', where S_f contains:
+             *    - the definition of f
+             *    - variable definitions that depend on f.
+             * Note that these two cases are exclusive.
+             * Note also that S_f may be empty.
+             *
+             * If S' is nonempty, then we lift it above the flatten node,
+             * i.e. we create a parent CONSTRUCT[V',S'],
+             * where
+             *   V' = domain(S') union {o,i}
+             * <p>
+             */
             ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
                     cn,
                     flattenNode.getFlattenedVariable()
@@ -54,7 +75,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                 );
             }
 
-            ConstructionNode newParentCn = getParent(flattenNode, cn, splitSub.get(false));
+            ConstructionNode newParentCn = getParent(flattenNode, splitSub.get(false));
 
             IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParentCn, normalizedChild.getChildren().get(0), variableGenerator);
 
@@ -92,35 +113,20 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     private ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
         return cn.getSubstitution().getImmutableMap().entrySet().stream().collect(
                 ImmutableCollectors.partitioningBy(
-                        e -> (e.getKey().equals(flattenedVar)),
+                        e -> (e.getKey().equals(flattenedVar) ||
+                                e.getValue().getVariableStream().anyMatch(v -> v.equals(flattenedVar))),
                         ImmutableCollectors.toMap(
                                 ImmutableMap.Entry::getKey,
                                 ImmutableMap.Entry::getValue
                         )));
     }
 
-    /**
-     * Let c be the root of the child tree before lift, of the form CONSTRUCT[V, S].
-     * Let f be the flattened variable.
-     * Let o be the output variable of flattening.
-     * <p>
-     * We create a new parent for the flatten node, lifting the substitution S of c,
-     * minus possibly the definition of f in c.
-     * <p>
-     * Partition S into S_f and S', where S_f is the definition of f
-     * Then c' is
-     *    CONSTRUCT[V', S']
-     * where V' is defined as
-     *    (V \ {f}) union {o}
-     */
-    private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
-
+    private ConstructionNode getParent(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
         return iqFactory.createConstructionNode(
-                Stream.concat(
-                        fn.getLocallyDefinedVariables().stream(),
-                        cn.getVariables().stream()
-                                .filter(v -> !v.equals(fn.getFlattenedVariable()))
-                ).collect(ImmutableCollectors.toSet()),
+                Sets.union(
+                        fn.getLocallyDefinedVariables(),
+                        filteredSub.keySet()
+                ).immutableCopy(),
                 substitutionFactory.getSubstitution(filteredSub)
         );
     }

@@ -28,7 +28,7 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "         :fullName ?v . " +
                 "}";
         ImmutableList<String> expectedValues =
-                ImmutableList.of( "Mary Poppins", "Roger Rabbit");
+                ImmutableList.of("Bob Loblaw", "Kenny McCormick", "Mary Poppins", "Roger Rabbit");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
@@ -81,6 +81,23 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "}";
         ImmutableList<String> expectedValues =
                 ImmutableList.of( "[111, 222, 333]", "[111, 222]", "[]");
+
+        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
+
+        LOGGER.debug("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testTagsAndIds() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>" +
+                "\n" +
+                "SELECT  ?person ?v " +
+                "WHERE {" +
+                "?person  :tag_ids ?v . " +
+                "?person  :tag_str ?s . " +
+                "}";
+        ImmutableList<String> expectedValues =
+                ImmutableList.of( "[111, 222, 333]", "[111, 222]");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
