@@ -80,7 +80,7 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "?person  :tag_ids ?v . " +
                 "}";
         ImmutableList<String> expectedValues =
-                ImmutableList.of( "[111, 222, 333]", "[111, 222]");
+                ImmutableList.of( "[111, 222, 333]", "[111, 222]", "[]");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
