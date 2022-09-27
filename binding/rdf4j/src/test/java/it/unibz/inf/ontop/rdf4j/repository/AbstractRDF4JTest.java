@@ -55,7 +55,14 @@ public class AbstractRDF4JTest {
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile,
                                    @Nullable String viewFile, @Nullable String dbMetadataFile) throws SQLException, IOException {
-        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, viewFile, dbMetadataFile, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String viewFile, @Nullable String dbMetadataFile,
+                                   @Nullable String sparqlRulesRelativePath) throws SQLException, IOException {
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
 
@@ -92,6 +99,9 @@ public class AbstractRDF4JTest {
 
         if (dbMetadataFile != null)
             builder.dbMetadataFile(AbstractRDF4JTest.class.getResource(dbMetadataFile).getPath());
+
+        if (sparqlRulesRelativePath != null)
+            builder.sparqlRulesFile(AbstractRDF4JTest.class.getResource(sparqlRulesRelativePath).getPath());
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 

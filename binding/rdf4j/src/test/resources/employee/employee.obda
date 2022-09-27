@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:		    http://employee.example.org/voc#
+data:		http://employee.example.org/data/
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-employee
+target		data:person/{"id"} a :Employee ; :firstName {"firstName"} ; :lastName {"lastName"} ; :country data:country/{"country"} ; :locality {"locality"} .
+source		SELECT * FROM "employee";
+
+mappingId	MAPID-country
+target		data:country/{"acronym"} a :Country ; :name {"name"} ; :continent data:continent/{"continent"} .
+source		SELECT * FROM "country";
+
+]]
+

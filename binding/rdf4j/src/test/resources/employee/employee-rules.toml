@@ -1,0 +1,14 @@
+rules = [
+    """
+    PREFIX : <http://employee.example.org/voc#>
+
+    INSERT {
+      ?e :fullName ?fullName .
+    } WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?firstName, ' ', ?lastName) AS ?fullName)
+    }
+    """
+]
