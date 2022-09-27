@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -111,6 +112,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+        TermFactory termFactory = cs.getTermFactory();
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
@@ -132,7 +134,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
             throw new MetadataExtractionException("The flattened column "+ flattenedColumn.name + " is not present in the base relation");
         }
 
-        Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
+        Variable flattenedJsonVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
         ImmutableSubstitution<ImmutableTerm> extractionSubstitution = getExtractionSubstitution(
@@ -157,9 +159,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 extractionSubstitution
         );
 
+        FilterNode filterNode = iqFactory.createFilterNode(
+                termFactory.getDBIsNotNull(flattenOutputVariable)
+        );
+
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
-                flattenedIfArrayVariable,
+                flattenedJsonVariable,
                 indexVariable,
                 flattenedDBType
         );
@@ -167,11 +173,11 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
         ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                getProjectedVars(dataNode.getVariables(), flattenedIfArrayVariable),
+                getProjectedVars(dataNode.getVariables(), flattenedJsonVariable),
                 getCheckIfArraySubstitution(
                         flattenedVariable,
                         flattenedDBType,
-                        flattenedIfArrayVariable,
+                        flattenedJsonVariable,
                         cs
                 ));
 
@@ -179,11 +185,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 iqFactory.createUnaryIQTree(
                         extractionConstructionNode,
                         iqFactory.createUnaryIQTree(
-                                flattennode,
+                                filterNode,
                                 iqFactory.createUnaryIQTree(
-                                        checkArrayConstructionNode,
-                                        dataNode
-                                ))));
+                                        flattennode,
+                                        iqFactory.createUnaryIQTree(
+                                                checkArrayConstructionNode,
+                                                dataNode
+                                        )))));
     }
 
     private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {
