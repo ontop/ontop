@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -58,7 +57,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              * If S' is nonempty, then we lift it above the flatten node,
              * i.e. we create a parent CONSTRUCT[V',S'],
              * where
-             *   V' = domain(S') union {o,i}
+             *   V' = (V minus {f}) union {o,i}
              * <p>
              */
             ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
@@ -75,7 +74,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                 );
             }
 
-            ConstructionNode newParentCn = getParent(flattenNode, splitSub.get(false));
+            ConstructionNode newParentCn = getParent(flattenNode, cn, splitSub.get(false));
 
             IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParentCn, normalizedChild.getChildren().get(0), variableGenerator);
 
@@ -121,12 +120,14 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         )));
     }
 
-    private ConstructionNode getParent(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
+    private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
+
         return iqFactory.createConstructionNode(
-                Sets.union(
-                        fn.getLocallyDefinedVariables(),
-                        filteredSub.keySet()
-                ).immutableCopy(),
+                Stream.concat(
+                        fn.getLocallyDefinedVariables().stream(),
+                        cn.getVariables().stream()
+                                .filter(v -> !v.equals(fn.getFlattenedVariable()))
+                ).collect(ImmutableCollectors.toSet()),
                 substitutionFactory.getSubstitution(filteredSub)
         );
     }
