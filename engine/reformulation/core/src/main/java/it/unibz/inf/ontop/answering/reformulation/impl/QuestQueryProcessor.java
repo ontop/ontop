@@ -46,6 +46,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								QueryCache queryCache,
+								QueryUnfolder.Factory queryUnfolderFactory,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								InputQueryFactory inputQueryFactory,
@@ -60,7 +61,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.queryLoggerFactory = queryLoggerFactory;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
-		this.queryUnfolder = translationFactory.create(obdaSpecification.getSaturatedMapping());
+		this.queryUnfolder = queryUnfolderFactory.create(obdaSpecification.getSaturatedMapping());
 		this.datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
 
 		this.inputQueryTranslator = inputQueryTranslator;

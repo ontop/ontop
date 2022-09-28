@@ -53,7 +53,7 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
                 Stream.concat(
                         super.buildGuiceModules(),
                         optimizationConfiguration.buildGuiceModules()),
-                Stream.of(new OntopTranslationModule(this)));
+                Stream.of(new OntopInputQueryModule(settings), new OntopTranslationModule(this)));
     }
 
     @Override
