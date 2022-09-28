@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.impl.*;
@@ -616,7 +617,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         try {
             SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
             return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
-        } catch (OntopReformulationException | OntopConnectionException e) {
+        } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
     }

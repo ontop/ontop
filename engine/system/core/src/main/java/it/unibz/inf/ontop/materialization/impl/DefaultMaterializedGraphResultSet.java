@@ -123,9 +123,9 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
              */
             VocabularyEntry predicate = vocabularyIterator.next();
 
-            SelectQuery query = inputQueryFactory.createSelectQuery(predicate.getSelectQuery());
-
             try {
+                SelectQuery query = inputQueryFactory.createSelectQuery(predicate.getSelectQuery());
+
                 tmpStatement = ontopConnection.createStatement();
                 tmpContextResultSet = tmpStatement.execute(query);
 
@@ -144,6 +144,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                     LOGGER.error("Problem materializing the class/property " + predicate);
                     throw e;
                 }
+            } catch (OntopInvalidKGQueryException e) {
+                throw new OntopInvalidInputQueryException(e);
             }
         }
 

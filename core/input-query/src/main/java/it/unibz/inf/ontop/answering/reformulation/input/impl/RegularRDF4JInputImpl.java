@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
@@ -15,7 +15,7 @@ class RegularRDF4JInputImpl<R extends OBDAResultSet> extends RDF4JInputQueryImpl
     }
 
     @Override
-    protected ParsedQuery transformParsedQuery() throws OntopUnsupportedInputQueryException {
+    protected ParsedQuery transformParsedQuery() throws OntopUnsupportedKGQueryException {
         return parsedQuery;
     }
 }

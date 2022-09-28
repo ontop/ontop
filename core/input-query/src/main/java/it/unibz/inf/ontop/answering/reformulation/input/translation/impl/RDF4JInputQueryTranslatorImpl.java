@@ -5,8 +5,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -78,7 +78,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     @Override
-    public IQ translate(ParsedQuery pq, BindingSet bindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    public IQ translate(ParsedQuery pq, BindingSet bindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("Parsed query:\n{}", pq);
@@ -115,7 +115,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     @Override
-    public IQ translateAskQuery(ParsedQuery pq, BindingSet bindings) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+    public IQ translateAskQuery(ParsedQuery pq, BindingSet bindings) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("Parsed query:\n{}", pq);
@@ -150,7 +150,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (node instanceof StatementPattern){
             StatementPattern stmt = (StatementPattern)node;
@@ -205,7 +205,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
     }
 
-    private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings);
         TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings);
@@ -300,7 +300,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .collect(ImmutableCollectors.toList()));
     }
 
-    private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(groupNode.getArg(), externalBindings);
         AggregationNode an = getAggregationNode(groupNode, child.iqTree.getVariables(), externalBindings);
 
@@ -373,7 +373,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return new ArrayList<>();
     }
 
-    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(node.getArg(), externalBindings);
         ImmutableSet<Variable> variables = child.iqTree.getVariables();
 
@@ -478,7 +478,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child;
         if (genNode instanceof Distinct) {
             child = translate(((Distinct) genNode).getArg(), externalBindings);
@@ -496,7 +496,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(node.getArg(), externalBindings);
 
         return createTranslationResult(
@@ -522,7 +522,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private TranslationResult translateFilter(Filter filter, ImmutableMap<Variable, GroundTerm> externalBindings)
-            throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+            throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         TranslationResult child = translate(filter.getArg(), externalBindings);
         return createTranslationResult(
@@ -538,7 +538,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (!(join instanceof Join) && !(join instanceof LeftJoin)) {
             throw new Sparql2IqConversionException("A left or inner join is expected");
@@ -731,7 +731,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         throw new Sparql2IqConversionException("Left or inner join expected");
     }
 
-    private TranslationResult translateProjection(Projection node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateProjection(Projection node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(node.getArg(), externalBindings);
         IQTree subQuery = child.iqTree;
 
@@ -807,7 +807,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return createTranslationResult(iqTree, nullableVariables);
     }
 
-    private TranslationResult translateUnion(Union union, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateUnion(Union union, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings);
         TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings);
 
@@ -901,7 +901,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
-    private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult childTranslation = translate(node.getArg(), externalBindings);
         IQTree childQuery = childTranslation.iqTree;
 
@@ -1059,17 +1059,17 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (v instanceof Literal) {
             try {
                 return getTermForLiteral((Literal) v);
-            } catch (OntopUnsupportedInputQueryException e) {
+            } catch (OntopUnsupportedKGQueryException e) {
                 throw new RuntimeException(e);
             }
         }
         if (v instanceof IRI)
             return getTermForIri((IRI) v);
 
-        throw new RuntimeException(new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!"));
+        throw new RuntimeException(new OntopUnsupportedKGQueryException("The value " + v + " is not supported yet!"));
     }
 
-    private GroundTerm getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
+    private GroundTerm getTermForLiteral(Literal literal) throws OntopUnsupportedKGQueryException {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
         Optional<String> lang = literal.getLanguage();
@@ -1101,7 +1101,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             // such errors coming from the input query
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
-                throw new OntopUnsupportedInputQueryException(
+                throw new OntopUnsupportedKGQueryException(
                         String.format("Invalid lexical forms are not accepted. Found for %s: %s", type.toString(), value));
 
             return termFactory.getRDFLiteralConstant(value, type);
@@ -1289,7 +1289,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     return termFactory.getImmutableFunctionalTerm(
                             functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG, 1),
                             term);
-                throw new RuntimeException(new OntopUnsupportedInputQueryException("A variable or a value is expected in " + expr));
+                throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
             }
             // other subclasses
             // IRIFunction: IRI (Sec 17.4.2.8) for constructing IRIs
@@ -1369,7 +1369,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2);
                         break;
                     default:
-                        throw new RuntimeException(new OntopUnsupportedInputQueryException("Unsupported operator: " + expr));
+                        throw new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr));
                 }
                 return termFactory.getImmutableFunctionalTerm(p, term1, term2);
             }
@@ -1386,7 +1386,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 if (!(term1 instanceof ImmutableFunctionalTerm
                         && ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
                         || !(term2 instanceof RDFConstant)) {
-                    throw new RuntimeException(new OntopUnsupportedInputQueryException("The function langMatches is " +
+                    throw new RuntimeException(new OntopUnsupportedKGQueryException("The function langMatches is " +
                             "only supported with lang(..) function for the first argument and a constant for the second")
                     );
                 }
@@ -1481,7 +1481,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         }
         // other subclasses
         // SubQueryValueOperator
-        throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
+        throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
     }
 
     private FunctionSymbol getSPARQLAggregateFunctionSymbol(String officialName, int arity, boolean isDistinct) {

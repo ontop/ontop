@@ -77,7 +77,7 @@ public class OfflineOnlineMarriageTest {
     }
 
     @Test
-    public void testQueryReformulator() throws OBDASpecificationException, OntopReformulationException {
+    public void testQueryReformulator() throws OBDASpecificationException, OntopReformulationException, OntopInvalidKGQueryException {
         QueryReformulator queryReformulator = createReformulator();
         InputQueryFactory inputQueryFactory = queryReformulator.getInputQueryFactory();
 
@@ -127,7 +127,7 @@ public class OfflineOnlineMarriageTest {
 
     @Test
     public void testQueryEngine() throws OBDASpecificationException, OntopConnectionException,
-            OntopReformulationException, OntopResultConversionException, OntopQueryEvaluationException {
+            OntopReformulationException, OntopResultConversionException, OntopQueryEvaluationException, OntopInvalidKGQueryException {
         try (OntopQueryEngine queryEngine = createQueryEngine()) {
             queryEngine.connect();
 

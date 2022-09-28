@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -151,17 +151,22 @@ public class QuestQueryProcessor implements QueryReformulator {
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		LOGGER.debug("SPARQL query:\n{}\n", query.getInputString());
 
-		IQ convertedIQ = query.translate(inputQueryTranslator);
-		LOGGER.debug("Parsed query converted into IQ:\n{}\n", convertedIQ);
-
 		try {
-			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
-			return rewrittenIQ.toString();
+			IQ convertedIQ = query.translate(inputQueryTranslator);
+			LOGGER.debug("Parsed query converted into IQ:\n{}\n", convertedIQ);
+
+			try {
+				IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
+				return rewrittenIQ.toString();
+			} catch (EmptyQueryException ignored) {
+				return "EMPTY REWRITING";
+			}
+		} catch (OntopInvalidKGQueryException e) {
+			throw new OntopInvalidInputQueryException(e);
 		}
-		catch (EmptyQueryException e) {
-			e.printStackTrace();
-		}
-		return "EMPTY REWRITING";
+		 catch (OntopUnsupportedKGQueryException e) {
+			throw new OntopUnsupportedInputQueryException(e);
+		 }
 	}
 
 	@Override

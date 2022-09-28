@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.answering.reformulation.input;
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 
 /**
@@ -17,5 +17,5 @@ public interface InputQuery<R extends OBDAResultSet> {
 
     String getInputString();
 
-    IQ translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
+    IQ translate(InputQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException;
 }

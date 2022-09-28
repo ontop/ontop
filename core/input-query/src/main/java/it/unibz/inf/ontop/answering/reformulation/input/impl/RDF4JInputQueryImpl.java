@@ -4,8 +4,8 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -30,14 +30,14 @@ abstract class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuer
 
     @Override
     public IQ translate(InputQueryTranslator translator)
-            throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+            throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
         if (!(translator instanceof RDF4JInputQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
         return ((RDF4JInputQueryTranslator) translator).translate(transformParsedQuery(), bindings);
     }
 
-    protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedInputQueryException;
+    protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedKGQueryException;
 
     @Override
     public boolean equals(Object o) {

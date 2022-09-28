@@ -70,7 +70,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 			return new OntopTupleOWLResultSet(resultSet, generateSalt());
 
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -90,7 +90,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 			return new OntopBooleanOWLResultSet(resultSet);
 
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -100,7 +100,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		try {
 			ConstructQuery query = inputQueryFactory.createConstructQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -110,7 +110,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		try {
 			DescribeQuery query = inputQueryFactory.createDescribeQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -120,7 +120,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		try {
 			GraphSPARQLQuery query = inputQueryFactory.createGraphQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -212,7 +212,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	private InputQuery parseQueryString(String queryString) throws OntopOWLException {
 		try {
 			return inputQueryFactory.createSPARQLQuery(queryString);
-		} catch (OntopInvalidInputQueryException | OntopUnsupportedInputQueryException e) {
+		} catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
