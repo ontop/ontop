@@ -27,13 +27,16 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "?person  a :Person ; \n" +
                 "         :fullName ?v . " +
                 "}";
-        ImmutableList<String> expectedValues =
-                ImmutableList.of("Bob Loblaw", "Kenny McCormick", "Mary Poppins", "Roger Rabbit");
+        ImmutableList<String> expectedValues = getExpectedValuesFullNames();
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
         LOGGER.debug("SQL Query: \n" + sql);
 
+    }
+
+    protected ImmutableList<String> getExpectedValuesFullNames() {
+        return ImmutableList.of("Bob Loblaw", "Kenny McCormick", "Mary Poppins", "Roger Rabbit");
     }
 
     @Test
@@ -79,15 +82,17 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "WHERE {" +
                 "?person  :tag_ids ?v . " +
                 "}";
-        ImmutableList<String> expectedValues =
-                ImmutableList.of( "[111, 222, 333]", "[111, 222]", "[]");
+        ImmutableList<String> expectedValues = getExpectedValuesTagIds();
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
         LOGGER.debug("SQL Query: \n" + sql);
     }
 
-    @Ignore("Limitation from the json datatype (cannot apply distinct on it). No problem with jsonb")
+    protected ImmutableList<String> getExpectedValuesTagIds() {
+        return ImmutableList.of( "[111, 222, 333]", "[111, 222]", "[]");
+    }
+
     @Test
     public void testTagsAndIds() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
