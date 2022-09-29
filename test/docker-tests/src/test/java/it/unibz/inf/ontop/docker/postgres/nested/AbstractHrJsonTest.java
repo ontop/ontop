@@ -56,7 +56,6 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
         LOGGER.debug("SQL Query: \n" + sql);
     }
 
-    @Ignore("Limitation from the json datatype (cannot apply distinct on it). No problem with jsonb")
     @Test
     public void testFlattenTags2() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +

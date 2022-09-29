@@ -1,17 +1,17 @@
 {
   "relations": [
     {
-      "name": ["\"hr\"","\"person-jsonb\""],
+      "name": ["\"hr\"","\"person-json\""],
       "baseRelation": ["\"hr\"","\"person-xt\""],
       "columns": {
         "added": [
           {
             "name": "\"tags\"",
-            "expression": "tags::jsonb"
+            "expression": "tags::json"
           },
           {
             "name": "\"friends\"",
-            "expression": "friends::jsonb"
+            "expression": "friends::json"
           }
         ],
         "hidden": [
@@ -21,10 +21,10 @@
     },
     {
       "name": ["\"hr\"","\"person-tags\""],
-      "baseRelation": ["\"hr\"","\"person-jsonb\""],
+      "baseRelation": ["\"hr\"","\"person-json\""],
       "flattenedColumn": {
         "name": "\"tags\"",
-        "datatype": "jsonb"
+        "datatype": "json"
       },
       "columns": {
         "kept": [
@@ -58,10 +58,10 @@
     },
     {
       "name": ["\"hr\"","\"persons-friends\""],
-      "baseRelation": ["\"hr\"","\"person-jsonb\""],
+      "baseRelation": ["\"hr\"","\"person-json\""],
       "flattenedColumn": {
         "name": "\"friends\"",
-        "datatype": "jsonb"
+        "datatype": "json"
       },
       "columns": {
         "kept": [
@@ -77,7 +77,7 @@
           {
             "name": "\"nickNames\"",
             "key": ["nickname"],
-            "datatype": "jsonb"
+            "datatype": "json"
           },
           {
             "name": "\"nickName_str\"",
