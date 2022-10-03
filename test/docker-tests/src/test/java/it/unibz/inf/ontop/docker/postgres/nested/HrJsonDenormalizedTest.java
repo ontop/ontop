@@ -6,9 +6,11 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+@Ignore
 public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
 
     final static String owlFile = "/pgsql/nested/hr/hr.owl";
@@ -20,21 +22,21 @@ public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
-        CONNECTION = ENGINE.getConnection();
-    }
-
+//    public static void before() throws OWLOntologyCreationException {
+//        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
+//        CONNECTION = ENGINE.getConnection();
+//    }
+//
     @Override
     protected OntopOWLStatement createStatement() throws OWLException {
         return CONNECTION.createStatement();
     }
-
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        ENGINE.close();
-    }
+//
+//    @AfterClass
+//    public static void after() throws Exception {
+//        CONNECTION.close();
+//        ENGINE.close();
+//    }
 
     @Override
     protected ImmutableList<String> getExpectedValuesFullNames() {
