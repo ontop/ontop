@@ -218,7 +218,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-input-query</artifactId>
+                <artifactId>ontop-kg-query</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

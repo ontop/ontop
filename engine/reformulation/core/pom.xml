@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-input-query</artifactId>
+            <artifactId>ontop-kg-query</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
