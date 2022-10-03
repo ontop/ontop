@@ -5,7 +5,7 @@
       "baseRelation": ["\"pub\"","\"person\""],
       "flattenedColumn": {
         "name": "\"publication\"",
-        "datatype": "json"
+        "datatype": "jsonb"
       },
       "columns": {
         "kept": [
@@ -35,7 +35,7 @@
           {
             "name": "\"editor\"",
             "key": ["editor"],
-            "datatype": "json"
+            "datatype": "jsonb"
           }
         ]
       },
