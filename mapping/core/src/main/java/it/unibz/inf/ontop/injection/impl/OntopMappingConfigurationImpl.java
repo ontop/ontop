@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
@@ -27,25 +26,22 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopMappingConfiguration {
+public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl implements OntopMappingConfiguration {
 
     private final OntopMappingSettings settings;
     private final OntopMappingOptions options;
-    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options) {
-        super(settings, options.obdaOptions);
+        super(settings, options.queryOptions);
         this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options,
                                   Supplier<Injector> injectorSupplier) {
-        super(settings, options.obdaOptions, injectorSupplier);
+        super(settings, options.queryOptions, injectorSupplier);
         this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     @Override
@@ -152,23 +148,19 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
-                Stream.concat(
-                        super.buildGuiceModules(),
-                        optimizationConfiguration.buildGuiceModules()),
+                super.buildGuiceModules(),
                 Stream.of(new OntopMappingModule(this)));
     }
 
     static class OntopMappingOptions {
 
-        final OntopOBDAOptions obdaOptions;
-        final OntopOptimizationOptions optimizationOptions;
+        final OntopKGQueryOptions queryOptions;
         private final Optional<TMappingExclusionConfig> excludeFromTMappings;
 
         private OntopMappingOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
-                                    OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
+                                    OntopKGQueryOptions queryOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
-            this.obdaOptions = obdaOptions;
-            this.optimizationOptions = optimizationOptions;
+            this.queryOptions = queryOptions;
         }
     }
 
@@ -202,9 +194,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
-                                                         OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
+        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+            return new OntopMappingOptions(excludeFromTMappings, queryOptions);
         }
 
         Properties generateProperties() {
@@ -218,12 +209,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
-        extends OntopOBDAConfigurationBuilderMixin<B>
+        extends OntopKGQueryBuilderMixin<B>
         implements OntopMappingConfiguration.Builder<B> {
 
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
-        private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
-        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
         private boolean isOntopViewDefined;
@@ -232,8 +221,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             B builder = (B) this;
             this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
                     this::declareDBMetadataDefined);
-            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
             this.isMappingDefined = false;
             this.isDBMetadataDefined = false;
         }
@@ -258,22 +245,18 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return generateMappingOptions(obdaOptions, optimizationBuilderFragment.generateOptimizationOptions(
-                    obdaOptions.modelOptions));
+            return generateMappingOptions(generateKGQueryOptions(obdaOptions));
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
-                                                         OntopOptimizationOptions optimizationOptions) {
-            return mappingBuilderFragment.generateMappingOptions(obdaOptions, optimizationOptions);
+        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+            return mappingBuilderFragment.generateMappingOptions(queryOptions);
         }
 
         @Override
         protected Properties generateProperties() {
             Properties properties = new Properties();
             properties.putAll(super.generateProperties());
-            properties.putAll(modelBuilderFragment.generateProperties());
             properties.putAll(mappingBuilderFragment.generateProperties());
-            properties.putAll(optimizationBuilderFragment.generateProperties());
 
             return properties;
         }
@@ -326,25 +309,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return isMappingDefined;
         }
 
-        @Override
-        public B properties(@Nonnull Properties properties) {
-            return modelBuilderFragment.properties(properties);
-        }
-
-        @Override
-        public B propertyFile(String propertyFilePath) {
-            return modelBuilderFragment.propertyFile(propertyFilePath);
-        }
-
-        @Override
-        public B propertyFile(File propertyFile) {
-            return modelBuilderFragment.propertyFile(propertyFile);
-        }
-
-        @Override
-        public B enableTestMode() {
-            return modelBuilderFragment.enableTestMode();
-        }
     }
 
     public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>
