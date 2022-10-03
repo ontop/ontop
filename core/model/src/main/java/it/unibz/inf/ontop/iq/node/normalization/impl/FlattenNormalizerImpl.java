@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -58,7 +57,6 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              * i.e. we create a parent CONSTRUCT[V',S'],
              * where
              *   V' = (V minus {f}) union {o,i}
-             * <p>
              */
             ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
                     cn,
