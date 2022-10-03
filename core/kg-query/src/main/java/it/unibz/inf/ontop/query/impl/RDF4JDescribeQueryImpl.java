@@ -50,11 +50,11 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
 
     @Override
     public RDF4JDescribeQuery newBindings(BindingSet newBindings) {
-        return new RDF4JDescribeQueryImpl(originalParsedQuery, getInputString(), newBindings, isFixedObjectIncludedInDescribe);
+        return new RDF4JDescribeQueryImpl(originalParsedQuery, getOriginalString(), newBindings, isFixedObjectIncludedInDescribe);
     }
 
     @Override
-    public String getInputString() {
+    public String getOriginalString() {
         return queryString;
     }
 

@@ -10,12 +10,12 @@ import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.query.parser.*;
 
 
-public class InputQueryFactoryImpl implements InputQueryFactory {
+public class KGQueryFactoryImpl implements KGQueryFactory {
 
-    private final RDF4JInputQueryFactory rdf4jFactory;
+    private final RDF4JQueryFactory rdf4jFactory;
 
     @Inject
-    private InputQueryFactoryImpl(RDF4JInputQueryFactory rdf4jFactory) {
+    private KGQueryFactoryImpl(RDF4JQueryFactory rdf4jFactory) {
         this.rdf4jFactory = rdf4jFactory;
     }
 

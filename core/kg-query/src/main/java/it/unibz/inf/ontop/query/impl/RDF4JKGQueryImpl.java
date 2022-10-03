@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.query.impl;
 
-import it.unibz.inf.ontop.query.InputQuery;
+import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.query.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
@@ -13,18 +13,18 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import java.util.Objects;
 
 
-abstract class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
+abstract class RDF4JKGQueryImpl<R extends OBDAResultSet> implements KGQuery<R> {
 
     private final String inputQueryString;
     protected final BindingSet bindings;
 
-    RDF4JInputQueryImpl(String inputQueryString, BindingSet bindings) {
+    RDF4JKGQueryImpl(String inputQueryString, BindingSet bindings) {
         this.inputQueryString = inputQueryString;
         this.bindings = bindings;
     }
 
     @Override
-    public String getInputString() {
+    public String getOriginalString() {
         return inputQueryString;
     }
 
@@ -43,7 +43,7 @@ abstract class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuer
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RDF4JInputQueryImpl<?> that = (RDF4JInputQueryImpl<?>) o;
+        RDF4JKGQueryImpl<?> that = (RDF4JKGQueryImpl<?>) o;
         return inputQueryString.equals(that.inputQueryString)
                 && bindings.equals(that.bindings);
     }

@@ -6,7 +6,7 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 /**
  * Depends on RDF4J
  */
-public interface RDF4JInputQueryFactory {
+public interface RDF4JQueryFactory {
 
     RDF4JSelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 

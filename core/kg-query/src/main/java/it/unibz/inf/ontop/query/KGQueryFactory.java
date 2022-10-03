@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 /**
  * NB: NOT USED by the Ontop RDF4J repository
  */
-public interface InputQueryFactory {
+public interface KGQueryFactory {
 
     //-----------------
     // Concrete types

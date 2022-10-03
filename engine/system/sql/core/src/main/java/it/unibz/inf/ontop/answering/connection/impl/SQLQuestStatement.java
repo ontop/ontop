@@ -118,7 +118,7 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public  <R extends OBDAResultSet>  int getTupleCount(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
+    public  <R extends OBDAResultSet>  int getTupleCount(KGQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
         IQ targetQuery = getExecutableQuery(inputQuery);
         try {
             String sql = extractSQLQuery(targetQuery);

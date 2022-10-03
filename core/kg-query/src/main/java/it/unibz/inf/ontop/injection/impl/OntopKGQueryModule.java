@@ -6,18 +6,18 @@ import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 
 
-public class OntopInputQueryModule extends OntopAbstractModule {
+public class OntopKGQueryModule extends OntopAbstractModule {
 
-    private final OntopInputQuerySettings settings;
+    private final OntopKGQuerySettings settings;
 
-    protected OntopInputQueryModule(OntopInputQuerySettings settings) {
+    protected OntopKGQueryModule(OntopKGQuerySettings settings) {
         super(settings);
         this.settings = settings;
     }
 
     @Override
     protected void configure() {
-        bind(OntopInputQuerySettings.class).toInstance(settings);
+        bind(OntopKGQuerySettings.class).toInstance(settings);
 
         Module unfolderFactory = buildFactory(
                 ImmutableList.of(

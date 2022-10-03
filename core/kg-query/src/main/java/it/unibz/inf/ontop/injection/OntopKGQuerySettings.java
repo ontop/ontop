@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
-public interface OntopInputQuerySettings extends OntopOBDASettings, OntopOptimizationSettings {
+public interface OntopKGQuerySettings extends OntopOBDASettings, OntopOptimizationSettings {
 
     /**
      * Returns true if the pattern "?s ?p <describedIRI>" should also be

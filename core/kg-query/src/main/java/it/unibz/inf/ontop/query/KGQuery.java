@@ -8,14 +8,14 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 
 /**
- * Must throw an OntopInvalidInputQueryException at CONSTRUCTION time if the input query is invalid.
+ * Must throw an OntopInvalidKGQueryException at CONSTRUCTION time if the query is invalid.
  *
  * At translation time, may throw an OntopUnsupportedInputQueryException
  *
  */
-public interface InputQuery<R extends OBDAResultSet> {
+public interface KGQuery<R extends OBDAResultSet> {
 
-    String getInputString();
+    String getOriginalString();
 
     IQ translate(InputQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException;
 }

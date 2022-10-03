@@ -10,7 +10,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import com.moandjiezana.toml.Toml;
 import it.unibz.inf.ontop.query.RDF4JConstructQuery;
-import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedGraphQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQueries;
@@ -37,11 +37,11 @@ import java.util.stream.Stream;
 
 public class PredefinedQueryParserImpl implements PredefinedQueryParser {
 
-    private final RDF4JInputQueryFactory inputQueryFactory;
+    private final RDF4JQueryFactory inputQueryFactory;
 
     public PredefinedQueryParserImpl(OntopSystemConfiguration configuration) {
         Injector injector = configuration.getInjector();
-        inputQueryFactory = injector.getInstance(RDF4JInputQueryFactory.class);
+        inputQueryFactory = injector.getInstance(RDF4JQueryFactory.class);
     }
 
     @Override

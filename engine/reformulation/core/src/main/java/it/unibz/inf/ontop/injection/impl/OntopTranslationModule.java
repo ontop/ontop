@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
-import it.unibz.inf.ontop.query.InputQueryFactory;
-import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
@@ -25,8 +25,8 @@ public class OntopTranslationModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopReformulationSettings.class).toInstance(configuration.getSettings());
-        bindFromSettings(RDF4JInputQueryFactory.class);
-        bindFromSettings(InputQueryFactory.class);
+        bindFromSettings(RDF4JQueryFactory.class);
+        bindFromSettings(KGQueryFactory.class);
         bindFromSettings(PostProcessingProjectionSplitter.class);
         bindFromSettings(OntopViewUnfolder.class);
 

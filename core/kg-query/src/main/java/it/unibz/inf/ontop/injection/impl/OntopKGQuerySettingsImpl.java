@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.OntopInputQuerySettings;
+import it.unibz.inf.ontop.injection.OntopKGQuerySettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 
 import java.util.Properties;
 
-public class OntopInputQuerySettingsImpl extends OntopOBDASettingsImpl implements OntopInputQuerySettings {
+public class OntopKGQuerySettingsImpl extends OntopOBDASettingsImpl implements OntopKGQuerySettings {
 
     private static final String DEFAULT_FILE = "kg-query-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
 
-    OntopInputQuerySettingsImpl(Properties userProperties) {
+    OntopKGQuerySettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         optimizationSettings = new OntopOptimizationSettingsImpl(copyProperties());
     }
@@ -23,7 +23,7 @@ public class OntopInputQuerySettingsImpl extends OntopOBDASettingsImpl implement
     }
 
     static Properties loadDefaultInputQueryProperties() {
-        return loadDefaultPropertiesFromFile(OntopInputQuerySettings.class, DEFAULT_FILE);
+        return loadDefaultPropertiesFromFile(OntopKGQuerySettings.class, DEFAULT_FILE);
     }
 
     @Override

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.query.AskQuery;
-import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
@@ -17,11 +17,11 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
 
 
-	private final RDF4JInputQueryFactory factory;
+	private final RDF4JQueryFactory factory;
 
 	public OntopBooleanQuery(String queryString, ParsedQuery q, String baseIRI, OntopConnection ontopConnection,
-							 ImmutableMultimap<String, String> httpHeaders,
-							 RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+                             ImmutableMultimap<String, String> httpHeaders,
+                             RDF4JQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         super(queryString, baseIRI, q, ontopConnection, httpHeaders, settings);
 		this.factory = inputQueryFactory;
     }

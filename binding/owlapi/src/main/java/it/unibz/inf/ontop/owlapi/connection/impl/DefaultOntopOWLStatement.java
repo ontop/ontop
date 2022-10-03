@@ -36,11 +36,11 @@ import java.security.SecureRandom;
  */
 public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	private OntopStatement st;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryFactory kgQueryFactory;
 
-	public DefaultOntopOWLStatement(OntopStatement st, InputQueryFactory inputQueryFactory) {
+	public DefaultOntopOWLStatement(OntopStatement st, KGQueryFactory kgQueryFactory) {
 		this.st = st;
-		this.inputQueryFactory = inputQueryFactory;
+		this.kgQueryFactory = kgQueryFactory;
 	}
 
 	public void cancel() throws OntopOWLException {
@@ -63,7 +63,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public TupleOWLResultSet executeSelectQuery(String inputQuery) throws OntopOWLException {
 		try {
-			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
+			SelectQuery query = kgQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
 
 
@@ -85,7 +85,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public BooleanOWLResultSet executeAskQuery(String inputQuery) throws OntopOWLException {
 		try {
-			AskQuery query = inputQueryFactory.createAskQuery(inputQuery);
+			AskQuery query = kgQueryFactory.createAskQuery(inputQuery);
 			BooleanResultSet resultSet = st.execute(query);
 
 			return new OntopBooleanOWLResultSet(resultSet);
@@ -98,7 +98,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeConstructQuery(String inputQuery) throws OntopOWLException {
 		try {
-			ConstructQuery query = inputQueryFactory.createConstructQuery(inputQuery);
+			ConstructQuery query = kgQueryFactory.createConstructQuery(inputQuery);
 			return executeGraph(query);
 		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
@@ -108,7 +108,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeDescribeQuery(String inputQuery) throws OntopOWLException {
 		try {
-			DescribeQuery query = inputQueryFactory.createDescribeQuery(inputQuery);
+			DescribeQuery query = kgQueryFactory.createDescribeQuery(inputQuery);
 			return executeGraph(query);
 		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
@@ -118,7 +118,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeGraphQuery(String inputQuery) throws OntopOWLException {
 		try {
-			GraphSPARQLQuery query = inputQueryFactory.createGraphQuery(inputQuery);
+			GraphSPARQLQuery query = kgQueryFactory.createGraphQuery(inputQuery);
 			return executeGraph(query);
 		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
@@ -209,9 +209,9 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	/**
 	 * In contexts where we don't know the precise type
 	 */
-	private InputQuery parseQueryString(String queryString) throws OntopOWLException {
+	private KGQuery parseQueryString(String queryString) throws OntopOWLException {
 		try {
-			return inputQueryFactory.createSPARQLQuery(queryString);
+			return kgQueryFactory.createSPARQLQuery(queryString);
 		} catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {
 			throw new OntopOWLException(e);
 		}

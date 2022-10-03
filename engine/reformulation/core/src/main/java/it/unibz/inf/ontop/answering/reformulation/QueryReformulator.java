@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.answering.reformulation;
 
 
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.query.InputQuery;
-import it.unibz.inf.ontop.query.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
 
@@ -12,14 +12,14 @@ import it.unibz.inf.ontop.iq.IQ;
  */
 public interface QueryReformulator {
 
-    IQ reformulateIntoNativeQuery(InputQuery inputQuery, QueryLogger queryLogger) throws OntopReformulationException;
+    IQ reformulateIntoNativeQuery(KGQuery inputQuery, QueryLogger queryLogger) throws OntopReformulationException;
 
     /**
      * For analysis purposes
      */
-    String getRewritingRendering(InputQuery query) throws OntopReformulationException;
+    String getRewritingRendering(KGQuery query) throws OntopReformulationException;
 
-    InputQueryFactory getInputQueryFactory();
+    KGQueryFactory getInputQueryFactory();
 
     QueryLogger.Factory getQueryLoggerFactory();
 }

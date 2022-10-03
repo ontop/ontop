@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Properties;
 
-public class OntopReformulationSettingsImpl extends OntopInputQuerySettingsImpl implements OntopReformulationSettings {
+public class OntopReformulationSettingsImpl extends OntopKGQuerySettingsImpl implements OntopReformulationSettings {
 
     private static final String DEFAULT_FILE = "reformulation-default.properties";
 

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlapi.connection.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.query.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -31,17 +31,17 @@ import org.semanticweb.owlapi.model.OWLException;
 public class DefaultOntopOWLConnection implements OntopOWLConnection {
 
 	private final OntopConnection conn;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryFactory kgQueryFactory;
 
-	public DefaultOntopOWLConnection(OntopConnection conn, InputQueryFactory inputQueryFactory) {
+	public DefaultOntopOWLConnection(OntopConnection conn, KGQueryFactory kgQueryFactory) {
 		this.conn = conn;
-		this.inputQueryFactory = inputQueryFactory;
+		this.kgQueryFactory = kgQueryFactory;
 	}
 
 	@Override
 	public OntopOWLStatement createStatement() throws OWLException {
 		try {
-			return new DefaultOntopOWLStatement(conn.createStatement(), inputQueryFactory);
+			return new DefaultOntopOWLStatement(conn.createStatement(), kgQueryFactory);
 		} catch (OntopConnectionException e) {
 			throw new OWLException(e);
 		}

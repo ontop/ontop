@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableSet;
 
-public interface OntopReformulationSettings extends OntopInputQuerySettings {
+public interface OntopReformulationSettings extends OntopKGQuerySettings {
 
     boolean isExistentialReasoningEnabled();
 

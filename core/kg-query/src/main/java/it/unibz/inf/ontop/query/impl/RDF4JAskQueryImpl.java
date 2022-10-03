@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.query.impl;
 
 import it.unibz.inf.ontop.query.RDF4JAskQuery;
-import it.unibz.inf.ontop.query.RDF4JInputQuery;
+import it.unibz.inf.ontop.query.RDF4JQuery;
 import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.query.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
@@ -12,7 +12,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
-class RDF4JAskQueryImpl extends RegularRDF4JInputImpl<BooleanResultSet> implements RDF4JAskQuery {
+class RDF4JAskQueryImpl extends RegularRDF4JKGQueryImpl<BooleanResultSet> implements RDF4JAskQuery {
 
     RDF4JAskQueryImpl(ParsedQuery parsedQuery, String queryString, BindingSet bindings) {
         super(parsedQuery, queryString, bindings);
@@ -27,7 +27,7 @@ class RDF4JAskQueryImpl extends RegularRDF4JInputImpl<BooleanResultSet> implemen
     }
 
     @Override
-    public RDF4JInputQuery<BooleanResultSet> newBindings(BindingSet newBindings) {
-        return new RDF4JAskQueryImpl(parsedQuery, getInputString(), newBindings);
+    public RDF4JQuery<BooleanResultSet> newBindings(BindingSet newBindings) {
+        return new RDF4JAskQueryImpl(parsedQuery, getOriginalString(), newBindings);
     }
 }

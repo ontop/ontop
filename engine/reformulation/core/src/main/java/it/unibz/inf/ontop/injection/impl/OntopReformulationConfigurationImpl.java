@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.query.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
@@ -53,7 +52,7 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
                 Stream.concat(
                         super.buildGuiceModules(),
                         optimizationConfiguration.buildGuiceModules()),
-                Stream.of(new OntopInputQueryModule(settings), new OntopTranslationModule(this)));
+                Stream.of(new OntopKGQueryModule(settings), new OntopTranslationModule(this)));
     }
 
     @Override
@@ -82,9 +81,9 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     }
 
     @Override
-    public InputQueryFactory getInputQueryFactory() {
+    public KGQueryFactory getKGQueryFactory() {
         return getInjector()
-                .getInstance(InputQueryFactory.class);
+                .getInstance(KGQueryFactory.class);
     }
 
     static class OntopReformulationOptions {

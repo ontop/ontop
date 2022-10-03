@@ -12,7 +12,7 @@ import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import java.util.Optional;
 
 
-class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<GraphResultSet> implements RDF4JConstructQuery {
+class RDF4JConstructQueryImpl extends RegularRDF4JKGQueryImpl<GraphResultSet> implements RDF4JConstructQuery {
     private final ConstructTemplate template;
 
     RDF4JConstructQueryImpl(String queryString, ParsedQuery parsedQuery, BindingSet bindings) {
@@ -36,7 +36,7 @@ class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<GraphResultSet> impl
 
     @Override
     public RDF4JConstructQuery newBindings(BindingSet newBindings) {
-        return new RDF4JConstructQueryImpl(template, parsedQuery, getInputString(), newBindings);
+        return new RDF4JConstructQueryImpl(template, parsedQuery, getOriginalString(), newBindings);
     }
 
     private static ConstructQuerySplit split(ParsedQuery parsedQuery) {

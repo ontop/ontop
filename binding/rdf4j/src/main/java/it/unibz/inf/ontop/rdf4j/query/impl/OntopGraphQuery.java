@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.query.GraphSPARQLQuery;
-import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.OntopCloseableStatementIteration;
@@ -24,11 +24,11 @@ import java.util.Map;
 
 public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
-	private final RDF4JInputQueryFactory inputQueryFactory;
+	private final RDF4JQueryFactory inputQueryFactory;
 	private final boolean isConstruct;
 
 	public OntopGraphQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection ontopConnection,
-						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory inputQueryFactory,
+						   ImmutableMultimap<String, String> httpHeaders, RDF4JQueryFactory inputQueryFactory,
 						   OntopSystemSettings settings) {
 		super(queryString, baseIRI, parsedQuery, ontopConnection, httpHeaders, settings);
 		this.isConstruct = !(parsedQuery instanceof ParsedDescribeQuery);

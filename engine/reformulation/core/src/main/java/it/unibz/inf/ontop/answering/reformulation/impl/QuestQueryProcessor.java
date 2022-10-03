@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.query.InputQuery;
-import it.unibz.inf.ontop.query.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
@@ -38,7 +38,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryUnfolder queryUnfolder;
 
 	private final InputQueryTranslator inputQueryTranslator;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryFactory kgQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
@@ -49,12 +49,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 								QueryUnfolder.Factory queryUnfolderFactory,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
-								InputQueryFactory inputQueryFactory,
+								KGQueryFactory kgQueryFactory,
 								InputQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								QueryPlanner queryPlanner,
 								QueryLogger.Factory queryLoggerFactory) {
-		this.inputQueryFactory = inputQueryFactory;
+		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
@@ -71,7 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(InputQuery inputQuery, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery inputQuery, QueryLogger queryLogger)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
@@ -83,7 +83,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		try {
-			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getInputString());
+			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getOriginalString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
@@ -158,8 +158,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		LOGGER.debug("SPARQL query:\n{}\n", query.getInputString());
+	public String getRewritingRendering(KGQuery query) throws OntopReformulationException {
+		LOGGER.debug("SPARQL query:\n{}\n", query.getOriginalString());
 
 		try {
 			IQ convertedIQ = query.translate(inputQueryTranslator);
@@ -180,8 +180,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public InputQueryFactory getInputQueryFactory() {
-		return inputQueryFactory;
+	public KGQueryFactory getInputQueryFactory() {
+		return kgQueryFactory;
 	}
 
 	@Override

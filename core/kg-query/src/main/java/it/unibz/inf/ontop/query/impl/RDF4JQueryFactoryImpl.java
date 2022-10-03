@@ -2,17 +2,17 @@ package it.unibz.inf.ontop.query.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.query.*;
-import it.unibz.inf.ontop.injection.OntopInputQuerySettings;
+import it.unibz.inf.ontop.injection.OntopKGQuerySettings;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
-public class RDF4JInputQueryFactoryImpl implements RDF4JInputQueryFactory {
+public class RDF4JQueryFactoryImpl implements RDF4JQueryFactory {
 
-    private final OntopInputQuerySettings settings;
+    private final OntopKGQuerySettings settings;
 
     @Inject
-    private RDF4JInputQueryFactoryImpl(OntopInputQuerySettings settings) {
+    private RDF4JQueryFactoryImpl(OntopKGQuerySettings settings) {
         this.settings = settings;
     }
 
