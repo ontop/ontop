@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.cache.HTTPCacheHeaders;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;

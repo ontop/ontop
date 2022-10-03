@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
+import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
+import it.unibz.inf.ontop.query.RDF4JInputQuery;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;

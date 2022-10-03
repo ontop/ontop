@@ -1,0 +1,55 @@
+package it.unibz.inf.ontop.query.impl;
+
+import it.unibz.inf.ontop.query.InputQuery;
+import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
+import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
+import it.unibz.inf.ontop.iq.IQ;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+
+import java.util.Objects;
+
+
+abstract class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
+
+    private final String inputQueryString;
+    protected final BindingSet bindings;
+
+    RDF4JInputQueryImpl(String inputQueryString, BindingSet bindings) {
+        this.inputQueryString = inputQueryString;
+        this.bindings = bindings;
+    }
+
+    @Override
+    public String getInputString() {
+        return inputQueryString;
+    }
+
+    @Override
+    public IQ translate(InputQueryTranslator translator)
+            throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        if (!(translator instanceof RDF4JInputQueryTranslator)) {
+            throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
+        }
+        return ((RDF4JInputQueryTranslator) translator).translate(transformParsedQuery(), bindings);
+    }
+
+    protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedKGQueryException;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RDF4JInputQueryImpl<?> that = (RDF4JInputQueryImpl<?>) o;
+        return inputQueryString.equals(that.inputQueryString)
+                && bindings.equals(that.bindings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inputQueryString, bindings);
+    }
+}

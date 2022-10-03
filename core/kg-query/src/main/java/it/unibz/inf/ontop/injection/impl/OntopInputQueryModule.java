@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 
 

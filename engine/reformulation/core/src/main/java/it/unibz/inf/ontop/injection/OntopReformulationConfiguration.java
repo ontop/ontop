@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 
 

@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.AskQuery;
+import it.unibz.inf.ontop.query.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;

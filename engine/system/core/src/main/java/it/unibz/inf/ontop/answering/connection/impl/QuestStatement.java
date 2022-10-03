@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.*;
-import it.unibz.inf.ontop.answering.resultset.*;
-import it.unibz.inf.ontop.answering.resultset.impl.DefaultDescribeGraphResultSet;
+import it.unibz.inf.ontop.query.*;
+import it.unibz.inf.ontop.query.resultset.impl.DefaultDescribeGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

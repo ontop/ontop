@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.query.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.iq.IQ;
 

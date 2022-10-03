@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.answering.connection;
 
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
-import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.ConstructTemplate;
+import it.unibz.inf.ontop.query.InputQuery;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 

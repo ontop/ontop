@@ -7,7 +7,7 @@ import java.util.Properties;
 
 public class OntopInputQuerySettingsImpl extends OntopOBDASettingsImpl implements OntopInputQuerySettings {
 
-    private static final String DEFAULT_FILE = "input-query-default.properties";
+    private static final String DEFAULT_FILE = "kg-query-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
 
     OntopInputQuerySettingsImpl(Properties userProperties) {

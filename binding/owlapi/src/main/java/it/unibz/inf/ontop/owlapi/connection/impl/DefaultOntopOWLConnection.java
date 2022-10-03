@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlapi.connection.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
