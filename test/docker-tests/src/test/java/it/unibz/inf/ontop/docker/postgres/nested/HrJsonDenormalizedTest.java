@@ -22,21 +22,21 @@ public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-//    public static void before() throws OWLOntologyCreationException {
-//        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
-//        CONNECTION = ENGINE.getConnection();
-//    }
-//
+    public static void before() throws OWLOntologyCreationException {
+        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
+        CONNECTION = ENGINE.getConnection();
+    }
+
     @Override
     protected OntopOWLStatement createStatement() throws OWLException {
         return CONNECTION.createStatement();
     }
-//
-//    @AfterClass
-//    public static void after() throws Exception {
-//        CONNECTION.close();
-//        ENGINE.close();
-//    }
+
+    @AfterClass
+    public static void after() throws Exception {
+        CONNECTION.close();
+        ENGINE.close();
+    }
 
     @Override
     protected ImmutableList<String> getExpectedValuesFullNames() {
