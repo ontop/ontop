@@ -25,8 +25,6 @@ public class OntopTranslationModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopReformulationSettings.class).toInstance(configuration.getSettings());
-        bindFromSettings(RDF4JQueryFactory.class);
-        bindFromSettings(KGQueryFactory.class);
         bindFromSettings(PostProcessingProjectionSplitter.class);
         bindFromSettings(OntopViewUnfolder.class);
 
