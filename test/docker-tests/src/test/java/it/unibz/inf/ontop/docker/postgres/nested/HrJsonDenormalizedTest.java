@@ -10,7 +10,6 @@ import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-@Ignore
 public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
 
     final static String owlFile = "/pgsql/nested/hr/hr.owl";
