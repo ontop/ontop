@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
-import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.exception.*;
@@ -37,7 +37,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryUnfolder queryUnfolder;
 
-	private final InputQueryTranslator inputQueryTranslator;
+	private final KGQueryTranslator inputQueryTranslator;
 	private final KGQueryFactory kgQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
@@ -50,7 +50,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								KGQueryFactory kgQueryFactory,
-								InputQueryTranslator inputQueryTranslator,
+								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								QueryPlanner queryPlanner,
 								QueryLogger.Factory queryLoggerFactory) {

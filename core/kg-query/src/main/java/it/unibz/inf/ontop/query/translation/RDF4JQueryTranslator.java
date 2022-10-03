@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.iq.IQ;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
-public interface RDF4JInputQueryTranslator extends InputQueryTranslator {
+public interface RDF4JQueryTranslator extends KGQueryTranslator {
 
-    IQ translate(ParsedQuery inputParsedQuery, BindingSet bindings)
+    IQ translate(ParsedQuery parsedQuery, BindingSet bindings)
             throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException;
 
     IQ translateAskQuery(ParsedQuery parsedQuery, BindingSet bindings)

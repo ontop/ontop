@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.query;
 
 
-import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
@@ -17,5 +17,5 @@ public interface KGQuery<R extends OBDAResultSet> {
 
     String getOriginalString();
 
-    IQ translate(InputQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException;
+    IQ translate(KGQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException;
 }

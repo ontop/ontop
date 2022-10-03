@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.query.impl;
 
 import it.unibz.inf.ontop.query.KGQuery;
-import it.unibz.inf.ontop.query.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.query.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
+import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
@@ -29,12 +29,12 @@ abstract class RDF4JKGQueryImpl<R extends OBDAResultSet> implements KGQuery<R> {
     }
 
     @Override
-    public IQ translate(InputQueryTranslator translator)
+    public IQ translate(KGQueryTranslator translator)
             throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
-        if (!(translator instanceof RDF4JInputQueryTranslator)) {
+        if (!(translator instanceof RDF4JQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
-        return ((RDF4JInputQueryTranslator) translator).translate(transformParsedQuery(), bindings);
+        return ((RDF4JQueryTranslator) translator).translate(transformParsedQuery(), bindings);
     }
 
     protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedKGQueryException;

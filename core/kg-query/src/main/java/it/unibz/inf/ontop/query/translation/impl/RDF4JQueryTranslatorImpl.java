@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.query.translation.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.query.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
@@ -49,7 +49,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator {
+public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     private final CoreUtilsFactory coreUtilsFactory;
     private final TermFactory termFactory;
@@ -60,13 +60,13 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private final RDF rdfFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JInputQueryTranslatorImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JQueryTranslatorImpl.class);
     private static final boolean IS_DEBUG_ENABLED = LOGGER.isDebugEnabled();
 
     @Inject
-    public RDF4JInputQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
-                                         FunctionSymbolFactory functionSymbolFactory) {
+    public RDF4JQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                    TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
+                                    FunctionSymbolFactory functionSymbolFactory) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
