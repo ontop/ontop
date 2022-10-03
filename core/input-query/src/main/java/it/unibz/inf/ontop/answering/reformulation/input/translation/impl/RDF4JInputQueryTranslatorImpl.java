@@ -202,7 +202,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (node instanceof Order)
             return translateOrder((Order) node, externalBindings);
 
-        throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
+        throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
 
     private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {

@@ -145,7 +145,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                     throw e;
                 }
             } catch (OntopInvalidKGQueryException e) {
-                throw new OntopInvalidInputQueryException(e);
+                throw new OntopInvalidInputQueryException(e.getMessage());
             }
         }
 

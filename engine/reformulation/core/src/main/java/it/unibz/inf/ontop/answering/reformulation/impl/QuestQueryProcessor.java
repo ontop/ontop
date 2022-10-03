@@ -122,6 +122,16 @@ public class QuestQueryProcessor implements QueryReformulator {
                 throw e;
             }
         }
+		catch (OntopInvalidKGQueryException e) {
+			OntopInvalidInputQueryException reformulationException = new OntopInvalidInputQueryException(e.getMessage());
+			queryLogger.declareReformulationException(reformulationException);
+			throw reformulationException;
+		}
+		catch (OntopUnsupportedKGQueryException e) {
+			OntopUnsupportedInputQueryException reformulationException = new OntopUnsupportedInputQueryException(e.getMessage());
+			queryLogger.declareReformulationException(reformulationException);
+			throw reformulationException;
+		}
 		/*
 		 * Bug: should normally not be reached
 		 * TODO: remove it
@@ -162,10 +172,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 				return "EMPTY REWRITING";
 			}
 		} catch (OntopInvalidKGQueryException e) {
-			throw new OntopInvalidInputQueryException(e);
+			throw new OntopInvalidInputQueryException(e.getMessage());
 		}
 		 catch (OntopUnsupportedKGQueryException e) {
-			throw new OntopUnsupportedInputQueryException(e);
+			throw new OntopUnsupportedInputQueryException(e.getMessage());
 		 }
 	}
 
