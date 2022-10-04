@@ -61,24 +61,27 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     @Override
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
-                                       Optional<Ontology> ontology, ImmutableSet<RDFFact> facts) {
+                                       Optional<Ontology> ontology, ImmutableSet<RDFFact> facts,
+                                       ImmutableList<IQ> rules) {
         ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
         ImmutableList<MappingAssertion> mappingWithFacts =
                 Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
 
         if (ontology.isPresent()) {
-            return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox());
+            return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox(), rules);
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory, termFactory).build().tbox();
-            return createSpecification(mappingWithFacts, dbParameters, emptyTBox);
+            return createSpecification(mappingWithFacts, dbParameters, emptyTBox, rules);
         }
     }
 
-    private OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, ClassifiedTBox tbox) {
+    private OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
+                                                  ClassifiedTBox tbox, ImmutableList<IQ> rules) {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
+        // TODO: saturate according to the rules
         ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
