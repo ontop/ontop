@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 
 
-public interface OntopReformulationConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
+public interface OntopReformulationConfiguration extends OntopKGQueryConfiguration {
 
     @Override
     OntopReformulationSettings getSettings();
@@ -26,8 +26,7 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
         B enableExistentialReasoning(boolean enable);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopReformulationBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
-            OntopOptimizationConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopReformulationBuilderFragment<B>, OntopKGQueryConfiguration.Builder<B>{
 
         @Override
         OntopReformulationConfiguration build();

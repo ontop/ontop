@@ -103,8 +103,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
             OntopReformulationConfigurationImpl.OntopReformulationOptions translationOptions =
                     this.translationFragmentBuilder.generateReformulationOptions(
-                        sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
-                        sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
+                        sqlMappingOptions.mappingSQLOptions.mappingOptions.queryOptions);
 
             OntopSQLCredentialOptions sqlOptions = sqlMappingOptions.mappingSQLOptions.sqlOptions;
 
