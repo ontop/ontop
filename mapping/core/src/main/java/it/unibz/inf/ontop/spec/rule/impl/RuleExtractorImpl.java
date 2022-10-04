@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.moandjiezana.toml.Toml;
+import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.exception.SparqlRuleException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.query.KGQueryFactory;
@@ -68,13 +70,18 @@ public class RuleExtractorImpl implements RuleExtractor {
         ImmutableSet.Builder<IQ> ruleSetBuilder = ImmutableSet.builder();
 
         for(String ruleString : ruleStrings) {
-            ruleSetBuilder.add(parseSparqlRule(ruleString));
+            ruleSetBuilder.addAll(parseSparqlRule(ruleString));
         }
         return ruleSetBuilder.build();
     }
 
-    private IQ parseSparqlRule(String ruleString) throws SparqlRuleException {
-        throw new RuntimeException("TODO: parse rule " + ruleString);
+    private ImmutableSet<IQ> parseSparqlRule(String ruleString) throws SparqlRuleException {
+        try {
+            return kgQueryFactory.createInsertQuery(ruleString)
+                    .translate(kgQueryTranslator);
+        } catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {
+            throw new SparqlRuleException(e);
+        }
     }
 
     protected ImmutableList<IQ> order(ImmutableSet<IQ> rules) throws SparqlRuleException {

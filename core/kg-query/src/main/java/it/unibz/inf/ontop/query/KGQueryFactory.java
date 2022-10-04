@@ -20,6 +20,8 @@ public interface KGQueryFactory {
 
     DescribeQuery createDescribeQuery(String queryString) throws OntopInvalidKGQueryException;
 
+    InsertOperation createInsertQuery(String operationString) throws OntopInvalidKGQueryException;
+
     //-----------------
     // Generic types
     //-----------------

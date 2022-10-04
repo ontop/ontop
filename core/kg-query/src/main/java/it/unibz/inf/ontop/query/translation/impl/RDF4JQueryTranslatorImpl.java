@@ -41,7 +41,9 @@ import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.Count;
+import org.eclipse.rdf4j.query.parser.ParsedOperation;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +80,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     @Override
-    public IQ translate(ParsedQuery pq, BindingSet bindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    public IQ translateQuery(ParsedQuery pq, BindingSet bindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("Parsed query:\n{}", pq);
@@ -133,6 +135,50 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 ),
                 projectOutAllVars(tree)
         ).normalizeForOptimization();
+    }
+
+    @Override
+    public ImmutableSet<IQ> translateInsertOperation(ParsedUpdate parsedUpdate) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
+        for (UpdateExpr expr: parsedUpdate.getUpdateExprs()) {
+            if (expr instanceof Modify) {
+                iqsBuilder.addAll(translateInsertExpression((Modify) expr));
+            }
+            else
+                throw new OntopUnsupportedKGQueryException("Unsupported update: " + expr);
+        }
+        return iqsBuilder.build();
+    }
+
+    protected ImmutableSet<IQ> translateInsertExpression(Modify expression) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        if (expression.getDeleteExpr() != null)
+            throw new OntopUnsupportedKGQueryException("DELETE clauses are not supported");
+        if (expression.getInsertExpr() == null)
+            throw new OntopInvalidKGQueryException("Was expecting an INSERT clause");
+
+        IQTree whereTree = expression.getWhereExpr() == null
+                ? iqFactory.createTrueNode()
+                : translate(expression.getWhereExpr(), ImmutableMap.of()).iqTree;
+
+        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of()).iqTree;
+
+        ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
+        for (IntensionalDataNode dataNode : extractIntensionalDataNodesFromHead(insertTree)) {
+            iqsBuilder.add(createInsertIQ(dataNode, whereTree));
+        }
+        return iqsBuilder.build();
+    }
+
+    private ImmutableSet<IntensionalDataNode> extractIntensionalDataNodesFromHead(IQTree insertTree) throws OntopUnsupportedKGQueryException {
+        if (insertTree instanceof IntensionalDataNode)
+            return ImmutableSet.of((IntensionalDataNode) insertTree);
+
+        // TODO: improve support
+        throw new OntopUnsupportedKGQueryException("INSERT clauses with more than one triple/quad patterns are not yet supported");
+    }
+
+    private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
+        throw new RuntimeException("TODO: build insert IQ");
     }
 
     private IQTree projectOutAllVars(IQTree tree) {

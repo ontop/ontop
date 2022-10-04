@@ -34,7 +34,7 @@ abstract class RDF4JKGQueryImpl<R extends OBDAResultSet> implements KGQuery<R> {
         if (!(translator instanceof RDF4JQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
-        return ((RDF4JQueryTranslator) translator).translate(transformParsedQuery(), bindings);
+        return ((RDF4JQueryTranslator) translator).translateQuery(transformParsedQuery(), bindings);
     }
 
     protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedKGQueryException;

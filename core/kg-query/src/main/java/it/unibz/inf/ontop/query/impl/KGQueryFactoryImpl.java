@@ -60,6 +60,13 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
     }
 
     @Override
+    public InsertOperation createInsertQuery(String operationString) throws OntopInvalidKGQueryException {
+        ParsedUpdate parsedUpdate = parseUpdateString(operationString);
+
+        return rdf4jFactory.createInsertOperation(operationString, parsedUpdate);
+    }
+
+    @Override
     public SPARQLQuery createSPARQLQuery(String queryString)
             throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
@@ -92,6 +99,14 @@ public class KGQueryFactoryImpl implements KGQueryFactory {
     private static ParsedQuery parseQueryString(String queryString) throws OntopInvalidKGQueryException {
         try {
             return QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, null);
+        } catch (MalformedQueryException e) {
+            throw new OntopInvalidKGQueryException(e);
+        }
+    }
+
+    private static ParsedUpdate parseUpdateString(String updateString) throws OntopInvalidKGQueryException {
+        try {
+            return QueryParserUtil.parseUpdate(QueryLanguage.SPARQL, updateString, null);
         } catch (MalformedQueryException e) {
             throw new OntopInvalidKGQueryException(e);
         }
