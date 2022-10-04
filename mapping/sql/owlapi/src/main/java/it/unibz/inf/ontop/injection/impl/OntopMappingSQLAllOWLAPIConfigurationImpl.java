@@ -18,20 +18,16 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         implements OntopMappingSQLAllOWLAPIConfiguration {
 
     private final OntopMappingOntologyConfigurationImpl mappingOWLConfiguration;
-    private final OntopMappingOntologyBuilders.OntopMappingOntologyOptions ontologyOptions;
 
     OntopMappingSQLAllOWLAPIConfigurationImpl(OntopMappingSQLAllSettings settings,
                                               OntopMappingSQLAllOWLAPIOptions options) {
         super(settings, options.sqlOptions);
         mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
-        this.ontologyOptions = options.ontologyOptions;
     }
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(mappingOWLConfiguration::loadOntology,
-                () -> ontologyOptions.sparqlRulesFile,
-                () -> ontologyOptions.sparqlRulesReader);
+        return loadSpecification(mappingOWLConfiguration::loadOntology);
     }
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
@@ -81,21 +77,6 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         @Override
         public B ontologyReader(@Nonnull Reader reader) {
             return ontologyBuilderFragment.ontologyReader(reader);
-        }
-
-        @Override
-        public B sparqlRulesFile(@Nonnull File file) {
-            return ontologyBuilderFragment.sparqlRulesFile(file);
-        }
-
-        @Override
-        public B sparqlRulesFile(@Nonnull String urlOrPath) {
-            return ontologyBuilderFragment.sparqlRulesFile(urlOrPath);
-        }
-
-        @Override
-        public B sparqlRulesReader(@Nonnull Reader reader) {
-            return ontologyBuilderFragment.sparqlRulesReader(reader);
         }
 
         @Override

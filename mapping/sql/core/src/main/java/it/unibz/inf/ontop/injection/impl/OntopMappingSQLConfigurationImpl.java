@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
@@ -71,7 +70,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
-                Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
@@ -82,9 +81,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                                         Supplier<Optional<File>> dbMetadataFileSupplier,
                                         Supplier<Optional<Reader>> dbMetadataReaderSupplier,
                                         Supplier<Optional<File>> ontopViewFileSupplier,
-                                        Supplier<Optional<Reader>> ontopViewReaderSupplier,
-                                        Supplier<Optional<File>> sparqlRuleFileSupplier,
-                                        Supplier<Optional<Reader>> sparqlRuleReaderSupplier)
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -96,9 +93,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 dbMetadataFileSupplier,
                 dbMetadataReaderSupplier,
                 ontopViewFileSupplier,
-                ontopViewReaderSupplier,
-                sparqlRuleFileSupplier,
-                sparqlRuleReaderSupplier
+                ontopViewReaderSupplier
         );
     }
 

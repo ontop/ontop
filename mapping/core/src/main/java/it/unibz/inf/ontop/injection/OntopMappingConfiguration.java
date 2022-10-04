@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.Reader;
 import java.util.Optional;
 
 public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
@@ -28,6 +30,12 @@ public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
 
         B enableDefaultDatatypeInference(boolean inferDefaultDatatype);
+
+        B sparqlRulesFile(@Nonnull File file);
+
+        B sparqlRulesFile(@Nonnull String path);
+
+        B sparqlRulesReader(@Nonnull Reader reader);
 
     }
 

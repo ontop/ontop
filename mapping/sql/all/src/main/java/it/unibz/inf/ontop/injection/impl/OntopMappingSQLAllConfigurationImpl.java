@@ -17,7 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigurationImpl
         implements OntopMappingSQLAllConfiguration {
@@ -39,12 +38,10 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty);
     }
 
-    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
-                                        Supplier<Optional<File>> sparqlRuleFileSupplier,
-                                        Supplier<Optional<Reader>> sparqlRuleReaderSupplier)
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier)
             throws OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,
@@ -55,9 +52,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                 () -> options.dbMetadataFile,
                 () -> options.dbMetadataReader,
                 () -> options.ontopViewFile,
-                () -> options.ontopViewReader,
-                sparqlRuleFileSupplier,
-                sparqlRuleReaderSupplier);
+                () -> options.ontopViewReader);
     }
 
     @Override
