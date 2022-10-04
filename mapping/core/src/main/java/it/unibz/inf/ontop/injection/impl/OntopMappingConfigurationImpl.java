@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -71,6 +69,8 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
+                Optional::empty,
+                Optional::empty,
                 Optional::empty
                 );
     }
@@ -84,7 +84,9 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                                                   Supplier<Optional<File>> dbMetadataFileSupplier,
                                                   Supplier<Optional<Reader>> dbMetadataReaderSupplier,
                                                   Supplier<Optional<File>> ontopViewFileSupplier,
-                                                  Supplier<Optional<Reader>> ontopViewReaderSupplier
+                                                  Supplier<Optional<Reader>> ontopViewReaderSupplier,
+                                                  Supplier<Optional<File>> sparqlRuleFileSupplier,
+                                                  Supplier<Optional<Reader>> sparqlRuleReaderSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -106,6 +108,10 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 .ifPresent(specInputBuilder::addOntopViewFile);
         ontopViewReaderSupplier.get()
                 .ifPresent(specInputBuilder::addOntopViewReader);
+        sparqlRuleFileSupplier.get()
+                .ifPresent(specInputBuilder::addSparqlRuleFile);
+        sparqlRuleReaderSupplier.get()
+                .ifPresent(specInputBuilder::addSparqlRuleReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();

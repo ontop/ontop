@@ -18,16 +18,20 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         implements OntopMappingSQLAllOWLAPIConfiguration {
 
     private final OntopMappingOntologyConfigurationImpl mappingOWLConfiguration;
+    private final OntopMappingOntologyBuilders.OntopMappingOntologyOptions ontologyOptions;
 
     OntopMappingSQLAllOWLAPIConfigurationImpl(OntopMappingSQLAllSettings settings,
                                               OntopMappingSQLAllOWLAPIOptions options) {
         super(settings, options.sqlOptions);
         mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
+        this.ontologyOptions = options.ontologyOptions;
     }
 
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(mappingOWLConfiguration::loadOntology);
+        return loadSpecification(mappingOWLConfiguration::loadOntology,
+                () -> ontologyOptions.sparqlRulesFile,
+                () -> ontologyOptions.sparqlRulesReader);
     }
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {

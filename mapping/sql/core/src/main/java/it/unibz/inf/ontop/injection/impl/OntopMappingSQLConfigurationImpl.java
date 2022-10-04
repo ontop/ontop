@@ -71,7 +71,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
-                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
@@ -82,7 +82,9 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                                         Supplier<Optional<File>> dbMetadataFileSupplier,
                                         Supplier<Optional<Reader>> dbMetadataReaderSupplier,
                                         Supplier<Optional<File>> ontopViewFileSupplier,
-                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier,
+                                        Supplier<Optional<File>> sparqlRuleFileSupplier,
+                                        Supplier<Optional<Reader>> sparqlRuleReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -94,7 +96,9 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 dbMetadataFileSupplier,
                 dbMetadataReaderSupplier,
                 ontopViewFileSupplier,
-                ontopViewReaderSupplier
+                ontopViewReaderSupplier,
+                sparqlRuleFileSupplier,
+                sparqlRuleReaderSupplier
         );
     }
 

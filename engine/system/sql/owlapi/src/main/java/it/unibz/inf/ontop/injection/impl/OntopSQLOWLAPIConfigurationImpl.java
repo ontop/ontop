@@ -22,15 +22,19 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
 
 
     private final OntopMappingOntologyConfigurationImpl mappingOWLConfiguration;
+    private final OntopMappingOntologyOptions ontologyOptions;
 
     OntopSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings, OntopSQLOWLAPIOptions options) {
         super(settings, options.sqlOptions);
         mappingOWLConfiguration = new OntopMappingOntologyConfigurationImpl(settings, options.ontologyOptions);
+        this.ontologyOptions = options.ontologyOptions;
     }
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(mappingOWLConfiguration::loadOntology);
+        return loadSpecification(mappingOWLConfiguration::loadOntology,
+                () -> ontologyOptions.sparqlRulesFile,
+                () -> ontologyOptions.sparqlRulesReader);
     }
 
     @Override
