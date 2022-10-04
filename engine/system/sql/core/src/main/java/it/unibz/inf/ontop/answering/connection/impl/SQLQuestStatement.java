@@ -6,15 +6,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.connection.JDBCStatementFinalizer;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.input.*;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
-import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.answering.resultset.impl.*;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.*;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
+import it.unibz.inf.ontop.query.resultset.impl.*;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
-import it.unibz.inf.ontop.answering.resultset.impl.PredefinedBooleanResultSet;
 
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.iq.IQ;
@@ -119,7 +118,7 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public  <R extends OBDAResultSet>  int getTupleCount(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
+    public  <R extends OBDAResultSet>  int getTupleCount(KGQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
         IQ targetQuery = getExecutableQuery(inputQuery);
         try {
             String sql = extractSQLQuery(targetQuery);

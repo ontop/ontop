@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopMappingConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
+public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
@@ -31,8 +31,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration, Ontop
 
     }
 
-    interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
-            OntopOptimizationConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopKGQueryConfiguration.Builder<B> {
 
         @Override
         OntopMappingConfiguration build();

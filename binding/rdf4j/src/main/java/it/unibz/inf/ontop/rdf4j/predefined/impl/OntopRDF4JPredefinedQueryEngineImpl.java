@@ -15,9 +15,9 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.ConstructTemplate;
+import it.unibz.inf.ontop.query.RDF4JQuery;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
@@ -305,7 +305,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                                       ImmutableMap<String, String> bindingWithReferences)
             throws OntopReformulationException {
         BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
-        RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
+        RDF4JQuery newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?

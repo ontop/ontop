@@ -2,9 +2,10 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
+import it.unibz.inf.ontop.query.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.impl.*;
@@ -39,7 +40,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
     private OntopRepository repository;
     private OntopConnection ontopConnection;
-    private final RDF4JInputQueryFactory inputQueryFactory;
+    private final RDF4JQueryFactory inputQueryFactory;
     private final OntopSystemSettings settings;
     private boolean isOpen;
     private boolean isActive;
@@ -48,7 +49,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
 
 
     OntopRepositoryConnectionImpl(OntopRepository rep, OntopConnection connection,
-                                  RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+                                  RDF4JQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         this.repository = rep;
         this.ontopConnection = connection;
         this.inputQueryFactory = inputQueryFactory;
@@ -616,7 +617,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         try {
             SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
             return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
-        } catch (OntopReformulationException | OntopConnectionException e) {
+        } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
     }

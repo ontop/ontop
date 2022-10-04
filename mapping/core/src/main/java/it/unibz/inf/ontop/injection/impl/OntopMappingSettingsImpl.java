@@ -2,26 +2,22 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 
 import java.util.Properties;
 
 
-class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMappingSettings {
+class OntopMappingSettingsImpl extends OntopKGQuerySettingsImpl implements OntopMappingSettings {
 
     private static final String DEFAULT_FILE = "mapping-default.properties";
-    private final OntopOptimizationSettings optimizationSettings;
 
     OntopMappingSettingsImpl(Properties properties) {
         super(loadProperties(properties));
-        optimizationSettings = new OntopOptimizationSettingsImpl(copyProperties());
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopOptimizationSettingsImpl.loadDefaultOptimizationProperties();
-        properties.putAll(loadDefaultMappingProperties());
+        Properties properties = loadDefaultMappingProperties();
         properties.putAll(userProperties);
 
         String factConverterKey = FactIntoMappingConverter.class.getCanonicalName();

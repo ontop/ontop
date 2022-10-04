@@ -218,6 +218,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-kg-query</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ontop-mapping</artifactId>
                 <version>${project.version}</version>
             </dependency>
