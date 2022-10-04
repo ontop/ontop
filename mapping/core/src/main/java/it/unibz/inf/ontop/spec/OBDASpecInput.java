@@ -55,7 +55,7 @@ public interface OBDASpecInput {
 
     default Optional<Reader> getOntopViewReader() throws FileNotFoundException { return getReader(ONTOPVIEW_KEY); }
 
-    default Optional<Reader> getSparqlRules() throws FileNotFoundException {
+    default Optional<Reader> getSparqlRulesReader() throws FileNotFoundException {
         return getReader(SPARQL_RULES_KEY);
     }
 
