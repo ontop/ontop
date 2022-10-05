@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
+import it.unibz.inf.ontop.spec.rule.RuleExtractor;
 
 
 public class OntopMappingModule extends OntopAbstractModule {
@@ -42,6 +43,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingDistinctTransformer.class);
         bindFromSettings(TargetAtomFactory.class);
         bindFromSettings(FactExtractor.class);
+        bindFromSettings(RuleExtractor.class);
 
         bind(MappingCoreSingletons.class).to(MappingCoreSingletonsImpl.class);
 

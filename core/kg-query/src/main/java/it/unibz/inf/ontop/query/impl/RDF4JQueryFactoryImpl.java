@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.query.*;
 import it.unibz.inf.ontop.injection.OntopKGQuerySettings;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedUpdate;
 
 
 public class RDF4JQueryFactoryImpl implements RDF4JQueryFactory {
@@ -34,5 +35,10 @@ public class RDF4JQueryFactoryImpl implements RDF4JQueryFactory {
     @Override
     public RDF4JDescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings) {
         return new RDF4JDescribeQueryImpl(parsedQuery, queryString, bindings, settings.isFixedObjectIncludedInDescribe());
+    }
+
+    @Override
+    public RDF4JInsertOperation createInsertOperation(String queryString, ParsedUpdate parsedUpdate) {
+        return new RDF4JInsertOperationImpl(parsedUpdate, queryString);
     }
 }

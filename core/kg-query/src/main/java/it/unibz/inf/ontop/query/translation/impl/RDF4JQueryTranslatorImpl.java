@@ -2,6 +2,9 @@ package it.unibz.inf.ontop.query.translation.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -42,6 +45,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.Count;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +82,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     @Override
-    public IQ translate(ParsedQuery pq, BindingSet bindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    public IQ translateQuery(ParsedQuery pq, BindingSet bindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("Parsed query:\n{}", pq);
@@ -133,6 +137,84 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 ),
                 projectOutAllVars(tree)
         ).normalizeForOptimization();
+    }
+
+    @Override
+    public ImmutableSet<IQ> translateInsertOperation(ParsedUpdate parsedUpdate) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
+        for (UpdateExpr expr: parsedUpdate.getUpdateExprs()) {
+            if (expr instanceof Modify) {
+                iqsBuilder.addAll(translateInsertExpression((Modify) expr));
+            }
+            else
+                throw new OntopUnsupportedKGQueryException("Unsupported update: " + expr);
+        }
+        return iqsBuilder.build();
+    }
+
+    protected ImmutableSet<IQ> translateInsertExpression(Modify expression) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+        if (expression.getDeleteExpr() != null)
+            throw new OntopUnsupportedKGQueryException("DELETE clauses are not supported");
+        if (expression.getInsertExpr() == null)
+            throw new OntopInvalidKGQueryException("Was expecting an INSERT clause");
+
+        IQTree whereTree = expression.getWhereExpr() == null
+                ? iqFactory.createTrueNode()
+                : translate(expression.getWhereExpr(), ImmutableMap.of()).iqTree;
+
+        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of()).iqTree;
+
+        ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
+        for (IntensionalDataNode dataNode : extractIntensionalDataNodesFromHead(insertTree)) {
+            iqsBuilder.add(createInsertIQ(dataNode, whereTree));
+        }
+        return iqsBuilder.build();
+    }
+
+    private ImmutableSet<IntensionalDataNode> extractIntensionalDataNodesFromHead(IQTree insertTree) throws OntopInvalidKGQueryException {
+        if (insertTree instanceof IntensionalDataNode)
+            return ImmutableSet.of((IntensionalDataNode) insertTree);
+
+        QueryNode rootNode = insertTree.getRootNode();
+        if ((rootNode instanceof InnerJoinNode) && !((InnerJoinNode) rootNode).getOptionalFilterCondition().isPresent()) {
+            ImmutableList<IQTree> children = insertTree.getChildren();
+            if (children.stream().allMatch(c -> c instanceof IntensionalDataNode))
+                return ImmutableSet.copyOf((ImmutableList<IntensionalDataNode>)(ImmutableList<?>)children);
+        }
+
+        throw new OntopInvalidKGQueryException("Invalid INSERT clause");
+    }
+
+    private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
+        DataAtom<AtomPredicate> dataNodeAtom = dataNode.getProjectionAtom();
+        List<Variable> mutableProjectedVariables = Lists.newArrayList();
+        Map<Variable, VariableOrGroundTerm> mutableSubstitutionMap = Maps.newHashMap();
+
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(whereTree.getKnownVariables(), dataNode.getKnownVariables()));
+
+        for (VariableOrGroundTerm term: dataNodeAtom.getArguments()) {
+            if ((term instanceof Variable) && !mutableProjectedVariables.contains(term))
+                mutableProjectedVariables.add((Variable) term);
+            else {
+                Variable newVariable = variableGenerator.generateNewVariable();
+                mutableSubstitutionMap.put(newVariable, term);
+                mutableProjectedVariables.add(newVariable);
+            }
+        }
+
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(dataNodeAtom.getPredicate(),
+                ImmutableList.copyOf(mutableProjectedVariables));
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                ImmutableSet.copyOf(mutableProjectedVariables),
+                substitutionFactory.getSubstitution(ImmutableMap.copyOf(mutableSubstitutionMap)));
+
+        IQ newIQ = iqFactory.createIQ(
+                projectionAtom,
+                iqFactory.createUnaryIQTree(constructionNode, whereTree));
+
+        return newIQ.normalizeForOptimization();
     }
 
     private IQTree projectOutAllVars(IQTree tree) {

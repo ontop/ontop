@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -106,6 +104,10 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 .ifPresent(specInputBuilder::addOntopViewFile);
         ontopViewReaderSupplier.get()
                 .ifPresent(specInputBuilder::addOntopViewReader);
+        options.sparqlRulesFile
+                .ifPresent(specInputBuilder::addSparqlRuleFile);
+        options.sparqlRulesReader
+                .ifPresent(specInputBuilder::addSparqlRuleReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
@@ -157,10 +159,16 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         final OntopKGQueryOptions queryOptions;
         private final Optional<TMappingExclusionConfig> excludeFromTMappings;
 
+        final Optional<File> sparqlRulesFile;
+
+        final Optional<Reader> sparqlRulesReader;
+
         private OntopMappingOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
-                                    OntopKGQueryOptions queryOptions) {
+                                    Optional<File> sparqlRulesFile, Optional<Reader> sparqlRulesReader, OntopKGQueryOptions queryOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.queryOptions = queryOptions;
+            this.sparqlRulesFile = sparqlRulesFile;
+            this.sparqlRulesReader = sparqlRulesReader;
         }
     }
 
@@ -171,6 +179,10 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> inferDefaultDatatype =  Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
+
+        private Optional<File> sparqlRulesFile = Optional.empty();
+
+        private Optional<Reader> sparqlRulesReader = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder, Runnable declareDBMetadataCB) {
             this.builder = builder;
@@ -194,8 +206,25 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return builder;
         }
 
+        @Override
+        public B sparqlRulesFile(@Nonnull File file) {
+            this.sparqlRulesFile = Optional.of(file);
+            return builder;
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull String path) {
+            return sparqlRulesFile(new File(path));
+        }
+
+        @Override
+        public B sparqlRulesReader(@Nonnull Reader reader) {
+            this.sparqlRulesReader = Optional.of(reader);
+            return builder;
+        }
+
         final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
-            return new OntopMappingOptions(excludeFromTMappings, queryOptions);
+            return new OntopMappingOptions(excludeFromTMappings, sparqlRulesFile, sparqlRulesReader, queryOptions);
         }
 
         Properties generateProperties() {
@@ -238,6 +267,21 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         @Override
         public B enableDefaultDatatypeInference(boolean inferDefaultDatatype) {
             return mappingBuilderFragment.enableDefaultDatatypeInference(inferDefaultDatatype);
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull File file) {
+            return mappingBuilderFragment.sparqlRulesFile(file);
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull String path) {
+            return mappingBuilderFragment.sparqlRulesFile(path);
+        }
+
+        @Override
+        public B sparqlRulesReader(@Nonnull Reader reader) {
+            return mappingBuilderFragment.sparqlRulesReader(reader);
         }
 
         final OntopMappingOptions generateMappingOptions() {
@@ -323,7 +367,6 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
             return new OntopMappingConfigurationImpl(settings, options);
         }
-
     }
 
 }

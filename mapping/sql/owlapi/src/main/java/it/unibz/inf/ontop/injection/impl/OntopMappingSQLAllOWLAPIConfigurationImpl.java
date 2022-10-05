@@ -80,21 +80,6 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         }
 
         @Override
-        public B sparqlRulesFile(@Nonnull File file) {
-            return ontologyBuilderFragment.sparqlRulesFile(file);
-        }
-
-        @Override
-        public B sparqlRulesFile(@Nonnull String urlOrPath) {
-            return ontologyBuilderFragment.sparqlRulesFile(urlOrPath);
-        }
-
-        @Override
-        public B sparqlRulesReader(@Nonnull Reader reader) {
-            return ontologyBuilderFragment.sparqlRulesReader(reader);
-        }
-
-        @Override
         public B xmlCatalogFile(@Nonnull String file) {
             return ontologyBuilderFragment.xmlCatalogFile(file);
         }
