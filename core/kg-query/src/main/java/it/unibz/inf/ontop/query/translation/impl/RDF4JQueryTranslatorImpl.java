@@ -2,6 +2,9 @@ package it.unibz.inf.ontop.query.translation.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -41,7 +44,6 @@ import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.Count;
-import org.eclipse.rdf4j.query.parser.ParsedOperation;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedUpdate;
 import org.slf4j.Logger;
@@ -178,7 +180,35 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
-        throw new RuntimeException("TODO: build insert IQ");
+        DataAtom<AtomPredicate> dataNodeAtom = dataNode.getProjectionAtom();
+        List<Variable> mutableProjectedVariables = Lists.newArrayList();
+        Map<Variable, VariableOrGroundTerm> mutableSubstitutionMap = Maps.newHashMap();
+
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(whereTree.getKnownVariables(), dataNode.getKnownVariables()));
+
+        for (VariableOrGroundTerm term: dataNodeAtom.getArguments()) {
+            if ((term instanceof Variable) && !mutableProjectedVariables.contains(term))
+                mutableProjectedVariables.add((Variable) term);
+            else {
+                Variable newVariable = variableGenerator.generateNewVariable();
+                mutableSubstitutionMap.put(newVariable, term);
+                mutableProjectedVariables.add(newVariable);
+            }
+        }
+
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(dataNodeAtom.getPredicate(),
+                ImmutableList.copyOf(mutableProjectedVariables));
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                ImmutableSet.copyOf(mutableProjectedVariables),
+                substitutionFactory.getSubstitution(ImmutableMap.copyOf(mutableSubstitutionMap)));
+
+        IQ newIQ = iqFactory.createIQ(
+                projectionAtom,
+                iqFactory.createUnaryIQTree(constructionNode, whereTree));
+
+        return newIQ.normalizeForOptimization();
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
