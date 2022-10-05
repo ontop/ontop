@@ -171,12 +171,18 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return iqsBuilder.build();
     }
 
-    private ImmutableSet<IntensionalDataNode> extractIntensionalDataNodesFromHead(IQTree insertTree) throws OntopUnsupportedKGQueryException {
+    private ImmutableSet<IntensionalDataNode> extractIntensionalDataNodesFromHead(IQTree insertTree) throws OntopInvalidKGQueryException {
         if (insertTree instanceof IntensionalDataNode)
             return ImmutableSet.of((IntensionalDataNode) insertTree);
 
-        // TODO: improve support
-        throw new OntopUnsupportedKGQueryException("INSERT clauses with more than one triple/quad patterns are not yet supported");
+        QueryNode rootNode = insertTree.getRootNode();
+        if ((rootNode instanceof InnerJoinNode) && !((InnerJoinNode) rootNode).getOptionalFilterCondition().isPresent()) {
+            ImmutableList<IQTree> children = insertTree.getChildren();
+            if (children.stream().allMatch(c -> c instanceof IntensionalDataNode))
+                return ImmutableSet.copyOf((ImmutableList<IntensionalDataNode>)(ImmutableList<?>)children);
+        }
+
+        throw new OntopInvalidKGQueryException("Invalid INSERT clause");
     }
 
     private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
