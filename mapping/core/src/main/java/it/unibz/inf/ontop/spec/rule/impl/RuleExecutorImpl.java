@@ -1,12 +1,15 @@
 package it.unibz.inf.ontop.spec.rule.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
@@ -25,16 +28,19 @@ public class RuleExecutorImpl implements RuleExecutor {
     private final QueryTransformerFactory transformerFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final AtomFactory atomFactory;
+    private final UnionBasedQueryMerger queryMerger;
 
     @Inject
     protected RuleExecutorImpl(IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+                               CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory,
+                               UnionBasedQueryMerger queryMerger) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.atomFactory = atomFactory;
+        this.queryMerger = queryMerger;
     }
 
     @Override
@@ -66,6 +72,15 @@ public class RuleExecutorImpl implements RuleExecutor {
     }
 
     private void updateMapping(Map<MappingAssertionIndex, MappingAssertion> mutableMappingMap, IQ additionalDefinition) {
-        throw new RuntimeException("TODO: update mapping");
+        MappingAssertion additionalAssertion = new MappingAssertion(additionalDefinition, null);
+        mutableMappingMap.merge(additionalAssertion.getIndex(), additionalAssertion, this::merge);
+    }
+
+    private MappingAssertion merge(MappingAssertion existingAssertion, MappingAssertion additionalAssertion) {
+        IQ mergedDefinition = queryMerger.mergeDefinitions(
+                        ImmutableSet.of(existingAssertion.getQuery(), additionalAssertion.getQuery()))
+                .orElseThrow(() -> new MinorOntopInternalBugException("Cannot merge the definitions"));
+
+        return new MappingAssertion(mergedDefinition, null);
     }
 }

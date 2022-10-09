@@ -26,7 +26,6 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
         release();
     }
 
-    @Ignore("TODO: support SPARQL rules")
     @Test
     public void testEmployeeFullNames() {
         String query = "PREFIX : <http://employee.example.org/voc#>\n" +

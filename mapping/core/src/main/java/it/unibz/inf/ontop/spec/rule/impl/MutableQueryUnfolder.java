@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.rule.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -96,14 +97,14 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
         }
 
         private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
-            // TODO: throw a better exception
-            throw new RuntimeException("Triple/quad patterns where the class or the non-rdf-type property are not specified " +
+            // Should have been detected before
+            throw new MinorOntopInternalBugException("Triple/quad patterns where the class or the non-rdf-type property are not specified " +
                     "are not supported for SPARQL INSERT rules");
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-            // TODO: throw a better exception
-            throw new RuntimeException("Triple/quad patterns where the class or the non-rdf-type property are not specified " +
+            // Should have been detected before
+            throw new MinorOntopInternalBugException("Triple/quad patterns where the class or the non-rdf-type property are not specified " +
                     "are not supported for SPARQL INSERT rules");
         }
 
