@@ -88,7 +88,8 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return createRelationID(
-                rs.getString(schemaNameColumn).split("\\."),
+                new String[] { rs.getString(schemaNameColumn)},
+                //rs.getString(schemaNameColumn).split("\\."),
                 rs.getString(tableNameColumn));
     }
 
@@ -111,5 +112,11 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     @Override
     protected String getRelationName(RelationID id) {
         return id.getComponents().get(TABLE_INDEX).getName();
+    }
+
+    @Override
+    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
+        if (!extractedId.toString().replace("\"", "").equals(givenId.toString().replace("\"", "")))
+            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 }
