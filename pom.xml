@@ -160,8 +160,8 @@
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
         <opencsv.version>4.6</opencsv.version>
-        <owlapi.version>5.1.19</owlapi.version>
-        <owlapi-osgi.version>5.1.19</owlapi-osgi.version>
+        <owlapi.version>5.1.20</owlapi.version>
+        <owlapi-osgi.version>5.1.20</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
