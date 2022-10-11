@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.spec.rule.RuleExecutor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -37,6 +38,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingDistinctTransformer mappingDistinctTransformer;
     private final TermFactory termFactory;
+    private final RuleExecutor ruleExecutor;
 
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
@@ -47,7 +49,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       SpecificationFactory specificationFactory,
                                       RDF rdfFactory,
                                       MappingDistinctTransformer mappingDistinctTransformer,
-                                      TermFactory termFactory) {
+                                      TermFactory termFactory, RuleExecutor ruleExecutor) {
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -57,6 +59,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.rdfFactory = rdfFactory;
         this.mappingDistinctTransformer = mappingDistinctTransformer;
         this.termFactory = termFactory;
+        this.ruleExecutor = ruleExecutor;
     }
 
     @Override
@@ -81,8 +84,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
-        // TODO: saturate according to the rules
-        ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+        ImmutableList<MappingAssertion> mappingAfterApplyingRules = ruleExecutor.apply(saturatedMapping, rules);
+        ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(mappingAfterApplyingRules);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
         ImmutableList<MappingAssertion> finalMapping = settings.getCardinalityPreservationMode() == LOOSE
