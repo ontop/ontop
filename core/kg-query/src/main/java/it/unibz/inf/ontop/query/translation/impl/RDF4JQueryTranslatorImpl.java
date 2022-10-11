@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
 import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -63,6 +64,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final InsertClauseNormalizer insertClauseNormalizer;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JQueryTranslatorImpl.class);
     private static final boolean IS_DEBUG_ENABLED = LOGGER.isDebugEnabled();
@@ -70,7 +72,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     @Inject
     public RDF4JQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                     TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
-                                    FunctionSymbolFactory functionSymbolFactory) {
+                                    FunctionSymbolFactory functionSymbolFactory,
+                                    InsertClauseNormalizer insertClauseNormalizer) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -79,6 +82,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.atomFactory = atomFactory;
         this.rdfFactory = rdfFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.insertClauseNormalizer = insertClauseNormalizer;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableMap<Variable, GroundTerm> externalBindings = convertExternalBindings(bindings);
 
-        IQTree tree = translate(pq.getTupleExpr(), externalBindings).iqTree;
+        IQTree tree = translate(pq.getTupleExpr(), externalBindings, true).iqTree;
 
         ImmutableSet<Variable> vars = tree.getVariables();
 
@@ -126,7 +130,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableMap<Variable, GroundTerm> externalBindings = convertExternalBindings(bindings);
 
-        IQTree tree = translate(pq.getTupleExpr(), externalBindings).iqTree;
+        IQTree tree = translate(pq.getTupleExpr(), externalBindings, true).iqTree;
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("IQTree (before normalization):\n{}", tree);
@@ -160,13 +164,22 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         IQTree whereTree = expression.getWhereExpr() == null
                 ? iqFactory.createTrueNode()
-                : translate(expression.getWhereExpr(), ImmutableMap.of()).iqTree;
+                : translate(expression.getWhereExpr(), ImmutableMap.of(), true).iqTree;
 
-        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of()).iqTree;
+        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of(), false).iqTree;
 
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
-        for (IntensionalDataNode dataNode : extractIntensionalDataNodesFromHead(insertTree)) {
-            iqsBuilder.add(createInsertIQ(dataNode, whereTree));
+        ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
+
+
+        InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
+        IQTree normalizedSubTree = normalization.getConstructionNode()
+                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, whereTree))
+                .orElse(whereTree);
+
+
+        for (IntensionalDataNode dataNode : dataNodes) {
+            iqsBuilder.add(createInsertIQ(dataNode, normalization.getBNodeVariableMap(), normalizedSubTree));
         }
         return iqsBuilder.build();
     }
@@ -177,23 +190,35 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         QueryNode rootNode = insertTree.getRootNode();
         if ((rootNode instanceof InnerJoinNode) && !((InnerJoinNode) rootNode).getOptionalFilterCondition().isPresent()) {
-            ImmutableList<IQTree> children = insertTree.getChildren();
-            if (children.stream().allMatch(c -> c instanceof IntensionalDataNode))
-                return ImmutableSet.copyOf((ImmutableList<IntensionalDataNode>)(ImmutableList<?>)children);
+
+            ImmutableSet.Builder<IntensionalDataNode> setBuilder = ImmutableSet.builder();
+            for (IQTree child : insertTree.getChildren()) {
+                setBuilder.addAll(extractIntensionalDataNodesFromHead(child));
+            }
+            return setBuilder.build();
         }
 
         throw new OntopInvalidKGQueryException("Invalid INSERT clause");
     }
 
-    private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
+    private IQ createInsertIQ(IntensionalDataNode dataNode, ImmutableMap<BNode, Variable> bnodeVariableMap, IQTree subTree) {
+
         DataAtom<AtomPredicate> dataNodeAtom = dataNode.getProjectionAtom();
         List<Variable> mutableProjectedVariables = Lists.newArrayList();
         Map<Variable, VariableOrGroundTerm> mutableSubstitutionMap = Maps.newHashMap();
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(whereTree.getKnownVariables(), dataNode.getKnownVariables()));
+                Sets.union(subTree.getKnownVariables(), dataNode.getKnownVariables()));
 
-        for (VariableOrGroundTerm term: dataNodeAtom.getArguments()) {
+        ImmutableList<VariableOrGroundTerm> normalizedArguments = dataNodeAtom.getArguments().stream()
+                .map(a -> (a instanceof BNode)
+                        ? Optional.ofNullable(bnodeVariableMap.get(a))
+                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                "BNodes from the INSERT clause should be replaced internally by variables generated out of templates"))
+                        : a)
+                .collect(ImmutableCollectors.toList());
+
+        for (VariableOrGroundTerm term: normalizedArguments) {
             if ((term instanceof Variable) && !mutableProjectedVariables.contains(term))
                 mutableProjectedVariables.add((Variable) term);
             else {
@@ -212,7 +237,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         IQ newIQ = iqFactory.createIQ(
                 projectionAtom,
-                iqFactory.createUnaryIQTree(constructionNode, whereTree));
+                iqFactory.createUnaryIQTree(constructionNode, subTree));
 
         return newIQ.normalizeForOptimization();
     }
@@ -232,65 +257,67 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                        boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (node instanceof StatementPattern){
             StatementPattern stmt = (StatementPattern)node;
             if (stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))
-                return translateQuadPattern(stmt, externalBindings);
+                return translateQuadPattern(stmt, externalBindings, treatBNodeAsVariable);
 
-            return translateTriplePattern((StatementPattern) node, externalBindings);
+            return translateTriplePattern((StatementPattern) node, externalBindings, treatBNodeAsVariable);
         }
 
         if (node instanceof Join)
-            return translateJoinLikeNode((Join) node, externalBindings);
+            return translateJoinLikeNode((Join) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof LeftJoin)
-            return translateJoinLikeNode((LeftJoin) node, externalBindings);
+            return translateJoinLikeNode((LeftJoin) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Difference)
-            return translateDifference((Difference) node, externalBindings);
+            return translateDifference((Difference) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Union)
-            return translateUnion((Union) node, externalBindings);
+            return translateUnion((Union) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Filter)
-            return translateFilter((Filter) node, externalBindings);
+            return translateFilter((Filter) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Projection)
-            return translateProjection((Projection) node, externalBindings);
+            return translateProjection((Projection) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Slice)
-            return translateSlice((Slice) node, externalBindings);
+            return translateSlice((Slice) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Distinct)
-            return translateDistinctOrReduced(node, externalBindings);
+            return translateDistinctOrReduced(node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Reduced)
-            return translateDistinctOrReduced(node, externalBindings);
+            return translateDistinctOrReduced(node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof SingletonSet)
-            return translateSingletonSet(externalBindings);
+            return translateSingletonSet(externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Group)
-            return translateAggregate((Group) node, externalBindings);
+            return translateAggregate((Group) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Extension)
-            return translateExtension((Extension) node, externalBindings);
+            return translateExtension((Extension) node, externalBindings, treatBNodeAsVariable);
 
         if (node instanceof BindingSetAssignment)
             return translateBindingSetAssignment((BindingSetAssignment) node, externalBindings);
 
         if (node instanceof Order)
-            return translateOrder((Order) node, externalBindings);
+            return translateOrder((Order) node, externalBindings, treatBNodeAsVariable);
 
         throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
 
-    private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                  boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
-        TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings);
-        TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings);
+        TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings, treatBNodeAsVariable);
 
         ImmutableSet<Variable> leftVars = leftTranslation.iqTree.getVariables();
         ImmutableSet<Variable> sharedVars = rightTranslation.iqTree.getVariables().stream()
@@ -382,9 +409,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 .collect(ImmutableCollectors.toList()));
     }
 
-    private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(groupNode.getArg(), externalBindings);
-        AggregationNode an = getAggregationNode(groupNode, child.iqTree.getVariables(), externalBindings);
+    private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                 boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(groupNode.getArg(), externalBindings, treatBNodeAsVariable);
+        AggregationNode an = getAggregationNode(groupNode, child.iqTree.getVariables(), externalBindings, treatBNodeAsVariable);
 
         UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(
                 an,
@@ -409,14 +437,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     }
 
-    private AggregationNode getAggregationNode(Group groupNode, ImmutableSet<Variable> childVariables, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private AggregationNode getAggregationNode(Group groupNode, ImmutableSet<Variable> childVariables,
+                                               ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) {
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
         ImmutableList<VarDef> varDefs = ImmutableList.copyOf(
                 getGroupVarDefs(
                         groupNode.getGroupElements().iterator(),
                         new HashSet<>(childVariables),
-                        externalBindings));
+                        externalBindings, treatBNodeAsVariable));
 
         ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
                 .map(ImmutableMap::copyOf)
@@ -434,17 +463,19 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private List<VarDef> getGroupVarDefs(Iterator<GroupElem> it, Set<Variable> allowedVars, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private List<VarDef> getGroupVarDefs(Iterator<GroupElem> it, Set<Variable> allowedVars, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                         boolean treatBNodeAsVariable) {
         if (it.hasNext()) {
             GroupElem elem = it.next();
             ImmutableTerm term = getTerm(
                     elem.getOperator(),
                     allowedVars,
-                    externalBindings);
+                    externalBindings,
+                    treatBNodeAsVariable);
             Variable definedVar = termFactory.getVariable(elem.getName());
             allowedVars.add(definedVar);
 
-            List<VarDef> varDefs = getGroupVarDefs(it, allowedVars, externalBindings);
+            List<VarDef> varDefs = getGroupVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
             varDefs.add(
                     new VarDef(
                             definedVar,
@@ -455,12 +486,12 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return new ArrayList<>();
     }
 
-    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings);
+    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
         ImmutableSet<Variable> variables = child.iqTree.getVariables();
 
         ImmutableList<OrderByNode.OrderComparator> comparators = node.getElements().stream()
-                .map(o -> getOrderComparator(o, variables, externalBindings))
+                .map(o -> getOrderComparator(o, variables, externalBindings, treatBNodeAsVariable))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toList());
@@ -474,8 +505,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         child.nullableVariables);
     }
 
-    private Optional<OrderByNode.OrderComparator> getOrderComparator(OrderElem oe, ImmutableSet<Variable> variables, ImmutableMap<Variable, GroundTerm> externalBindings) {
-        ImmutableTerm expr = getTerm(oe.getExpr(), variables, externalBindings);
+    private Optional<OrderByNode.OrderComparator> getOrderComparator(OrderElem oe, ImmutableSet<Variable> variables,
+                                                                     ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                                     boolean treatBNodeAsVariable) {
+        ImmutableTerm expr = getTerm(oe.getExpr(), variables, externalBindings, treatBNodeAsVariable);
         if (expr.isGround()) {
             return Optional.empty();
         }
@@ -553,19 +586,19 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 getTermForLiteralOrIri(binding.getValue());
     }
 
-    private TranslationResult translateSingletonSet(ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private TranslationResult translateSingletonSet(ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) {
         return createTranslationResult(
                 iqFactory.createTrueNode(),
                 ImmutableSet.of()
         );
     }
 
-    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child;
         if (genNode instanceof Distinct) {
-            child = translate(((Distinct) genNode).getArg(), externalBindings);
+            child = translate(((Distinct) genNode).getArg(), externalBindings, treatBNodeAsVariable);
         } else if (genNode instanceof Reduced) {
-            child = translate(((Reduced) genNode).getArg(), externalBindings);
+            child = translate(((Reduced) genNode).getArg(), externalBindings, treatBNodeAsVariable);
         } else {
             throw new Sparql2IqConversionException("Unexpected node type for node: " + genNode.toString());
         }
@@ -578,8 +611,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings);
+    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
@@ -603,30 +636,30 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 );
     }
 
-    private TranslationResult translateFilter(Filter filter, ImmutableMap<Variable, GroundTerm> externalBindings)
+    private TranslationResult translateFilter(Filter filter, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable)
             throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
-        TranslationResult child = translate(filter.getArg(), externalBindings);
+        TranslationResult child = translate(filter.getArg(), externalBindings, treatBNodeAsVariable);
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
                         iqFactory.createFilterNode(
                                 getFilterExpression(
                                         filter.getCondition(),
                                         child.iqTree.getVariables(),
-                                        externalBindings)),
+                                        externalBindings, treatBNodeAsVariable)),
                         child.iqTree
                 ),
                 child.nullableVariables
         );
     }
 
-    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (!(join instanceof Join) && !(join instanceof LeftJoin)) {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
-        TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings);
-        TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings);
+        TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings, treatBNodeAsVariable);
 
         IQTree leftQuery = leftTranslation.iqTree;
         IQTree rightQuery = rightTranslation.iqTree;
@@ -673,7 +706,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                 projectedFromLeft,
                                 projectedFromRight
                         ).immutableCopy(),
-                        externalBindings) :
+                        externalBindings,
+                        treatBNodeAsVariable) :
                 Optional.empty();
 
         Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, toCoalesce.stream()
@@ -724,14 +758,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private Optional<ImmutableExpression> getLeftJoinFilter(LeftJoin join, ImmutableSubstitution<ImmutableTerm> topSubstitution, ImmutableSet<Variable> variables,
-                                                            ImmutableMap<Variable, GroundTerm> externalBindings) {
+                                                            ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                            boolean treatBNodeAsVariable) {
         return join.getCondition() != null ?
                 Optional.of(
                         topSubstitution.applyToBooleanExpression(
                                 getFilterExpression(
                                         join.getCondition(),
                                         variables,
-                                        externalBindings))) :
+                                        externalBindings, treatBNodeAsVariable))) :
                 Optional.empty();
     }
 
@@ -813,8 +848,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         throw new Sparql2IqConversionException("Left or inner join expected");
     }
 
-    private TranslationResult translateProjection(Projection node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings);
+    private TranslationResult translateProjection(Projection node, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                  boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
         IQTree subQuery = child.iqTree;
 
         List<ProjectionElem> projectionElems = node.getProjectionElemList().getElements();
@@ -889,9 +925,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return createTranslationResult(iqTree, nullableVariables);
     }
 
-    private TranslationResult translateUnion(Union union, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings);
-        TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings);
+    private TranslationResult translateUnion(Union union, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                             boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings, treatBNodeAsVariable);
 
         IQTree leftQuery = leftTranslation.iqTree;
         IQTree rightQuery = rightTranslation.iqTree;
@@ -945,12 +982,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                     boolean treatBNodeAsVariable) {
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalTripleAtom(
-                        translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
+                        translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
+                        translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
+                        translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable)
                 ));
 
         // In most cases
@@ -963,14 +1001,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
-    private TranslationResult translateQuadPattern(StatementPattern quad, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private TranslationResult translateQuadPattern(StatementPattern quad, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                   boolean treatBNodeAsVariable) {
 
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalQuadAtom(
-                        translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true, externalBindings)
+                        translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
+                        translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
+                        translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
+                        translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable)
                 ));
 
         // In most cases
@@ -983,8 +1022,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
-    private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult childTranslation = translate(node.getArg(), externalBindings);
+    private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                 boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult childTranslation = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
         IQTree childQuery = childTranslation.iqTree;
 
         // Warning: an ExtensionElement might reference a variable appearing in a previous ExtensionElement
@@ -995,7 +1035,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 getVarDefs(
                         node.getElements().iterator(),
                         new HashSet<>(childQuery.getVariables()),
-                        externalBindings));
+                        externalBindings, treatBNodeAsVariable));
         ImmutableSet<Variable> childVars = childQuery.getVariables();
         varDefs = varDefs.stream()
                 .filter(vd -> !childVars.contains(vd.var))
@@ -1015,20 +1055,22 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private List<VarDef> getVarDefs(Iterator<ExtensionElem> it, Set<Variable> allowedVars, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private List<VarDef> getVarDefs(Iterator<ExtensionElem> it, Set<Variable> allowedVars,
+                                    ImmutableMap<Variable, GroundTerm> externalBindings,
+                                    boolean treatBNodeAsVariable) {
         if (it.hasNext()) {
             ExtensionElem elem = it.next();
             if (elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName())) {
-                return getVarDefs(it, allowedVars, externalBindings);
+                return getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
             }
             ImmutableTerm term = getTerm(
                     elem.getExpr(),
                     allowedVars,
-                    externalBindings);
+                    externalBindings, treatBNodeAsVariable);
             Variable definedVar = termFactory.getVariable(elem.getName());
             allowedVars.add(definedVar);
 
-            List<VarDef> varDefs = getVarDefs(it, allowedVars, externalBindings);
+            List<VarDef> varDefs = getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
             varDefs.add(
                     new VarDef(
                             definedVar,
@@ -1191,15 +1233,16 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     /**
-     * @param expr      expression
-     * @param childVariables the set of variables that can occur in the expression
+     * @param expr                 expression
+     * @param childVariables       the set of variables that can occur in the expression
      * @param externalBindings
+     * @param treatBNodeAsVariable
      */
 
     private ImmutableExpression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> childVariables,
-                                                    ImmutableMap<Variable, GroundTerm> externalBindings) {
+                                                    ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) {
 
-        ImmutableTerm term = getTerm(expr, childVariables, externalBindings);
+        ImmutableTerm term = getTerm(expr, childVariables, externalBindings, treatBNodeAsVariable);
 
         ImmutableTerm xsdBooleanTerm = term.inferType()
                 .flatMap(TermTypeInference::getTermType)
@@ -1220,14 +1263,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
      * @return term
      */
 
-    private ImmutableTerm getTerm(ValueExpr expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private ImmutableTerm getTerm(ValueExpr expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                  boolean treatBNodeAsVariable) {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
         // iriOrFunction ::= iri ArgList?
 
         if (expr instanceof Var)
-            return translateRDF4JVar((Var) expr, knownVariables, false, externalBindings);
+            return translateRDF4JVar((Var) expr, knownVariables, false, externalBindings, treatBNodeAsVariable);
         if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
             return getTermForLiteralOrIri(v);
@@ -1257,7 +1301,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         ));
             }
 
-            ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables, externalBindings);
+            ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables, externalBindings, treatBNodeAsVariable);
 
             //Unary count
             if (expr instanceof Count) {
@@ -1385,8 +1429,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         }
         if (expr instanceof BinaryValueOperator) {
             BinaryValueOperator bexpr = (BinaryValueOperator) expr;
-            ImmutableTerm term1 = getTerm(bexpr.getLeftArg(), knownVariables, externalBindings);
-            ImmutableTerm term2 = getTerm(bexpr.getRightArg(), knownVariables, externalBindings);
+            ImmutableTerm term1 = getTerm(bexpr.getLeftArg(), knownVariables, externalBindings, treatBNodeAsVariable);
+            ImmutableTerm term2 = getTerm(bexpr.getRightArg(), knownVariables, externalBindings, treatBNodeAsVariable);
 
             if (expr instanceof And) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1414,7 +1458,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         ? termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 3),
                         term1, term2,
-                        getTerm(reg.getFlagsArg(), knownVariables, externalBindings))
+                        getTerm(reg.getFlagsArg(), knownVariables, externalBindings, treatBNodeAsVariable))
                         : termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
                         term1, term2);
@@ -1482,7 +1526,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             FunctionCall f = (FunctionCall) expr;
 
             ImmutableList<ImmutableTerm> terms = f.getArgs().stream()
-                    .map(a -> getTerm(a, knownVariables, externalBindings))
+                    .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
                     .collect(ImmutableCollectors.toList());
 
             String functionName = extractFunctionName(f.getURI());
@@ -1498,7 +1542,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             NAryValueOperator op = (NAryValueOperator) expr;
 
             ImmutableList<ImmutableTerm> terms = op.getArguments().stream()
-                    .map(a -> getTerm(a, knownVariables, externalBindings))
+                    .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
                     .collect(ImmutableCollectors.toList());
 
             if (expr instanceof Coalesce) {
@@ -1510,7 +1554,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         }
         if (expr instanceof BNodeGenerator) {
             Optional<ImmutableTerm> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
-                    .map(t -> getTerm(t, knownVariables, externalBindings));
+                    .map(t -> getTerm(t, knownVariables, externalBindings, treatBNodeAsVariable));
 
             SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                     SPARQL.BNODE, term.isPresent() ? 1 : 0);
@@ -1519,7 +1563,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                     .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol));
         }
         if (expr instanceof IRIFunction) {
-            ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables, externalBindings);
+            ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables, externalBindings, treatBNodeAsVariable);
             Optional<org.apache.commons.rdf.api.IRI> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI())
                     .map(rdfFactory::createIRI);
 
@@ -1537,9 +1581,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
             return termFactory.getImmutableFunctionalTerm(
                     functionSymbol,
-                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables, externalBindings)),
-                    getTerm(ifExpr.getResult(), knownVariables, externalBindings),
-                    getTerm(ifExpr.getAlternative(), knownVariables, externalBindings));
+                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables, externalBindings, treatBNodeAsVariable)),
+                    getTerm(ifExpr.getResult(), knownVariables, externalBindings, treatBNodeAsVariable),
+                    getTerm(ifExpr.getAlternative(), knownVariables, externalBindings, treatBNodeAsVariable));
         }
         if (expr instanceof ListMemberOperator) {
             ListMemberOperator listMemberOperator = (ListMemberOperator) expr;
@@ -1548,7 +1592,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 throw new MinorOntopInternalBugException("Was not expecting a ListMemberOperator from RDF4J with less than 2 args");
 
             ImmutableList<ImmutableTerm> argTerms = arguments.stream()
-                    .map(a -> getTerm(a, knownVariables, externalBindings))
+                    .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
                     .collect(ImmutableCollectors.toList());
             ImmutableTerm firstArgument = argTerms.get(0);
 
@@ -1601,10 +1645,14 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
      * Translates a RDF4J "Var" (which can be a variable or a constant) into a Ontop term.
      */
     private VariableOrGroundTerm translateRDF4JVar(Var v, Set<Variable> subtreeVariables, boolean leafNode,
-                                                   ImmutableMap<Variable, GroundTerm> externalBindings) {
+                                                   ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                   boolean treatBNodeAsVariable) {
         // If this "Var" is a constant
         if ((v.hasValue()))
             return getTermForLiteralOrIri(v.getValue());
+        if (v.isAnonymous() && !treatBNodeAsVariable)
+            return termFactory.getConstantBNode(v.getName());
+
         // Otherwise, this "Var" is a variable
         Variable var = termFactory.getVariable(v.getName());
         // If the subtree is empty, create a variable
