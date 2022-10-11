@@ -13,5 +13,9 @@ mappingId	MAPID-country
 target		data:country/{"acronym"} a :Country ; :name {"name"} ; :continent data:continent/{"continent"} .
 source		SELECT * FROM "country";
 
+mappingId	MAPID-developer
+target		data:person/{"id"} a :Developer .
+source		SELECT * FROM "employee" WHERE "role" = 'developer';
+
 ]]
 
