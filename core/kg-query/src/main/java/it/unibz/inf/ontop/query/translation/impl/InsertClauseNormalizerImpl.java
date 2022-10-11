@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -31,15 +32,18 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
 
     @Inject
     protected InsertClauseNormalizerImpl(CoreUtilsFactory coreUtilsFactory, IntermediateQueryFactory iqFactory,
                                          SubstitutionFactory substitutionFactory,
-                                         TermFactory termFactory) {
+                                         TermFactory termFactory,
+                                         FunctionSymbolFactory functionSymbolFactory) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     @Override
@@ -118,7 +122,13 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 .skip(1)
                 .forEach(v -> templateBuilder.addSeparator("/").addColumn());
 
-        return termFactory.getBnodeFunctionalTerm(templateBuilder.build(), ImmutableList.copyOf(variables));
+        ImmutableList<ImmutableFunctionalTerm> arguments = variables.stream()
+                .map(v -> termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getExtractLexicalTermFromRDFTerm(),
+                        v))
+                .collect(ImmutableCollectors.toList());
+
+        return termFactory.getBnodeFunctionalTerm(templateBuilder.build(), arguments);
     }
 
 
