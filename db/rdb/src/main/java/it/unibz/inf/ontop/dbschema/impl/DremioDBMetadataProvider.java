@@ -107,10 +107,4 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         return id.getComponents().get(TABLE_INDEX).getName();
     }
 
-    @Override
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
-        if (!extractedId.toString().replace("\"", "").equals(givenId.toString()
-                .replace("\"", "")))
-            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
-    }
 }
