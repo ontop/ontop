@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
@@ -26,15 +27,12 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
         builder.add(createFromString(components[components.length - 1]));
 
-        StringBuilder current = new StringBuilder();
-        for (int i = components.length - 2; i >= 0; i--) {
-            if (components[i] == null)
-                continue;
-            if(current.length() > 0)
-                current.insert(0, ".");
-            current.insert(0, components[i].replace("\"", ""));
-        }
-        builder.add(createFromString(current.toString()));
+        builder.add(createFromString(
+                String.join(".", Arrays.stream(components)
+                        .limit(components.length - 1) //First (N-1) components are schema, last is table name
+                        .map(name -> name.replace("\"", "")) //Remove quotes in-between
+                        .toArray(String[]::new)))
+        );
 
         return new RelationIDImpl(builder.build());
     }

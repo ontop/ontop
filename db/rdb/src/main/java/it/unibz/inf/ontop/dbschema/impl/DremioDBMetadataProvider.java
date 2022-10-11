@@ -21,31 +21,31 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
-    private final String[] defaultSchemaComponents;
+    private final String defaultSchemaComponent;
 
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
 
-        String[] localDefaultSchemaComponents = null;
+        String localdefaultSchemaComponent = null;
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
             rs.next();
-            localDefaultSchemaComponents = rs.getString("TABLE_SCHEM").split("\\.");
+            localdefaultSchemaComponent = rs.getString("TABLE_SCHEM");
         }
         catch (SQLException e) {
             /* NO-OP */
         }
-        defaultSchemaComponents = localDefaultSchemaComponents;
+        defaultSchemaComponent = localdefaultSchemaComponent;
     }
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (id.getComponents().size() > 1 || defaultSchemaComponents == null)
+        if (id.getComponents().size() > 1 || defaultSchemaComponent == null)
             return id;
 
         return createRelationID(
-                defaultSchemaComponents,
+                defaultSchemaComponent,
                 id.getComponents().get(TABLE_INDEX).getName());
     }
 
@@ -57,16 +57,10 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     }
 
     private boolean hasDefaultSchema(RelationID id) {
-        if (defaultSchemaComponents == null
-                || id.getComponents().size() != defaultSchemaComponents.length + 1)
+        if (defaultSchemaComponent == null || id.getComponents().size() != 2)
             return false;
 
-        for (int i = id.getComponents().size() - 1; i > 0; i--)
-            if (!id.getComponents().get(i).getName()
-                    .equals(defaultSchemaComponents[defaultSchemaComponents.length - i]))
-                return false;
-
-        return true;
+        return id.getComponents().get(1).equals(defaultSchemaComponent);
     }
 
     @Override
@@ -75,6 +69,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
             return super.getRelation(id0);
         }
         catch (RelationNotFoundInMetadataException e) {
+            //In case the metadata is not loaded yet, we run a simple query to force Dremio to load it.
             try (Statement st = connection.createStatement()) {
                 st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
             }
@@ -88,14 +83,12 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return createRelationID(
-                new String[] { rs.getString(schemaNameColumn)},
-                //rs.getString(schemaNameColumn).split("\\."),
+                rs.getString(schemaNameColumn),
                 rs.getString(tableNameColumn));
     }
 
-    private RelationID createRelationID(String[] schemaComponents, String tableName) {
-        String[] components = Arrays.copyOf(schemaComponents, schemaComponents.length + 1);
-        components[schemaComponents.length] = tableName;
+    private RelationID createRelationID(String schema, String tableName) {
+        String[] components = new String[] { schema, tableName };
         return rawIdFactory.createRelationID(components);
     }
 
@@ -116,7 +109,8 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
-        if (!extractedId.toString().replace("\"", "").equals(givenId.toString().replace("\"", "")))
+        if (!extractedId.toString().replace("\"", "").equals(givenId.toString()
+                .replace("\"", "")))
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 }
