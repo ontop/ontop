@@ -1,0 +1,13 @@
+@prefix : <http://www.example.org/test#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Professor a rdfs:Class .
+:Course a rdfs:Class .
+
+:numberOfStudents a owl:DatatypeProperty ; rdfs:range xsd:integer .
+:duration a owl:DatatypeProperty ; rdfs:range xsd:decimal .
+
+:teaches a owl:ObjectProperty .
+
