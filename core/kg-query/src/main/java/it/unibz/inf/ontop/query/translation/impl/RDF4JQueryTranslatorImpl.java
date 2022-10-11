@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
 import it.unibz.inf.ontop.query.translation.RDF4JQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -63,6 +64,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final InsertClauseNormalizer insertClauseNormalizer;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JQueryTranslatorImpl.class);
     private static final boolean IS_DEBUG_ENABLED = LOGGER.isDebugEnabled();
@@ -70,7 +72,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     @Inject
     public RDF4JQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                     TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
-                                    FunctionSymbolFactory functionSymbolFactory) {
+                                    FunctionSymbolFactory functionSymbolFactory,
+                                    InsertClauseNormalizer insertClauseNormalizer) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -79,6 +82,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.atomFactory = atomFactory;
         this.rdfFactory = rdfFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.insertClauseNormalizer = insertClauseNormalizer;
     }
 
     @Override
@@ -165,8 +169,17 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of(), false).iqTree;
 
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
-        for (IntensionalDataNode dataNode : extractIntensionalDataNodesFromHead(insertTree)) {
-            iqsBuilder.add(createInsertIQ(dataNode, whereTree));
+        ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
+
+
+        InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
+        IQTree normalizedSubTree = normalization.getConstructionNode()
+                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, whereTree))
+                .orElse(whereTree);
+
+
+        for (IntensionalDataNode dataNode : dataNodes) {
+            iqsBuilder.add(createInsertIQ(dataNode, normalization.getBNodeVariableMap(), normalizedSubTree));
         }
         return iqsBuilder.build();
     }
@@ -188,15 +201,24 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         throw new OntopInvalidKGQueryException("Invalid INSERT clause");
     }
 
-    private IQ createInsertIQ(IntensionalDataNode dataNode, IQTree whereTree) {
+    private IQ createInsertIQ(IntensionalDataNode dataNode, ImmutableMap<BNode, Variable> bnodeVariableMap, IQTree subTree) {
+
         DataAtom<AtomPredicate> dataNodeAtom = dataNode.getProjectionAtom();
         List<Variable> mutableProjectedVariables = Lists.newArrayList();
         Map<Variable, VariableOrGroundTerm> mutableSubstitutionMap = Maps.newHashMap();
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(whereTree.getKnownVariables(), dataNode.getKnownVariables()));
+                Sets.union(subTree.getKnownVariables(), dataNode.getKnownVariables()));
 
-        for (VariableOrGroundTerm term: dataNodeAtom.getArguments()) {
+        ImmutableList<VariableOrGroundTerm> normalizedArguments = dataNodeAtom.getArguments().stream()
+                .map(a -> (a instanceof BNode)
+                        ? Optional.ofNullable(bnodeVariableMap.get(a))
+                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                "BNodes from the INSERT clause should be replaced internally by variables generated out of templates"))
+                        : a)
+                .collect(ImmutableCollectors.toList());
+
+        for (VariableOrGroundTerm term: normalizedArguments) {
             if ((term instanceof Variable) && !mutableProjectedVariables.contains(term))
                 mutableProjectedVariables.add((Variable) term);
             else {
@@ -215,7 +237,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         IQ newIQ = iqFactory.createIQ(
                 projectionAtom,
-                iqFactory.createUnaryIQTree(constructionNode, whereTree));
+                iqFactory.createUnaryIQTree(constructionNode, subTree));
 
         return newIQ.normalizeForOptimization();
     }
