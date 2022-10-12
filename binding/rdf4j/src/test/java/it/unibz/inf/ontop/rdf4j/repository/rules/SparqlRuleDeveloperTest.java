@@ -28,8 +28,7 @@ public class SparqlRuleDeveloperTest extends AbstractRDF4JTest {
     public static void after() throws SQLException {
         release();
     }
-
-    @Ignore("TODO: support BGP insert rules")
+    
     @Test
     public void testDeveloperPosition() {
         String query = "PREFIX : <http://employee.example.org/voc#>\n" +
