@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
@@ -568,44 +567,9 @@ public class ValuesNodeOptimizationTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // 1 RDFConstant, 1 DBConstant of same datatype - optimization
-    @Ignore("Unclear if scenario within scope of optimization")
-    @Test
-    public void test20normalizationConstructionUnionTrueTrueRDFConstantSub() {
-        RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
-                TYPE_FACTORY.getXsdStringDatatype());
-        DBConstant xValue1 = TERM_FACTORY.getDBConstant("alpha", 
-                TYPE_FACTORY.getDBTypeFactory().getDBStringType());
-
-        ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue0));
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue1));
-
-        IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
-        IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
-        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0)
-        );
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(IQ_FACTORY.createValuesNode(
-                                ImmutableList.of(X),
-                                ImmutableList.of(ImmutableList.of(xValue0), ImmutableList.of(xValue1))),
-                        dataNode0));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
     // 1 RDFConstant, 1 DBConstant of different datatypes - no optimization
     @Test
-    public void test21normalizationConstructionUnionTrueTrueRDFConstantSub() {
+    public void test20normalizationConstructionUnionTrueTrueRDFConstantSub() {
         RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
                 TYPE_FACTORY.getXsdStringDatatype());
         DBConstant xValue1 = TERM_FACTORY.getDBConstant("2.4356", TYPE_FACTORY.getDBTypeFactory().getDBDoubleType());
@@ -636,7 +600,7 @@ public class ValuesNodeOptimizationTest {
 
     // If the substitution in the CONSTRUCT has an IRIConstant (not DBConstant) skip optimization for that CONSTRUCT
     @Test
-    public void test22normalizationConstructionUnionTrueTrueIRIConstant() {
+    public void test21normalizationConstructionUnionTrueTrueIRIConstant() {
         ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -676,7 +640,7 @@ public class ValuesNodeOptimizationTest {
 
     // If the substitution in the CONSTRUCT does not have a Constant skip optimization
     @Test
-    public void test23normalizationConstructionUnionTrueTrueNonConstant() {
+    public void test22normalizationConstructionUnionTrueTrueNonConstant() {
         ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -709,7 +673,7 @@ public class ValuesNodeOptimizationTest {
 
     // 2 RDF Constants same datatype with more than one projected variable - optimization
     @Test
-    public void test24normalizationConstructionUnionTrueTrueRDFConstant() {
+    public void test23normalizationConstructionUnionTrueTrueRDFConstant() {
         RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
                 TYPE_FACTORY.getXsdStringDatatype());
         RDFConstant xValue1 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/2",
@@ -762,7 +726,7 @@ public class ValuesNodeOptimizationTest {
 
     // 1 RDFConstant, 1 RDFLiteralConstant of same datatype - optimization
     @Test
-    public void test25normalizationConstructionUnionTrueTrueRDFConstantSub() {
+    public void test24normalizationConstructionUnionTrueTrueRDFConstantSub() {
         RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
                 TYPE_FACTORY.getXsdStringDatatype());
         RDFLiteralConstant xValue1 = TERM_FACTORY.getRDFLiteralConstant("alpha",
