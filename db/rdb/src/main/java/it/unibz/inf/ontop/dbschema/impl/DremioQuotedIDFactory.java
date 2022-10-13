@@ -31,6 +31,8 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
                         .toArray(String[]::new))
         );
 
+        System.out.println("DREMIO-DEBUG: relation " + schemaId.getName() + " " + schemaId.getSQLRendering());
+
         return new RelationIDImpl(ImmutableList.of(
                 createFromString(components[components.length - 1]),
                 schemaId
