@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
@@ -20,7 +21,7 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Nullable // the defaul schema is optional
-    private final String defaultSchema;
+    private final QuotedID defaultSchema;
 
     private static final int SCHEMA_INDEX = 1;
 
@@ -28,11 +29,13 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
 
-        String localDefaultSchema = null;
+        QuotedID localDefaultSchema = null;
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
             rs.next();
-            localDefaultSchema = rs.getString("TABLE_SCHEM");
+            String defaultSchemaName = rs.getString("TABLE_SCHEM");
+            RelationID id = rawIdFactory.createRelationID(defaultSchemaName, "DUMMY");
+            localDefaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
             /* NO-OP */
@@ -42,10 +45,9 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (defaultSchema == null || id.getComponents().size() > SCHEMA_INDEX)
-            return id;
-
-        return rawIdFactory.createRelationID(defaultSchema, id.getComponents().get(TABLE_INDEX).getName());
+        return (defaultSchema == null || id.getComponents().size() > SCHEMA_INDEX)
+            ? id
+            : new RelationIDImpl(ImmutableList.of(id.getComponents().get(TABLE_INDEX), defaultSchema));
     }
 
     @Override
@@ -62,7 +64,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         if (defaultSchema == null || id.getComponents().size() < SCHEMA_INDEX + 1)
             return false;
 
-        return id.getComponents().get(SCHEMA_INDEX).getName().equals(defaultSchema);
+        return id.getComponents().get(SCHEMA_INDEX).equals(defaultSchema);
     }
 
     @Override
