@@ -14,14 +14,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     private final String defaultSchemaComponent;
+
+    private static final int SCHEMA_INDEX = 1;
 
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
@@ -41,12 +41,10 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (id.getComponents().size() > 1 || defaultSchemaComponent == null)
+        if (defaultSchemaComponent == null || id.getComponents().size() > SCHEMA_INDEX)
             return id;
 
-        return createRelationID(
-                defaultSchemaComponent,
-                id.getComponents().get(TABLE_INDEX).getName());
+        return rawIdFactory.createRelationID(defaultSchemaComponent, id.getComponents().get(TABLE_INDEX).getName());
     }
 
     @Override
@@ -57,10 +55,10 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     }
 
     private boolean hasDefaultSchema(RelationID id) {
-        if (defaultSchemaComponent == null || id.getComponents().size() != 2)
+        if (defaultSchemaComponent == null || id.getComponents().size() <= SCHEMA_INDEX)
             return false;
 
-        return id.getComponents().get(1).equals(defaultSchemaComponent);
+        return id.getComponents().get(SCHEMA_INDEX).getName().equals(defaultSchemaComponent);
     }
 
     @Override
@@ -82,14 +80,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
-        return createRelationID(
-                rs.getString(schemaNameColumn),
-                rs.getString(tableNameColumn));
-    }
-
-    private RelationID createRelationID(String schema, String tableName) {
-        String[] components = new String[] { schema, tableName };
-        return rawIdFactory.createRelationID(components);
+        return rawIdFactory.createRelationID(rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
     }
 
     @Override
@@ -97,9 +88,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected String getRelationSchema(RelationID id) {
-        return id.getComponents().subList(1, id.getComponents().size()).reverse().stream()
-                .map(QuotedID::getName) // IMPORTANT: no quotation marks!
-                .collect(Collectors.joining("."));
+        return  id.getComponents().get(SCHEMA_INDEX).getName();
     }
 
     @Override
