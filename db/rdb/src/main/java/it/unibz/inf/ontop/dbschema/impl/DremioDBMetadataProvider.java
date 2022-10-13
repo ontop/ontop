@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +19,7 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
+    @Nullable // the defaul schema is optional
     private final String defaultSchemaComponent;
 
     private static final int SCHEMA_INDEX = 1;
@@ -55,26 +56,26 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     }
 
     private boolean hasDefaultSchema(RelationID id) {
-        if (defaultSchemaComponent == null || id.getComponents().size() <= SCHEMA_INDEX)
+        if (defaultSchemaComponent == null || id.getComponents().size() < SCHEMA_INDEX + 1)
             return false;
 
         return id.getComponents().get(SCHEMA_INDEX).getName().equals(defaultSchemaComponent);
     }
 
     @Override
-    public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
+    public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         try {
-            return super.getRelation(id0);
+            return super.getRelation(id);
         }
         catch (RelationNotFoundInMetadataException e) {
-            //In case the metadata is not loaded yet, we run a simple query to force Dremio to load it.
+            // In case the metadata is not loaded yet, we run a simple query to force Dremio to load it.
             try (Statement st = connection.createStatement()) {
-                st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
+                st.execute("SELECT * FROM " + id.getSQLRendering() + " WHERE 1 = 0");
             }
             catch (SQLException ex) {
                 throw new MetadataExtractionException(ex);
             }
-            return super.getRelation(id0);
+            return super.getRelation(id); // try again
         }
     }
 
