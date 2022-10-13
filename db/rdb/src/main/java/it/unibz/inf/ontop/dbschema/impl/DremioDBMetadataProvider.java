@@ -52,12 +52,9 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected ImmutableList<RelationID> getAllIDs(RelationID id) {
-        ImmutableList<RelationID> r = hasDefaultSchema(id)
+        return hasDefaultSchema(id)
                 ? ImmutableList.of(id, id.getTableOnlyID())
                 : ImmutableList.of(id);
-
-        System.out.println("DREMIO-DEBUG: getAllIDs " + r);
-        return r;
     }
 
     private boolean hasDefaultSchema(RelationID id) {
