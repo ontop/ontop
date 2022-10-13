@@ -20,7 +20,7 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Nullable // the defaul schema is optional
-    private final String defaultSchemaComponent;
+    private final String defaultSchema;
 
     private static final int SCHEMA_INDEX = 1;
 
@@ -28,38 +28,41 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
 
-        String localdefaultSchemaComponent = null;
+        String localDefaultSchema = null;
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
             rs.next();
-            localdefaultSchemaComponent = rs.getString("TABLE_SCHEM");
+            localDefaultSchema = rs.getString("TABLE_SCHEM");
         }
         catch (SQLException e) {
             /* NO-OP */
         }
-        defaultSchemaComponent = localdefaultSchemaComponent;
+        defaultSchema = localDefaultSchema;
     }
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (defaultSchemaComponent == null || id.getComponents().size() > SCHEMA_INDEX)
+        if (defaultSchema == null || id.getComponents().size() > SCHEMA_INDEX)
             return id;
 
-        return rawIdFactory.createRelationID(defaultSchemaComponent, id.getComponents().get(TABLE_INDEX).getName());
+        return rawIdFactory.createRelationID(defaultSchema, id.getComponents().get(TABLE_INDEX).getName());
     }
 
     @Override
     protected ImmutableList<RelationID> getAllIDs(RelationID id) {
-        return hasDefaultSchema(id)
+        ImmutableList<RelationID> r = hasDefaultSchema(id)
                 ? ImmutableList.of(id, id.getTableOnlyID())
                 : ImmutableList.of(id);
+
+        System.out.println("DREMIO-DEBUG: getAllIDs " + r);
+        return r;
     }
 
     private boolean hasDefaultSchema(RelationID id) {
-        if (defaultSchemaComponent == null || id.getComponents().size() < SCHEMA_INDEX + 1)
+        if (defaultSchema == null || id.getComponents().size() < SCHEMA_INDEX + 1)
             return false;
 
-        return id.getComponents().get(SCHEMA_INDEX).getName().equals(defaultSchemaComponent);
+        return id.getComponents().get(SCHEMA_INDEX).getName().equals(defaultSchema);
     }
 
     @Override
