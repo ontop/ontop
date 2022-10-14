@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
@@ -441,34 +440,6 @@ public class ValuesNodeOptimizationTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // 2 DBConstants of different datatypes - no optimization
-    @Test
-    public void test16normalizationConstructionUnionTrueTrueDBConstant() {
-        DBConstant xValue0 = TERM_FACTORY.getDBConstant("alpha", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
-        DBConstant xValue1 = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
-
-        ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue0));
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue1));
-
-        IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
-        IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
-        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0));
-
-        // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
-
     // 2 DBConstants of same datatype - optimization
     @Test
     public void test17normalizationConstructionUnionTrueTrueDBConstant() {
@@ -701,8 +672,8 @@ public class ValuesNodeOptimizationTest {
         // Additional logic due to lifted bindings in Union Node
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode2,
                         IQ_FACTORY.createValuesNode(
-                                ImmutableList.of(F1, F0), ImmutableList.of(ImmutableList.of(yValue1, yValue0),
-                        ImmutableList.of(yValue3, yValue2))));
+                                ImmutableList.of(F0, F1), ImmutableList.of(ImmutableList.of(yValue0, yValue1),
+                        ImmutableList.of(yValue2, yValue3))));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }

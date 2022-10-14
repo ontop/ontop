@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -25,7 +24,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -716,16 +714,32 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         // CASE 2: UNION [[CONSTRUCT TRUE] [CONSTRUCT TRUE]] --> VALUES
         else if
-            (liftedChildren.stream().filter(c -> c.getRootNode() instanceof ConstructionNode)
-                    .filter(ch -> ch.getChildren().get(0).getRootNode() instanceof TrueNode)
-                    .filter(ch -> ((ConstructionNode) ch.getRootNode()).getSubstitution().getImmutableMap().values().stream()
-                            // RDF constants are already expected to be decomposed
-                            .allMatch(v -> v instanceof DBConstant))
-                    .count() > 1)
+            (liftedChildren.stream()
+                        .filter(this::isConstructTrueTreeWithOnlyDBConstantsOrNulls)
+                        .count() > 1)
             return mergeConstructTrueNodesIntoValuesNodes(liftedChildren, (UnionNode) tree.getRootNode());
         else
             return tree;
 
+    }
+
+    /**
+     * TODO: relax these constraints once we are sure non-DB constants in values nodes
+     * are lifted or transformed properly in the rest of the code
+     */
+    private boolean isConstructTrueTreeWithOnlyDBConstantsOrNulls(IQTree tree) {
+        QueryNode rootNode = tree.getRootNode();
+        if (!(rootNode instanceof ConstructionNode))
+            return false;
+
+        if (!(tree.getChildren().get(0) instanceof TrueNode))
+            return false;
+
+        ConstructionNode constructionNode = (ConstructionNode) rootNode;
+
+        // RDF constants are already expected to be decomposed
+        return constructionNode.getSubstitution().getImmutableMap().values().stream()
+                .allMatch(v -> (v instanceof DBConstant) || v.isNull());
     }
 
     private IQTree mergeValuesNodes(IQTree tree) {
@@ -760,83 +774,37 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return optimizeIntoValuesNode(newTree);
     }
 
-    private IQTree mergeConstructTrueNodesIntoValuesNodes(ImmutableList<IQTree> liftedChildren, UnionNode rootNode) {
+    private IQTree mergeConstructTrueNodesIntoValuesNodes(ImmutableList<IQTree> children, UnionNode rootNode) {
 
-        // Create key-value pair of {(set of variables, set of datatypes), substitution}
-        ImmutableMap<ImmutableList<ImmutableList<?>>, List<ImmutableMap<Variable, ImmutableTerm>>> variableDatatypeMappings =
-                liftedChildren.stream()
-                .filter(c -> c.getRootNode() instanceof ConstructionNode && c.getChildren().size() == 1
-                        && c.getChildren().get(0).getRootNode() instanceof TrueNode)
-                .map(c -> ((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap())
-                .filter(c -> c.values().stream().allMatch(x -> x instanceof Constant)
-                        && c.values().stream().map(v -> ((Constant) v).getOptionalType()).allMatch(Optional::isPresent))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(
-                                c -> ImmutableList.copyOf(Arrays.asList(c.keySet().stream().collect(ImmutableCollectors.toList()),
-                                        c.values().stream().map(v -> ((Constant) v).getOptionalType().get())
-                                                .collect(ImmutableCollectors.toList())
-                                ))),
-                        ImmutableMap::copyOf));
-
-        // Generate new values nodes
-        ImmutableList<ValuesNode> newValuesNode = variableDatatypeMappings.entrySet().stream()
-                .filter(v -> v.getValue().size() > 1 && v.getKey().get(1).stream().noneMatch(c -> c instanceof IRITermType))
-                .map(v -> iqFactory.createValuesNode(
-                        // Variables
-                        v.getKey().get(0).stream().map(y -> (Variable) y).collect(ImmutableCollectors.toList()),
-                        // Values
-                        v.getValue().stream()
-                                .map(c -> c.values().stream().map(x -> (Constant) x)
-                                        .map(y -> y instanceof RDFLiteralConstant
-                                            ? (Constant) ((GroundFunctionalTerm) normalizeNullAndRDFConstants(y)).getTerms().get(0)
-                                            : y)
-                                        .collect(ImmutableCollectors.toList()))
-                                .collect(ImmutableCollectors.toList())
-                ))
+        ImmutableList<IQTree> nonMergedChildren = children.stream()
+                .filter(tree -> !isConstructTrueTreeWithOnlyDBConstantsOrNulls(tree))
                 .collect(ImmutableCollectors.toList());
 
-        // Filter out remaining not merged CONSTRUCT TRUE to be readded to tree
-        ImmutableList<ImmutableMap<Variable, ImmutableTerm>> nonMergableConstructTrue = variableDatatypeMappings.values().stream()
-                .filter(v -> (v.size() == 1) || (v.stream().map(c -> c.values().stream().map(d -> d instanceof IRIConstant)
-                        .reduce(Boolean::logicalOr)).map(Optional::get).reduce(Boolean::logicalOr)).get())
-                .flatMap(Collection::stream)
+        ImmutableList<Variable> valuesVariables = ImmutableList.copyOf(rootNode.getVariables());
+
+        ImmutableList<ImmutableList<Constant>> values = children.stream()
+                .filter(this::isConstructTrueTreeWithOnlyDBConstantsOrNulls)
+                .map(IQTree::getRootNode)
+                .map(n -> (ConstructionNode) n)
+                .map(ConstructionNode::getSubstitution)
+                .map(s -> valuesVariables.stream()
+                        .map(v -> Optional.ofNullable(s.get(v))
+                                .orElseThrow(() -> new MinorOntopInternalBugException("The variable should have been defined")))
+                        .map(t -> (Constant) t)
+                        .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
-        List<IQTree> nonMergedChildren = new ArrayList<>();
-        for (ImmutableMap<Variable, ImmutableTerm> leftoverTree : nonMergableConstructTrue) {
-            nonMergedChildren.addAll(liftedChildren.stream()
-                    .filter(c -> c.getRootNode() instanceof ConstructionNode && c.getChildren().size() == 1
-                            && c.getChildren().get(0).getRootNode() instanceof TrueNode)
-                    .filter(c ->
-                            new ArrayList<>(((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap()
-                                    .keySet()).equals(new ArrayList<>(leftoverTree.keySet()))
-                            && new ArrayList<>(((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap()
-                                    .values()).equals(new ArrayList<>(leftoverTree.values())))
-                    .collect(Collectors.toList()));
-        }
-        ImmutableList<IQTree> remainingTrueNodes = ImmutableList.copyOf(nonMergedChildren);
+        ValuesNode valuesNode = iqFactory.createValuesNode(valuesVariables, values);
 
-        // Recreate tree with 1) VALUES node(s) 2) Non-Mergable [CONSTRUCT TRUE] nodes 3) Non-[CONSTRUCT TRUE] nodes
-        return (liftedChildren.stream().allMatch(c -> c.getRootNode() instanceof ConstructionNode
-                && c.getChildren().size() == 1 && c.getChildren().get(0).getRootNode() instanceof TrueNode
-                && ((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap().values().stream()
-                .allMatch(v -> v instanceof Constant))
-                && (newValuesNode.size() == 1 && remainingTrueNodes.size() == 0))
-                // CASE 1: All Construction nodes reduce to single Values Node
-                ? newValuesNode.get(0)
-                // CASE 2: Merge new Values Node with the other non-Values Nodes remaining
-                : iqFactory.createNaryIQTree(rootNode,
-                Stream.concat(
-                            newValuesNode.stream(),
-                            Stream.concat(
-                                    remainingTrueNodes.stream(),
-                                    liftedChildren.stream().filter(c -> !(c.getRootNode() instanceof ConstructionNode
-                                            && c.getChildren().size() == 1
-                                            && c.getChildren().get(0).getRootNode() instanceof TrueNode
-                                            && ((ConstructionNode) c.getRootNode()).getSubstitution().getImmutableMap()
-                                            .values().stream().allMatch(v -> v instanceof Constant
-                                                    && ((Constant) v).getOptionalType().isPresent())))
-                                    ))
-                        .collect(ImmutableCollectors.toList()));
+        if (nonMergedChildren.isEmpty())
+            return valuesNode;
+
+        ImmutableList<IQTree> newChildren = Stream.concat(
+                        Stream.of(valuesNode),
+                        nonMergedChildren.stream())
+                .collect(ImmutableCollectors.toList());
+
+        // Recursive
+        return mergeValuesNodes(iqFactory.createNaryIQTree(rootNode, newChildren));
     }
 }
