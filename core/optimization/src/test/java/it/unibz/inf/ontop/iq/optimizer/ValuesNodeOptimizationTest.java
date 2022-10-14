@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
@@ -546,57 +548,38 @@ public class ValuesNodeOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, xValue0));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, xValue1));
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFLiteralFunctionalTerm(A, TYPE_FACTORY.getXsdStringDatatype())));
 
         IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
         IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
-        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
+        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(A));
+        IQTree tree2 = IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode0);
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0)
+                ImmutableList.of(tree0, tree1, tree2)
         );
 
+        ExtensionalDataNode newDataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(F0F1));
+
         // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(IQ_FACTORY.createValuesNode(
-                                ImmutableList.of(X), ImmutableList.of(ImmutableList.of(yValue0), ImmutableList.of(yValue1))),
-                        dataNode0));
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X,
+                                TERM_FACTORY.getRDFLiteralFunctionalTerm(F0F1, TYPE_FACTORY.getXsdStringDatatype()))),
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(ImmutableSet.of(F0F1)),
+                        ImmutableList.of(
+                                IQ_FACTORY.createValuesNode(
+                                        ImmutableList.of(F0F1),
+                                        ImmutableList.of(ImmutableList.of(yValue0), ImmutableList.of(yValue1))),
+                                newDataNode)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // 1 RDFConstant, 1 DBConstant of different datatypes - no optimization
-    @Test
-    public void test20normalizationConstructionUnionTrueTrueRDFConstantSub() {
-        RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
-                TYPE_FACTORY.getXsdStringDatatype());
-        DBConstant xValue1 = TERM_FACTORY.getDBConstant("2.4356", TYPE_FACTORY.getDBTypeFactory().getDBDoubleType());
-
-        ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue0));
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, xValue1));
-
-        IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
-        IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
-        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
-
-        // Create initial node
-        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0)
-        );
-
-        // Create expected Tree
-        // NOTE: Order changes between CONSTRUCTs but since it is a UNION it does not matter
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree1, tree0, dataNode0));
-
-        assertTrue(baseTestNormalization(initialTree, expectedTree));
-    }
 
     // If the substitution in the CONSTRUCT has an IRIConstant (not DBConstant) skip optimization for that CONSTRUCT
     @Test
@@ -724,40 +707,67 @@ public class ValuesNodeOptimizationTest {
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
 
-    // 1 RDFConstant, 1 RDFLiteralConstant of same datatype - optimization
+    /**
+     * 1 IRIConstant, 1 RDFLiteralConstant of same datatype - just lifting the RDF term
+     * Could be further optimized if we start accepting TermTypeConstant in ValuesNode.
+     *
+     */
     @Test
     public void test24normalizationConstructionUnionTrueTrueRDFConstantSub() {
-        RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1",
-                TYPE_FACTORY.getXsdStringDatatype());
-        RDFLiteralConstant xValue1 = TERM_FACTORY.getRDFLiteralConstant("alpha",
-                XSD.STRING);
-        DBConstant yValue0 = TERM_FACTORY.getDBConstant("http://example.org/ds1/1",
-                TYPE_FACTORY.getDBTypeFactory().getDBStringType());
-        DBConstant yValue1 = TERM_FACTORY.getDBConstant("alpha",
-                TYPE_FACTORY.getDBTypeFactory().getDBStringType());
+        ObjectRDFType iriType = TYPE_FACTORY.getIRITermType();
+        RDFDatatype xsdStringType = TYPE_FACTORY.getXsdStringDatatype();
+        RDFConstant xValue0 = TERM_FACTORY.getRDFConstant("http://example.org/ds1/1", iriType);
+        RDFConstant xValue1 = TERM_FACTORY.getRDFConstant("alpha", xsdStringType);
 
         ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, xValue0));
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, xValue1));
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFLiteralFunctionalTerm(A, xsdStringType)));
 
         IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
         IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createTrueNode());
-        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(X));
+        ExtensionalDataNode dataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(A));
+        IQTree tree2 = IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode0);
 
         // Create initial node
         IQTree initialTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(tree0, tree1, dataNode0)
+                ImmutableList.of(tree0, tree1, tree2)
         );
 
+        Variable f0f2 = TERM_FACTORY.getVariable("f0f2");
+        Variable f1f3 = TERM_FACTORY.getVariable("f1f3");
+
+        ConstructionNode newConstructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(f0f2, f1f3),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        f0f2, TERM_FACTORY.getDBStringConstant("http://example.org/ds1/1"),
+                        f1f3, TERM_FACTORY.getRDFTermTypeConstant(iriType)
+                        ));
+        ConstructionNode newConstructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(f0f2, f1f3),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        f0f2, TERM_FACTORY.getDBStringConstant("alpha"),
+                        f1f3, TERM_FACTORY.getRDFTermTypeConstant(xsdStringType)
+                ));
+        ConstructionNode newConstructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(f0f2, f1f3),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        f1f3, TERM_FACTORY.getRDFTermTypeConstant(xsdStringType)
+                ));
+        IQTree newTree0 = IQ_FACTORY.createUnaryIQTree(newConstructionNode0, IQ_FACTORY.createTrueNode());
+        IQTree newTree1 = IQ_FACTORY.createUnaryIQTree(newConstructionNode1, IQ_FACTORY.createTrueNode());
+        ExtensionalDataNode newDataNode0 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(f0f2));
+        IQTree newTree2 = IQ_FACTORY.createUnaryIQTree(newConstructionNode2, newDataNode0);
+
+
         // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(IQ_FACTORY.createValuesNode(
-                                ImmutableList.of(X),
-                                ImmutableList.of(ImmutableList.of(yValue0), ImmutableList.of(yValue1))),
-                        dataNode0));
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X,
+                                TERM_FACTORY.getRDFFunctionalTerm(f0f2, f1f3))),
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f2, f1f3)),
+                        ImmutableList.of(newTree0, newTree1, newTree2)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }

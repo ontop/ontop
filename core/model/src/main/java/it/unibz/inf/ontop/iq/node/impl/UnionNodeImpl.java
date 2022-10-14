@@ -411,7 +411,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return optimizeConstructIntoValuesNode(
+                return optimizeIntoValuesNode(
                         liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, treeCache));
         }
     }
@@ -694,7 +694,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
     }
 
-    private IQTree optimizeConstructIntoValuesNode(IQTree tree) {
+    private IQTree optimizeIntoValuesNode(IQTree tree) {
+        QueryNode rootNode = tree.getRootNode();
+
+        if (rootNode instanceof ConstructionNode) {
+            IQTree subTree = tree.getChildren().get(0);
+            IQTree newSubTree = optimizeIntoValuesNode(subTree);
+            return (subTree == newSubTree)
+                    ? tree
+                    : iqFactory.createUnaryIQTree((ConstructionNode) rootNode, newSubTree);
+        }
+
+        if (!(rootNode instanceof UnionNode))
+            return tree;
 
         ImmutableList<IQTree> liftedChildren = tree.getChildren();
 
@@ -707,23 +719,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             (liftedChildren.stream().filter(c -> c.getRootNode() instanceof ConstructionNode)
                     .filter(ch -> ch.getChildren().get(0).getRootNode() instanceof TrueNode)
                     .filter(ch -> ((ConstructionNode) ch.getRootNode()).getSubstitution().getImmutableMap().values().stream()
-                            .allMatch(v -> v instanceof Constant))
+                            // RDF constants are already expected to be decomposed
+                            .allMatch(v -> v instanceof DBConstant))
                     .count() > 1)
             return mergeConstructTrueNodesIntoValuesNodes(liftedChildren, (UnionNode) tree.getRootNode());
-
-        // CASE 3: CONSTRUCT UNION [[CONSTRUCT TRUE] [CONSTRUCT TRUE]] --> CONSTRUCT VALUES
-        // This scenario arises due to the RDF normalization applied in the Union node
-        else if ((liftedChildren.get(0).getRootNode() instanceof UnionNode) &&
-                (liftedChildren.get(0).getChildren().stream().filter(c -> c.getRootNode() instanceof ConstructionNode)
-                    .filter(ch -> ch.getChildren().get(0).getRootNode() instanceof TrueNode)
-                    .filter(ch -> ((ConstructionNode) ch.getRootNode()).getSubstitution().getImmutableMap().values().stream()
-                            .allMatch(v -> v instanceof Constant))
-                    .count() > 1)) {
-            ImmutableList<IQTree> newLiftedChildren = liftedChildren.get(0).getChildren();
-            return iqFactory.createUnaryIQTree((ConstructionNode) tree.getRootNode(),
-                    mergeConstructTrueNodesIntoValuesNodes(newLiftedChildren,
-                            (UnionNode) liftedChildren.get(0).getRootNode()));
-        }
         else
             return tree;
 
@@ -744,11 +743,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .filter(c -> c instanceof ValuesNode)
                 .map(c -> ((ValuesNode) c))
                 .map(ValuesNode::getOrderedVariables)
-                .findFirst().get();
+                .findFirst()
+                .orElseThrow(() -> new MinorOntopInternalBugException("At least one values node was expected"));
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(orderedVariables, mergedValuesNodes);
 
-        return liftedChildren.stream().allMatch(c -> c instanceof ValuesNode)
+        IQTree newTree = liftedChildren.stream().allMatch(c -> c instanceof ValuesNode)
                 // If all children are values nodes, just return the new node
                 ? newValuesNode
                 // Otherwise, merge new Values Node with the other non-Values Nodes remaining
@@ -756,6 +756,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 Stream.concat(
                         Stream.of(newValuesNode),
                         liftedChildren.stream().filter(c -> !(c instanceof ValuesNode))).collect(ImmutableCollectors.toList()));
+
+        return optimizeIntoValuesNode(newTree);
     }
 
     private IQTree mergeConstructTrueNodesIntoValuesNodes(ImmutableList<IQTree> liftedChildren, UnionNode rootNode) {
