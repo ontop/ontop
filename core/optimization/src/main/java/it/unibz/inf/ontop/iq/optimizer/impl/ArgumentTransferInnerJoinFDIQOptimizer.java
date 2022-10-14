@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -29,18 +30,21 @@ import java.util.stream.Stream;
  */
 public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimizer {
 
-    private final ArgumentTransferJoinTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
+    private final CoreSingletons coreSingletons;
+    private final SelfJoinFDSimplifier simplifier;
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        SelfJoinFDSimplifier simplifier = new SelfJoinFDSimplifier(coreSingletons);
-        this.transformer = new ArgumentTransferJoinTransformer(simplifier, coreSingletons);
+        simplifier = new SelfJoinFDSimplifier(coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQ optimize(IQ query) {
+
+        ArgumentTransferJoinTransformer transformer = new ArgumentTransferJoinTransformer(simplifier, coreSingletons, query.getVariableGenerator());
         IQTree initialTree = query.getTree();
         IQTree newTree = transformer.transform(initialTree);
         return (newTree == initialTree)
@@ -52,15 +56,18 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
     protected static class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final SelfJoinFDSimplifier simplifier;
+        private final VariableGenerator variableGenerator;
 
-        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, CoreSingletons coreSingletons) {
+        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, CoreSingletons coreSingletons,
+                                                  VariableGenerator variableGenerator) {
             super(coreSingletons);
             this.simplifier = simplifier;
+            this.variableGenerator = variableGenerator;
         }
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return simplifier.transformInnerJoin(rootNode, children, tree.getVariables())
+            return simplifier.transformInnerJoin(rootNode, children, tree.getVariables(), variableGenerator)
                     .orElse(tree);
         }
     }

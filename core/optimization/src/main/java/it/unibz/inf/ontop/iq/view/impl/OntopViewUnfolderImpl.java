@@ -115,7 +115,7 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
                     dataNode.getArgumentMap());
 
             IQTree substitutedDefinition = renamedDefinition.getTree()
-                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
+                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dataNode.getVariables()),

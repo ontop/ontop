@@ -287,10 +287,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
+                                          VariableGenerator variableGenerator) {
         return iqFactory.createNaryIQTree(this,
                 children.stream()
-                        .map(c -> c.propagateDownConstraint(constraint))
+                        .map(c -> c.propagateDownConstraint(constraint, variableGenerator))
                         .collect(ImmutableCollectors.toList()));
     }
 
@@ -417,12 +418,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
+                                              VariableGenerator variableGenerator) {
         ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
                     descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint))
+                .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
@@ -439,12 +441,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
+            VariableGenerator variableGenerator) {
         ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
                 descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
         UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
@@ -504,7 +507,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
                 IntStream.range(0, liftedChildren.size())
                         .mapToObj(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
-                                tmpNormalizedChildSubstitutions.get(i), unionVariables))
+                                tmpNormalizedChildSubstitutions.get(i), unionVariables, variableGenerator))
                         .flatMap(this::flattenChild)
                         .map(c -> c.getVariables().equals(unionVariables)
                                 ? c
@@ -667,7 +670,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      */
     private IQTree updateChild(UnaryIQTree liftedChildTree, ImmutableSubstitution<ImmutableTerm> mergedSubstitution,
                                ImmutableSubstitution<ImmutableTerm> tmpNormalizedSubstitution,
-                               ImmutableSet<Variable> projectedVariables) {
+                               ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
         ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
 
         ConstructionNodeTools.NewSubstitutionPair substitutionPair = constructionTools.traverseConstructionNode(
@@ -680,7 +683,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 substitutionPair.propagatedSubstitution.transform(v -> (VariableOrGroundTerm)v);
 
         IQTree newChild = liftedChildTree.getChild()
-                .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
+                .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                     // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)

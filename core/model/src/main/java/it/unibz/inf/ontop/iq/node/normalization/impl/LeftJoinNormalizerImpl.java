@@ -326,7 +326,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     children.get(0).getVariables(),
                     leftGrandChild.getVariables()).immutableCopy();
 
-            IQTree rightSubTree = initialRightChild.applyDescendingSubstitution(descendingSubstitution, ljCondition);
+            IQTree rightSubTree = initialRightChild.applyDescendingSubstitution(descendingSubstitution, ljCondition, variableGenerator);
 
             // Creates a right provenance if needed for lifting the substitution
             Optional<RightProvenance> rightProvenance = createProvenanceElements(rightSubTree,
@@ -389,7 +389,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     return updateConditionAndRightChild(simplificationResults.getOptionalExpression(), rightChild);
 
                 IQTree updatedRightChild = rightChild.applyDescendingSubstitution(downSubstitution,
-                        simplificationResults.getOptionalExpression());
+                        simplificationResults.getOptionalExpression(), variableGenerator);
 
                 Optional<RightProvenance> rightProvenance = createProvenanceElements(updatedRightChild, downSubstitution,
                         leftVariables, updatedRightChild.getVariables(), variableGenerator);
@@ -780,7 +780,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         public LJNormalizationState propagateDownLJCondition() {
             if (ljCondition.isPresent()) {
-                IQTree newRightChild = rightChild.propagateDownConstraint(ljCondition.get());
+                IQTree newRightChild = rightChild.propagateDownConstraint(ljCondition.get(), variableGenerator);
                 return rightChild.equals(newRightChild)
                         ? this
                         : updateConditionAndRightChild(ljCondition, newRightChild);

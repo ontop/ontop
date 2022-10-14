@@ -35,4 +35,6 @@ public interface QueryNodeVisitor {
     void visit(SliceNode sliceNode);
 
     void visit(OrderByNode orderByNode);
+
+    void visit(FlattenNode flattenNode);
 }

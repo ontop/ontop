@@ -231,6 +231,20 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ValuesNode valuesNode = (ValuesNode) rootNode;
             return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
         }
+        else if (rootNode instanceof FlattenNode) {
+            FlattenNode flattenNode = (FlattenNode) rootNode;
+            IQTree subtree = tree.getChildren().get(0);
+            return sqlAlgebraFactory.createSQLFlattenExpression(
+                    convert(
+                            subtree,
+                            ImmutableSortedSet.copyOf(subtree.getVariables())
+                    ),
+                    flattenNode.getFlattenedVariable(),
+                    flattenNode.getOutputVariable(),
+                    flattenNode.getIndexVariable(),
+                    flattenNode.getFlattenedType()
+            );
+        }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
     }

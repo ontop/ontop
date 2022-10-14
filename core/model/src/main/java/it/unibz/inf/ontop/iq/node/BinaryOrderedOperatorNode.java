@@ -45,11 +45,11 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
+            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            IQTree leftChild, IQTree rightChild);
+            IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild,
                               IQTreeCache treeCache);
@@ -58,7 +58,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     boolean isDistinct(IQTree tree, IQTree leftChild, IQTree rightChild);
 
-    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild);
+    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
     /**
      * Only validates the node, not its children

@@ -272,6 +272,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
+
     //-------------
     // Aggregation
     //-------------
@@ -358,5 +359,13 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMinutesBetweenFromDateTime();
     DBFunctionSymbol getDBSecondsBetweenFromDateTime();
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
+
+    //JSON
+    DBFunctionSymbol getDBJsonElt(ImmutableList<String> path);
+    DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path);
+    DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
 }

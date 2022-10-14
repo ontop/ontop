@@ -72,10 +72,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+                                              Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
 
         return newOrderByNode
                 .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
@@ -84,10 +84,10 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
 
         Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         return newOrderByNode
                 .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))

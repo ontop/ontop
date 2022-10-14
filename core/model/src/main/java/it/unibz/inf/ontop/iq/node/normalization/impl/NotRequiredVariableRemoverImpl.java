@@ -154,7 +154,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(variablesToKeep,
                     normalization.getNormalizedSubstitution());
-            IQTree newChild = normalization.updateChild(child);
+            IQTree newChild = normalization.updateChild(child, variableGenerator);
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
             return iqFactory.createUnaryIQTree(newConstructionNode, newChild)
@@ -174,6 +174,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+            return iqFactory.createUnaryIQTree(
+                    rootNode,
+                    transform(child));
+        }
+
+        @Override
+        public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
             return iqFactory.createUnaryIQTree(
                     rootNode,
                     transform(child));

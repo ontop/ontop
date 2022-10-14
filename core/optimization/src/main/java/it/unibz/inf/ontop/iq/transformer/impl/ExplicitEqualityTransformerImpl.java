@@ -63,14 +63,17 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     }
 
     /**
-     * Affects (left) joins and data nodes.
-     * - left join: if the same variable is returned by both operands (implicit equality),
-     * rename it (with a fresh variable each time) in each branch but the left one,
-     * and make the corresponding equalities explicit.
-     * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
-     * - data node: if the data node contains a ground term, create a variable and make the equality explicit (create a filter).
+     * Affects left joins, inner joins and data nodes.
      *
-     * If needed, creates a root projection to ensure that the transformed query has the same signature as the input one
+     * - left join: if the same variable is returned by both operands (implicit equality),
+     * rename it (with a fresh variable) in the left branch, and make the corresponding equality explicit.
+     *
+     * - inner join: identical to left join, except that renaming is performed in each branch but the first where the variable appears.
+     *
+     * - data node or: if the data atom contains a ground term or a duplicate variable,
+     * create a variable and make the equality explicit by creating a filter.
+     *
+     * If needed, create a root projection to ensure that the transformed query has the same signature as the input one.
      */
     class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -149,7 +152,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
             Iterator<IQTree> it = children.iterator();
             return substitutions.stream().sequential()
-                    .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s))
+                    .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .collect(ImmutableCollectors.toList());
         }
 
@@ -171,7 +174,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
             ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
 
-            if (empt(replacementVars))
+            if (allAbsent(replacementVars))
                 return dn;
 
             FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
@@ -201,9 +204,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             );
         }
 
-
-
-        private boolean empt(ImmutableList<Optional<Variable>> replacementVars) {
+        private boolean allAbsent(ImmutableList<Optional<Variable>> replacementVars) {
             return replacementVars.stream()
                     .noneMatch(Optional::isPresent);
         }
@@ -234,18 +235,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom<AtomPredicate> dataAtom) {
-            Set<Variable> vars = new HashSet<>();
+            Set<Variable> newVariables = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
             for (VariableOrGroundTerm term: dataAtom.getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {
                     Variable var = (Variable) term;
-                    if (vars.contains(var)) {
+                    if (newVariables.contains(var)) {
                         replacements.add(Optional.of(variableGenerator.generateNewVariableFromVar(var)));
                     } else {
                         replacements.add(Optional.empty());
-                        vars.add(var);
+                        newVariables.add(var);
                     }
                 }
             }
@@ -372,6 +373,30 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     trimRootFilter(child)
             );
         }
+
+
+//        private IQTree transformFlattenNode(IQTree tree, FlattenNode node, IQTree child) {
+//
+//            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(node.getDataAtom(), child.getVariables());
+//
+//            if (empt(replacementVars))
+//                return tree;
+//
+//            FilterNode filter = createFilter(node.getDataAtom(), replacementVars);
+//            DataAtom atom = replaceVars(node.getDataAtom(), replacementVars);
+//            return iqFactory.createUnaryIQTree(
+//                    iqFactory.createConstructionNode(node.getDataAtom().getVariables()),
+//                    iqFactory.createUnaryIQTree(
+//                            filter,
+//                            iqFactory.createUnaryIQTree(
+//                                    node.newNode(
+//                                            node.getFlattenedVariable(),
+//                                            node.getArrayIndexIndex(),
+//                                            atom),
+//                                    child
+//                            )));
+//        }
+//    }
 
         private ImmutableList<ImmutableExpression> getChildExpressions(ImmutableList<IQTree> children) {
             return children.stream()

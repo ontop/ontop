@@ -107,7 +107,7 @@ public class IQ2CQ {
                                     e -> freshVariables.get(e.getKey()),
                                     Map.Entry::getValue)));
 
-            IQTree newValuesNode = freshValuesNode.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+            IQTree newValuesNode = freshValuesNode.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
             IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 

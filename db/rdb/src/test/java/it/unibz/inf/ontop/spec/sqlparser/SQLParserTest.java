@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -15,8 +16,7 @@ import org.junit.Test;
 
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class SQLParserTest {
 
@@ -163,6 +163,18 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mc_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
+
+		builder.createDatabaseRelation("\"table.with.dots\"",
+				"id", varchar20DBType, false);
+
+		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("schema.with.dots", "\"table.with.dots\"")), DatabaseTableDefinition.attributeListBuilder()
+				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
+
+		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("name", "many", "many", "so", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
+				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
+
+		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("\"name.with.dots\"", "many", "many", "\"so.so\"", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
+				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
 
 		MetadataLookup metadataLookup = builder.build();
 		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
@@ -424,7 +436,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_2_8() throws Exception {
-		// ROMAN (Feb 2017): changed to upper-case STUDENT (otherwise invalid)
 		RAExpression re = parse("SELECT id, name FROM \"public\".\"STUDENT\" WHERE name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
@@ -433,7 +444,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_2_9() throws Exception {
-		// ROMAN (Feb 2017): changed to upper-case STUDENT (otherwise invalid)
 		RAExpression re = parse("SELECT t1.id, t1.name FROM \"public\".\"STUDENT\" as t1 "
 				+ "WHERE t1.name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
@@ -443,7 +453,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_2_10() throws Exception {
-		// ROMAN (Feb 2017): changed to upper-case STUDENT (otherwise invalid)
 		RAExpression re = parse("SELECT t1.id, t1.name, t1.grade FROM \"public\".\"STUDENT\" as t1 "
 				+ "WHERE t1.grade is not null AND t1.name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
@@ -497,19 +506,21 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT COUNT(id) AS student_count FROM student");
 	}
 
-	//@Test(expected = UnsupportedSelectQueryException.class)
-	// SQL:1999 aggregation not supported by JSQLParser
+	// @Test(expected = UnsupportedSelectQueryException.class)
+	// SQL:1999 aggregation not supported by JSQLParser: it treats EVERY as a function name here
 	// see https://blog.jooq.org/2014/12/18/a-true-sql-gem-you-didnt-know-yet-the-every-aggregate-function/
 	public void every_test() throws Exception {
 		RAExpression re = parse("SELECT EVERY(id < 10) AS student_id FROM student");
 	}
 
 	// @Test(expected = UnsupportedSelectQueryException.class)
+	// SQL:1999 aggregation not supported by JSQLParser: it treats ANY as a function name here
 	public void any_test() throws Exception {
 		RAExpression re = parse("SELECT ANY(id < 10) AS student_id FROM student");
 	}
 
 	// @Test(expected = UnsupportedSelectQueryException.class)
+	// SQL:1999 aggregation not supported by JSQLParser: it treats SOME as a function name here
 	public void some_test() throws Exception {
 		RAExpression re = parse("SELECT SOME(id < 10) AS student_id FROM student");
 	}
@@ -612,7 +623,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 LEFT OUTER JOIN grade t2 ON t1.id=t2.st_id");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to RIGTH JOIN
+	@Test(expected = UnsupportedSelectQueryException.class) // due to RIGHT JOIN
 	public void test_5_7() throws Exception {
 		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 RIGHT OUTER JOIN grade t2 ON t1.id=t2.st_id");
 	}
@@ -774,7 +785,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_9_5() throws Exception {
-		// ROMAN (Feb 2017): changed passed to pass
 		RAExpression re = parse("SELECT st_id, course, score from grade where pass = TRUE");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
@@ -783,7 +793,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_10_1() throws Exception {
-		// ROMAN (Feb 2017): changed passed to pass
 		RAExpression re = parse("SELECT name from grade, student where pass = TRUE AND course = 'CS001' AND ( (score = 8 AND mark = 'B') OR (score = 7 AND mark = 'C') OR (score >= 9 AND mark = 'A') )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(3, re.getFilterAtoms().size());
@@ -792,7 +801,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_10_2() throws Exception {
-		// ROMAN (Feb 2017): changed passed to pass
 		RAExpression re = parse("SELECT name from grade, student where pass = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
@@ -801,7 +809,6 @@ public class SQLParserTest {
 
 	@Test
 	public void test_11() throws Exception {
-		// ROMAN (Feb 2017): changed passed to pass
 		RAExpression re = parse("SELECT \"NAME\" from grade, student where pass = FALSE AND ( \"COURSE\" = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
@@ -927,12 +934,15 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	// TODO: expand
-	@Test //(expected = UnsupportedSelectQueryException.class) // due to COALESCE
+	@Test
 	public void test_md5() throws Exception {
 		RAExpression re = parse("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
 				"COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
 				"RAND()) )) AS locationID FROM northwind.Suppliers");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertTrue(re.getAttributes().asMap().values().iterator().next() instanceof ImmutableFunctionalTerm);
 	}
 
 	@Test
@@ -954,7 +964,7 @@ public class SQLParserTest {
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class)
-	// due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function calls
+	// due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
 	public void test_2_p() throws Exception {
 		RAExpression re = parse("SELECT \"ID\" as \"KEYID\"\n" +
 				"      ,CONVERT(varchar(50), \"DATETIME\", 0) as \"DATETIMEH\"\n" +
@@ -1027,4 +1037,36 @@ public class SQLParserTest {
 		RAExpression re = parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50");
 	}
 
+	@Test
+	public void test_table_with_dots() throws Exception {
+		RAExpression re = parse("select * from \"table.with.dots\"");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
+	}
+
+
+	@Test
+	public void test_schema_with_dots() throws Exception {
+		RAExpression re = parse("select * from \"SCHEMA.WITH.DOTS\".\"table.with.dots\"");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
+	}
+
+	@Test
+	public void test_multiple_components() throws Exception {
+		RAExpression re = parse("select * from name.many.many.so.many.components");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
+	}
+
+	@Test
+	public void test_multiple_dotted_components() throws Exception {
+		RAExpression re = parse("select * from \"name.with.dots\".many.many.\"so.so\".many.components");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
+	}
 }
