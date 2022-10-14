@@ -209,14 +209,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
                     .map(e-> convert(e, signature))
-                    // Special case: UNION [SLICE T1] additional SelectFromWhereWithModifiers wrapping needed
-                    // Where T1 could be e.g. VALUES or EXTENSIONAL as introduced by SliceNode optimizations
-                    .map(v -> (v.getLimit().isPresent())
-                            ? sqlAlgebraFactory.createSelectFromWhere(
-                            v.getProjectedVariables(), substitutionFactory.getSubstitution(), v, Optional.empty(),
-                            ImmutableSet.of(), Optional.empty().isPresent(), Optional.empty(),
-                            Optional.empty(), ImmutableList.of())
-                            : v)
                     .collect(ImmutableCollectors.toList());
             return sqlAlgebraFactory.createSQLUnionExpression(subExpressions,unionNode.getVariables());
         }
