@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Run tests on whether the SQL translation of the Slice Optimization for Values Node
@@ -31,7 +31,7 @@ public class ValuesNodeSimpleQueryOptimizationTest extends AbstractRDF4JTest {
 
     @Test
     public void testTranslatedSQLQuery1() {
-        String SPARQL_Query_String = "SELECT ?v WHERE {\n" +
+        String sparqlQueryString = "SELECT ?v WHERE {\n" +
                 "  ?v ?p ?o .\n" +
                 "}" +
                 "LIMIT 2";
@@ -39,18 +39,8 @@ public class ValuesNodeSimpleQueryOptimizationTest extends AbstractRDF4JTest {
         String expectedSQLQueryTranslation = "SELECT V1.C1 AS \"v1m6\"\n" +
                         "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Anna'), ('http://te.st/ValuesNodeTest#student/Francis') AS V1 )";
 
-        String ontopSQLtranslation = reformulate(SPARQL_Query_String);
-
-        assertEquals(expectedSQLQueryTranslation, adjustSQLTranslation(ontopSQLtranslation));
-    }
-
-    private String adjustSQLTranslation(String SQL_query) {
-        // Remove ans, CONSTRUCT, NATIVE clauses i.e. first 3 lines
-        String query2 = SQL_query.substring(SQL_query.indexOf('\n',
-                SQL_query.indexOf('\n',
-                        SQL_query.indexOf('\n')+1)+1)+1);
-        // Remove any remaining newlines at the end
-        return query2.replaceAll("([\\n\\r]+\\s*)*$", "");
+        String ontopSQLtranslation = reformulate(sparqlQueryString);
+        assertTrue(ontopSQLtranslation.contains(expectedSQLQueryTranslation));
     }
 
 }
