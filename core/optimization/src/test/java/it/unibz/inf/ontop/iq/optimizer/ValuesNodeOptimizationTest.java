@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
@@ -739,6 +740,56 @@ public class ValuesNodeOptimizationTest {
                 IQ_FACTORY.createNaryIQTree(
                         IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f2, f1f3)),
                         ImmutableList.of(newTree0, newTree1, newTree2)));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
+    @Test
+    public void test25NoVariableTrueNodesAndValuesNodes() {
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of()),
+                ImmutableList.of(
+                        IQ_FACTORY.createTrueNode(),
+                        IQ_FACTORY.createTrueNode(),
+                        IQ_FACTORY.createValuesNode(
+                                ImmutableList.of(),
+                                ImmutableList.of(ImmutableList.of(), ImmutableList.of(), ImmutableList.of()))));
+
+        IQTree expectedTree = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(),
+                ImmutableList.of(ImmutableList.of(), ImmutableList.of(), ImmutableList.of(),
+                        ImmutableList.of(), ImmutableList.of()));
+
+        assertTrue(baseTestNormalization(initialTree, expectedTree));
+    }
+
+    @Test
+    public void test26MergeableCombinationOfTrueConstructionValuesNodes() {
+        ConstructionNode constructionNode0 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR, Y, TWO_STR));
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO_STR));
+        IQTree tree0 = IQ_FACTORY.createUnaryIQTree(constructionNode0, IQ_FACTORY.createTrueNode());
+        IQTree tree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, IQ_FACTORY.createValuesNode(
+                ImmutableList.of(Y),
+                ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR))));
+
+        ValuesNode valuesNode2 = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(Y, X),
+                ImmutableList.of(ImmutableList.of(THREE_STR, ONE_STR), ImmutableList.of(FOUR_STR, TWO_STR)));
+
+        // Create initial node
+        IQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y)),
+                ImmutableList.of(tree0, tree1, valuesNode2)
+        );
+
+        // Create expected Tree
+        IQTree expectedTree = IQ_FACTORY.createValuesNode(
+                ImmutableList.of(Y, X), ImmutableList.of(
+                        ImmutableList.of(TWO_STR, ONE_STR),
+                        ImmutableList.of(ONE_STR, TWO_STR), ImmutableList.of(TWO_STR, TWO_STR),
+                        ImmutableList.of(THREE_STR, ONE_STR), ImmutableList.of(FOUR_STR, TWO_STR)));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
