@@ -98,18 +98,4 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    /*
-    * Accounting for the timezone in the data
-     */
-    @Override
-    protected List<String> getSecondsExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"116806800\"^^xsd:long");
-        expectedValues.add("\"1413511200\"^^xsd:long");
-        expectedValues.add("\"1492150672\"^^xsd:long");
-        expectedValues.add("\"1532991186\"^^xsd:long");
-
-        return expectedValues;
-    }
-
 }

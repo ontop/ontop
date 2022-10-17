@@ -55,17 +55,6 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         return expectedValues;
     }
 
-    @Override
-    protected List<String> getStrExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1970-11-05T07:50:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T11:30:00\"^^xsd:string");
-        expectedValues.add("\"2014-06-05T16:47:52\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06\"^^xsd:string");
-
-        return expectedValues;
-    }
-
     @Ignore("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
     @Test
     public void testTZ() throws Exception {

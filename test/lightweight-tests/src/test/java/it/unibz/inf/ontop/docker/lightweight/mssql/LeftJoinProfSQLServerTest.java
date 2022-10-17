@@ -12,9 +12,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import static it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest.obdaFileName;
-import static it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest.owlFileName;
-
 
 public class LeftJoinProfSQLServerTest extends AbstractLeftJoinProfTest {
 

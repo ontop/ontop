@@ -64,10 +64,10 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getStrExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1970-11-05T07:50:00.000000+01:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T11:30:00.000000+01:00\"^^xsd:string");
-        expectedValues.add("\"2014-06-05T16:47:52.000000+02:00\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06.000000+02:00\"^^xsd:string");
+        expectedValues.add("\"1970-11-05T07:50:00.000000\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T11:30:00.000000\"^^xsd:string");
+        expectedValues.add("\"2014-06-05T16:47:52.000000\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T09:23:06.000000\"^^xsd:string");
 
         return expectedValues;
     }
@@ -91,40 +91,13 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
-    //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
-    //here instead return null value
-    @Override
-    protected List<String> getBindWithAfter1ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\" Semantic Web\"@en");
-        expectedValues.add(null);
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
-
-        return expectedValues;
-    }
-
-    //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
-    //here instead return null value
-
-    @Override
-    protected List<String> getBindWithBefore1ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\"The Seman\"@en");
-        expectedValues.add(null);
-        expectedValues.add("\"The Logic Book: Introduc\"@en");
-
-        return expectedValues;
-    }
-
     @Override
     protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
 
         return expectedValues;
     }
@@ -140,33 +113,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
-    /*
-    Due to the timezone, automatically UTC+00 is set, and the timezones are added respectively
-     */
-    protected List<String> getHoursExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"10\"^^xsd:integer");
-        expectedValues.add("\"14\"^^xsd:integer");
-        expectedValues.add("\"6\"^^xsd:integer");
-        expectedValues.add("\"7\"^^xsd:integer");
-        return expectedValues;
-    }
-
-    /*
-     * Accounting for the timezone in the data
-     */
-    @Override
-    protected List<String> getSecondsExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"116806800\"^^xsd:long");
-        expectedValues.add("\"1413511200\"^^xsd:long");
-        expectedValues.add("\"1492150672\"^^xsd:long");
-        expectedValues.add("\"1532991186\"^^xsd:long");
-
-        return expectedValues;
-    }
-
-    @Ignore("Currently Oracle handling does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Ignore("Currently Oracle does not allow operation between DATE and DATETIME, db example has only DATE")
     @Test
     @Override
     public void testDaysBetweenDateMappingInput() throws Exception {
