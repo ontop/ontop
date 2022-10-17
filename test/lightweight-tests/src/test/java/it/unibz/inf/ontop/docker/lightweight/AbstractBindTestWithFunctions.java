@@ -82,11 +82,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testAndBind() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
                 + "}\n" +
                 "ORDER BY ?w";
@@ -103,11 +100,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testAndBindDistinct() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT DISTINCT ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
                 + "}\n" +
                 "ORDER BY ?w";
@@ -124,11 +118,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testOrBind() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT DISTINCT ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
                 + "}\n"
                 + "ORDER BY ?w";
@@ -150,12 +141,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testCeil() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:discount ?discount .\n"
                 + "   BIND (CEIL(?discount) AS ?w)\n"
                 + "}";
 
@@ -176,12 +164,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testFloor() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:discount ?discount .\n"
                 + "   BIND (FLOOR(?discount) AS ?w)\n"
                 + "}";
 
@@ -201,12 +186,10 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testRound() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
                 + "   BIND (CONCAT(STR(ROUND(?discount)),', ',STR(ROUND(?p))) AS ?w)\n"
                 + "}";
 
@@ -226,12 +209,10 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testAbs() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
                 + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?w)\n"
                 + "}";
 
@@ -255,11 +236,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testHashSHA256() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount.\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
                 + "   BIND (SHA256(str(?title)) AS ?w)\n"
                 + "}";
@@ -276,7 +254,7 @@ public abstract class AbstractBindTestWithFunctions {
                 hexString.append(hex);
             }
 
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
@@ -316,11 +294,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testStrLen() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRLEN(?title) AS ?w)\n"
                 + "}";
 
@@ -338,11 +313,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testSubstr2() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (SUBSTR(?title, 3) AS ?w)\n"
                 + "}";
 
@@ -360,11 +332,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testSubstr3() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (SUBSTR(?title, 3, 6) AS ?w)\n"
                 + "}";
 
@@ -380,12 +349,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testURIEncoding() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title,\"The\"))\n"
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
                 + "}";
@@ -403,11 +368,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testStrEnds() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
                 + "   FILTER(STRENDS(?title,\"b\"))\n"
                 + "}";
@@ -421,11 +383,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testStrStarts() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
@@ -441,11 +400,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testStrSubstring() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND(SUBSTR(?title,1,STRLEN(?title)) AS ?w)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
@@ -461,11 +417,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testContainsBind() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
                 + "}";
 
@@ -481,11 +434,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testContainsFilter() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
                 + "   FILTER(CONTAINS(?title,\"Semantic\"))\n"
                 + "}";
@@ -500,11 +450,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testBindWithUcase() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (UCASE(?title) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
                 + "}";
@@ -525,10 +472,8 @@ public abstract class AbstractBindTestWithFunctions {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (LCASE(?title) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
                 + "}";
@@ -550,11 +495,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testBindWithBefore1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
@@ -576,11 +518,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testBindWithBefore2() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
                 + "}";
         checkReturnedValuesUnordered(queryBind, getBindWithBefore2ExpectedValues());
@@ -600,11 +539,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testBindWithAfter1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
@@ -624,11 +560,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testBindWithAfter2() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
                 + "}";
 
@@ -656,13 +589,9 @@ public abstract class AbstractBindTestWithFunctions {
     public void testMonth() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND (MONTH(?year) AS ?w)\n"
                 + "}";
 
@@ -683,13 +612,9 @@ public abstract class AbstractBindTestWithFunctions {
     public void testYear() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND (YEAR(?year) AS ?w)\n"
                 + "}";
 
@@ -709,13 +634,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testDay() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND (DAY(?year) AS ?w)\n"
                 + "}";
 
@@ -737,13 +658,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testMinutes() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND (MINUTES(?year) AS ?w)\n"
                 + "}";
 
@@ -760,13 +677,9 @@ public abstract class AbstractBindTestWithFunctions {
     public void testHours() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND (HOURS(?year) AS ?w)\n"
                 + "}";
 
@@ -785,13 +698,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testSeconds() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{   ?x ns:pubYear ?year .\n"
                 + "   BIND (SECONDS(?year) AS ?w)\n"
                 + "}";
 
@@ -811,14 +720,8 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testNow() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (NOW() AS ?w)\n"
+        String queryBind = "SELECT ?w WHERE \n"
+                + "{  BIND (NOW() AS ?w)\n"
                 + "}";
 
         runTests(queryBind);
@@ -827,12 +730,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testUuid() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title (UUID() AS ?w) WHERE \n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (UUID() AS ?w) WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
                 + "}";
 
 
@@ -841,13 +741,7 @@ public abstract class AbstractBindTestWithFunctions {
 
     @Test
     public void testStrUuid() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title (STRUUID() AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "}";
+        String queryBind = "SELECT (STRUUID() AS ?w) WHERE { }";
 
 
         runTests(queryBind);
@@ -855,13 +749,7 @@ public abstract class AbstractBindTestWithFunctions {
 
     @Test
     public void testRand() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title (RAND() AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "}";
+        String queryBind = "SELECT (RAND() AS ?w) WHERE { }";
 
 
         runTests(queryBind);
@@ -870,11 +758,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testDivide() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   ?x dc:title ?title .\n"
                 + "   BIND ((?p / 2) AS ?w)\n"
                 + "}";
 
@@ -894,13 +780,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testTZ() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title (TZ(?year) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (TZ(?year) AS ?w) WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "}";
 
         checkReturnedValuesUnordered(queryBind, getTZExpectedValues());
@@ -1011,12 +893,8 @@ public abstract class AbstractBindTestWithFunctions {
     public void testIsIRI() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (isIRI(?title) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?price .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x dc:title ?title .\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -1036,13 +914,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testIsLiteral() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (isLiteral(?discount) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?price .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -1057,13 +931,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testIsNumeric() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (isNumeric(?discount) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?price .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x dc:title ?title .\n"
+                + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -1078,14 +948,10 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testStr() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (str(?year) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   } ORDER BY ?year ";
+                + "{ ?x ns:pubYear ?year . }\n"
+                + "ORDER BY ?year ";
 
         checkReturnedValuesAndOrder(queryBind, getStrExpectedValues());
 
@@ -1106,13 +972,9 @@ public abstract class AbstractBindTestWithFunctions {
     public void testLang() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (lang(?title) AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   }  ";
+                + "{  ?x dc:title ?title .\n"
+                + "}";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"en\"^^xsd:string");
@@ -1126,13 +988,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testDatatype() throws Exception {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT (?discount AS ?w) WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x ns:discount ?discount .\n"
+                + "{  ?x ns:discount ?discount .\n"
                 + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
                 + "   }  ";
 
@@ -1155,14 +1013,10 @@ public abstract class AbstractBindTestWithFunctions {
     public void testConcat() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  (CONCAT(?title,\" | \", ?description) AS ?w) WHERE \n"
                 + "{  \n"
-                + "   ?x ns:price ?p .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   ?x dc:description ?description .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   ?x ns:discount ?discount .\n"
                 + "   } ORDER BY ?title";
 
         List<String> expectedValues = new ArrayList<>();
@@ -1221,13 +1075,9 @@ public abstract class AbstractBindTestWithFunctions {
     @Test
     public void testREPLACE() throws Exception {
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?w WHERE \n"
                 + "{  \n"
-                + "   ?x ns:price ?p .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x dc:description ?description .\n"
-                + "   ?x ns:pubYear ?year .\n"
                 + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?w) .\n"
                 + "   } ORDER BY ?title";
 
@@ -1647,14 +1497,10 @@ public abstract class AbstractBindTestWithFunctions {
     public void testDaysBetweenDateTimeMappingInput() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
                 + "}";
@@ -1676,14 +1522,10 @@ public abstract class AbstractBindTestWithFunctions {
     public void testDaysBetweenDateMappingInput() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22\"^^xsd:date AS ?start )\n"
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
                 + "}";
@@ -1754,14 +1596,10 @@ public abstract class AbstractBindTestWithFunctions {
     public void testSecondsBetweenMappingInput() throws Exception {
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
+        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
+                + "SELECT ?w WHERE \n"
+                + "{   ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
                 + "   BIND (ofn:secondsBetween(?start, ?year) AS ?w)\n"
                 + "}";
@@ -1825,7 +1663,7 @@ public abstract class AbstractBindTestWithFunctions {
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }
-            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
+            assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues.toString()), expectedValues, returnedValues);
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
         }
     }
