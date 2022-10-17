@@ -3,14 +3,16 @@ package it.unibz.inf.ontop.docker.lightweight.db2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
-import org.junit.BeforeClass;
+import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
+import org.junit.jupiter.api.BeforeAll;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+@DB2LightweightTest
 public class DistinctInAggregateDB2Test extends AbstractDistinctInAggregateTest {
 
     private static String propertiesFile = "/university/university-db2.properties";
 
-    @BeforeClass
+    @BeforeAll
     public static void before() throws OWLOntologyCreationException {
         REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
         CONNECTION = REASONER.getConnection();

@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.docker.lightweight.db2;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
  */
+@DB2LightweightTest
 public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     private static final String owlfile = "/books/books.owl";
     private static final String obdafile = "/books/db2/books-db2.obda";
@@ -29,25 +31,25 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
         CONNECTION = getConnection();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
     }
 
-    @Ignore("Not yet supported")
+    @Disabled("Not yet supported")
     @Test
     @Override
     public void testHashSHA256() {
     }
 
-    @Ignore("Not yet supported")
+    @Disabled("Not yet supported")
     @Test
     @Override
     public void testUuid() {
     }
 
-    @Ignore("Not yet supported")
+    @Disabled("Not yet supported")
     @Test
     @Override
     public void testStrUuid() {
@@ -63,7 +65,7 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
-    @Ignore("Not yet supported")
+    @Disabled("Not yet supported")
     @Test
     @Override
     public void testTZ() {

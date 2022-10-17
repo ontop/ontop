@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
  */
-
+@PostgreSQLLightweightTest
 public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/books/books.owl";
@@ -31,7 +32,7 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         CONNECTION = getConnection();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
@@ -47,14 +48,14 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
+    @Disabled("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
     public void testHashSHA256() throws Exception {
         super.testHashSHA256();
     }
 
-    @Ignore("PostgreSQL v14 introduces trailing 0-s to result")
+    @Disabled("PostgreSQL v14 introduces trailing 0-s to result")
     @Test
     public void testSeconds() throws Exception {
         super.testSeconds();

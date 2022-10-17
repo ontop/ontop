@@ -22,7 +22,9 @@ package it.unibz.inf.ontop.docker.lightweight.db2;
  */
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
+import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 
+@DB2LightweightTest
 public class ConstraintDB2Test extends AbstractConstraintTest {
 
     private static final String propertyFile = "/books/db2/books-db2.properties";

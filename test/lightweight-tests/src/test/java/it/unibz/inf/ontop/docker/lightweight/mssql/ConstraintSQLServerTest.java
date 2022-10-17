@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.docker.lightweight.mssql;
  */
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
+import it.unibz.inf.ontop.docker.lightweight.MSSQLLightweightTest;
 
+@MSSQLLightweightTest
 public class ConstraintSQLServerTest extends AbstractConstraintTest {
 
     private static final String propertyFile = "/dbconstraints/dbconstraints-mssql.properties";

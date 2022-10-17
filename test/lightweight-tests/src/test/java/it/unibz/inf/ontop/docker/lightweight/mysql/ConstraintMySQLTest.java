@@ -22,7 +22,9 @@ package it.unibz.inf.ontop.docker.lightweight.mysql;
 
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
+import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 
+@MySQLLightweightTest
 public class ConstraintMySQLTest extends AbstractConstraintTest {
 
     private static final String propertyFile = "/dbconstraints/dbconstraints-mysql.properties";

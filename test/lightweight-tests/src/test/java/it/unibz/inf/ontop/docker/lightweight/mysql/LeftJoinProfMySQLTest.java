@@ -2,14 +2,16 @@ package it.unibz.inf.ontop.docker.lightweight.mysql;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest;
+import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+@MySQLLightweightTest
 public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
 
     private static final String propertyFileName = "/prof/mysql/prof-mysql.properties";
@@ -17,7 +19,7 @@ public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
-    @BeforeClass
+    @BeforeAll
     public static void before() throws OWLOntologyCreationException {
         REASONER = createReasoner(owlFileName, obdaFileName, propertyFileName);
         CONNECTION = REASONER.getConnection();
@@ -28,7 +30,7 @@ public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
         return CONNECTION.createStatement();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();

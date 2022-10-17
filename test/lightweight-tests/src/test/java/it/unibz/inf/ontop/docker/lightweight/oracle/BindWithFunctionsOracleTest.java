@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.docker.lightweight.oracle;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.docker.lightweight.OracleLightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
  *
  */
 
+@OracleLightweightTest
 public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/books/books.owl";
@@ -31,7 +33,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         CONNECTION = getConnection();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
@@ -40,21 +42,21 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     /*
      * Tests for hash functions. Oracle does not support any hash functions if DBMS CRYPTO is not enabled
      */
-    @Ignore("Require DBMS CRYPTO to be enabled")
+    @Disabled("Require DBMS CRYPTO to be enabled")
     @Test
     @Override
     public void testHashSHA256() throws Exception {
         super.testHashSHA256();
     }
 
-    @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Disabled("Find a way to distinguish empty strings and NULLs")
     @Test
     @Override
     public void testBindWithBefore1() throws Exception {
         super.testBindWithBefore1();
     }
 
-    @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Disabled("Find a way to distinguish empty strings and NULLs")
     @Test
     @Override
     public void testBindWithAfter1() throws Exception {
@@ -113,7 +115,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
-    @Ignore("Currently Oracle does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Disabled("Currently Oracle does not allow operation between DATE and DATETIME, db example has only DATE")
     @Test
     @Override
     public void testDaysBetweenDateMappingInput() throws Exception {

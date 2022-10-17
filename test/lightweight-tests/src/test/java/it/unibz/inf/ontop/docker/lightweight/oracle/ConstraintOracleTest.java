@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.docker.lightweight.oracle;
  */
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
+import it.unibz.inf.ontop.docker.lightweight.OracleLightweightTest;
 
+@OracleLightweightTest
 public class ConstraintOracleTest extends AbstractConstraintTest {
 
     private static final String propertyFile = "/dbconstraints/dbconstraints-oracle.properties";

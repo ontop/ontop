@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.docker.lightweight.postgresql;
  */
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 
+@PostgreSQLLightweightTest
 public class ConstraintPostgreSQLTest extends AbstractConstraintTest {
 
     private static final String propertyFile = "/dbconstraints/dbconstraints-postgresql.properties";

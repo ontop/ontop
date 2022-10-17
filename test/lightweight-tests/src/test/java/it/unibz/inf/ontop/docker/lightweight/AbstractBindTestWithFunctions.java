@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -262,25 +262,25 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testHashMd5() {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testHashSHA1() {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testHashSHA384() {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testHashSHA512() {
 
@@ -1211,7 +1211,7 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
-    @Ignore("TODO: support it, by using a case")
+    @Disabled("TODO: support it, by using a case")
     @Test
     public void testDivideByZeroFloat() throws Exception {
         String queryBind = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?w)  {} ";
@@ -1634,11 +1634,11 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValuesUnordered(query, expectedValues);
     }
     
-    private void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
+    protected void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
         checkReturnedValues(query, expectedValues, true);
     }
 
-    private void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {
+    protected void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {
 
         try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
             int i = 0;

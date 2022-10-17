@@ -2,11 +2,12 @@ package it.unibz.inf.ontop.docker.lightweight.mysql;
 
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
  */
+@MySQLLightweightTest
 public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/books/books.owl";
@@ -31,14 +33,14 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         CONNECTION = getConnection();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
     }
 
 
-    @Ignore("Not yet supported")
+    @Disabled("Not yet supported")
     @Test
     @Override
     public void testTZ() {

@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.docker.lightweight.mssql;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.docker.lightweight.MSSQLLightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
  */
+@MSSQLLightweightTest
 public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunctions {
     private static final String owlfile = "/books/books.owl";
     private static final String obdafile = "/books/books.obda";
@@ -29,7 +31,7 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         CONNECTION = getConnection();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
@@ -55,19 +57,19 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         return expectedValues;
     }
 
-    @Ignore("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
+    @Disabled("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
     @Test
     public void testTZ() throws Exception {
         super.testTZ();
     }
 
-    @Ignore("not supported?")
+    @Disabled("not supported?")
     @Test
     public void testREGEX() throws Exception {
         super.testREGEX();
     }
 
-    @Ignore("not supported")
+    @Disabled("not supported")
     @Test
     public void testREPLACE() throws Exception {
         super.testREPLACE();
@@ -81,13 +83,13 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
     }
 
     @Test
-    @Ignore("TODO: support regex")
+    @Disabled("TODO: support regex")
     @Override
     public void testIRI7() throws Exception {
         super.testIRI7();
     }
 
-    @Ignore("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Disabled("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
     @Test
     @Override
     public void testDaysBetweenDateMappingInput() throws Exception {

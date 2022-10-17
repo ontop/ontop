@@ -3,14 +3,16 @@ package it.unibz.inf.ontop.docker.lightweight.postgresql;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
-import org.junit.BeforeClass;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
+import org.junit.jupiter.api.BeforeAll;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+@PostgreSQLLightweightTest
 public class DistinctInAggregatePostgreSQLTest extends AbstractDistinctInAggregateTest {
 
     private static String propertiesFile = "/university/university-postgresql.properties";
 
-    @BeforeClass
+    @BeforeAll
     public static void before() throws OWLOntologyCreationException {
         REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
         CONNECTION = REASONER.getConnection();

@@ -2,24 +2,25 @@ package it.unibz.inf.ontop.docker.lightweight.db2;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest;
+import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-
+@DB2LightweightTest
 public class LeftJoinProfDB2Test extends AbstractLeftJoinProfTest {
     private static final String propertyFileName = "/prof/db2/prof-db2.properties";
 
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
-    @BeforeClass
+    @BeforeAll
     public static void before() throws OWLOntologyCreationException {
         REASONER = createReasoner(owlFileName, obdaFileName, propertyFileName);
         CONNECTION = REASONER.getConnection();
@@ -30,7 +31,7 @@ public class LeftJoinProfDB2Test extends AbstractLeftJoinProfTest {
         return CONNECTION.createStatement();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws Exception {
         CONNECTION.close();
         REASONER.close();
@@ -74,28 +75,28 @@ public class LeftJoinProfDB2Test extends AbstractLeftJoinProfTest {
      * "A string value with a length attribute greater than 255 bytes is not allowed in a SELECT list that also
      * specifies DISTINCT."
      */
-    @Ignore
+    @Disabled
     @Test
     @Override
     public void testMinStudents1() throws Exception {
         super.testMinStudents1();
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Override
     public void testMaxStudents1() throws Exception {
         super.testMaxStudents1();
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Override
     public void testSumStudents1() throws Exception {
         super.testSumStudents1();
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Override
     public void testAvgStudents1() throws Exception {
