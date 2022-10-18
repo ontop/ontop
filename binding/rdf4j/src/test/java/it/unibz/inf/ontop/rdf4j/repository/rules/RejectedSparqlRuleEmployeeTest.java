@@ -88,5 +88,35 @@ public class RejectedSparqlRuleEmployeeTest {
         }
     }
 
+    @Test
+    public void testInvalidInsertRule() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/invalid-insert.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testUnsupportedInsertDeleteRule() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/invalid-insert-delete.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testConstructRule() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/construct-rule.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
 
 }
