@@ -63,4 +63,18 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Roger Smith (Developer)"));
     }
+
+    @Test
+    public void testPositionCategoryCounts() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " BIND(<http://example.org/positionCategory/Developer> AS ?positionCategory)\n" +
+                " ?positionCategory a :PositionCategory ; :count ?v ." +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("1"));
+    }
+
+
 }
