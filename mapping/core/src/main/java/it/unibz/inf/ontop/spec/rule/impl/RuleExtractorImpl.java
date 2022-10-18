@@ -185,7 +185,15 @@ public class RuleExtractorImpl implements RuleExtractor {
     }
 
     private void checkForCycles(Map<IQ, Set<IQ>> saturatedDependencyMap) throws SparqlRuleException {
-        // TODO: implement seriously
+        ImmutableSet<String> rulesInCycles = saturatedDependencyMap.entrySet().stream()
+                .filter(e -> e.getValue().contains(e.getKey()))
+                .map(Map.Entry::getKey)
+                .map(Object::toString)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!rulesInCycles.isEmpty())
+            throw new SparqlRuleException("Dependency cycles detected for the following rules: \n" +
+                    String.join("\n", rulesInCycles));
     }
 
 }

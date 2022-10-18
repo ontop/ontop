@@ -58,7 +58,7 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 " ?x a :Employee . \n" +
                 " GRAPH <http://employee.example.org/graph1> {\n" +
-                "    ?x rdfs:label ?v .\n" +
+                "    ?x :label ?v .\n" +
                 " }\n" +
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Roger Smith (Developer)"));

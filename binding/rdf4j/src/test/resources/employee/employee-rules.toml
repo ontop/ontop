@@ -27,7 +27,7 @@ rules = [
 
     INSERT {
       GRAPH <http://employee.example.org/graph1> {
-         ?employee rdfs:label ?label .
+         ?employee :label ?label .
       }
     } WHERE {
       ?employee a :Employee ;
