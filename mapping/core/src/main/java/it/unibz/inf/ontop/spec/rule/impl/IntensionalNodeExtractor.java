@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
 
 import java.util.stream.Stream;
 
-public class DependencyPredicateExtractor extends AbstractPredicateExtractor<IntensionalDataNode> {
+public class IntensionalNodeExtractor extends AbstractPredicateExtractor<IntensionalDataNode> {
 
     @Inject
-    protected DependencyPredicateExtractor() {
+    protected IntensionalNodeExtractor() {
     }
 
     @Override

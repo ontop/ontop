@@ -32,14 +32,14 @@ public class RuleExtractorImpl implements RuleExtractor {
     private static final String RULES_KEY = "rules";
     private final KGQueryFactory kgQueryFactory;
     private final KGQueryTranslator kgQueryTranslator;
-    private final DependencyPredicateExtractor dependencyPredicateExtractor;
+    private final IntensionalNodeExtractor intensionalNodeExtractor;
 
     @Inject
     protected RuleExtractorImpl(KGQueryFactory kgQueryFactory, KGQueryTranslator kgQueryTranslator,
-                                DependencyPredicateExtractor dependencyPredicateExtractor) {
+                                IntensionalNodeExtractor intensionalNodeExtractor) {
         this.kgQueryFactory = kgQueryFactory;
         this.kgQueryTranslator = kgQueryTranslator;
-        this.dependencyPredicateExtractor = dependencyPredicateExtractor;
+        this.intensionalNodeExtractor = intensionalNodeExtractor;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class RuleExtractorImpl implements RuleExtractor {
     }
 
     private ImmutableSet<IRI> extractDependencyPredicates(IQ rule) throws SparqlRuleException {
-        ImmutableList<DataAtom<AtomPredicate>> dependencyAtoms = rule.getTree().acceptVisitor(dependencyPredicateExtractor)
+        ImmutableList<DataAtom<AtomPredicate>> dependencyAtoms = rule.getTree().acceptVisitor(intensionalNodeExtractor)
                 .map(IntensionalDataNode::getProjectionAtom)
                 .collect(ImmutableCollectors.toList());
 

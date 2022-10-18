@@ -41,7 +41,17 @@ public class RejectedSparqlRuleEmployeeTest {
     @Test
     public void testCyclingRules1() {
         try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
-                "/employee/cyclic-rules-1.toml")) {
+                "/employee/rejected/cyclic-rules-1.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testMetaPropertyInBody() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/meta-property-body-rule.toml")) {
             fail("A repository exception was expected");
         } catch (RepositoryException e) {
             assertTrue(e.getCause() instanceof SparqlRuleException);
