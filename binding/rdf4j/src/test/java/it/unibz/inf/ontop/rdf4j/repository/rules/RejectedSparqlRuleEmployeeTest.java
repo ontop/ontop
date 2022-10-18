@@ -58,5 +58,35 @@ public class RejectedSparqlRuleEmployeeTest {
         }
     }
 
+    @Test
+    public void testMetaPropertyInHead() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/meta-property-head-rule.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testMetaClassInBody() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/meta-class-body-rule.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testMetaClassInHead() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/meta-class-head-rule.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
 
 }

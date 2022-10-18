@@ -131,9 +131,13 @@ public class RuleExtractorImpl implements RuleExtractor {
         ImmutableMultimap.Builder<IRI, IQ> multimapBuilder = ImmutableMultimap.builder();
         for (IQ rule : rules) {
             // Slightly abusing the notion of mapping assertion, for not re-implementing the same logic for extracting the IRI
-            // TODO: refactor and throw a SparqlRuleException instead of a MinorOntopInternalBugException
-            IRI iri = new MappingAssertion(rule, null).getIndex().getIri();
-            multimapBuilder.put(iri, rule);
+            try {
+                IRI iri = new MappingAssertion(rule, null).getIndex().getIri();
+                multimapBuilder.put(iri, rule);
+            } catch (MappingAssertion.NoGroundPredicateOntopInternalBugException e) {
+                throw new SparqlRuleException("Unsupported rule: must use a constant class or a constant non-rdf:type " +
+                        "property in the INSERT clause.\n" + rule);
+            }
         }
         return multimapBuilder.build();
     }
