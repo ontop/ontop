@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -94,14 +95,21 @@ public class MappingAssertion {
             ImmutableList<? extends ImmutableTerm> substitutedArguments = getTerms();
 
             IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query));
+                    .orElseThrow(() -> new NoGroundPredicateOntopInternalBugException("The definition of the predicate is not always a ground term " + query));
 
             index = propertyIRI.equals(RDF.TYPE)
                     ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query)))
+                    .orElseThrow(() -> new NoGroundPredicateOntopInternalBugException("The definition of the predicate is not always a ground term " + query)))
                     : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
         }
         return index;
+    }
+
+    public static class NoGroundPredicateOntopInternalBugException extends OntopInternalBugException {
+
+        protected NoGroundPredicateOntopInternalBugException(String message) {
+            super(message);
+        }
     }
 
 }

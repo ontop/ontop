@@ -10,5 +10,46 @@ rules = [
          :lastName ?lastName .
       BIND (CONCAT(?firstName, ' ', ?lastName) AS ?fullName)
     }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?d :hasPosition [ a :Position ; rdfs:label "Developer" ] .
+    } WHERE {
+      ?d a :Developer .
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      GRAPH <http://employee.example.org/graph1> {
+         ?employee :label ?label .
+      }
+    } WHERE {
+      ?employee a :Employee ;
+        :fullName ?fullName ;
+        :hasPosition / rdfs:label ?positionLabel .
+      BIND (CONCAT(?fullName,' (', ?positionLabel, ')') AS ?label)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?positionCategory a :PositionCategory ; :count ?count .
+    } WHERE {
+      { SELECT ?positionLabel (COUNT(DISTINCT ?employee) AS ?count) WHERE {
+        ?employee a :Employee ;
+           :hasPosition / rdfs:label ?positionLabel .
+        }
+        GROUP BY ?positionLabel
+      }
+      BIND (IRI(CONCAT("http://example.org/positionCategory/", ?positionLabel)) AS ?positionCategory)
+    }
     """
 ]

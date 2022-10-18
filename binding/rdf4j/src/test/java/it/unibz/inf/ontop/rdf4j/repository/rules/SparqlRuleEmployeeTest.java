@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.rdf4j.repository.AbstractRDF4JTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,4 +35,46 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Roger Smith", "Anna Gross"));
     }
+
+    @Test
+    public void testDeveloperPosition() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Developer . \n" +
+                " ?x :hasPosition ?p . \n" +
+                " ?p a :Position . \n" +
+                " ?p rdfs:label ?v . \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("Developer"));
+    }
+
+    @Test
+    public void testEmployeeLabels() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Employee . \n" +
+                " GRAPH <http://employee.example.org/graph1> {\n" +
+                "    ?x :label ?v .\n" +
+                " }\n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("Roger Smith (Developer)"));
+    }
+
+    @Test
+    public void testPositionCategoryCounts() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " BIND(<http://example.org/positionCategory/Developer> AS ?positionCategory)\n" +
+                " ?positionCategory a :PositionCategory ; :count ?v ." +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("1"));
+    }
+
+
 }
