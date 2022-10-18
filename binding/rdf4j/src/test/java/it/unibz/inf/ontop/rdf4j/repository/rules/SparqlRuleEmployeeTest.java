@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.rdf4j.repository.AbstractRDF4JTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,5 +34,18 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 " ?x :fullName ?v . \n" +
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Roger Smith", "Anna Gross"));
+    }
+
+    @Test
+    public void testDeveloperPosition() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Developer . \n" +
+                " ?x :hasPosition ?p . \n" +
+                " ?p a :Position . \n" +
+                " ?p rdfs:label ?v . \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("Developer"));
     }
 }
