@@ -13,11 +13,27 @@ rules = [
     """,
     """
     PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     INSERT {
       ?d :hasPosition [ a :Position ; rdfs:label "Developer" ] .
     } WHERE {
       ?d a :Developer .
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      GRAPH <http://employee.example.org/graph1> {
+         ?employee rdfs:label ?label .
+      }
+    } WHERE {
+      ?employee a :Employee ;
+      :fullName ?fullName ;
+      :hasPosition / rdfs:label ?positionLabel .
+      BIND (CONCAT(?fullName,' (', ?positionLabel, ')') AS ?label)
     }
     """
 ]

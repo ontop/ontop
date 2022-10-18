@@ -176,7 +176,7 @@ public class RuleExtractorImpl implements RuleExtractor {
                     Set<IQ> inheritedDependencies = map.get(dependency);
                     if (inheritedDependencies != null) {
                         boolean hasChanged = mutableDependencySet.addAll(inheritedDependencies);
-                        hasNotConverged = hasNotConverged || !hasChanged;
+                        hasNotConverged = hasNotConverged || hasChanged;
                     }
                 }
             }

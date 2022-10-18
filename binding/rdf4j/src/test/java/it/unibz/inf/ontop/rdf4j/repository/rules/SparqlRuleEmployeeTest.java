@@ -39,6 +39,7 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
     @Test
     public void testDeveloperPosition() {
         String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "SELECT  ?v \n" +
                 "WHERE {\n" +
                 " ?x a :Developer . \n" +
@@ -47,5 +48,19 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 " ?p rdfs:label ?v . \n" +
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Developer"));
+    }
+
+    @Test
+    public void testEmployeeLabels() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Employee . \n" +
+                " GRAPH <http://employee.example.org/graph1> {\n" +
+                "    ?x rdfs:label ?v .\n" +
+                " }\n" +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("Roger Smith (Developer)"));
     }
 }
