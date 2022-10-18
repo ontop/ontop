@@ -1,16 +1,15 @@
 package it.unibz.inf.ontop.docker.lightweight.mssql;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.MSSQLLightweightTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -18,81 +17,61 @@ import java.util.List;
  */
 @MSSQLLightweightTest
 public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunctions {
-    private static final String owlfile = "/books/books.owl";
-    private static final String obdafile = "/books/books.obda";
-    private static final String propertiesfile = "/books/mssql/books-mssql.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
+    private static final String PROPERTIES_FILE = "/books/mssql/books-mssql.properties";
 
-    public BindWithFunctionsSQLServerTest() throws OWLOntologyCreationException {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
+    @BeforeAll
+    public static void before() throws IOException, SQLException {
+        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
+    public static void after() throws SQLException {
+        release();
     }
 
     @Override
-    protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.600000\"^^xsd:decimal");
-        expectedValues.add("\"5.750000\"^^xsd:decimal");
-        expectedValues.add("\"6.800000\"^^xsd:decimal");
-        expectedValues.add("\"1.500000\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getAbsExpectedValues() {
+        return ImmutableList.of("\"8.600000\"^^xsd:decimal", "\"5.750000\"^^xsd:decimal", "\"6.800000\"^^xsd:decimal",
+        "\"1.500000\"^^xsd:decimal");
     }
 
     @Override
-    protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0E-19, 43.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 23.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 34.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 10.0000000000000000000\"^^xsd:string");
-        return expectedValues;
-    }
-
-    @Disabled("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
-    @Test
-    public void testTZ() throws Exception {
-        super.testTZ();
+    protected ImmutableList<String> getRoundExpectedValues() {
+        return ImmutableList.of("\"0E-19, 43.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 23.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 34.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 10.0000000000000000000\"^^xsd:string");
     }
 
     @Disabled("not supported?")
     @Test
-    public void testREGEX() throws Exception {
+    public void testREGEX() {
         super.testREGEX();
     }
 
     @Disabled("not supported")
     @Test
-    public void testREPLACE() throws Exception {
+    public void testREPLACE() {
         super.testREPLACE();
     }
 
     @Override
-    protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.500000\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.500000\"^^xsd:decimal");
     }
 
     @Test
     @Disabled("TODO: support regex")
     @Override
-    public void testIRI7() throws Exception {
+    public void testIRI7() {
         super.testIRI7();
     }
 
     @Disabled("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
     @Test
     @Override
-    public void testDaysBetweenDateMappingInput() throws Exception {
+    public void testDaysBetweenDateMappingInput() {
         super.testDaysBetweenDateMappingInput();
     }
 }

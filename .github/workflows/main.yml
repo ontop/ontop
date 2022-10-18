@@ -43,6 +43,8 @@ jobs:
 
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI without docker tests
+        run: ./mvnw install --fail-at-end
       # Runs all tests specific to a db engine
       - name: Run CI for docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="pgsqllighttests" -DskipTests=false --fail-at-end
@@ -78,6 +80,8 @@ jobs:
 
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI without docker tests
+        run: ./mvnw install --fail-at-end
       # Runs all tests specific to a db engine
       - name: Run CI for docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mssqllighttests" -DskipTests=false --fail-at-end
@@ -112,6 +116,8 @@ jobs:
 
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI without docker tests
+        run: ./mvnw install --fail-at-end
       # Runs all tests specific to a db engine
       - name: Run CI for docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
@@ -148,6 +154,8 @@ jobs:
 
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI without docker tests
+        run: ./mvnw install --fail-at-end
       # Runs all tests specific to a db engine
       - name: Run CI for docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="oraclelighttests" -DskipTests=false --fail-at-end
@@ -187,6 +195,8 @@ jobs:
 
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI without docker tests
+        run: ./mvnw install --fail-at-end
       # Runs all tests specific to a db engine
       - name: Run CI for docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="db2lighttests" -DskipTests=false --fail-at-end

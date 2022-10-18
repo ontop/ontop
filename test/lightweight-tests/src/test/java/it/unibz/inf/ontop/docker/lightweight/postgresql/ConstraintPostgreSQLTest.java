@@ -26,10 +26,10 @@ import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 @PostgreSQLLightweightTest
 public class ConstraintPostgreSQLTest extends AbstractConstraintTest {
 
-    private static final String propertyFile = "/dbconstraints/dbconstraints-postgresql.properties";
+    private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-postgresql.properties";
 
     public ConstraintPostgreSQLTest(String method) {
-        super(method, propertyFile);
+        super(method, PROPERTIES_FILE);
     }
 
 }

@@ -52,19 +52,19 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private static final String TB_EDITION = "EDITION";
 	private static final String TB_BOOKWRITER = "BOOKWRITER";
 
-	private final String propertyFile;
+	private final String PROPERTIES_FILE;
 	private Properties properties;
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
 	
 	public AbstractConstraintTest(String method, String propertyFile) {
 		super(method);
-		this.propertyFile = propertyFile;
+		this.PROPERTIES_FILE = propertyFile;
 	}
 	
 	@Override
 	public void setUp() throws IOException, SQLException, MetadataExtractionException {
-		InputStream pStream = this.getClass().getResourceAsStream(propertyFile);
+		InputStream pStream = this.getClass().getResourceAsStream(PROPERTIES_FILE);
 		properties = new Properties();
 		properties.load(pStream);
 
@@ -100,73 +100,80 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		System.out.println(metadata);
 	}
-	
-	public void testPrimaryKey() {
-		log.info("==== PRIMARY KEY ====");
 
+	public void testPrimaryKey1() {
 		if (tBook.isPresent()) {
 			List<UniqueConstraint> ucs = tBook.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
+			fail("AbstractConstraintTest: " + TB_BOOK + " is not found");
+	}
 
+	public void testPrimaryKey2() {
 		if (tBookWriter.isPresent()) {
 			List<UniqueConstraint> ucs = tBookWriter.get().getUniqueConstraints();
 			assertEquals(0, ucs.size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+			fail("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+	}
 
+	public void testPrimaryKey3() {
 		if (tEdition.isPresent()) {
 			List<UniqueConstraint> ucs = tEdition.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
+			fail("AbstractConstraintTest: " + TB_EDITION + " is not found");
+	}
 
+	public void testPrimaryKey4() {
 		if (tWriter.isPresent()) {
 			List<UniqueConstraint> ucs = tWriter.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_WRITER + " is not found");
+			fail("AbstractConstraintTest: " + TB_WRITER + " is not found");
 	}
-	
-	public void testForeignKey() {
-		log.info("==== FOREIGN KEY ====");
 
+	public void testForeignKey1() {
 		if (tBook.isPresent()) {
 			List<ForeignKeyConstraint> fks =  tBook.get().getForeignKeys();
 			assertEquals(0, fks.size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
+			fail("AbstractConstraintTest: " + TB_BOOK + " is not found");
+	}
 
+	public void testForeignKey2() {
 		if (tBookWriter.isPresent()) {
 			List<ForeignKeyConstraint> fks =  tBookWriter.get().getForeignKeys();
 			assertEquals(2, fks.size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+			fail("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+	}
 
+	public void testForeignKey3() {
 		if (tEdition.isPresent()) {
 			List<ForeignKeyConstraint> fks =  tEdition.get().getForeignKeys();
 			assertEquals(1, fks.size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
+			fail("AbstractConstraintTest: " + TB_EDITION + " is not found");
+	}
 
+	public void testForeignKey4() {
 		if (tWriter.isPresent()) {
 			List<ForeignKeyConstraint> fks =  tWriter.get().getForeignKeys();
 			assertEquals(0, fks.size());
 		}
 		else
-			System.out.println("AbstractConstraintTest: " + TB_WRITER + " is not found");
-
+			fail("AbstractConstraintTest: " + TB_WRITER + " is not found");
 	}
 	
 	public String getConnectionPassword() {

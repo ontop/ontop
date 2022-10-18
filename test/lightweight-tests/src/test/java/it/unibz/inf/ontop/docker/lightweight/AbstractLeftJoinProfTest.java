@@ -1,28 +1,24 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
+public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
     private static final String LEFT_JOIN_NOT_OPTIMIZED_MSG = "The left join is still present in the output query";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLeftJoinProfTest.class);
 
-    public static final String owlFileName = "/prof/prof.owl";
-    public static final String obdaFileName = "/prof/prof.obda";
+    protected static final String OWL_FILE = "/prof/prof.owl";
+    protected static final String OBDA_FILE = "/prof/prof.obda";
+
 
     @Test
-    public void testMinusNickname() throws Exception {
+    public void testMinusNickname() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -35,18 +31,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 " FILTER (!bound(?nickname)) \n" +
                 "} ORDER BY ?v";
 
-        List<String> expectedValues = Lists.newArrayList(
-                "Barbara", "Diego", "Johann", "Mary"
-        );
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Barbara", "Diego", "Johann", "Mary"));
     }
 
     @Test
-    public void testMinus2() throws Exception {
+    public void testMinus2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -61,18 +55,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 " FILTER (!bound(?w)) \n" +
                 "} ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of(
-                "Barbara", "Johann", "Mary"
-        );
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Barbara", "Johann", "Mary"));
     }
 
     @Test
-    public void testMinusLastname() throws Exception {
+    public void testMinusLastname() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -85,13 +77,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 " FILTER (!bound(?n)) \n" +
                 "} ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of();
-        checkReturnedValuesAndOrder(expectedValues, query);
+        runQueryAndCompare(query, ImmutableList.of());
     }
 
 
     @Test
-    public void testSimpleFirstName() throws Exception {
+    public void testSimpleFirstName() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -103,18 +94,20 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "  }\n" +
                 "}";
 
+        String ontopSQLtranslation = reformulate(query);
 
-        String [] expectedValues = {"Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"};
-        String sql = checkReturnedValuesUnorderedReturnSql(query, Arrays.asList(expectedValues));
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        LOGGER.debug("SQL Query: \n" + sql);
-
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"professors\""));
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
+                "Mary"));
     }
 
     @Test
-    public void testRequiredTeacherNickname() throws Exception {
+    public void testRequiredTeacherNickname() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -129,17 +122,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n"
                 + "ORDER BY ?v\n";
 
-        List<String> expectedValues = Lists.newArrayList(
-                "Johnny", "Rog"
-        );
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
-        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
+
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Johnny", "Rog"));
     }
 
     @Test
-    public void testFullName1() throws Exception {
+    public void testFullName1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -152,17 +144,20 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "  }\n" +
                 "}";
 
-        String [] expectedValues = {"Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"};
-        String sql = checkReturnedValuesUnorderedReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"professors\""));
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
+                "Mary"));
     }
 
     @Test
-    public void testFullName2() throws Exception {
+    public void testFullName2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -177,17 +172,20 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   }\n" +
                 "}";
 
-        String [] expectedValues = {"Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"};
-        String sql = checkReturnedValuesUnorderedReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"professors\""));
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
+                "Mary"));
     }
 
     @Test
-    public void testFirstNameNickname() throws Exception {
+    public void testFirstNameNickname() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -200,17 +198,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "  }\n" +
                 "}";
 
-        String [] expectedValues = {
-                "Roger", "Frank", "John", "Michael"};
-        String sql = checkReturnedValuesUnorderedReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael"));
     }
 
     @Test
-    public void testSimpleNickname() throws Exception {
+    public void testSimpleNickname() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -222,19 +219,17 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "  }\n" +
                 "}";
 
-        String [] expectedValues = {
-                "Rog", "Frankie", "Johnny", "King of Pop"
-        };
-        String sql = checkReturnedValuesUnorderedReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        LOGGER.debug("SQL Query: \n" + sql);
-
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop"));
     }
 
     @Test
-    public void testNicknameAndCourse() throws Exception {
+    public void testNicknameAndCourse() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -249,20 +244,21 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 " }\n" +
                 "ORDER BY DESC(?v)";
 
-        List<String> expectedValues = getExpectedValuesNicknameAndCourse();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
+        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
+                NO_SELF_LJ_OPTIMIZATION_MSG);
+        runQueryAndCompare(query, getExpectedValuesNicknameAndCourse());
     }
 
-    protected List<String> getExpectedValuesNicknameAndCourse() {
+    protected ImmutableList<String> getExpectedValuesNicknameAndCourse() {
         return ImmutableList.of("Rog", "Rog", "Rog", "Johnny");
     }
 
     @Test
-    public void testCourseTeacherName() throws Exception {
+    public void testCourseTeacherName() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -275,19 +271,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY DESC(?v)";
 
-        String [] expectedValues = {
-                "Smith", "Poppins", "Depp"
-        };
-        String sql = checkReturnedValuesAndOrderReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        LOGGER.debug("SQL Query: \n" + sql);
-
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Smith", "Poppins", "Depp"));
     }
 
     @Test
-    public void testCourseJoinOnLeft1() throws Exception {
+    public void testCourseJoinOnLeft1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -302,18 +295,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY DESC(?v)";
 
-        List<String> expectedValues = ImmutableList.of(
-                "Smith", "Poppins", "Depp"
-        );
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Smith", "Poppins", "Depp"));
     }
 
     @Test
-    public void testCourseJoinOnLeft2() throws Exception {
+    public void testCourseJoinOnLeft2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -327,18 +318,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        String [] expectedValues = {
-                "John", "Mary", "Roger"
-        };
-        String sql = checkReturnedValuesAndOrderReturnSql(query, Arrays.asList(expectedValues));
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("John", "Mary", "Roger"));
     }
 
     @Test
-    public void testNotEqOrUnboundCondition() throws Exception {
+    public void testNotEqOrUnboundCondition() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -353,14 +342,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = Lists.newArrayList(
-                "John", "Mary"
-        );
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("John", "Mary"));
     }
 
     @Test
-    public void testPreferences() throws Exception {
+    public void testPreferences() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -376,17 +362,17 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of(
-                "Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop", "Poppins", "Rog");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop",
+                "Poppins", "Rog"));
     }
 
     @Test
-    public void testUselessRightPart2() throws Exception {
+    public void testUselessRightPart2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -402,17 +388,17 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        String [] expectedValues = {
-                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Smith"};
+        String ontopSQLtranslation = reformulate(query);
 
-        String sql = checkReturnedValuesAndOrderReturnSql(query, Arrays.asList(expectedValues));
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins",
+                "Smith"));
     }
 
     @Test
-    public void testOptionalTeachesAt() throws Exception {
+    public void testOptionalTeachesAt() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -427,16 +413,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = Arrays.asList("Depp", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Depp", "Poppins", "Smith"));
     }
 
     @Test
-    public void testOptionalTeacherID() throws Exception {
+    public void testOptionalTeacherID() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -451,12 +437,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = Arrays.asList("Depp", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, ImmutableList.of("Depp", "Poppins", "Smith"));
     }
 
     @Test
@@ -470,18 +456,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = getExpectedValueSumStudents1();
-        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValueSumStudents1());
     }
 
-    protected List<String> getExpectedValueSumStudents1() {
+    protected ImmutableList<String> getExpectedValueSumStudents1() {
         return ImmutableList.of("56");
     }
 
     @Test
-    public void testSumStudents2() throws Exception {
+    public void testSumStudents2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -493,18 +476,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValueSumStudents2();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValueSumStudents2());
     }
 
-    protected List<String> getExpectedValueSumStudents2() {
+    protected ImmutableList<String> getExpectedValueSumStudents2() {
         return ImmutableList.of("12", "13", "31");
     }
 
     @Test
-    public void testSumStudents3() throws Exception {
+    public void testSumStudents3() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -519,18 +499,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValueSumStudents3();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValueSumStudents3());
     }
 
-    protected List<String> getExpectedValueSumStudents3() {
+    protected ImmutableList<String> getExpectedValueSumStudents3() {
         return ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "31");
     }
 
     @Test
-    public void testSumStudents4() throws Exception {
+    public void testSumStudents4() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -542,18 +519,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        List<String> expectedValues = getExpectedValueSumStudents4();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValueSumStudents4());
     }
 
-    protected List<String> getExpectedValueSumStudents4() {
+    protected ImmutableList<String> getExpectedValueSumStudents4() {
         return ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
     }
 
     @Test
-    public void testSumStudents5() throws Exception {
+    public void testSumStudents5() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -565,18 +539,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        List<String> expectedValues = getExpectedValueSumStudents5();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValueSumStudents5());
     }
 
-    protected List<String> getExpectedValueSumStudents5() {
+    protected ImmutableList<String> getExpectedValueSumStudents5() {
         return ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
     }
 
     @Test
-    public void testDistinctAsGroupBy1() throws Exception {
+    public void testDistinctAsGroupBy1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -588,11 +559,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?fName";
 
-        List<String> expectedValues = ImmutableList.of("Barbara.", "Diego.", "Frank.", "Johann.", "John.", "Mary.",
-                "Michael.", "Roger.");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("Barbara.", "Diego.", "Frank.", "Johann.", "John.", "Mary.",
+                "Michael.", "Roger."));
     }
 
     @Test
@@ -606,10 +574,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = getExpectedValuesAvgStudents1();
-        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesAvgStudents1());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents1() {
@@ -617,7 +582,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testAvgStudents2() throws Exception {
+    public void testAvgStudents2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -629,10 +594,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValuesAvgStudents2();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesAvgStudents2());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
@@ -641,7 +603,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
 
 
     @Test
-    public void testAvgStudents3() throws Exception {
+    public void testAvgStudents3() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -656,10 +618,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValuesAvgStudents3();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesAvgStudents3());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
@@ -677,14 +636,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = ImmutableList.of("10");
-        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("10"));
     }
 
     @Test
-    public void testMinStudents2() throws Exception {
+    public void testMinStudents2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -696,10 +652,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("10","12", "13");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("10","12", "13"));
     }
 
     @Test
@@ -713,14 +666,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = ImmutableList.of("13");
-        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("13"));
     }
 
     @Test
-    public void testMaxStudents2() throws Exception {
+    public void testMaxStudents2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -732,14 +682,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("11","12", "13");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("11","12", "13"));
     }
 
     @Test
-    public void testDuration1() throws Exception {
+    public void testDuration1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -754,10 +701,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValuesDuration1();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesDuration1());
     }
 
     protected ImmutableList<String> getExpectedValuesDuration1() {
@@ -765,7 +709,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testMultitypedSum1() throws Exception {
+    public void testMultitypedSum1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -779,10 +723,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValuesMultitypedSum1();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesMultitypedSum1());
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
@@ -790,7 +731,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testMultitypedAvg1() throws Exception {
+    public void testMultitypedAvg1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -804,19 +745,15 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = getExpectedValuesMultitypedAvg1();
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, getExpectedValuesMultitypedAvg1());
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
         return ImmutableList.of("15.5", "16", "19.25");
     }
 
-
     @Test
-    public void testMinusMultitypedSum() throws Exception {
+    public void testMinusMultitypedSum() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -840,17 +777,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt"));
     }
 
     /**
      * Checks that the type error is detected
      */
     @Test
-    public void testMinusMultitypedAvg() throws Exception {
+    public void testMinusMultitypedAvg() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -874,17 +808,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt"));
     }
 
     /**
      * Tests that the FILTER is not lifted above the query modifiers
      */
     @Test
-    public void testLimitSubQuery1() throws Exception {
+    public void testLimitSubQuery1() {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
                 "SELECT ?v {\n" +
@@ -899,14 +830,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "  }\n" +
                 "}";
 
-        List<String> expectedValues = ImmutableList.of("Depp");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("Depp"));
     }
 
     @Test
-    public void testSumOverNull1() throws Exception {
+    public void testSumOverNull1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -920,14 +848,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
     }
 
     @Test
-    public void testAvgOverNull1() throws Exception {
+    public void testAvgOverNull1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -941,14 +866,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
     }
 
     @Test
-    public void testCountOverNull1() throws Exception {
+    public void testCountOverNull1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -962,14 +884,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
     }
 
     @Test
-    public void testMinOverNull1() throws Exception {
+    public void testMinOverNull1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -983,14 +902,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
     }
 
     @Test
-    public void testMaxOverNull1() throws Exception {
+    public void testMaxOverNull1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1004,14 +920,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
-        String sql = checkReturnedValuesAndOrderReturnSql(query, expectedValues);
-
-        LOGGER.debug("SQL Query: \n" + sql);
+        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
     }
 
     @Test
-    public void testGroupConcat1() throws Exception {
+    public void testGroupConcat1() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1025,12 +938,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
     }
 
     @Test
-    public void testGroupConcat2() throws Exception {
+    public void testGroupConcat2() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1046,8 +958,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("Rog Rog", "Frankie Frankie", "Johnny Johnny", "King of Pop King of Pop", "", "", "", "");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("Rog Rog", "Frankie Frankie", "Johnny Johnny",
+                "King of Pop King of Pop", "", "", "", ""));
     }
 
     @Test
@@ -1067,12 +979,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
     }
 
     @Test
-    public void testGroupConcat4() throws Exception {
+    public void testGroupConcat4() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1088,8 +999,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("Rog|Rog", "Frankie|Frankie", "Johnny|Johnny", "King of Pop|King of Pop", "", "", "", "");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("Rog|Rog", "Frankie|Frankie", "Johnny|Johnny",
+                "King of Pop|King of Pop", "", "", "", ""));
     }
 
     @Test
@@ -1109,12 +1020,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
     }
 
     @Test
-    public void testGroupConcat6() throws Exception {
+    public void testGroupConcat6() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1131,12 +1041,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "", "nothing");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "",
+                "nothing"));
     }
 
     @Test
-    public void testProperties() throws Exception {
+    public void testProperties() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1152,12 +1062,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v\n";
 
-        List<String> expectedValues = ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents", "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname");
-        checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+        runQueryAndCompare(query,
+                ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents",
+                        "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname"));
     }
 
     @Test
-    public void testNonOptimizableLJAndJoinMix() throws Exception {
+    public void testNonOptimizableLJAndJoinMix() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1171,19 +1082,20 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}" +
                 "ORDER BY ?v";
 
-        String sql = checkReturnedValuesAndOrderReturnSql(query, getExpectedValuesNonOptimizableLJAndJoinMix());
+        String ontopSQLtranslation = reformulate(query);
 
-        assertTrue(sql.toUpperCase().contains("LEFT"));
+        Assertions.assertTrue(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        runQueryAndCompare(query, getExpectedValuesNonOptimizableLJAndJoinMix());
     }
 
-    protected List<String> getExpectedValuesNonOptimizableLJAndJoinMix() {
+    protected ImmutableList<String> getExpectedValuesNonOptimizableLJAndJoinMix() {
         return ImmutableList.of("Depp", "Poppins", "Smith", "Smith", "Smith");
     }
 
     @Test
-    public void testValuesNodeOntologyProperty() throws Exception {
+    public void testValuesNodeOntologyProperty() {
 
-        String querySelect =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
                 "SELECT ?v\n" +
                 "WHERE {\n" +
@@ -1192,15 +1104,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   :conductsLab ?c .\n" +
                 "}\n" ;
 
-        List<String> expectedValues = Lists.newArrayList("Jane Smith", "Joe Logan");
-        checkReturnedValuesAndOrderReturnSql(querySelect, expectedValues);
-
+        runQueryAndCompare (query, ImmutableList.of("Jane Smith", "Joe Logan"));
     }
 
     @Test
-    public void testAggregationMappingProfStudentCountProperty() throws Exception {
+    public void testAggregationMappingProfStudentCountProperty() {
 
-        String querySelect =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
                 "SELECT ?v\n" +
                 "WHERE {\n" +
@@ -1209,8 +1119,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}" +
                 "ORDER BY ?v\n" ;
 
-        ImmutableList<String> expectedValues = getExpectedAggregationMappingProfStudentCountPropertyResults();
-        checkReturnedValuesAndOrderReturnSql(querySelect, expectedValues);
+        runQueryAndCompare(query, getExpectedAggregationMappingProfStudentCountPropertyResults());
     }
 
     protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {

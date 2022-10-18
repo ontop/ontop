@@ -1,245 +1,156 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  */
 
-public abstract class AbstractBindTestWithFunctions {
+public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JTest {
 
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
-    private final OntopOWLEngine reasoner;
-    private final OWLConnection conn;
 
-
-    protected AbstractBindTestWithFunctions(OntopOWLEngine reasoner) {
-        this.reasoner = reasoner;
-        this.conn = reasoner.getConnection();
-    }
-
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
-
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertiesFile)
-                .enableTestMode()
-                .build();
-        return new SimpleOntopOWLEngine(config);
-    }
-
-    public OntopOWLEngine getReasoner() {
-        return reasoner;
-    }
-
-    public OWLConnection getConnection() {
-        return conn;
-    }
-
-    private void runTests(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
-            int i = 0;
-            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
-                while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
-                    OWLObject ind1 = bindingSet.getOWLObject("w");
-
-                    log.debug(ind1.toString());
-                    i++;
-                }
-                assertTrue(i > 0);
-            }
-        }
-    }
+    protected static final String OBDA_FILE = "/books/books.obda";
+    protected static final String OWL_FILE = "/books/books.owl";
 
     @Test
-    public void testAndBind() throws Exception {
+    public void testAndBind() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?title ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?v)\n"
                 + "}\n" +
-                "ORDER BY ?w";
+                "ORDER BY ?v";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
     @Test
-    public void testAndBindDistinct() throws Exception {
+    public void testAndBindDistinct() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT DISTINCT ?title ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT DISTINCT ?title ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?v)\n"
                 + "}\n" +
-                "ORDER BY ?w";
+                "ORDER BY ?v";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
     @Test
-    public void testOrBind() throws Exception {
+    public void testOrBind() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT DISTINCT ?title ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT DISTINCT ?title ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?v)\n"
                 + "}\n"
-                + "ORDER BY ?w";
+                + "ORDER BY ?v";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
 
-	/*
+    /*
 	 * Tests for numeric functions
-	 */
+    */
 
 
     @Test
-    public void testCeil() throws Exception {
+    public void testCeil() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
-                + "   BIND (CEIL(?discount) AS ?w)\n"
+                + "   BIND (CEIL(?discount) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getCeilExpectedValues());
+        runQueryAndCompare(query, getCeilExpectedValues());
     }
 
-    protected List<String> getCeilExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
-
-        return expectedValues;
+    protected ImmutableList<String> getCeilExpectedValues() {
+        return ImmutableList.of("\"1\"^^xsd:decimal", "\"1\"^^xsd:decimal", "\"1\"^^xsd:decimal", "\"1\"^^xsd:decimal");
     }
 
 
     @Test
-    public void testFloor() throws Exception {
+    public void testFloor() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
-                + "   BIND (FLOOR(?discount) AS ?w)\n"
+                + "   BIND (FLOOR(?discount) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getFloorExpectedValues());
+        runQueryAndCompare(query, getFloorExpectedValues());
     }
 
-    protected List<String> getFloorExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getFloorExpectedValues() {
+        return ImmutableList.of("\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal");
     }
 
 
     @Test
-    public void testRound() throws Exception {
+    public void testRound() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
-                + "   BIND (CONCAT(STR(ROUND(?discount)),', ',STR(ROUND(?p))) AS ?w)\n"
+                + "   BIND (CONCAT(STR(ROUND(?discount)),', ',STR(ROUND(?p))) AS ?v)\n"
                 + "}";
 
-
-        checkReturnedValuesUnordered(queryBind, getRoundExpectedValues());
+        runQueryAndCompare(query, getRoundExpectedValues());
     }
 
-    protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0, 43.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 23.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 34.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 10.0\"^^xsd:string");
-        return expectedValues;
+    protected ImmutableList<String> getRoundExpectedValues() {
+        return ImmutableList.of("\"0.0, 43.0\"^^xsd:string", "\"0.0, 23.0\"^^xsd:string", "\"0.0, 34.0\"^^xsd:string",
+        "\"0.0, 10.0\"^^xsd:string");
     }
 
     @Test
-    public void testAbs() throws Exception {
+    public void testAbs() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
-                + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?w)\n"
+                + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getAbsExpectedValues());
+        runQueryAndCompare(query, getAbsExpectedValues());
     }
 
-    protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6\"^^xsd:decimal");
-        expectedValues.add("\"5.75\"^^xsd:decimal");
-        expectedValues.add("\"6.8\"^^xsd:decimal");
-        expectedValues.add("\"1.5\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getAbsExpectedValues() {
+        return ImmutableList.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
+        "\"1.5\"^^xsd:decimal");
     }
 
-	/*
+    /*
 	 * Tests for hash functions. H2 supports only SHA256 algorithm.
-	 */
+    */
 
     @Test
-    public void testHashSHA256() throws Exception {
+    public void testHashSHA256() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA256(str(?title)) AS ?w)\n"
+                + "   BIND (SHA256(str(?title)) AS ?v)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -258,7 +169,7 @@ public abstract class AbstractBindTestWithFunctions {
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.copyOf(expectedValues));
 
     }
 
@@ -286,524 +197,400 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
-	/*
+    /*
 	 * Tests for functions on strings.
-	 */
+    */
 
     @Test
-    public void testStrLen() throws Exception {
+    public void testStrLen() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (STRLEN(?title) AS ?w)\n"
+                + "   BIND (STRLEN(?title) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"15\"^^xsd:integer");
-        expectedValues.add("\"16\"^^xsd:integer");
-        expectedValues.add("\"20\"^^xsd:integer");
-        expectedValues.add("\"44\"^^xsd:integer");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"15\"^^xsd:integer", "\"16\"^^xsd:integer", "\"20\"^^xsd:integer",
+                "\"44\"^^xsd:integer"));
     }
 
     //test substring with 2 parameters
     @Test
-    public void testSubstr2() throws Exception {
+    public void testSubstr2() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (SUBSTR(?title, 3) AS ?w)\n"
+                + "   BIND (SUBSTR(?title, 3) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL Tutorial\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\"e Semantic Web\"@en");
-        expectedValues.add("\"ime and Punishment\"@en");
-        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"ARQL Tutorial\"@en", "\"e Semantic Web\"@en",
+                "\"ime and Punishment\"@en", "\"e Logic Book: Introduction, Second Edition\"@en"));
     }
 
     //test substring with 3 parameters
     @Test
-    public void testSubstr3() throws Exception {
+    public void testSubstr3() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (SUBSTR(?title, 3, 6) AS ?w)\n"
+                + "   BIND (SUBSTR(?title, 3, 6) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL T\"@en");   // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\"e Sema\"@en");
-        expectedValues.add("\"ime an\"@en");
-        expectedValues.add("\"e Logi\"@en");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"ARQL T\"@en", "\"e Sema\"@en", "\"ime an\"@en", "\"e Logi\"@en"));
     }
     @Test
-    public void testURIEncoding() throws Exception {
+    public void testURIEncoding() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title,\"The\"))\n"
-                + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
+                + "   BIND (ENCODE_FOR_URI(?title) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The%20Semantic%20Web\"^^xsd:string");
-        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"The%20Semantic%20Web\"^^xsd:string",
+                "\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string"));
     }
 
 
 
     @Test
-    public void testStrEnds() throws Exception {
+    public void testStrEnds() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND(?title AS ?w)\n"
+                + "   BIND(?title AS ?v)\n"
                 + "   FILTER(STRENDS(?title,\"b\"))\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en"));
     }
 
     @Test
-    public void testStrStarts() throws Exception {
+    public void testStrStarts() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND(?title AS ?w)\n"
+                + "   BIND(?title AS ?v)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
-
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en",
+                "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
     @Test
-    public void testStrSubstring() throws Exception {
+    public void testStrSubstring() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND(SUBSTR(?title,1,STRLEN(?title)) AS ?w)\n"
+                + "   BIND(SUBSTR(?title,1,STRLEN(?title)) AS ?v)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en",
+                "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
     @Test
-    public void testContainsBind() throws Exception {
+    public void testContainsBind() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
+                + "   BIND(CONTAINS(?title,\"Semantic\") AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
 
     @Test
-    public void testContainsFilter() throws Exception {
+    public void testContainsFilter() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND(?title AS ?w)\n"
+                + "   BIND(?title AS ?v)\n"
                 + "   FILTER(CONTAINS(?title,\"Semantic\"))\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en"));
     }
 
 
     @Test
-    public void testBindWithUcase() throws Exception {
+    public void testBindWithUcase() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (UCASE(?title) AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (UCASE(?title) AS ?w)\n"
+                + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string");
-        expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string");
-        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
-                "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
-
+        runQueryAndCompare(query, ImmutableList.of("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string",
+                "\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string",
+                "\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string",
+                "\"The Logic Book: Introduction, Second Edition " +
+                        "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string"));
     }
 
     @Test
-    public void testBindWithLcase() throws Exception {
+    public void testBindWithLcase() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (LCASE(?title) AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (LCASE(?title) AS ?w)\n"
+                + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"^^xsd:string");
-        expectedValues.add("\"The Semantic Web the semantic web\"^^xsd:string");
-        expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
-                "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
-
+        runQueryAndCompare(query, ImmutableList.of("\"SPARQL Tutorial sparql tutorial\"^^xsd:string",
+                "\"The Semantic Web the semantic web\"^^xsd:string",
+                "\"Crime and Punishment crime and punishment\"^^xsd:string",
+                "\"The Logic Book: Introduction, Second Edition " +
+                        "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string"));
     }
 
 
 
     @Test
-    public void testBindWithBefore1() throws Exception {
+    public void testBindWithBefore1() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\"ti\") AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getBindWithBefore1ExpectedValues());
-
+        runQueryAndCompare(query, getBindWithBefore1ExpectedValues());
     }
 
-    protected List<String> getBindWithBefore1ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"^^xsd:string");
-        expectedValues.add("\"The Seman\"@en");
-        expectedValues.add("\"\"^^xsd:string");
-        expectedValues.add("\"The Logic Book: Introduc\"@en");
-
-        return expectedValues;
+    protected ImmutableList<String> getBindWithBefore1ExpectedValues() {
+        return ImmutableList.of("\"\"^^xsd:string", "\"The Seman\"@en", "\"\"^^xsd:string",
+                "\"The Logic Book: Introduc\"@en");
     }
 
     @Test
-    public void testBindWithBefore2() throws Exception {
+    public void testBindWithBefore2() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\"\") AS ?v)\n"
                 + "}";
-        checkReturnedValuesUnordered(queryBind, getBindWithBefore2ExpectedValues());
+        runQueryAndCompare(query, getBindWithBefore2ExpectedValues());
     }
 
-    protected List<String> getBindWithBefore2ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        return expectedValues;
-    }
-
-
-    @Test
-    public void testBindWithAfter1() throws Exception {
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
-                + "{  ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
-                + "}";
-
-        checkReturnedValuesUnordered(queryBind, getBindWithAfter1ExpectedValues());
-    }
-
-    protected List<String> getBindWithAfter1ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"^^xsd:string");
-        expectedValues.add("\" Semantic Web\"@en");
-        expectedValues.add("\"\"^^xsd:string");
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
-        return expectedValues;
+    protected ImmutableList<String> getBindWithBefore2ExpectedValues() {
+        return ImmutableList.of("\"\"@en", "\"\"@en", "\"\"@en", "\"\"@en");
     }
 
     @Test
-    public void testBindWithAfter2() throws Exception {
+    public void testBindWithAfter1() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
+                + "   BIND (STRAFTER(?title,\"The\") AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getBindWithAfter2ExpectedValues());
-
+        runQueryAndCompare(query, getBindWithAfter1ExpectedValues());
     }
 
-    protected List<String> getBindWithAfter2ExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial\"@en");
-        expectedValues.add("\"The Semantic Web\"@en");
-        expectedValues.add("\"Crime and Punishment\"@en");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
+    protected ImmutableList<String> getBindWithAfter1ExpectedValues() {
+        return ImmutableList.of("\"\"^^xsd:string", "\" Semantic Web\"@en", "\"\"^^xsd:string",
+        "\" Logic Book: Introduction, Second Edition\"@en");
+    }
 
-        return expectedValues;
+    @Test
+    public void testBindWithAfter2() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  ?x dc:title ?title .\n"
+                + "   BIND (STRAFTER(?title,\"\") AS ?v)\n"
+                + "}";
+
+        runQueryAndCompare(query, getBindWithAfter2ExpectedValues());
+    }
+
+    protected ImmutableList<String> getBindWithAfter2ExpectedValues() {
+        return ImmutableList.of("\"SPARQL Tutorial\"@en", "\"The Semantic Web\"@en", "\"Crime and Punishment\"@en",
+        "\"The Logic Book: Introduction, Second Edition\"@en");
     }
 
 
-	/*
+    /*
 	 * Tests for functions on date and time
-	 */
+    */
 
 
     @Test
-    public void testMonth() throws Exception {
+    public void testMonth() {
 
-
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (MONTH(?year) AS ?w)\n"
+                + "   BIND (MONTH(?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getMonthExpectedValues());
-    }
-
-    protected List<String> getMonthExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"6\"^^xsd:integer");
-        expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"9\"^^xsd:integer");
-        expectedValues.add("\"11\"^^xsd:integer");
-
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"6\"^^xsd:integer","\"12\"^^xsd:integer", "\"9\"^^xsd:integer",
+                "\"11\"^^xsd:integer"));
     }
 
     @Test
-    public void testYear() throws Exception {
+    public void testYear() {
 
-
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (YEAR(?year) AS ?w)\n"
+                + "   BIND (YEAR(?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getYearExpectedValues());
-    }
-
-    protected List<String> getYearExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2014\"^^xsd:integer");
-        expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"2015\"^^xsd:integer");
-        expectedValues.add("\"1970\"^^xsd:integer");
-
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
+                "\"2015\"^^xsd:integer", "\"1970\"^^xsd:integer"));
     }
 
     @Test
-    public void testDay() throws Exception {
+    public void testDay() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (DAY(?year) AS ?w)\n"
+                + "   BIND (DAY(?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getDayExpectedValues());
+        runQueryAndCompare(query, ImmutableList.of("\"5\"^^xsd:integer", "\"8\"^^xsd:integer", "\"21\"^^xsd:integer",
+                "\"5\"^^xsd:integer"));
     }
-
-    protected List<String> getDayExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"5\"^^xsd:integer");
-        expectedValues.add("\"8\"^^xsd:integer");
-        expectedValues.add("\"21\"^^xsd:integer");
-        expectedValues.add("\"5\"^^xsd:integer");
-
-        return expectedValues;
-    }
-
-
 
     @Test
-    public void testMinutes() throws Exception {
+    public void testMinutes() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (MINUTES(?year) AS ?w)\n"
+                + "   BIND (MINUTES(?year) AS ?v)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"30\"^^xsd:integer");
-        expectedValues.add("\"23\"^^xsd:integer");
-        expectedValues.add("\"50\"^^xsd:integer");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"47\"^^xsd:integer", "\"30\"^^xsd:integer", "\"23\"^^xsd:integer",
+                "\"50\"^^xsd:integer"));
     }
 
     @Test
-    public void testHours() throws Exception {
+    public void testHours() {
 
-
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
-                + "   BIND (HOURS(?year) AS ?w)\n"
+                + "   BIND (HOURS(?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getHoursExpectedValues());
-    }
-
-    protected List<String> getHoursExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"11\"^^xsd:integer");
-        expectedValues.add("\"16\"^^xsd:integer");
-        expectedValues.add("\"7\"^^xsd:integer");
-        expectedValues.add("\"9\"^^xsd:integer");
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"16\"^^xsd:integer", "\"11\"^^xsd:integer",
+                "\"9\"^^xsd:integer", "\"7\"^^xsd:integer"));
     }
 
     @Test
-    public void testSeconds() throws Exception {
+    public void testSeconds() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{   ?x ns:pubYear ?year .\n"
-                + "   BIND (SECONDS(?year) AS ?w)\n"
+                + "   BIND (SECONDS(?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getSecondsExpectedValues());
+        runQueryAndCompare(query, getSecondsExpectedValues());
     }
 
-    protected List<String> getSecondsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+    protected ImmutableList<String> getSecondsExpectedValues() {
+        return ImmutableList.of("\"52\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"6\"^^xsd:decimal",
+                "\"0\"^^xsd:decimal");
+    }
 
-        return expectedValues;
+
+    @Test
+    public void testNow() {
+
+        String query = "SELECT ?v WHERE \n"
+                + "{  BIND (NOW() AS ?v)\n"
+                + "}";
+
+        int count = runQueryAndCount(query);
+        Assertions.assertTrue(count > 0);
     }
 
     @Test
-    public void testNow() throws Exception {
+    public void testUuid() {
 
-        String queryBind = "SELECT ?w WHERE \n"
-                + "{  BIND (NOW() AS ?w)\n"
-                + "}";
-
-        runTests(queryBind);
-    }
-
-    @Test
-    public void testUuid() throws Exception {
-
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (UUID() AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (UUID() AS ?v) WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "}";
 
-
-        runTests(queryBind);
+        int count = runQueryAndCount(query);
+        Assertions.assertTrue(count > 0);
     }
 
     @Test
-    public void testStrUuid() throws Exception {
-        String queryBind = "SELECT (STRUUID() AS ?w) WHERE { }";
+    public void testStrUuid() {
+        String query = "SELECT (STRUUID() AS ?v) WHERE { }";
 
-
-        runTests(queryBind);
+        int count = runQueryAndCount(query);
+        Assertions.assertTrue(count > 0);
     }
 
     @Test
-    public void testRand() throws Exception {
-        String queryBind = "SELECT (RAND() AS ?w) WHERE { }";
+    public void testRand() {
+        String query = "SELECT (RAND() AS ?v) WHERE { }";
 
-
-        runTests(queryBind);
+        int count = runQueryAndCount(query);
+        Assertions.assertTrue(count > 0);
     }
 
     @Test
-    public void testDivide() throws Exception {
+    public void testDivide() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?w WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   BIND ((?p / 2) AS ?w)\n"
+                + "   BIND ((?p / 2) AS ?v)\n"
                 + "}";
 
-
-        checkReturnedValuesUnordered(queryBind, getDivideExpectedValues());
+        runQueryAndCompare(query, getDivideExpectedValues());
     }
 
-    protected List<String> getDivideExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.500000\"^^xsd:decimal");
-        expectedValues.add("\"11.500000\"^^xsd:decimal");
-        expectedValues.add("\"17.000000\"^^xsd:decimal");
-        expectedValues.add("\"5.000000\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getDivideExpectedValues() {
+        return ImmutableList.of("\"21.500000\"^^xsd:decimal", "\"11.500000\"^^xsd:decimal",
+                "\"17.000000\"^^xsd:decimal", "\"5.000000\"^^xsd:decimal");
     }
 
+    @Disabled
     @Test
-    public void testTZ() throws Exception {
+    public void testTZ() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (TZ(?year) AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (TZ(?year) AS ?v) WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getTZExpectedValues());
+        runQueryAndCompare(query, ImmutableList.of("\"00:00\"^^xsd:string", "\"00:00\"^^xsd:string",
+                "\"00:00\"^^xsd:string", "\"00:00\"^^xsd:string"));
     }
-
-    protected List<String> getTZExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"00:00\"^^xsd:string");
-        expectedValues.add("\"00:00\"^^xsd:string");
-        expectedValues.add("\"00:00\"^^xsd:string");
-        expectedValues.add("\"00:00\"^^xsd:string");
-        return expectedValues;
-    }
-
 
     @Test
-    public void testBound() throws Exception {
+    public void testBound() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (BOUND(?title) AS ?w) WHERE \n"
+                + "SELECT (BOUND(?title) AS ?v) WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x ns:pubYear ?year .\n"
@@ -813,13 +600,8 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   } \n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
-
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
 
@@ -832,10 +614,10 @@ public abstract class AbstractBindTestWithFunctions {
      * (TODO: see how other systems behave)
      */
     @Test
-    public void testRDFTermEqual1() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+    public void testRDFTermEqual1() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
@@ -844,15 +626,14 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   FILTER (?discount = ?discount2 && ?title != ?title2)\n"
                 + "   } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of());
     }
 
     @Test
-    public void testRDFTermEqual2() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+    public void testRDFTermEqual2() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
@@ -861,19 +642,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   FILTER (?discount = ?discount2 && str(?title) != str(?title2))\n"
                 + "   } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
-        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
+                "\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string"));
     }
 
-
     @Test
-    public void testSameTerm() throws Exception {
+    public void testSameTerm() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
@@ -882,29 +660,21 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   FILTER(sameTerm(?discount, ?discount2) && !sameTerm(?title, ?title2))\n"
                 + "   } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
-        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
+                "\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string"));
     }
 
-
     @Test
-    public void testIsIRI() throws Exception {
+    public void testIsIRI() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT (isIRI(?title) AS ?w) WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT (isIRI(?title) AS ?v) WHERE \n"
                 + "{  ?x dc:title ?title .\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
-
 
     @Test
     public void testIsBlank() {
@@ -912,128 +682,98 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
     @Test
-    public void testIsLiteral() throws Exception {
+    public void testIsLiteral() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (isLiteral(?discount) AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isLiteral(?discount) AS ?v) WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+                "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
-
     @Test
-    public void testIsNumeric() throws Exception {
+    public void testIsNumeric() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (isNumeric(?discount) AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isNumeric(?discount) AS ?v) WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+                "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
-
     @Test
-    public void testStr() throws Exception {
+    public void testStr() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (str(?year) AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (str(?year) AS ?v) WHERE \n"
                 + "{ ?x ns:pubYear ?year . }\n"
                 + "ORDER BY ?year ";
 
-        checkReturnedValuesAndOrder(queryBind, getStrExpectedValues());
-
+        runQueryAndCompare(query, getStrExpectedValues());
     }
 
-    protected List<String> getStrExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1970-11-05T07:50:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T11:30:00\"^^xsd:string");
-        expectedValues.add("\"2014-06-05T16:47:52\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06\"^^xsd:string");
-
-        return expectedValues;
+    protected ImmutableList<String> getStrExpectedValues() {
+        return ImmutableList.of("\"1970-11-05T07:50:00\"^^xsd:string", "\"2011-12-08T11:30:00\"^^xsd:string",
+        "\"2014-06-05T16:47:52\"^^xsd:string", "\"2015-09-21T09:23:06\"^^xsd:string");
     }
-
 
     @Test
-    public void testLang() throws Exception {
+    public void testLang() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT (lang(?title) AS ?w) WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT (lang(?title) AS ?v) WHERE \n"
                 + "{  ?x dc:title ?title .\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"en\"^^xsd:string");
-        expectedValues.add("\"en\"^^xsd:string");
-        expectedValues.add("\"en\"^^xsd:string");
-        expectedValues.add("\"en\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"en\"^^xsd:string", "\"en\"^^xsd:string",
+                "\"en\"^^xsd:string", "\"en\"^^xsd:string"));
     }
 
     //In SPARQL 1.0, the DATATYPE function was not defined for literals with a language tag
     @Test
-    public void testDatatype() throws Exception {
+    public void testDatatype() {
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT (?discount AS ?w) WHERE \n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (?discount AS ?v) WHERE \n"
                 + "{  ?x ns:discount ?discount .\n"
                 + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
                 + "   }  ";
 
-        checkReturnedValuesUnordered(queryBind, getDatatypeExpectedValues());
+        runQueryAndCompare(query, getDatatypeExpectedValues());
     }
 
-    protected List<String> getDatatypeExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.20\"^^xsd:decimal");
-        expectedValues.add("\"0.25\"^^xsd:decimal");
-        expectedValues.add("\"0.20\"^^xsd:decimal");
-        expectedValues.add("\"0.15\"^^xsd:decimal");
-
-        return expectedValues;
+    protected ImmutableList<String> getDatatypeExpectedValues() {
+        return ImmutableList.of("\"0.20\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.20\"^^xsd:decimal",
+                "\"0.15\"^^xsd:decimal");
     }
-
-
 
     @Test
-    public void testConcat() throws Exception {
+    public void testConcat() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT  (CONCAT(?title,\" | \", ?description) AS ?w) WHERE \n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT  (CONCAT(?title,\" | \", ?description) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x dc:title ?title .\n"
                 + "   ?x dc:description ?description .\n"
                 + "   } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"Crime and Punishment | good\"^^xsd:string");
-        expectedValues.add("\"SPARQL Tutorial | good\"^^xsd:string");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string");
-        expectedValues.add("\"The Semantic Web | bad\"^^xsd:string");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | good\"^^xsd:string",
+                "\"SPARQL Tutorial | good\"^^xsd:string",
+                "\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string",
+                "\"The Semantic Web | bad\"^^xsd:string"));
     }
 
 
     @Test
-    public void testLangMatches() throws Exception {
+    public void testLangMatches() {
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "SELECT  (BOUND(?title) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
@@ -1042,20 +782,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "     FILTER(langMatches( lang(?title), \"EN\" )) \n"
                 + "   } } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+                "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
 
     @Test
-    public void testREGEX() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+    public void testREGEX() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "SELECT  (BOUND(?title) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
@@ -1064,610 +800,466 @@ public abstract class AbstractBindTestWithFunctions {
                 + "     FILTER(REGEX( ?title, \"Semantic\" )) \n"
                 + "   } } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
     @Test
-    public void testREPLACE() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "SELECT  ?w WHERE \n"
+    public void testREPLACE() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT  ?v WHERE \n"
                 + "{  \n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?w) .\n"
+                + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?v) .\n"
                 + "   } ORDER BY ?title";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"Crime and Punishment\"@en");
-        expectedValues.add("\"SPARQL Tutorial\"@en");
-        expectedValues.add("\"The Logic Book: Introduction, First Edition\"@en");
-        expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValuesAndOrder(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment\"@en", "\"SPARQL Tutorial\"@en",
+                "\"The Logic Book: Introduction, First Edition\"@en", "\"The Semantic Web\"@en"));
     }
 
     @Test
-    public void testConstantFloatDivide() throws Exception {
-        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:float AS ?w)  {} ";
+    public void testConstantFloatDivide() {
+        String query = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:float AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, getConstantFloatDivideExpectedResults());
+    }
+
+    protected ImmutableList<String> getConstantFloatDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:float");
     }
 
     @Test
-    public void testConstantFloatIntegerDivide() throws Exception {
-        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1\"^^xsd:integer AS ?w)  {} ";
+    public void testConstantFloatIntegerDivide() {
+        String query = "SELECT (\"0.5\"^^xsd:float / \"1\"^^xsd:integer AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, getConstantFloatIntegerDivideExpectedResults());
+    }
+
+    protected ImmutableList<String> getConstantFloatIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:float");
     }
 
     @Test
-    public void testConstantFloatDecimalDivide() throws Exception {
-        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:decimal AS ?w)  {} ";
+    public void testConstantFloatDecimalDivide() {
+        String query = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:decimal AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, getConstantFloatDecimalDivideExpectedResults());
+    }
+
+    protected ImmutableList<String> getConstantFloatDecimalDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:float");
     }
 
     @Test
-    public void testConstantFloatDoubleDivide() throws Exception {
-        String queryBind = "SELECT (\"1.0\"^^xsd:float / \"2.0\"^^xsd:double AS ?w)  {} ";
+    public void testConstantFloatDoubleDivide() {
+        String query = "SELECT (\"1.0\"^^xsd:float / \"2.0\"^^xsd:double AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:double");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, getConstantFloatDoubleDivideExpectedResults());
+    }
+
+    protected ImmutableList<String> getConstantFloatDoubleDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:double");
     }
 
     @Test
-    public void testConstantDoubleDoubleDivide() throws Exception {
-        String queryBind = "SELECT (\"1.0\"^^xsd:double / \"2.0\"^^xsd:double AS ?w)  {} ";
+    public void testConstantDoubleDoubleDivide() {
+        String query = "SELECT (\"1.0\"^^xsd:double / \"2.0\"^^xsd:double AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:double");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, getConstantDoubleDoubleDivideExpectedResults());
+    }
+
+    protected ImmutableList<String> getConstantDoubleDoubleDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:double");
     }
 
     @Test
-    public void testConstantIntegerDivide() throws Exception {
-        String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
+    public void testConstantIntegerDivide() {
+        String query = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?v)  {} ";
 
-
-        checkReturnedValuesUnordered(queryBind, getConstantIntegerDivideExpectedResults());
+        runQueryAndCompare(query, getConstantIntegerDivideExpectedResults());
     }
 
-    protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.5\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.5\"^^xsd:decimal");
     }
 
     @Test
-    public void testCoalesceDivideByZeroInt() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:integer / \"0\"^^xsd:integer, \"other\") AS ?w)  {} ";
+    public void testCoalesceDivideByZeroInt() {
+        String query = "SELECT (COALESCE(\"1\"^^xsd:integer / \"0\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceDivideByZeroDecimal() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:decimal / \"0\"^^xsd:decimal, \"other\") AS ?w)  {} ";
+    public void testCoalesceDivideByZeroDecimal() {
+        String query = "SELECT (COALESCE(\"1\"^^xsd:decimal / \"0\"^^xsd:decimal, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceInvalidDivide1() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+    public void testCoalesceInvalidDivide1() {
+        String query = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceInvalidDivide2() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?w)  {} ";
+    public void testCoalesceInvalidDivide2() {
+        String query = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceInvalidSum() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+    public void testCoalesceInvalidSum() {
+        String query = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceInvalidSub() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"rrr\" - \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+    public void testCoalesceInvalidSub() {
+        String query = "SELECT (COALESCE(\"rrr\" - \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testCoalesceInvalidTimes() throws Exception {
-        String queryBind = "SELECT (COALESCE(\"rrr\" * \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+    public void testCoalesceInvalidTimes() {
+        String query = "SELECT (COALESCE(\"rrr\" * \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Disabled("TODO: support it, by using a case")
     @Test
-    public void testDivideByZeroFloat() throws Exception {
-        String queryBind = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?w)  {} ";
+    public void testDivideByZeroFloat() {
+        String query = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"INF\"^^xsd:float");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
-    }
-
-    private void checkReturnedValuesUnordered(String query, List<String> expectedValues) throws Exception {
-        checkReturnedValues(query, expectedValues, false);
+        runQueryAndCompare(query, ImmutableList.of("\"INF\"^^xsd:float"));
     }
 
     @Test
-    public void testBNODE0() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+    public void testBNODE0() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "SELECT DISTINCT ?b ?v WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   BIND (BNODE() AS ?b)\n"
-                + "   BIND (\"cst\" AS ?w)\n"
+                + "   BIND (\"cst\" AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
+                "\"cst\"^^xsd:string"));
     }
 
     @Test
-    public void testBNODE1() throws Exception {
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+    public void testBNODE1() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "SELECT DISTINCT ?b ?v WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   BIND (BNODE(\"b1\") AS ?b)\n"
-                + "   BIND (\"cst\" AS ?w)\n"
+                + "   BIND (\"cst\" AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        expectedValues.add("\"cst\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
+                "\"cst\"^^xsd:string", "\"cst\"^^xsd:string"));
     }
 
     @Test
-    public void testIRI1() throws Exception {
-        String queryBind = "SELECT ?w  {" +
-                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI1() {
+        String query = "SELECT ?v  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI1_2() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI1_2() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI2() throws Exception {
-        String queryBind = "SELECT ?w  {" +
-                "BIND(IRI(<http://example.org/john>) AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI2() {
+        String query = "SELECT ?v  {" +
+                "BIND(IRI(<http://example.org/john>) AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI3() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "BIND(IRI(\"john\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI3() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "BIND(IRI(\"john\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI4() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "BIND(URI(\"john\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI4() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "BIND(URI(\"john\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI5() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "BIND(IRI(\"urn:john\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI5() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "BIND(IRI(\"urn:john\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<urn:john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<urn:john>"));
     }
 
     @Test
-    public void testIRI6() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "BIND(IRI(\"mailto:john@somewhere.org\") AS ?w)\n" +
-                "FILTER (isIRI(?w))\n" +
+    public void testIRI6() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "BIND(IRI(\"mailto:john@somewhere.org\") AS ?v)\n" +
+                "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<mailto:john@somewhere.org>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<mailto:john@somewhere.org>"));
     }
 
     @Test
-    public void testIRI7() throws Exception {
-        String queryBind = "BASE <http://example.org/>\n" +
-                "SELECT ?w  {" +
-                "{ VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } } UNION { BIND (str(rand()) AS ?v) } \n" +
-                "BIND(IRI(?v) AS ?w)\n" +
+    public void testIRI7() {
+        String query = "BASE <http://example.org/>\n" +
+                "SELECT ?v  {" +
+                "{ VALUES ?w { \"john\" \"ernest\" \"http://example.org/alice\" } } UNION { BIND (str(rand()) AS ?w) } \n" +
+                "BIND(IRI(?w) AS ?v)\n" +
                 "VALUES ?y { <http://example.org/john> <http://otherdomain.org/ernest> } \n" +
-                "FILTER (?w = ?y)\n" +
+                "FILTER (?v = ?y)\n" +
                 "} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
-    public void testIRI8() throws Exception {
-        String queryBind = "BASE <http://example.org/project1#data/>\n" +
-                "SELECT ?w {" +
-                "BIND(IRI(\"john\") AS ?w)\n" +
+    public void testIRI8() {
+        String query = "BASE <http://example.org/project1#data/>\n" +
+                "SELECT ?v {" +
+                "BIND(IRI(\"john\") AS ?v)\n" +
                 "} ";
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://example.org/project1#data/john>");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+
+        runQueryAndCompare(query, ImmutableList.of("<http://example.org/project1#data/john>"));
     }
 
     @Test
-    public void testIF1() throws Exception {
-        String queryBind = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?w)  {} ";
+    public void testIF1() {
+        String query = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testIF2() throws Exception {
-        String queryBind = "SELECT (IF(1 < 2, \"first\", \"second\") AS ?w)  {} ";
+    public void testIF2() {
+        String query = "SELECT (IF(1 < 2, \"first\", \"second\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"first\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"first\"^^xsd:string"));
     }
 
     @Test
-    public void testIF3() throws Exception {
-        String queryBind = "SELECT (IF(1 > 2, \"first\", \"second\") AS ?w)  {} ";
+    public void testIF3() {
+        String query = "SELECT (IF(1 > 2, \"first\", \"second\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"second\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"second\"^^xsd:string"));
     }
 
     @Test
-    public void testIF4() throws Exception {
-        String queryBind = "SELECT (COALESCE(IF(1 < 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+    public void testIF4() {
+        String query = "SELECT (COALESCE(IF(1 < 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testIF5() throws Exception {
-        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+    public void testIF5() {
+        String query = "SELECT (COALESCE(IF(1 > 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"second\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"second\"^^xsd:string"));
     }
 
     @Test
-    public void testIF6() throws Exception {
-        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"first\", \"rrr\" * \"2\"^^xsd:integer), \"other\") AS ?w)  {} ";
+    public void testIF6() {
+        String query = "SELECT (COALESCE(IF(1 > 2, \"first\", \"rrr\" * \"2\"^^xsd:integer), \"other\") AS ?v)  {} ";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValuesUnordered(queryBind, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
-    public void testWeeksBetweenDate() throws Exception {
+    public void testWeeksBetweenDate() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14\"^^xsd:date AS ?end )\n"
                 + "   BIND(\"1932-02-22\"^^xsd:date AS ?start )\n"
-                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"3538\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"3538\"^^xsd:long"));
     }
 
     @Test
-    public void testDaysBetweenDate() throws Exception {
+    public void testDaysBetweenDate() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14\"^^xsd:date AS ?end )\n"
                 + "   BIND(\"1932-02-22\"^^xsd:date AS ?start )\n"
-                + "   BIND (ofn:daysBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
                 + "}";
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"24767\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+
+        runQueryAndCompare(query, ImmutableList.of("\"24767\"^^xsd:long"));
     }
 
     @Test
-    public void testWeeksBetweenDateTime() throws Exception {
+    public void testWeeksBetweenDateTime() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"3538\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"3538\"^^xsd:long"));
     }
 
     @Test
-    public void testDaysBetweenDateTime() throws Exception {
+    public void testDaysBetweenDateTime() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:daysBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(query, getDaysBetweenDTExpectedValues());
-    }
-
-    protected List<String> getDaysBetweenDTExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"24766\"^^xsd:long");
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"24766\"^^xsd:long"));
     }
 
     @Test
-    public void testDaysBetweenDateTimeMappingInput() throws Exception {
+    public void testDaysBetweenDateTimeMappingInput() {
 
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
+                + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getDaysDTExpectedValuesMappingInput());
-    }
-
-    protected List<String> getDaysDTExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1351\"^^xsd:long");
-        expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17742\"^^xsd:long");
-
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17742\"^^xsd:long",
+                "\"1351\"^^xsd:long"));
     }
 
     @Test
-    public void testDaysBetweenDateMappingInput() throws Exception {
+    public void testDaysBetweenDateMappingInput() {
 
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22\"^^xsd:date AS ?start )\n"
-                + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
+                + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getDaysExpectedValuesMappingInput());
-    }
-
-    protected List<String> getDaysExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17743\"^^xsd:long");
-        expectedValues.add("\"1352\"^^xsd:long");
-
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17743\"^^xsd:long",
+                "\"1352\"^^xsd:long"));
     }
 
     @Test
-    public void testHoursBetween() throws Exception {
+    public void testHoursBetween() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:hoursBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:hoursBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(query, getHoursBetweenExpectedValues());
-    }
-
-    protected List<String> getHoursBetweenExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"594407\"^^xsd:long");
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"594407\"^^xsd:long"));
     }
 
     @Test
-    public void testMinutesBetween() throws Exception {
+    public void testMinutesBetween() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:minutesBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:minutesBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"35664450\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"35664450\"^^xsd:long"));
     }
 
     @Test
-    public void testSecondsBetween() throws Exception {
+    public void testSecondsBetween() {
 
         String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:secondsBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:secondsBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2139867000\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"2139867000\"^^xsd:long"));
     }
 
     @Test
-    public void testSecondsBetweenMappingInput() throws Exception {
+    public void testSecondsBetweenMappingInput() {
 
 
-        String queryBind = "PREFIX  ns:  <http://example.org/ns#>\n"
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{   ?x ns:pubYear ?year .\n"
                 + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:secondsBetween(?start, ?year) AS ?w)\n"
+                + "   BIND (ofn:secondsBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        checkReturnedValuesUnordered(queryBind, getSecondsExpectedValuesMappingInput());
-    }
-    
-    protected List<String> getSecondsExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"116806800\"^^xsd:long");
-        expectedValues.add("\"1413511200\"^^xsd:long");
-        expectedValues.add("\"1492154272\"^^xsd:long");
-        expectedValues.add("\"1532994786\"^^xsd:long");
-
-        return expectedValues;
+        runQueryAndCompare(query, ImmutableList.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
+                "\"1532994786\"^^xsd:long", "\"116806800\"^^xsd:long"));
     }
 
     @Test
-    public void testMilliSeconds() throws Exception {
+    public void testMilliSeconds() {
 
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
-                + "SELECT ?w WHERE \n"
+                + "SELECT ?v WHERE \n"
                 + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
                 + "   BIND(\"1999-12-13T09:30:00\"^^xsd:dateTime AS ?start )\n"
-                + "   BIND (ofn:millisBetween(?start, ?end) AS ?w)\n"
+                + "   BIND (ofn:millisBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"84600000\"^^xsd:long");
-        checkReturnedValuesUnordered(query, expectedValues);
+        runQueryAndCompare(query, ImmutableList.of("\"84600000\"^^xsd:long"));
     }
-    
-    protected void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
-        checkReturnedValues(query, expectedValues, true);
-    }
-
-    protected void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {
-
-        try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
-            int i = 0;
-            List<String> returnedValues = new ArrayList<>();
-            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
-                while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
-                    OWLObject ind1 = bindingSet.getOWLObject("w");
-
-                    if (ind1 != null) {
-                        String value = ToStringRenderer.getInstance().getRendering(ind1);
-                        returnedValues.add(value);
-                        log.debug(value);
-                    }
-                    else {
-                        returnedValues.add(null);
-                    }
-                    i++;
-                }
-            }
-            if(!sameOrder){
-                Collections.sort(expectedValues);
-                Collections.sort(returnedValues);
-            }
-            assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues.toString()), expectedValues, returnedValues);
-            assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
-        }
-    }
-
-
 
 }

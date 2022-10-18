@@ -27,10 +27,10 @@ import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 @MySQLLightweightTest
 public class ConstraintMySQLTest extends AbstractConstraintTest {
 
-    private static final String propertyFile = "/dbconstraints/dbconstraints-mysql.properties";
+    private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-mysql.properties";
 
     public ConstraintMySQLTest(String method) {
-        super(method, propertyFile);
+        super(method, PROPERTIES_FILE);
     }
 
 }

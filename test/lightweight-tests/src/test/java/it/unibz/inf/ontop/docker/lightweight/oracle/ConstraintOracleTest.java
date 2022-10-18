@@ -26,11 +26,10 @@ import it.unibz.inf.ontop.docker.lightweight.OracleLightweightTest;
 @OracleLightweightTest
 public class ConstraintOracleTest extends AbstractConstraintTest {
 
-    private static final String propertyFile = "/dbconstraints/dbconstraints-oracle.properties";
+    private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-oracle.properties";
 
-    // TODO: CHECK THAT THE DATABASE CONTAINS THE TABLES
     public ConstraintOracleTest(String method) {
-        super(method, propertyFile);
+        super(method, PROPERTIES_FILE);
     }
 
 }

@@ -27,11 +27,10 @@ import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 @DB2LightweightTest
 public class ConstraintDB2Test extends AbstractConstraintTest {
 
-    private static final String propertyFile = "/books/db2/books-db2.properties";
+    private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-db2.properties";
 
-    // TODO: CHECK THAT THE DATABASE CONTAINS THE TABLES
     public ConstraintDB2Test(String method) {
-        super(method, propertyFile);
+        super(method, PROPERTIES_FILE);
     }
 }
 

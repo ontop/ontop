@@ -95,4 +95,12 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     public boolean equals(Object other) {
         return super.equals(other);
     }
+
+    public OntopBinding getOntopBinding(String input) {
+        return ontopBindingSet.getBinding(input);
+    }
+
+    public OntopBindingSet getAllOntopBindings() {
+        return ontopBindingSet;
+    }
 }

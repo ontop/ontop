@@ -1,16 +1,15 @@
 package it.unibz.inf.ontop.docker.lightweight.db2;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -18,23 +17,17 @@ import java.util.List;
  */
 @DB2LightweightTest
 public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
-    private static final String owlfile = "/books/books.owl";
-    private static final String obdafile = "/books/db2/books-db2.obda";
-    private static final String propertiesfile = "/books/db2/books-db2.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
+    private static final String PROPERTIES_FILE = "/books/db2/books-db2.properties";
 
-    public BindWithFunctionsDB2Test() throws OWLOntologyCreationException {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
+    @BeforeAll
+    public static void before() throws IOException, SQLException {
+        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
+    public static void after() throws SQLException {
+        release();
     }
 
     @Disabled("Not yet supported")
@@ -56,68 +49,41 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected List<String> getDivideExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.2500000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"11.5000000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"16.7500000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"5.0000000000000000000000000\"^^xsd:decimal");
-        return expectedValues;
-    }
-
-    @Disabled("Not yet supported")
-    @Test
-    @Override
-    public void testTZ() {
+    protected ImmutableList<String> getDivideExpectedValues() {
+        return ImmutableList.of("\"21.2500000000000000000000000\"^^xsd:decimal",
+                "\"11.5000000000000000000000000\"^^xsd:decimal",
+                "\"16.7500000000000000000000000\"^^xsd:decimal",
+                "\"5.0000000000000000000000000\"^^xsd:decimal");
     }
 
     @Override
-    protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.50000000000000000000000000\"^^xsd:decimal");
-        return expectedValues;
-    }
-
-
-    @Override
-    protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"^^xsd:decimal");
-        expectedValues.add("\"5.7500\"^^xsd:decimal");
-        expectedValues.add("\"6.7000\"^^xsd:decimal");
-        expectedValues.add("\"1.5000\"^^xsd:decimal");
-        return expectedValues;
+    protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.50000000000000000000000000\"^^xsd:decimal");
     }
 
     @Override
-    protected List<String> getStrExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1970-11-05T07:50:00.000000\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T11:30:00.000000\"^^xsd:string");
-        expectedValues.add("\"2014-06-05T16:47:52.000000\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06.000000\"^^xsd:string");
-
-        return expectedValues;
+    protected ImmutableList<String> getAbsExpectedValues() {
+        return ImmutableList.of("\"8.5000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.7000\"^^xsd:decimal",
+                "\"1.5000\"^^xsd:decimal");
     }
 
     @Override
-    protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.00, 43.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 23.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 34.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 10.00\"^^xsd:string");
-        return expectedValues;
+    protected ImmutableList<String> getStrExpectedValues() {
+        return ImmutableList.of("\"1970-11-05T07:50:00.000000\"^^xsd:string",
+                "\"2011-12-08T11:30:00.000000\"^^xsd:string",
+                "\"2014-06-05T16:47:52.000000\"^^xsd:string",
+                "\"2015-09-21T09:23:06.000000\"^^xsd:string");
     }
 
     @Override
-    protected List<String> getSecondsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52.000000\"^^xsd:decimal");
-        expectedValues.add("\"0.000000\"^^xsd:decimal");
-        expectedValues.add("\"6.000000\"^^xsd:decimal");
-        expectedValues.add("\"0.000000\"^^xsd:decimal");
+    protected ImmutableList<String> getRoundExpectedValues() {
+        return ImmutableList.of("\"0.00, 43.00\"^^xsd:string", "\"0.00, 23.00\"^^xsd:string",
+                "\"0.00, 34.00\"^^xsd:string", "\"0.00, 10.00\"^^xsd:string");
+    }
 
-        return expectedValues;
+    @Override
+    protected ImmutableList<String> getSecondsExpectedValues() {
+        return ImmutableList.of("\"52.000000\"^^xsd:decimal", "\"0.000000\"^^xsd:decimal", "\"6.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal");
     }
 }
