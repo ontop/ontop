@@ -27,13 +27,16 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "?person  a :Person ; \n" +
                 "         :fullName ?v . " +
                 "}";
-        ImmutableList<String> expectedValues =
-                ImmutableList.of( "Mary Poppins", "Roger Rabbit");
+        ImmutableList<String> expectedValues = getExpectedValuesFullNames();
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 
         LOGGER.debug("SQL Query: \n" + sql);
 
+    }
+
+    protected ImmutableList<String> getExpectedValuesFullNames() {
+        return ImmutableList.of("Bob Loblaw", "Kenny McCormick", "Mary Poppins", "Roger Rabbit");
     }
 
     @Test
@@ -53,7 +56,6 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
         LOGGER.debug("SQL Query: \n" + sql);
     }
 
-    @Ignore("Limitation from the json datatype (cannot apply distinct on it). No problem with jsonb")
     @Test
     public void testFlattenTags2() throws Exception {
         String query = "PREFIX : <http://person.example.org/>" +
@@ -79,8 +81,28 @@ public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
                 "WHERE {" +
                 "?person  :tag_ids ?v . " +
                 "}";
+        ImmutableList<String> expectedValues = getExpectedValuesTagIds();
+
+        String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
+
+        LOGGER.debug("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesTagIds() {
+        return ImmutableList.of( "[111, 222, 333]", "[111, 222]", "[]");
+    }
+
+    @Test
+    public void testTagsAndIds() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>" +
+                "\n" +
+                "SELECT  ?person ?v " +
+                "WHERE {" +
+                "?person  :tag_ids ?v . " +
+                "?person  :tag_str ?s . " +
+                "}";
         ImmutableList<String> expectedValues =
-                ImmutableList.of( "[111, 222, 333]", "[111, 222]");
+                ImmutableList.of( "[111, 222, 333]","[111, 222, 333]","[111, 222, 333]","[111, 222]", "[111, 222]");
 
         String sql = checkReturnedValuesUnorderedReturnSql(query, expectedValues);
 

@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -111,6 +112,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+        TermFactory termFactory = cs.getTermFactory();
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
@@ -157,6 +159,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 extractionSubstitution
         );
 
+        FilterNode filterNode = iqFactory.createFilterNode(
+                cs.getTermFactory().getDBIsNotNull(flattenOutputVariable)
+        );
+
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
                 flattenedIfArrayVariable,
@@ -179,11 +185,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 iqFactory.createUnaryIQTree(
                         extractionConstructionNode,
                         iqFactory.createUnaryIQTree(
-                                flattennode,
+                                filterNode,
                                 iqFactory.createUnaryIQTree(
-                                        checkArrayConstructionNode,
-                                        dataNode
-                                ))));
+                                        flattennode,
+                                        iqFactory.createUnaryIQTree(
+                                                checkArrayConstructionNode,
+                                                dataNode
+                                        )))));
     }
 
     private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {

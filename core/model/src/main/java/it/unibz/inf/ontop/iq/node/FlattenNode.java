@@ -33,20 +33,8 @@ import java.util.Optional;
  * }
  *  Variable O is used (by subsequent operators) to refer to the second attribute of R'.
  *
- * A "strict" flatten discards instances with an empty relation or a NULL value for the flattened attribute.
- *
- * So the query:
- *   FLATTEN STRICT [ O/flatten(Y) ]
- *     R(X,Y)
- *
- * evaluated over R yields the relation: {
- *     (1, a),
- *     (1, b),
- *     (2, c)
- * }
- *
- * Optionally, viewing the unfolded relation as 0-indexed array,
- * the FLATTEN (or FLATTEN STRICT) operator may also output the index of each value in this array.
+ * Optionally, viewing the unfolded relation as a 0-indexed array,
+ * the FLATTEN operator may also output the index of each value in this array.
  *
  * So the query:
  *   FLATTEN [ O/flatten(Y), I/indexIn(Y) ]

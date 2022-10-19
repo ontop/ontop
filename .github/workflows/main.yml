@@ -1,0 +1,40 @@
+# Main CI workflow for Ontop
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push for all branches or pull request events but only for the version4/releasing branches
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - version4
+      - releasing/**
+
+jobs:
+  # This workflow contains a single job called "runtests"
+  runtestst:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      # The java versions the job will run on
+      matrix:
+        jdk: [8, 11]
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.jdk }}
+
+      # MAVEN_OPTS copied from gitlab-ci.yml
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      # Runs all the tests except those in packages where skipTests=true (currently docker tests specific to a db engine)
+      - name: Run CI without docker tests
+        run:  ./mvnw install --fail-at-end

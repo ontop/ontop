@@ -5,7 +5,7 @@
       "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": {
         "name": "\"tags\"",
-        "datatype": "json"
+        "datatype": "jsonb"
       },
       "columns": {
         "kept": [
@@ -42,7 +42,7 @@
       "baseRelation": ["\"hr\"","\"person-xt\""],
       "flattenedColumn": {
         "name": "\"friends\"",
-        "datatype": "json"
+        "datatype": "jsonb"
       },
       "columns": {
         "kept": [

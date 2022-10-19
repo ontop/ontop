@@ -20,10 +20,8 @@ public class PubJsonTest extends AbstractVirtualModeTest {
 
     final static String owlFile = "/pgsql/nested/pub/pub.owl";
     final static String obdaFile = "/pgsql/nested/pub/pub.obda";
-//    final static String obdaFile = "/pgsql/nested/pub/er/pub_er.obda";
     final static String propertyFile = "/pgsql/nested/pub/pub.properties";
     final static String viewFile = "/pgsql/nested/pub/pub_lenses.json";
-//    final static String viewFile = "/pgsql/nested/pub/er/pub_lenses_er.json";
 
     private static OntopOWLEngine ENGINE;
     private static OntopOWLConnection CONNECTION;
