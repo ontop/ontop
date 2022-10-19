@@ -17,5 +17,9 @@ mappingId	MAPID-developer
 target		data:person/{"id"} a :Developer .
 source		SELECT * FROM "employee" WHERE "role" = 'developer';
 
+mappingId	MAPID-activity
+target		data:activity/{"type"}/{"title"} a :Activity ; :title {"title"} ; :participant data:person/{"employeeId"} .
+source		SELECT * FROM "activity_denorm";
+
 ]]
 

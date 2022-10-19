@@ -51,5 +51,15 @@ rules = [
       }
       BIND (IRI(CONCAT("http://example.org/positionCategory/", ?positionLabel)) AS ?positionCategory)
     }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      [] a :Event ; :label ?title .
+    } WHERE {
+      ?activity a :Activity ; :title ?title .
+    }
     """
 ]

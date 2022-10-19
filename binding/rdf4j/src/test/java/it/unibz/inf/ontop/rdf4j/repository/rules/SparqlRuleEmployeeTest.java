@@ -76,5 +76,14 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, ImmutableSet.of("1"));
     }
 
+    @Test
+    public void testEvent() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?event a :Event ; :label ?v ." +
+                "}";
+        runQueryAndCompare(query, ImmutableSet.of("Deployment on Kubernetes", "CRM update"));
+    }
 
 }
