@@ -71,6 +71,8 @@ public class RuleExtractorImpl implements RuleExtractor {
         List<String> ruleStrings;
         try {
             ruleStrings = toml.getList(RULES_KEY);
+            if (!ruleStrings.stream().allMatch(Objects::nonNull))
+                throw new SparqlRuleException("Invalid SPARQL rules: Was expecting a list of non-null strings for the key \"rules\"");
         }
         // Reverse-engineering the implementation of the library
         catch (ClassCastException e) {

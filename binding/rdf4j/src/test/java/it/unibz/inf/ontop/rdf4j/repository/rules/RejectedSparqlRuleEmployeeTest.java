@@ -118,5 +118,25 @@ public class RejectedSparqlRuleEmployeeTest {
         }
     }
 
+    @Test
+    public void testNoRuleEntries() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/no-rules.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
+    @Test
+    public void testNoStringRules() {
+        try(OntopRepositoryConnection ignored = H2RDF4JTestTools.initOBDA(JDBC_URL, OBDA_FILE, null, null, null, null,
+                "/employee/rejected/non-string-rules.toml")) {
+            fail("A repository exception was expected");
+        } catch (RepositoryException e) {
+            assertTrue(e.getCause() instanceof SparqlRuleException);
+        }
+    }
+
 
 }
