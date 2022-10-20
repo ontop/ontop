@@ -80,6 +80,7 @@ public class JsonMetadata extends JsonOpenObject {
                 .put("MYSQL-D", MySQLCaseNotSensitiveTableNamesQuotedIDFactory.class)
                 .put("POSTGRESQL", PostgreSQLQuotedIDFactory.class)
                 .put("MSSQLSERVER", SQLServerQuotedIDFactory.class)
+                .put("SPARK", SparkSQLQuotedIDFactory.class)
                 .build();
 
         public Parameters(DBParameters parameters) {
