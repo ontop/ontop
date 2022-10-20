@@ -26,13 +26,18 @@ import static java.util.stream.Collectors.joining;
 
 @Command(name = "query",
         description = "Query the RDF graph exposed by the mapping and the OWL ontology")
-public class OntopQuery extends OntopReasoningCommandBase {
+public class OntopQuery extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
             description = "SPARQL SELECT query file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Required
     private String queryFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
+            title = "output", description = "output file (default)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    protected String outputFile;
 
     public OntopQuery() {
     }
@@ -61,6 +66,9 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
         if (ontopViewFile != null)
             configurationBuilder.ontopViewFile(ontopViewFile);
+
+        if (sparqlRulesFile != null)
+            configurationBuilder.sparqlRulesFile(sparqlRulesFile);
 
         if (dbPassword != null)
             configurationBuilder.jdbcPassword(dbPassword);

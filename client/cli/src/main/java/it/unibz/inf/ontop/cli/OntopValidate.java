@@ -31,10 +31,10 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
             System.exit(1);
         }
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder =
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder =
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
-                        .ontologyFile(owlFile);
-        //                .propertyFile(propertiesFile);
+                        .ontologyFile(owlFile)
+                        .enableOntologyAnnotationQuerying(enableAnnotations);
 
         if (propertiesFile != null)
             builder.propertyFile(propertiesFile);
@@ -62,6 +62,12 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         if (ontopViewFile != null)
             builder.ontopViewFile(ontopViewFile);
 
+        if (xmlCatalogFile != null)
+            builder.xmlCatalogFile(xmlCatalogFile);
+
+        if (sparqlRulesFile != null)
+            builder.sparqlRulesFile(sparqlRulesFile);
+
         OntopSQLOWLAPIConfiguration config = builder.build();
 
         OWLOntology ontology = null;
@@ -74,7 +80,7 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
             System.exit(1);
         }
         catch (Exception ex) {
-            System.out.format("ERROR: QuestOWL reasoner cannot be initialized\n");
+            System.out.format("ERROR: OntopOWL reasoner cannot be initialized\n");
             ex.printStackTrace();
             System.exit(1);
         }
