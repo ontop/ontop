@@ -17,8 +17,11 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.rule.RuleExecutor;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -31,6 +34,8 @@ public class RuleExecutorImpl implements RuleExecutor {
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuleExecutorImpl.class);
 
     @Inject
     protected RuleExecutorImpl(IntermediateQueryFactory iqFactory,
@@ -62,16 +67,21 @@ public class RuleExecutorImpl implements RuleExecutor {
                 transformerFactory, coreUtilsFactory, atomFactory);
 
         for (IQ rule : rules) {
-            IQ additionalDefinition = optimize(mappingUnfolder.optimize(rule));
+            Optional<IQ> additionalDefinition = optimize(mappingUnfolder.optimize(rule));
             // Mutation
-            updateMapping(mutableMappingMap, additionalDefinition);
+            additionalDefinition.ifPresent(d -> updateMapping(mutableMappingMap, d));
         }
 
         return ImmutableList.copyOf(mutableMappingMap.values());
     }
 
-    private IQ optimize(IQ rule) {
-        return generalStructuralAndSemanticIQOptimizer.optimize(rule);
+    private Optional<IQ> optimize(IQ rule) {
+        IQ optimizedRule = generalStructuralAndSemanticIQOptimizer.optimize(rule);
+        if (optimizedRule.getTree().isDeclaredAsEmpty()) {
+            LOGGER.warn("The following rule does not produce any result:\n{}", rule);
+            return Optional.empty();
+        }
+        return Optional.of(optimizedRule);
     }
 
     private void updateMapping(Map<MappingAssertionIndex, MappingAssertion> mutableMappingMap, IQ additionalDefinition) {

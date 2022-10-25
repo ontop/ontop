@@ -61,5 +61,16 @@ rules = [
     } WHERE {
       ?activity a :Activity ; :title ?title .
     }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?employee :doesNotMatter ?notAProperty .
+    } WHERE {
+      ?employee a :Employee ;
+        :notAProperty ?notAProperty ;
+    }
     """
 ]
