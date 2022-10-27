@@ -43,13 +43,16 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.Count;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -93,7 +96,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableMap<Variable, GroundTerm> externalBindings = convertExternalBindings(bindings);
 
-        IQTree tree = translate(pq.getTupleExpr(), externalBindings, true).iqTree;
+        IQTree tree = translate(pq.getTupleExpr(), externalBindings, pq.getDataset(), true).iqTree;
 
         ImmutableSet<Variable> vars = tree.getVariables();
 
@@ -130,7 +133,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableMap<Variable, GroundTerm> externalBindings = convertExternalBindings(bindings);
 
-        IQTree tree = translate(pq.getTupleExpr(), externalBindings, true).iqTree;
+        IQTree tree = translate(pq.getTupleExpr(), externalBindings, pq.getDataset(), true).iqTree;
 
         if (IS_DEBUG_ENABLED)
             LOGGER.debug("IQTree (before normalization):\n{}", tree);
@@ -146,9 +149,12 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     @Override
     public ImmutableSet<IQ> translateInsertOperation(ParsedUpdate parsedUpdate) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
+
+        Map<UpdateExpr, Dataset> datasetMapping = parsedUpdate.getDatasetMapping();
+
         for (UpdateExpr expr: parsedUpdate.getUpdateExprs()) {
             if (expr instanceof Modify) {
-                iqsBuilder.addAll(translateInsertExpression((Modify) expr));
+                iqsBuilder.addAll(translateInsertExpression((Modify) expr, datasetMapping.get(expr)));
             }
             else
                 throw new OntopUnsupportedKGQueryException("Unsupported update: " + expr);
@@ -156,7 +162,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return iqsBuilder.build();
     }
 
-    protected ImmutableSet<IQ> translateInsertExpression(Modify expression) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+    protected ImmutableSet<IQ> translateInsertExpression(Modify expression, @Nullable Dataset dataset) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
         if (expression.getDeleteExpr() != null)
             throw new OntopUnsupportedKGQueryException("DELETE clauses are not supported");
         if (expression.getInsertExpr() == null)
@@ -164,9 +170,20 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         IQTree whereTree = expression.getWhereExpr() == null
                 ? iqFactory.createTrueNode()
-                : translate(expression.getWhereExpr(), ImmutableMap.of(), true).iqTree;
+                : translate(expression.getWhereExpr(), ImmutableMap.of(), dataset, true).iqTree;
 
-        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of(), false).iqTree;
+        @Nullable Dataset insertDataset;
+        if (dataset != null) {
+            SimpleDataset newDataset = new SimpleDataset();
+            IRI defaultInsertGraph = dataset.getDefaultInsertGraph();
+            if (defaultInsertGraph != null)
+                newDataset.addDefaultGraph(defaultInsertGraph);
+            insertDataset = newDataset;
+        }
+        else
+            insertDataset = null;
+
+        IQTree insertTree = translate(expression.getInsertExpr(), ImmutableMap.of(), insertDataset, false).iqTree;
 
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
         ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
@@ -177,6 +194,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, whereTree))
                 .orElse(whereTree);
 
+        // NB: when there is no default graph
+        if (normalizedSubTree.isDeclaredAsEmpty())
+            return ImmutableSet.of();
 
         for (IntensionalDataNode dataNode : dataNodes) {
             iqsBuilder.add(createInsertIQ(dataNode, normalization.getBNodeVariableMap(), normalizedSubTree));
@@ -258,66 +278,66 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private TranslationResult translate(TupleExpr node, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                        boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+                                        @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (node instanceof StatementPattern){
             StatementPattern stmt = (StatementPattern)node;
             if (stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))
-                return translateQuadPattern(stmt, externalBindings, treatBNodeAsVariable);
+                return translateQuadPattern(stmt, externalBindings, dataset, treatBNodeAsVariable);
 
-            return translateTriplePattern((StatementPattern) node, externalBindings, treatBNodeAsVariable);
+            return translateTriplePattern((StatementPattern) node, externalBindings, dataset, treatBNodeAsVariable);
         }
 
         if (node instanceof Join)
-            return translateJoinLikeNode((Join) node, externalBindings, treatBNodeAsVariable);
+            return translateJoinLikeNode((Join) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof LeftJoin)
-            return translateJoinLikeNode((LeftJoin) node, externalBindings, treatBNodeAsVariable);
+            return translateJoinLikeNode((LeftJoin) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Difference)
-            return translateDifference((Difference) node, externalBindings, treatBNodeAsVariable);
+            return translateDifference((Difference) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Union)
-            return translateUnion((Union) node, externalBindings, treatBNodeAsVariable);
+            return translateUnion((Union) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Filter)
-            return translateFilter((Filter) node, externalBindings, treatBNodeAsVariable);
+            return translateFilter((Filter) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Projection)
-            return translateProjection((Projection) node, externalBindings, treatBNodeAsVariable);
+            return translateProjection((Projection) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Slice)
-            return translateSlice((Slice) node, externalBindings, treatBNodeAsVariable);
+            return translateSlice((Slice) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Distinct)
-            return translateDistinctOrReduced(node, externalBindings, treatBNodeAsVariable);
+            return translateDistinctOrReduced(node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Reduced)
-            return translateDistinctOrReduced(node, externalBindings, treatBNodeAsVariable);
+            return translateDistinctOrReduced(node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof SingletonSet)
             return translateSingletonSet(externalBindings, treatBNodeAsVariable);
 
         if (node instanceof Group)
-            return translateAggregate((Group) node, externalBindings, treatBNodeAsVariable);
+            return translateAggregate((Group) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof Extension)
-            return translateExtension((Extension) node, externalBindings, treatBNodeAsVariable);
+            return translateExtension((Extension) node, externalBindings, dataset, treatBNodeAsVariable);
 
         if (node instanceof BindingSetAssignment)
             return translateBindingSetAssignment((BindingSetAssignment) node, externalBindings);
 
         if (node instanceof Order)
-            return translateOrder((Order) node, externalBindings, treatBNodeAsVariable);
+            return translateOrder((Order) node, externalBindings, dataset, treatBNodeAsVariable);
 
         throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
 
     private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                  boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+                                                  @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
-        TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings, treatBNodeAsVariable);
-        TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
         ImmutableSet<Variable> leftVars = leftTranslation.iqTree.getVariables();
         ImmutableSet<Variable> sharedVars = rightTranslation.iqTree.getVariables().stream()
@@ -410,8 +430,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                 boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(groupNode.getArg(), externalBindings, treatBNodeAsVariable);
+                                                 @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(groupNode.getArg(), externalBindings, dataset, treatBNodeAsVariable);
         AggregationNode an = getAggregationNode(groupNode, child.iqTree.getVariables(), externalBindings, treatBNodeAsVariable);
 
         UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(
@@ -486,8 +506,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return new ArrayList<>();
     }
 
-    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
+    private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                             @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, dataset, treatBNodeAsVariable);
         ImmutableSet<Variable> variables = child.iqTree.getVariables();
 
         ImmutableList<OrderByNode.OrderComparator> comparators = node.getElements().stream()
@@ -593,12 +614,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                         @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child;
         if (genNode instanceof Distinct) {
-            child = translate(((Distinct) genNode).getArg(), externalBindings, treatBNodeAsVariable);
+            child = translate(((Distinct) genNode).getArg(), externalBindings, dataset, treatBNodeAsVariable);
         } else if (genNode instanceof Reduced) {
-            child = translate(((Reduced) genNode).getArg(), externalBindings, treatBNodeAsVariable);
+            child = translate(((Reduced) genNode).getArg(), externalBindings, dataset, treatBNodeAsVariable);
         } else {
             throw new Sparql2IqConversionException("Unexpected node type for node: " + genNode.toString());
         }
@@ -611,8 +633,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
+    private TranslationResult translateSlice(Slice node, ImmutableMap<Variable, GroundTerm> externalBindings, Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, dataset, treatBNodeAsVariable);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
@@ -636,10 +658,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 );
     }
 
-    private TranslationResult translateFilter(Filter filter, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable)
+    private TranslationResult translateFilter(Filter filter, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                              @Nullable Dataset dataset, boolean treatBNodeAsVariable)
             throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
-        TranslationResult child = translate(filter.getArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult child = translate(filter.getArg(), externalBindings, dataset, treatBNodeAsVariable);
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
                         iqFactory.createFilterNode(
@@ -653,13 +676,14 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+    private TranslationResult translateJoinLikeNode(BinaryTupleOperator join, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                    @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
 
         if (!(join instanceof Join) && !(join instanceof LeftJoin)) {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
-        TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings, treatBNodeAsVariable);
-        TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings, treatBNodeAsVariable);
+        TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
         IQTree leftQuery = leftTranslation.iqTree;
         IQTree rightQuery = rightTranslation.iqTree;
@@ -849,8 +873,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private TranslationResult translateProjection(Projection node, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                  boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult child = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
+                                                  @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult child = translate(node.getArg(), externalBindings, dataset, treatBNodeAsVariable);
         IQTree subQuery = child.iqTree;
 
         List<ProjectionElem> projectionElems = node.getProjectionElemList().getElements();
@@ -926,9 +950,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private TranslationResult translateUnion(Union union, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                             boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings, treatBNodeAsVariable);
-        TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings, treatBNodeAsVariable);
+                                             @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
+        TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
         IQTree leftQuery = leftTranslation.iqTree;
         IQTree rightQuery = rightTranslation.iqTree;
@@ -983,48 +1007,108 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                     boolean treatBNodeAsVariable) {
-        IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleAtom(
-                        translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
-                        translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
-                        translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable)
-                ));
+                                                     @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
+        VariableOrGroundTerm subject = translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable);
+        VariableOrGroundTerm predicate = translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable);
+        VariableOrGroundTerm object = translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable);
+
+        IQTree subTree;
+        if (dataset == null || dataset.getDefaultGraphs().isEmpty() && dataset.getNamedGraphs().isEmpty()) {
+            subTree = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleAtom(subject, predicate, object));
+        }
+        else {
+            Set<IRI> defaultGraphs = dataset.getDefaultGraphs();
+            int defaultGraphCount = defaultGraphs.size();
+
+            // From SPARQL 1.1 "If there is no FROM clause, but there is one or more FROM NAMED clauses,
+            // then the dataset includes an empty graph for the default graph."
+            if (defaultGraphCount == 0)
+                subTree = iqFactory.createEmptyNode(
+                        Stream.of(subject, predicate, object)
+                                .filter(t -> t instanceof Variable)
+                                .map(t -> (Variable) t)
+                                .collect(ImmutableCollectors.toSet()));
+            // NB: INSERT blocks cannot have more than 1 default graph. Important for the rest
+            else if (defaultGraphCount == 1) {
+                IRIConstant graph = termFactory.getConstantIRI(
+                        defaultGraphs.iterator().next().stringValue());
+                subTree = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+            }
+            else {
+                Variable graph = termFactory.getVariable("g" + UUID.randomUUID());
+
+                IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
+
+                ImmutableExpression graphFilter = termFactory.getDisjunction(defaultGraphs.stream()
+                                .map(g -> termFactory.getConstantIRI(g.stringValue()))
+                                .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
+                        .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
+
+                ImmutableSet<Variable> projectedVariables = quadNode.getVariables().stream()
+                        .filter(v -> !v.equals(graph))
+                        .collect(ImmutableCollectors.toSet());
+
+                // Merges the default trees -> removes duplicates
+                subTree = iqFactory.createUnaryIQTree(
+                        iqFactory.createDistinctNode(),
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createConstructionNode(projectedVariables),
+                                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(graphFilter), quadNode)));
+            }
+        }
 
         // In most cases
         if (externalBindings.isEmpty())
-            return createTranslationResult(dataNode, ImmutableSet.of());
+            return createTranslationResult(subTree, ImmutableSet.of());
 
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(dataNode.getVariables(), externalBindings.keySet());
-        IQTree iqTree = applyExternalBindingFilter(dataNode, externalBindings, externallyBoundedVariables);
+        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(subTree.getVariables(), externalBindings.keySet());
+        IQTree iqTree = applyExternalBindingFilter(subTree, externalBindings, externallyBoundedVariables);
 
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
     private TranslationResult translateQuadPattern(StatementPattern quad, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                   boolean treatBNodeAsVariable) {
+                                                   @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
+
+        VariableOrGroundTerm graph = translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable);
 
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalQuadAtom(
                         translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
                         translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
                         translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
-                        translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable)
+                        graph
                 ));
+
+        IQTree subTree;
+        if (dataset == null || dataset.getNamedGraphs().isEmpty()) {
+            subTree = dataNode;
+        }
+        else {
+            ImmutableExpression graphFilter = termFactory.getDisjunction(dataset.getNamedGraphs().stream()
+                            .map(g -> termFactory.getConstantIRI(g.stringValue()))
+                            .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
+
+            subTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(graphFilter), dataNode);
+        }
 
         // In most cases
         if (externalBindings.isEmpty())
-            return createTranslationResult(dataNode, ImmutableSet.of());
+            return createTranslationResult(subTree, ImmutableSet.of());
 
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(dataNode.getVariables(), externalBindings.keySet());
-        IQTree iqTree = applyExternalBindingFilter(dataNode, externalBindings, externallyBoundedVariables);
+        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(subTree.getVariables(), externalBindings.keySet());
+        IQTree iqTree = applyExternalBindingFilter(subTree, externalBindings, externallyBoundedVariables);
 
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
     private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                 boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
-        TranslationResult childTranslation = translate(node.getArg(), externalBindings, treatBNodeAsVariable);
+                                                 @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+        TranslationResult childTranslation = translate(node.getArg(), externalBindings, dataset, treatBNodeAsVariable);
         IQTree childQuery = childTranslation.iqTree;
 
         // Warning: an ExtensionElement might reference a variable appearing in a previous ExtensionElement

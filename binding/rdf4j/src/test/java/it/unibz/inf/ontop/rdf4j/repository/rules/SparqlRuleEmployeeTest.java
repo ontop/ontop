@@ -55,7 +55,6 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
                 "SELECT  ?v \n" +
                 "FROM <http://employee.example.org/data/newGraph>\n" +
                 "WHERE {\n" +
-                " ?x a :Employee . \n" +
                 " ?x :fullName ?v . \n" +
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("Papov Vlad", "Doe John"));
