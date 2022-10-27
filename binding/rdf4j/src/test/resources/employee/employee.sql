@@ -30,3 +30,23 @@ create table "activity_denorm" (
 insert into "activity_denorm" ("employeeId", "type", "title") values (1, 1, 'Deployment on Kubernetes');
 insert into "activity_denorm" ("employeeId", "type", "title") values (2, 2, 'CRM update');
 
+
+create table "staff-company2" (
+                            "id" int primary key,
+                            "fname" varchar(100) NOT NULL,
+                            "lname" varchar(100) NOT NULL
+);
+
+insert into "staff-company2" ("id", "fname", "lname") values (1, 'Vlad','Papov');
+insert into "staff-company2" ("id", "fname", "lname") values (2, 'John','Doe');
+
+create table "staff-company2-source2" (
+                                  "id" int primary key,
+                                  "fname" varchar(100) NOT NULL,
+                                  "lname" varchar(100) NOT NULL
+);
+
+insert into "staff-company2-source2" ("id", "fname", "lname") values (2, 'John','Doe');
+insert into "staff-company2-source2" ("id", "fname", "lname") values (100, 'Andrew','Taylor');
+
+
