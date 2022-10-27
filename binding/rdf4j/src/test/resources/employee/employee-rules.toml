@@ -72,5 +72,67 @@ rules = [
       ?employee a :Employee ;
         :notAProperty ?notAProperty ;
     }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    WITH <http://employee.example.org/data/graph/company2>
+    INSERT {
+      ?e :fullName ?fullName .
+    } WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?lastName, ' ', ?firstName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    WITH <http://employee.example.org/data/newGraph>
+    INSERT {
+      ?e :fullName ?fullName .
+    }
+    USING <http://employee.example.org/data/graph/company2>
+    WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?lastName, ' ', ?firstName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e :capitalizedName ?name .
+    }
+    USING <http://employee.example.org/data/graph/company2>
+    WHERE {
+      ?e a :Employee ;
+         :lastName ?lastName .
+      BIND (UCASE(?lastName) AS ?name)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e :lowerCaseName ?name .
+    }
+    USING NAMED <http://employee.example.org/data/graph/company2-source2>
+    WHERE {
+      GRAPH ?g {
+        ?e a :Employee ;
+           :lastName ?lastName .
+        BIND (LCASE(?lastName) AS ?name)
+      }
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e a :NotAClass .
+    }
+    USING NAMED <http://employee.example.org/data/graph/company2-source2>
+    WHERE {
+       ?e a :Employee .
+    }
     """
 ]

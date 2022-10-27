@@ -21,5 +21,13 @@ mappingId	MAPID-activity
 target		data:activity/{"type"}/{"title"} a :Activity ; :title {"title"} ; :participant data:person/{"employeeId"} .
 source		SELECT * FROM "activity_denorm";
 
+mappingId	MAPID-company2
+target		GRAPH data:graph/company2 { data:company2/staff/{"id"} a :Employee ; :firstName {"fname"} ; :lastName {"lname"} . }
+source		SELECT * FROM "staff-company2";
+
+mappingId	MAPID-company2-source2
+target		GRAPH data:graph/company2-source2 { data:company2/staff/{"id"} a :Employee ; :firstName {"fname"} ; :lastName {"lname"} . }
+source		SELECT * FROM "staff-company2-source2";
+
 ]]
 
