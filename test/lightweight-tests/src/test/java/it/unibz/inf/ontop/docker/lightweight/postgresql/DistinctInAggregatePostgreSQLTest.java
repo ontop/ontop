@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -26,8 +26,8 @@ public class DistinctInAggregatePostgreSQLTest extends AbstractDistinctInAggrega
     }
 
     @Override
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForAvg() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p",buildAnswerIRI("1"),
                         "ad", "\"10.5000000000000000\"^^xsd:decimal"

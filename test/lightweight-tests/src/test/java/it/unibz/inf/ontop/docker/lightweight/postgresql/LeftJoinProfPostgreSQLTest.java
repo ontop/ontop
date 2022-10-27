@@ -26,22 +26,26 @@ public class LeftJoinProfPostgreSQLTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.5000000000000000", "16.0000000000000000", "19.2500000000000000");
+        return ImmutableList.of("\"15.5000000000000000\"^^xsd:decimal", "\"16.0000000000000000\"^^xsd:decimal",
+                "\"19.2500000000000000\"^^xsd:decimal");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("11.2000000000000000");
+        return  ImmutableList.of("\"11.2000000000000000\"^^xsd:decimal");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
-        return ImmutableList.of("10.3333333333333333","12.0000000000000000", "13.0000000000000000");
+        return ImmutableList.of("\"10.3333333333333333\"^^xsd:decimal","\"12.0000000000000000\"^^xsd:decimal",
+                "\"13.0000000000000000\"^^xsd:decimal");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "10.3333333333333333", "12.0000000000000000", "13.0000000000000000");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"10.3333333333333333\"^^xsd:decimal", "\"12.0000000000000000\"^^xsd:decimal",
+                "\"13.0000000000000000\"^^xsd:decimal");
     }
 
 }

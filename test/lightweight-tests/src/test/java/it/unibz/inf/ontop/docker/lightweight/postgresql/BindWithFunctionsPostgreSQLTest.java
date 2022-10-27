@@ -39,8 +39,22 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Disabled("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
+    public void testHashSHA1() {
+        super.testHashSHA1();
+    }
+
+    @Disabled("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
+    @Test
+    @Override
     public void testHashSHA256() {
         super.testHashSHA256();
+    }
+
+    @Disabled("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
+    @Test
+    @Override
+    public void testHashSHA512() {
+        super.testHashSHA512();
     }
 
     @Disabled("PostgreSQL v14 introduces trailing 0-s to result")
@@ -71,5 +85,4 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.50000000000000000000\"^^xsd:decimal");
     }
-
 }

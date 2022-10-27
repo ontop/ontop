@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -15,8 +13,6 @@ import java.util.List;
  */
 
 public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JTest {
-
-    protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
 
     protected static final String OBDA_FILE = "/books/books.obda";
     protected static final String OWL_FILE = "/books/books.owl";
@@ -31,7 +27,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "}\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -45,7 +41,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "}\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -59,7 +55,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "}\n"
                 + "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
                 "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -78,7 +74,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CEIL(?discount) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getCeilExpectedValues());
+        executeAndCompareLexicalValues(query, getCeilExpectedValues());
     }
 
     protected ImmutableList<String> getCeilExpectedValues() {
@@ -95,7 +91,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (FLOOR(?discount) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getFloorExpectedValues());
+        executeAndCompareLexicalValues(query, getFloorExpectedValues());
     }
 
     protected ImmutableList<String> getFloorExpectedValues() {
@@ -113,7 +109,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CONCAT(STR(ROUND(?discount)),', ',STR(ROUND(?p))) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getRoundExpectedValues());
+        executeAndCompareLexicalValues(query, getRoundExpectedValues());
     }
 
     protected ImmutableList<String> getRoundExpectedValues() {
@@ -131,7 +127,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getAbsExpectedValues());
+        executeAndCompareLexicalValues(query, getAbsExpectedValues());
     }
 
     protected ImmutableList<String> getAbsExpectedValues() {
@@ -140,7 +136,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     /*
-	 * Tests for hash functions. H2 supports only SHA256 algorithm.
+	 * Tests for hash functions.
     */
 
     @Test
@@ -169,32 +165,125 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
-        runQueryAndCompare(query, ImmutableList.copyOf(expectedValues));
+        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
 
     }
 
-    @Disabled
     @Test
     public void testHashMd5() {
 
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (MD5(str(?title)) AS ?v)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
     }
 
-    @Disabled
     @Test
     public void testHashSHA1() {
 
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA1(str(?title)) AS ?v)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
     }
 
     @Disabled
     @Test
     public void testHashSHA384() {
 
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA384(str(?title)) AS ?v)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-384");
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
     }
 
-    @Disabled
     @Test
     public void testHashSHA512() {
 
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA512(str(?title)) AS ?v)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
     }
 
     /*
@@ -210,7 +299,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (STRLEN(?title) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"15\"^^xsd:integer", "\"16\"^^xsd:integer", "\"20\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"15\"^^xsd:integer", "\"16\"^^xsd:integer", "\"20\"^^xsd:integer",
                 "\"44\"^^xsd:integer"));
     }
 
@@ -224,7 +313,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SUBSTR(?title, 3) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"ARQL Tutorial\"@en", "\"e Semantic Web\"@en",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"ARQL Tutorial\"@en", "\"e Semantic Web\"@en",
                 "\"ime and Punishment\"@en", "\"e Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -238,7 +327,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SUBSTR(?title, 3, 6) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"ARQL T\"@en", "\"e Sema\"@en", "\"ime an\"@en", "\"e Logi\"@en"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"ARQL T\"@en", "\"e Sema\"@en", "\"ime an\"@en", "\"e Logi\"@en"));
     }
     @Test
     public void testURIEncoding() {
@@ -250,7 +339,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"The%20Semantic%20Web\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The%20Semantic%20Web\"^^xsd:string",
                 "\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string"));
     }
 
@@ -266,7 +355,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(STRENDS(?title,\"b\"))\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Semantic Web\"@en"));
     }
 
     @Test
@@ -279,7 +368,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Semantic Web\"@en",
                 "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -293,7 +382,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Semantic Web\"@en",
                 "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -306,7 +395,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND(CONTAINS(?title,\"Semantic\") AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
 
@@ -320,7 +409,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(CONTAINS(?title,\"Semantic\"))\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"The Semantic Web\"@en"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Semantic Web\"@en"));
     }
 
 
@@ -334,7 +423,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string",
                 "\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string",
                 "\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string",
                 "\"The Logic Book: Introduction, Second Edition " +
@@ -352,7 +441,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"SPARQL Tutorial sparql tutorial\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"SPARQL Tutorial sparql tutorial\"^^xsd:string",
                 "\"The Semantic Web the semantic web\"^^xsd:string",
                 "\"Crime and Punishment crime and punishment\"^^xsd:string",
                 "\"The Logic Book: Introduction, Second Edition " +
@@ -370,7 +459,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getBindWithBefore1ExpectedValues());
+        executeAndCompareLexicalValues(query, getBindWithBefore1ExpectedValues());
     }
 
     protected ImmutableList<String> getBindWithBefore1ExpectedValues() {
@@ -386,7 +475,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x dc:title ?title .\n"
                 + "   BIND (STRBEFORE(?title,\"\") AS ?v)\n"
                 + "}";
-        runQueryAndCompare(query, getBindWithBefore2ExpectedValues());
+        executeAndCompareLexicalValues(query, getBindWithBefore2ExpectedValues());
     }
 
     protected ImmutableList<String> getBindWithBefore2ExpectedValues() {
@@ -402,7 +491,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (STRAFTER(?title,\"The\") AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getBindWithAfter1ExpectedValues());
+        executeAndCompareLexicalValues(query, getBindWithAfter1ExpectedValues());
     }
 
     protected ImmutableList<String> getBindWithAfter1ExpectedValues() {
@@ -419,7 +508,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (STRAFTER(?title,\"\") AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getBindWithAfter2ExpectedValues());
+        executeAndCompareLexicalValues(query, getBindWithAfter2ExpectedValues());
     }
 
     protected ImmutableList<String> getBindWithAfter2ExpectedValues() {
@@ -442,7 +531,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (MONTH(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"6\"^^xsd:integer","\"12\"^^xsd:integer", "\"9\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"6\"^^xsd:integer","\"12\"^^xsd:integer", "\"9\"^^xsd:integer",
                 "\"11\"^^xsd:integer"));
     }
 
@@ -455,7 +544,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (YEAR(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
                 "\"2015\"^^xsd:integer", "\"1970\"^^xsd:integer"));
     }
 
@@ -468,7 +557,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (DAY(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"5\"^^xsd:integer", "\"8\"^^xsd:integer", "\"21\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"5\"^^xsd:integer", "\"8\"^^xsd:integer", "\"21\"^^xsd:integer",
                 "\"5\"^^xsd:integer"));
     }
 
@@ -481,7 +570,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (MINUTES(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"47\"^^xsd:integer", "\"30\"^^xsd:integer", "\"23\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"47\"^^xsd:integer", "\"30\"^^xsd:integer", "\"23\"^^xsd:integer",
                 "\"50\"^^xsd:integer"));
     }
 
@@ -494,7 +583,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (HOURS(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"16\"^^xsd:integer", "\"11\"^^xsd:integer",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"16\"^^xsd:integer", "\"11\"^^xsd:integer",
                 "\"9\"^^xsd:integer", "\"7\"^^xsd:integer"));
     }
 
@@ -507,7 +596,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SECONDS(?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getSecondsExpectedValues());
+        executeAndCompareLexicalValues(query, getSecondsExpectedValues());
     }
 
     protected ImmutableList<String> getSecondsExpectedValues() {
@@ -564,7 +653,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND ((?p / 2) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, getDivideExpectedValues());
+        executeAndCompareLexicalValues(query, getDivideExpectedValues());
     }
 
     protected ImmutableList<String> getDivideExpectedValues() {
@@ -581,7 +670,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x ns:pubYear ?year .\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"00:00\"^^xsd:string", "\"00:00\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"00:00\"^^xsd:string", "\"00:00\"^^xsd:string",
                 "\"00:00\"^^xsd:string", "\"00:00\"^^xsd:string"));
     }
 
@@ -600,7 +689,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   } \n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -626,14 +715,14 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER (?discount = ?discount2 && ?title != ?title2)\n"
                 + "   } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of());
+        executeAndCompareLexicalValues(query, ImmutableList.of());
     }
 
     @Test
     public void testRDFTermEqual2() {
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
+                + "SELECT (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
@@ -642,7 +731,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER (?discount = ?discount2 && str(?title) != str(?title2))\n"
                 + "   } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
                 "\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string"));
     }
 
@@ -651,7 +740,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
 
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
+                + "SELECT (CONCAT(?title,\" | \",?title2) AS ?v) WHERE \n"
                 + "{  \n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
@@ -660,8 +749,100 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(sameTerm(?discount, ?discount2) && !sameTerm(?title, ?title2))\n"
                 + "   } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string",
                 "\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string"));
+    }
+
+    @Test
+    public void testIn() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  \n"
+                + "   ?x ?p ?v .\n"
+                + "   VALUES (?chosentitles) { \n"
+                + "         (\"Crime and Punishment\"@en) \n"
+                + "         (\"SPARQL Tutorial\"@en) } \n"
+                + "   FILTER(?v IN (?chosentitles)) \n"
+                + "   } ORDER BY ?v";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment\"@en",
+                "\"SPARQL Tutorial\"@en"));
+    }
+
+    @Test
+    public void testIn2() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  \n"
+                + "   ?x dc:title ?v .\n"
+                + "   FILTER(?v IN (\"Crime and Punishment\"@en, \n"
+                + "                     \"SPARQL Tutorial\"@en)) \n"
+                + "   } ORDER BY ?v";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment\"@en",
+                "\"SPARQL Tutorial\"@en"));
+    }
+
+    @Disabled
+    @Test
+    public void testNotIn1() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  \n"
+                + "   ?x dc:title ?v .\n"
+                + "   VALUES (?chosentitles) { \n"
+                + "         (\"Crime and Punishment\"@en) \n"
+                + "         (\"SPARQL Tutorial\"@en) } \n"
+                + "   FILTER(?v NOT IN (?chosentitles)) \n"
+                + "   } ORDER BY ?v";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Logic Book: Introduction, Second Edition\"@en",
+        "\"The Semantic Web\"@en"));
+    }
+
+    @Disabled
+    @Test
+    public void testNotIn2() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  \n"
+                + "   ?x dc:title ?v .\n"
+                + "   FILTER(?v NOT IN (\"Crime and Punishment\"@en, \n"
+                + "                     \"SPARQL Tutorial\"@en)) \n"
+                + "   } ORDER BY ?v";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Logic Book: Introduction, Second Edition\"@en",
+                "\"The Semantic Web\"@en"));
+    }
+
+    @Test
+    public void testOffset1() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  ?x dc:title ?v . }\n"
+                + "ORDER BY ASC(?v) \n"
+                + "OFFSET 2";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Logic Book: Introduction, Second Edition\"@en",
+                "\"The Semantic Web\"@en"));
+    }
+
+    @Test
+    public void testOffset2() {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  ?x dc:title ?v . }\n"
+                + "ORDER BY ASC(?v) \n"
+                + "OFFSET 2  \n"
+                + "LIMIT 1";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
     @Test
@@ -672,13 +853,26 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x dc:title ?title .\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
 
     @Test
     public void testIsBlank() {
-            //no example data
+
+        /*String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isBlank(?discount) AS ?v) WHERE \n"
+                + "{ ?x ns:discount [a ?discount .\n"
+                + "  ?x ns:discount [a ?discount .\n"
+                + "}";
+        ?s :child [a :Person] .*/
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isBlank(?discount) AS ?v) WHERE \n"
+                + "{  ?x ns:discount ?discount .\n"
+                + "}";
+
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
 
     @Test
@@ -689,7 +883,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -701,7 +895,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x ns:discount ?discount .\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -713,7 +907,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{ ?x ns:pubYear ?year . }\n"
                 + "ORDER BY ?year ";
 
-        runQueryAndCompare(query, getStrExpectedValues());
+        executeAndCompareLexicalValues(query, getStrExpectedValues());
     }
 
     protected ImmutableList<String> getStrExpectedValues() {
@@ -729,7 +923,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "{  ?x dc:title ?title .\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"en\"^^xsd:string", "\"en\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"en\"^^xsd:string", "\"en\"^^xsd:string",
                 "\"en\"^^xsd:string", "\"en\"^^xsd:string"));
     }
 
@@ -743,7 +937,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
                 + "   }  ";
 
-        runQueryAndCompare(query, getDatatypeExpectedValues());
+        executeAndCompareLexicalValues(query, getDatatypeExpectedValues());
     }
 
     protected ImmutableList<String> getDatatypeExpectedValues() {
@@ -761,7 +955,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   ?x dc:description ?description .\n"
                 + "   } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment | good\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment | good\"^^xsd:string",
                 "\"SPARQL Tutorial | good\"^^xsd:string",
                 "\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string",
                 "\"The Semantic Web | bad\"^^xsd:string"));
@@ -782,7 +976,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "     FILTER(langMatches( lang(?title), \"EN\" )) \n"
                 + "   } } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"true\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -800,7 +994,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "     FILTER(REGEX( ?title, \"Semantic\" )) \n"
                 + "   } } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -813,7 +1007,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?v) .\n"
                 + "   } ORDER BY ?title";
 
-        runQueryAndCompare(query, ImmutableList.of("\"Crime and Punishment\"@en", "\"SPARQL Tutorial\"@en",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Crime and Punishment\"@en", "\"SPARQL Tutorial\"@en",
                 "\"The Logic Book: Introduction, First Edition\"@en", "\"The Semantic Web\"@en"));
     }
 
@@ -821,7 +1015,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantFloatDivide() {
         String query = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:float AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantFloatDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantFloatDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantFloatDivideExpectedResults() {
@@ -832,7 +1026,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantFloatIntegerDivide() {
         String query = "SELECT (\"0.5\"^^xsd:float / \"1\"^^xsd:integer AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantFloatIntegerDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantFloatIntegerDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantFloatIntegerDivideExpectedResults() {
@@ -843,7 +1037,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantFloatDecimalDivide() {
         String query = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:decimal AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantFloatDecimalDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantFloatDecimalDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantFloatDecimalDivideExpectedResults() {
@@ -854,7 +1048,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantFloatDoubleDivide() {
         String query = "SELECT (\"1.0\"^^xsd:float / \"2.0\"^^xsd:double AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantFloatDoubleDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantFloatDoubleDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantFloatDoubleDivideExpectedResults() {
@@ -865,7 +1059,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantDoubleDoubleDivide() {
         String query = "SELECT (\"1.0\"^^xsd:double / \"2.0\"^^xsd:double AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantDoubleDoubleDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantDoubleDoubleDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantDoubleDoubleDivideExpectedResults() {
@@ -876,7 +1070,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testConstantIntegerDivide() {
         String query = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?v)  {} ";
 
-        runQueryAndCompare(query, getConstantIntegerDivideExpectedResults());
+        executeAndCompareLexicalValues(query, getConstantIntegerDivideExpectedResults());
     }
 
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
@@ -887,49 +1081,49 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testCoalesceDivideByZeroInt() {
         String query = "SELECT (COALESCE(\"1\"^^xsd:integer / \"0\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceDivideByZeroDecimal() {
         String query = "SELECT (COALESCE(\"1\"^^xsd:decimal / \"0\"^^xsd:decimal, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceInvalidDivide1() {
         String query = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceInvalidDivide2() {
         String query = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceInvalidSum() {
         String query = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceInvalidSub() {
         String query = "SELECT (COALESCE(\"rrr\" - \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testCoalesceInvalidTimes() {
         String query = "SELECT (COALESCE(\"rrr\" * \"2\"^^xsd:integer, \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Disabled("TODO: support it, by using a case")
@@ -937,7 +1131,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     public void testDivideByZeroFloat() {
         String query = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"INF\"^^xsd:float"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"INF\"^^xsd:float"));
     }
 
     @Test
@@ -950,7 +1144,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (\"cst\" AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
                 "\"cst\"^^xsd:string"));
     }
 
@@ -964,7 +1158,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (\"cst\" AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"cst\"^^xsd:string", "\"cst\"^^xsd:string",
                 "\"cst\"^^xsd:string", "\"cst\"^^xsd:string"));
     }
 
@@ -975,7 +1169,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -986,7 +1180,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -996,7 +1190,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -1007,7 +1201,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -1018,7 +1212,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -1029,7 +1223,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<urn:john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<urn:john>"));
     }
 
     @Test
@@ -1040,7 +1234,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (isIRI(?v))\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<mailto:john@somewhere.org>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<mailto:john@somewhere.org>"));
     }
 
     @Test
@@ -1053,7 +1247,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "FILTER (?v = ?y)\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/john>"));
     }
 
     @Test
@@ -1063,49 +1257,49 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 "BIND(IRI(\"john\") AS ?v)\n" +
                 "} ";
 
-        runQueryAndCompare(query, ImmutableList.of("<http://example.org/project1#data/john>"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("<http://example.org/project1#data/john>"));
     }
 
     @Test
     public void testIF1() {
         String query = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testIF2() {
         String query = "SELECT (IF(1 < 2, \"first\", \"second\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"first\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"first\"^^xsd:string"));
     }
 
     @Test
     public void testIF3() {
         String query = "SELECT (IF(1 > 2, \"first\", \"second\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"second\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"second\"^^xsd:string"));
     }
 
     @Test
     public void testIF4() {
         String query = "SELECT (COALESCE(IF(1 < 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
     public void testIF5() {
         String query = "SELECT (COALESCE(IF(1 > 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"second\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"second\"^^xsd:string"));
     }
 
     @Test
     public void testIF6() {
         String query = "SELECT (COALESCE(IF(1 > 2, \"first\", \"rrr\" * \"2\"^^xsd:integer), \"other\") AS ?v)  {} ";
 
-        runQueryAndCompare(query, ImmutableList.of("\"other\"^^xsd:string"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"other\"^^xsd:string"));
     }
 
     @Test
@@ -1118,7 +1312,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:weeksBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"3538\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"3538\"^^xsd:long"));
     }
 
     @Test
@@ -1131,7 +1325,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"24767\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"24767\"^^xsd:long"));
     }
 
     @Test
@@ -1144,7 +1338,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:weeksBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"3538\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"3538\"^^xsd:long"));
     }
 
     @Test
@@ -1157,7 +1351,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"24766\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"24766\"^^xsd:long"));
     }
 
     @Test
@@ -1172,7 +1366,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17742\"^^xsd:long",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17742\"^^xsd:long",
                 "\"1351\"^^xsd:long"));
     }
 
@@ -1188,7 +1382,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17743\"^^xsd:long",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17743\"^^xsd:long",
                 "\"1352\"^^xsd:long"));
     }
 
@@ -1202,7 +1396,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:hoursBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"594407\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"594407\"^^xsd:long"));
     }
 
     @Test
@@ -1215,7 +1409,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:minutesBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"35664450\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"35664450\"^^xsd:long"));
     }
 
     @Test
@@ -1228,7 +1422,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:secondsBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"2139867000\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"2139867000\"^^xsd:long"));
     }
 
     @Test
@@ -1243,7 +1437,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:secondsBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
                 "\"1532994786\"^^xsd:long", "\"116806800\"^^xsd:long"));
     }
 
@@ -1259,7 +1453,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:millisBetween(?start, ?end) AS ?v)\n"
                 + "}";
 
-        runQueryAndCompare(query, ImmutableList.of("\"84600000\"^^xsd:long"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"84600000\"^^xsd:long"));
     }
 
 }

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.mssql;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.MSSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -34,8 +34,8 @@ public class DistinctInAggregateSQLServerTest extends AbstractDistinctInAggregat
     }
 
     @Override
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForAvg() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p",buildAnswerIRI("1"),
                         "ad", "\"10.500000\"^^xsd:decimal"

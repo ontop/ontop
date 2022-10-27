@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.docker.lightweight;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
     private static final String LEFT_JOIN_NOT_OPTIMIZED_MSG = "The left join is still present in the output query";
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLeftJoinProfTest.class);
 
     protected static final String OWL_FILE = "/prof/prof.owl";
     protected static final String OBDA_FILE = "/prof/prof.obda";
@@ -33,10 +30,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Barbara", "Diego", "Johann", "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Barbara\"^^xsd:string", "\"Diego\"^^xsd:string",
+                "\"Johann\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -57,10 +53,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Barbara", "Johann", "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Barbara\"^^xsd:string", "\"Johann\"^^xsd:string",
+                "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -77,7 +72,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 " FILTER (!bound(?n)) \n" +
                 "} ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of());
+        executeAndCompareLexicalValues(query, ImmutableList.of());
     }
 
 
@@ -96,14 +91,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
-                "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+                "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
+                "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -124,10 +118,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Johnny", "Rog"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Johnny\"^^xsd:string", "\"Rog\"^^xsd:string"));
     }
 
     @Test
@@ -146,14 +138,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
-                "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+                "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
+                "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -174,14 +165,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara",
-                "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+                "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
+                "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -200,10 +190,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Roger", "Frank", "John", "Michael"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+                "\"John\"^^xsd:string", "\"Michael\"^^xsd:string"));
     }
 
     @Test
@@ -221,11 +210,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string"));
     }
 
     @Test
@@ -246,15 +234,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        runQueryAndCompare(query, getExpectedValuesNicknameAndCourse());
+        executeAndCompareLexicalValues(query, getExpectedValuesNicknameAndCourse());
     }
 
     protected ImmutableList<String> getExpectedValuesNicknameAndCourse() {
-        return ImmutableList.of("Rog", "Rog", "Rog", "Johnny");
+        return ImmutableList.of("\"Rog\"^^xsd:string", "\"Rog\"^^xsd:string", "\"Rog\"^^xsd:string",
+                "\"Johnny\"^^xsd:string");
     }
 
     @Test
@@ -273,10 +260,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Smith", "Poppins", "Depp"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Smith\"^^xsd:string", "\"Poppins\"^^xsd:string",
+                "\"Depp\"^^xsd:string"));
     }
 
     @Test
@@ -297,10 +283,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Smith", "Poppins", "Depp"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Smith\"^^xsd:string", "\"Poppins\"^^xsd:string",
+                "\"Depp\"^^xsd:string"));
     }
 
     @Test
@@ -320,10 +305,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("John", "Mary", "Roger"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"John\"^^xsd:string", "\"Mary\"^^xsd:string",
+                "\"Roger\"^^xsd:string"));
     }
 
     @Test
@@ -342,7 +326,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "}" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("John", "Mary"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"John\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
 
     @Test
@@ -364,11 +348,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop",
-                "Poppins", "Rog"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Dodero\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"Gamper\"^^xsd:string", "\"Helmer\"^^xsd:string", "\"Johnny\"^^xsd:string",
+                "\"King of Pop\"^^xsd:string", "\"Poppins\"^^xsd:string", "\"Rog\"^^xsd:string"));
     }
 
     @Test
@@ -390,11 +373,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins",
-                "Smith"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Dodero\"^^xsd:string",
+                "\"Gamper\"^^xsd:string", "\"Helmer\"^^xsd:string", "\"Jackson\"^^xsd:string", "\"Pitt\"^^xsd:string",
+                "\"Poppins\"^^xsd:string", "\"Smith\"^^xsd:string"));
     }
 
     @Test
@@ -415,10 +397,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Depp", "Poppins", "Smith"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string",
+                "\"Smith\"^^xsd:string"));
     }
 
     @Test
@@ -439,10 +420,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        LOGGER.debug("SQL Query: \n" + ontopSQLtranslation);
-
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, ImmutableList.of("Depp", "Poppins", "Smith"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string",
+                "\"Smith\"^^xsd:string"));
     }
 
     @Test
@@ -456,11 +436,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        runQueryAndCompare(query, getExpectedValueSumStudents1());
+        executeAndCompareLexicalValues(query, getExpectedValueSumStudents1());
     }
 
     protected ImmutableList<String> getExpectedValueSumStudents1() {
-        return ImmutableList.of("56");
+        return ImmutableList.of("\"56\"^^xsd:integer");
     }
 
     @Test
@@ -476,11 +456,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValueSumStudents2());
+        executeAndCompareLexicalValues(query, getExpectedValueSumStudents2());
     }
 
     protected ImmutableList<String> getExpectedValueSumStudents2() {
-        return ImmutableList.of("12", "13", "31");
+        return ImmutableList.of("\"12\"^^xsd:integer", "\"13\"^^xsd:integer", "\"31\"^^xsd:integer");
     }
 
     @Test
@@ -499,11 +479,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValueSumStudents3());
+        executeAndCompareLexicalValues(query, getExpectedValueSumStudents3());
     }
 
     protected ImmutableList<String> getExpectedValueSumStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "31");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"12\"^^xsd:integer", "\"13\"^^xsd:integer", "\"31\"^^xsd:integer");
     }
 
     @Test
@@ -519,11 +500,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        runQueryAndCompare(query, getExpectedValueSumStudents4());
+        executeAndCompareLexicalValues(query, getExpectedValueSumStudents4());
     }
 
     protected ImmutableList<String> getExpectedValueSumStudents4() {
-        return ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
+        return ImmutableList.of("\"John: 12\"^^xsd:string", "\"Mary: 13\"^^xsd:string", "\"Roger: 31\"^^xsd:string");
     }
 
     @Test
@@ -539,11 +520,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        runQueryAndCompare(query, getExpectedValueSumStudents5());
+        executeAndCompareLexicalValues(query, getExpectedValueSumStudents5());
     }
 
     protected ImmutableList<String> getExpectedValueSumStudents5() {
-        return ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
+        return ImmutableList.of("\"John: 12\"^^xsd:string", "\"Mary: 13\"^^xsd:string", "\"Roger: 31\"^^xsd:string");
     }
 
     @Test
@@ -559,8 +540,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?fName";
 
-        runQueryAndCompare(query, ImmutableList.of("Barbara.", "Diego.", "Frank.", "Johann.", "John.", "Mary.",
-                "Michael.", "Roger."));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Barbara.\"^^xsd:string", "\"Diego.\"^^xsd:string",
+                "\"Frank.\"^^xsd:string", "\"Johann.\"^^xsd:string", "\"John.\"^^xsd:string", "\"Mary.\"^^xsd:string",
+                "\"Michael.\"^^xsd:string", "\"Roger.\"^^xsd:string"));
     }
 
     @Test
@@ -574,11 +556,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        runQueryAndCompare(query, getExpectedValuesAvgStudents1());
+        executeAndCompareLexicalValues(query, getExpectedValuesAvgStudents1());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("11.2");
+        return  ImmutableList.of("\"11.2\"^^xsd:decimal");
     }
 
     @Test
@@ -594,11 +576,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValuesAvgStudents2());
+        executeAndCompareLexicalValues(query, getExpectedValuesAvgStudents2());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
-        return   ImmutableList.of("10.3","12", "13");
+        return   ImmutableList.of("\"10.3\"^^xsd:decimal","\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
     }
 
 
@@ -618,11 +600,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValuesAvgStudents3());
+        executeAndCompareLexicalValues(query, getExpectedValuesAvgStudents3());
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "10.3", "12", "13");
+        return ImmutableList.of("\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal",
+                "\"0\"^^xsd:decimal", "\"10.3\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
     }
 
     @Test
@@ -636,7 +619,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        runQueryAndCompare(query, ImmutableList.of("10"));
+        executeAndCompareLexicalValues(query, getExpectedValuesMinStudents1());
+    }
+
+    protected ImmutableList<String> getExpectedValuesMinStudents1() {
+        return ImmutableList.of("\"10\"^^xsd:integer");
     }
 
     @Test
@@ -652,7 +639,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("10","12", "13"));
+        executeAndCompareLexicalValues(query, getExpectedValuesMinStudents2());
+    }
+
+    protected ImmutableList<String> getExpectedValuesMinStudents2() {
+        return ImmutableList.of("\"10\"^^xsd:integer","\"12\"^^xsd:integer", "\"13\"^^xsd:integer");
     }
 
     @Test
@@ -666,7 +657,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        runQueryAndCompare(query, ImmutableList.of("13"));
+        executeAndCompareLexicalValues(query, getExpectedValuesMaxStudents1());
+    }
+
+    protected ImmutableList<String> getExpectedValuesMaxStudents1() {
+        return ImmutableList.of("\"13\"^^xsd:integer");
     }
 
     @Test
@@ -682,7 +677,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("11","12", "13"));
+        executeAndCompareLexicalValues(query, getExpectedValuesMaxStudents2());
+    }
+
+    protected ImmutableList<String> getExpectedValuesMaxStudents2() {
+        return ImmutableList.of("\"11\"^^xsd:integer","\"12\"^^xsd:integer", "\"13\"^^xsd:integer");
     }
 
     @Test
@@ -701,11 +700,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValuesDuration1());
+        executeAndCompareLexicalValues(query, getExpectedValuesDuration1());
     }
 
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "84.5");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"18\"^^xsd:decimal", "\"20\"^^xsd:decimal", "\"84.5\"^^xsd:decimal");
     }
 
     @Test
@@ -723,11 +723,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValuesMultitypedSum1());
+        executeAndCompareLexicalValues(query, getExpectedValuesMultitypedSum1());
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31", "32", "115.5");
+        return ImmutableList.of("\"31\"^^xsd:decimal", "\"32\"^^xsd:decimal", "\"115.5\"^^xsd:decimal");
     }
 
     @Test
@@ -745,11 +745,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, getExpectedValuesMultitypedAvg1());
+        executeAndCompareLexicalValues(query, getExpectedValuesMultitypedAvg1());
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.5", "16", "19.25");
+        return ImmutableList.of("\"15.5\"^^xsd:decimal", "\"16\"^^xsd:decimal", "\"19.25\"^^xsd:decimal");
     }
 
     @Test
@@ -777,7 +777,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Dodero\"^^xsd:string", "\"Gamper\"^^xsd:string",
+                "\"Helmer\"^^xsd:string", "\"Jackson\"^^xsd:string", "\"Pitt\"^^xsd:string"));
     }
 
     /**
@@ -808,7 +809,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Dodero\"^^xsd:string", "\"Gamper\"^^xsd:string",
+                "\"Helmer\"^^xsd:string", "\"Jackson\"^^xsd:string", "\"Pitt\"^^xsd:string"));
     }
 
     /**
@@ -830,7 +832,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "  }\n" +
                 "}";
 
-        runQueryAndCompare(query, ImmutableList.of("Depp"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Depp\"^^xsd:string"));
     }
 
     @Test
@@ -848,7 +850,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer"));
     }
 
     @Test
@@ -866,7 +870,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer"));
     }
 
     @Test
@@ -884,7 +890,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer"));
     }
 
     @Test
@@ -902,7 +910,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer"));
     }
 
     @Test
@@ -920,7 +930,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        runQueryAndCompare(query, ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer"));
     }
 
     @Test
@@ -938,7 +950,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
     @Test
@@ -958,8 +972,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("Rog Rog", "Frankie Frankie", "Johnny Johnny",
-                "King of Pop King of Pop", "", "", "", ""));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog Rog\"^^xsd:string", "\"Frankie Frankie\"^^xsd:string",
+                "\"Johnny Johnny\"^^xsd:string", "\"King of Pop King of Pop\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
     @Test
@@ -979,7 +994,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
     @Test
@@ -999,8 +1016,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("Rog|Rog", "Frankie|Frankie", "Johnny|Johnny",
-                "King of Pop|King of Pop", "", "", "", ""));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog|Rog\"^^xsd:string", "\"Frankie|Frankie\"^^xsd:string",
+                "\"Johnny|Johnny\"^^xsd:string", "\"King of Pop|King of Pop\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
     @Test
@@ -1020,7 +1038,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", ""));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
     @Test
@@ -1041,8 +1061,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        runQueryAndCompare(query, ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "",
-                "nothing"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"nothing\"^^xsd:string", "\"Frankie\"^^xsd:string",
+                "\"nothing\"^^xsd:string", "\"King of Pop\"^^xsd:string", "\"\"^^xsd:string", "\"\"^^xsd:string",
+                "\"\"^^xsd:string", "\"nothing\"^^xsd:string"));
     }
 
     @Test
@@ -1062,9 +1083,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "}\n" +
                 "ORDER BY ?v\n";
 
-        runQueryAndCompare(query,
-                ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents",
-                        "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname"));
+        executeAndCompareLexicalValues(query,
+                ImmutableList.of("\"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents\"^^xsd:string",
+                        "\"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname\"^^xsd:string"));
     }
 
     @Test
@@ -1085,11 +1106,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
         String ontopSQLtranslation = reformulate(query);
 
         Assertions.assertTrue(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        runQueryAndCompare(query, getExpectedValuesNonOptimizableLJAndJoinMix());
+        executeAndCompareLexicalValues(query, getExpectedValuesNonOptimizableLJAndJoinMix());
     }
 
     protected ImmutableList<String> getExpectedValuesNonOptimizableLJAndJoinMix() {
-        return ImmutableList.of("Depp", "Poppins", "Smith", "Smith", "Smith");
+        return ImmutableList.of("\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string", "\"Smith\"^^xsd:string",
+                "\"Smith\"^^xsd:string", "\"Smith\"^^xsd:string");
     }
 
     @Test
@@ -1104,7 +1126,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "   :conductsLab ?c .\n" +
                 "}\n" ;
 
-        runQueryAndCompare (query, ImmutableList.of("Jane Smith", "Joe Logan"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("Jane Smith", "Joe Logan"));
     }
 
     @Test
@@ -1119,11 +1141,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "}" +
                 "ORDER BY ?v\n" ;
 
-        runQueryAndCompare(query, getExpectedAggregationMappingProfStudentCountPropertyResults());
+        executeAndCompareLexicalValues(query, getExpectedAggregationMappingProfStudentCountPropertyResults());
     }
 
     protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
-        return ImmutableList.of("12", "13", "31");
+        return ImmutableList.of("\"12\"^^xsd:integer", "\"13\"^^xsd:integer", "\"31\"^^xsd:integer");
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {

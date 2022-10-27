@@ -3,15 +3,13 @@ package it.unibz.inf.ontop.docker.lightweight;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
-import it.unibz.inf.ontop.model.type.impl.LangDatatype;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopRDF4JBindingSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
+import org.eclipse.rdf4j.model.impl.SimpleLiteral;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.slf4j.Logger;
@@ -22,8 +20,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -118,22 +114,22 @@ public class AbstractDockerRDF4JTest {
         return count;
     }
 
-    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues) {
-        runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
+    protected void executeAndCompareLexicalValues(String queryString, ImmutableSet<String> expectedVValues) {
+        executeAndCompareLexicalValues(queryString, expectedVValues, new MapBindingSet());
     }
 
-    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues,
-                                      BindingSet bindings) {
+    protected void executeAndCompareLexicalValues(String queryString, ImmutableSet<String> expectedVValues,
+                                                  BindingSet bindings) {
         ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
         assertEquals(expectedVValues, vValues);
     }
 
-    protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues) {
-        runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
+    protected void executeAndCompareLexicalValues(String queryString, ImmutableList<String> expectedVValues) {
+        executeAndCompareLexicalValues(queryString, expectedVValues, new MapBindingSet());
     }
 
-    protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues,
-                                      BindingSet bindings) {
+    protected void executeAndCompareLexicalValues(String queryString, ImmutableList<String> expectedVValues,
+                                                  BindingSet bindings) {
         ImmutableList<String> vValues = runQuery(queryString, bindings);
         assertEquals(expectedVValues, vValues);
     }
@@ -158,41 +154,38 @@ public class AbstractDockerRDF4JTest {
         ImmutableList.Builder<String> vValueBuilder = ImmutableList.builder();
         while (result.hasNext()) {
             BindingSet bindingSet = result.next();
-
-            // CASE 1: RDFLiteralConstant
-            Optional.ofNullable(((OntopRDF4JBindingSet) bindingSet).getOntopBinding("v"))
-                    .map(OntopBinding::getValue)
-                    .filter(v -> v instanceof RDFLiteralConstant)
-                    .map(v -> (RDFLiteralConstant) v)
-                    .map(v -> v.getType() instanceof LangDatatype
-                            ? '"' +  v.getValue() + '"' + v.getType().toString()
-                            : '"' +  v.getValue() + '"' + "^^" + v.getType().toString())
-                    .ifPresent(vValueBuilder::add);
-
-            // CASE 2: IRIConstant
-            Optional.ofNullable(((OntopRDF4JBindingSet) bindingSet).getOntopBinding("v"))
-                    .map(OntopBinding::getValue)
-                    .filter(v -> v instanceof IRIConstant)
-                    .map(Object::toString)
-                    .ifPresent(vValueBuilder::add);
+            Value bindingSetValue = bindingSet.getValue("v");
+            // CASE 1: SimpleIRI
+            if (bindingSetValue instanceof SimpleIRI) {
+                vValueBuilder.add("<" + bindingSetValue.stringValue() + ">");
+            // CASE 2: SimpleLiteral
+            } else if (bindingSetValue instanceof SimpleLiteral) {
+                SimpleLiteral simpleLiteral = (SimpleLiteral) bindingSetValue;
+                if (simpleLiteral.getLanguage().isPresent()) {
+                    // CASE 2.1: Literal with language tag
+                    vValueBuilder.add("\"" + simpleLiteral.stringValue() + "\"" + "@" + simpleLiteral.getLanguage().get());
+                } else {
+                    // CASE 2.2: Literal without a language tag
+                    // CASE 2.2.1: rdf PlainLiteral
+                    if (((SimpleLiteral) bindingSetValue).getDatatype().stringValue().endsWith("#PlainLiteral")) {
+                            vValueBuilder.add(bindingSetValue.stringValue());
+                    } else {
+                    // CASE 2.2.2: xsd datatype
+                            vValueBuilder.add("\"" + simpleLiteral.stringValue() + "\"" + "^^" +
+                            ((SimpleLiteral) bindingSetValue).getDatatype().stringValue()
+                                    .replace("http://www.w3.org/2001/XMLSchema#", "xsd:"));
+                    }
+                }
+            }
 
             LOGGER.debug(bindingSet + "\n");
         }
-
-        /*while (result.hasNext()) {
-            BindingSet bindingSet = result.next();
-            Optional.ofNullable(bindingSet.getValue("v"))
-                    .map(Value::stringValue)
-                    .ifPresent(vValueBuilder::add);
-
-            LOGGER.debug(bindingSet + "\n");
-        }*/
         result.close();
 
         return vValueBuilder.build();
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> executeQuery(String queryString) {
+    protected ImmutableList<ImmutableMap<String, String>> executeAndCompareBindingValues(String queryString) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 
         TupleQueryResult result = query.evaluate();
@@ -211,23 +204,32 @@ public class AbstractDockerRDF4JTest {
         return list.build();
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> executeQueryWithDatatypes(String queryString) {
+    protected ImmutableSet<ImmutableMap<String, String>> executeQueryAndCompareBindingLexicalValues(String queryString) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 
         TupleQueryResult result = query.evaluate();
-        ImmutableList.Builder<ImmutableMap<String, String>> list = ImmutableList.builder();
+        ImmutableSet.Builder<ImmutableMap<String, String>> set = ImmutableSet.builder();
         while (result.hasNext()) {
             BindingSet bindingSet = result.next();
             ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
-            OntopRDF4JBindingSet ontopRDF4JBindingSet = (OntopRDF4JBindingSet) bindingSet;
-            OntopBinding[] ontopBindings = ontopRDF4JBindingSet.getAllOntopBindings().getBindings();
-            Arrays.stream(ontopBindings)
-                    .forEach(v -> map.put(v.getName(), v.getValue().toString()));
-            list.add(map.build());
+            for (Binding b : bindingSet) {
+                Value bindingSetValue = b.getValue();
+                if (bindingSetValue instanceof SimpleIRI) {
+                    map.put(b.getName(), "<" + bindingSetValue.stringValue() + ">");
+                } else if (bindingSetValue instanceof SimpleLiteral) {
+                    SimpleLiteral simpleLiteral = (SimpleLiteral) bindingSetValue;
+                    String finalLiteral = simpleLiteral.getLanguage().isPresent()
+                            ? "\"" + simpleLiteral.stringValue() + "\"" + "@" + simpleLiteral.getLanguage().get()
+                            : "\"" + simpleLiteral.stringValue() + "\"" + "^^" + simpleLiteral.getDatatype().stringValue()
+                                    .replace("http://www.w3.org/2001/XMLSchema#", "xsd:");
+                    map.put(b.getName(), finalLiteral);
+                }
+            }
+            set.add(map.build());
             LOGGER.debug(bindingSet + "\n");
         }
         result.close();
-
-        return list.build();
+        
+        return set.build();
     }
 }

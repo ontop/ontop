@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
     public void testGroupConcatDistinct() throws Exception {
         Assertions.assertEquals(
                 getTuplesForConcat(),
-                executeQueryWithDatatypes(readQueryFile(groupConcatDistinctQueryFile))
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(groupConcatDistinctQueryFile))
         );
     }
 
@@ -35,7 +35,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
     public void testSumDistinct() throws Exception {
         Assertions.assertEquals(
                 getTuplesForSum(),
-                executeQueryWithDatatypes(readQueryFile(sumDistinctQueryFile))
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(sumDistinctQueryFile))
         );
     }
 
@@ -43,7 +43,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
     public void testAvgDistinct() throws Exception {
         Assertions.assertEquals(
                 getTuplesForAvg(),
-                executeQueryWithDatatypes(readQueryFile(avgDistinctQueryFile))
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(avgDistinctQueryFile))
         );
     }
 
@@ -51,12 +51,12 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
     public void testCountDistinct() throws Exception {
         Assertions.assertEquals(
                 getTuplesForCount(),
-                executeQueryWithDatatypes(readQueryFile(countDistinctQueryFile))
+                executeQueryAndCompareBindingLexicalValues(readQueryFile(countDistinctQueryFile))
         );
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForCount() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForCount() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p", buildAnswerIRI("1"),
                         "cd", "\"2\"^^xsd:integer"
@@ -72,8 +72,8 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
         );
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForSum() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForSum() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p", buildAnswerIRI("1"),
                         "sd", "\"21\"^^xsd:integer"
@@ -88,8 +88,8 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
                 ));
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForAvg() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p",buildAnswerIRI("1"),
                         "ad", "\"10.5000\"^^xsd:decimal"
@@ -105,19 +105,19 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractDockerRDF4
         );
     }
 
-    protected ImmutableList<ImmutableMap<String, String>> getTuplesForConcat() {
-        return ImmutableList.of(
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForConcat() {
+        return ImmutableSet.of(
                 ImmutableMap.of(
                         "p", buildAnswerIRI("1"),
-                        "sd", "\"10|11\""
+                        "sd", "\"10|11\"^^xsd:string"
                 ),
                 ImmutableMap.of(
                         "p", buildAnswerIRI("3"),
-                        "sd", "\"12\""
+                        "sd", "\"12\"^^xsd:string"
                 ),
                 ImmutableMap.of(
                         "p", buildAnswerIRI("8"),
-                        "sd", "\"13\""
+                        "sd", "\"13\"^^xsd:string"
                 ));
     }
 
