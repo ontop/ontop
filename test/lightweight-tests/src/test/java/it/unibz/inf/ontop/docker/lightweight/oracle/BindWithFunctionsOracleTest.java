@@ -59,6 +59,13 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     @Disabled("Require DBMS CRYPTO to be enabled")
     @Test
     @Override
+    public void testHashSHA384() {
+        super.testHashSHA384();
+    }
+
+    @Disabled("Require DBMS CRYPTO to be enabled")
+    @Test
+    @Override
     public void testHashSHA512() {
         super.testHashSHA512();
     }

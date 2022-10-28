@@ -168,7 +168,7 @@ public class AbstractDockerRDF4JTest {
                     // CASE 2.2: Literal without a language tag
                     // CASE 2.2.1: rdf PlainLiteral
                     if (((SimpleLiteral) bindingSetValue).getDatatype().stringValue().endsWith("#PlainLiteral")) {
-                            vValueBuilder.add(bindingSetValue.stringValue());
+                            vValueBuilder.add("\"" + bindingSetValue.stringValue() + "\"^^xsd:string");
                     } else {
                     // CASE 2.2.2: xsd datatype
                             vValueBuilder.add("\"" + simpleLiteral.stringValue() + "\"" + "^^" +

@@ -1126,7 +1126,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "   :conductsLab ?c .\n" +
                 "}\n" ;
 
-        executeAndCompareLexicalValues(query, ImmutableList.of("Jane Smith", "Joe Logan"));
+        executeAndCompareLexicalValues(query, ImmutableList.of("\"Jane Smith\"^^xsd:string", "\"Joe Logan\"^^xsd:string"));
     }
 
     @Test

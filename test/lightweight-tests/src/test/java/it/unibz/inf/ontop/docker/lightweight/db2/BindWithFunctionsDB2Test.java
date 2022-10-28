@@ -51,6 +51,12 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     @Disabled("Not yet supported")
     @Test
     @Override
+    public void testHashSHA384() {
+    }
+
+    @Disabled("Not yet supported")
+    @Test
+    @Override
     public void testHashSHA512() {
     }
 

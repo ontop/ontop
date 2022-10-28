@@ -61,6 +61,12 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         return ImmutableList.of("\"0.500000\"^^xsd:decimal");
     }
 
+    @Disabled("not supported")
+    @Test
+    public void testHashSHA384() {
+        super.testHashSHA384();
+    }
+
     @Test
     @Disabled("TODO: support regex")
     @Override

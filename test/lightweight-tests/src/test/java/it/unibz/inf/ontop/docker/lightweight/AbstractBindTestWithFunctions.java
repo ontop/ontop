@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -149,24 +147,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SHA256(str(?title)) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
-
+        String hexString = new DigestUtils(SHA_256).digestAsHex("The Semantic Web");
+        executeAndCompareLexicalValues(query, ImmutableList.of(String.format("\"%s\"^^xsd:string", hexString)));
     }
 
     @Test
@@ -179,23 +161,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (MD5(str(?title)) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
+        String hexString = new DigestUtils(MD5).digestAsHex("The Semantic Web");
+        executeAndCompareLexicalValues(query, ImmutableList.of(String.format("\"%s\"^^xsd:string", hexString)));
     }
 
     @Test
@@ -208,26 +175,10 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SHA1(str(?title)) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
+        String hexString = new DigestUtils(SHA_1).digestAsHex("The Semantic Web");
+        executeAndCompareLexicalValues(query, ImmutableList.of(String.format("\"%s\"^^xsd:string", hexString)));
     }
 
-    @Disabled
     @Test
     public void testHashSHA384() {
 
@@ -238,23 +189,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SHA384(str(?title)) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-            MessageDigest digest = MessageDigest.getInstance("SHA-384");
-            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
+        String hexString = new DigestUtils(SHA_384).digestAsHex("The Semantic Web");
+        executeAndCompareLexicalValues(query, ImmutableList.of(String.format("\"%s\"^^xsd:string", hexString)));
     }
 
     @Test
@@ -267,23 +203,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SHA512(str(?title)) AS ?v)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-            MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        executeAndCompareLexicalValues(query, ImmutableList.copyOf(expectedValues));
+        String hexString = new DigestUtils(SHA_512).digestAsHex("The Semantic Web");
+        executeAndCompareLexicalValues(query, ImmutableList.of(String.format("\"%s\"^^xsd:string", hexString)));
     }
 
     /*

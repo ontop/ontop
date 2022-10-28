@@ -59,6 +59,8 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
                 "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
     }
 
+    // Results for MIN and MAX are inferred as xsd:decimal because the datatype was not provided in the mapping
+    // Integer detection for the NUMBER datatype in Oracle needs to be reviewed to retrieve more consistently xsd:integer
     @Override
     protected ImmutableList<String> getExpectedValuesMaxStudents1() {
         return ImmutableList.of("\"13\"^^xsd:decimal");

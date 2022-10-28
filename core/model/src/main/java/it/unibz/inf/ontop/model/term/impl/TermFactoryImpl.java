@@ -426,6 +426,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBSha384(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha384(), stringTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha512(), stringTerm);
 	}

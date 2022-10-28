@@ -12,6 +12,7 @@ on:
     branches:
       - version4
       - releasing/**
+    types: [opened, edited, reopened]
 
 jobs:
   run-postgresql:
