@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.docker.lightweight;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.rdf4j.query.impl.OntopRDF4JBindingSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
@@ -114,22 +116,22 @@ public class AbstractDockerRDF4JTest {
         return count;
     }
 
-    protected void executeAndCompareLexicalValues(String queryString, ImmutableSet<String> expectedVValues) {
-        executeAndCompareLexicalValues(queryString, expectedVValues, new MapBindingSet());
+    protected void executeAndCompareValues(String queryString, ImmutableSet<String> expectedVValues) {
+        executeAndCompareValues(queryString, expectedVValues, new MapBindingSet());
     }
 
-    protected void executeAndCompareLexicalValues(String queryString, ImmutableSet<String> expectedVValues,
-                                                  BindingSet bindings) {
+    protected void executeAndCompareValues(String queryString, ImmutableSet<String> expectedVValues,
+                                           BindingSet bindings) {
         ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
         assertEquals(expectedVValues, vValues);
     }
 
-    protected void executeAndCompareLexicalValues(String queryString, ImmutableList<String> expectedVValues) {
-        executeAndCompareLexicalValues(queryString, expectedVValues, new MapBindingSet());
+    protected void executeAndCompareValues(String queryString, ImmutableList<String> expectedVValues) {
+        executeAndCompareValues(queryString, expectedVValues, new MapBindingSet());
     }
 
-    protected void executeAndCompareLexicalValues(String queryString, ImmutableList<String> expectedVValues,
-                                                  BindingSet bindings) {
+    protected void executeAndCompareValues(String queryString, ImmutableList<String> expectedVValues,
+                                           BindingSet bindings) {
         ImmutableList<String> vValues = runQuery(queryString, bindings);
         assertEquals(expectedVValues, vValues);
     }
