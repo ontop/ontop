@@ -21,8 +21,7 @@ jobs:
     strategy:
       # The java versions the job will run on
       matrix:
-        jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
+        jdk: [ 8, 11 ]
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -47,18 +46,18 @@ jobs:
       # The java versions the job will run on
       matrix:
         jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
-
-    services:
-      pgsql:
-        image: albulenpano/pgsql-lightweight:v2
-        env:
-          POSTGRES_PASSWORD: postgres2
-        ports:
-          - "7777:5432"
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ontop/lightweight-db-images
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Set up docker
+        run: docker-compose -f "docker-compose.lightweight.yml" up -d pgsql
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
       - name: Set up Java
@@ -78,19 +77,20 @@ jobs:
     strategy:
       matrix:
         jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
-
-    services:
-      mssql:
-        image: albulenpano/mssql-lightweight:v2
-        env:
-          SA_PASSWORD: Mssql1.0
-          ACCEPT_EULA: Y
-        ports:
-          - "1533:1433"
 
     steps:
+      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ontop/lightweight-db-images
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Set up docker
+        run: docker-compose -f "docker-compose.lightweight.yml" up -d mssql
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
+      # Set up the java versions
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -109,18 +109,20 @@ jobs:
     strategy:
       matrix:
         jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
-
-    services:
-      mysql:
-        image: albulenpano/mysql-lightweight:v2
-        env:
-          MYSQL_ROOT_PASSWORD: mysql
-        ports:
-          - "3694:3306"
 
     steps:
+      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ontop/lightweight-db-images
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Set up docker
+        run: docker-compose -f "docker-compose.lightweight.yml" up -d mysql
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
+      # Set up the java versions
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -139,20 +141,20 @@ jobs:
     strategy:
       matrix:
         jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
-
-    services:
-      oracle:
-        image: albulenpano/oracle-lightweight:v2
-        env:
-          ORACLE_PASSWORD: oracle
-          LICENSE: accept
-        ports:
-          - "49160:8080"
-          - "49161:1521"
 
     steps:
+      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ontop/lightweight-db-images
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Set up docker
+        run: docker-compose -f "docker-compose.lightweight.yml" up -d oracle
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
+      # Set up the java versions
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -172,22 +174,20 @@ jobs:
     strategy:
       matrix:
         jdk: [ 11 ]
-        #jdk: [ 8, 11 ]
-
-    services:
-      db2:
-        image: albulenpano/db2-lightweight:v2
-        ports:
-          - "50000:50000"
-        env:
-          DB2INSTANCE: db2inst1
-          DB2INST1_PASSWORD: obda-pwd
-          LICENSE: accept
-        options: >-
-          --privileged=true
 
     steps:
+      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ontop/lightweight-db-images
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Set up docker
+        run: docker-compose -f "docker-compose.lightweight.yml" up -d db2
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
+      # Set up the java versions
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
