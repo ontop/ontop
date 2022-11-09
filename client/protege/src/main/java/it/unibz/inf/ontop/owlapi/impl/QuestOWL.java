@@ -159,11 +159,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	public void dispose() {
 		super.dispose();
 		try {
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-		
-		try {
 			queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
