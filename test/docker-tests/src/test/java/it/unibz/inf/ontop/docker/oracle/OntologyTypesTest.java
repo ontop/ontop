@@ -251,7 +251,7 @@ public class OntologyTypesTest {
 		} catch (Exception e) {
 
 
-			assertTrue(e instanceof IllegalConfigurationException);
+			assertTrue(e instanceof SimpleOntopOWLEngine.InvalidOBDASpecificationException);
 			log.debug(e.getMessage());
 
 

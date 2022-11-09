@@ -56,7 +56,7 @@ public class ConferenceMySQLTest  {
 	}
 
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = SimpleOntopOWLEngine.InvalidOBDASpecificationException.class)
 	public void testWrongMappings() throws Exception {
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
