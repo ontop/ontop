@@ -59,7 +59,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
-		OntopOWLEngine reasoner;
+		OntopOWLReasoner reasoner;
 		try(OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
