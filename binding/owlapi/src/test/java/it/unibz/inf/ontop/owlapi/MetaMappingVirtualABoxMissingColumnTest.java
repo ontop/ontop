@@ -23,12 +23,12 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine.InvalidOBDASpecificationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -77,7 +77,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
     @Test
 	public void testViEqSig() throws Exception {
 
-        expectedEx.expect(IllegalConfigurationException.class);
+        expectedEx.expect(InvalidOBDASpecificationException.class);
         expectedEx.expectMessage("The placeholder(s) code1 in the target do(es) not occur in source query of the mapping assertion");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
