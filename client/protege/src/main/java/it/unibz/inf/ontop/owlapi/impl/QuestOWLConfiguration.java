@@ -7,9 +7,6 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import javax.annotation.Nonnull;
 
-/**
- * See QuestPreferences.builder() for an high-level configuration builder.
- */
 public class QuestOWLConfiguration extends SimpleConfiguration {
 
     private final OntopSystemConfiguration ontopConfiguration;

@@ -1,16 +1,15 @@
 package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-
 /**
- * Not for production! Use RDF4J instead.
- *
- * OWL just in the name but actually independent of OWLOntology files
- *
+ * Ontop OWLAPI reasoner
  */
-public interface OntopOWLEngine extends AutoCloseable {
+public interface OntopOWLReasoner extends OWLReasoner, AutoCloseable {
 
     OntopOWLConnection getConnection() throws ReasonerInternalException;
+
+    Object getInconsistentAxiom();
 }

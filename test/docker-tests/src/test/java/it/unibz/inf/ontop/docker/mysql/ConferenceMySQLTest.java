@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class ConferenceMySQLTest  {
 	}
 
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = SimpleOntopOWLEngine.InvalidOBDASpecificationException.class)
 	public void testWrongMappings() throws Exception {
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
