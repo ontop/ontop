@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.BINARY_VAR_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -51,6 +52,8 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
         DBTermType varBinary = dbTypeFactory.getDBTermType(VARBINARY_STR);
         builder.put(varBinary, createHexBinaryNormFunctionSymbol(varBinary));
+        DBTermType varBinary2 = dbTypeFactory.getDBTermType(BINARY_VAR_STR);
+        builder.put(varBinary2, createHexBinaryNormFunctionSymbol(varBinary2));
 
         return builder.build();
     }
@@ -193,6 +196,16 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSXXX'), ' ', 'T')", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (databaseInfoSupplier.getDatabaseVersion()
+                .filter(s -> s.startsWith("1"))
+                .isPresent())
+            return super.serializeHexBinaryNorm(terms, termConverter, termFactory);
+
+        return String.format("UPPER(RAWTOHEX(%s))", termConverter.apply(terms.get(0)));
     }
 
     @Override
