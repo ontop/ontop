@@ -209,7 +209,7 @@ public class RDBMSSIRepositoryManager {
 		attributeDescriptions.add(new AttributeTableDescritpion(   // 9
 				XSD.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
 		attributeDescriptions.add(new AttributeTableDescritpion(   // 10
-				XSD.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
+				XSD.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL(35,17)", "IDX_DECIMAL_ATTRIBUTE"));
 		attributeDescriptions.add(new AttributeTableDescritpion(   // 11
 				XSD.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
 		attributeDescriptions.add(new AttributeTableDescritpion(   // 12

@@ -102,12 +102,12 @@ public class MultiSchemaH2Test extends AbstractOWLAPITest {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
 				"SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkReturnedValues(query, "x", ImmutableList.of(
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-997>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-996>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-995>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-993>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-992>",
 				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-991>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-992>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-993>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-995>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-996>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-997>",
 				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-998>"));
 	}
 }

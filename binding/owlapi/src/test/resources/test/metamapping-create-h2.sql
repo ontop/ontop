@@ -3,7 +3,7 @@ CREATE TABLE "table1" (
     "uri" character varying(100) NOT NULL,
     "val" character varying(100),
     "code" integer,
-    "role" character varying(100), 
+    "role" character varying(100)
 );
 
 

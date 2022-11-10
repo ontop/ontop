@@ -5,7 +5,7 @@ rdfs: http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 
 mappingId   ma
-target      :Individual{id} rdfs:label {label} ; :value {value}.
-source      SELECT id, value, label FROM data
+target      :Individual{id} rdfs:label {label} ; :value {value1}.
+source      SELECT id, value1, label FROM data
 
 ]]

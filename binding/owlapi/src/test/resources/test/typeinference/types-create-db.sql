@@ -1,6 +1,6 @@
 CREATE TABLE "company_name" (
 "id" INT NOT NULL PRIMARY KEY,
-"country_code" VARCHAR(40),
+"country_code" VARCHAR(40)
 );
 
 INSERT INTO "company_name"

@@ -123,7 +123,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("HASH('SHA256', STRINGTOUTF8(%s), 1)", termConverter.apply(terms.get(0)));
+        return String.format("RAWTOHEX(HASH('SHA256', STRINGTOUTF8(%s), 1))", termConverter.apply(terms.get(0)));
     }
 
     @Override
@@ -198,7 +198,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
         // To make sure the AVG does not return an integer but a decimal
-        if (inputType.equals(dbIntegerType))
+        if (inputType.equals(dbIntegerType) && databaseInfoSupplier.getDatabaseVersion().get().startsWith("1"))
             return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
 
         return super.createDBAvg(inputType, isDistinct);
@@ -209,5 +209,56 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return UUID_STR;
     }
 
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/604800)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/86400)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/3600)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/60)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s)))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))*1000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
 
 }

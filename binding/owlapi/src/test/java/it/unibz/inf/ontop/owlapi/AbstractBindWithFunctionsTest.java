@@ -41,10 +41,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal"));
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal"));
     }
 	
 	
@@ -61,10 +61,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal"));
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal"));
     }
 	
 	
@@ -81,10 +81,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.0, 43\"^^xsd:string",
-                "\"0.0, 23\"^^xsd:string",
-                "\"0.0, 34\"^^xsd:string",
-                "\"0.0, 10\"^^xsd:string"));
+                "\"0.000000, 43\"^^xsd:string",
+                "\"0.000000, 23\"^^xsd:string",
+                "\"0.000000, 34\"^^xsd:string",
+                "\"0.000000, 10\"^^xsd:string"));
     }
 	
 	@Test
@@ -100,10 +100,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"8.6\"^^xsd:decimal",
-                "\"5.75\"^^xsd:decimal",
-                "\"6.8\"^^xsd:decimal",
-                "\"1.50\"^^xsd:decimal"));
+                "\"8.60000000\"^^xsd:decimal",
+                "\"5.75000000\"^^xsd:decimal",
+                "\"6.80000000\"^^xsd:decimal",
+                "\"1.50000000\"^^xsd:decimal"));
 	}
 	
 	/*
@@ -762,10 +762,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"21.5\"^^xsd:decimal",
-                "\"11.5\"^^xsd:decimal",
-                "\"17\"^^xsd:decimal",
-                "\"5\"^^xsd:decimal"));
+                "\"21.5000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"11.5000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"17.0000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"5.0000000000000000000000000000000000000000\"^^xsd:decimal"));
     }
 
 //    @Test timezone is not supported in h2
@@ -849,7 +849,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
         String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.5\"^^xsd:decimal"));
+                "\"0.5000000000000000000000000000000000000000\"^^xsd:decimal"));
     }
 
     @Test

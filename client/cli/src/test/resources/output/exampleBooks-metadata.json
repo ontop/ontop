@@ -1,6 +1,1776 @@
 {
   "relations" : [ {
     "uniqueConstraints" : [ {
+      "name" : "pr_pk",
+      "determinants" : [ "\"wr_code\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"wr_code\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"wr_name\"",
+      "isNullable" : false,
+      "datatype" : "CHARACTER VARYING(100)"
+    } ],
+    "name" : [ "\"tb_on_prob_wr\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_on_prob_wr\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_on_prob_wr\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SESSION_ID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"LOCK_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"LOCKS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"LOCKS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLUMN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"CONSTRAINT_COLUMN_USAGE\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"CONSTRAINT_COLUMN_USAGE\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_INSERTABLE_INTO\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COMMIT_ACTION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"STORAGE_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"LAST_MODIFICATION\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"TABLE_CLASS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROW_COUNT_ESTIMATE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"TABLES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"TABLES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TRANSACTION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TRANSACTION_STATE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"IN_DOUBT\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"IN_DOUBT\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"OBJECT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLECTION_TYPE_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"ELEMENT_TYPES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"ELEMENT_TYPES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CONSTANT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTANT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTANT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"VALUE_DEFINITION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"CONSTANTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"CONSTANTS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"UNIQUE_CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"UNIQUE_CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"UNIQUE_CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"MATCH_OPTION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"UPDATE_RULE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DELETE_RULE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"REFERENTIAL_CONSTRAINTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"REFERENTIAL_CONSTRAINTS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SETTING_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SETTING_VALUE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SETTINGS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SETTINGS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SESSION_ID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"USER_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SERVER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CLIENT_ADDR\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CLIENT_INFO\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SESSION_START\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP WITH TIME ZONE"
+    }, {
+      "name" : "\"ISOLATION_LEVEL\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EXECUTING_STATEMENT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EXECUTING_STATEMENT_START\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP WITH TIME ZONE"
+    }, {
+      "name" : "\"CONTAINS_UNCOMMITTED\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"SESSION_STATE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"BLOCKER_ID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"SLEEP_SINCE\"",
+      "isNullable" : true,
+      "datatype" : "TIMESTAMP WITH TIME ZONE"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SESSIONS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SESSIONS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CATALOG_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SCHEMA_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SCHEMA_OWNER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DEFAULT_CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DEFAULT_CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DEFAULT_CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SQL_PATH\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DEFAULT_COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SCHEMATA\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SCHEMATA\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SYNONYM_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SYNONYM_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SYNONYM_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SYNONYM_FOR\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SYNONYM_FOR_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TYPE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"STATUS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SYNONYMS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SYNONYMS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"DOMAIN_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DOMAIN_DEFAULT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DOMAIN_ON_UPDATE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PARENT_DOMAIN_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PARENT_DOMAIN_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PARENT_DOMAIN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"DOMAINS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"DOMAINS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TRIGGER_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TRIGGER_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TRIGGER_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EVENT_MANIPULATION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EVENT_OBJECT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EVENT_OBJECT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EVENT_OBJECT_TABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ACTION_ORIENTATION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ACTION_TIMING\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_ROLLBACK\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"JAVA_CLASS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"QUEUE_SIZE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NO_WAIT\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"TRIGGERS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"TRIGGERS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"USER_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_ADMIN\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"USERS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"USERS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"GRANTOR\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GRANTEE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PRIVILEGE_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_GRANTABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"WITH_HIERARCHY\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"TABLE_PRIVILEGES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"TABLE_PRIVILEGES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CATALOG_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"INFORMATION_SCHEMA_CATALOG_NAME\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"INFORMATION_SCHEMA_CATALOG_NAME\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "pk_gen",
+      "determinants" : [ "\"id_bk\"", "\"gen_name\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "foreignKeys" : [ {
+      "name" : "fk_bk_gen",
+      "from" : {
+        "relation" : [ "\"tb_bk_gen\"" ],
+        "columns" : [ "\"id_bk\"" ]
+      },
+      "to" : {
+        "relation" : [ "\"tb_books\"" ],
+        "columns" : [ "\"bk_code\"" ]
+      }
+    } ],
+    "columns" : [ {
+      "name" : "\"id_bk\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"gen_name\"",
+      "isNullable" : false,
+      "datatype" : "CHARACTER VARYING(100)"
+    } ],
+    "name" : [ "\"tb_bk_gen\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_bk_gen\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_bk_gen\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"OBJECT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROW_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"FIELD_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ORDINAL_POSITION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"FIELDS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"FIELDS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SPECIFIC_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SPECIFIC_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SPECIFIC_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ORDINAL_POSITION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"PARAMETER_MODE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_RESULT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"AS_LOCATOR\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PARAMETER_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"PARAMETER_DEFAULT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"PARAMETERS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"PARAMETERS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PAD_ATTRIBUTE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"LANGUAGE_TAG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"COLLATIONS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"COLLATIONS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLUMN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ORDINAL_POSITION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"COLUMN_DEFAULT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_NULLABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_IDENTITY\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IDENTITY_GENERATION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IDENTITY_START\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"IDENTITY_INCREMENT\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"IDENTITY_MAXIMUM\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"IDENTITY_MINIMUM\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"IDENTITY_CYCLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_GENERATED\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GENERATION_EXPRESSION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"IDENTITY_BASE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"IDENTITY_CACHE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"COLUMN_ON_UPDATE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_VISIBLE\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"DEFAULT_ON_NULL\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"SELECTIVITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"COLUMNS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"COLUMNS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"ROLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"ROLES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"ROLES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHECK_CLAUSE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"CHECK_CONSTRAINTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"CHECK_CONSTRAINTS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SQL_STATEMENT\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EXECUTION_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MIN_EXECUTION_TIME\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"MAX_EXECUTION_TIME\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"CUMULATIVE_EXECUTION_TIME\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"AVERAGE_EXECUTION_TIME\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"STD_DEV_EXECUTION_TIME\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"MIN_ROW_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"MAX_ROW_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CUMULATIVE_ROW_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"AVERAGE_ROW_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    }, {
+      "name" : "\"STD_DEV_ROW_COUNT\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE PRECISION"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"QUERY_STATISTICS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"QUERY_STATISTICS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"SEQUENCE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SEQUENCE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SEQUENCE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"START_VALUE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"MINIMUM_VALUE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"MAXIMUM_VALUE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"INCREMENT\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CYCLE_OPTION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"BASE_VALUE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CACHE\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SEQUENCES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SEQUENCES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"INDEX_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLUMN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ORDINAL_POSITION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"ORDERING_SPECIFICATION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NULL_ORDERING\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_UNIQUE\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"INDEX_COLUMNS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"INDEX_COLUMNS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"INDEX_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_TYPE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_GENERATED\"",
+      "isNullable" : true,
+      "datatype" : "BOOLEAN"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_CLASS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"INDEXES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"INDEXES\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"GRANTOR\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GRANTEE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLUMN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PRIVILEGE_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_GRANTABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"COLUMN_PRIVILEGES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"COLUMN_PRIVILEGES\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "aff_wr_pk",
+      "determinants" : [ "\"wr_code\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"wr_code\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"wr_name\"",
+      "isNullable" : false,
+      "datatype" : "CHARACTER VARYING(100)"
+    } ],
+    "name" : [ "\"tb_affiliated_writers\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_affiliated_writers\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_affiliated_writers\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"GRANTEE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GRANTEETYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GRANTEDROLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"RIGHTS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"RIGHTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"RIGHTS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"STATE_KEY\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"STATE_COMMAND\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"SESSION_STATE\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"SESSION_STATE\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"VIEW_DEFINITION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHECK_OPTION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_UPDATABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INSERTABLE_INTO\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_TRIGGER_UPDATABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_TRIGGER_DELETABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_TRIGGER_INSERTABLE_INTO\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"STATUS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"VIEWS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"VIEWS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_DEFERRABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INITIALLY_DEFERRED\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ENFORCED\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INDEX_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"TABLE_CONSTRAINTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"TABLE_CONSTRAINTS\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"OBJECT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"OBJECT_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ENUM_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"VALUE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"VALUE_ORDINAL\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"ENUM_VALUES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"ENUM_VALUES\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
       "name" : "pk_emerge_authors",
       "determinants" : [ "\"bk_code\"", "\"wr_id\"" ],
       "isPrimaryKey" : true
@@ -36,7 +1806,7 @@
       "datatype" : "INTEGER"
     } ],
     "name" : [ "\"tb_emerge_authors\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_emerge_authors\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_emerge_authors\"" ] ]
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_emerge_authors\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_emerge_authors\"" ] ]
   }, {
     "uniqueConstraints" : [ {
       "name" : "edition_pk",
@@ -71,7 +1841,7 @@
     }, {
       "name" : "\"ed_type\"",
       "isNullable" : false,
-      "datatype" : "CHAR(1)"
+      "datatype" : "CHARACTER(1)"
     }, {
       "name" : "\"pub_date\"",
       "isNullable" : false,
@@ -90,24 +1860,7 @@
       "datatype" : "INTEGER"
     } ],
     "name" : [ "\"tb_edition\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_edition\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_edition\"" ] ]
-  }, {
-    "uniqueConstraints" : [ {
-      "name" : "pr_pk",
-      "determinants" : [ "\"wr_code\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "columns" : [ {
-      "name" : "\"wr_code\"",
-      "isNullable" : false,
-      "datatype" : "INTEGER"
-    }, {
-      "name" : "\"wr_name\"",
-      "isNullable" : false,
-      "datatype" : "VARCHAR(100)"
-    } ],
-    "name" : [ "\"tb_on_prob_wr\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_on_prob_wr\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_on_prob_wr\"" ] ]
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_edition\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_edition\"" ] ]
   }, {
     "uniqueConstraints" : [ {
       "name" : "ed_pk",
@@ -121,27 +1874,90 @@
     }, {
       "name" : "\"ed_name\"",
       "isNullable" : false,
-      "datatype" : "VARCHAR(100)"
+      "datatype" : "CHARACTER VARYING(100)"
     } ],
     "name" : [ "\"tb_editor\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_editor\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_editor\"" ] ]
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_editor\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_editor\"" ] ]
   }, {
-    "uniqueConstraints" : [ {
-      "name" : "aff_wr_pk",
-      "determinants" : [ "\"wr_code\"" ],
-      "isPrimaryKey" : true
-    } ],
     "columns" : [ {
-      "name" : "\"wr_code\"",
-      "isNullable" : false,
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"TABLE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLUMN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ORDINAL_POSITION\"",
+      "isNullable" : true,
       "datatype" : "INTEGER"
     }, {
-      "name" : "\"wr_name\"",
-      "isNullable" : false,
-      "datatype" : "VARCHAR(100)"
+      "name" : "\"POSITION_IN_UNIQUE_CONSTRAINT\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
     } ],
-    "name" : [ "\"tb_affiliated_writers\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_affiliated_writers\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_affiliated_writers\"" ] ]
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"KEY_COLUMN_USAGE\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"KEY_COLUMN_USAGE\"" ] ]
+  }, {
+    "columns" : [ {
+      "name" : "\"CONSTRAINT_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CONSTRAINT_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DOMAIN_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_DEFERRABLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INITIALLY_DEFERRED\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    } ],
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"DOMAIN_CONSTRAINTS\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"DOMAIN_CONSTRAINTS\"" ] ]
   }, {
     "uniqueConstraints" : [ {
       "name" : "pk_au",
@@ -179,7 +1995,7 @@
       "datatype" : "INTEGER"
     } ],
     "name" : [ "\"tb_authors\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_authors\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_authors\"" ] ]
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_authors\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_authors\"" ] ]
   }, {
     "uniqueConstraints" : [ {
       "name" : "bk_pk",
@@ -193,49 +2009,169 @@
     }, {
       "name" : "\"bk_title\"",
       "isNullable" : false,
-      "datatype" : "VARCHAR(100)"
+      "datatype" : "CHARACTER VARYING(100)"
     }, {
       "name" : "\"bk_type\"",
       "isNullable" : false,
-      "datatype" : "CHAR(1)"
+      "datatype" : "CHARACTER(1)"
     } ],
     "name" : [ "\"tb_books\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_books\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_books\"" ] ]
+    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_books\"" ], [ "\"BOOKS.H2\"", "\"PUBLIC\"", "\"tb_books\"" ] ]
   }, {
-    "uniqueConstraints" : [ {
-      "name" : "pk_gen",
-      "determinants" : [ "\"id_bk\"", "\"gen_name\"" ],
-      "isPrimaryKey" : true
-    } ],
-    "foreignKeys" : [ {
-      "name" : "fk_bk_gen",
-      "from" : {
-        "relation" : [ "\"tb_bk_gen\"" ],
-        "columns" : [ "\"id_bk\"" ]
-      },
-      "to" : {
-        "relation" : [ "\"tb_books\"" ],
-        "columns" : [ "\"bk_code\"" ]
-      }
-    } ],
     "columns" : [ {
-      "name" : "\"id_bk\"",
-      "isNullable" : false,
+      "name" : "\"SPECIFIC_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SPECIFIC_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"SPECIFIC_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_MAXIMUM_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_OCTET_LENGTH\"",
+      "isNullable" : true,
+      "datatype" : "BIGINT"
+    }, {
+      "name" : "\"CHARACTER_SET_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"CHARACTER_SET_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_CATALOG\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_SCHEMA\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"COLLATION_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"NUMERIC_PRECISION\"",
+      "isNullable" : true,
       "datatype" : "INTEGER"
     }, {
-      "name" : "\"gen_name\"",
-      "isNullable" : false,
-      "datatype" : "VARCHAR(100)"
+      "name" : "\"NUMERIC_PRECISION_RADIX\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DATETIME_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"INTERVAL_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"INTERVAL_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"MAXIMUM_CARDINALITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DTD_IDENTIFIER\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_BODY\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"ROUTINE_DEFINITION\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EXTERNAL_NAME\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"EXTERNAL_LANGUAGE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"PARAMETER_STYLE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"IS_DETERMINISTIC\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_DATA_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_PRECISION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DECLARED_NUMERIC_SCALE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GEOMETRY_TYPE\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
+    }, {
+      "name" : "\"GEOMETRY_SRID\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"REMARKS\"",
+      "isNullable" : true,
+      "datatype" : "CHARACTER VARYING(1000000000)"
     } ],
-    "name" : [ "\"tb_bk_gen\"" ],
-    "otherNames" : [ [ "\"PUBLIC\"", "\"tb_bk_gen\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_bk_gen\"" ] ]
+    "name" : [ "\"INFORMATION_SCHEMA\"", "\"ROUTINES\"" ],
+    "otherNames" : [ [ "\"BOOKS.H2\"", "\"INFORMATION_SCHEMA\"", "\"ROUTINES\"" ] ]
   } ],
   "metadata" : {
     "dbmsProductName" : "H2",
-    "dbmsVersion" : "1.4.196 (2017-06-10)",
+    "dbmsVersion" : "2.1.214 (2022-06-13)",
     "driverName" : "H2 JDBC Driver",
-    "driverVersion" : "1.4.196 (2017-06-10)",
+    "driverVersion" : "2.1.214 (2022-06-13)",
     "quotationString" : "\"",
-    "extractionTime" : "2021-12-30T12:27:43"
+    "extractionTime" : "2022-11-10T13:51:46"
   }
 }

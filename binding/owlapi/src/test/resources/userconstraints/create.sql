@@ -1,14 +1,14 @@
 CREATE TABLE TABLE1 (
 	"COL1" INT,
-	"COL2" INT,
+	"COL2" INT
 );              
 
 CREATE TABLE TABLE2 (
 	"COL1" INT,
-	"COL2" INT,
+	"COL2" INT
 );     
 
 CREATE TABLE TABLE3 (
 	"COL1" INT,
-	"COL2" INT,
+	"COL2" INT
 );     
