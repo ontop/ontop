@@ -159,7 +159,11 @@ public class DirectMappingEngine {
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
 			MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
-			ImmutableList<NamedRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
+			ImmutableList<NamedRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations()
+					// Filter all INFORMATION_SCHEMA tables
+					.stream()
+					.filter(t -> !(t.getID().getComponents().size() > 1 && t.getID().getComponents().get(1).getName().equals("INFORMATION_SCHEMA")))
+					.collect(ImmutableCollectors.toList());
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultIriPrefix()
 					: baseIRI0;
