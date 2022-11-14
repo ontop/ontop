@@ -72,6 +72,30 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     public void testStrUuid() {
     }
 
+    @Disabled("CAST AS DECIMAL in DB2 gives default precision 0")
+    @Test
+    @Override
+    public void testIn1() {
+    }
+
+    @Disabled("CAST AS DECIMAL in DB2 gives default precision 0")
+    @Test
+    @Override
+    public void testIn2() {
+    }
+
+    @Disabled("CAST AS DECIMAL in DB2 gives default precision 0")
+    @Test
+    @Override
+    public void testNotIn1() {
+    }
+
+    @Disabled("CAST AS DECIMAL in DB2 gives default precision 0")
+    @Test
+    @Override
+    public void testNotIn2() {
+    }
+
     @Override
     protected ImmutableList<String> getDivideExpectedValues() {
         return ImmutableList.of("\"21.2500000000000000000000000\"^^xsd:decimal",

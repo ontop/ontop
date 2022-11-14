@@ -48,15 +48,6 @@ jobs:
         jdk: [ 11 ]
 
     steps:
-      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ontop/lightweight-db-images
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Set up docker
-        run: docker-compose -f "docker-compose.lightweight.yml" up -d pgsql
       # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
@@ -68,6 +59,9 @@ jobs:
           cache: maven
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+         docker-compose -f "docker-compose.lightweight.yml" up -d pgsql
       - name: Run CI for PostgreSQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="pgsqllighttests" -DskipTests=false --fail-at-end
 
@@ -79,15 +73,6 @@ jobs:
         jdk: [ 11 ]
 
     steps:
-      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ontop/lightweight-db-images
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Set up docker
-        run: docker-compose -f "docker-compose.lightweight.yml" up -d mssql
       # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
@@ -99,6 +84,9 @@ jobs:
           cache: maven
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d mssql
       # Runs all tests specific to a db engine
       - name: Run CI for SQLServer docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mssqllighttests" -DskipTests=false --fail-at-end
@@ -111,15 +99,6 @@ jobs:
         jdk: [ 11 ]
 
     steps:
-      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ontop/lightweight-db-images
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Set up docker
-        run: docker-compose -f "docker-compose.lightweight.yml" up -d mysql
       # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
@@ -131,6 +110,9 @@ jobs:
           cache: maven
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d mysql
       # Runs all tests specific to a db engine
       - name: Run CI for MySQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
@@ -143,15 +125,6 @@ jobs:
         jdk: [ 11 ]
 
     steps:
-      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ontop/lightweight-db-images
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Set up docker
-        run: docker-compose -f "docker-compose.lightweight.yml" up -d oracle
       # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
@@ -163,28 +136,24 @@ jobs:
           cache: maven
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d oracle
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
       # Runs all tests specific to a db engine
       - name: Run CI for Oracle docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="oraclelighttests" -DskipTests=false --fail-at-end
 
-
   run-db2:
-    needs: [run-oracle]
+    needs: [ run-oracle ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         jdk: [ 11 ]
 
     steps:
-      # Checks-out lightweight images repository under $GITHUB_WORKSPACE
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ontop/lightweight-db-images
-      - name: Copy env file
-        run: cp .env.example .env
-      - name: Set up docker
-        run: docker-compose -f "docker-compose.lightweight.yml" up -d db2
       # Checks-out ontop repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
       # Set up the java versions
@@ -196,6 +165,12 @@ jobs:
           cache: maven
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d db2
+      - name: Sleep for 180 seconds
+        run: sleep 180s
+        shell: bash
       # Runs all tests specific to a db engine
       - name: Run CI for DB2 docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="db2lighttests" -DskipTests=false --fail-at-end
