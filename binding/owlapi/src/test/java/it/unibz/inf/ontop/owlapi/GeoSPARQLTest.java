@@ -1214,7 +1214,6 @@ public class GeoSPARQLTest {
         assertEquals("POLYGON ((2 2, 7 7, 6 2, 2 2))", val);
     }
 
-    @Ignore
     @Test // Boolean Relate - Check for equality
     public void testAskRelate() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -1229,7 +1228,6 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Ignore
     @Test // Boolean relate - Check for within condition
     public void testAskRelate2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
