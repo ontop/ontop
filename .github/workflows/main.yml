@@ -194,8 +194,8 @@ jobs:
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker-compose -f "docker-compose.lightweight.yml" up -d db2
-      - name: Sleep for 180 seconds
-        run: sleep 180s
+      - name: Sleep for 240 seconds
+        run: sleep 240s
         shell: bash
       # Runs all tests specific to a db engine
       - name: Run CI for DB2 docker tests
