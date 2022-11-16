@@ -12,7 +12,7 @@ import java.sql.SQLException;
 @MariaDBLightweightTest
 public class LeftJoinProfMariaDBTest extends AbstractLeftJoinProfTest {
 
-    private static final String PROPERTIES_FILE = "/prof/mysql/prof-mariadb.properties";
+    private static final String PROPERTIES_FILE = "/prof/mariadb/prof-mariadb.properties";
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
@@ -42,9 +42,9 @@ public class LeftJoinProfMariaDBTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("\"15.500000000000000000000000000000\"^^xsd:decimal",
-                "\"16.000000000000000000000000000000\"^^xsd:decimal",
-                "\"19.250000000000000000000000000000\"^^xsd:decimal");
+        return ImmutableList.of("\"15.5000000000000000000000000000000000\"^^xsd:decimal",
+                "\"16.0000000000000000000000000000000000\"^^xsd:decimal",
+                "\"19.2500000000000000000000000000000000\"^^xsd:decimal");
     }
 
     @Override

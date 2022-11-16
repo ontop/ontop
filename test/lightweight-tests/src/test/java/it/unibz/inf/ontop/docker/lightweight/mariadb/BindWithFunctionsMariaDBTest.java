@@ -51,32 +51,32 @@ public class BindWithFunctionsMariaDBTest extends AbstractBindTestWithFunctions 
 
     @Override
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:decimal");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:decimal");
     }
 
     @Override
     protected ImmutableList<String> getConstantDoubleDoubleDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:double");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:double");
     }
 
     @Override
     protected ImmutableList<String> getConstantFloatDecimalDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:float");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:float");
     }
 
     @Override
     protected ImmutableList<String> getConstantFloatDoubleDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:double");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:double");
     }
 
     @Override
     protected ImmutableList<String> getConstantFloatIntegerDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:float");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:float");
     }
 
     @Override
     protected ImmutableList<String> getConstantFloatDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000000000000000000000000000\"^^xsd:float");
+        return ImmutableList.of("\"0.5000000000000000000000000000000000\"^^xsd:float");
     }
 
 }
