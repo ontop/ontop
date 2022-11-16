@@ -14,6 +14,7 @@
         every database engine.</description>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <filter.test.resources>true</filter.test.resources>
         <skipTests>true</skipTests>
         <docker.url>localhost</docker.url>

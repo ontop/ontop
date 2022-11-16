@@ -410,6 +410,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-lightweight-tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ontop-rdb2rdf-compliance</artifactId>
                 <version>${project.version}</version>
             </dependency>
