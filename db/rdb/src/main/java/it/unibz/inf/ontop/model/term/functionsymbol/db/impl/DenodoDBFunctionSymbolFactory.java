@@ -140,6 +140,11 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
+    protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA384: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("SHA512: " + NOT_YET_SUPPORTED_MSG);
     }

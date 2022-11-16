@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  pgsql:
+    #image: ontop_pgsql_lightweight:v1
+    build: ./pgsql
+    env_file: .env
+    container_name: ontop_pgsql_running
+    ports:
+      - "7777:5432"
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  oracle:
+    #image: ontop_oracle_lightweight:v1
+    build: ./oracle
+    env_file: .env
+    container_name: ontop_oracle_running
+    ports:
+      - "49160:8080"
+      - "49161:1521"
+
+  mssql:
+    #image: ontop_mssql_lightweight:v1
+    build: ./mssql
+    env_file: .env
+    container_name: ontop_mssql_running
+    ports:
+      - "1533:1433"
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
+
+  mysql:
+    #image: ontop_mysql_lightweight:v1
+    build: ./mysql
+    env_file: .env
+    container_name: ontop_mysql_lw_running
+    ports:
+      - "3694:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+  db2:
+    #image: ontop_db2_lightweight:v1
+    build: ./db2
+    env_file: .env
+    container_name: ontop_db2_lw_running
+    privileged: true
+    ports:
+      - "50000:50000"
+    environment:
+      - DB2INSTANCE=db2inst1
+      - DB2INST1_PASSWORD=${DB2INST1_PASSWORD}
+      - LICENSE=accept

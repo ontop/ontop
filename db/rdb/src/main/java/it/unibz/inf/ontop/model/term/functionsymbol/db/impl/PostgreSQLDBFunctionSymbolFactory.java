@@ -377,6 +377,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
      * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
      */
     @Override
+    protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("encode(digest(%s, 'sha384'), 'hex')", termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
+     */
+    @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("encode(digest(%s, 'sha512'), 'hex')", termConverter.apply(terms.get(0)));
     }
