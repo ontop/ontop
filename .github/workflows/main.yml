@@ -117,8 +117,34 @@ jobs:
       - name: Run CI for MySQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mysqllighttests" -DskipTests=false --fail-at-end
 
-  run-oracle:
+  run-mariadb:
     needs: [run-mysql]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d mariadb
+      # Runs all tests specific to a db engine
+      - name: Run CI for MariaDB docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="mariadblighttests" -DskipTests=false --fail-at-end
+
+  run-oracle:
+    needs: [run-mariadb]
     runs-on: ubuntu-latest
     strategy:
       matrix:

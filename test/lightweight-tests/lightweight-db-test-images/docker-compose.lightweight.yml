@@ -42,6 +42,16 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
+  mariadb:
+    #image: ontop_mysql_lightweight:v1
+    build: ./mariadb
+    env_file: .env
+    container_name: ontop_mariadb_lw_running
+    ports:
+      - "3694:3306"
+    environment:
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+
   db2:
     #image: ontop_db2_lightweight:v1
     build: ./db2
