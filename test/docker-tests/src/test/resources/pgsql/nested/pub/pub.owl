@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://pub.example.org"
+     xml:base="http://pub.example.org"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://pub.example.org"/>
+
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+
+
+    <!-- ttp://pub.example.org/author -->
+
+    <owl:ObjectProperty rdf:about="http://pub.example.org/author">
+        <rdf:domain rdf:resource="http://pub.example.org/Person"/>
+        <rdfs:range rdf:resource="http://pub.example.org/Publication"/>
+    </owl:ObjectProperty>
+
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <!-- ttp://pub.example.org/name -->
+
+    <owl:DatatypeProperty rdf:about="http://pub.example.org/name">
+        <rdf:domain rdf:resource="http://pub.example.org/Person"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+    <!-- ttp://pub.example.org/title -->
+
+    <owl:DatatypeProperty rdf:about="http://pub.example.org/title">
+        <rdf:domain rdf:resource="http://pub.example.org/Publication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+
+    <!-- ttp://pub.example.org/year -->
+
+    <owl:DatatypeProperty rdf:about="http://pub.example.org/year">
+        <rdf:domain rdf:resource="http://pub.example.org/Publication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+
+
+    <!-- ttp://pub.example.org/venue -->
+
+    <owl:DatatypeProperty rdf:about="http://pub.example.org/venue">
+        <rdf:domain rdf:resource="http://pub.example.org/Publication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <!-- ttp://pub.example.org/Person -->
+
+    <owl:Class rdf:about="http://pub.example.org/Person"/>
+
+    <!-- ttp://pub.example.org/Publication -->
+
+    <owl:Class rdf:about="http://pub.example.org/Publication"/>
+
+</rdf:RDF>

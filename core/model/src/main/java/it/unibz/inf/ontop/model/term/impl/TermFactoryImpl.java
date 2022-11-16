@@ -59,6 +59,7 @@ public class TermFactoryImpl implements TermFactory {
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
 		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
 		this.lexicalTrue = getDBStringConstant("true");
@@ -435,7 +436,7 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha512(), stringTerm);
 	}
 
-    @Override
+	@Override
     public ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1, ImmutableTerm rdfTypeTerm2) {
         return getImmutableFunctionalTerm(
         		functionSymbolFactory.getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol(),
@@ -1302,5 +1303,35 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalLangMatches(), langTagTerm, langRangeTerm);
     }
+
+	@Override
+	public ImmutableFunctionalTerm getDBJsonElement(ImmutableTerm arg, ImmutableList<String> path) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonElt(path), arg);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBJsonElementAsText(ImmutableTerm arg, ImmutableList<String> path) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBJsonEltAsText(path), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsBoolean(DBTermType dbType, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsBoolean(dbType), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsNumber(DBTermType dbType, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsNumber(dbType), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBJsonIsScalar(DBTermType dbType, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBJsonIsScalar(dbType), arg);
+	}
+
+	@Override
+	public ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsArray(dbType), arg);
+	}
 
 }

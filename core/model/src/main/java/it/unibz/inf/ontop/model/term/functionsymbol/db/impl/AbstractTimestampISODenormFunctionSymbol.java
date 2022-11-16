@@ -58,7 +58,7 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
             return ((AbstractTimestampISONormFunctionSymbol) subTermFunctionSymbol).getInputType()
                     // There might be several DB datetime types
                     .filter(t -> !t.equals(targetType))
-                    .map(t -> (ImmutableTerm) termFactory.getDBCastFunctionalTerm(t, targetType, subSubTerm))
+                    .map(t -> termFactory.getDBCastFunctionalTerm(t, targetType, subSubTerm).simplify(variableNullability))
                     .orElse(subSubTerm);
         }
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));

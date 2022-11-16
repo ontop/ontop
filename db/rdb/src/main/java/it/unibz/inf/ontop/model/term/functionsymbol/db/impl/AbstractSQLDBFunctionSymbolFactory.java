@@ -113,7 +113,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
 
-
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
         super(regularFunctionTable, typeFactory);
@@ -1214,7 +1213,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
-
 
     /**
      * Can be overridden.

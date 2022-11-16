@@ -59,6 +59,11 @@ public class DefaultIdentityIQTreeExtendedTransformer<T> implements IQTreeExtend
     }
 
     @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child, T context) {
+        return tree;
+    }
+
+    @Override
     public IQTree transformDistinct(IQTree tree, DistinctNode distinctNode, IQTree child, T context) {
         return tree;
     }

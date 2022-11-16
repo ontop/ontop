@@ -1,25 +1,6 @@
 package it.unibz.inf.ontop.owlapi.impl;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -30,11 +11,12 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -71,9 +53,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private Exception questException = null;
 
-	/* The merge and translation of all loaded ontologies */
-	// TODO: see if still relevant
-	private ClassifiedTBox translatedOntologyMerge;
+	private final ClassifiedTBox classifiedTBox;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -84,7 +64,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private final OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
-	private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
 	/**
 	 * End-users: use the QuestOWLFactory instead
@@ -107,7 +86,11 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
 		try {
-			queryEngine = ontopConfiguration.loadQueryEngine();
+			OBDASpecification obdaSpecification = ontopConfiguration.loadSpecification();
+			classifiedTBox = obdaSpecification.getSaturatedTBox();
+			Injector injector = ontopConfiguration.getInjector();
+			OntopSystemFactory systemFactory = injector.getInstance(OntopSystemFactory.class);
+			queryEngine = systemFactory.create(obdaSpecification);
 			/*
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
@@ -120,8 +103,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		pm = owlConfiguration.getProgressMonitor();
 
 		version = extractVersion();
-
-		owlapiTranslator = ontopConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
 
 		prepareReasoner();
 
@@ -178,36 +159,10 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	public void dispose() {
 		super.dispose();
 		try {
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-		
-		try {
 			queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
-	}
-
-	/***
-	 * This method loads the given ontologies in the system. This will merge
-	 * these new ontologies with the existing ones in a set. Then it will
-	 * translate the assertions in all the ontologies into a single one, in our
-	 * internal representation.
-	 * 
-	 * The translation is done using our OWLAPITranslator that gets the TBox
-	 * part of the ontologies and filters all the DL-Lite axioms (RDFS/OWL2QL
-	 * and DL-Lite).
-	 *
-	 */
-	private ClassifiedTBox loadOntologies(OWLOntology ontology) {
-		/*
-		 * We will keep track of the loaded ontologies and translate the TBox
-		 * part of them into our internal representation.
-		 */
-		log.debug("Load ontologies called. Translating ontologies.");
-        Ontology mergeOntology = owlapiTranslator.translateAndClassify(ontology);
-        return mergeOntology.tbox();
 	}
 
 	/**
@@ -294,12 +249,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
         structuralReasoner.prepareReasoner();
 
         try {
-			/*
-			 * Compute the an ontology with the merge of all the vocabulary and
-			 * axioms of the closure of the root ontology
-			 */
-            this.translatedOntologyMerge = loadOntologies(getRootOntology());
-
 			questready = false;
 			questException = null;
 			try {
@@ -363,7 +312,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.disjointClasses()) {
+			for (NaryAxiom<ClassExpression> dda : classifiedTBox.disjointClasses()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
@@ -384,7 +333,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<ObjectPropertyExpression> dda
-						: translatedOntologyMerge.disjointObjectProperties()) {
+						: classifiedTBox.disjointObjectProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
@@ -404,7 +353,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<DataPropertyExpression> dda
-						: translatedOntologyMerge.disjointDataProperties()) {
+						: classifiedTBox.disjointDataProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
@@ -429,7 +378,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		
-		for (ObjectPropertyExpression pfa : translatedOntologyMerge.functionalObjectProperties()) {
+		for (ObjectPropertyExpression pfa : classifiedTBox.functionalObjectProperties()) {
 			// TODO: handle inverses
 			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
@@ -441,7 +390,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			}
 		}
 		
-		for (DataPropertyExpression pfa : translatedOntologyMerge.functionalDataProperties()) {
+		for (DataPropertyExpression pfa : classifiedTBox.functionalDataProperties()) {
 			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			

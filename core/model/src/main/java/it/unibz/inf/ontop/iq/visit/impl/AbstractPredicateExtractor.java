@@ -69,6 +69,11 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
+    public Stream<T> visitFlatten(FlattenNode rootNode, IQTree child) {
+        return child.acceptVisitor(this);
+    }
+
+    @Override
     public Stream<T> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }
@@ -102,4 +107,5 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
         return children.stream()
                 .flatMap(c -> c.acceptVisitor(this));
     }
+
 }

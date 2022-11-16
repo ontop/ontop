@@ -1,0 +1,37 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+        "name" : "\"ssn\"",
+        "datatype" : "INTEGER",
+        "isNullable" : false
+    }, {
+      "name" : "\"fullName\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"tags\"",
+      "datatype" : "JSON",
+      "isNullable" : true
+    }, {
+        "name" : "\"friends\"",
+        "datatype" : "JSON",
+        "isNullable" : true
+      }
+    ],
+    "name": ["\"hr\"","\"person-xt\""]
+  }],
+  "metadata" : {
+    "dbmsProductName" : "POSTGRESQL"
+  }
+}

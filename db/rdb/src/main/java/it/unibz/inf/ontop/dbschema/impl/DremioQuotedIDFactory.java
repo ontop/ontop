@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
@@ -15,5 +18,25 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
             return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
 
         return new QuotedIDImpl(s, NO_QUOTATION, false);
+    }
+
+    @Override
+    public RelationID createRelationID(String... components) {
+        Objects.requireNonNull(components[components.length - 1]);
+
+        if (components.length == 1)
+            return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
+
+        QuotedID schemaId = createFromString(
+                String.join(".", Arrays.stream(components)
+                        .limit(components.length - 1) //First (N-1) components are schema, last is table name
+                        .map(name -> name.replace("\"", "")) //Remove quotes in-between
+                        .toArray(String[]::new))
+        );
+
+        return new RelationIDImpl(ImmutableList.of(
+                createFromString(components[components.length - 1]),
+                schemaId
+        ));
     }
 }

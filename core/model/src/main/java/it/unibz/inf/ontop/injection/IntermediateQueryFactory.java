@@ -47,6 +47,10 @@ public interface IntermediateQueryFactory {
 
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
+    FlattenNode createFlattenNode(@Assisted("outputVariable") Variable outputVariable,
+                                  @Assisted("flattenedVariable") Variable flattenedVariable,
+                                  Optional<Variable> indexVariable, DBTermType dbTermType);
+
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
 
     /**

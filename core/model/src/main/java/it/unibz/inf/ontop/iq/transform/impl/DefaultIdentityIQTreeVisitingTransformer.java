@@ -72,6 +72,11 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
+        return tree;
+    }
+
+    @Override
     public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return tree;
     }

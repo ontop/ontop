@@ -301,9 +301,14 @@ public abstract class JsonView extends JsonOpenObject {
                 case "JoinViewDefinition":
                     instanceClass = JsonJoinView.class;
                     break;
+                case "FlattenLens":
+                // Deprecated
+                case "FlattenedViewDefinition":
+                    instanceClass = JsonFlattenLens.class;
+                    break;
                 default:
                     // TODO: throw proper exception
-                    throw new RuntimeException("Unsupported type of Ontop views: " + type);
+                    throw new RuntimeException("Unsupported type of lens: " + type);
             }
             return mapper.treeToValue(node, instanceClass);
         }

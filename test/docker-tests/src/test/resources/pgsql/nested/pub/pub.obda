@@ -1,0 +1,27 @@
+[PrefixDeclaration]
+:		http://pub.example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-person
+target		:person/{"id"} a :Person ; :name {"name"}.
+source		SELECT "id", "name" FROM "pub"."person";
+]]
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-pub
+target		:publication/{"id_pub"} a :Publication ; :title {"title"} ; :year {"year"} ; :venue {"venue"}.
+source		SELECT "id_pub", "title", "year", "venue" FROM "pub"."publication";
+]]
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-author
+target		:person/{"id"} :author :publication/{"id_pub"}.
+source		SELECT "id", "id_pub" FROM "pub"."publication";
+]]
+

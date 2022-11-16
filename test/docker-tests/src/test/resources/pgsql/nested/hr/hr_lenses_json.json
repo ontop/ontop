@@ -1,0 +1,107 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"","\"person-json\""],
+      "baseRelation": ["\"hr\"","\"person-xt\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"tags\"",
+            "expression": "tags::json"
+          },
+          {
+            "name": "\"friends\"",
+            "expression": "friends::json"
+          }
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"hr\"","\"person-tags\""],
+      "baseRelation": ["\"hr\"","\"person-json\""],
+      "flattenedColumn": {
+        "name": "\"tags\"",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "\"id\"",
+          "\"ssn\"",
+          "\"fullname\"",
+          "\"tags\""
+        ],
+        "position": "\"pos\"",
+        "extracted": [
+          {
+            "name": "\"tag_str\"",
+            "datatype": "text"
+          },
+          {
+            "name": "\"tag_int\"",
+            "datatype": "integer"
+          }
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"hr\"","\"persons-friends\""],
+      "baseRelation": ["\"hr\"","\"person-json\""],
+      "flattenedColumn": {
+        "name": "\"friends\"",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "position": "\"pos\"",
+        "extracted": [
+          {
+            "name": "\"firstName\"",
+            "key": ["fName"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"nickNames\"",
+            "key": ["nickname"],
+            "datatype": "json"
+          },
+          {
+            "name": "\"nickName_str\"",
+            "key": ["nickname"],
+            "datatype": "text"
+          },
+          {
+            "name": "\"city\"",
+            "key": ["address", "city"],
+            "datatype": "text"
+          }
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "FlattenLens"
+    }
+  ]
+}
+
