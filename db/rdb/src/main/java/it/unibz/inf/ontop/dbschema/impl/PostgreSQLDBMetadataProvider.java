@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -26,5 +27,10 @@ public class PostgreSQLDBMetadataProvider extends DefaultSchemaDBMetadataProvide
     @Override
     protected ResultSet getRelationIDsResultSet() throws SQLException {
         return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW" });
+    }
+
+    @Override
+    protected boolean isRelationExcluded(RelationID id) {
+        return "_timescaledb_cache".equals(getRelationSchema(id));
     }
 }
