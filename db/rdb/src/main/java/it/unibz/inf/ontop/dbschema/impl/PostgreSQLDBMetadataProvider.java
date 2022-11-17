@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -29,8 +30,10 @@ public class PostgreSQLDBMetadataProvider extends DefaultSchemaDBMetadataProvide
         return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW" });
     }
 
+    private static final ImmutableList<String> IGNORED_SCHEMAS = ImmutableList.of( "_timescaledb_cache", "_timescaledb_catalog", "_timescaledb_internal");
+
     @Override
     protected boolean isRelationExcluded(RelationID id) {
-        return "_timescaledb_cache".equals(getRelationSchema(id));
+        return IGNORED_SCHEMAS.contains(getRelationSchema(id));
     }
 }
