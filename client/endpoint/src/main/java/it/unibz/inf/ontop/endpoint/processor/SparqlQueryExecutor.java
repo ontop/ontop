@@ -21,6 +21,8 @@ import org.eclipse.rdf4j.rio.jsonld.JSONLDWriter;
 import org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
+import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
@@ -110,6 +112,14 @@ public class SparqlQueryExecutor {
                 else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+xml;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new RDFXMLWriter(bao), response);
+                }
+                else if (accept.contains("n-triples")) {
+                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/n-triples;charset=UTF-8");
+                    evaluateGraphQuery(graphQuery, new NTriplesWriter(bao), response);
+                }
+                else if (accept.contains("n-quads")) {
+                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/n-quads;charset=UTF-8");
+                    evaluateGraphQuery(graphQuery, new NQuadsWriter(bao), response);
                 } else {
                     response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
                 }
