@@ -30,7 +30,8 @@ public class PostgreSQLDBMetadataProvider extends DefaultSchemaDBMetadataProvide
         return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW", "MATERIALIZED VIEW" });
     }
 
-    private static final ImmutableList<String> IGNORED_SCHEMAS = ImmutableList.of( "_timescaledb_cache", "_timescaledb_catalog", "_timescaledb_internal");
+    private static final ImmutableList<String> IGNORED_SCHEMAS = ImmutableList.of( "_timescaledb_cache", "_timescaledb_catalog",
+            "_timescaledb_internal", "_timescaledb_config");
 
     @Override
     protected boolean isRelationExcluded(RelationID id) {
