@@ -120,6 +120,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol rowUniqueStrFct;
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
+    private DBFunctionSymbol rowNumberWithOrderByFct;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -384,6 +385,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
+        rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -957,6 +959,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBRowNumberWithOrderBy() {
+        return rowNumberWithOrderByFct;
+    }
+
+    @Override
     public DBFunctionSymbol getDBIriStringResolver(IRI baseIRI) {
         return iriStringResolverMap.computeIfAbsent(baseIRI, this::createDBIriStringResolver);
     }
@@ -1203,6 +1210,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 (t, c, f) -> serializeDBRowNumber(c, f));
     }
 
+    protected DBFunctionSymbol createDBRowNumberWithOrderBy() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("ROW_NUMBER_WITH_ORDERBY", rootDBType, dbIntegerType, true,
+                (t, c, f) -> serializeDBRowNumberWithOrderBy(t, c, f));
+    }
+
 
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
@@ -1446,6 +1458,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected abstract String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory);
+
+    protected abstract String serializeDBRowNumberWithOrderBy(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> converter,
+                                                              TermFactory termFactory);
 
 
 

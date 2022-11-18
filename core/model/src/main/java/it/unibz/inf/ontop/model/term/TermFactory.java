@@ -552,6 +552,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
 
+	ImmutableFunctionalTerm getDBRowNumber();
+
 	ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical);
 
 	//-------------
