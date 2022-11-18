@@ -1,0 +1,7 @@
+PREFIX : <http://www.example.org/test#>
+SELECT ?p (GROUP_CONCAT(DISTINCT ?ss; SEPARATOR="|") as ?sd)
+WHERE {
+?p :teaches ?c .
+?c :numberOfStudents ?s .
+BIND (str(?s) AS ?ss)
+} GROUP BY ?p

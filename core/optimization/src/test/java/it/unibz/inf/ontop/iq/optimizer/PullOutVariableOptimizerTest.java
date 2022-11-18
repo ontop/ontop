@@ -10,7 +10,10 @@ import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -18,6 +21,7 @@ import static junit.framework.TestCase.assertEquals;
 
 public class PullOutVariableOptimizerTest {
     private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable X1 = TERM_FACTORY.getVariable("Xf1");
     private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");
     private final static Variable X2 = TERM_FACTORY.getVariable("Xf2");
     private final static Variable X4 = TERM_FACTORY.getVariable("Xf0f3");
@@ -426,5 +430,157 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nExpected: \n" +  expectedQuery);
 
         assertEquals(expectedQuery, optimizedIQ);
+    }
+
+    @Test
+    @Ignore
+    public void testFlattenOutputVariable() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
+
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(O, F, Optional.empty(), JSON_TYPE);
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(O, F));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flattenNode1,
+                                dataNode
+                        )));
+
+        System.out.println("\nBefore optimization: \n" +  initialIQ);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X0, O));
+        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(X0, F, Optional.empty(), JSON_TYPE);
+
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                filterNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flattenNode2,
+                                        dataNode
+                                ))));
+
+        System.out.println("\nExpected: \n" +  expectedIQ);
+        optimizeAndCheck(initialIQ, expectedIQ);
+    }
+
+    @Test
+    @Ignore
+    public void testFlattenOutputVariable2()  {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(X, F, Optional.of(X), JSON_TYPE);
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(Y, F));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flattenNode1,
+                                dataNode
+                        )));
+
+        System.out.println("\nBefore optimization: \n" +  initialIQ);
+
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X0, X));
+        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(X0, F, Optional.of(X), JSON_TYPE);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                filterNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flattenNode2,
+                                        dataNode
+                        ))));
+
+        System.out.println("\nExpected: \n" +  expectedIQ);
+
+        optimizeAndCheck(initialIQ, expectedIQ);
+    }
+
+    @Test
+    @Ignore
+    public void testFlattenIndexVariable() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(O, F, Optional.of(I), JSON_TYPE);
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(I, F));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flattenNode1,
+                                dataNode
+                        )));
+
+        System.out.println("\nBefore optimization: \n" +  initialIQ);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X0, I));
+        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(O, F, Optional.of(X0), JSON_TYPE);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                filterNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flattenNode2,
+                                        dataNode
+                                ))));
+
+
+        System.out.println("\nExpected: \n" +  expectedIQ);
+        optimizeAndCheck(initialIQ, expectedIQ);
+    }
+
+    @Test
+    @Ignore
+    public void testFlattenIndexAndOutputVariable() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(1), X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        FlattenNode flattenNode1 = IQ_FACTORY.createFlattenNode(X, F, Optional.of(X), JSON_TYPE);
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, F));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flattenNode1,
+                                dataNode
+                        )));
+
+        System.out.println("\nBefore optimization: \n" +  initialIQ);
+
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getStrictEquality(X0, X),
+                TERM_FACTORY.getStrictEquality(X1, X)
+        ));
+        FlattenNode flattenNode2 = IQ_FACTORY.createFlattenNode(X0, F, Optional.of(X1), JSON_TYPE);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                filterNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flattenNode2,
+                                        dataNode
+                                ))));
+
+        System.out.println("\nExpected: \n" +  expectedIQ);
+
+        optimizeAndCheck(initialIQ, expectedIQ);
     }
 }

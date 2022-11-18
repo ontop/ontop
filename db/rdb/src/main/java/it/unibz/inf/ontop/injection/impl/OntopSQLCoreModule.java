@@ -40,6 +40,7 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
                         SQLLeftJoinExpression.class,
                         SQLNaryJoinExpression.class,
                         SQLUnionExpression.class,
+                        SQLFlattenExpression.class,
                         SQLOneTupleDummyQueryExpression.class,
                         SQLValuesExpression.class,
                         SQLOrderComparator.class

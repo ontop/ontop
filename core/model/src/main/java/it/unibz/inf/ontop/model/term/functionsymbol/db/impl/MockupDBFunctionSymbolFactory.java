@@ -327,6 +327,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
@@ -571,6 +577,36 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBFunctionSymbol getDBNow() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

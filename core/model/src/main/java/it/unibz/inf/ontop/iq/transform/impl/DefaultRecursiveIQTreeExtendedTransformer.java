@@ -71,6 +71,11 @@ public abstract class DefaultRecursiveIQTreeExtendedTransformer<T> implements IQ
     }
 
     @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child, T context) {
+        return transformUnaryNode(tree, rootNode, child, context);
+    }
+
+    @Override
     public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child, T context) {
         return transformUnaryNode(tree, rootNode, child, context);
     }

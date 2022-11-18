@@ -19,6 +19,7 @@ public interface IQVisitor<T> {
     T visitConstruction(ConstructionNode rootNode, IQTree child);
     T visitAggregation(AggregationNode aggregationNode, IQTree child);
     T visitFilter(FilterNode rootNode, IQTree child);
+    T visitFlatten(FlattenNode rootNode, IQTree child);
     T visitDistinct(DistinctNode rootNode, IQTree child);
     T visitSlice(SliceNode sliceNode, IQTree child);
     T visitOrderBy(OrderByNode rootNode, IQTree child);

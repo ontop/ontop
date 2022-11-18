@@ -87,8 +87,28 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public boolean supportsJson() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsArrayType() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return getDBTermType("HEXBINARY");
+    }
+
+    @Override
+    public DBTermType getDBArrayType() {
+        return getDBTermType("ARRAY");
+    }
+
+    @Override
+    public DBTermType getDBJsonType() {
+        throw new UnsupportedOperationException("No JSON datatype supported");
     }
 
     @Override

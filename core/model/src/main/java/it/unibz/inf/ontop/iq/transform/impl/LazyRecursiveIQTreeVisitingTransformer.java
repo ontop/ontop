@@ -52,6 +52,11 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
     }
 
     @Override
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
+        return transformUnaryNode(tree, node, child);
+    }
+
+    @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) { return transformUnaryNode(tree, rootNode, child); }
 
     @Override

@@ -246,11 +246,6 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private void ontologyCreated() {
-		OWLOntology ontology = getModelManager().getActiveOntology();
-		createObdaModel(ontology);
-	}
-
 	private OBDAModel createObdaModel(OWLOntology ontology) {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
 		//obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
@@ -274,6 +269,12 @@ public class OBDAModelManager implements Disposable {
 			}
 		});
 		return obdaModel;
+	}
+
+	private void ontologyCreated() {
+		OWLOntology ontology = getModelManager().getActiveOntology();
+		OBDAModel obdaModel = createObdaModel(ontology);
+		obdaModels.put(ontology.getOntologyID(), obdaModel);
 	}
 
 	private void activeOntologyChanged() {

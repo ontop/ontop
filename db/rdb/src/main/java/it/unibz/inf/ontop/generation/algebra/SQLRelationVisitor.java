@@ -20,4 +20,7 @@ public interface SQLRelationVisitor<T> {
     T visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression);
 
     T visit(SQLValuesExpression sqlValuesExpression);
+
+    T visit(SQLFlattenExpression sqlFlattenExpression);
+
 }

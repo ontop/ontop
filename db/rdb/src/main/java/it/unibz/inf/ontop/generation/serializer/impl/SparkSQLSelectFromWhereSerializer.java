@@ -86,19 +86,6 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
             }
 
-            //this function is required in case at least one of the children is
-            // SelectFromWhereWithModifiers expression
-            private QuerySerialization getSQLSerializationForChild(SQLExpression expression) {
-                if (expression instanceof SelectFromWhereWithModifiers) {
-                    QuerySerialization serialization = expression.acceptVisitor(this);
-                    RelationID alias = generateFreshViewAlias();
-                    String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
-                    return new QuerySerializationImpl(sql,
-                            replaceRelationAlias(alias, serialization.getColumnIDs()));
-                }
-                return expression.acceptVisitor(this);
-            }
-
             private ImmutableMap<Variable, QualifiedAttributeID> replaceRelationAlias(RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
                 return columnIDs.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(

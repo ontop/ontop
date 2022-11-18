@@ -72,6 +72,11 @@ public class RequiredExtensionalDataNodeExtractorImpl implements RequiredExtensi
     }
 
     @Override
+    public Stream<ExtensionalDataNode> visitFlatten(FlattenNode rootNode, IQTree child) {
+        return child.acceptVisitor(this);
+    }
+
+    @Override
     public Stream<ExtensionalDataNode> visitDistinct(DistinctNode rootNode, IQTree child) {
         return child.acceptVisitor(this);
     }

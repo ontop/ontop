@@ -8,7 +8,8 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.*;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -28,6 +29,9 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
+    public static final String JSON_STR = "JSON";
+    public static final String JSONB_STR = "JSONB";
+    public static final String ARRAY_STR = "ARRAY";
     public static final String BYTEA_STR = "BYTEA";
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
@@ -97,9 +101,16 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         /*
          * POSTGIS types
+         *
          */
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
         map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
+
+        /*
+         * JSON
+         */
+        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry));
+        map.put(JSONB_STR, new JsonDBTermTypeImpl(JSONB_STR, rootAncestry));
 
         return map;
     }
@@ -114,6 +125,10 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          */
         map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
+        /*
+         * JSON: JSONB is more efficient than JSON
+         */
+        map.put(DefaultTypeCode.JSON, JSONB_STR);
 
         return ImmutableMap.copyOf(map);
     }
@@ -130,6 +145,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBDistanceSphere() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsJson() {
         return true;
     }
 }

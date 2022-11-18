@@ -65,6 +65,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol sha256FunctionSymbol;
     // Created in init()
+    private DBFunctionSymbol sha384FunctionSymbol;
+    // Created in init()
     private DBFunctionSymbol sha512FunctionSymbol;
     // Created in init()
     private DBFunctionSymbol yearFromDatetimeFunctionSymbol;
@@ -122,6 +124,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol rowNumberFct;
     private DBFunctionSymbol rowNumberWithOrderByFct;
+
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
+    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -343,6 +350,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
         this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
+
+        this.isArrayMap = new ConcurrentHashMap<>();
+        this.jsonIsNumberMap = new ConcurrentHashMap<>();
+        this.jsonIsBooleanMap = new ConcurrentHashMap<>();
+        this.jsonIsScalarMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -379,6 +391,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         md5FunctionSymbol = createMD5FunctionSymbol();
         sha1FunctionSymbol = createSHA1FunctionSymbol();
         sha256FunctionSymbol = createSHA256FunctionSymbol();
+        sha384FunctionSymbol = createSHA384FunctionSymbol();
         sha512FunctionSymbol = createSHA512FunctionSymbol();
 
         yearFromDatetimeFunctionSymbol = createYearFromDatetimeFunctionSymbol();
@@ -806,6 +819,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBSha384() {
+        return sha384FunctionSymbol;
+    }
+
+    @Override
     public DBFunctionSymbol getDBSha512() {
         return sha512FunctionSymbol;
     }
@@ -1059,6 +1077,35 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
     }
 
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+            throw new UnsupportedOperationException("Json support unavailable for this DBMS");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType) {
+        return jsonIsScalarMap.computeIfAbsent(dbType, this::createJsonIsScalar);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType) {
+        return jsonIsNumberMap.computeIfAbsent(dbType, this::createJsonIsNumber);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType) {
+        return jsonIsBooleanMap.computeIfAbsent(dbType, this::createJsonIsBoolean);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        return isArrayMap.computeIfAbsent(dbType, this::createIsArray);
+    }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
@@ -1170,6 +1217,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createSHA256FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA256", rootDBType, dbStringType, this::serializeSHA256);
+    }
+
+    protected DBFunctionSymbol createSHA384FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_SHA384", rootDBType, dbStringType, this::serializeSHA384);
     }
 
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
@@ -1346,6 +1397,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
+    protected abstract String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms,
+                                              Function<ImmutableTerm, String> termConverter,
+                                              TermFactory termFactory);
+
     protected abstract String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
@@ -1481,6 +1536,22 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBFunctionSymbol createMillisBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeMillisBetween);
+    }
+
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported nested datatype: " + dbType.getName());
+    }
+
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
+    }
+
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
+    }
+
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        throw new UnsupportedOperationException("Unsupported JSON-like datatype: " + dbType.getName());
     }
 
     /**

@@ -180,6 +180,13 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         @Override
+        public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+            return iqFactory.createUnaryIQTree(
+                    rootNode,
+                    transform(child));
+        }
+
+        @Override
         public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
             return iqFactory.createUnaryIQTree(
                     rootNode,

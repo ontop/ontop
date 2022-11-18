@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -81,6 +80,17 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
         return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
                 renameSubstitution(aggregationNode.getSubstitution()));
+    }
+
+    @Override
+    public FlattenNode transform(FlattenNode flattenNode) {
+        return iqFactory.createFlattenNode(
+                renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
+                renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
+                flattenNode.getIndexVariable()
+                        .map(v -> renamingSubstitution.applyToVariable(v)),
+                flattenNode.getFlattenedType()
+        );
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {

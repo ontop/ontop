@@ -218,6 +218,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMd5();
     DBFunctionSymbol getDBSha1();
     DBFunctionSymbol getDBSha256();
+    DBFunctionSymbol getDBSha384();
     DBFunctionSymbol getDBSha512();
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType);
@@ -271,6 +272,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBRowNumberWithOrderBy();
 
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
+
 
     //-------------
     // Aggregation
@@ -358,5 +360,13 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMinutesBetweenFromDateTime();
     DBFunctionSymbol getDBSecondsBetweenFromDateTime();
     DBFunctionSymbol getDBMillisBetweenFromDateTime();
+
+    //JSON
+    DBFunctionSymbol getDBJsonElt(ImmutableList<String> path);
+    DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path);
+    DBBooleanFunctionSymbol getDBJsonIsNumber(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsBoolean(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
+    DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
 }

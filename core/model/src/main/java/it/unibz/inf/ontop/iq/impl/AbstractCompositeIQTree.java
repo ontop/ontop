@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -86,10 +84,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        else
-            return children.stream()
-                    .flatMap(c -> c.getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> childVariables = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+        if (rootNode instanceof FlattenNode)
+            return ((FlattenNode) rootNode).getVariables(childVariables);
+        return  childVariables;
     }
 
     @Override
