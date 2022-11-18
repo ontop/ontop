@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;

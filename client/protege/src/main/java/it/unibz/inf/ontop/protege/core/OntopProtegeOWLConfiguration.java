@@ -8,6 +8,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import javax.annotation.Nonnull;
 
+@SuppressWarnings("serial")
 public class OntopProtegeOWLConfiguration extends SimpleConfiguration {
 
     private final OBDAModelManager obdaModelManager;

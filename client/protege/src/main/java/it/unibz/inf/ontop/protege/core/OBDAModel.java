@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
-import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import it.unibz.inf.ontop.exception.MappingException;

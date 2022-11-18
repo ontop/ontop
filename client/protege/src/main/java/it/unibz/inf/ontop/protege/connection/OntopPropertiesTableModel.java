@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.connection;
 
 
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;

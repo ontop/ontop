@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ValidationSwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;

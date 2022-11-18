@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.connection;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.Maps;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;

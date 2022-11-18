@@ -120,6 +120,7 @@
         <maven-project-info-reports-plugin.version>3.1.0</maven-project-info-reports-plugin.version>
         <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
@@ -385,6 +386,23 @@
                 <artifactId>ontop-rdf4j-workbench</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege-dependencies</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege-dependencies</artifactId>
+                <version>${project.version}</version>
+                <classifier>shaded</classifier>
+                <exclusions>
+                    <exclusion>
+		                <groupId>*</groupId>
+		                <artifactId>*</artifactId>
+		            </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -1321,6 +1339,11 @@
                     <configuration>
                         <escapeString>\</escapeString>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

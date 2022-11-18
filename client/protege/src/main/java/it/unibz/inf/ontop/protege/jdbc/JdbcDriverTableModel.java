@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.jdbc;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.Maps;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;

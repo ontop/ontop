@@ -10,9 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.swing.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static it.unibz.inf.ontop.shaded.com.google.common.base.Preconditions.checkArgument;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.htmlEscape;
 
 /**

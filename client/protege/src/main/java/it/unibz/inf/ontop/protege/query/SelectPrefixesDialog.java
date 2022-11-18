@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 
@@ -82,7 +83,7 @@ public class SelectPrefixesDialog extends JDialog {
 			if (e.getKey().equals("version"))
 				continue;
 
-			boolean isDefaultPrefix = e.getKey().equals(prefixManager.DEFAULT_PREFIX);
+			boolean isDefaultPrefix = e.getKey().equals(PrefixManager.DEFAULT_PREFIX);
 			JCheckBox checkbox = new JCheckBox(e.getKey());
 			checkbox.setFont(checkbox.getFont().deriveFont(Font.BOLD));
 			if (presentPrefixes.contains(e.getKey())) {

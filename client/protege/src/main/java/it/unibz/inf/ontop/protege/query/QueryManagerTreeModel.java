@@ -9,7 +9,6 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -47,7 +46,8 @@ public class QueryManagerTreeModel implements TreeModel, OBDAModelManagerListene
 
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
-        QueryManager.Item item = (QueryManager.Item)path.getLastPathComponent();
+        path.getLastPathComponent();
+        //QueryManager.Item item = (QueryManager.Item)path.getLastPathComponent();
         //item.setUserObject(newValue);
         //nodeChanged(aNode);
     }

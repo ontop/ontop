@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
