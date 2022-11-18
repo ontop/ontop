@@ -581,11 +581,6 @@
                 <artifactId>rdf4j-queryparser-sparql</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.eclipse.rdf4j</groupId>-->
-<!--                <artifactId>rdf4j-util</artifactId>-->
-<!--                <version>${rdf4j.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sparql-compliance</artifactId>
