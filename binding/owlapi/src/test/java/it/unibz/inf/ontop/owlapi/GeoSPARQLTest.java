@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.h2gis.ext.H2GISExtension;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -356,7 +357,7 @@ public class GeoSPARQLTest {
         double val = runQueryAndReturnDoubleX(query);
         assertEquals(1.41, val, 0.1);
     }
-    
+
     @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
@@ -1413,6 +1414,198 @@ public class GeoSPARQLTest {
                 "<http://ex.org/feature/2> a :Feature; geo:hasGeometry/geo:asWKT ?yWkt.\n" +
                 "BIND(geof:buffer(?yWkt, 3500000, uom:metre) AS ?bWkt) .\n" +
                 "FILTER (geof:sfWithin(?xWkt, ?bWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testDisjointQueryRewriteExtGeometryGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "?xWkt geo:sfDisjoint ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testDisjointQueryRewriteExtFeatureFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/1> geo:sfDisjoint <http://ex.org/featurerewrite/2> .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testDisjointQueryRewriteExtGeometryFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature .\n" +
+                "?xWkt geo:sfDisjoint <http://ex.org/featurerewrite/2> .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testDisjointQueryRewriteExtFeatureGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "<http://ex.org/featurerewrite/1> geo:sfDisjoint ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfEqualsQueryRewriteExtGeometryGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/3> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "?xWkt geo:sfEquals ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfEqualsQueryRewriteExtGeometryFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/3> a geo:Feature .\n" +
+                "?xWkt geo:sfEquals <http://ex.org/featurerewrite/3> .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfEqualsQueryRewriteExtFeatureGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/3> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "<http://ex.org/featurerewrite/2> geo:sfEquals ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfEqualsQueryRewriteExtFeatureFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/2> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/3> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/2> geo:sfEquals <http://ex.org/featurerewrite/3> .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfContainsQueryRewriteExtGeometryGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/4> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "?xWkt geo:sfContains ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfContainsQueryRewriteExtGeometryFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/4> a geo:Feature; geo:hasDefaultGeometry ?xWkt.\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature .\n" +
+                "?xWkt geo:sfContains <http://ex.org/featurerewrite/1> .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfContainsQueryRewriteExtFeatureGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/4> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature; geo:hasDefaultGeometry ?yWkt.\n" +
+                "<http://ex.org/featurerewrite/4> geo:sfContains ?yWkt .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testSfContainsQueryRewriteExtFeatureFeature() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/featurerewrite/4> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/1> a geo:Feature .\n" +
+                "<http://ex.org/featurerewrite/4> geo:sfContains <http://ex.org/featurerewrite/1> .\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
