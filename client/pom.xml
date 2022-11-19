@@ -14,8 +14,6 @@
 
     <modules>
         <module>cli</module>
-        <module>protege-dependencies</module>
-        <module>protege</module>
         <module>rdf4j-webapps</module>
         <module>endpoint</module>
     </modules>

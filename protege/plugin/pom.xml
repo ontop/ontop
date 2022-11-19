@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
-        <artifactId>ontop-client</artifactId>
+        <artifactId>ontop-protege-parent</artifactId>
         <version>4.3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ontop-protege</artifactId>
+    <artifactId>ontop-protege-plugin</artifactId>
     <description>Ontop OBDA plugin for protégé</description>
     <url>http://ontop.inf.unibz.it/</url>
 
@@ -32,6 +32,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-protege-dependencies</artifactId>
             <classifier>shaded</classifier>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- dependencies available from Protege: begin -->
