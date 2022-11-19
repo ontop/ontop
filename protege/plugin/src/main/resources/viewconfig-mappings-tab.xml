@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<VSNode splits="0.275 0.725">
+
+		<HSNode splits="0.5 0.5">
+			<CNode>
+				<Component label="Class hierarchy">
+					<Property id="pluginId"
+						value="org.protege.editor.owl.OWLAssertedClassHierarchy" />
+				</Component>
+			</CNode>
+			<VSNode splits="1.0">
+				<CNode>
+					<Component label="Object property hierarchy">
+						<Property id="pluginId"
+							value="org.protege.editor.owl.OWLObjectPropertyTree" />
+					</Component>
+					<Component label="Data property hierarchy">
+						<Property id="pluginId" value="org.protege.editor.owl.OWLDataPropertyTree" />
+					</Component>
+					<Component label="Annotation property hierarchy">
+						<Property id="pluginId"
+							value="org.protege.editor.owl.OWLAnnotationPropertyTree" />
+					</Component>
+				</CNode>
+			</VSNode>
+		</HSNode>
+
+		<VSNode splits="1.0">
+			<CNode>
+				<Component label="Connection parameters">
+					<Property id="pluginId"
+						value="it.unibz.inf.ontop.protege.DatasourcesManagerViewComponent" />
+				</Component>
+				<Component label="Ontop properties">
+					<Property id="pluginId"
+							  value="it.unibz.inf.ontop.protege.OntopPropertiesViewComponent" />
+				</Component>
+				<Component label="Mapping manager">
+					<Property id="pluginId"
+						value="it.unibz.inf.ontop.protege.MappingsManagerViewComponent" />
+				</Component>
+			</CNode>
+		</VSNode>
+	</VSNode>
+</layout>
