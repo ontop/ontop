@@ -13,6 +13,11 @@
 	<description>Ontop OBDA plugin for protégé - shaded dependencies</description>
     <url>http://ontop.inf.unibz.it/</url>
 	
+    <properties>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <bundle.protege.phase>package</bundle.protege.phase>
+    </properties>
+    
     <organization>
         <name>KRDB Research Centre for Knowledge and Data, Free University of Bozen-Bolzano</name>
         <url>http://www.inf.unibz.it/krdb/</url>
@@ -177,6 +182,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-semantic-index</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-apibinding</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     
     <build>
@@ -184,6 +203,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>shaded</shadedClassifierName>

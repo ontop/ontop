@@ -22,8 +22,10 @@
         <guava.version>18.0</guava.version> <!-- Protégé version -->
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <finalName>${symbolic.name}-${project.version}</finalName>
+        <project.build.finalName>${symbolic.name}-${project.version}</project.build.finalName>
         <filter.main.resources>true</filter.main.resources>
         <skipTests>true</skipTests>
+        <bundle.protege.phase>package</bundle.protege.phase>
     </properties>
 
     <dependencies>
@@ -457,6 +459,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -467,7 +470,6 @@
                         </goals>
                         <configuration>
                             <classifier>bundle</classifier>
-
                             <!-- The following is the set of instructions of how pack the bundle and how to create the
                                  MANIFEST.MF for the bundle. The configuration does 3 things.
 
@@ -481,7 +483,8 @@
                             -->
 
                             <instructions>
-                                <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+                                <finalName>${finalName}}</finalName>
+                                <Bundle-RequiredExecutionEnvironment>JavaSE-11</Bundle-RequiredExecutionEnvironment>
                                 <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                                      as .classes (uncompressed, no jars) and the rest is packed as .jars -->
                                 <Embed-Dependency>

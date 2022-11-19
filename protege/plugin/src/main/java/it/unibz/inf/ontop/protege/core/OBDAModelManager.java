@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
+//import it.unibz.inf.ontop.shaded.com.google.common.base.Throwables;
 import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;

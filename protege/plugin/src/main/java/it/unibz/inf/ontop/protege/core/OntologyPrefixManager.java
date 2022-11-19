@@ -38,7 +38,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
-import it.unibz.inf.ontop.protege.utils.OWLAPIAdapter;
+//import it.unibz.inf.ontop.protege.utils.OWLAPIAdapter;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
@@ -95,7 +95,8 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
 		
-		final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
+		//final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
+		final IRI ontologyIri = ontologyID.getOntologyIRI().orElse(null);
 
 		if (ontologyIri == null)
 			return;
