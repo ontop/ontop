@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -26,8 +27,7 @@ import javax.annotation.Nonnull;
  * #L%
  */
 
-import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
@@ -118,12 +118,12 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
+	protected List<Map.Entry<String, String>> getOrderedMap() {
 		return orderMap(getPrefixManager().getPrefixName2PrefixMap());
 	}
 
 	@Override
-	public ImmutableMap<String, String> getPrefixMap() {
+	public Map<String, String> getPrefixMap() {
 		return ImmutableMap.copyOf(getPrefixManager().getPrefixName2PrefixMap());
 	}
 
