@@ -96,7 +96,7 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
 		
 		//final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
-		final IRI ontologyIri = ontologyID.getOntologyIRI().orElse(null);
+		final IRI ontologyIri = ontologyID.getOntologyIRI().orNull();
 
 		if (ontologyIri == null)
 			return;

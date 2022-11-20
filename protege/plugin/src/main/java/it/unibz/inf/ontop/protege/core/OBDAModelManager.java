@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.core;
 
 //import it.unibz.inf.ontop.shaded.com.google.common.base.Throwables;
-import com.google.common.base.Throwables;
+//import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -233,8 +233,12 @@ public class OBDAModelManager implements Disposable {
 				}
 				
 				// Propagate the error
-				Throwables.throwIfUnchecked(ex);
-				throw new RuntimeException(ex);
+				// Throwables.throwIfUnchecked(ex);
+				if (ex instanceof RuntimeException) {
+					throw (RuntimeException) ex;
+				} else {
+					throw new RuntimeException(ex);
+				}
 			}
 		}
 	}

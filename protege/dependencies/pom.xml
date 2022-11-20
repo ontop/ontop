@@ -157,6 +157,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -169,6 +175,10 @@
                 <exclusion>
                     <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>owlapi-apibinding</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-impl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
