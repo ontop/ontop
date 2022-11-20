@@ -21,9 +21,9 @@
     <properties>
         <guava.version>18.0</guava.version> <!-- Protégé version -->
         <owlapi.version>4.5.20</owlapi.version> <!-- Protégé version -->
+        <h2.version>1.4.196</h2.version> <!-- testing -->
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <finalName>${symbolic.name}-${project.version}</finalName>
-        <project.build.finalName>${symbolic.name}-${project.version}</project.build.finalName>
         <filter.main.resources>true</filter.main.resources>
         <skipTests>true</skipTests>
         <bundle.protege.phase>package</bundle.protege.phase>
@@ -125,6 +125,14 @@
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
         </dependency>
+        
+        <!-- testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -156,7 +164,7 @@
                             -->
 
                             <instructions>
-                                <finalName>${finalName}}</finalName>
+                                <finalName>${finalName}</finalName>
                                 <Bundle-RequiredExecutionEnvironment>JavaSE-11</Bundle-RequiredExecutionEnvironment>
                                 <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                                      as .classes (uncompressed, no jars) and the rest is packed as .jars -->
