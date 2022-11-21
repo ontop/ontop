@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-./mvnw clean package -DskipTests -Prelease
+./mvnw clean install -DskipTests -Prelease
 cd protege
-../mvnw clean package -DskipTests
+../mvnw clean install -DskipTests
