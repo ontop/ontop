@@ -15,8 +15,9 @@
     <url>http://ontop.inf.unibz.it/</url>
 
     <modules>
-        <module>plugin</module>
         <module>dependencies</module>
+        <module>plugin</module>
+        <module>distribution</module>
     </modules>
 
     <properties>
