@@ -21,7 +21,7 @@ jobs:
     strategy:
       # The java versions the job will run on
       matrix:
-        jdk: [ 8, 11 ]
+        jdk: [ 11 ]
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
