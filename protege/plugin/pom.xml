@@ -21,7 +21,7 @@
     <properties>
         <guava.version>18.0</guava.version> <!-- Protégé version -->
         <owlapi.version>4.5.20</owlapi.version> <!-- Protégé version -->
-        <h2.version>1.4.196</h2.version> <!-- testing -->
+        <h2.version>2.1.214</h2.version> <!-- testing -->
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <finalName>${symbolic.name}-${project.version}</finalName>
         <filter.main.resources>true</filter.main.resources>
