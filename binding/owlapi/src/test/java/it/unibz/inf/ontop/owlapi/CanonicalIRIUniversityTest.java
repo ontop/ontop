@@ -75,7 +75,7 @@ public class CanonicalIRIUniversityTest {
                 final OWLBindingSet bindingSet = rs.next();
                 for (String s : rs.getSignature()) {
                     OWLObject binding = bindingSet.getOWLObject(s);
-                    String rendering = ToStringRenderer.getInstance().getRendering(binding);
+                    String rendering = ToStringRenderer.getInstance().render(binding);
                     retVal.add(rendering);
                     System.out.println((s + ":  " + rendering));
                 }

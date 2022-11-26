@@ -45,7 +45,7 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 
 //		try {
 			OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
-			repo.initialize();
+			repo.init();
 			return repo;
 //		} catch (Exception e) {
 //			e.printStackTrace();

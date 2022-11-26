@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.MappingSerializer;
 
 import java.io.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +48,7 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
     }
 
     private String renderPrefixDeclaration(PrefixManager prefixManager)  {
-        ImmutableMap<String, String> prefixMap = prefixManager.getPrefixMap();
+        Map<String, String> prefixMap = prefixManager.getPrefixMap();
 
         if (prefixMap.isEmpty())
             return "";

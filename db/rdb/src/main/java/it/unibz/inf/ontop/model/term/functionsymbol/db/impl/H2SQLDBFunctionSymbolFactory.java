@@ -130,6 +130,13 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         // TODO: throw a better exception

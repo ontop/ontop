@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>webapps</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<outputFileNameMapping>rdf4j-server.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-server:war</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<outputFileNameMapping>rdf4j-workbench.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-workbench:war</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>

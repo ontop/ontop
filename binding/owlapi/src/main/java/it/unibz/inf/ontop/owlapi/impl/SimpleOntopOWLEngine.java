@@ -22,7 +22,7 @@ public class SimpleOntopOWLEngine implements OntopOWLEngine {
             this.queryEngine = configuration.loadQueryEngine();
             inputQueryFactory = configuration.getInputQueryFactory();
         } catch (OBDASpecificationException e) {
-            throw new InvalidOBDASpecificationException(e);
+            throw new InvalidOBDASpecificationException(e); //, new QuestOWLConfiguration(configuration));
         }
     }
 

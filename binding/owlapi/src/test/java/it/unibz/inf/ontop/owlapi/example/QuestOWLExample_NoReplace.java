@@ -80,7 +80,7 @@ public class QuestOWLExample_NoReplace {
                 final OWLBindingSet bindingSet = rs.next();
                 for (String name: rs.getSignature()) {
                     OWLObject binding = bindingSet.getOWLObject(name);
-                    System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
+                    System.out.print(ToStringRenderer.getInstance().render(binding) + ", ");
                 }
                 System.out.print("\n");
             }

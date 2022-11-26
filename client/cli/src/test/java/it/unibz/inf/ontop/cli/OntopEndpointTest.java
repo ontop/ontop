@@ -51,7 +51,7 @@ public class OntopEndpointTest {
     public void testQuery() {
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
-        repo.initialize();
+        repo.init();
 
         try (RepositoryConnection conn = repo.getConnection()) {
             String queryString = "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
@@ -77,7 +77,7 @@ public class OntopEndpointTest {
     public void testDescribeQuery() {
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
-        repo.initialize();
+        repo.init();
 
         try (RepositoryConnection conn = repo.getConnection()) {
             String queryString = "DESCRIBE <http://meraka/moss/exampleBooks.owl#book/10/>";
@@ -98,7 +98,7 @@ public class OntopEndpointTest {
 
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
-        repo.initialize();
+        repo.init();
         try (RepositoryConnection conn = repo.getConnection()) {
             String queryString = "X";
             TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);

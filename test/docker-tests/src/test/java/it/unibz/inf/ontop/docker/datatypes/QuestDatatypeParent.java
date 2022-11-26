@@ -54,9 +54,10 @@ import java.util.Set;
 
 
 public abstract class QuestDatatypeParent extends TestCase {
+
 	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeParent.class);
 
-	protected final String testURI;
+	protected final String testIRI;
 	protected final String queryFileURL;
 	protected final String resultFileURL;
 	protected final String owlFileURL;
@@ -64,15 +65,15 @@ public abstract class QuestDatatypeParent extends TestCase {
 	protected final String parameterFileURL;
 	protected Repository dataRep;
 
-	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL,
+	public QuestDatatypeParent(String testIRI, String name, String queryFileURL, String resultFileURL,
 			String owlFileURL, String obdaFileURL) {
-		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
+		this(testIRI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
 
-	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL,
+	public QuestDatatypeParent(String testIRI, String name, String queryFileURL, String resultFileURL,
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
 		super(name);
-		this.testURI = testURI;
+		this.testIRI = testIRI;
 		this.queryFileURL = queryFileURL;
 		this.resultFileURL = resultFileURL;
 		this.owlFileURL = owlFileURL;
@@ -81,10 +82,10 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	public interface Factory {
-		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL,
+		QuestDatatypeParent createQuestDatatypeTest(String testIRI, String name, String queryFileURL,
                                                     String resultFileURL, String owlFileURL, String obdaFileURL);
 
-		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL,
+		QuestDatatypeParent createQuestDatatypeTest(String testIRI, String name, String queryFileURL,
                                                     String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
 
 		String getMainManifestFile();
@@ -117,7 +118,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 				configBuilder.propertyFile(parameterFileURL);
 
 		OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
-		repo.initialize();
+		repo.init();
 		return repo;
 	}
 
@@ -263,7 +264,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 		// Read manifest and create declared test cases
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		QuestDatatypeTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -273,29 +274,29 @@ public abstract class QuestDatatypeParent extends TestCase {
 		// Extract test case information from the manifest file. Note that we only
 		// select those test cases that are mentioned in the list.
 		StringBuilder query = new StringBuilder(512);
-		query.append(" SELECT DISTINCT testURI, testName, resultFile, queryFile, owlFile, obdaFile, parameterFile \n");
-		query.append(" FROM {} rdf:first {testURI} \n");
+		query.append(" PREFIX mf: <http://obda.org/quest/tests/test-manifest#> \n");
+		query.append(" PREFIX obdat: <http://obda.org/quest/tests/test-scenario#> \n");
+		query.append(" PREFIX qt: <http://obda.org/quest/tests/test-query#> \n");
+		query.append(" SELECT DISTINCT ?testIRI ?testName ?resultFile ?queryFile ?owlFile ?obdaFile ?parameterFile \n");
+		query.append(" WHERE { [] rdf:first ?testIRI . \n");
 		if (approvedOnly) {
-			query.append("    obdat:approval {obdat:Approved}; \n");
+			query.append(" ?testIRI obdat:approval obdat:Approved . \n");
 		}
-		query.append("    mf:name {testName}; \n");
-		query.append("    mf:result {resultFile}; \n");
-		query.append("    mf:knowledgebase {owlFile}; \n");
-		query.append("    mf:mappings {obdaFile}; \n");
-		query.append("    [ mf:parameters {parameterFile} ]; \n");
-		query.append("    mf:action {action} qt:query {queryFile} \n");
-		query.append(" USING NAMESPACE \n");
-		query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
-		query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
-		query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		query.append(" ?testIRI mf:name ?testName; \n");
+		query.append("    mf:result ?resultFile ; \n");
+		query.append("    mf:knowledgebase ?owlFile ; \n");
+		query.append("    mf:mappings ?obdaFile . \n");
+		query.append(" OPTIONAL { ?testIRI mf:parameters ?parameterFile . } \n");
+		query.append(" ?testIRI mf:action ?action \n");
+		query.append(" ?action qt:query ?queryFile . } \n");
+		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
 		logger.debug("Evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
 		while (testCases.hasNext()) {
 			BindingSet bindingSet = testCases.next();
 
-			IRI testURI = (IRI) bindingSet.getValue("testURI");
+			IRI testIRI = (IRI) bindingSet.getValue("testIRI");
 			String testName = bindingSet.getValue("testName").toString();
 			String resultFile = bindingSet.getValue("resultFile").toString();
 			String queryFile = bindingSet.getValue("queryFile").toString();
@@ -306,7 +307,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 			logger.debug("Found test case: {}", testName);
 
-			QuestDatatypeParent test = factory.createQuestDatatypeTest(testURI.toString(), testName, queryFile,
+			QuestDatatypeParent test = factory.createQuestDatatypeTest(testIRI.toString(), testName, queryFile,
 					resultFile, owlFile, obdaFile, parameterFile);
 			if (test != null) {
 				suite.addTest(test);
@@ -325,8 +326,8 @@ public abstract class QuestDatatypeParent extends TestCase {
 		throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
 		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
-				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
+		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+				"SELECT ManifestName WHERE { ?ManifestURL rdfs:label ?ManifestName . }");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
 		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {
 			if (manifestNames.hasNext()) {

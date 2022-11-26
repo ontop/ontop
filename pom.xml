@@ -12,7 +12,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -136,22 +136,20 @@
         <commons-collections4.version>4.2</commons-collections4.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
+        <commons-text.version>1.9</commons-text.version>
         <functionaljava.version>4.8.1</functionaljava.version>
-        <gson.version>2.8.6</gson.version>
-        <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
+        <gson.version>2.8.9</gson.version>
         <guava.version>30.1.1-jre</guava.version>
         <guice.version>5.0.1</guice.version>
-        <h2gis.version>2.1.0</h2gis.version>
-        <h2.version>2.1.214</h2.version>
+        <h2gis.version>1.3.2</h2gis.version>
+        <h2.version>1.4.196</h2.version>
         <hamcrest.version>1.3</hamcrest.version>
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
-        <icu4j.version>58.2</icu4j.version>
         <jackson.version>2.13.2</jackson.version>
-        <jackson-databind.version>2.13.2.2</jackson-databind.version>
+        <jackson-databind.version>2.13.4.2</jackson-databind.version>
         <javax-inject.version>1</javax-inject.version>
-        <javax-json.version>1.0.4</javax-json.version>
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.4</jsqlparser.version>
         <jsr305.version>3.0.2</jsr305.version>
@@ -159,26 +157,22 @@
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
         <opencsv.version>4.6</opencsv.version>
-        <owlapi.version>4.5.19</owlapi.version>
-        <owlapi-osgi.version>4.5.9</owlapi-osgi.version>
+        <owlapi.version>5.1.20</owlapi.version>
+        <owlapi-osgi.version>5.1.20</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.8.0</r2rml-api.version>
-        <rdf4j.version>3.3.0</rdf4j.version>
+        <rdf4j.version>4.1.3</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
         <spring-boot.version>2.6.6</spring-boot.version>
-        <thrift.version>[0.12.0,)</thrift.version>
+        <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
-        <treelayout.version>1.0.3</treelayout.version>
-        <urlbuilder.version>2.0.9</urlbuilder.version>
-        <xerces.version>2.12.0</xerces.version>
-        <xml-apis.version>1.4.01</xml-apis.version>
-
+        
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
         <checkerframework.version>3.8.0</checkerframework.version>
         <commons-io.version>2.7</commons-io.version>
@@ -188,9 +182,11 @@
         <osgi.version>6.0.0</osgi.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
-        <sesame.version>2.7.16</sesame.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
+        
+        <!-- JDK version -->
+        <jdk.version>11</jdk.version>
     </properties>
 
     <dependencyManagement>
@@ -385,11 +381,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-protege</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>ontop-build</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -406,6 +397,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>ontop-docker-tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-lightweight-tests</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -448,18 +444,7 @@
                 <version>${tomcat-jdbc.version}</version>
             </dependency>
 
-            <!-- Protégé -->
-            <dependency>
-                <groupId>edu.stanford.protege</groupId>
-                <artifactId>protege-editor-core</artifactId>
-                <version>${protege.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>edu.stanford.protege</groupId>
-                <artifactId>protege-editor-owl</artifactId>
-                <version>${protege.version}</version>
-            </dependency>
-
+            
             <!-- Protégé XML Catalog -->
             <dependency>
                 <groupId>edu.stanford.protege</groupId>
@@ -571,11 +556,6 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-queryparser-sparql</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-util</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
@@ -711,6 +691,21 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-trix</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-n3</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-hdt</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
@@ -722,11 +717,6 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sail-memory</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-queryparser-serql</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
@@ -744,6 +734,16 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-config</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-model-vocabulary</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-model-api</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
 
@@ -816,13 +816,6 @@
                 <version>${httpcore.version}</version>
             </dependency>
 
-            <!-- ICU4J -->
-            <dependency>
-                <groupId>com.ibm.icu</groupId>
-                <artifactId>icu4j</artifactId>
-                <version>${icu4j.version}</version>
-            </dependency>
-
             <!-- Proj4J -->
             <dependency>
                 <groupId>org.locationtech.proj4j</groupId>
@@ -848,14 +841,7 @@
                 <artifactId>antlr4-runtime</artifactId>
                 <version>${antlr4.version}</version>
             </dependency>
-
-            <!-- abego TreeLayout -->
-            <dependency>
-                <groupId>org.abego.treelayout</groupId>
-                <artifactId>org.abego.treelayout.core</artifactId>
-                <version>${treelayout.version}</version>
-            </dependency>
-
+            
             <!-- Dependency Injection (Guice, javax-inject API) -->
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -892,11 +878,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>failureaccess</artifactId>
-                <version>${guava-failureaccess.version}</version>
             </dependency>
 
             <!-- Airline CLI library -->
@@ -953,11 +934,11 @@
                 <version>${commons-collections4.version}</version>
             </dependency>
 
-            <!-- Javax JSON Processing API (JSR 353) -->
+            <!-- Apache Commons Text -->
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
-                <version>${javax-json.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
 
             <!-- Jackson -->
@@ -996,33 +977,6 @@
                 <version>${toml4j.version}</version>
             </dependency>
 
-            <!-- Xerces -->
-            <dependency>
-                <groupId>xerces</groupId>
-                <artifactId>xercesImpl</artifactId>
-                <version>${xerces.version}</version>
-            </dependency>
-
-            <!-- XML APIs -->
-            <dependency>
-                <groupId>xml-apis</groupId>
-                <artifactId>xml-apis</artifactId>
-                <version>${xml-apis.version}</version>
-            </dependency>
-
-            <!-- Apache Thrift -->
-            <dependency>
-                <groupId>org.apache.thrift</groupId>
-                <artifactId>libthrift</artifactId>
-                <version>${thrift.version}</version>
-            </dependency>
-
-            <!-- OpenCSV -->
-            <dependency>
-                <groupId>com.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>${opencsv.version}</version>
-            </dependency>
 
             <!-- SLF4J -->
             <dependency>
@@ -1077,27 +1031,11 @@
             </dependency>
             <dependency>
                 <groupId>org.orbisgis</groupId>
-                <artifactId>h2gis-osgi</artifactId>
+                <artifactId>h2gis-ext</artifactId>
                 <version>${h2gis.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- Indirectly used & pinned (for maven-enforcer-plugin) -->
-            <dependency>
-                <groupId>org.openrdf.sesame</groupId>
-                <artifactId>sesame-model</artifactId>
-                <version>${sesame.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openrdf.sesame</groupId>
-                <artifactId>sesame-rio-api</artifactId>
-                <version>${sesame.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
@@ -1224,7 +1162,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <release>11</release>
+                        <source>${jdk.version}</source>
+                        <target>${jdk.version}</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1305,6 +1244,11 @@
                     <configuration>
                         <escapeString>\</escapeString>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

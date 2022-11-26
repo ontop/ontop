@@ -69,10 +69,10 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		return Optional.ofNullable(prefixToIriMap.get(prefix));
 	}
 
-	private ImmutableList<Map.Entry<String, String>> orderedMap; // lazy instantiation
+	private List<Map.Entry<String, String>> orderedMap; // lazy instantiation
 
 	@Override
-	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
+	protected List<Map.Entry<String, String>> getOrderedMap() {
 		if (orderedMap == null)
 			orderedMap = orderMap(prefixToIriMap);
 		return orderedMap;
@@ -84,7 +84,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 * @return an immutable map
 	 */
     @Override
-	public ImmutableMap<String, String> getPrefixMap() {
+	public Map<String, String> getPrefixMap() {
 		return prefixToIriMap;
 	}
 }

@@ -16,7 +16,9 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
@@ -73,7 +75,7 @@ public class RDF4JBindingsTest {
                 .build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
-        repo.initialize();
+        repo.init();
         /*
          * Prepare the data connection for querying.
          */
@@ -104,7 +106,7 @@ public class RDF4JBindingsTest {
 
         // execute query
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-        query.setBinding("x", new URIImpl("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-1"));
+        query.setBinding("x", SimpleValueFactory.getInstance().createIRI("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-1"));
 
         TupleQueryResult result = query.evaluate();
         int count = 0;
@@ -143,7 +145,7 @@ public class RDF4JBindingsTest {
 
         // execute query
         GraphQuery query = conn.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
-        query.setBinding("x", new URIImpl("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-1"));
+        query.setBinding("x", SimpleValueFactory.getInstance().createIRI("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-1"));
 
         GraphQueryResult result = query.evaluate();
         int count = 0;
@@ -181,7 +183,7 @@ public class RDF4JBindingsTest {
 
         // execute query
         BooleanQuery query = conn.prepareBooleanQuery(QueryLanguage.SPARQL, queryString);
-        query.setBinding("x", new URIImpl("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-107"));
+        query.setBinding("x", SimpleValueFactory.getInstance().createIRI("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-107"));
 
         assertFalse(query.evaluate());
     }

@@ -66,6 +66,9 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
     @Override
     public SelectQuery getSelectQuery() {
         TupleExpr root = originalParsedQuery.getTupleExpr();
+        if (root instanceof QueryRoot) {
+            root = ((QueryRoot) root).getArg();
+        }
         TupleExpr topNonDescribeExpression = Optional.of(root)
                 .filter(t -> t instanceof DescribeOperator)
                 .map(t -> ((DescribeOperator)t).getArg())
@@ -124,18 +127,15 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
     }
 
     private static TupleExpr createSPPOUnion(boolean isFixedObjectIncludedInDescribe) {
-        Var describeVariable = new Var(DESCRIBE_VARIABLE);
-        StatementPattern leftStatement = new StatementPattern(describeVariable, new Var(P1), new Var(O1));
-
-        ProjectionElem describeProjectionElem = new ProjectionElem(DESCRIBE_VARIABLE);
+        StatementPattern leftStatement = new StatementPattern(new Var(DESCRIBE_VARIABLE), new Var(P1), new Var(O1));
 
         Projection left = new Projection(leftStatement,
-                new ProjectionElemList(describeProjectionElem, new ProjectionElem(P1), new ProjectionElem(O1)));
+                new ProjectionElemList(new ProjectionElem(DESCRIBE_VARIABLE), new ProjectionElem(P1), new ProjectionElem(O1)));
 
         if (isFixedObjectIncludedInDescribe) {
-            StatementPattern rightStatement = new StatementPattern(new Var(S2), new Var(P2), describeVariable);
+            StatementPattern rightStatement = new StatementPattern(new Var(S2), new Var(P2), new Var(DESCRIBE_VARIABLE));
             Projection right = new Projection(rightStatement,
-                    new ProjectionElemList(new ProjectionElem(S2), new ProjectionElem(P2), describeProjectionElem));
+                    new ProjectionElemList(new ProjectionElem(S2), new ProjectionElem(P2), new ProjectionElem(DESCRIBE_VARIABLE)));
 
             return new Union(left, right);
         }

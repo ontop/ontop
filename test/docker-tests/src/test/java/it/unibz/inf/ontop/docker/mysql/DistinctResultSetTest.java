@@ -81,7 +81,7 @@ public class DistinctResultSetTest {
 
         Repository repo = OntopRepository.defaultRepository(configuration);
 
-        repo.initialize();
+        repo.init();
 
         RepositoryConnection con = repo.getConnection();
 
