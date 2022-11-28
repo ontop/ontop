@@ -15,11 +15,11 @@
 		</fileSet>
 		<!--Create empty jdbc folder-->
 		<fileSet>
-			<directory>${maven.multiModuleProjectDirectory}/client/cli/src/main/resources/</directory>
+			<directory>${maven.multiModuleProjectDirectory}/build/distribution/src/main/resources/</directory>
 			<outputDirectory>/jdbc</outputDirectory>
-			<excludes>
-				<exclude>*/**</exclude>
-			</excludes>
+			<includes>
+				<include>DROP_YOUR_JDBC_DRIVERS_IN_THIS_DIR.txt</include>
+			</includes>
 		</fileSet>
 		<fileSet>
 			<directory>${maven.multiModuleProjectDirectory}/build/distribution/src/main/resources/log
