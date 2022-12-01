@@ -157,13 +157,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * Returns true if we are sure the two children can only return different tuples
      */
     private boolean areDisjoint(IQTree child1, IQTree child2) {
+        return areDisjoint(child1, child2, projectedVariables);
+    }
+
+    private boolean areDisjoint(IQTree child1, IQTree child2, ImmutableSet<Variable> variables) {
         VariableNullability variableNullability1 = child1.getVariableNullability();
         VariableNullability variableNullability2 = child2.getVariableNullability();
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs1 = child1.getPossibleVariableDefinitions();
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs2 = child2.getPossibleVariableDefinitions();
 
-        return projectedVariables.stream()
+        return variables.stream()
                 // We don't consider variables nullable on both side
                 .filter(v -> !(variableNullability1.isPossiblyNullable(v) && variableNullability2.isPossiblyNullable(v)))
                 .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
@@ -343,15 +347,23 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     /**
-     * TODO: implement it seriously
+     * TODO: generalize it and merge it with the isDistinct() method implementation
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
-        return ImmutableSet.of();
+        if (children.size() < 2)
+            throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
+
+        IQTree firstChild = children.get(0);
+        return firstChild.inferUniqueConstraints().stream()
+                .filter(uc -> children.stream()
+                        .skip(1)
+                        .allMatch(c -> c.inferUniqueConstraints().contains(uc) && areDisjoint(firstChild, c, uc)))
+                .collect(ImmutableCollectors.toSet());
     }
 
     /**
-     * All the variables of an union could be projected out
+     * All the variables of a union could be projected out
      */
     @Override
     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
