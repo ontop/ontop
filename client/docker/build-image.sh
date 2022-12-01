@@ -18,6 +18,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"/../..
 VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep -oP '(?<=<version>)[^>]+(?=</version>)' )
 
 # Build variables customizable via command line options
+TARGET="image-from-binaries"
 CLEANARG=
 NOCACHEARG=
 QUIETARG=
@@ -29,6 +30,7 @@ PUSH="false"
 # Build variables non-customizable (edit in this script, and ensure BINDIR is relative to Ontop root)
 BINDIR="build/distribution/target/ontop"
 BUILDARGS="--build-arg ONTOP_CLI_BINDIR=${BINDIR}"
+PLATFORMS="linux/amd64,linux/arm64"
 
 # Handle -h or --help command line options
 if [[ "$@" = *--help ]] || [[ "$@" = *-h ]]; then cat <<EOF
@@ -38,7 +40,10 @@ Builds and/or pushes the Ontop Docker image, using Docker buildx.
 (see https://docs.docker.com/buildx/working-with-buildx/ for buildx setup).
 
 Options:
-    -c            issue 'mvn clean' to ensure recompiling code from scratch
+    -c            compile from scratch outside Docker ('mvn clean package -Pcli')
+    -C            compile from scratch inside Docker (as -c, but use dockerized Maven)
+                  this option does not require a JDK and provide maximum reproducibility
+                  at the expenses of longer build time (mostly to download dependencies)
     -n            build Docker image with --no-cache
     -t name:tag   tagged image name ('name:tag' format) to apply to the generated image
                   (default: ${NAME}:${TAG})
@@ -53,15 +58,29 @@ Options:
     -q            suppress output
     -h, --help    display command line usage
 
+Unless option -C is used, code is compiled outside Docker using a local JDK and Maven,
+with substantial speedups due to reuse of local Maven cache and already built artifacts.
+
+Examples:
+    ./build-image.sh                     Build local platform image using local JDK/Maven
+    ./build-image.sh -C                  Build local platform image entirely within Docker,
+                                         i.e. not requiring a JDK being installed
+    ./build-image.sh -N myrepo/ontop -x  Build multi-platform image pushing it to a custom
+                                         repository (e.g., for pre-release testing)
+    ./build-image.sh -C -n -x            Build multi-platform image entirely within Docker,
+                                         without cache for further reproducibility, pushing
+                                         the image to the official Ontop Docker repository
+
 EOF
 exit 0
 fi
 
 # Parse script options, updating corresponding build variables
-while getopts cnt:T:N:pxb:q option
+while getopts cCnt:T:N:pxb:q option
 do
     case "${option}" in
         c) CLEANARG="clean";;
+        C) TARGET="image-from-sources";;
         n) NOCACHEARG="--no-cache";;
         t) NAMETAG=${OPTARG};;
         T) TAG=${OPTARG};;
@@ -81,26 +100,29 @@ function log {
     [ -z "$QUIETARG" ] && echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1" || true
 }
 
-# Compile via Maven ('clean' triggered by -c option; ontop-cli assembly not zipped)
-log "Compiling Ontop ${VERSION}"
-./mvnw ${QUIETARG} ${CLEANARG} package -Pcli -Dassembly.cli.format=dir
+# Compile outside Docker (if -C not used), integrating with local Maven build workflow
+if [ "${TARGET}" = "image-from-binaries" ]; then
+    # Compile via Maven ('clean' triggered by -c option; ontop-cli assembly not zipped)
+    log "Compiling Ontop ${VERSION}"
+    ./mvnw ${QUIETARG} ${CLEANARG} package -Pcli -Dassembly.cli.format=dir
 
-# Rearrange generated ontop-cli files, dropping unused files and adding entrypoint.sh script
-log "Assembling content of image ${NAMETAG}"
-rm -rf ${BINDIR}
-mv build/distribution/target/ontop-cli-* ${BINDIR}
-rm -r ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc}
-cp client/docker/entrypoint.sh ${BINDIR}
+    # Rearrange generated ontop-cli files, dropping unused files and adding entrypoint.sh script
+    log "Assembling content of image ${NAMETAG}"
+    rm -rf ${BINDIR}
+    mv build/distribution/target/ontop-cli-* ${BINDIR}
+    rm -r ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc}
+    cp client/docker/entrypoint.sh ${BINDIR}
+fi
 
 # Build via Docker 'buildx', differentiating "simple" (local platform only) vs "cross" (linux/amd64 + linux/arm64) build
 if [ "${CROSS_BUILD}" != "false" ]; then
     # When cross-building, the generated multi-platform image cannot be stored locally but need to be pushed to a Docker repository
     log "Building & pushing multi-platform image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target image-from-binaries -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --push --platform linux/amd64,linux/arm64 .
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --push --platform "${PLATFORMS}" .
 else
     # When not cross-building, pushing the image is optional and is triggered by supplying option '-p'
     log "Building image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target image-from-binaries -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --load .
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --load .
     if [ "${PUSH}" != "false" ]; then
         log "Pushing image ${NAMETAG}"
         docker push ${QUIETARG} "${NAMETAG}"
