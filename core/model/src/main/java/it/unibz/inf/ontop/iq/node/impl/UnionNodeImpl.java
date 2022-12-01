@@ -346,6 +346,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return iqFactory.createNaryIQTree(this, children, newTreeCache);
     }
 
+    /**
+     * TODO: generalize it and merge it with the isDistinct() method implementation
+     */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
         if (children.size() < 2)
