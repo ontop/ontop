@@ -15,7 +15,7 @@ set -e
 cd "$( dirname "${BASH_SOURCE[0]}" )"/../..
 
 # Extract the Ontop version from pom.xml (to be used in Docker image tag, if not overridden)
-VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep -oP '(?<=<version>)[^>]+(?=</version>)' )
+VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep '<version>' | sed -E 's/.*>(.*)<.*/\1/' )
 
 # Build variables customizable via command line options
 TARGET="image-from-binaries"
