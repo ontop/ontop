@@ -1,16 +1,19 @@
 # COMMON STAGE setting up the Ontop image, extended by 'image-from-binaries' or 'image-from-sources'
-# We use a lightweight Alpine Linux / JRE 11 image, extended with bash (not needed by this Docker
-# image, but often used by users for scripts like wait-for-it.sh)
-FROM eclipse-temurin:11-jre-alpine AS common
-RUN apk add --no-cache bash
+# We use Eclipse Temurin JRE 11 on Ubuntu 20.04 LTS "focal" (default for Temurin JRE 11) supporting
+# amd64 and arm64, extended with nc (netcat) support used by wait-for-it.sh and our entrypoint.sh
+# scripts (note: Temurin JRE 11 on Alpine supports only amd64 likely due use of non-glibc library).
+FROM eclipse-temurin:11-jre-focal AS common
+RUN apt-get update && \
+    apt-get install -y netcat && \
+    rm -rf /var/cache/apt/archives /var/lib/apt/lists
 VOLUME /tmp
 EXPOSE 8080
 WORKDIR /opt/ontop
-ENTRYPOINT ./entrypoint.sh
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 # COMPILE STAGE triggered by 'image-from-sources' and using a Docker image of Maven for compiling
 # (note that except for generated binaries, content here will not end up in the built Ontop image)
-FROM --platform=${BUILDPLATFORM} 3-eclipse-temurin-11-alpine AS compile
+FROM --platform=${BUILDPLATFORM} maven:3-eclipse-temurin-11-focal AS compile
 WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
