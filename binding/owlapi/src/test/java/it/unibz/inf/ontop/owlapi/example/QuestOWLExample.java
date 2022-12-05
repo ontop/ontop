@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.owlapi.example;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
@@ -78,7 +76,7 @@ public class QuestOWLExample {
                 final OWLBindingSet bindingSet = rs.next();
                 for (String name: rs.getSignature()) {
                     OWLObject binding = bindingSet.getOWLObject(name);
-                    System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
+                    System.out.print(ToStringRenderer.getInstance().render(binding) + ", ");
                 }
                 System.out.print("\n");
             }

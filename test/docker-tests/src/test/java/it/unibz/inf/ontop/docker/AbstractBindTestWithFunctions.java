@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -1816,7 +1816,7 @@ public abstract class AbstractBindTestWithFunctions {
                     OWLObject ind1 = bindingSet.getOWLObject("w");
 
                     if (ind1 != null) {
-                        String value = ToStringRenderer.getInstance().getRendering(ind1);
+                        String value = ToStringRenderer.getInstance().render(ind1);
                         returnedValues.add(value);
                         log.debug(value);
                     }

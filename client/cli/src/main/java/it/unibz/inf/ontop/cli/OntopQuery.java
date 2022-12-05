@@ -134,7 +134,7 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
             ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
             for (String columnName : signature) {
                 // TODO: make it robust to NULLs
-                valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+                valueListBuilder.add(ToStringRenderer.getInstance().render(bindingSet.getOWLObject(columnName)));
             }
             wr.append(String.join(",", valueListBuilder.build()));
             wr.newLine();

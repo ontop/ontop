@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.rdf4j.completeness;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import org.eclipse.rdf4j.OpenRDFUtil;
+
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
@@ -36,7 +36,7 @@ public class CompletenessTestUtils {
 					+ ".\nPlease make sure resources have been generated");
 
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		String manifestFile = url.toString();
@@ -68,7 +68,7 @@ public class CompletenessTestUtils {
 
 		// Read manifest and create declared test cases
 		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
+		manifestRep.init();
 		RepositoryConnection con = manifestRep.getConnection();
 
 		CompletenessTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -151,7 +151,7 @@ public class CompletenessTestUtils {
 		}
 
 		try (InputStream in = url.openStream()) {
-			OpenRDFUtil.verifyContextNotNull(contexts);
+			//OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 

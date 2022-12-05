@@ -1,0 +1,6 @@
+PREFIX : <http://www.example.org/test#>
+SELECT ?p (AVG(DISTINCT ?s) as ?ad)
+WHERE {
+?p :teaches ?c .
+?c :numberOfStudents ?s .
+} GROUP BY ?p

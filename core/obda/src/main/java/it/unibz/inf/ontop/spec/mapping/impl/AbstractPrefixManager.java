@@ -31,9 +31,9 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 
 	protected abstract Optional<String> getIriDefinition(String prefix);
 
-	protected abstract ImmutableList<Map.Entry<String, String>> getOrderedMap();
+	protected abstract List<Map.Entry<String, String>> getOrderedMap();
 
-	protected static ImmutableList<Map.Entry<String, String>> orderMap(Map<String, String> map) {
+	protected static List<Map.Entry<String, String>> orderMap(Map<String, String> map) {
 		Comparator<Map.Entry<String, String>> comparator =
 				Map.Entry.<String, String>comparingByValue()
 						.thenComparing(Map.Entry.comparingByKey());

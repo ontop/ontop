@@ -40,7 +40,7 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
 			/*
 			 * Repository must be always initialized first
 			 */
-            repo.initialize();
+            repo.init();
 
 			/*
 			 * Get the repository connection

@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 /**
  * Not for production! Use RDF4J instead.
  *
- * OWL just in the name but actually independpent from OWLOntology files
+ * OWL just in the name but actually independent of OWLOntology files
  *
  */
 public interface OntopOWLEngine extends AutoCloseable {

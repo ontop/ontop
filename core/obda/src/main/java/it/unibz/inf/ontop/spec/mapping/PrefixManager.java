@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Map;
+
 /**
  * Abstracts the prefix mapping mechanism.
  *
@@ -33,7 +35,7 @@ public interface PrefixManager {
 
 	String getExpandForm(String prefixedName);
 
-	ImmutableMap<String, String> getPrefixMap();
+	Map<String, String> getPrefixMap();
 
 	String getDefaultIriPrefix();
 

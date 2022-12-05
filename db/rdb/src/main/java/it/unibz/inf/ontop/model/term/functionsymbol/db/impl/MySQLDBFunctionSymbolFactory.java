@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
 import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.BIT_STR;
 import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.YEAR_STR;
 
@@ -74,6 +75,9 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         map.put(year, new NonPostProcessedSimpleDBCastFunctionSymbol(year, dbStringType,
                 Serializers.getCastSerializer(dbStringType)));
 
+        DBTermType varBinary = dbTypeFactory.getDBTermType(VARBINARY_STR);
+        map.put(varBinary, createHexBinaryNormFunctionSymbol(varBinary));
+
         return ImmutableMap.copyOf(map);
     }
 
@@ -86,6 +90,12 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                         termConverter.apply(terms.get(0)),
                         termConverter.apply(terms.get(1))
                 ));
+    }
+
+    @Override
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("UPPER(HEX(%s))", termConverter.apply(terms.get(0)));
     }
 
     /**
@@ -136,6 +146,11 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("SHA2(%s,256)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("SHA2(%s,384)", termConverter.apply(terms.get(0)));
     }
 
     @Override

@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 
@@ -18,12 +17,12 @@ public class SimpleOntopOWLEngine implements OntopOWLEngine {
     private final OntopQueryEngine queryEngine;
     private final KGQueryFactory kgQueryFactory;
 
-    public SimpleOntopOWLEngine(OntopSystemConfiguration configuration) throws IllegalConfigurationException {
+    public SimpleOntopOWLEngine(OntopSystemConfiguration configuration) throws InvalidOBDASpecificationException {
         try {
             this.queryEngine = configuration.loadQueryEngine();
             kgQueryFactory = configuration.getKGQueryFactory();
         } catch (OBDASpecificationException e) {
-            throw new IllegalConfigurationException(e, new QuestOWLConfiguration(configuration));
+            throw new InvalidOBDASpecificationException(e); //, new QuestOWLConfiguration(configuration));
         }
     }
 
@@ -42,5 +41,11 @@ public class SimpleOntopOWLEngine implements OntopOWLEngine {
     @Override
     public void close() throws Exception {
         queryEngine.close();
+    }
+
+    public static class InvalidOBDASpecificationException extends RuntimeException {
+        public InvalidOBDASpecificationException(OBDASpecificationException e) {
+            super(e);
+        }
     }
 }

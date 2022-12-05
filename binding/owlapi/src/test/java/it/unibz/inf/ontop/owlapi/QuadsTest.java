@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class QuadsTest {
   private static final String OWL_FILE = "src/test/resources/quads/test.owl";
   private static final String MAPPING_FILE = "src/test/resources/quads/test.obda";
   private static final String RESULT_FILE="src/test/resources/quads/query-result.txt";
-  private static final ToStringRenderer renderer = ToStringRenderer.getInstance();
+  private static final OWLObjectRenderer renderer = ToStringRenderer.getInstance();
 
   private static final String URL = "jdbc:h2:mem:job";
   private static final String USER = "sa";
@@ -129,6 +130,6 @@ public class QuadsTest {
   }
 
   private String stringify(OWLObject owlObject) {
-        return renderer.getRendering(owlObject);
+        return renderer.render(owlObject);
     }
 }

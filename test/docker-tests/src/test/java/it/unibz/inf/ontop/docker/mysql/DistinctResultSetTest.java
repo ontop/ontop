@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -81,7 +81,7 @@ public class DistinctResultSetTest {
 
         Repository repo = OntopRepository.defaultRepository(configuration);
 
-        repo.initialize();
+        repo.init();
 
         RepositoryConnection con = repo.getConnection();
 

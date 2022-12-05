@@ -22,14 +22,13 @@ package it.unibz.inf.ontop.owlapi;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
+import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine.InvalidOBDASpecificationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
@@ -94,7 +93,7 @@ public class MappingAnalyzerTest {
 		runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_5_ambiguous_column_name() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 	}
@@ -109,17 +108,17 @@ public class MappingAnalyzerTest {
 		runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_8_duplicate_column_name() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_9_placeholder_does_not_match() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_10_duplicate_column_name() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 	}
@@ -139,7 +138,7 @@ public class MappingAnalyzerTest {
 		runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_14_fqdn_in_target() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 	}
@@ -154,7 +153,7 @@ public class MappingAnalyzerTest {
 		runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
 	}
 
-	@Test(expected = IllegalConfigurationException.class)
+	@Test(expected = InvalidOBDASpecificationException.class)
 	public void test_17_ambigous_column_name() throws Exception {
 		runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
 	}
