@@ -1,5 +1,8 @@
 # COMMON STAGE setting up the Ontop image, extended by 'image-from-binaries' or 'image-from-sources'
-FROM openjdk:11-jre-buster AS common
+# We use a lightweight Alpine Linux / JRE 11 image, extended with bash (not needed by this Docker
+# image, but often used by users for scripts like wait-for-it.sh)
+FROM eclipse-temurin:11-jre-alpine AS common
+RUN apk add --no-cache bash
 VOLUME /tmp
 EXPOSE 8080
 WORKDIR /opt/ontop
@@ -7,7 +10,7 @@ ENTRYPOINT ./entrypoint.sh
 
 # COMPILE STAGE triggered by 'image-from-sources' and using a Docker image of Maven for compiling
 # (note that except for generated binaries, content here will not end up in the built Ontop image)
-FROM --platform=${BUILDPLATFORM} maven:3.8.6-openjdk-11-slim AS compile
+FROM --platform=${BUILDPLATFORM} 3-eclipse-temurin-11-alpine AS compile
 WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
