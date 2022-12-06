@@ -21,10 +21,5 @@ public interface TargetAtom {
 
     ImmutableList<ImmutableTerm> getSubstitutedTerms();
 
-    /**
-     * Returns a new (immutable) TargetAtom
-     */
-    TargetAtom changeSubstitution(ImmutableSubstitution<ImmutableTerm> newSubstitution);
-
     Optional<IRI> getPredicateIRI();
 }
