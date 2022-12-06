@@ -6,8 +6,8 @@
 
 | Branch    | build status  |
 |-----------|---------------|
-| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| [version5](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://travis-ci.org/ontop/ontop)|
+| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=master)](https://github.com/ontop/ontop/actions/)|
+| [version5](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://github.com/ontop/ontop/actions/)|
 
 
 Ontop
