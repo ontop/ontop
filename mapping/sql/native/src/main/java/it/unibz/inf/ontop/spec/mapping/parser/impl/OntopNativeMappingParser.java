@@ -41,7 +41,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.*;
+import static it.unibz.inf.ontop.spec.mapping.parser.impl.Indicator.*;
 
 /**
  * Mapping parser specific to the Ontop Native Mapping Language for SQL.
@@ -120,7 +120,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
 	private SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
-            throws MappingIOException, InvalidMappingExceptionWithIndicator {
+            throws MappingIOException, InvalidMappingException {
 
         ImmutableMap.Builder<String, String> prefixes = ImmutableMap.builder();
         ImmutableList.Builder<SQLPPTriplesMap> mappings = ImmutableList.builder();
@@ -167,7 +167,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
         // Throw some validation exceptions
         if (!invalidMappingIndicators.isEmpty()) {
-            throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
+            throw new InvalidMappingException(Indicator.buildMessage(invalidMappingIndicators));
         }
 
         PrefixManager prefixManager = specificationFactory.createPrefixManager(prefixes.build());

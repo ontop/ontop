@@ -60,23 +60,23 @@ public class SQLMappingParserUsingOwlTest {
         loadRegularFile();
     }
 
-    @Test(expected=InvalidMappingExceptionWithIndicator.class)
+    @Test(expected=InvalidMappingException.class)
     public void testLoadWithBlankMappingId()
             throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
-    @Test(expected=InvalidMappingExceptionWithIndicator.class)
+    @Test(expected=InvalidMappingException.class)
     public void testLoadWithBlankTargetQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
-    @Test(expected=InvalidMappingExceptionWithIndicator.class)
+    @Test(expected=InvalidMappingException.class)
     public void testLoadWithBlankSourceQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
-    @Test(expected=InvalidMappingExceptionWithIndicator.class)
+    @Test(expected=InvalidMappingException.class)
     public void testLoadWithBadTargetQuery() throws InvalidMappingException,
             MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
@@ -87,7 +87,7 @@ public class SQLMappingParserUsingOwlTest {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile9.obda");
     }
 
-    @Test(expected=InvalidMappingExceptionWithIndicator.class)
+    @Test(expected=InvalidMappingException.class)
     public void testLoadWithAllMistakes() throws InvalidMappingException,
             MappingIOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
