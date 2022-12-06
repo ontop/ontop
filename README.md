@@ -7,7 +7,7 @@
 | Branch    | build status  |
 |-----------|---------------|
 | [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| [version4](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://travis-ci.org/ontop/ontop)|
+| [version5](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://travis-ci.org/ontop/ontop)|
 
 
 Ontop
@@ -46,7 +46,7 @@ License
 The Ontop framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2021 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2022 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
