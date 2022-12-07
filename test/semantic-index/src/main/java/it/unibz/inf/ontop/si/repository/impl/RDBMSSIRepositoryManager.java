@@ -160,6 +160,29 @@ public class RDBMSSIRepositoryManager {
 			.put(XSD.DATETIMESTAMP, getAttributeTableDescription("DATETIMESTAMP", "TIMESTAMP"))
 			.build();
 
+	@FunctionalInterface
+	private interface InsertPreparedStatementValue {
+		void setValue(PreparedStatement stm, String v) throws SQLException;
+	}
+
+	private static final ImmutableMap<IRI, InsertPreparedStatementValue> IRI2STM = ImmutableMap.<IRI, InsertPreparedStatementValue>builder()
+			.put(XSD.STRING, (stm, v) -> stm.setString(2, v))
+			.put(XSD.INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.INT, (stm, v) -> stm.setInt(2, Integer.parseInt(v)))
+			.put(XSD.UNSIGNED_INT, (stm, v) -> stm.setInt(2, Integer.parseInt(v)))
+			.put(XSD.NEGATIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.NON_NEGATIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.POSITIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.NON_POSITIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.LONG, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
+			.put(XSD.DECIMAL, (stm, v) -> stm.setBigDecimal(2, new BigDecimal(v)))
+			.put(XSD.FLOAT, (stm, v) -> stm.setDouble(2, Float.parseFloat(v)))
+			.put(XSD.DOUBLE, (stm, v) -> stm.setDouble(2, Double.parseDouble(v)))
+			.put(XSD.DATETIME, (stm, v) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(v)))
+			.put(XSD.BOOLEAN, (stm, v) -> stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(v)))
+			.put(XSD.DATETIMESTAMP, (stm, v) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(v)))
+			.build();
+
 	private final SemanticIndexURIMap uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
@@ -319,6 +342,7 @@ public class RDBMSSIRepositoryManager {
 	// TODO: use database to get the maximum URIId
 	private int maxUriId = -1;
 
+
 	private final class BatchProcessor implements AutoCloseable {
 		private final Connection conn;
 		private final PreparedStatement uriIdStm;
@@ -393,8 +417,8 @@ public class RDBMSSIRepositoryManager {
 			view.addIndex(idx);
 		}
 
-		private void process(DataPropertyExpression dpe, ObjectConstant subject, RDFLiteralConstant object) throws SQLException {
 
+		private void process(DataPropertyExpression dpe, ObjectConstant subject, RDFLiteralConstant object) throws SQLException {
 			int idx = semanticIndex.getRange(dpe).getIndex();
 
 			int uriId = getObjectConstantUriId(subject);
@@ -406,49 +430,18 @@ public class RDBMSSIRepositoryManager {
 			stm.setInt(1, uriId);
 
 			String value = object.getValue();
-			switch (COL_TYPE.getColType(object.getType().getIRI())) {
-				case LANG_STRING:  // -3
-					stm.setString(2, value);
-					stm.setString(4, object.getType().getLanguageTag().get().getFullString());
-					break;
-				case STRING:   // 1
-					stm.setString(2, value);
-					break;
-				case INT:   // 3
-					stm.setInt(2, Integer.parseInt(value));
-					break;
-				case UNSIGNED_INT:  // 4
-					stm.setInt(2, Integer.parseInt(value));
-					break;
-				case INTEGER:  // 2
-				case NEGATIVE_INTEGER:   // 5
-				case POSITIVE_INTEGER:   // 6
-				case NON_NEGATIVE_INTEGER: // 7
-				case NON_POSITIVE_INTEGER: // 8
-				case LONG: // 10
-					stm.setLong(2, Long.parseLong(value));
-					break;
-				case FLOAT: // 9
-					stm.setDouble(2, Float.parseFloat(value));
-					break;
-				case DOUBLE: // 12
-					stm.setDouble(2, Double.parseDouble(value));
-					break;
-				case DECIMAL: // 11
-					stm.setBigDecimal(2, new BigDecimal(value));
-					break;
-				case DATETIME_STAMP: // 15
-				case DATETIME: // 13
-					Timestamp timestamp = XsdDatatypeConverter.parseXsdDateTime(value);
-					stm.setTimestamp(2, timestamp);
-					break;
-				case BOOLEAN: // 14
-					stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
-					break;
-				default:
-					// UNSUPPORTED DATATYPE
-					log.warn("Ignoring assertion: {} {} {}", dpe, subject, object);
-					return;
+			IRI typeIri = object.getType().getIRI();
+			InsertPreparedStatementValue insertStmValue = IRI2STM.get(typeIri);
+			if (insertStmValue != null) {
+				insertStmValue.setValue(stm, value);
+			}
+			else if (typeIri.equals(RDF.LANGSTRING)) {
+				stm.setString(2, value);
+				stm.setString(4, object.getType().getLanguageTag().get().getFullString());
+			}
+			else {
+				log.warn("Ignoring assertion: {} {} {}", dpe, subject, object);
+				return;
 			}
 
 			stm.setInt(3, idx);

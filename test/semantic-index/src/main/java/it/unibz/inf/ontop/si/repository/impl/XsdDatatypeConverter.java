@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 public class XsdDatatypeConverter {
 	
 	/**
-	 * @see http://www.w3.org/TR/xmlschema11-2/#boolean
+	 * @see <http://www.w3.org/TR/xmlschema11-2/#boolean>
 	 * @param value from the lexical space of xsd:boolean
 	 * @return boolean
 	 */
@@ -23,8 +23,6 @@ public class XsdDatatypeConverter {
 	}
 	
 
-	// TODO: double-check the formats
-
 	private static final String[] formatStrings = {
 				"yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
 				"yyyy-MM-dd'T'HH:mm:ssXXX",
@@ -35,9 +33,8 @@ public class XsdDatatypeConverter {
 				"yyyy-MM-dd"};
 	
 	/**
-	 * @see http://www.w3.org/TR/xmlschema11-2/#dateTime
-	 * @param lit
-	 * @return
+	 * @see <http://www.w3.org/TR/xmlschema11-2/#dateTime>
+	 * @return Timestamp
 	 */
 	
 	public static Timestamp parseXsdDateTime(String value) {
@@ -45,10 +42,9 @@ public class XsdDatatypeConverter {
 		for (String formatString : formatStrings) {
 			try {
 				long time = new SimpleDateFormat(formatString).parse(value).getTime();
-				Timestamp ts = new Timestamp(time);
-				return ts;
+				return new Timestamp(time);
 			} 
-			catch (ParseException e) {
+			catch (ParseException ignored) {
 			}
 		}
 		throw new RuntimeException("Invalid lexical form for xsd:dateTime. Found: " + value);		
