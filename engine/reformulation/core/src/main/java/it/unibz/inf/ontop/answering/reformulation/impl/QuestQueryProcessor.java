@@ -44,7 +44,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryLogger.Factory queryLoggerFactory;
 
 	@AssistedInject
-	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
+	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								QueryCache queryCache,
 								QueryUnfolder.Factory queryUnfolderFactory,
 								TranslationFactory translationFactory,
@@ -144,7 +144,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private IQ generateExecutableQuery(IQ iq) {
+	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
