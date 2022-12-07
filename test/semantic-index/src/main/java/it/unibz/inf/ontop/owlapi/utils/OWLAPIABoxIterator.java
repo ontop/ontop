@@ -132,7 +132,7 @@ public class OWLAPIABoxIterator implements Iterator<RDFFact> {
 			else if (axiom instanceof OWLDataPropertyAssertionAxiom)
                 return owlapiTranslator.translate((OWLDataPropertyAssertionAxiom)axiom, tbox.dataProperties());
 		}
-		catch (TranslationException | InconsistentOntologyException e) {
+		catch (TranslationException e) {
 			return null;
 		} 
         return null;

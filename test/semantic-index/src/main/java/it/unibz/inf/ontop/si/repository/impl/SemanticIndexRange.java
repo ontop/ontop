@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.si.repository.impl;
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,12 +28,10 @@ import java.util.List;
  * Represents a set of contiguous intervals
  */
 
-public class SemanticIndexRange implements Serializable {
+public class SemanticIndexRange {
 
-	private static final long serialVersionUID = 8420832314126437803L;
-	
-	private List<Interval> intervals = new LinkedList<>();
-	private int index;
+	private List<Interval> intervals = new LinkedList<>(); // MUTABLE (CAN BE EXTENDED)
+	private final int index;
 
 
 	/**
@@ -52,9 +49,9 @@ public class SemanticIndexRange implements Serializable {
     public void addRange(List<Interval> other) {
         intervals.addAll(other);
 
-    /**
-     * Sort in ascending order and collapse overlapping intervals
-     */
+        /*
+        * Sort in ascending order and collapse overlapping intervals
+        */
 
         Collections.sort(intervals);
         List<Interval> new_intervals = new LinkedList<>();
@@ -68,7 +65,7 @@ public class SemanticIndexRange implements Serializable {
                 new_intervals.add(new Interval(min, max));
                 min = item.getStart();
             }
-            max = (max > item.getEnd()) ? max : item.getEnd();
+            max = Math.max(max, item.getEnd());
         }
         new_intervals.add(new Interval(min, max));
         intervals = new_intervals;
@@ -97,15 +94,14 @@ public class SemanticIndexRange implements Serializable {
     }
 
     public boolean contained(SemanticIndexRange other) {
-        boolean[] otherContained = new boolean[other.intervals.size()];
-        for (int i = 0; i < otherContained.length; ++i) 
-            otherContained[i] = false;
+        boolean[] otherContained = new boolean[other.intervals.size()]; // filled with false
 
         for (Interval it1 : intervals) {
             for (int i = 0; i < other.intervals.size(); ++i) {
                 Interval it2 = other.intervals.get(i);
                 if ((it1.getStart() <= it2.getStart()) && (it1.getEnd() >= it2.getEnd())) {
                     otherContained[i] = true;
+                    break;
                 }
             }
         }

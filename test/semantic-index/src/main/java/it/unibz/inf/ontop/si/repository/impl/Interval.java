@@ -56,7 +56,7 @@ public class Interval implements Comparable<Interval> {
     @Override
     public int compareTo(Interval o) {
         return this.start - o.start;
-    }
+    } // needed in SemanticIndexRange
 
     @Override
     public String toString() {

@@ -98,7 +98,7 @@ public class RDF4JGraphLoading {
 
         private static final int MAX_BUFFER_SIZE = 5000;
 
-        private List<Statement> buffer = new ArrayList<>(MAX_BUFFER_SIZE);
+        private final List<Statement> buffer = new ArrayList<>(MAX_BUFFER_SIZE);
         private int count = 0;
         private final RDF rdfFactory;
 
@@ -129,7 +129,7 @@ public class RDF4JGraphLoading {
         private void loadBuffer() throws RDFHandlerException {
             try {
                 Iterator<RDFFact> assertionIterator = buffer.stream()
-                        .map(st -> constructAssertion(st))
+                        .map(this::constructAssertion)
                         .iterator();
                 count += repository.insertData(connection, assertionIterator);
                 buffer.clear();

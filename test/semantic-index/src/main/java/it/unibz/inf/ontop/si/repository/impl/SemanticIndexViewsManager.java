@@ -76,7 +76,7 @@ public class SemanticIndexViewsManager {
 		return views.get(viewId);
 	}
 	
-	private final void init() {
+	private void init() {
 
 		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
 				typeFactory.getBlankNodeType());

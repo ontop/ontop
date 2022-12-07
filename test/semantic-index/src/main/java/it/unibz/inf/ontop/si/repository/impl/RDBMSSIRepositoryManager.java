@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -46,6 +45,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * Store ABox assertions in the DB
@@ -62,12 +62,7 @@ public class RDBMSSIRepositoryManager {
 		final String createCommand;
 		private final String insertCommand;
 		private final String selectCommand;
-		
-		private final List<String> createIndexCommands = new ArrayList<>(3);
-		private final List<String> dropIndexCommands = new ArrayList<>(3);
-		
-		//private final String dropCommand;
-		
+
 		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
 			//this.dropCommand = "DROP TABLE " + tableName;
@@ -84,15 +79,6 @@ public class RDBMSSIRepositoryManager {
 		
 		String getSELECT(String filter) {
 			return selectCommand +  " WHERE " + filter;
-		}
-		
-		String getSELECT() {
-			return selectCommand;
-		}
-		
-		void indexOn(String indexName, String columns) {
-			createIndexCommands.add("CREATE INDEX " + indexName + " ON " + tableName + " (" + columns + ")");
-			dropIndexCommands.add("DROP INDEX " + indexName);
 		}
 	}
 
@@ -154,9 +140,6 @@ public class RDBMSSIRepositoryManager {
 	static {
 		ImmutableList.Builder<TableDescription> attributeTableBuilder = ImmutableList.builder();
 
-		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
-		classTable.indexOn("idxclassfull2", "URI, IDX");
-		
 		ROLE_TABLE = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION",
 				ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL", 
 						        "\"URI2\"", "INTEGER NOT NULL", 
@@ -165,10 +148,6 @@ public class RDBMSSIRepositoryManager {
 						        "ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
 
 		attributeTableBuilder.add(ROLE_TABLE);
-
-		ROLE_TABLE.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
-		ROLE_TABLE.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
-		ROLE_TABLE.indexOn("idxrolefull22", "URI1, URI2, IDX");
 
 		ImmutableMap.Builder<IRI, TableDescription> datatypeTableMapBuilder = ImmutableMap.builder();
 		// LANG_STRING is special because of one extra attribute (LANG)
@@ -182,11 +161,6 @@ public class RDBMSSIRepositoryManager {
 		attributeTableBuilder.add(LANG_STRING_TABLE);
 		datatypeTableMapBuilder.put(RDF.LANGSTRING, LANG_STRING_TABLE);
 			
-		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");
-		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "2", "IDX");
-		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "3", "VAL");
-
-		
 		// all other datatypes from COL_TYPE are treated similarly
 		List<AttributeTableDescritpion> attributeDescriptions = new ArrayList<>();
 
@@ -228,10 +202,6 @@ public class RDBMSSIRepositoryManager {
 							        "\"IDX\"", "SMALLINT  NOT NULL", 
 							        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
 			
-			table.indexOn(description.indexName + "1", "URI");
-			table.indexOn(description.indexName + "2", "IDX");
-			table.indexOn(description.indexName + "3", "VAL");
-
 			attributeTableBuilder.add(table);
 			datatypeTableMapBuilder.put(description.datatypeIRI, table);
 		}
@@ -244,7 +214,7 @@ public class RDBMSSIRepositoryManager {
 	
 	private final ClassifiedTBox reasonerDag;
 
-	private final SemanticIndexCache cacheSI;
+	private final SemanticIndex semanticIndex;
 
 	private final SemanticIndexViewsManager views;
 	private final TermFactory termFactory;
@@ -260,10 +230,10 @@ public class RDBMSSIRepositoryManager {
 		this.reasonerDag = reasonerDag;
 		this.termFactory = termFactory;
 		this.sourceQueryFactory = sourceQueryFactory;
-		views = new SemanticIndexViewsManager(typeFactory);
-        cacheSI = new SemanticIndexCache(reasonerDag);
 		this.targetAtomFactory = targetAtomFactory;
-		cacheSI.buildSemanticIndexFromReasoner();
+
+		views = new SemanticIndexViewsManager(typeFactory);
+        semanticIndex = new SemanticIndex(reasonerDag);
 		uriMap = new SemanticIndexURIMap();
 
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -272,11 +242,6 @@ public class RDBMSSIRepositoryManager {
 		iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
-
-	public SemanticIndexURIMap getUriMap() {
-		return uriMap;
-	}
-	
 
 	public void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException {
 
@@ -326,35 +291,13 @@ public class RDBMSSIRepositoryManager {
 		}
 		return false; // there was an exception if we have got here
 	}
-	
-/*
-	public void dropDBSchema(Connection conn) throws SQLException {
-
-		try (Statement st = conn.createStatement()) {
-			st.addBatch(indexTable.dropCommand);
-			st.addBatch(intervalTable.dropCommand);
-			st.addBatch(emptinessIndexTable.dropCommand);
-
-			st.addBatch(classTable.dropCommand);
-			for (TableDescription table : attributeTables)
-				st.addBatch(table.dropCommand);
-			
-			st.addBatch(uriIdTable.dropCommand);
-
-			st.executeBatch();
-		}
-		catch (BatchUpdateException e) {
-			// no-op: ignore all exceptions here
-		}
-	}
-*/
 
 	public int insertData(Connection conn, Iterator<RDFFact> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to one.
-		commitLimit = (commitLimit < 1) ? 1 : commitLimit;
-		batchLimit = (batchLimit < 1) ? 1 : batchLimit;
+		commitLimit = Math.max(commitLimit, 1);
+		batchLimit = Math.max(batchLimit, 1);
 
 		boolean oldAutoCommit = conn.getAutoCommit();
 		conn.setAutoCommit(false);
@@ -474,12 +417,8 @@ public class RDBMSSIRepositoryManager {
 		
 		ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
 				
-		ObjectConstant o1, o2;
+		final ObjectConstant o1, o2;
 		if (ope.isInverse()) {
-			// the canonical representative is inverse
-			// and so, it is not indexed -- swap the arguments 
-			// and replace the representative with its inverse 
-			// (which must be indexed)
 			o1 = (ObjectConstant) assertion.getObject();
 			o2 = assertion.getSubject();
 			ope = ope.getInverse();
@@ -489,7 +428,7 @@ public class RDBMSSIRepositoryManager {
 			o2 = (ObjectConstant) assertion.getObject();
 		}
 
-		int idx = cacheSI.getEntry(ope).getIndex();
+		int idx = semanticIndex.getRange(ope).getIndex();
 		
 
 		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
@@ -517,7 +456,7 @@ public class RDBMSSIRepositoryManager {
 
 		// replace the property by its canonical representative
 		DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
-		int idx = cacheSI.getEntry(dpe).getIndex();
+		int idx = semanticIndex.getRange(dpe).getIndex();
 		
 		ObjectConstant subject = assertion.getSubject();
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
@@ -546,8 +485,6 @@ public class RDBMSSIRepositoryManager {
 				stm.setString(2, value);
 				break;
 	        case INT:   // 3
-	            //if (value.charAt(0) == '+') // ROMAN: not needed in Java 7
-	            //    value = value.substring(1, value.length());
 	        	stm.setInt(2, Integer.parseInt(value));
 	            break;
 	        case UNSIGNED_INT:  // 4
@@ -559,8 +496,6 @@ public class RDBMSSIRepositoryManager {
 	        case NON_NEGATIVE_INTEGER: // 7
 	        case NON_POSITIVE_INTEGER: // 8
 	        case LONG: // 10
-	            //if (value.charAt(0) == '+')  // ROMAN: not needed in Java 7
-	            //    value = value.substring(1, value.length());
 	            stm.setLong(2, Long.parseLong(value));
 	            break;
 	        case FLOAT: // 9
@@ -598,7 +533,7 @@ public class RDBMSSIRepositoryManager {
 		
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept = (OClass)reasonerDag.classesDAG().getCanonicalForm(concept0);
-		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
+		int conceptIndex = semanticIndex.getRange(concept).getIndex();
 
 		ObjectConstant c1 = assertion.getSubject();
 
@@ -650,92 +585,6 @@ public class RDBMSSIRepositoryManager {
 	public final static int CLASS_TYPE = 1;
 	public final static int ROLE_TYPE = 2;
 	
-/* ROMAN: commented out dead code
-
-	private void setIndex(String iri, int type, int idx) {
-		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.classes().get(iri);
-			if (reasonerDag.classesDAG().getVertex(c) == null)
-				throw new RuntimeException("UNKNOWN CLASS: " + iri);
-			
-			if (cacheSI.getEntry(c) != null)
-				throw new RuntimeException("DUPLICATE CLASS INDEX: " + iri);
-			
-			cacheSI.setIndex(c, idx);
-		}
-		else {
-			if (reasonerDag.objectProperties().contains(iri)) {
-				//
-				// a bit elaborate logic is a consequence of using the same type for
-				// both object and data properties (which can have the same name)
-				// according to the SemanticIndexBuilder, object properties are indexed first 
-				// (and have lower indexes), and only then data properties are indexed
-				// so, the first occurrence is an object property, 
-				// and the second occurrence is a datatype property
-				// (here we use the fact that the query result is sorted by idx)
-				//
-				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(iri);
-				if (cacheSI.getEntry(ope) != null)  {
-					DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
-					if (reasonerDag.dataPropertiesDAG().getVertex(dpe) != null) {
-						if (cacheSI.getEntry(dpe) != null)
-							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
-						
-						cacheSI.setIndex(dpe, idx);
-					}	
-					else
-						throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
-				}
-				else 
-					cacheSI.setIndex(ope, idx);
-			}
-			else {
-				DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
-				if (reasonerDag.dataPropertiesDAG().getVertex(dpe) != null) {
-					if (cacheSI.getEntry(dpe) != null)
-						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
-					
-					cacheSI.setIndex(dpe, idx);
-				}	
-				else
-					throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
-			}
-		}		
-	}
-	
-	private void setIntervals(String iri, int type, List<Interval> intervals, int maxObjectPropertyIndex) {
-		
-		SemanticIndexRange range;
-		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.classes().get(iri);
-			range = cacheSI.getEntry(c);
-		}
-		else {
-			Interval interval = intervals.get(0);
-			// if the first interval is within object property indexes
-			if (interval.getEnd() <= maxObjectPropertyIndex) {
-				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(iri);
-				range = cacheSI.getEntry(ope);
-			}
-			else {
-				DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
-				range = cacheSI.getEntry(dpe);
-			}
-		}
-		int idx = range.getIndex();
-		boolean idxInIntervals = false;
-		for (Interval interval : intervals) {
-			if (idx >= interval.getStart() && idx <= interval.getEnd()) {
-				idxInIntervals = true;
-				break;
-			}
-		}
-		if (!idxInIntervals)
-			throw new RuntimeException("INTERVALS " + intervals + " FOR " + iri + "(" + type + ") DO NOT CONTAIN " + range.getIndex());
-
-		range.addRange(intervals);	
-	}
-*/
 
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
@@ -748,7 +597,6 @@ public class RDBMSSIRepositoryManager {
 		 * and ranges for each class.
 		 */
 
-
 		for (Equivalences<ObjectPropertyExpression> set : reasonerDag.objectPropertiesDAG()) {
 
 			ObjectPropertyExpression ope = set.getRepresentative();
@@ -760,7 +608,7 @@ public class RDBMSSIRepositoryManager {
 			if (!reasonerDag.objectProperties().contains(ope.getIRI()))
 				continue;
 
-			SemanticIndexRange range = cacheSI.getEntry(ope);
+			SemanticIndexRange range = semanticIndex.getRange(ope);
 			if (range == null) {
 				log.debug("Object property " + ope + " has no SemanticIndexRange");
 				return null;
@@ -769,7 +617,7 @@ public class RDBMSSIRepositoryManager {
 			String intervalsSqlFilter = getIntervalString(intervals);
 			
 			
-			/***
+			/*
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
 			 * each case we will construct 1 target query, one source query and
@@ -785,7 +633,7 @@ public class RDBMSSIRepositoryManager {
 				
 				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
-						view.getId().getType1(), view.getId().getType2(), getUriMap());
+						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
 						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);		
@@ -800,7 +648,7 @@ public class RDBMSSIRepositoryManager {
 			if (!reasonerDag.dataProperties().contains(dpe.getIRI()))
 				continue;
 			
-			SemanticIndexRange range = cacheSI.getEntry(dpe);
+			SemanticIndexRange range = semanticIndex.getRange(dpe);
 			if (range == null) {
 				log.debug("Data property " + dpe + " has no SemanticIndexRange");
 				return null;
@@ -809,7 +657,7 @@ public class RDBMSSIRepositoryManager {
 			String intervalsSqlFilter = getIntervalString(intervals);
 			
 		
-			/***
+			/*
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
 			 * each case we will construct 1 target query, one source query and
@@ -826,7 +674,7 @@ public class RDBMSSIRepositoryManager {
 				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(dpe.getIRI()) ,
-						view.getId().getType1(), view.getId().getType2(), getUriMap());
+						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
 						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);
@@ -840,12 +688,11 @@ public class RDBMSSIRepositoryManager {
 		for (Equivalences<ClassExpression> set : reasonerDag.classesDAG()) {
 			
 			ClassExpression node = set.getRepresentative();
-			
 			if (!(node instanceof OClass))
 				continue;
 						
 			OClass classNode = (OClass)node;
-			SemanticIndexRange range = cacheSI.getEntry(classNode);
+			SemanticIndexRange range = semanticIndex.getRange(classNode);
 			if (range == null) {
 				log.debug("Class: " + classNode + " has no SemanticIndexRange");
 				continue;
@@ -866,36 +713,6 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		/*
-		 * PART 4: Optimizing.
-		 */
-
-		// Merging multiple mappings into 1 with UNION ALL to minimize the
-		// number of the mappings.
-        /* ROMAN: mergeUniions was final = false;
-		if (mergeUniions) {
-			for (Predicate predicate : mappings.keySet()) {
-
-				List<OBDAMappingAxiom> currentMappings = mappings.get(predicate);
-
-				// Getting the current head 
-				CQIE targetQuery = (CQIE) currentMappings.get(0).getTargetQuery();
-
-				// Computing the merged SQL 
-				StringBuilder newSQL = new StringBuilder();
-				newSQL.append(((SQLPPSourceQuery) currentMappings.get(0).getSourceQuery()).toString());
-				for (int mapi = 1; mapi < currentMappings.size(); mapi++) {
-					newSQL.append(" UNION ALL ");
-					newSQL.append(((SQLPPSourceQuery) currentMappings.get(mapi).getSourceQuery()).toString());
-				}
-
-				// Replacing the old mappings 
-				OBDAMappingAxiom mergedMapping = nativeQLFactory.create(newSQL.toString(), targetQuery);
-				currentMappings.clear();
-				currentMappings.add(mergedMapping);
-			}
-		}
-		*/
 		log.debug("Total: {} mappings", result.size());
 		return ImmutableList.copyOf(result);
 	}
@@ -919,8 +736,7 @@ public class RDBMSSIRepositoryManager {
 	}
 	
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1,
-																		RDFTermType type2, IRIDictionary iriDictionary) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1, RDFTermType type2) {
 
 		Variable X = termFactory.getVariable("X");
 		Variable Y = termFactory.getVariable("Y");
@@ -966,36 +782,10 @@ public class RDBMSSIRepositoryManager {
 	 * Generating the interval conditions for semantic index
 	 */
 	
-	private static String getIntervalString(final List<Interval> intervals) {
-		
-		if (intervals.size() == 1)
-			return getIntervalString(intervals.iterator().next());
-		
-		else if (intervals.size() > 1) { 
-			StringBuilder sql = new StringBuilder();
-			
-			sql.append("(");
-			Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
-				private final Iterator<Interval> it = intervals.iterator();
-
-				@Override
-				public boolean hasNext() { return it.hasNext(); }
-
-				@Override
-				public String next() {
-					Interval interval = it.next();
-					return getIntervalString(interval);
-				}
-
-				@Override
-				public void remove() { }
-			});
-			sql.append(")");
-			
-			return sql.toString();
-		}
-		else // if the size is 0
-			return "";
+	private static String getIntervalString(List<Interval> intervals) {
+		return intervals.stream()
+				.map(RDBMSSIRepositoryManager::getIntervalString)
+				.collect(Collectors.joining(" OR "));
 	}
 	
 
@@ -1011,7 +801,6 @@ public class RDBMSSIRepositoryManager {
 	 * Inserts the metadata about semantic indexes and intervals into the
 	 * database. The metadata is later used to reconstruct a semantic index
 	 * repository.
-	 * @throws  
 	 */
 	public void insertMetadata(Connection conn) throws SQLException {
 
@@ -1030,19 +819,19 @@ public class RDBMSSIRepositoryManager {
 
 			// inserting index data for classes and properties 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
+				for (Entry<OClass,SemanticIndexRange> concept : semanticIndex.getIndexedClasses()) {
 					stm.setString(1, concept.getKey().getIRI().getIRIString());
 					stm.setInt(2, concept.getValue().getIndex());
 					stm.setInt(3, CLASS_TYPE);
 					stm.addBatch();
 				}
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedObjectProperties()) {
 					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
-				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
+				for (Entry<DataPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedDataProperties()) {
 					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
@@ -1053,7 +842,7 @@ public class RDBMSSIRepositoryManager {
 
 			// Inserting interval metadata
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
+				for (Entry<OClass,SemanticIndexRange> concept : semanticIndex.getIndexedClasses()) {
 					for (Interval it : concept.getValue().getIntervals()) {
 						stm.setString(1, concept.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
@@ -1062,7 +851,7 @@ public class RDBMSSIRepositoryManager {
 						stm.addBatch();
 					}
 				}
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedObjectProperties()) {
 					for (Interval it : role.getValue().getIntervals()) {
 						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
@@ -1071,7 +860,7 @@ public class RDBMSSIRepositoryManager {
 						stm.addBatch();
 					}
 				}
-				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
+				for (Entry<DataPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedDataProperties()) {
 					for (Interval it : role.getValue().getIntervals()) {
 						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
@@ -1099,39 +888,4 @@ public class RDBMSSIRepositoryManager {
 	
 	
 	
-/* dead code
-	public void createIndexes(Connection conn) throws SQLException {
-		log.debug("Creating indexes");
-		try (Statement st = conn.createStatement()) {
-			for (TableDescription table : attributeTables)
-				for (String s : table.createIndexCommands)
-					st.addBatch(s);
-						
-			for (String s : classTable.createIndexCommands)
-				st.addBatch(s);
-			
-			st.executeBatch();
-			st.clearBatch();
-			
-			log.debug("Executing ANALYZE");
-			st.addBatch("ANALYZE");
-			st.executeBatch();
-		}
-	}
-
-	public void dropIndexes(Connection conn) throws SQLException {
-		log.debug("Dropping indexes");
-
-		try (Statement st = conn.createStatement()) {
-			for (String s : classTable.dropIndexCommands)
-				st.addBatch(s);	
-
-			for (TableDescription table : attributeTables)
-				for (String s : table.dropIndexCommands)
-					st.addBatch(s);
-			
-			st.executeBatch();
-		}
-	}
- */
 }

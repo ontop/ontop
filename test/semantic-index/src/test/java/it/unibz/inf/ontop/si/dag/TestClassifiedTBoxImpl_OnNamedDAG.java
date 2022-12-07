@@ -22,11 +22,9 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -36,7 +34,6 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -63,13 +60,13 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 	public TestClassifiedTBoxImpl_OnNamedDAG(ClassifiedTBox reasoner) {
 
 		this.objectPropertyDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.objectPropertiesDAG()), reasoner.objectPropertiesDAG());
+				SemanticIndex.getNamedDAG(reasoner.objectPropertiesDAG()), reasoner.objectPropertiesDAG());
 		this.dataPropertyDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.dataPropertiesDAG()), reasoner.dataPropertiesDAG());
+				SemanticIndex.getNamedDAG(reasoner.dataPropertiesDAG()), reasoner.dataPropertiesDAG());
 		this.classDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG()), reasoner.classesDAG());
+				SemanticIndex.getNamedDAG(reasoner.classesDAG()), reasoner.classesDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<>(
-					SemanticIndexBuilder.getNamedDAG(reasoner.dataRangesDAG()), reasoner.dataRangesDAG());
+					SemanticIndex.getNamedDAG(reasoner.dataRangesDAG()), reasoner.dataRangesDAG());
 		this.reasoner = reasoner;
 	}
 

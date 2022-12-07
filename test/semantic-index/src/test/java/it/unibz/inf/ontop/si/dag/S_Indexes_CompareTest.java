@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 import it.unibz.inf.ontop.spec.ontology.*;
 import junit.framework.TestCase;
@@ -51,7 +51,7 @@ public class S_Indexes_CompareTest extends TestCase {
 		for (String fileInput: input) {
 			ClassifiedTBox dag = loadOntologyFromFileAndClassify(fileInput);
 
-			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+			SemanticIndex engine = new SemanticIndex(dag);
 
 			log.debug("Input {}", fileInput);
 
@@ -60,13 +60,13 @@ public class S_Indexes_CompareTest extends TestCase {
 	}
 
 
-	private boolean testIndexes(SemanticIndexBuilder engine, ClassifiedTBox reasoner) {
+	private boolean testIndexes(SemanticIndex engine, ClassifiedTBox reasoner) {
 		
 		boolean result = true;
 		
 		//check that the index of the node is contained in the intervals of the parent node
 		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP 
-							= SemanticIndexBuilder.getNamedDAG(reasoner.objectPropertiesDAG());
+							= SemanticIndex.getNamedDAG(reasoner.objectPropertiesDAG());
 		for (Entry<ObjectPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
@@ -77,7 +77,7 @@ public class S_Indexes_CompareTest extends TestCase {
 			}
 		}
 		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP
-					= SemanticIndexBuilder.getNamedDAG(reasoner.dataPropertiesDAG());
+					= SemanticIndex.getNamedDAG(reasoner.dataPropertiesDAG());
 		for (Entry<DataPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
@@ -88,8 +88,8 @@ public class S_Indexes_CompareTest extends TestCase {
 			}
 		}
 		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
-						= SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG());
-		for (Entry<ClassExpression, SemanticIndexRange> vertex: engine.getIndexedClasses()) { 
+						= SemanticIndex.getNamedDAG(reasoner.classesDAG());
+		for (Entry<OClass, SemanticIndexRange> vertex: engine.getIndexedClasses()) {
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);			
 			for (ClassExpression parent: Graphs.successorListOf(namedCL, vertex.getKey())) {

@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -27,11 +29,11 @@ import java.util.Set;
  * 
  * 
  */
-public class SemanticIndexBuilder  {
+public class SemanticIndex {
 
-	private final Map<ClassExpression, SemanticIndexRange> classRanges;
-	private final Map<ObjectPropertyExpression, SemanticIndexRange> opRanges;
-	private final Map<DataPropertyExpression, SemanticIndexRange> dpRanges;
+	private final ImmutableMap<OClass, SemanticIndexRange> classRanges;
+	private final ImmutableMap<ObjectPropertyExpression, SemanticIndexRange> opRanges;
+	private final ImmutableMap<DataPropertyExpression, SemanticIndexRange> dpRanges;
 	
 	// index_counter is changed during the traversal of all three DAGs
 	private int index_counter = 1;
@@ -46,7 +48,7 @@ public class SemanticIndexBuilder  {
 		private T reference; 		//last root node
 		private boolean newComponent = true;
 
-		private final DirectedGraph <T,DefaultEdge> namedDAG;
+		private final DirectedGraph<T,DefaultEdge> namedDAG;
 		private final Map<T, SemanticIndexRange> ranges;
 		
 		public SemanticIndexer(DirectedGraph<T,DefaultEdge> namedDAG, Map<T, SemanticIndexRange> ranges) {
@@ -101,19 +103,17 @@ public class SemanticIndexBuilder  {
 		
 		LinkedList<T> roots = new LinkedList<>();
 		for (T n : reversed.vertexSet()) 
-			if ((reversed.incomingEdgesOf(n)).isEmpty()) 
+			if (reversed.incomingEdgesOf(n).isEmpty())
 				roots.add(n);
 			
 		Map<T,SemanticIndexRange> ranges = new HashMap<>();
 		for (T root: roots) {
-			// depth-first sort 
 			GraphIterator<T, DefaultEdge> orderIterator = new DepthFirstIterator<>(reversed, root);
 		
 			// add Listener to create the ranges
-			orderIterator.addTraversalListener(new SemanticIndexer<T>(reversed, ranges));
+			orderIterator.addTraversalListener(new SemanticIndexer<>(reversed, ranges));
 		
-			// System.out.println("\nIndexing:");
-			while (orderIterator.hasNext()) 
+			while (orderIterator.hasNext())
 				orderIterator.next();
 		}
 		return ranges;
@@ -124,7 +124,7 @@ public class SemanticIndexBuilder  {
 	 * @param dag the DAG from which we want to keep only the named descriptions
 	 */
 
-	public static <T> SimpleDirectedGraph <T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
+	public static <T> SimpleDirectedGraph<T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
 		
 		SimpleDirectedGraph<T,DefaultEdge> namedDAG = new SimpleDirectedGraph<>(DefaultEdge.class); 
 
@@ -158,15 +158,16 @@ public class SemanticIndexBuilder  {
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
 	
-	public SemanticIndexBuilder(ClassifiedTBox reasoner)  {
-		classRanges = createSemanticIndex(reasoner.classesDAG());
-		opRanges = createSemanticIndex(reasoner.objectPropertiesDAG());
-		dpRanges = createSemanticIndex(reasoner.dataPropertiesDAG());
+	public SemanticIndex(ClassifiedTBox reasoner)  {
+		classRanges = createSemanticIndex(reasoner.classesDAG()).entrySet().stream()
+				.collect(ImmutableCollectors.toMap(e -> (OClass)e.getKey(), Entry::getValue));
+		opRanges = ImmutableMap.copyOf(createSemanticIndex(reasoner.objectPropertiesDAG()));
+		dpRanges = ImmutableMap.copyOf(createSemanticIndex(reasoner.dataPropertiesDAG()));
 	}
 		
 	
 
-	public Set<Entry<ClassExpression, SemanticIndexRange>> getIndexedClasses() {
+	public Set<Entry<OClass, SemanticIndexRange>> getIndexedClasses() {
 		return classRanges.entrySet();
 	}
 	public Set<Entry<ObjectPropertyExpression, SemanticIndexRange>> getIndexedObjectProperties() {

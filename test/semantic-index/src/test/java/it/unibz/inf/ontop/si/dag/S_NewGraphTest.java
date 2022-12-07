@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("See information named DAG");
 		log.debug(r.classesDAG().toString());
 		log.debug(r.objectPropertiesDAG().toString());
-		log.debug(SemanticIndexBuilder.getNamedDAG(r.classesDAG()).toString());
-		log.debug(SemanticIndexBuilder.getNamedDAG(r.objectPropertiesDAG()).toString());
+		log.debug(SemanticIndex.getNamedDAG(r.classesDAG()).toString());
+		log.debug(SemanticIndex.getNamedDAG(r.objectPropertiesDAG()).toString());
 	}
 }
