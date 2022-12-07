@@ -26,10 +26,9 @@ package it.unibz.inf.ontop.si.repository.impl;
  *
  * @author Sergejs Pugacs
  */
-public class Interval implements Comparable<Interval> {
+public class Interval {
 
-	private final int start;
-	private final int end;
+	private final int start, end;
 
     public Interval(int start, int end) {
         this.start = start;
@@ -52,11 +51,6 @@ public class Interval implements Comparable<Interval> {
         result += 37 * result + end;
         return result;
     }
-
-    @Override
-    public int compareTo(Interval o) {
-        return this.start - o.start;
-    } // needed in SemanticIndexRange
 
     @Override
     public String toString() {

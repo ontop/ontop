@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 
 /**
  * Store ABox assertions in the DB
- * 
  */
 
 public class RDBMSSIRepositoryManager {
@@ -58,15 +57,14 @@ public class RDBMSSIRepositoryManager {
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
 	static final class TableDescription {
-		final String tableName;
-		final String createCommand;
+		private final String tableName;
+		private final String createCommand;
 		private final String insertCommand;
 		private final String selectCommand;
 
 		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
-			//this.dropCommand = "DROP TABLE " + tableName;
-			this.createCommand = "CREATE TABLE " + tableName + 
+			this.createCommand = "CREATE TABLE " + tableName +
 					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
 			this.insertCommand = "INSERT INTO " + tableName + 
 					" (" + Joiner.on(", ").join(columnDefintions.keySet()) + ") VALUES (";
@@ -114,7 +112,7 @@ public class RDBMSSIRepositoryManager {
 	 *  Data tables
 	 */
 	
-	final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
+	final static TableDescription CLASS_TABLE = new TableDescription("QUEST_CLASS_ASSERTION",
 			ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
 					        "\"IDX\"", "SMALLINT NOT NULL", 
 					        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
@@ -123,13 +121,13 @@ public class RDBMSSIRepositoryManager {
     final static TableDescription ROLE_TABLE;
 	final static ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
 	
-	private static final class AttributeTableDescritpion {
+	private static final class AttributeTableDescription {
 		final IRI datatypeIRI;
 		final String tableName;
 		final String sqlTypeName;
 		final String indexName;
 		
-		public AttributeTableDescritpion(IRI datatypeIRI, String tableName, String sqlTypeName, String indexName) {
+		public AttributeTableDescription(IRI datatypeIRI, String tableName, String sqlTypeName, String indexName) {
 			this.datatypeIRI = datatypeIRI;
 			this.tableName = tableName;
 			this.sqlTypeName = sqlTypeName;
@@ -162,40 +160,40 @@ public class RDBMSSIRepositoryManager {
 		datatypeTableMapBuilder.put(RDF.LANGSTRING, LANG_STRING_TABLE);
 			
 		// all other datatypes from COL_TYPE are treated similarly
-		List<AttributeTableDescritpion> attributeDescriptions = new ArrayList<>();
+		List<AttributeTableDescription> attributeDescriptions = new ArrayList<>();
 
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 1
+		attributeDescriptions.add(new AttributeTableDescription(   // 1
 				XSD.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 2
+		attributeDescriptions.add(new AttributeTableDescription(   // 2
 				XSD.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 3
+		attributeDescriptions.add(new AttributeTableDescription(   // 3
 				XSD.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 4
+		attributeDescriptions.add(new AttributeTableDescription(   // 4
 				XSD.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 5
+		attributeDescriptions.add(new AttributeTableDescription(   // 5
 				XSD.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 6
+		attributeDescriptions.add(new AttributeTableDescription(   // 6
 				XSD.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 7
+		attributeDescriptions.add(new AttributeTableDescription(   // 7
 				XSD.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 8
+		attributeDescriptions.add(new AttributeTableDescription(   // 8
 				XSD.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 9
+		attributeDescriptions.add(new AttributeTableDescription(   // 9
 				XSD.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 10
+		attributeDescriptions.add(new AttributeTableDescription(   // 10
 				XSD.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 11
+		attributeDescriptions.add(new AttributeTableDescription(   // 11
 				XSD.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 12
+		attributeDescriptions.add(new AttributeTableDescription(   // 12
 				XSD.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 13
+		attributeDescriptions.add(new AttributeTableDescription(   // 13
 				XSD.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 14
+		attributeDescriptions.add(new AttributeTableDescription(   // 14
 				XSD.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescritpion(   // 15
+		attributeDescriptions.add(new AttributeTableDescription(   // 15
 				XSD.DATETIMESTAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
 		
-		for (AttributeTableDescritpion description : attributeDescriptions) {
+		for (AttributeTableDescription description : attributeDescriptions) {
 			TableDescription table = new TableDescription(description.tableName,
 					ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
 							        "VAL", description.sqlTypeName,
@@ -259,7 +257,7 @@ public class RDBMSSIRepositoryManager {
 			st.addBatch(intervalTable.createCommand);
 			st.addBatch(emptinessIndexTable.createCommand);
 
-			st.addBatch(classTable.createCommand);
+			st.addBatch(CLASS_TABLE.createCommand);
 			for (TableDescription table : attributeTables)
 				st.addBatch(table.createCommand);
 			
@@ -272,7 +270,7 @@ public class RDBMSSIRepositoryManager {
 	private boolean isDBSchemaDefined(Connection conn)  {
 		
 		try (Statement st = conn.createStatement()) {
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", CLASS_TABLE.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ROLE_TABLE.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(RDF.LANGSTRING).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.STRING).tableName));
@@ -609,14 +607,9 @@ public class RDBMSSIRepositoryManager {
 				continue;
 
 			SemanticIndexRange range = semanticIndex.getRange(ope);
-			if (range == null) {
-				log.debug("Object property " + ope + " has no SemanticIndexRange");
-				return null;
-			}
-			List<Interval> intervals = range.getIntervals();	
+			List<Interval> intervals = range.getIntervals();
 			String intervalsSqlFilter = getIntervalString(intervals);
-			
-			
+
 			/*
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -627,7 +620,7 @@ public class RDBMSSIRepositoryManager {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (SemanticIndexView view : views.getPropertyViews()) {
+			for (SemanticIndexView view : views.getViews()) {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
@@ -649,10 +642,6 @@ public class RDBMSSIRepositoryManager {
 				continue;
 			
 			SemanticIndexRange range = semanticIndex.getRange(dpe);
-			if (range == null) {
-				log.debug("Data property " + dpe + " has no SemanticIndexRange");
-				return null;
-			}
 			List<Interval> intervals = range.getIntervals();
 			String intervalsSqlFilter = getIntervalString(intervals);
 			
@@ -667,13 +656,12 @@ public class RDBMSSIRepositoryManager {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (SemanticIndexView view : views.getPropertyViews()) {
+			for (SemanticIndexView view : views.getViews()) {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
 				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getConstantIRI(dpe.getIRI()) ,
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(dpe.getIRI()) ,
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
 						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
@@ -693,14 +681,10 @@ public class RDBMSSIRepositoryManager {
 						
 			OClass classNode = (OClass)node;
 			SemanticIndexRange range = semanticIndex.getRange(classNode);
-			if (range == null) {
-				log.debug("Class: " + classNode + " has no SemanticIndexRange");
-				continue;
-			}
 			List<Interval> intervals = range.getIntervals();
 			String intervalsSqlFilter = getIntervalString(intervals);
 
-			for (SemanticIndexView view : views.getClassViews()) {
+			for (SemanticIndexView view : views.getViews()) {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
@@ -717,42 +701,37 @@ public class RDBMSSIRepositoryManager {
 		return ImmutableList.copyOf(result);
 	}
 
-	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
-
-		Variable X = termFactory.getVariable("X");
-
-		ImmutableFunctionalTerm subjectTerm;
-		if (!type.isBlankNode())
-			subjectTerm = getEncodedIRIFunctionalTerm(X);
-		else {
-			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type));
+	private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
+		if (!type.isBlankNode()) {
+			ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
+					int2IRIStringFunctionSymbol, var);
+			return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 		}
-
-		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
-
-		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm ,classTerm);
-		return ImmutableList.of(targetAtom);
+		else {
+			return termFactory.getRDFFunctionalTerm(var, termFactory.getRDFTermTypeConstant(type));
+		}
 	}
 	
-	
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
+		Variable X = termFactory.getVariable("X");
+
+		ImmutableFunctionalTerm subjectTerm = getTerm(type, X);
+		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
+
+		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm, classTerm);
+		return ImmutableList.of(targetAtom);
+	}
+
 	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1, RDFTermType type2) {
 
 		Variable X = termFactory.getVariable("X");
 		Variable Y = termFactory.getVariable("Y");
 
-		ImmutableFunctionalTerm subjectTerm;
-		if (!type1.isBlankNode())
-			subjectTerm = getEncodedIRIFunctionalTerm(X);
-		else {
-			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type1));
-		}
+		ImmutableFunctionalTerm subjectTerm = getTerm(type1, X);
 
-		ImmutableFunctionalTerm objectTerm;
+		final ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
-			objectTerm = ((ObjectRDFType)type2).isBlankNode()
-					? termFactory.getRDFFunctionalTerm(Y, termFactory.getRDFTermTypeConstant(type2))
-					: getEncodedIRIFunctionalTerm(Y);
+			objectTerm = getTerm((ObjectRDFType)type2, Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;
@@ -765,19 +744,11 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm,iriTerm,objectTerm);
-
+		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, iriTerm, objectTerm);
 		return ImmutableList.of(targetAtom);
 	}
 
-	public ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm) {
-		ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
-				int2IRIStringFunctionSymbol, dbIntegerTerm);
-		return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
-	}
 
-	
-	
 	/**
 	 * Generating the interval conditions for semantic index
 	 */

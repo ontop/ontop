@@ -20,8 +20,11 @@ package it.unibz.inf.ontop.si.repository.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -30,7 +33,7 @@ import java.util.List;
 
 public class SemanticIndexRange {
 
-	private List<Interval> intervals = new LinkedList<>(); // MUTABLE (CAN BE EXTENDED)
+	private final ImmutableList<Interval> intervals;
 	private final int index;
 
 
@@ -41,20 +44,22 @@ public class SemanticIndexRange {
 	 * @param index
 	 */
 	public SemanticIndexRange(int index) {
-		this.index = index;
-		intervals.add(new Interval(index, index));
+		this(index, ImmutableList.of(new Interval(index, index)));
 	}
 
+    private SemanticIndexRange(int index, ImmutableList<Interval> intervals) {
+        this.index = index;
+        this.intervals = intervals;
+    }
 
-    public void addRange(List<Interval> other) {
+    public SemanticIndexRange addRange(List<Interval> other) {
+
+        List<Interval> intervals = new ArrayList<>(this.intervals);
         intervals.addAll(other);
 
-        /*
-        * Sort in ascending order and collapse overlapping intervals
-        */
-
-        Collections.sort(intervals);
-        List<Interval> new_intervals = new LinkedList<>();
+        // Sort in ascending order and collapse overlapping intervals
+        intervals.sort(Comparator.comparingInt(Interval::getStart));
+        List<Interval> new_intervals = new ArrayList<>();
 
         int min = intervals.get(0).getStart();
         int max = intervals.get(0).getEnd();
@@ -68,15 +73,15 @@ public class SemanticIndexRange {
             max = Math.max(max, item.getEnd());
         }
         new_intervals.add(new Interval(min, max));
-        intervals = new_intervals;
+        return new SemanticIndexRange(index, ImmutableList.copyOf(new_intervals));
     }
 
     @Override
     public boolean equals(Object other) {
         if (other instanceof SemanticIndexRange) {
-        SemanticIndexRange otherRange = (SemanticIndexRange) other;
-        return this.intervals.equals(otherRange.intervals);
-    }
+            SemanticIndexRange otherRange = (SemanticIndexRange) other;
+            return this.intervals.equals(otherRange.intervals);
+        }
         return false;
     }
 
@@ -85,32 +90,12 @@ public class SemanticIndexRange {
         return intervals.toString();
     }
 
-    public List<Interval> getIntervals() {
+    public ImmutableList<Interval> getIntervals() {
         return intervals;
     }
 
     public int getIndex() {
     	return index;
-    }
-
-    public boolean contained(SemanticIndexRange other) {
-        boolean[] otherContained = new boolean[other.intervals.size()]; // filled with false
-
-        for (Interval it1 : intervals) {
-            for (int i = 0; i < other.intervals.size(); ++i) {
-                Interval it2 = other.intervals.get(i);
-                if ((it1.getStart() <= it2.getStart()) && (it1.getEnd() >= it2.getEnd())) {
-                    otherContained[i] = true;
-                    break;
-                }
-            }
-        }
-
-        for (boolean it : otherContained) 
-            if (!it) 
-                return false;
-      
-        return true;
     }
 
 	

@@ -7,8 +7,8 @@ import java.util.HashMap;
 public class SemanticIndexURIMap implements IRIDictionary {
 	
 	// Semantic Index URI reference structures
-	private final HashMap<String, Integer> uriIds = new HashMap<> (100000);
-	private final HashMap <Integer, String> uriMap2 = new HashMap<> (100000);
+	private final HashMap<String, Integer> uriIds = new HashMap<>(100000);
+	private final HashMap<Integer, String> uriMap2 = new HashMap<>(100000);
 	
 	
 	/**

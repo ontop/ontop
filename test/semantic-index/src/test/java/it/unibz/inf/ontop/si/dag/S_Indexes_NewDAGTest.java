@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 import it.unibz.inf.ontop.spec.ontology.*;
 import junit.framework.TestCase;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.si.dag.S_Indexes_CompareTest.contains;
 import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
 
 public class S_Indexes_NewDAGTest extends TestCase {
@@ -108,34 +110,34 @@ public class S_Indexes_NewDAGTest extends TestCase {
 		//classify semantic index
 		//check that the index of the node is contained in the intervals of the parent node
 		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP
-						= SemanticIndex.getNamedDAG(reasoner.objectPropertiesDAG());
+						= SemanticIndexBuilder.getNamedDAG(reasoner.objectPropertiesDAG());
 		for (Entry<ObjectPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
 			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex.getKey())){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index));
+				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}
 		}
 		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP
-						= SemanticIndex.getNamedDAG(reasoner.dataPropertiesDAG());
+						= SemanticIndexBuilder.getNamedDAG(reasoner.dataPropertiesDAG());
 		for (Entry<DataPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedDataProperties()) { 
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
 			for(DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex.getKey())){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index));
+				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}
 		}
 		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL
-						= SemanticIndex.getNamedDAG(reasoner.classesDAG());
+						= SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG());
 		for (Entry<OClass, SemanticIndexRange> vertex: engine.getIndexedClasses()) {
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
 			for(ClassExpression parent: Graphs.successorListOf(namedCL, vertex.getKey())) {
-				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index));
+				result = contains(engine.getRange((OClass)parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}			

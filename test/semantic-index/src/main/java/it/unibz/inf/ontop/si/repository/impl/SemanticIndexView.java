@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFTermType;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -12,12 +15,18 @@ public class SemanticIndexView {
 	private final String insertCommand;
 	private final Set<Integer> indexes = new HashSet<>();
 	
-	public SemanticIndexView(SemanticIndexViewID id, String selectCommand, String insertCommand) {
-		this.id = id;
+	public SemanticIndexView(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand) {
+		this.id = new SemanticIndexViewID(type1, type2);
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;
 	}
-	
+
+	public SemanticIndexView(ObjectRDFType type1, String selectCommand, String insertCommand) {
+		this.id = new SemanticIndexViewID(type1);
+		this.selectCommand = selectCommand;
+		this.insertCommand = insertCommand;
+	}
+
 	public SemanticIndexViewID getId() {
 		return id;
 	}
