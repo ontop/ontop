@@ -23,12 +23,11 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Represents a set of contiguous intervals
+ * Represents a set of contiguous intervals (IMMUTABLE)
  */
 
 public class SemanticIndexRange {

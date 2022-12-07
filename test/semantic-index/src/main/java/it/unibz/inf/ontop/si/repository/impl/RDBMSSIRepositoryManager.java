@@ -162,25 +162,28 @@ public class RDBMSSIRepositoryManager {
 
 	@FunctionalInterface
 	private interface InsertPreparedStatementValue {
-		void setValue(PreparedStatement stm, String v) throws SQLException;
+		void setValue(PreparedStatement stm, RDFLiteralConstant o) throws SQLException;
 	}
 
-	private static final ImmutableMap<IRI, InsertPreparedStatementValue> IRI2STM = ImmutableMap.<IRI, InsertPreparedStatementValue>builder()
-			.put(XSD.STRING, (stm, v) -> stm.setString(2, v))
-			.put(XSD.INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.INT, (stm, v) -> stm.setInt(2, Integer.parseInt(v)))
-			.put(XSD.UNSIGNED_INT, (stm, v) -> stm.setInt(2, Integer.parseInt(v)))
-			.put(XSD.NEGATIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.NON_NEGATIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.POSITIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.NON_POSITIVE_INTEGER, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.LONG, (stm, v) -> stm.setLong(2, Long.parseLong(v)))
-			.put(XSD.DECIMAL, (stm, v) -> stm.setBigDecimal(2, new BigDecimal(v)))
-			.put(XSD.FLOAT, (stm, v) -> stm.setDouble(2, Float.parseFloat(v)))
-			.put(XSD.DOUBLE, (stm, v) -> stm.setDouble(2, Double.parseDouble(v)))
-			.put(XSD.DATETIME, (stm, v) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(v)))
-			.put(XSD.BOOLEAN, (stm, v) -> stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(v)))
-			.put(XSD.DATETIMESTAMP, (stm, v) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(v)))
+	private static final ImmutableMap<IRI, InsertPreparedStatementValue> ATTRIBUTE_INSERT_VALUE_STM = ImmutableMap.<IRI, InsertPreparedStatementValue>builder()
+			.put(RDF.LANGSTRING, (stm, o) -> {
+				stm.setString(2, o.getValue());
+				stm.setString(4, o.getType().getLanguageTag().get().getFullString()); })
+			.put(XSD.STRING, (stm, o) -> stm.setString(2, o.getValue()))
+			.put(XSD.INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.INT, (stm, o) -> stm.setInt(2, Integer.parseInt(o.getValue())))
+			.put(XSD.UNSIGNED_INT, (stm, o) -> stm.setInt(2, Integer.parseInt(o.getValue())))
+			.put(XSD.NEGATIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.NON_NEGATIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.POSITIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.NON_POSITIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.LONG, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
+			.put(XSD.DECIMAL, (stm, o) -> stm.setBigDecimal(2, new BigDecimal(o.getValue())))
+			.put(XSD.FLOAT, (stm, o) -> stm.setDouble(2, Float.parseFloat(o.getValue())))
+			.put(XSD.DOUBLE, (stm, o) -> stm.setDouble(2, Double.parseDouble(o.getValue())))
+			.put(XSD.DATETIME, (stm, o) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
+			.put(XSD.BOOLEAN, (stm, o) -> stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(o.getValue())))
+			.put(XSD.DATETIMESTAMP, (stm, o) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
 			.build();
 
 	private final SemanticIndexURIMap uriMap;
@@ -423,21 +426,14 @@ public class RDBMSSIRepositoryManager {
 
 			int uriId = getObjectConstantUriId(subject);
 
-			// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
-			//                       a a workaround, obtain the URI ID first, without triggering an exception here
 			SemanticIndexView view =  views.getView(subject.getType(), object.getType());
 			PreparedStatement stm = getPreparedStatement(view);
 			stm.setInt(1, uriId);
 
-			String value = object.getValue();
 			IRI typeIri = object.getType().getIRI();
-			InsertPreparedStatementValue insertStmValue = IRI2STM.get(typeIri);
+			InsertPreparedStatementValue insertStmValue = ATTRIBUTE_INSERT_VALUE_STM.get(typeIri);
 			if (insertStmValue != null) {
-				insertStmValue.setValue(stm, value);
-			}
-			else if (typeIri.equals(RDF.LANGSTRING)) {
-				stm.setString(2, value);
-				stm.setString(4, object.getType().getLanguageTag().get().getFullString());
+				insertStmValue.setValue(stm, object);
 			}
 			else {
 				log.warn("Ignoring assertion: {} {} {}", dpe, subject, object);
@@ -620,7 +616,7 @@ public class RDBMSSIRepositoryManager {
 			}
 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> e : semanticIndex.getIndexedClasses())
+				for (Entry<OClass, SemanticIndexRange> e : semanticIndex.getIndexedClasses())
 					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
 
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
@@ -633,14 +629,14 @@ public class RDBMSSIRepositoryManager {
 			}
 
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> e : semanticIndex.getIndexedClasses())
-					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
+				for (Entry<OClass, SemanticIndexRange> e : semanticIndex.getIndexedClasses())
+					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
 
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
-					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
 				for (Entry<DataPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedDataProperties())
-					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
 				stm.executeBatch();
 			}
