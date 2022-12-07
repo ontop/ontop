@@ -32,7 +32,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestQueryProcessor.class);
 
 	private final QueryRewriter rewriter;
-	private final NativeQueryGenerator datasourceQueryGenerator;
+	protected final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;

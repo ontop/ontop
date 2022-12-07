@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
@@ -31,6 +32,8 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -40,6 +43,8 @@ import java.util.Map;
  *
  */
 public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToFullNativeQueryReformulator.class);
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
@@ -81,8 +86,18 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
 
         IQTree nativeTree = replaceRDFByDBTerms(initialTree, rdfTypes);
 
-        return super.generateExecutableQuery(
-                iqFactory.createIQ(initialProjectionAtom, nativeTree));
+        LOGGER.debug("Producing the native query string...");
+
+        IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, nativeTree);
+
+        IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(dbIQ, true)
+                .normalizeForOptimization();
+        LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
+
+        if (!(executableQuery.getTree() instanceof NativeNode))
+            throw new NotFullyTranslatableToNativeQueryException("the post-processing step could not be eliminated");
+
+        return executableQuery;
     }
 
     private IQTree replaceRDFByDBTerms(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {

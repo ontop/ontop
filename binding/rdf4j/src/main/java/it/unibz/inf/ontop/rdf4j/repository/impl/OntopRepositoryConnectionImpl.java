@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.query.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -617,7 +619,12 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
             throws RepositoryException {
         try {
             SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
+            IQ executableQuery = ontopConnection.createStatement().getExecutableQuery(sparqlQuery);
+
+            // Useful when ToFullNativeQueryReformulator is used
+            if (executableQuery.getTree() instanceof NativeNode)
+                return ((NativeNode) executableQuery.getTree()).getNativeQueryString();
+            return executableQuery.toString();
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
