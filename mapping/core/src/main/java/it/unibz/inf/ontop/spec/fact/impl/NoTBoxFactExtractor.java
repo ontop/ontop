@@ -12,15 +12,15 @@ import java.util.stream.Stream;
  * Does not extract any T-box axioms
  */
 @Singleton
-public class NoTboxFactExtractor extends AbstractFactExtractor {
+public class NoTBoxFactExtractor extends AbstractFactExtractor {
 
     @Inject
-    protected NoTboxFactExtractor(OntopMappingSettings settings) {
+    protected NoTBoxFactExtractor(OntopMappingSettings settings) {
         super(settings);
     }
 
     @Override
-    protected Stream<RDFFact> extractTbox(ClassifiedTBox tbox) {
+    protected Stream<RDFFact> extractTBox(ClassifiedTBox tbox) {
         return Stream.empty();
     }
 }

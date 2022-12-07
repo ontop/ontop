@@ -20,21 +20,15 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-import org.antlr.v4.runtime.RecognitionException;
-
 public class TargetQueryParserException extends Exception {
 	
-	private static final long serialVersionUID = 8515860690059565681L;
-
 	private final int line, column;
 
 	public TargetQueryParserException(String message, Throwable cause) {
-		super(message, cause);
-		line = 0;
-		column = 0;
+		this(0, 0, message, cause);
 	}
 
-	public TargetQueryParserException(int line, int column, String message, RecognitionException e) {
+	public TargetQueryParserException(int line, int column, String message, Throwable e) {
 		super(message, e);
 		this.line = line;
 		this.column = column;
