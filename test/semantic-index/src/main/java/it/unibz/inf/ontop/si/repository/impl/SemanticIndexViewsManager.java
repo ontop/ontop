@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.sql.Connection;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SemanticIndexViewsManager {
-
 
 	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
 	private static final int OBJ_TYPE_URI = 0;
@@ -75,10 +75,9 @@ public class SemanticIndexViewsManager {
 		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
 				typeFactory.getBlankNodeType());
 
-		IRI[] datatypeIRIs = { XSD.BOOLEAN, XSD.DATETIME, XSD.DATETIMESTAMP, XSD.DECIMAL, XSD.DOUBLE, XSD.INTEGER,
-				XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER, XSD.NON_NEGATIVE_INTEGER,
-				XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER, XSD.FLOAT, XSD.LONG,
-				XSD.STRING };
+		ImmutableList<IRI> datatypeIRIs = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP.keySet().stream()
+				.filter(i -> !i.equals(RDF.LANGSTRING)) // WHY?
+				.collect(ImmutableCollectors.toList());
 
 		for (ObjectRDFType type1 : objectTypes) {
 			initClass(type1);

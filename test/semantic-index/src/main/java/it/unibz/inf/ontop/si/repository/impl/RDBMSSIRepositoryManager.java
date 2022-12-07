@@ -37,6 +37,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +46,15 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Store ABox assertions in the DB
  */
 
 public class RDBMSSIRepositoryManager {
-
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
@@ -62,17 +64,17 @@ public class RDBMSSIRepositoryManager {
 		private final String insertCommand;
 		private final String selectCommand;
 
-		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
+		TableDescription(String tableName, ImmutableMap<String, String> columnDefinitions, String selectColumns) {
 			this.tableName = tableName;
 			this.createCommand = "CREATE TABLE " + tableName +
-					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
+					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefinitions) + " )";
 			this.insertCommand = "INSERT INTO " + tableName + 
-					" (" + Joiner.on(", ").join(columnDefintions.keySet()) + ") VALUES (";
+					" (" + Joiner.on(", ").join(columnDefinitions.keySet()) + ") VALUES ";
 			this.selectCommand = "SELECT " + selectColumns + " FROM " + tableName; 
 		}
 		
 		String getINSERT(String values) {
-			return insertCommand + values + ")";
+			return insertCommand + "(" + values + ")";
 		}
 		
 		String getSELECT(String filter) {
@@ -104,9 +106,7 @@ public class RDBMSSIRepositoryManager {
 					        "IDX", "INTEGER",
 					        "TYPE1", "INTEGER", 
 					        "TYPE2", "INTEGER"), "*");
-	
-	
-	
+
 	
 	/**
 	 *  Data tables
@@ -117,97 +117,49 @@ public class RDBMSSIRepositoryManager {
 					        "\"IDX\"", "SMALLINT NOT NULL", 
 					        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
 	
-    final static ImmutableList<TableDescription> attributeTables;
-    final static TableDescription ROLE_TABLE;
-	final static ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
-	
-	private static final class AttributeTableDescription {
-		final IRI datatypeIRI;
-		final String tableName;
-		final String sqlTypeName;
-		final String indexName;
-		
-		public AttributeTableDescription(IRI datatypeIRI, String tableName, String sqlTypeName, String indexName) {
-			this.datatypeIRI = datatypeIRI;
-			this.tableName = tableName;
-			this.sqlTypeName = sqlTypeName;
-			this.indexName = indexName;
-		}
-	}
+    final static TableDescription ROLE_TABLE = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION",
+			ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL",
+					"\"URI2\"", "INTEGER NOT NULL",
+					"\"IDX\"", "SMALLINT NOT NULL",
+					"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE",
+					"ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
 
-	static {
-		ImmutableList.Builder<TableDescription> attributeTableBuilder = ImmutableList.builder();
-
-		ROLE_TABLE = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION",
-				ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL", 
-						        "\"URI2\"", "INTEGER NOT NULL", 
-						        "\"IDX\"", "SMALLINT NOT NULL", 
-						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE", 
-						        "ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
-
-		attributeTableBuilder.add(ROLE_TABLE);
-
-		ImmutableMap.Builder<IRI, TableDescription> datatypeTableMapBuilder = ImmutableMap.builder();
-		// LANG_STRING is special because of one extra attribute (LANG)
-
-		TableDescription LANG_STRING_TABLE = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+	private static TableDescription getAttributeTableDescription(String tableNameFragment, String sqlTypeName) {
+		return new TableDescription(String.format("QUEST_DATA_PROPERTY_%s_ASSERTION", tableNameFragment),
 				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
-						        "VAL", "VARCHAR(1000) NOT NULL",
-						        "\"IDX\"", "SMALLINT NOT NULL",
-						        "LANG", "VARCHAR(20)",
-						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z");
-		attributeTableBuilder.add(LANG_STRING_TABLE);
-		datatypeTableMapBuilder.put(RDF.LANGSTRING, LANG_STRING_TABLE);
-			
-		// all other datatypes from COL_TYPE are treated similarly
-		List<AttributeTableDescription> attributeDescriptions = new ArrayList<>();
-
-		attributeDescriptions.add(new AttributeTableDescription(   // 1
-				XSD.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 2
-				XSD.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 3
-				XSD.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 4
-				XSD.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 5
-				XSD.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 6
-				XSD.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 7
-				XSD.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 8
-				XSD.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 9
-				XSD.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 10
-				XSD.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 11
-				XSD.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 12
-				XSD.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 13
-				XSD.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 14
-				XSD.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
-		attributeDescriptions.add(new AttributeTableDescription(   // 15
-				XSD.DATETIMESTAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
-		
-		for (AttributeTableDescription description : attributeDescriptions) {
-			TableDescription table = new TableDescription(description.tableName,
-					ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
-							        "VAL", description.sqlTypeName,
-							        "\"IDX\"", "SMALLINT  NOT NULL", 
-							        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
-			
-			attributeTableBuilder.add(table);
-			datatypeTableMapBuilder.put(description.datatypeIRI, table);
-		}
-
-		attributeTables = attributeTableBuilder.build();
-		ATTRIBUTE_TABLE_MAP = datatypeTableMapBuilder.build();
+						"VAL", sqlTypeName,
+						"\"IDX\"", "SMALLINT  NOT NULL",
+						"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
 	}
-	
+
+	final static ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP = ImmutableMap.<IRI, TableDescription>builder()
+			// LANG_STRING is special because of one extra attribute (LANG)
+			.put(RDF.LANGSTRING,
+					new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+							ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
+									"VAL", "VARCHAR(1000) NOT NULL",
+									"\"IDX\"", "SMALLINT NOT NULL",
+									"LANG", "VARCHAR(20)",
+									"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z"))
+
+			// all other datatypes from COL_TYPE are treated similarly
+			.put(XSD.STRING, getAttributeTableDescription("STRING", "VARCHAR(1000)"))
+			.put(XSD.INTEGER, getAttributeTableDescription("INTEGER", "BIGINT"))
+			.put(XSD.INT, getAttributeTableDescription("INT", "INTEGER"))
+			.put(XSD.UNSIGNED_INT, getAttributeTableDescription("UNSIGNED_INT", "INTEGER"))
+			.put(XSD.NEGATIVE_INTEGER, getAttributeTableDescription("NEGATIVE_INTEGER", "BIGINT"))
+			.put(XSD.NON_NEGATIVE_INTEGER, getAttributeTableDescription("NON_NEGATIVE_INTEGER", "BIGINT"))
+			.put(XSD.POSITIVE_INTEGER, getAttributeTableDescription("POSITIVE_INTEGER", "BIGINT"))
+			.put(XSD.NON_POSITIVE_INTEGER, getAttributeTableDescription("NON_POSITIVE_INTEGER", "BIGINT"))
+			.put(XSD.LONG, getAttributeTableDescription("LONG", "BIGINT"))
+			.put(XSD.DECIMAL, getAttributeTableDescription("DECIMAL", "DECIMAL"))
+			.put(XSD.FLOAT, getAttributeTableDescription("FLOAT", "DOUBLE PRECISION"))
+			.put(XSD.DOUBLE, getAttributeTableDescription("DOUBLE", "DOUBLE PRECISION"))
+			.put(XSD.DATETIME, getAttributeTableDescription("DATETIME", "TIMESTAMP"))
+			.put(XSD.BOOLEAN,  getAttributeTableDescription("BOOLEAN", "BOOLEAN"))
+			.put(XSD.DATETIMESTAMP, getAttributeTableDescription("DATETIMESTAMP", "TIMESTAMP"))
+			.build();
+
 	private final SemanticIndexURIMap uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
@@ -258,7 +210,8 @@ public class RDBMSSIRepositoryManager {
 			st.addBatch(emptinessIndexTable.createCommand);
 
 			st.addBatch(CLASS_TABLE.createCommand);
-			for (TableDescription table : attributeTables)
+			st.addBatch(ROLE_TABLE.createCommand);
+			for (TableDescription table : ATTRIBUTE_TABLE_MAP.values())
 				st.addBatch(table.createCommand);
 			
 			st.executeBatch();			
@@ -285,9 +238,8 @@ public class RDBMSSIRepositoryManager {
 			return true; // everything is fine if we get to this point
 		} 
 		catch (Exception e) {
-			// ignore all exceptions
+			return false;
 		}
-		return false; // there was an exception if we have got here
 	}
 
 	public int insertData(Connection conn, Iterator<RDFFact> data, int commitLimit, int batchLimit) throws SQLException {
@@ -300,9 +252,6 @@ public class RDBMSSIRepositoryManager {
 		boolean oldAutoCommit = conn.getAutoCommit();
 		conn.setAutoCommit(false);
 
-		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.getINSERT("?, ?"));
-		Map<SemanticIndexViewID, PreparedStatement> stmMap = new HashMap<>();
-		
 		// For counting the insertion
 		int success = 0;
 		Map<IRI, Integer> failures = new HashMap<>();
@@ -310,16 +259,15 @@ public class RDBMSSIRepositoryManager {
 		int batchCount = 0;
 		int commitCount = 0;
 
-		try {
+		try (BatchProcessor batch = new BatchProcessor(conn)) {
 			while (data.hasNext()) {
 				RDFFact ax = data.next();
 
-				// log.debug("Inserting statement: {}", ax);
 				batchCount++;
 				commitCount++;
 
 				try {
-					process(conn, ax, uriidStm, stmMap);
+					batch.process(ax);
 					success++;
 				}
 				catch (Exception e) {
@@ -328,20 +276,13 @@ public class RDBMSSIRepositoryManager {
 							.map(c -> (IRIConstant) c)
 							.orElseGet(ax::getProperty)
 							.getIRI();
-					Integer counter = failures.get(iri);
-					if (counter == null)
-						counter = 0;
+					int counter = failures.getOrDefault(iri, 0);
 					failures.put(iri, counter + 1);
 				}
 
 				// Check if the batch count is already in the batch limit
 				if (batchCount == batchLimit) {
-					uriidStm.executeBatch();
-					uriidStm.clearBatch();
-					for (PreparedStatement stm : stmMap.values()) {
-						stm.executeBatch();
-						stm.clearBatch();
-					}
+					batch.execute();
 					batchCount = 0; // reset the counter
 				}
 
@@ -353,20 +294,9 @@ public class RDBMSSIRepositoryManager {
 			}
 
 			// Execute the rest of the batch
-			uriidStm.executeBatch();
-			uriidStm.clearBatch();
-			for (PreparedStatement stm : stmMap.values()) {
-				stm.executeBatch();
-				stm.clearBatch();
-			}
+			batch.execute();
 			// Commit the rest of the batch insert
 			conn.commit();
-		}
-		finally {
-			// Close all open statements
-			uriidStm.close();
-			for (PreparedStatement stm : stmMap.values()) 
-				stm.close();
 		}
 
 		conn.setAutoCommit(oldAutoCommit);
@@ -385,320 +315,243 @@ public class RDBMSSIRepositoryManager {
 		return success;
 	}
 
-	private void process(Connection conn, RDFFact ax, PreparedStatement uriidStm,
-						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
-		if (ax.isClassAssertion() && (ax.getObject() instanceof IRIConstant)) {
-			IRI classIRI = ((IRIConstant) ax.getObject()).getIRI();
-			OClass cls = reasonerDag.classes().get(classIRI);
-			process(conn, ax, cls, uriidStm, stmMap);
-		}
-		else {
-			RDFConstant object = ax.getObject();
-			IRI propertyIri = ax.getProperty().getIRI();
-
-			if (object instanceof ObjectConstant) {
-				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(propertyIri);
-				process(conn, ax, ope, uriidStm, stmMap);
-			}
-			else if (object instanceof RDFLiteralConstant) {
-				DataPropertyExpression dpe = reasonerDag.dataProperties().get(propertyIri);
-				process(conn, ax, dpe, uriidStm, stmMap);
-			}
-		}
-	}
-
-	private void process(Connection conn, RDFFact assertion, ObjectPropertyExpression ope0, PreparedStatement uriidStm,
-						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
-
-		if (ope0.isInverse()) 
-			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + assertion);
-		
-		ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
-				
-		final ObjectConstant o1, o2;
-		if (ope.isInverse()) {
-			o1 = (ObjectConstant) assertion.getObject();
-			o2 = assertion.getSubject();
-			ope = ope.getInverse();
-		}
-		else {
-			o1 = assertion.getSubject();
-			o2 = (ObjectConstant) assertion.getObject();
-		}
-
-		int idx = semanticIndex.getRange(ope).getIndex();
-		
-
-		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
-		
-		PreparedStatement stm = stmMap.get(view.getId());
-		if (stm == null) {
-			stm = conn.prepareStatement(view.getINSERT());
-			stmMap.put(view.getId(), stm);
-		}
-		
-		int uri_id = getObjectConstantUriId(o1, uriidStm);
-		int uri2_id = getObjectConstantUriId(o2, uriidStm);
-		
-		// Construct the database INSERT statements		
-		stm.setInt(1, uri_id);
-		stm.setInt(2, uri2_id);		
-		stm.setInt(3, idx);
-		stm.addBatch();
-		
-		// Register non emptiness
-		view.addIndex(idx);
-	} 
-
-	private void process(Connection conn, RDFFact assertion, DataPropertyExpression dpe0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
-
-		// replace the property by its canonical representative
-		DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
-		int idx = semanticIndex.getRange(dpe).getIndex();
-		
-		ObjectConstant subject = assertion.getSubject();
-		int uri_id = getObjectConstantUriId(subject, uriidStm);
-
-		RDFLiteralConstant object = (RDFLiteralConstant) assertion.getObject();
-
-		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
-		//                       a a workaround, obtain the URI ID first, without triggering an exception here
-		SemanticIndexView view =  views.getView(subject.getType(), object.getType());
-		PreparedStatement stm = stmMap.get(view.getId());
-		if (stm == null) {
-			stm = conn.prepareStatement(view.getINSERT());
-			stmMap.put(view.getId(), stm);
-		}
-
-		stm.setInt(1, uri_id);
-		
-		String value = object.getValue();
-		
-		switch (COL_TYPE.getColType(object.getType().getIRI())) {
-			case LANG_STRING:  // -3
-				stm.setString(2, value);
-				stm.setString(4, object.getType().getLanguageTag().get().getFullString());
-				break;  
-			case STRING:   // 1
-				stm.setString(2, value);
-				break;
-	        case INT:   // 3
-	        	stm.setInt(2, Integer.parseInt(value));
-	            break;
-	        case UNSIGNED_INT:  // 4
-	        	stm.setInt(2, Integer.parseInt(value));
-	            break;
-	        case INTEGER:  // 2
-	        case NEGATIVE_INTEGER:   // 5
-	        case POSITIVE_INTEGER:   // 6
-	        case NON_NEGATIVE_INTEGER: // 7
-	        case NON_POSITIVE_INTEGER: // 8
-	        case LONG: // 10
-	            stm.setLong(2, Long.parseLong(value));
-	            break;
-	        case FLOAT: // 9
-				stm.setDouble(2, Float.parseFloat(value));
-	            break;
-			case DOUBLE: // 12
-				stm.setDouble(2, Double.parseDouble(value));
-				break;
-			case DECIMAL: // 11
-				stm.setBigDecimal(2, new BigDecimal(value));
-				break;
-			case DATETIME_STAMP: // 15
-			case DATETIME: // 13
-				Timestamp timestamp = XsdDatatypeConverter.parseXsdDateTime(value);
-				stm.setTimestamp(2, timestamp);
-				break;
-			case BOOLEAN: // 14				
-				stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
-				break;
-			default:
-				// UNSUPPORTED DATATYPE
-				log.warn("Ignoring assertion: {}", assertion);
-				return;				
-		}
-		
-		stm.setInt(3, idx);
-		stm.addBatch();
-		
-		// register non-emptiness
-		view.addIndex(idx);
-	}
-	
-		
-	private void process(Connection conn, RDFFact assertion, OClass concept0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
-		
-		// replace concept by the canonical representative (which must be a concept name)
-		OClass concept = (OClass)reasonerDag.classesDAG().getCanonicalForm(concept0);
-		int conceptIndex = semanticIndex.getRange(concept).getIndex();
-
-		ObjectConstant c1 = assertion.getSubject();
-
-		SemanticIndexView view =  views.getView(c1.getType());
-	
-		PreparedStatement stm = stmMap.get(view.getId());
-		if (stm == null) {
-			stm = conn.prepareStatement(view.getINSERT());
-			stmMap.put(view.getId(), stm);
-		}
-
-		int uri_id = getObjectConstantUriId(c1, uriidStm); 
-		
-		// Construct the database INSERT statements
-		stm.setInt(1, uri_id);
-		stm.setInt(2, conceptIndex);
-		stm.addBatch();
-	
-		// Register non emptiness
-		view.addIndex(conceptIndex);
-	}
-
 	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
-	
 	// TODO: use database to get the maximum URIId
-	private int maxURIId = -1;
-	
-	private int getObjectConstantUriId(ObjectConstant c, PreparedStatement uriidStm) throws SQLException {
-		
-		// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
-		String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
+	private int maxUriId = -1;
 
-		int uri_id = uriMap.getId(uri);
-		if (uri_id < 0) {
-			uri_id = maxURIId + 1;
+	private final class BatchProcessor implements AutoCloseable {
+		private final Connection conn;
+		private final PreparedStatement uriIdStm;
+		private final Map<SemanticIndexViewID, PreparedStatement> stmMap;
 
-			uriMap.set(uri, uri_id);
-			maxURIId++;
-			
-			// Construct the database INSERT statement
-			uriidStm.setInt(1, uri_id);
-			uriidStm.setString(2, uri);
-			uriidStm.addBatch();								
+		BatchProcessor(Connection conn) throws SQLException {
+			this.conn = conn;
+			uriIdStm = conn.prepareStatement(uriIdTable.getINSERT("?, ?"));
+			stmMap = new HashMap<>();
 		}
-			
-		return uri_id;
+
+		void process(RDFFact ax) throws SQLException {
+			if (ax.isClassAssertion() && (ax.getObject() instanceof IRIConstant)) {
+				IRI classIRI = ((IRIConstant) ax.getObject()).getIRI();
+				OClass cls0 = reasonerDag.classes().get(classIRI);
+				// replace concept by the canonical representative (which must be a concept name)
+				OClass cls = (OClass)reasonerDag.classesDAG().getCanonicalForm(cls0);
+				process(cls, ax.getSubject());
+			}
+			else {
+				RDFConstant object = ax.getObject();
+				IRI propertyIri = ax.getProperty().getIRI();
+
+				if (object instanceof ObjectConstant) {
+					ObjectPropertyExpression ope0 = reasonerDag.objectProperties().get(propertyIri);
+					if (ope0.isInverse())
+						throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
+					ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
+					if (ope.isInverse())
+						process(ope.getInverse(), (ObjectConstant) object, ax.getSubject());
+					else
+						process(ope, ax.getSubject(), (ObjectConstant) object);
+				}
+				else if (object instanceof RDFLiteralConstant) {
+					DataPropertyExpression dpe0 = reasonerDag.dataProperties().get(propertyIri);
+					// replace the property by its canonical representative
+					DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
+					process(dpe, ax.getSubject(), (RDFLiteralConstant) ax.getObject());
+				}
+			}
+		}
+
+		private void process(OClass cls, ObjectConstant c1) throws SQLException {
+			int idx = semanticIndex.getRange(cls).getIndex();
+
+			int uriId = getObjectConstantUriId(c1);
+
+			SemanticIndexView view =  views.getView(c1.getType());
+			PreparedStatement stm = getPreparedStatement(view);
+			stm.setInt(1, uriId);
+			stm.setInt(2, idx);
+			stm.addBatch();
+
+			// Register non emptiness
+			view.addIndex(idx);
+		}
+
+		private void process(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws SQLException {
+			int	idx = semanticIndex.getRange(ope).getIndex();
+
+			int uriId1 = getObjectConstantUriId(o1);
+			int uriId2 = getObjectConstantUriId(o2);
+
+			SemanticIndexView view = views.getView(o1.getType(), o2.getType());
+			PreparedStatement stm = getPreparedStatement(view);
+			stm.setInt(1, uriId1);
+			stm.setInt(2, uriId2);
+			stm.setInt(3, idx);
+			stm.addBatch();
+
+			// Register non emptiness
+			view.addIndex(idx);
+		}
+
+		private void process(DataPropertyExpression dpe, ObjectConstant subject, RDFLiteralConstant object) throws SQLException {
+
+			int idx = semanticIndex.getRange(dpe).getIndex();
+
+			int uriId = getObjectConstantUriId(subject);
+
+			// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
+			//                       a a workaround, obtain the URI ID first, without triggering an exception here
+			SemanticIndexView view =  views.getView(subject.getType(), object.getType());
+			PreparedStatement stm = getPreparedStatement(view);
+			stm.setInt(1, uriId);
+
+			String value = object.getValue();
+			switch (COL_TYPE.getColType(object.getType().getIRI())) {
+				case LANG_STRING:  // -3
+					stm.setString(2, value);
+					stm.setString(4, object.getType().getLanguageTag().get().getFullString());
+					break;
+				case STRING:   // 1
+					stm.setString(2, value);
+					break;
+				case INT:   // 3
+					stm.setInt(2, Integer.parseInt(value));
+					break;
+				case UNSIGNED_INT:  // 4
+					stm.setInt(2, Integer.parseInt(value));
+					break;
+				case INTEGER:  // 2
+				case NEGATIVE_INTEGER:   // 5
+				case POSITIVE_INTEGER:   // 6
+				case NON_NEGATIVE_INTEGER: // 7
+				case NON_POSITIVE_INTEGER: // 8
+				case LONG: // 10
+					stm.setLong(2, Long.parseLong(value));
+					break;
+				case FLOAT: // 9
+					stm.setDouble(2, Float.parseFloat(value));
+					break;
+				case DOUBLE: // 12
+					stm.setDouble(2, Double.parseDouble(value));
+					break;
+				case DECIMAL: // 11
+					stm.setBigDecimal(2, new BigDecimal(value));
+					break;
+				case DATETIME_STAMP: // 15
+				case DATETIME: // 13
+					Timestamp timestamp = XsdDatatypeConverter.parseXsdDateTime(value);
+					stm.setTimestamp(2, timestamp);
+					break;
+				case BOOLEAN: // 14
+					stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
+					break;
+				default:
+					// UNSUPPORTED DATATYPE
+					log.warn("Ignoring assertion: {} {} {}", dpe, subject, object);
+					return;
+			}
+
+			stm.setInt(3, idx);
+			stm.addBatch();
+
+			// register non-emptiness
+			view.addIndex(idx);
+		}
+
+		PreparedStatement getPreparedStatement(SemanticIndexView view) throws SQLException {
+			PreparedStatement stm = stmMap.get(view.getId());
+			if (stm == null) {
+				stm = conn.prepareStatement(view.getINSERT());
+				stmMap.put(view.getId(), stm);
+			}
+			return stm;
+		}
+
+		private int getObjectConstantUriId(ObjectConstant c) throws SQLException {
+			// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
+			String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
+
+			int uriId = uriMap.getId(uri);
+			if (uriId < 0) {
+				uriId = ++maxUriId;
+				uriMap.set(uri, uriId);
+
+				// Construct the database INSERT statement
+				uriIdStm.setInt(1, uriId);
+				uriIdStm.setString(2, uri);
+				uriIdStm.addBatch();
+			}
+
+			return uriId;
+		}
+
+		void execute() throws SQLException {
+			uriIdStm.executeBatch();
+			uriIdStm.clearBatch();
+			for (PreparedStatement stm : stmMap.values()) {
+				stm.executeBatch();
+				stm.clearBatch();
+			}
+		}
+
+		@Override
+		public void close() throws SQLException {
+			uriIdStm.close();
+			for (PreparedStatement stm : stmMap.values())
+				stm.close();
+		}
 	}
 
-	public final static int CLASS_TYPE = 1;
-	public final static int ROLE_TYPE = 2;
-	
+
+
+
+	private static String getIntervalString(Interval interval) {
+		if (interval.getStart() == interval.getEnd())
+			return String.format("IDX = %d", interval.getStart());
+		else
+			return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());
+	}
+
+	private Stream<SQLPPTriplesMap> getTripleMaps(SemanticIndexRange range, IRI iri, BiFunction<IRI, SemanticIndexView, TargetAtom> transformer) {
+		List<Interval> intervals = range.getIntervals();
+		String intervalsSqlFilter = intervals.stream()
+				.map(RDBMSSIRepositoryManager::getIntervalString)
+				.collect(Collectors.joining(" OR "));
+
+		return views.getViews().stream()
+				.filter(v -> !v.isEmptyForIntervals(intervals))
+				.map(v -> {
+					SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(v.getSELECT(intervalsSqlFilter));
+					TargetAtom targetAtom = transformer.apply(iri, v);
+					return new OntopNativeSQLPPTriplesMap(
+							IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, ImmutableList.of(targetAtom));
+				});
+	}
 
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
-		List<SQLPPTriplesMap> result = new LinkedList<>();
+		ImmutableList<SQLPPTriplesMap> result = Stream.concat(Stream.concat(
+				reasonerDag.objectPropertiesDAG().stream()
+						.map(Equivalences::getRepresentative)
+						.filter(ope -> !ope.isInverse())
+						.filter(ope -> reasonerDag.objectProperties().contains(ope.getIRI())) 	// no mappings for auxiliary roles, which are introduced by the ontology translation process
+						.flatMap(ope -> getTripleMaps(semanticIndex.getRange(ope), ope.getIRI(), this::constructPropertyTargetQuery)),
 
-		/*
-		 * PART 2: Creating the mappings
-		 * 
-		 * Note, at every step we always use the pureIsa dag to get the indexes
-		 * and ranges for each class.
-		 */
+				reasonerDag.dataPropertiesDAG().stream()
+						.map(Equivalences::getRepresentative)
+						.filter(dpe -> reasonerDag.dataProperties().contains(dpe.getIRI())) 	// no mappings for auxiliary roles, which are introduced by the ontology translation process
+						.flatMap(dpe -> getTripleMaps(semanticIndex.getRange(dpe), dpe.getIRI(), this::constructPropertyTargetQuery))),
 
-		for (Equivalences<ObjectPropertyExpression> set : reasonerDag.objectPropertiesDAG()) {
+				reasonerDag.classesDAG().stream()
+						.map(Equivalences::getRepresentative)
+						.filter(cle -> cle instanceof OClass) // only named classes are mapped
+						.map(cle -> (OClass)cle)
+						.flatMap(cls -> getTripleMaps(semanticIndex.getRange(cls), cls.getIRI(), this::constructClassTargetQuery)))
 
-			ObjectPropertyExpression ope = set.getRepresentative();
-			// only named roles are mapped
-			if (ope.isInverse()) 
-				continue;
-			
-			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.objectProperties().contains(ope.getIRI()))
-				continue;
-
-			SemanticIndexRange range = semanticIndex.getRange(ope);
-			List<Interval> intervals = range.getIntervals();
-			String intervalsSqlFilter = getIntervalString(intervals);
-
-			/*
-			 * Generating one mapping for each supported cases, i.e., the second
-			 * component is an object, or one of the supported datatypes. For
-			 * each case we will construct 1 target query, one source query and
-			 * the mapping axiom.
-			 * 
-			 * The resulting mapping will be added to the list. In this way,
-			 * each property can act as an object or data property of any type.
-			 */
-			
-			for (SemanticIndexView view : views.getViews()) {
-				if (view.isEmptyForIntervals(intervals))
-					continue;
-				
-				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
-						view.getId().getType1(), view.getId().getType2());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
-						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
-				result.add(basicmapping);		
-			}
-		}
-
-		for (Equivalences<DataPropertyExpression> set : reasonerDag.dataPropertiesDAG()) {
-
-			DataPropertyExpression dpe = set.getRepresentative();
-			
-			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.dataProperties().contains(dpe.getIRI()))
-				continue;
-			
-			SemanticIndexRange range = semanticIndex.getRange(dpe);
-			List<Interval> intervals = range.getIntervals();
-			String intervalsSqlFilter = getIntervalString(intervals);
-			
-		
-			/*
-			 * Generating one mapping for each supported cases, i.e., the second
-			 * component is an object, or one of the supported datatypes. For
-			 * each case we will construct 1 target query, one source query and
-			 * the mapping axiom.
-			 * 
-			 * The resulting mapping will be added to the list. In this way,
-			 * each property can act as an object or data property of any type.
-			 */
-			
-			for (SemanticIndexView view : views.getViews()) {
-				if (view.isEmptyForIntervals(intervals))
-					continue;
-				
-				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(dpe.getIRI()) ,
-						view.getId().getType1(), view.getId().getType2());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
-						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
-				result.add(basicmapping);
-			}
-		}
-		
-		/*
-		 * Creating mappings for each concept
-		 */
-
-		for (Equivalences<ClassExpression> set : reasonerDag.classesDAG()) {
-			
-			ClassExpression node = set.getRepresentative();
-			if (!(node instanceof OClass))
-				continue;
-						
-			OClass classNode = (OClass)node;
-			SemanticIndexRange range = semanticIndex.getRange(classNode);
-			List<Interval> intervals = range.getIntervals();
-			String intervalsSqlFilter = getIntervalString(intervals);
-
-			for (SemanticIndexView view : views.getViews()) {
-				if (view.isEmptyForIntervals(intervals))
-					continue;
-				
-				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
-						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
-				result.add(basicmapping);
-			}
-		}
+						.collect(ImmutableCollectors.toList());
 
 		log.debug("Total: {} mappings", result.size());
-		return ImmutableList.copyOf(result);
+		return result;
 	}
 
 	private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
@@ -712,23 +565,24 @@ public class RDBMSSIRepositoryManager {
 		}
 	}
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
+	private TargetAtom constructClassTargetQuery(IRI iri, SemanticIndexView view) {
 		Variable X = termFactory.getVariable("X");
 
-		ImmutableFunctionalTerm subjectTerm = getTerm(type, X);
+		ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
 		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
+		IRIConstant classTerm = termFactory.getConstantIRI(iri);
 
-		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm, classTerm);
-		return ImmutableList.of(targetAtom);
+		return targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm, classTerm);
 	}
 
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1, RDFTermType type2) {
-
+	private TargetAtom constructPropertyTargetQuery(IRI iri, SemanticIndexView view) {
 		Variable X = termFactory.getVariable("X");
 		Variable Y = termFactory.getVariable("Y");
 
-		ImmutableFunctionalTerm subjectTerm = getTerm(type1, X);
+		ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
+		IRIConstant iriTerm = termFactory.getConstantIRI(iri);
 
+		RDFTermType type2 = view.getId().getType2();
 		final ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = getTerm((ObjectRDFType)type2, Y);
@@ -744,29 +598,13 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, iriTerm, objectTerm);
-		return ImmutableList.of(targetAtom);
+		return targetAtomFactory.getTripleTargetAtom(subjectTerm, iriTerm, objectTerm);
 	}
 
 
-	/**
-	 * Generating the interval conditions for semantic index
-	 */
-	
-	private static String getIntervalString(List<Interval> intervals) {
-		return intervals.stream()
-				.map(RDBMSSIRepositoryManager::getIntervalString)
-				.collect(Collectors.joining(" OR "));
-	}
-	
 
-	private static String getIntervalString(Interval interval) {
-		if (interval.getStart() == interval.getEnd()) 
-			return String.format("IDX = %d", interval.getStart());
-		else 
-			return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());		
-	}
-	
+	public final static int CLASS_TYPE = 1;
+	public final static int ROLE_TYPE = 2;
 
 	/***
 	 * Inserts the metadata about semantic indexes and intervals into the
@@ -788,58 +626,29 @@ public class RDBMSSIRepositoryManager {
 				st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
 			}
 
-			// inserting index data for classes and properties 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> concept : semanticIndex.getIndexedClasses()) {
-					stm.setString(1, concept.getKey().getIRI().getIRIString());
-					stm.setInt(2, concept.getValue().getIndex());
-					stm.setInt(3, CLASS_TYPE);
-					stm.addBatch();
-				}
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedObjectProperties()) {
-					stm.setString(1, role.getKey().getIRI().getIRIString());
-					stm.setInt(2, role.getValue().getIndex());
-					stm.setInt(3, ROLE_TYPE);
-					stm.addBatch();
-				}
-				for (Entry<DataPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedDataProperties()) {
-					stm.setString(1, role.getKey().getIRI().getIRIString());
-					stm.setInt(2, role.getValue().getIndex());
-					stm.setInt(3, ROLE_TYPE);
-					stm.addBatch();
-				}
+				for (Entry<OClass,SemanticIndexRange> e : semanticIndex.getIndexedClasses())
+					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
+
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
+					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+
+				for (Entry<DataPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedDataProperties())
+					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+
 				stm.executeBatch();
 			}
 
-			// Inserting interval metadata
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
-				for (Entry<OClass,SemanticIndexRange> concept : semanticIndex.getIndexedClasses()) {
-					for (Interval it : concept.getValue().getIntervals()) {
-						stm.setString(1, concept.getKey().getIRI().getIRIString());
-						stm.setInt(2, it.getStart());
-						stm.setInt(3, it.getEnd());
-						stm.setInt(4, CLASS_TYPE);
-						stm.addBatch();
-					}
-				}
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedObjectProperties()) {
-					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getIRI().getIRIString());
-						stm.setInt(2, it.getStart());
-						stm.setInt(3, it.getEnd());
-						stm.setInt(4, ROLE_TYPE);
-						stm.addBatch();
-					}
-				}
-				for (Entry<DataPropertyExpression, SemanticIndexRange> role : semanticIndex.getIndexedDataProperties()) {
-					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getIRI().getIRIString());
-						stm.setInt(2, it.getStart());
-						stm.setInt(3, it.getEnd());
-						stm.setInt(4, ROLE_TYPE);
-						stm.addBatch();
-					}
-				}
+				for (Entry<OClass,SemanticIndexRange> e : semanticIndex.getIndexedClasses())
+					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
+
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
+					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+
+				for (Entry<DataPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedDataProperties())
+					insertIntervalMetadata(stm,  e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
+
 				stm.executeBatch();
 			}
 
@@ -856,7 +665,20 @@ public class RDBMSSIRepositoryManager {
 		}
 	}
 
-	
-	
-	
+	private void insertIntervalMetadata(PreparedStatement stm, IRI iri, SemanticIndexRange range, int type) throws SQLException {
+		for (Interval it : range.getIntervals()) {
+			stm.setString(1, iri.getIRIString());
+			stm.setInt(2, it.getStart());
+			stm.setInt(3, it.getEnd());
+			stm.setInt(4, type);
+			stm.addBatch();
+		}
+	}
+
+	private void insertIndexData(PreparedStatement stm, IRI iri, SemanticIndexRange range, int type) throws SQLException {
+		stm.setString(1, iri.getIRIString());
+		stm.setInt(2, range.getIndex());
+		stm.setInt(3, type);
+		stm.addBatch();
+	}
 }
