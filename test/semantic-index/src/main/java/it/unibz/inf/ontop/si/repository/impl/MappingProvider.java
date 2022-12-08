@@ -27,17 +27,15 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SemanticIndexMapping {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(SemanticIndexMapping.class);
-
+public class MappingProvider {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MappingProvider.class);
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final FunctionSymbol int2IRIStringFunctionSymbol;
     private final RDFTermTypeConstant iriTypeConstant;
     private final SQLPPSourceQueryFactory sourceQueryFactory;
 
-    public SemanticIndexMapping(IRIDictionaryImpl uriMap, LoadingConfiguration loadingConfiguration) {
+    public MappingProvider(IRIDictionaryImpl uriMap, LoadingConfiguration loadingConfiguration) {
         this.termFactory = loadingConfiguration.getTermFactory();
         this.targetAtomFactory = loadingConfiguration.getTargetAtomFactory();
         this.sourceQueryFactory = loadingConfiguration.getSourceQueryFactory();
@@ -47,10 +45,9 @@ public class SemanticIndexMapping {
         int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
                 dbTypeFactory.getDBTermType("INTEGER"), dbTypeFactory.getDBStringType(), uriMap);
         iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
-
     }
 
-    public ImmutableList<SQLPPTriplesMap> getMappings(ClassifiedTBox tbox, SemanticIndex semanticIndex, SemanticIndexViewsManager views) {
+    public ImmutableList<SQLPPTriplesMap> getMappings(ClassifiedTBox tbox, SemanticIndex semanticIndex, RepositoryTableManager views) {
 
         ImmutableList<SQLPPTriplesMap> result = Stream.concat(Stream.concat(
                                 tbox.objectPropertiesDAG().stream()
@@ -76,10 +73,10 @@ public class SemanticIndexMapping {
         return result;
     }
 
-    private Stream<SQLPPTriplesMap> getTripleMaps(SemanticIndexViewsManager views, SemanticIndexRange range, IRI iri, BiFunction<IRI, SemanticIndexView, TargetAtom> transformer) {
+    private Stream<SQLPPTriplesMap> getTripleMaps(RepositoryTableManager views, SemanticIndexRange range, IRI iri, BiFunction<IRI, RepositoryTableSlice, TargetAtom> transformer) {
         List<Interval> intervals = range.getIntervals();
         String intervalsSqlFilter = intervals.stream()
-                .map(SemanticIndexMapping::getIntervalString)
+                .map(MappingProvider::getIntervalString)
                 .collect(Collectors.joining(" OR "));
 
         return views.getViews().stream()
@@ -94,9 +91,10 @@ public class SemanticIndexMapping {
 
     private static String getIntervalString(Interval interval) {
         if (interval.getStart() == interval.getEnd())
-            return String.format("IDX = %d", interval.getStart());
+            return String.format("%s = %d", RepositoryTableManager.IDX_COLUMN, interval.getStart());
         else
-            return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());
+            return String.format("%s >= %d AND %s <= %d", RepositoryTableManager.IDX_COLUMN, interval.getStart(),
+                    RepositoryTableManager.IDX_COLUMN, interval.getEnd());
     }
 
     private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
@@ -110,7 +108,7 @@ public class SemanticIndexMapping {
         }
     }
 
-    private TargetAtom constructClassTargetQuery(IRI iri, SemanticIndexView view) {
+    private TargetAtom constructClassTargetQuery(IRI iri, RepositoryTableSlice view) {
         Variable X = termFactory.getVariable("X");
 
         ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
@@ -120,7 +118,7 @@ public class SemanticIndexMapping {
         return targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm, classTerm);
     }
 
-    private TargetAtom constructPropertyTargetQuery(IRI iri, SemanticIndexView view) {
+    private TargetAtom constructPropertyTargetQuery(IRI iri, RepositoryTableSlice view) {
         Variable X = termFactory.getVariable("X");
         Variable Y = termFactory.getVariable("Y");
 
@@ -145,5 +143,4 @@ public class SemanticIndexMapping {
 
         return targetAtomFactory.getTripleTargetAtom(subjectTerm, iriTerm, objectTerm);
     }
-
 }

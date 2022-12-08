@@ -19,57 +19,66 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SemanticIndexViewsManager {
+public class RepositoryTableManager {
+
+	public static final String IDX_COLUMN = "IDX";
+	public static final String ISBNODE_COLUMN = "ISBNODE";
+	public static final String ISBNODE2_COLUMN = "ISBNODE2";
+	public static final String URI_COLUMN = "\"URI\"";
+	public static final String URI2_COLUMN = "\"URI2\"";
+	public static final String LANG_COLUMN = "LANG";
+	public static final String VAL_COLUMN = "VAL";
+
 
 	private final static RepositoryTable CLASS_TABLE = new RepositoryTable("QUEST_CLASS_ASSERTION",
-			ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
-					"\"IDX\"", "SMALLINT NOT NULL",
-					"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
+			ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+					IDX_COLUMN, "SMALLINT NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X");
 
 	private final static RepositoryTable OBJECT_PROPERTY_TABLE = new RepositoryTable("QUEST_OBJECT_PROPERTY_ASSERTION",
-			ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL",
-					"\"URI2\"", "INTEGER NOT NULL",
-					"\"IDX\"", "SMALLINT NOT NULL",
-					"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE",
-					"ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
+			ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+					URI2_COLUMN, "INTEGER NOT NULL",
+					IDX_COLUMN, "SMALLINT NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE",
+					ISBNODE2_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X, " + URI2_COLUMN + " as Y");
 
-	private static RepositoryTable getAttributeTableDescription(String tableNameFragment, String sqlTypeName) {
+	private static RepositoryTable getDataPropertyTable(String tableNameFragment, String sqlTypeName) {
 		return new RepositoryTable(String.format("QUEST_DATA_PROPERTY_%s_ASSERTION", tableNameFragment),
-				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
-						"VAL", sqlTypeName,
-						"\"IDX\"", "SMALLINT  NOT NULL",
-						"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
+				ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+						VAL_COLUMN, sqlTypeName,
+						IDX_COLUMN, "SMALLINT  NOT NULL",
+						ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
 	}
 
 	private final static ImmutableMap<IRI, RepositoryTable> DATA_PROPERTY_TABLE_MAP = ImmutableMap.<IRI, RepositoryTable>builder()
 			// LANG_STRING is special because of one extra attribute (LANG)
 			.put(RDF.LANGSTRING,
 					new RepositoryTable("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-							ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
-									"VAL", "VARCHAR(1000) NOT NULL",
-									"\"IDX\"", "SMALLINT NOT NULL",
-									"LANG", "VARCHAR(20)",
-									"ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z"))
+							ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+									VAL_COLUMN, "VARCHAR(1000) NOT NULL",
+									IDX_COLUMN, "SMALLINT NOT NULL",
+									LANG_COLUMN, "VARCHAR(20)",
+									ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"),
+							URI_COLUMN + " as X, " + VAL_COLUMN + " as Y, " + LANG_COLUMN + " as Z"))
 
 			// all other datatypes from COL_TYPE are treated similarly
-			.put(XSD.STRING, getAttributeTableDescription("STRING", "VARCHAR(1000)"))
-			.put(XSD.INTEGER, getAttributeTableDescription("INTEGER", "BIGINT"))
-			.put(XSD.INT, getAttributeTableDescription("INT", "INTEGER"))
-			.put(XSD.UNSIGNED_INT, getAttributeTableDescription("UNSIGNED_INT", "INTEGER"))
-			.put(XSD.NEGATIVE_INTEGER, getAttributeTableDescription("NEGATIVE_INTEGER", "BIGINT"))
-			.put(XSD.NON_NEGATIVE_INTEGER, getAttributeTableDescription("NON_NEGATIVE_INTEGER", "BIGINT"))
-			.put(XSD.POSITIVE_INTEGER, getAttributeTableDescription("POSITIVE_INTEGER", "BIGINT"))
-			.put(XSD.NON_POSITIVE_INTEGER, getAttributeTableDescription("NON_POSITIVE_INTEGER", "BIGINT"))
-			.put(XSD.LONG, getAttributeTableDescription("LONG", "BIGINT"))
-			.put(XSD.DECIMAL, getAttributeTableDescription("DECIMAL", "DECIMAL"))
-			.put(XSD.FLOAT, getAttributeTableDescription("FLOAT", "DOUBLE PRECISION"))
-			.put(XSD.DOUBLE, getAttributeTableDescription("DOUBLE", "DOUBLE PRECISION"))
-			.put(XSD.DATETIME, getAttributeTableDescription("DATETIME", "TIMESTAMP"))
-			.put(XSD.BOOLEAN,  getAttributeTableDescription("BOOLEAN", "BOOLEAN"))
-			.put(XSD.DATETIMESTAMP, getAttributeTableDescription("DATETIMESTAMP", "TIMESTAMP"))
+			.put(XSD.STRING, getDataPropertyTable("STRING", "VARCHAR(1000)"))
+			.put(XSD.INTEGER, getDataPropertyTable("INTEGER", "BIGINT"))
+			.put(XSD.INT, getDataPropertyTable("INT", "INTEGER"))
+			.put(XSD.UNSIGNED_INT, getDataPropertyTable("UNSIGNED_INT", "INTEGER"))
+			.put(XSD.NEGATIVE_INTEGER, getDataPropertyTable("NEGATIVE_INTEGER", "BIGINT"))
+			.put(XSD.NON_NEGATIVE_INTEGER, getDataPropertyTable("NON_NEGATIVE_INTEGER", "BIGINT"))
+			.put(XSD.POSITIVE_INTEGER, getDataPropertyTable("POSITIVE_INTEGER", "BIGINT"))
+			.put(XSD.NON_POSITIVE_INTEGER, getDataPropertyTable("NON_POSITIVE_INTEGER", "BIGINT"))
+			.put(XSD.LONG, getDataPropertyTable("LONG", "BIGINT"))
+			.put(XSD.DECIMAL, getDataPropertyTable("DECIMAL", "DECIMAL"))
+			.put(XSD.FLOAT, getDataPropertyTable("FLOAT", "DOUBLE PRECISION"))
+			.put(XSD.DOUBLE, getDataPropertyTable("DOUBLE", "DOUBLE PRECISION"))
+			.put(XSD.DATETIME, getDataPropertyTable("DATETIME", "TIMESTAMP"))
+			.put(XSD.BOOLEAN,  getDataPropertyTable("BOOLEAN", "BOOLEAN"))
+			.put(XSD.DATETIMESTAMP, getDataPropertyTable("DATETIMESTAMP", "TIMESTAMP"))
 			.build();
-
-	private static final ImmutableList<RepositoryTable> DATA_TABLES = Stream.concat(Stream.of(CLASS_TABLE, OBJECT_PROPERTY_TABLE), DATA_PROPERTY_TABLE_MAP.values().stream()).collect(ImmutableCollectors.toList());
+	private static final ImmutableList<RepositoryTable> ABOX_TABLES = Stream.concat(Stream.of(CLASS_TABLE, OBJECT_PROPERTY_TABLE), DATA_PROPERTY_TABLE_MAP.values().stream()).collect(ImmutableCollectors.toList());
 
 	@FunctionalInterface
 	public interface PreparedStatementInsertAction {
@@ -100,15 +109,15 @@ public class SemanticIndexViewsManager {
 
 	private final static RepositoryTable EMPTINESS_INDEX_TABLE = new RepositoryTable("NONEMPTYNESSINDEX",
 			ImmutableMap.of("TABLEID", "INTEGER",
-					"IDX", "INTEGER",
+					IDX_COLUMN, "INTEGER",
 					"TYPE1", "INTEGER",
 					"TYPE2", "INTEGER"), "*");
 
-	private final Map<SemanticIndexView.Identifier, SemanticIndexView> views = new HashMap<>(); // fully mutable - see getView
+	private final Map<RepositoryTableSlice.Identifier, RepositoryTableSlice> views = new HashMap<>(); // fully mutable - see getView
 
 	private final ImmutableMap<TermType, Integer> colTypetoSITable;
 
-	public SemanticIndexViewsManager(TypeFactory typeFactory) {
+	public RepositoryTableManager(TypeFactory typeFactory) {
 
 		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
 				typeFactory.getBlankNodeType());
@@ -143,17 +152,17 @@ public class SemanticIndexViewsManager {
 		colTypetoSITable = colTypetoSITableBuilder.build();
 	}
 
-	public ImmutableList<SemanticIndexView> getViews() {
+	public ImmutableList<RepositoryTableSlice> getViews() {
 		return ImmutableList.copyOf(views.values());
 	}
 
-	public SemanticIndexView getView(ObjectRDFType type) {
-		SemanticIndexView.Identifier viewId = new SemanticIndexView.Identifier(type);
+	public RepositoryTableSlice getView(ObjectRDFType type) {
+		RepositoryTableSlice.Identifier viewId = new RepositoryTableSlice.Identifier(type);
 		return views.get(viewId);
 	}
 	
-	public SemanticIndexView getView(ObjectRDFType type1, RDFTermType type2) {
-		SemanticIndexView.Identifier viewId = new SemanticIndexView.Identifier(type1, type2);
+	public RepositoryTableSlice getView(ObjectRDFType type1, RDFTermType type2) {
+		RepositoryTableSlice.Identifier viewId = new RepositoryTableSlice.Identifier(type1, type2);
 		/*
 		 * For language tags (need to know the concrete one)
 		 */
@@ -167,37 +176,35 @@ public class SemanticIndexViewsManager {
 	}
 
 	private void initClass(ObjectRDFType type1) {
-		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
-		String filter = "ISBNODE = " + value + " AND ";
+		String value = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, value);
 
 		String select = CLASS_TABLE.getSELECT(filter);
 		String insert = CLASS_TABLE.getINSERT("?, ?, " + value);
-
-		SemanticIndexView view = new SemanticIndexView(type1, select, insert);
+		RepositoryTableSlice view = new RepositoryTableSlice(type1, select, insert);
 		views.put(view.getId(), view);
 	}
 
 	private void initObjectProperty(ObjectRDFType type1, ObjectRDFType type2) {
-		String value1 =  type1.isBlankNode() ? "TRUE" : "FALSE";
-		String value2 =  type2.isBlankNode() ? "TRUE" : "FALSE";
-		String filter = "ISBNODE = " + value1 + " AND " + "ISBNODE2 = " + value2 + " AND ";
+		String value1 = getBooleanValue(type1.isBlankNode());
+		String value2 = getBooleanValue(type2.isBlankNode());
+		String filter = String.format("%s = %s AND %s = %s AND ", ISBNODE_COLUMN, value1, ISBNODE2_COLUMN, value2);
 
 		String select = OBJECT_PROPERTY_TABLE.getSELECT(filter);
 		String insert = OBJECT_PROPERTY_TABLE.getINSERT("?, ?, ?, " + value1 + ", " + value2);
-
-		SemanticIndexView view = new SemanticIndexView(type1, type2, select, insert);
+		RepositoryTableSlice view = new RepositoryTableSlice(type1, type2, select, insert);
 		views.put(view.getId(), view);
 	}
 
 	private void initDataProperty(ObjectRDFType type1, RDFDatatype type2) {
-		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
-		String filter = "ISBNODE = " + value + " AND ";
+		String value = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, value);
 
 		final String select, insert;
 		if (type2.getLanguageTag().isPresent()) {
 			LanguageTag languageTag = type2.getLanguageTag().get();
 			RepositoryTable table = DATA_PROPERTY_TABLE_MAP.get(RDF.LANGSTRING);
-			select = table.getSELECT(filter + "LANG = '" + languageTag.getFullString() +  "' AND ");
+			select = table.getSELECT(filter + String.format("%s = '%s' AND ", LANG_COLUMN, languageTag.getFullString()));
 			insert = table.getINSERT("?, ?, ?, ?, " + value);
 		}
 		else {
@@ -206,8 +213,12 @@ public class SemanticIndexViewsManager {
 			insert = table.getINSERT("?, ?, ?, " + value);
 		}
 
-		SemanticIndexView view = new SemanticIndexView(type1, type2, select, insert);
+		RepositoryTableSlice view = new RepositoryTableSlice(type1, type2, select, insert);
 		views.put(view.getId(), view);
+	}
+
+	private static String getBooleanValue(boolean b) {
+		return b ? "TRUE" : "FALSE";
 	}
 
 	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
@@ -220,7 +231,7 @@ public class SemanticIndexViewsManager {
 
 
 	public void init(Statement st) throws SQLException {
-		for (RepositoryTable table : DATA_TABLES)
+		for (RepositoryTable table : ABOX_TABLES)
 			st.addBatch(table.getCREATE());
 
 		st.addBatch(EMPTINESS_INDEX_TABLE.getCREATE());
@@ -229,7 +240,7 @@ public class SemanticIndexViewsManager {
 	public boolean isDBSchemaDefined(Connection conn)  {
 
 		try (Statement st = conn.createStatement()) {
-			for (RepositoryTable table : DATA_TABLES)
+			for (RepositoryTable table : ABOX_TABLES)
 				st.executeQuery(table.getEXISTS());
 
 			return true; // everything is fine if we get to this point
@@ -250,8 +261,8 @@ public class SemanticIndexViewsManager {
 		}
 
 		try (PreparedStatement stm = conn.prepareStatement(EMPTINESS_INDEX_TABLE.getINSERT("?, ?, ?, ?"))) {
-			for (SemanticIndexView view : views.values()) {
-				SemanticIndexView.Identifier viewId = view.getId();
+			for (RepositoryTableSlice view : views.values()) {
+				RepositoryTableSlice.Identifier viewId = view.getId();
 				for (Integer idx : view.getIndexes()) {
 					if (viewId.getType2() == null) {
 						// class view (only type1 is relevant)

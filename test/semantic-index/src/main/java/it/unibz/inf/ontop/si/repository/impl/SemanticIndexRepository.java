@@ -39,9 +39,9 @@ public class SemanticIndexRepository {
 
     private final SemanticIndex semanticIndex;
 
-    private final SemanticIndexViewsManager views;
+    private final RepositoryTableManager views;
 
-    private final SemanticIndexMapping mapping;
+    private final MappingProvider mapping;
 
     public SemanticIndexRepository(ClassifiedTBox tbox, LoadingConfiguration loadingConfiguration) {
         this.tbox = tbox;
@@ -51,9 +51,9 @@ public class SemanticIndexRepository {
         semanticIndex = new SemanticIndex(tbox);
 
         TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
-        views = new SemanticIndexViewsManager(typeFactory);
+        views = new RepositoryTableManager(typeFactory);
 
-        mapping = new SemanticIndexMapping(iriDictionary, loadingConfiguration);
+        mapping = new MappingProvider(iriDictionary, loadingConfiguration);
 
         LOGGER.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
     }
@@ -196,7 +196,7 @@ public class SemanticIndexRepository {
 
     private final class BatchProcessor implements AutoCloseable {
         private final Connection conn;
-        private final Map<SemanticIndexView.Identifier, PreparedStatement> stmMap;
+        private final Map<RepositoryTableSlice.Identifier, PreparedStatement> stmMap;
 
         BatchProcessor(Connection conn) throws SQLException {
             this.conn = conn;
@@ -239,7 +239,7 @@ public class SemanticIndexRepository {
 
             int uriId = getObjectConstantUriId(c1);
 
-            SemanticIndexView view =  views.getView(c1.getType());
+            RepositoryTableSlice view =  views.getView(c1.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, uriId);
             stm.setInt(2, idx);
@@ -255,7 +255,7 @@ public class SemanticIndexRepository {
             int uriId1 = getObjectConstantUriId(o1);
             int uriId2 = getObjectConstantUriId(o2);
 
-            SemanticIndexView view = views.getView(o1.getType(), o2.getType());
+            RepositoryTableSlice view = views.getView(o1.getType(), o2.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, uriId1);
             stm.setInt(2, uriId2);
@@ -272,12 +272,12 @@ public class SemanticIndexRepository {
 
             int uriId = getObjectConstantUriId(subject);
 
-            SemanticIndexView view =  views.getView(subject.getType(), object.getType());
+            RepositoryTableSlice view =  views.getView(subject.getType(), object.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, uriId);
 
             IRI typeIri = object.getType().getIRI();
-            SemanticIndexViewsManager.PreparedStatementInsertAction insertStmValue = SemanticIndexViewsManager.DATA_PROPERTY_TABLE_INSERT_STM_MAP.get(typeIri);
+            RepositoryTableManager.PreparedStatementInsertAction insertStmValue = RepositoryTableManager.DATA_PROPERTY_TABLE_INSERT_STM_MAP.get(typeIri);
             if (insertStmValue != null) {
                 insertStmValue.setValue(stm, object);
             }
@@ -293,7 +293,7 @@ public class SemanticIndexRepository {
             view.addIndex(idx);
         }
 
-        PreparedStatement getPreparedStatement(SemanticIndexView view) throws SQLException {
+        PreparedStatement getPreparedStatement(RepositoryTableSlice view) throws SQLException {
             PreparedStatement stm = stmMap.get(view.getId());
             if (stm == null) {
                 stm = conn.prepareStatement(view.getINSERT());

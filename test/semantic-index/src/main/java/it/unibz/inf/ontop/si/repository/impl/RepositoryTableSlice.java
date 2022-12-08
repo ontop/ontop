@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class SemanticIndexView {
+public class RepositoryTableSlice {
 
 	static final class Identifier {
 		private final ObjectRDFType type1;
@@ -56,13 +56,13 @@ public class SemanticIndexView {
 	private final String insertCommand;
 	private final Set<Integer> indexes = new HashSet<>();
 	
-	public SemanticIndexView(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand) {
+	public RepositoryTableSlice(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand) {
 		this.id = new Identifier(type1, type2);
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;
 	}
 
-	public SemanticIndexView(ObjectRDFType type1, String selectCommand, String insertCommand) {
+	public RepositoryTableSlice(ObjectRDFType type1, String selectCommand, String insertCommand) {
 		this.id = new Identifier(type1);
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;

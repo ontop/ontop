@@ -29,18 +29,6 @@ public class SemanticIndex {
 		dpRanges = ImmutableMap.copyOf(builder.createSemanticIndex(reasoner.dataPropertiesDAG()));
 	}
 
-
-	public ImmutableSet<Entry<OClass, SemanticIndexRange>> getIndexedClasses() {
-		return classRanges.entrySet();
-	}
-	public ImmutableSet<Entry<ObjectPropertyExpression, SemanticIndexRange>> getIndexedObjectProperties() {
-		return opRanges.entrySet();
-	}
-	public ImmutableSet<Entry<DataPropertyExpression, SemanticIndexRange>> getIndexedDataProperties() {
-		return dpRanges.entrySet();
-	}
-
-	
 	public SemanticIndexRange getRange(OClass d) {
 		return classRanges.get(d);
 	}
@@ -51,6 +39,16 @@ public class SemanticIndex {
 		return dpRanges.get(d);
 	}
 
+
+	public ImmutableSet<Entry<OClass, SemanticIndexRange>> getIndexedClasses() {
+		return classRanges.entrySet();
+	}
+	public ImmutableSet<Entry<ObjectPropertyExpression, SemanticIndexRange>> getIndexedObjectProperties() {
+		return opRanges.entrySet();
+	}
+	public ImmutableSet<Entry<DataPropertyExpression, SemanticIndexRange>> getIndexedDataProperties() {
+		return dpRanges.entrySet();
+	}
 
 	private final static RepositoryTable INDEX_TABLE = new RepositoryTable("IDX",
 			ImmutableMap.of("URI", "VARCHAR(400)",

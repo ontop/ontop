@@ -4,10 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
 public class RepositoryTable {
-    private final String tableName;
-    private final String createCommand;
-    private final String insertCommand;
-    private final String selectCommand;
+    private final String tableName, createCommand, insertCommand, selectCommand;
 
     RepositoryTable(String tableName, ImmutableMap<String, String> columnDefinitions, String selectColumns) {
         this.tableName = tableName;
