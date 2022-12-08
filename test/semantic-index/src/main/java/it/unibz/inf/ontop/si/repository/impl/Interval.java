@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.si.repository.impl;
  */
 
 
+import java.util.Objects;
+
 /**
  * Contiguous interval
  *
@@ -35,21 +37,12 @@ public class Interval {
         this.end = end;
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Interval) {
-        Interval otherInterval = (Interval) other;
-        	return (this.start == otherInterval.start) && (this.end == otherInterval.end);
-        }
-        return false;
+    public int getStart() {
+        return start;
     }
 
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result += 37 * result + start;
-        result += 37 * result + end;
-        return result;
+    public int getEnd() {
+        return end;
     }
 
     @Override
@@ -57,11 +50,12 @@ public class Interval {
         return String.format("[%s:%s]", start, end);
     }
 
-    public int getStart() {
-        return start;
-    }
-
-    public int getEnd() {
-        return end;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Interval) {
+            Interval other = (Interval) obj;
+        	return this.start == other.start && this.end == other.end;
+        }
+        return false;
     }
 }

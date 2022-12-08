@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.si.repository.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Represents a set of contiguous intervals (IMMUTABLE)
@@ -34,7 +34,6 @@ public class SemanticIndexRange {
 
 	private final ImmutableList<Interval> intervals;
 	private final int index;
-
 
 	/**
 	 * creates a Semantic Index range with the specified index 
@@ -51,37 +50,12 @@ public class SemanticIndexRange {
         this.intervals = intervals;
     }
 
-    public SemanticIndexRange addRange(List<Interval> other) {
-
-        List<Interval> intervals = new ArrayList<>(this.intervals);
-        intervals.addAll(other);
-
-        // Sort in ascending order and collapse overlapping intervals
-        intervals.sort(Comparator.comparingInt(Interval::getStart));
-        List<Interval> new_intervals = new ArrayList<>();
-
-        int min = intervals.get(0).getStart();
-        int max = intervals.get(0).getEnd();
-
-        for (int i = 1; i < intervals.size(); ++i) {
-            Interval item = intervals.get(i);
-            if (item.getEnd() > max + 1 && item.getStart() > max + 1) {
-                new_intervals.add(new Interval(min, max));
-                min = item.getStart();
-            }
-            max = Math.max(max, item.getEnd());
-        }
-        new_intervals.add(new Interval(min, max));
-        return new SemanticIndexRange(index, ImmutableList.copyOf(new_intervals));
+    public ImmutableList<Interval> getIntervals() {
+        return intervals;
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof SemanticIndexRange) {
-            SemanticIndexRange otherRange = (SemanticIndexRange) other;
-            return this.intervals.equals(otherRange.intervals);
-        }
-        return false;
+    public int getIndex() {
+        return index;
     }
 
     @Override
@@ -89,13 +63,34 @@ public class SemanticIndexRange {
         return intervals.toString();
     }
 
-    public ImmutableList<Interval> getIntervals() {
-        return intervals;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SemanticIndexRange) {
+            SemanticIndexRange other = (SemanticIndexRange) obj;
+            return this.index == other.index && this.intervals.equals(other.intervals);
+        }
+        return false;
     }
 
-    public int getIndex() {
-    	return index;
-    }
+    public SemanticIndexRange extendWith(SemanticIndexRange other) {
 
-	
+        ImmutableList<Interval> intervals = Stream.concat(this.intervals.stream(), other.getIntervals().stream())
+                .sorted(Comparator.comparingInt(Interval::getStart))
+                .collect(ImmutableCollectors.toList());
+
+        // collapse overlapping intervals
+        ImmutableList.Builder<Interval> builder = ImmutableList.builder();
+        int min = intervals.get(0).getStart();
+        int max = intervals.get(0).getEnd();
+        for (int i = 1; i < intervals.size(); i++) {
+            Interval item = intervals.get(i);
+            if (item.getStart() > max + 1) {
+                builder.add(new Interval(min, max));
+                min = item.getStart();
+            }
+            max = Math.max(max, item.getEnd());
+        }
+        builder.add(new Interval(min, max));
+        return new SemanticIndexRange(index, builder.build());
+    }
 }

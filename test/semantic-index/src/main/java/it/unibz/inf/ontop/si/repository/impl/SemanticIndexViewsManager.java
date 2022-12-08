@@ -13,26 +13,35 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SemanticIndexViewsManager {
 
-	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
-	private static final int OBJ_TYPE_URI = 0;
-	private static final int OBJ_TYPE_BNode = 1;
-
 	private final Map<SemanticIndexViewID, SemanticIndexView> views = new HashMap<>(); // fully mutable - see getView
-	
-	private final TypeFactory typeFactory;
+
 	private final ImmutableMap<TermType, Integer> colTypetoSITable;
 
 	public SemanticIndexViewsManager(TypeFactory typeFactory) {
-		this.typeFactory = typeFactory;
-		init();
+
+		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
+				typeFactory.getBlankNodeType());
+
+		ImmutableList<IRI> datatypeIRIs = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP.keySet().stream()
+				.filter(i1 -> !i1.equals(RDF.LANGSTRING)) // TODO: WHY?
+				.collect(ImmutableCollectors.toList());
+
+		for (ObjectRDFType type1 : objectTypes) {
+			initClass(type1);
+
+			for (ObjectRDFType type2 : objectTypes)
+				initObjectProperty(type1, type2);
+
+			for (IRI iriType2 : datatypeIRIs)
+				initDataProperty(type1, typeFactory.getDatatype(iriType2));
+		}
 
 		IRI[] SITableToIRI = {
-				XSD.STRING, XSD.INTEGER,
+				XSD.STRING, XSD.INTEGER, // TODO: why these two skipped below?
 				XSD.LONG, XSD.DECIMAL, XSD.DOUBLE, XSD.DATETIME, XSD.INT, XSD.UNSIGNED_INT,
 				XSD.NEGATIVE_INTEGER, XSD.NON_NEGATIVE_INTEGER, XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER,
 				XSD.FLOAT, XSD.BOOLEAN, XSD.DATETIMESTAMP };
@@ -47,7 +56,7 @@ public class SemanticIndexViewsManager {
 		colTypetoSITable = colTypetoSITableBuilder.build();
 	}
 
-	public List<SemanticIndexView> getViews() {
+	public ImmutableList<SemanticIndexView> getViews() {
 		return ImmutableList.copyOf(views.values());
 	}
 
@@ -68,26 +77,6 @@ public class SemanticIndexViewsManager {
 				throw new UnexpectedRDFTermTypeException(type2);
 
 		return views.get(viewId);
-	}
-	
-	private void init() {
-
-		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
-				typeFactory.getBlankNodeType());
-
-		ImmutableList<IRI> datatypeIRIs = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP.keySet().stream()
-				.filter(i -> !i.equals(RDF.LANGSTRING)) // WHY?
-				.collect(ImmutableCollectors.toList());
-
-		for (ObjectRDFType type1 : objectTypes) {
-			initClass(type1);
-
-			for (ObjectRDFType type2 : objectTypes)
-				initObjectProperty(type1, type2);
-			
-			for (IRI iriType2 : datatypeIRIs)
-				initDataProperty(type1, typeFactory.getDatatype(iriType2));
-		}
 	}
 
 	private void initClass(ObjectRDFType type1) {
@@ -147,12 +136,15 @@ public class SemanticIndexViewsManager {
 		views.put(view.getId(), view);
 	}
 
+	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
+	private static final int OBJ_TYPE_URI = 0;
+	private static final int OBJ_TYPE_BNode = 1;
+
 	private static int COLTYPEtoInt(ObjectRDFType t) {
 		return t.isBlankNode()  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
 
-	
-	
+
 	/**
 	 * Stores the emptiness index in the database
 	 * @throws SQLException 
@@ -166,7 +158,7 @@ public class SemanticIndexViewsManager {
 				for (Integer idx : view.getIndexes()) {
 					if (viewId.getType2() == null) {
 						// class view (only type1 is relevant)
-						stm.setInt(1, 0); // SITable.CLASS.ordinal()
+						stm.setInt(1, 0); //
 						stm.setInt(2, idx);
 						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
 						stm.setInt(4, OBJ_TYPE_BNode);

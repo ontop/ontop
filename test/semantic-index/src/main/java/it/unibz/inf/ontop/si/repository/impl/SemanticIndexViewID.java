@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermType;
+
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 /*
  * #%L
@@ -27,26 +29,23 @@ import it.unibz.inf.ontop.model.type.TermType;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
- * in it. It allows allows to know the type of rows each has, as in, for which
+ * in it. It allows to know the type of rows each has, as in, for which
  * indexes and which type of object.
  */
 
 public class SemanticIndexViewID {
-	
 	private final ObjectRDFType type1;
+	@Nullable
 	private final RDFTermType type2;
-	private final int hashCode;
 
 	public SemanticIndexViewID(ObjectRDFType type1, RDFTermType type2) {
 		this.type1 = type1;
 		this.type2 = type2;
-		this.hashCode  = type2.hashCode() ^ (type1.hashCode() << 16);
 	}
 	
 	public SemanticIndexViewID(ObjectRDFType type1) {
 		this.type1 = type1;
 		this.type2 = null;
-		this.hashCode  = type1.hashCode();
 	}
 
 	public ObjectRDFType getType1() {
@@ -56,33 +55,23 @@ public class SemanticIndexViewID {
 	public RDFTermType getType2() {
 		return type2;
 	}
-	
-	@Override
-	public int hashCode() {
-		return hashCode;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof SemanticIndexViewID))
-			return false;
-		
-		SemanticIndexViewID r2 = (SemanticIndexViewID) obj;
-		return this.type1.equals(r2.type1)
-				&& ((this.type2 == null && r2.type2 == null)
-				|| (this.type2 != null && r2.type2 != null && this.type2.equals(r2.type2)));
-	}
-	
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append(" T1: ");
-		b.append(type1);
-		if (type2 != null) {
-			b.append(" T2: ");
-			b.append(type2);
+		return " T1: " + type1 + (type2 != null ? ", T2: " + type2 : "");
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof SemanticIndexViewID) {
+			SemanticIndexViewID other = (SemanticIndexViewID) obj;
+			return Objects.equals(this.type1, other.type1) && Objects.equals(this.type2, other.type2);
 		}
-		return b.toString();
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type1, type2);
 	}
 }

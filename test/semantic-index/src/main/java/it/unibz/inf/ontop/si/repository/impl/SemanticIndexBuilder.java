@@ -70,7 +70,7 @@ public class SemanticIndexBuilder {
                     mergeRangeNode(child);
 
                     //merge the index of the node with the index of his child
-                    ranges.put(d, ranges.get(d).addRange(ranges.get(child).getIntervals()));
+                    ranges.put(d, ranges.get(d).extendWith(ranges.get(child)));
                 }
             }
         }
@@ -87,7 +87,7 @@ public class SemanticIndexBuilder {
             if (reversed.incomingEdgesOf(n).isEmpty())
                 roots.add(n);
 
-        Map<T,SemanticIndexRange> ranges = new HashMap<>();
+        Map<T, SemanticIndexRange> ranges = new HashMap<>();
         for (T root: roots) {
             GraphIterator<T, DefaultEdge> orderIterator = new DepthFirstIterator<>(reversed, root);
 
@@ -132,5 +132,4 @@ public class SemanticIndexBuilder {
             }
         return namedDAG;
     }
-
 }
