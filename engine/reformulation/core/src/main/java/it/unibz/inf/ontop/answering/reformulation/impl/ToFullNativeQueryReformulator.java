@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Transforms the SPARQL query into a native (e.g. SQL) query without post-processing.
@@ -84,18 +86,51 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         ImmutableMap<Variable, ImmutableTerm> definitions = extractDefinitions(initialTree);
         ImmutableMap<Variable, RDFTermType> rdfTypes = extractRDFTypes(definitions);
 
-        IQTree nativeTree = replaceRDFByDBTerms(initialTree, rdfTypes);
+        IQTree dbTree = replaceRDFByDBTerms(initialTree, rdfTypes);
 
         LOGGER.debug("Producing the native query string...");
 
-        IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, nativeTree);
+        IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, dbTree);
 
-        IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(dbIQ, true)
-                .normalizeForOptimization();
-        LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
+        IQTree nativeTree = datasourceQueryGenerator.generateSourceQuery(dbIQ, true)
+                .normalizeForOptimization().getTree();
 
-        if (!(executableQuery.getTree() instanceof NativeNode))
+        if (!(nativeTree instanceof NativeNode))
             throw new NotFullyTranslatableToNativeQueryException("the post-processing step could not be eliminated");
+
+        NativeNode nativeNode = (NativeNode) nativeTree;
+
+        ImmutableMap<Variable, DBTermType> dbTypeMap = nativeNode.getTypeMap();
+
+        /*
+         * HACK! The construction node reuses the same variables for the constructed RDF terms and the DB ones.
+         * This is illegal but does the trick, as the IQTree does not get normalized anymore at that stage.
+         *
+         * TODO: find an alternative to that hack while preserving good variable names in the native query.
+         *
+         */
+        ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNode(
+                nativeTree.getVariables(),
+                substitutionFactory.getSubstitution(
+                        nativeTree.getVariables().stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        v -> v,
+                                        v -> termFactory.getRDFFunctionalTerm(
+                                                termFactory.getConversion2RDFLexical(
+                                                        Optional.ofNullable(dbTypeMap.get(v))
+                                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting a type from the native node")),
+                                                        v,
+                                                        Optional.ofNullable(rdfTypes.get(v))
+                                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
+                                                termFactory.getRDFTermTypeConstant(rdfTypes.get(v)))))));
+
+        IQTree executableTree = iqFactory.createUnaryIQTree(
+                postProcessingToRDFNode,
+                nativeTree);
+
+        IQ executableQuery = iqFactory.createIQ(dbIQ.getProjectionAtom(), executableTree);
+
+        LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
 
         return executableQuery;
     }

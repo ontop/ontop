@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import com.google.common.collect.ImmutableSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -7,7 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
 
@@ -28,7 +30,7 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
 
     @Test
     public void testQuery() {
-        String sql = reformulate("PREFIX schema: <http://schema.org/>\n" +
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
                 "\n" +
@@ -36,7 +38,6 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 "  ?h a schema:LodgingBusiness ;\n" +
                 "     schema:name ?posLabel .\n" +
-                "  #?h schema:containedInPlace/schema:name \"Bozen\"@de . # Uncomment for restricting to a municipality\n" +
                 "  FILTER (lang(?posLabel) = 'de')\n" +
                 "  \n" +
                 "    # Colors\n" +
@@ -58,10 +59,56 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
                 "  }\n" +
                 "\n" +
                 "}\n" +
-                "LIMIT 500\n");
+                "LIMIT 500\n";
 
-        assertFalse(sql.contains("CONSTRUCT"));
-        assertFalse(sql.contains("NATIVE"));
+        String sql = reformulateIntoNativeQuery(sparql);
+        int count = runQueryAndCount(sparql);
+
+        assertTrue(sql.toUpperCase().contains("UNION ALL"));
+        assertEquals(1, count);
+    }
+
+    /**
+     * SPARQL query rejected because it is not strongly typed
+     */
+    @Test(expected = QueryEvaluationException.class)
+    public void testSPO() {
+        runQueryAndCount(
+                "SELECT * WHERE {\n" +
+                        "  ?s ?p ?o \n" +
+                        "}\n" +
+                        "LIMIT 10");
+    }
+
+    @Test
+    public void testSPOWithFilter() {
+        int count = runQueryAndCount(
+                "SELECT * WHERE {\n" +
+                        "  ?s ?p ?o \n" +
+                        "  FILTER (datatype(?o) = <http://www.w3.org/2001/XMLSchema#string>)" +
+                        "}\n" +
+                        "LIMIT 10");
+        assertEquals(10, count);
+    }
+
+    @Test
+    public void testName() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "\n" +
+                "SELECT ?h ?v\n" +
+                "WHERE {\n" +
+                "  ?h a schema:LodgingBusiness ;\n" +
+                "     schema:name ?v .\n" +
+                "  FILTER (lang(?v) = 'de')\n" +
+                "}\n" +
+                "LIMIT 1\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        runQueryAndCompare(sparql, ImmutableSet.of("eee"));
+
+        assertTrue(sql.toUpperCase().contains("UNION ALL"));
     }
 
 }

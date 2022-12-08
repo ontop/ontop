@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.query.SPARQLQuery;
@@ -618,13 +621,28 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     public String reformulate(String sparql)
             throws RepositoryException {
         try {
-            SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            IQ executableQuery = ontopConnection.createStatement().getExecutableQuery(sparqlQuery);
+            SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
+            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
+        } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
+            throw new RepositoryException(e);
+        }
+    }
 
-            // Useful when ToFullNativeQueryReformulator is used
-            if (executableQuery.getTree() instanceof NativeNode)
-                return ((NativeNode) executableQuery.getTree()).getNativeQueryString();
-            return executableQuery.toString();
+    @Override
+    public String reformulateIntoNativeQuery(String sparql)
+            throws RepositoryException {
+        try {
+            SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
+            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery)
+                    .getTree();
+
+            if (executableTree.getRootNode() instanceof ConstructionNode) {
+                IQTree child = executableTree.getChildren().get(0);
+                if (child instanceof NativeNode)
+                    return ((NativeNode) child).getNativeQueryString();
+            }
+            throw new MinorOntopInternalBugException("Unexpected structure of the executable IQTree: " + executableTree);
+
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }

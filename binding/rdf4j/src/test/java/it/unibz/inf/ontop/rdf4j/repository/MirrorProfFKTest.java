@@ -36,7 +36,7 @@ public class MirrorProfFKTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 " ?v a :Teacher . \n" +
                 "}";
-        String reformulatedQuery = reformulate(query);
+        String reformulatedQuery = reformulateIntoNativeQuery(query);
         assertFalse("Reformulated query with unwanted union: " + reformulatedQuery,
                 reformulatedQuery.toLowerCase().contains("union"));
     }
