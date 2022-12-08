@@ -82,17 +82,13 @@ public class RepositoryTableSlice {
 	
 	public boolean isEmptyForIntervals(List<Interval> intervals) {
 		for (Interval interval : intervals) 
-			for (Integer i = interval.getStart(); i <= interval.getEnd(); i++) 
+			for (int i = interval.getStart(); i <= interval.getEnd(); i++)
 				if (indexes.contains(i)) 
 					return false;
 		return true;
 	}
 
-	public void addIndex(Integer idx) {
+	public void addIndex(int idx) {
 		indexes.add(idx);			
-	}
-	
-	public Set<Integer> getIndexes() {
-		return Collections.unmodifiableSet(indexes);
 	}
 }

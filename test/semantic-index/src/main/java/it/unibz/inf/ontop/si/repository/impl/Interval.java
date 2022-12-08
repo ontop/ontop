@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.si.repository.impl;
  */
 
 
-import java.util.Objects;
-
 /**
  * Contiguous interval
  *

@@ -73,7 +73,17 @@ public class SemanticIndexRepository {
         try {
             Connection localConnection = DriverManager.getConnection(getJdbcUrl(), getUser(), getPassword());
             // Creating the ABox repository
-            createDBSchemaAndInsertMetadata(localConnection);
+            if (views.isDBSchemaDefined(localConnection)) {
+                LOGGER.debug("Schema already exists. Skipping creation");
+            }
+            else {
+                LOGGER.debug("Creating data tables");
+                try (Statement st = localConnection.createStatement()) {
+                    views.init(st);
+                    st.executeBatch();
+                }
+            }
+
             return localConnection;
         }
         catch (SQLException e) {
@@ -95,35 +105,6 @@ public class SemanticIndexRepository {
 
     public int insertData(Connection connection, Iterator<RDFFact> iterator) throws SQLException {
         return insertData(connection, iterator, 5000, 500);
-    }
-
-    private void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException {
-        if (views.isDBSchemaDefined(conn)) {
-            LOGGER.debug("Schema already exists. Skipping creation");
-            return;
-        }
-
-        LOGGER.debug("Creating data tables");
-        try (Statement st = conn.createStatement()) {
-            semanticIndex.init(st);
-            views.init(st);
-            st.executeBatch();
-        }
-
-        LOGGER.debug("Inserting semantic index metadata.");
-        boolean commitval = conn.getAutoCommit();
-        conn.setAutoCommit(false);
-        try {
-            semanticIndex.store(conn);
-            views.store(conn);
-            conn.commit();
-        }
-        catch (SQLException e) {
-            conn.rollback(); // If there is a big error, restore everything as it was
-        }
-        finally {
-            conn.setAutoCommit(commitval);
-        }
     }
 
     private int insertData(Connection conn, Iterator<RDFFact> data, int commitLimit, int batchLimit) throws SQLException {

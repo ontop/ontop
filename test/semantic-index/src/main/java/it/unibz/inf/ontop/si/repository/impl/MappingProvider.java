@@ -75,14 +75,14 @@ public class MappingProvider {
 
     private Stream<SQLPPTriplesMap> getTripleMaps(RepositoryTableManager views, SemanticIndexRange range, IRI iri, BiFunction<IRI, RepositoryTableSlice, TargetAtom> transformer) {
         List<Interval> intervals = range.getIntervals();
-        String intervalsSqlFilter = intervals.stream()
+        String filter = intervals.stream()
                 .map(MappingProvider::getIntervalString)
                 .collect(Collectors.joining(" OR "));
 
-        return views.getViews().stream()
+        return views.getViewsStream()
                 .filter(v -> !v.isEmptyForIntervals(intervals))
                 .map(v -> {
-                    SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(v.getSELECT(intervalsSqlFilter));
+                    SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(v.getSELECT(filter));
                     TargetAtom targetAtom = transformer.apply(iri, v);
                     return new OntopNativeSQLPPTriplesMap(
                             IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, ImmutableList.of(targetAtom));
