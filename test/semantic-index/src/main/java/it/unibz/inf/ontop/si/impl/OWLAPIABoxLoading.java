@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.si.impl;
 
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
-import it.unibz.inf.ontop.si.repository.impl.SIRepository;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRepository;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
@@ -39,7 +39,7 @@ public class OWLAPIABoxLoading {
         Ontology ontology = translatorOWL2QL.translateAndClassify(owlOntology);
         ClassifiedTBox tbox = ontology.tbox();
 
-        SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
+        SemanticIndexRepository repo = new SemanticIndexRepository(ontology.tbox(), loadingConfiguration);
 
 
         try {

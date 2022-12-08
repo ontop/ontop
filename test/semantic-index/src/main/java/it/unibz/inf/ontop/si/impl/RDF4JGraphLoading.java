@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
-import it.unibz.inf.ontop.si.repository.impl.SIRepository;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRepository;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
@@ -47,7 +47,7 @@ public class RDF4JGraphLoading {
         }
         Ontology vocabulary = collectVocabulary.vb.build();
 
-        SIRepository repo = new SIRepository(vocabulary.tbox(), loadingConfiguration);
+        SemanticIndexRepository repo = new SemanticIndexRepository(vocabulary.tbox(), loadingConfiguration);
         Connection connection = repo.createConnection();
 
         //  Load the data
@@ -91,7 +91,7 @@ public class RDF4JGraphLoading {
 
     private static final class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
-        private final SIRepository repository;
+        private final SemanticIndexRepository repository;
         private final Connection connection;
         private final TypeFactory typeFactory;
         private final TermFactory termFactory;
@@ -102,7 +102,7 @@ public class RDF4JGraphLoading {
         private int count = 0;
         private final RDF rdfFactory;
 
-        public SemanticIndexRDFHandler(SIRepository repository, Connection connection,
+        public SemanticIndexRDFHandler(SemanticIndexRepository repository, Connection connection,
                                        TypeFactory typeFactory, TermFactory termFactory,
                                        RDF rdfFactory) {
             this.repository = repository;
