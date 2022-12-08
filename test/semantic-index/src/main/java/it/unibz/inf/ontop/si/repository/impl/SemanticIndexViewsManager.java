@@ -12,12 +12,19 @@ import org.apache.commons.rdf.api.IRI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SemanticIndexViewsManager {
 
-	private final Map<SemanticIndexViewID, SemanticIndexView> views = new HashMap<>(); // fully mutable - see getView
+	final static RDBMSSIRepositoryManager.TableDescription emptinessIndexTable = new RDBMSSIRepositoryManager.TableDescription("NONEMPTYNESSINDEX",
+			ImmutableMap.of("TABLEID", "INTEGER",
+					"IDX", "INTEGER",
+					"TYPE1", "INTEGER",
+					"TYPE2", "INTEGER"), "*");
+
+	private final Map<SemanticIndexView.Identifier, SemanticIndexView> views = new HashMap<>(); // fully mutable - see getView
 
 	private final ImmutableMap<TermType, Integer> colTypetoSITable;
 
@@ -61,12 +68,12 @@ public class SemanticIndexViewsManager {
 	}
 
 	public SemanticIndexView getView(ObjectRDFType type) {
-		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
+		SemanticIndexView.Identifier viewId = new SemanticIndexView.Identifier(type);
 		return views.get(viewId);
 	}
 	
 	public SemanticIndexView getView(ObjectRDFType type1, RDFTermType type2) {
-		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		SemanticIndexView.Identifier viewId = new SemanticIndexView.Identifier(type1, type2);
 		/*
 		 * For language tags (need to know the concrete one)
 		 */
@@ -145,16 +152,24 @@ public class SemanticIndexViewsManager {
 	}
 
 
+	public void init(Statement st) throws SQLException {
+		st.addBatch(emptinessIndexTable.getCREATE());
+	}
+
 	/**
 	 * Stores the emptiness index in the database
 	 * @throws SQLException 
 	 */
 
 	public void store(Connection conn) throws SQLException {
-		
-		try (PreparedStatement stm = conn.prepareStatement(RDBMSSIRepositoryManager.emptinessIndexTable.getINSERT("?, ?, ?, ?"))) {
+
+		try(Statement st = conn.createStatement()) {
+			st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
+		}
+
+		try (PreparedStatement stm = conn.prepareStatement(emptinessIndexTable.getINSERT("?, ?, ?, ?"))) {
 			for (SemanticIndexView view : views.values()) {
-				SemanticIndexViewID viewId = view.getId();
+				SemanticIndexView.Identifier viewId = view.getId();
 				for (Integer idx : view.getIndexes()) {
 					if (viewId.getType2() == null) {
 						// class view (only type1 is relevant)

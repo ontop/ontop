@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 
+import javax.annotation.Nonnull;
+
 public interface IRIDictionary {
 
     /***
@@ -12,5 +14,5 @@ public interface IRIDictionary {
      */
     int getId(String uri);
 
-    String getURI(Integer id);
+    @Nonnull  String getURI(Integer id);
 }

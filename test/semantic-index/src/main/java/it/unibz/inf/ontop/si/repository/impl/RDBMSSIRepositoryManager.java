@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,7 +58,7 @@ public class RDBMSSIRepositoryManager {
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
 	static final class TableDescription {
-		private final String tableName;
+		final String tableName;
 		private final String createCommand;
 		private final String insertCommand;
 		private final String selectCommand;
@@ -80,34 +79,11 @@ public class RDBMSSIRepositoryManager {
 		String getSELECT(String filter) {
 			return selectCommand +  " WHERE " + filter;
 		}
+
+		String getCREATE() { return createCommand; }
 	}
 
-	/**
-	 * Metadata tables 
-	 */
-	
-	private final static TableDescription indexTable = new TableDescription("IDX", 
-			ImmutableMap.of("URI", "VARCHAR(400)", 
-					        "IDX", "INTEGER", 
-					        "ENTITY_TYPE", "INTEGER"), "*");   
 
-	private final static TableDescription intervalTable = new TableDescription("IDXINTERVAL",
-			ImmutableMap.of("URI", "VARCHAR(400)", 
-					        "IDX_FROM", "INTEGER", 
-					        "IDX_TO", "INTEGER", 
-					        "ENTITY_TYPE", "INTEGER"), "*");
-
-	private final static TableDescription uriIdTable = new TableDescription("URIID",
-			ImmutableMap.of("ID", "INTEGER", 
-					        "URI", "VARCHAR(400)"), "*");
-	
-	final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
-			ImmutableMap.of("TABLEID", "INTEGER", 
-					        "IDX", "INTEGER",
-					        "TYPE1", "INTEGER", 
-					        "TYPE2", "INTEGER"), "*");
-
-	
 	/**
 	 *  Data tables
 	 */
@@ -186,7 +162,7 @@ public class RDBMSSIRepositoryManager {
 			.put(XSD.DATETIMESTAMP, (stm, o) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
 			.build();
 
-	private final SemanticIndexURIMap uriMap;
+	private final IRIDictionaryImpl uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
 
@@ -210,7 +186,7 @@ public class RDBMSSIRepositoryManager {
 
 		views = new SemanticIndexViewsManager(typeFactory);
         semanticIndex = new SemanticIndex(reasonerDag);
-		uriMap = new SemanticIndexURIMap();
+		uriMap = new IRIDictionaryImpl();
 
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 		int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
@@ -229,11 +205,8 @@ public class RDBMSSIRepositoryManager {
 		log.debug("Creating data tables");
 
 		try (Statement st = conn.createStatement()) {
-			st.addBatch(uriIdTable.createCommand);
-			
-			st.addBatch(indexTable.createCommand);
-			st.addBatch(intervalTable.createCommand);
-			st.addBatch(emptinessIndexTable.createCommand);
+			semanticIndex.init(st);
+			views.init(st);
 
 			st.addBatch(CLASS_TABLE.createCommand);
 			st.addBatch(ROLE_TABLE.createCommand);
@@ -242,8 +215,23 @@ public class RDBMSSIRepositoryManager {
 			
 			st.executeBatch();			
 		}
-		
-		insertMetadata(conn);
+
+		log.debug("Inserting semantic index metadata.");
+
+		boolean commitval = conn.getAutoCommit();
+		conn.setAutoCommit(false);
+
+		try {
+			semanticIndex.store(conn);
+			views.store(conn);
+			conn.commit();
+		}
+		catch (SQLException e) {
+			conn.rollback(); // If there is a big error, restore everything as it was
+		}
+		finally {
+			conn.setAutoCommit(commitval);
+		}
 	}
 
 	private boolean isDBSchemaDefined(Connection conn)  {
@@ -251,15 +239,8 @@ public class RDBMSSIRepositoryManager {
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", CLASS_TABLE.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ROLE_TABLE.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(RDF.LANGSTRING).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.STRING).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.INTEGER).tableName));
-            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.LONG).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DECIMAL).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DOUBLE).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DATETIME).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.BOOLEAN).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DATETIMESTAMP).tableName));
+			for (TableDescription d : ATTRIBUTE_TABLE_MAP.values())
+				st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", d.tableName));
 
 			return true; // everything is fine if we get to this point
 		} 
@@ -341,19 +322,13 @@ public class RDBMSSIRepositoryManager {
 		return success;
 	}
 
-	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
-	// TODO: use database to get the maximum URIId
-	private int maxUriId = -1;
-
 
 	private final class BatchProcessor implements AutoCloseable {
 		private final Connection conn;
-		private final PreparedStatement uriIdStm;
-		private final Map<SemanticIndexViewID, PreparedStatement> stmMap;
+		private final Map<SemanticIndexView.Identifier, PreparedStatement> stmMap;
 
 		BatchProcessor(Connection conn) throws SQLException {
 			this.conn = conn;
-			uriIdStm = conn.prepareStatement(uriIdTable.getINSERT("?, ?"));
 			stmMap = new HashMap<>();
 		}
 
@@ -457,26 +432,12 @@ public class RDBMSSIRepositoryManager {
 		}
 
 		private int getObjectConstantUriId(ObjectConstant c) throws SQLException {
-			// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
 			String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
 
-			int uriId = uriMap.getId(uri);
-			if (uriId < 0) {
-				uriId = ++maxUriId;
-				uriMap.set(uri, uriId);
-
-				// Construct the database INSERT statement
-				uriIdStm.setInt(1, uriId);
-				uriIdStm.setString(2, uri);
-				uriIdStm.addBatch();
-			}
-
-			return uriId;
+			return uriMap.getIdOrCreate(uri, null);
 		}
 
 		void execute() throws SQLException {
-			uriIdStm.executeBatch();
-			uriIdStm.clearBatch();
 			for (PreparedStatement stm : stmMap.values()) {
 				stm.executeBatch();
 				stm.clearBatch();
@@ -485,7 +446,6 @@ public class RDBMSSIRepositoryManager {
 
 		@Override
 		public void close() throws SQLException {
-			uriIdStm.close();
 			for (PreparedStatement stm : stmMap.values())
 				stm.close();
 		}
@@ -591,83 +551,4 @@ public class RDBMSSIRepositoryManager {
 	}
 
 
-
-	public final static int CLASS_TYPE = 1;
-	public final static int ROLE_TYPE = 2;
-
-	/***
-	 * Inserts the metadata about semantic indexes and intervals into the
-	 * database. The metadata is later used to reconstruct a semantic index
-	 * repository.
-	 */
-	public void insertMetadata(Connection conn) throws SQLException {
-
-		log.debug("Inserting semantic index metadata.");
-
-		boolean commitval = conn.getAutoCommit();
-		conn.setAutoCommit(false);
-
-		try {
-			// dropping previous metadata 
-			try (Statement st = conn.createStatement()) {
-				st.executeUpdate("DELETE FROM " + indexTable.tableName);
-				st.executeUpdate("DELETE FROM " + intervalTable.tableName);
-				st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
-			}
-
-			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
-				for (Entry<OClass, SemanticIndexRange> e : semanticIndex.getIndexedClasses())
-					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
-
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
-					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
-
-				for (Entry<DataPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedDataProperties())
-					insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
-
-				stm.executeBatch();
-			}
-
-			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
-				for (Entry<OClass, SemanticIndexRange> e : semanticIndex.getIndexedClasses())
-					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
-
-				for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedObjectProperties())
-					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
-
-				for (Entry<DataPropertyExpression, SemanticIndexRange> e : semanticIndex.getIndexedDataProperties())
-					insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
-
-				stm.executeBatch();
-			}
-
-			views.store(conn);
-			
-			conn.commit();
-		} 
-		catch (SQLException e) {
-			// If there is a big error, restore everything as it was
-			conn.rollback();
-		}
-		finally {
-			conn.setAutoCommit(commitval);			
-		}
-	}
-
-	private void insertIntervalMetadata(PreparedStatement stm, IRI iri, SemanticIndexRange range, int type) throws SQLException {
-		for (Interval it : range.getIntervals()) {
-			stm.setString(1, iri.getIRIString());
-			stm.setInt(2, it.getStart());
-			stm.setInt(3, it.getEnd());
-			stm.setInt(4, type);
-			stm.addBatch();
-		}
-	}
-
-	private void insertIndexData(PreparedStatement stm, IRI iri, SemanticIndexRange range, int type) throws SQLException {
-		stm.setString(1, iri.getIRIString());
-		stm.setInt(2, range.getIndex());
-		stm.setInt(3, type);
-		stm.addBatch();
-	}
 }

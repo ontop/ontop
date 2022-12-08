@@ -33,6 +33,9 @@ public class Interval {
 	private final int start, end;
 
     public Interval(int start, int end) {
+        if (start > end)
+            throw new IllegalArgumentException("Invalid interval [" + start + ", " + end + "]");
+
         this.start = start;
         this.end = end;
     }

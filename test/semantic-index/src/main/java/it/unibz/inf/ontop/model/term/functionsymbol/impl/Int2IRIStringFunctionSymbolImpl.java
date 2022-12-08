@@ -60,11 +60,10 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
         if (newTerm instanceof DBConstant) {
             try {
                 int id = Integer.parseInt(((DBConstant) newTerm).getValue());
-                return Optional.ofNullable(iriDictionary.getURI(id))
-                        .map(termFactory::getDBStringConstant)
-                        .orElseThrow(() -> new MinorOntopInternalBugException("Unknown encoded ID used: " + id));
-
-            } catch (NumberFormatException e) {
+                String iri = iriDictionary.getURI(id);
+                return termFactory.getDBStringConstant(iri);
+            }
+            catch (NumberFormatException e) {
                 throw new MinorOntopInternalBugException(getName() + " was expecting an integer, not " + newTerm);
             }
         }
