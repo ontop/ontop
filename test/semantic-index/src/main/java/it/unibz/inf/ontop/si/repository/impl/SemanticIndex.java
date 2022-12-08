@@ -52,12 +52,12 @@ public class SemanticIndex {
 	}
 
 
-	private final static RDBMSSIRepositoryManager.TableDescription indexTable = new RDBMSSIRepositoryManager.TableDescription("IDX",
+	private final static RepositoryTable INDEX_TABLE = new RepositoryTable("IDX",
 			ImmutableMap.of("URI", "VARCHAR(400)",
 					"IDX", "INTEGER",
 					"ENTITY_TYPE", "INTEGER"), "*");
 
-	private final static RDBMSSIRepositoryManager.TableDescription intervalTable = new RDBMSSIRepositoryManager.TableDescription("IDXINTERVAL",
+	private final static RepositoryTable INTERVAL_TABLE = new RepositoryTable("IDXINTERVAL",
 			ImmutableMap.of("URI", "VARCHAR(400)",
 					"IDX_FROM", "INTEGER",
 					"IDX_TO", "INTEGER",
@@ -65,8 +65,8 @@ public class SemanticIndex {
 
 
 	public void init(java.sql.Statement st) throws SQLException {
-		st.addBatch(indexTable.getCREATE());
-		st.addBatch(intervalTable.getCREATE());
+		st.addBatch(INDEX_TABLE.getCREATE());
+		st.addBatch(INTERVAL_TABLE.getCREATE());
 	}
 
 	public final static int CLASS_TYPE = 1;
@@ -76,31 +76,31 @@ public class SemanticIndex {
 	public void store(Connection conn) throws SQLException {
 		// dropping previous metadata
 		try (Statement st = conn.createStatement()) {
-			st.executeUpdate("DELETE FROM " + indexTable.tableName);
-			st.executeUpdate("DELETE FROM " + intervalTable.tableName);
+			st.executeUpdate(INDEX_TABLE.getDELETE());
+			st.executeUpdate(INTERVAL_TABLE.getDELETE());
 		}
 
-		try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
-			for (Entry<OClass, SemanticIndexRange> e : getIndexedClasses())
+		try (PreparedStatement stm = conn.prepareStatement(INDEX_TABLE.getINSERT("?, ?, ?"))) {
+			for (Entry<OClass, SemanticIndexRange> e : classRanges.entrySet())
 				insertIndexData(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
 
-			for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : getIndexedObjectProperties())
+			for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : opRanges.entrySet())
 				insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
-			for (Entry<DataPropertyExpression, SemanticIndexRange> e : getIndexedDataProperties())
+			for (Entry<DataPropertyExpression, SemanticIndexRange> e : dpRanges.entrySet())
 				insertIndexData(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
 			stm.executeBatch();
 		}
 
-		try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
-			for (Entry<OClass, SemanticIndexRange> e : getIndexedClasses())
+		try (PreparedStatement stm = conn.prepareStatement(INTERVAL_TABLE.getINSERT("?, ?, ?, ?"))) {
+			for (Entry<OClass, SemanticIndexRange> e : classRanges.entrySet())
 				insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), CLASS_TYPE);
 
-			for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : getIndexedObjectProperties())
+			for (Entry<ObjectPropertyExpression, SemanticIndexRange> e : opRanges.entrySet())
 				insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
-			for (Entry<DataPropertyExpression, SemanticIndexRange> e : getIndexedDataProperties())
+			for (Entry<DataPropertyExpression, SemanticIndexRange> e : dpRanges.entrySet())
 				insertIntervalMetadata(stm, e.getKey().getIRI(), e.getValue(), ROLE_TYPE);
 
 			stm.executeBatch();
