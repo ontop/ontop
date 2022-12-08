@@ -30,8 +30,8 @@ import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.*;
@@ -316,7 +316,7 @@ public class RDB2RDFTest {
 			throws OWLOntologyCreationException, MappingException, MappingBootstrappingException {
 
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();
-		DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
+		Bootstrapper bootstrapper = Bootstrapper.defaultBootstrapper();
 		BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI);
 
 		SQLPPMapping bootstrappedMapping = results.getPPMapping();

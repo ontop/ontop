@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.MPBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DefaultDirectMappingBootstrapper;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -13,15 +14,16 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  * https://www.w3.org/TR/rdb-direct-mapping/
  *
  */
-public interface DirectMappingBootstrapper {
+public interface Bootstrapper {
 
     BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI)
             throws MappingBootstrappingException, MappingException, OWLOntologyCreationException;
 
-    static DirectMappingBootstrapper defaultBootstrapper() {
+    static Bootstrapper defaultBootstrapper() {
         return new DefaultDirectMappingBootstrapper();
     }
 
+    static Bootstrapper mpBootstrapper() { return new MPBootstrapper(); }
 
     interface BootstrappingResults {
 

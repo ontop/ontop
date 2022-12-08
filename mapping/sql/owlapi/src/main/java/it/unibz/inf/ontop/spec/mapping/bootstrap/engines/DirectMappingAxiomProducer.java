@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.engines;
 
 /*
  * #%L

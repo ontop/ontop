@@ -8,8 +8,8 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -67,7 +67,7 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
             OntopSQLOWLAPIConfiguration configuration = builder.build();
 
-            DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
+            Bootstrapper bootstrapper = Bootstrapper.defaultBootstrapper();
             BootstrappingResults results = bootstrapper.bootstrap(configuration, baseIRI);
 
             File ontologyFile = new File(owlFile);

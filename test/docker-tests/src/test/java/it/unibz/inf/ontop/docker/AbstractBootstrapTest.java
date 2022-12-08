@@ -3,11 +3,10 @@ package it.unibz.inf.ontop.docker;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLException;
@@ -58,8 +57,8 @@ public class AbstractBootstrapTest {
                 .propertyFile(propertyFile)
                 .build();
 
-        DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
-        DirectMappingBootstrapper.BootstrappingResults results = bootstrapper.bootstrap(config, baseIRI);
+        Bootstrapper bootstrapper = Bootstrapper.defaultBootstrapper();
+        Bootstrapper.BootstrappingResults results = bootstrapper.bootstrap(config, baseIRI);
 
         File obdaFile = new File(outputObdaFile);
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.engines.impl;
 
 /*
  * #%L
@@ -40,7 +40,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.engines.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -56,7 +57,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -85,7 +85,7 @@ public class DirectMappingEngine {
 	 * Entry point.
 	 *
 	 */
-	static BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI)
+	public static BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI)
 			throws MappingException, OWLOntologyCreationException, MappingBootstrappingException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
