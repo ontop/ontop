@@ -32,7 +32,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestQueryProcessor.class);
 
 	private final QueryRewriter rewriter;
-	private final NativeQueryGenerator datasourceQueryGenerator;
+	protected final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
@@ -44,7 +44,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryLogger.Factory queryLoggerFactory;
 
 	@AssistedInject
-	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
+	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								QueryCache queryCache,
 								QueryUnfolder.Factory queryUnfolderFactory,
 								TranslationFactory translationFactory,
@@ -144,7 +144,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private IQ generateExecutableQuery(IQ iq) {
+	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
