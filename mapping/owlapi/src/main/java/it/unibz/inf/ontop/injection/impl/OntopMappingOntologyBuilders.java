@@ -27,7 +27,8 @@ public class OntopMappingOntologyBuilders {
 
         private OntopMappingOntologyOptions(Optional<File> ontologyFile,
                                             Optional<URL> ontologyURL,
-                                            Optional<Reader> ontologyReader, Optional<String> xmlCatalogFile,
+                                            Optional<Reader> ontologyReader,
+                                            Optional<String> xmlCatalogFile,
                                             OntopMappingOptions mappingOptions) {
             this.ontologyFile = ontologyFile;
             this.ontologyReader = ontologyReader;

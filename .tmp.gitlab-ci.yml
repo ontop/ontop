@@ -1,0 +1,4 @@
+test:
+  image: maven:3.6-jdk-11
+  script:
+    - 'mvn test'

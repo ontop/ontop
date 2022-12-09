@@ -1,0 +1,138 @@
+rules = [
+    """
+    PREFIX : <http://employee.example.org/voc#>
+
+    INSERT {
+      ?e :fullName ?fullName .
+    } WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?firstName, ' ', ?lastName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?d :hasPosition [ a :Position ; rdfs:label "Developer" ] .
+    } WHERE {
+      ?d a :Developer .
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      GRAPH <http://employee.example.org/graph1> {
+         ?employee :label ?label .
+      }
+    } WHERE {
+      ?employee a :Employee ;
+        :fullName ?fullName ;
+        :hasPosition / rdfs:label ?positionLabel .
+      BIND (CONCAT(?fullName,' (', ?positionLabel, ')') AS ?label)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?positionCategory a :PositionCategory ; :count ?count .
+    } WHERE {
+      { SELECT ?positionLabel (COUNT(DISTINCT ?employee) AS ?count) WHERE {
+        ?employee a :Employee ;
+           :hasPosition / rdfs:label ?positionLabel .
+        }
+        GROUP BY ?positionLabel
+      }
+      BIND (IRI(CONCAT("http://example.org/positionCategory/", ?positionLabel)) AS ?positionCategory)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      [] a :Event ; :label ?title .
+    } WHERE {
+      ?activity a :Activity ; :title ?title .
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?employee :doesNotMatter ?notAProperty .
+    } WHERE {
+      ?employee a :Employee ;
+        :notAProperty ?notAProperty ;
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    WITH <http://employee.example.org/data/graph/company2>
+    INSERT {
+      ?e :fullName ?fullName .
+    } WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?lastName, ' ', ?firstName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    WITH <http://employee.example.org/data/newGraph>
+    INSERT {
+      ?e :fullName ?fullName .
+    }
+    USING <http://employee.example.org/data/graph/company2>
+    WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?lastName, ' ', ?firstName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e :capitalizedName ?name .
+    }
+    USING <http://employee.example.org/data/graph/company2>
+    WHERE {
+      ?e a :Employee ;
+         :lastName ?lastName .
+      BIND (UCASE(?lastName) AS ?name)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e :lowerCaseName ?name .
+    }
+    USING NAMED <http://employee.example.org/data/graph/company2-source2>
+    WHERE {
+      GRAPH ?g {
+        ?e a :Employee ;
+           :lastName ?lastName .
+        BIND (LCASE(?lastName) AS ?name)
+      }
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      ?e a :NotAClass .
+    }
+    USING NAMED <http://employee.example.org/data/graph/company2-source2>
+    WHERE {
+       ?e a :Employee .
+    }
+    """
+]

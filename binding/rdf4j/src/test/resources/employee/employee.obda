@@ -1,0 +1,33 @@
+[PrefixDeclaration]
+:		    http://employee.example.org/voc#
+data:		http://employee.example.org/data/
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-employee
+target		data:person/{"id"} a :Employee ; :firstName {"firstName"} ; :lastName {"lastName"} ; :country data:country/{"country"} ; :locality {"locality"} .
+source		SELECT * FROM "employee";
+
+mappingId	MAPID-country
+target		data:country/{"acronym"} a :Country ; :name {"name"} ; :continent data:continent/{"continent"} .
+source		SELECT * FROM "country";
+
+mappingId	MAPID-developer
+target		data:person/{"id"} a :Developer .
+source		SELECT * FROM "employee" WHERE "role" = 'developer';
+
+mappingId	MAPID-activity
+target		data:activity/{"type"}/{"title"} a :Activity ; :title {"title"} ; :participant data:person/{"employeeId"} .
+source		SELECT * FROM "activity_denorm";
+
+mappingId	MAPID-company2
+target		GRAPH data:graph/company2 { data:company2/staff/{"id"} a :Employee ; :firstName {"fname"} ; :lastName {"lname"} . }
+source		SELECT * FROM "staff-company2";
+
+mappingId	MAPID-company2-source2
+target		GRAPH data:graph/company2-source2 { data:company2/staff/{"id"} a :Employee ; :firstName {"fname"} ; :lastName {"lname"} . }
+source		SELECT * FROM "staff-company2-source2";
+
+]]
+

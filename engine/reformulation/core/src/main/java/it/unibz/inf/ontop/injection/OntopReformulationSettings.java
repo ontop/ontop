@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableSet;
 
-public interface OntopReformulationSettings extends OntopOBDASettings, OntopOptimizationSettings {
+public interface OntopReformulationSettings extends OntopKGQuerySettings {
 
     boolean isExistentialReasoningEnabled();
 
@@ -22,13 +22,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     boolean areTablesIncludedIntoQueryLog();
     boolean isQueryLoggingDecompositionEnabled();
     boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive();
-
-    /**
-     * Returns true if the pattern "?s ?p <describedIRI>" should also be
-     * considered while answering a DESCRIBE query.
-     *
-     */
-    boolean isFixedObjectIncludedInDescribe();
 
     ImmutableSet<String> getHttpHeaderNamesToLog();
 
@@ -60,6 +53,4 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String QUERY_TEMPLATE_EXTRACTION = "ontop.queryLogging.extractQueryTemplate";
     String QUERY_LOGGING_DECOMPOSITION = "ontop.queryLogging.decomposition";
     String QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE = "ontop.queryLogging.decompositionAndMergingMutuallyExclusive";
-
-    String INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE = "ontop.includeFixedObjectPositionInDescribe";
 }

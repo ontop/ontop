@@ -20,6 +20,7 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${constraint:#{null}}") String constraint,
                                                              @Value("${db-metadata:#{null}}") String dbMetadata,
                                                              @Value("${ontop-views:#{null}}") String ontopViews,
+                                                             @Value("${sparql-rules:#{null}}") String sparqlRules,
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
                                                              @Value("${db-url:#{null}}") String dbUrl,
@@ -48,6 +49,9 @@ public class OntopVirtualRepositoryBean {
 
         if (ontopViews !=null && !ontopViews.isEmpty())
             builder.ontopViewFile(ontopViews);
+
+        if (sparqlRules !=null && !sparqlRules.isEmpty())
+            builder.sparqlRulesFile(sparqlRules);
 
         if (dbUser != null && !dbUser.isEmpty())
             builder.jdbcUser(dbUser);

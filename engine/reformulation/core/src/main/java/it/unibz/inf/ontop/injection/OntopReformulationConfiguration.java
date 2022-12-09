@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.injection;
 
 
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 
 
-public interface OntopReformulationConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
+public interface OntopReformulationConfiguration extends OntopKGQueryConfiguration {
 
     @Override
     OntopReformulationSettings getSettings();
@@ -18,7 +18,7 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
      */
     QueryReformulator loadQueryReformulator() throws OBDASpecificationException;
 
-    InputQueryFactory getInputQueryFactory();
+    KGQueryFactory getKGQueryFactory();
 
 
     interface OntopReformulationBuilderFragment<B extends Builder<B>> {
@@ -26,8 +26,7 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
         B enableExistentialReasoning(boolean enable);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopReformulationBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
-            OntopOptimizationConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopReformulationBuilderFragment<B>, OntopKGQueryConfiguration.Builder<B>{
 
         @Override
         OntopReformulationConfiguration build();
