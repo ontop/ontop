@@ -5,13 +5,11 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
@@ -89,4 +87,54 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
                 "   NOT view_name LIKE 'AQ$_%'");
     }
+
+    @Override
+    protected boolean isPrimaryKeyDisabled(RelationID id, String primaryKeyId) {
+        return isConstraintDisabled(id, primaryKeyId);
+    }
+    @Override
+    protected boolean isUniqueConstraintDisabled(RelationID id, String uniqueConstraintId) {
+        return isConstraintDisabled(id, uniqueConstraintId);
+    }
+    protected boolean isForeignKeyDisabled(RelationID id, String foreignKeyId) {
+        return isConstraintDisabled(id, foreignKeyId);
+    }
+
+
+    private boolean isConstraintDisabled(RelationID id, String constraintId) {
+        /*
+            OWNER	VARCHAR2(30)	NOT NULL	Owner of the constraint definition
+            CONSTRAINT_NAME	VARCHAR2(30)	NOT NULL	Name of the constraint definition
+            CONSTRAINT_TYPE	VARCHAR2(1)	 	Type of constraint definition:
+                C (check constraint on a table)
+                P (primary key)
+                U (unique key)
+                R (referential integrity)
+                V (with check option, on a view)
+                O (with read only, on a view)
+            TABLE_NAME	VARCHAR2(30)	NOT NULL	Name associated with the table (or view) with constraint definition
+            STATUS	VARCHAR2(8)	 	Enforcement status of constraint (ENABLED or DISABLED)
+     */
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT status\n" +
+                        "FROM all_constraints\n" +
+                        "WHERE constraint_name = :1\n" +
+                        "  AND table_name = :2\n" +
+                        "  AND owner = :3")) {
+            stmt.setString(1, constraintId);
+            stmt.setString(2, getRelationName(id));
+            stmt.setString(3, getRelationSchema(id));
+            stmt.closeOnCompletion();
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String status = rs.getString("status");
+                return "DISABLED".equals(status);
+            }
+            throw new MinorOntopInternalBugException("Constraint " + constraintId + " in " + id + " not found");
+        }
+        catch (SQLException e) {
+            throw new MinorOntopInternalBugException("Error retrieving constraint " + constraintId + " in " + id + " info: " + e.getMessage());
+        }
+    }
 }
+

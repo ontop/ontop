@@ -1,12 +1,14 @@
 [![Maven Central](https://img.shields.io/maven-central/v/it.unibz.inf.ontop/ontop.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22it.unibz.inf.ontop%22)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![SourceForge](https://img.shields.io/sourceforge/dm/ontop4obda.svg)](http://sourceforge.net/projects/ontop4obda/files/)
+[![Docker](https://img.shields.io/docker/image-size/ontop/ontop-endpoint?label=ontop%2Fontop-endpoint)](https://hub.docker.com/r/ontop/ontop-endpoint)
 [![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
+
 
 | Branch    | build status  |
 |-----------|---------------|
-| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| [version4](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=version4)](https://travis-ci.org/ontop/ontop)|
+| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=master)](https://github.com/ontop/ontop/actions/)|
+| [version5](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://github.com/ontop/ontop/actions/)|
 
 
 Ontop
@@ -45,7 +47,7 @@ License
 The Ontop framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2021 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2022 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
