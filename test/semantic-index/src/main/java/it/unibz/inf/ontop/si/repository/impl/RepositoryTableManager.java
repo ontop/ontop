@@ -30,44 +30,50 @@ public class RepositoryTableManager {
 	public static final String VAL_COLUMN = "VAL";
 	public static final String TYPE_COLUMN = "TYPE";
 
+	private static final String IDX_COLUMN_TYPE = "SMALLINT";
+	private static final String URI_COLUMN_TYPE = "INTEGER";
+	private static final String ISBNODE_COLUMN_TYPE = "BOOLEAN";
+	private static final String VAL_COLUMN_TYPE = "VARCHAR(1000)";
+	private static final String IRI_COLUMN_TYPE = "VARCHAR(200)";
+
 	private final static RepositoryTable CLASS_TABLE = new RepositoryTable("QUEST_CLASS_ASSERTION",
-			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
-					URI_COLUMN, "INTEGER NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL"), URI_COLUMN + " as X");
+			ImmutableMap.of(IDX_COLUMN, IDX_COLUMN_TYPE,
+					URI_COLUMN, URI_COLUMN_TYPE,
+					ISBNODE_COLUMN, ISBNODE_COLUMN_TYPE),  RepositoryTable.getSelectListOf(URI_COLUMN));
 
 	private final static RepositoryTable OBJECT_PROPERTY_TABLE = new RepositoryTable("QUEST_OBJECT_PROPERTY_ASSERTION",
-			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
-					URI_COLUMN, "INTEGER NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
-					URI2_COLUMN, "INTEGER NOT NULL",
-					ISBNODE2_COLUMN, "BOOLEAN NOT NULL"), URI_COLUMN + " as X, " + URI2_COLUMN + " as Y");
+			ImmutableMap.of(IDX_COLUMN, IDX_COLUMN_TYPE,
+					URI_COLUMN, URI_COLUMN_TYPE,
+					ISBNODE_COLUMN, ISBNODE_COLUMN_TYPE,
+					URI2_COLUMN, URI_COLUMN_TYPE,
+					ISBNODE2_COLUMN, ISBNODE_COLUMN_TYPE),  RepositoryTable.getSelectListOf(URI_COLUMN, URI2_COLUMN));
 
 	private static RepositoryTable getDataPropertyTable(String tableNameFragment, String sqlTypeName) {
 		return new RepositoryTable(String.format("QUEST_DATA_PROPERTY_%s_ASSERTION", tableNameFragment),
-				ImmutableMap.of(IDX_COLUMN, "SMALLINT  NOT NULL",
-						URI_COLUMN, "INTEGER NOT NULL",
-						ISBNODE_COLUMN, "BOOLEAN NOT NULL",
-						VAL_COLUMN, sqlTypeName), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
+				ImmutableMap.of(IDX_COLUMN, IDX_COLUMN_TYPE,
+						URI_COLUMN, URI_COLUMN_TYPE,
+						ISBNODE_COLUMN, ISBNODE_COLUMN_TYPE,
+						VAL_COLUMN, sqlTypeName),  RepositoryTable.getSelectListOf(URI_COLUMN, VAL_COLUMN));
 	}
 
 	// LANG_STRING is special because of one extra attribute (LANG)
 	private final static RepositoryTable LANGSTRING_DATA_PROPERTY_TABLE = new RepositoryTable("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
-					URI_COLUMN, "INTEGER NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
-					VAL_COLUMN, "VARCHAR(1000) NOT NULL",
-					LANG_COLUMN, "VARCHAR(20)"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
+			ImmutableMap.of(IDX_COLUMN, IDX_COLUMN_TYPE,
+					URI_COLUMN, URI_COLUMN_TYPE,
+					ISBNODE_COLUMN, ISBNODE_COLUMN_TYPE,
+					VAL_COLUMN, VAL_COLUMN_TYPE,
+					LANG_COLUMN, "VARCHAR(20)"),  RepositoryTable.getSelectListOf(URI_COLUMN, VAL_COLUMN));
 
 	private final static RepositoryTable DEFAULT_TYPE_DATA_PROPERTY_TABLE = new RepositoryTable("QUEST_DATA_PROPERTY_DEFAULT_TYPE_ASSERTION",
-			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
-					URI_COLUMN, "INTEGER NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
-					VAL_COLUMN, "VARCHAR(1000) NOT NULL",
-					TYPE_COLUMN, "VARCHAR(200) NOT NULL"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
+			ImmutableMap.of(IDX_COLUMN, IDX_COLUMN_TYPE,
+					URI_COLUMN, URI_COLUMN_TYPE,
+					ISBNODE_COLUMN, ISBNODE_COLUMN_TYPE,
+					VAL_COLUMN, VAL_COLUMN_TYPE,
+					TYPE_COLUMN, IRI_COLUMN_TYPE), RepositoryTable.getSelectListOf(URI_COLUMN, VAL_COLUMN));
 
 	// all other datatypes are treated similarly
 	private final static ImmutableMap<IRI, RepositoryTable> DATA_PROPERTY_TABLE_MAP = ImmutableMap.<IRI, RepositoryTable>builder()
-			.put(XSD.STRING, getDataPropertyTable("STRING", "VARCHAR(1000)"))
+			.put(XSD.STRING, getDataPropertyTable("STRING", VAL_COLUMN_TYPE))
 			.put(XSD.INTEGER, getDataPropertyTable("INTEGER", "BIGINT"))
 			.put(XSD.INT, getDataPropertyTable("INT", "INTEGER"))
 			.put(XSD.UNSIGNED_INT, getDataPropertyTable("UNSIGNED_INT", "INTEGER"))
@@ -95,9 +101,11 @@ public class RepositoryTableManager {
 
 	private static final int VAL_PARAM_INDEX = 3;
 
+	private static final PreparedStatementInsertAction DEFAULT_TYPE_TABLE_INSERT_STM = (stm, o) -> stm.setString(VAL_PARAM_INDEX, o.getValue());
+
 	private static final ImmutableMap<IRI, PreparedStatementInsertAction> DATA_PROPERTY_TABLE_INSERT_STM_MAP = ImmutableMap.<IRI, PreparedStatementInsertAction>builder()
-			.put(RDF.LANGSTRING, (stm, o) ->  stm.setString(VAL_PARAM_INDEX, o.getValue()))
-			.put(XSD.STRING, (stm, o) -> stm.setString(VAL_PARAM_INDEX, o.getValue()))
+			.put(RDF.LANGSTRING, DEFAULT_TYPE_TABLE_INSERT_STM)
+			.put(XSD.STRING, DEFAULT_TYPE_TABLE_INSERT_STM)
 			.put(XSD.INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
 			.put(XSD.INT, (stm, o) -> stm.setInt(VAL_PARAM_INDEX, Integer.parseInt(o.getValue())))
 			.put(XSD.UNSIGNED_INT, (stm, o) -> stm.setInt(VAL_PARAM_INDEX, Integer.parseInt(o.getValue())))
@@ -113,8 +121,6 @@ public class RepositoryTableManager {
 			.put(XSD.BOOLEAN, (stm, o) -> stm.setBoolean(VAL_PARAM_INDEX, XsdDatatypeConverter.parseXsdBoolean(o.getValue())))
 			.put(XSD.DATETIMESTAMP, (stm, o) -> stm.setTimestamp(VAL_PARAM_INDEX, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
 			.build();
-
-	private static final PreparedStatementInsertAction DEFAULT_TYPE_TABLE_INSERT_STM = (stm, o) -> stm.setString(VAL_PARAM_INDEX, o.getValue());
 
 	private final Map<RepositoryTableSlice.Identifier, RepositoryTableSlice> views = new HashMap<>(); // fully mutable - see getView
 
