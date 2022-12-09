@@ -6,14 +6,11 @@
 []    rdf:type    rs:ResultSet ;
       rs:resultVariable  "x" ;
       rs:resultVariable  "v" ;
-      # Removed entry: The reason is because DBMS may modify the string representation
-      #    of the original data, i.e., "01"^^xsd:integer --> 1.
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :xi3 ;
-      #                             rs:variable  "x"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "01"^^xsd:integer ;
-      #                             rs:variable  "v"
-      #                           ]
-      #             ] .
-      .
+      rs:solution
+                  [ rs:binding  [ rs:value    :xi3 ;
+                                  rs:variable  "x"
+                                ] ;
+                    rs:binding  [ rs:value    "01"^^xsd:integer ;
+                                  rs:variable  "v"
+                                ]
+                  ] .

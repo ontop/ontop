@@ -3,9 +3,11 @@
 
 :xi1 :p  "1"^^xsd:integer .
 :xi2 :p  "1"^^xsd:integer .
+:xi3 :p  "01"^^xsd:integer .
 
 :xd1 :p  "1.0"^^xsd:double .
 :xd2 :p  "1.0"^^xsd:double .
+:xd3 :p  "1"^^xsd:double .
 
 :xp1 :p  "zzz" .
 :xp2 :p  "1" .

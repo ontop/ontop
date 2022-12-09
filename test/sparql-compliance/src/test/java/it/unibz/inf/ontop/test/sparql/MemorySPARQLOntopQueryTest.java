@@ -75,23 +75,14 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			// Quads are not yet supported by the SI
 			algebraManifest + "join-combo-2",
-			//error, missing a result, null equalities. TODO: fix
-			algebraManifest + "join-combo-1",
 
 			/* DATA-R2: BASIC*/
-
-			//error, empty query instead of solution. UNIX line end conventions is ignored
-			basicManifest + "quotes-4",
 
 			//missing result "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-6",
 
 			//MalformedQueryException SPARQL Parser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-7",
-
-			// "+5"^^xsd:integer is stored as a 5 integer by H2, which is in then rebuilt as "5"^^xsd:integer, which is not strictly equal to the initial one.
-			// Ontop must not return a result, test not passed due to a fair design choice of the Semantic Index (canonicalization of numbers)
-			basicManifest + "term-8",
 
 			/* DATA-R2: CAST
 			Cast with function call on the datatype is not yet supported e.g. FILTER(datatype(xsd:double(?v)) = xsd:double) . */
@@ -117,41 +108,26 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values + DISTINCT on IRI)
 			distinctManifest + "distinct-9",
 
-			//Incompatible with the SI mode: normalized lexical values + custom datatype
-			exprBuiltInManifest + "sameTerm-eq",
-
-			//Incompatible with the SI mode: normalized lexical values
-			exprBuiltInManifest + "sameTerm-not-eq",
-
-			//missing and unexpected bindings:
-			// The reason is because DBMS may modify the string representation
-			// of the original data no support for custom datatype
-			exprBuiltInManifest + "sameTerm-simple",
+			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0"
 
 			/* DATA-R2: EXPR-EQUALS   */
 
-			//missing and unexpected bindings, no custom datatypes supported
-			exprEqualsManifest + "eq-2-2",
-
-			// Lexical "values" of doubles are not preserved by the Semantic Index, so cannot match a non-canonical one
-			exprEqualsManifest + "eq-graph-2",
+			exprEqualsManifest + "eq-graph-1", // ??
+			exprEqualsManifest + "eq-2-1", // JdbcSQLException: Data conversion error converting "1.0e0"
+			exprEqualsManifest + "eq-2-2", // JdbcSQLException: Data conversion error converting "1.0e0"
 
 			/* DATA-R2: OPEN_WORLD   */
 			//TODO: double-check
-			openWorldManifest +"date-2",
+			openWorldManifest +"date-2", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z"
 			// > for xsd:date is not part of SPARQL 1.1
-			openWorldManifest +"date-3",
+			openWorldManifest +"date-3", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z"
 
-			//Missing bindings equality between variables
-			openWorldManifest +"open-eq-07",
-
-			//Missing bindings: problem handling language tags
-			openWorldManifest +"open-eq-08",
-			openWorldManifest +"open-eq-10",
-			openWorldManifest +"open-eq-11",
-
-			//Data conversion error converting "xyz"
-			openWorldManifest +"open-eq-12",
+			openWorldManifest +"open-eq-07", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-08", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-11", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-12", // JdbcSQLException: Data conversion error converting "xyz"
 
 			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
 			solutionSeqManifest + "limit-4",
@@ -161,25 +137,18 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			solutionSeqManifest + "slice-5",
 
 			/* DATA-R2: SORT */
-
 			// TODO: support the xsd:integer cast
 			sortManifest + "dawg-sort-function",
 
-
-			/* DATA-R2: TYPE-PROMOTION
-			 * all removed because of unsupported types */
+			/* DATA-R2: TYPE-PROMOTION */
 			// TODO: double-check why it is the case
 			typePromotionManifest + "type-promotion-13",
 			typePromotionManifest + "type-promotion-11",
-			typePromotionManifest + "type-promotion-07",
 			typePromotionManifest + "type-promotion-10",
 			typePromotionManifest + "type-promotion-09",
 			typePromotionManifest + "type-promotion-14",
 			typePromotionManifest + "type-promotion-08",
 			typePromotionManifest + "type-promotion-19",
-			typePromotionManifest + "type-promotion-22",
-			typePromotionManifest + "type-promotion-20",
-			typePromotionManifest + "type-promotion-21",
 			typePromotionManifest + "type-promotion-12",
 			typePromotionManifest + "type-promotion-18",
 			typePromotionManifest + "type-promotion-15",

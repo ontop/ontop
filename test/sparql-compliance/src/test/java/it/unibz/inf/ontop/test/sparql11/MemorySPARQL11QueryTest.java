@@ -80,10 +80,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//problem importing dataset
 			constructManifest + "constructwhere04",
 
-			/* CSV */
-			//different format for number and not supported custom datatype
-			csvTscResManifest + "tsv03",
-
 			/* NEGATION
 			not supported yet */
             negationManifest + "subset-by-exclusion-nex-1",
