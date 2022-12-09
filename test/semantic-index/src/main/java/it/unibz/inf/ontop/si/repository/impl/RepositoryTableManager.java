@@ -28,38 +28,44 @@ public class RepositoryTableManager {
 	public static final String URI2_COLUMN = "\"URI2\"";
 	public static final String LANG_COLUMN = "LANG";
 	public static final String VAL_COLUMN = "VAL";
-
+	public static final String TYPE_COLUMN = "TYPE";
 
 	private final static RepositoryTable CLASS_TABLE = new RepositoryTable("QUEST_CLASS_ASSERTION",
-			ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
-					IDX_COLUMN, "SMALLINT NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X");
+			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
+					URI_COLUMN, "INTEGER NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL"), URI_COLUMN + " as X");
 
 	private final static RepositoryTable OBJECT_PROPERTY_TABLE = new RepositoryTable("QUEST_OBJECT_PROPERTY_ASSERTION",
-			ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
+					URI_COLUMN, "INTEGER NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
 					URI2_COLUMN, "INTEGER NOT NULL",
-					IDX_COLUMN, "SMALLINT NOT NULL",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE",
-					ISBNODE2_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X, " + URI2_COLUMN + " as Y");
+					ISBNODE2_COLUMN, "BOOLEAN NOT NULL"), URI_COLUMN + " as X, " + URI2_COLUMN + " as Y");
 
 	private static RepositoryTable getDataPropertyTable(String tableNameFragment, String sqlTypeName) {
 		return new RepositoryTable(String.format("QUEST_DATA_PROPERTY_%s_ASSERTION", tableNameFragment),
-				ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
-						VAL_COLUMN, sqlTypeName,
-						IDX_COLUMN, "SMALLINT  NOT NULL",
-						ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
+				ImmutableMap.of(IDX_COLUMN, "SMALLINT  NOT NULL",
+						URI_COLUMN, "INTEGER NOT NULL",
+						ISBNODE_COLUMN, "BOOLEAN NOT NULL",
+						VAL_COLUMN, sqlTypeName), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
 	}
 
 	// LANG_STRING is special because of one extra attribute (LANG)
 	private final static RepositoryTable LANGSTRING_DATA_PROPERTY_TABLE = new RepositoryTable("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-			ImmutableMap.of(URI_COLUMN, "INTEGER NOT NULL",
+			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
+					URI_COLUMN, "INTEGER NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
 					VAL_COLUMN, "VARCHAR(1000) NOT NULL",
-					IDX_COLUMN, "SMALLINT NOT NULL",
-					LANG_COLUMN, "VARCHAR(20)",
-					ISBNODE_COLUMN, "BOOLEAN NOT NULL DEFAULT FALSE"),
-			URI_COLUMN + " as X, " + VAL_COLUMN + " as Y, " + LANG_COLUMN + " as Z");
+					LANG_COLUMN, "VARCHAR(20)"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
 
-	// all other datatypes from COL_TYPE are treated similarly
+	private final static RepositoryTable DEFAULT_TYPE_DATA_PROPERTY_TABLE = new RepositoryTable("QUEST_DATA_PROPERTY_DEFAULT_TYPE_ASSERTION",
+			ImmutableMap.of(IDX_COLUMN, "SMALLINT NOT NULL",
+					URI_COLUMN, "INTEGER NOT NULL",
+					ISBNODE_COLUMN, "BOOLEAN NOT NULL",
+					VAL_COLUMN, "VARCHAR(1000) NOT NULL",
+					TYPE_COLUMN, "VARCHAR(200) NOT NULL"), URI_COLUMN + " as X, " + VAL_COLUMN + " as Y");
+
+	// all other datatypes are treated similarly
 	private final static ImmutableMap<IRI, RepositoryTable> DATA_PROPERTY_TABLE_MAP = ImmutableMap.<IRI, RepositoryTable>builder()
 			.put(XSD.STRING, getDataPropertyTable("STRING", "VARCHAR(1000)"))
 			.put(XSD.INTEGER, getDataPropertyTable("INTEGER", "BIGINT"))
@@ -78,7 +84,8 @@ public class RepositoryTableManager {
 			.put(XSD.DATETIMESTAMP, getDataPropertyTable("DATETIMESTAMP", "TIMESTAMP"))
 			.build();
 	private static final ImmutableList<RepositoryTable> ABOX_TABLES = Stream.concat(
-			Stream.of(CLASS_TABLE, OBJECT_PROPERTY_TABLE, LANGSTRING_DATA_PROPERTY_TABLE), DATA_PROPERTY_TABLE_MAP.values().stream())
+					Stream.of(CLASS_TABLE, OBJECT_PROPERTY_TABLE, LANGSTRING_DATA_PROPERTY_TABLE, DEFAULT_TYPE_DATA_PROPERTY_TABLE),
+					DATA_PROPERTY_TABLE_MAP.values().stream())
 			.collect(ImmutableCollectors.toList());
 
 	@FunctionalInterface
@@ -86,26 +93,28 @@ public class RepositoryTableManager {
 		void setValue(PreparedStatement stm, RDFLiteralConstant o) throws SQLException;
 	}
 
-	public static final ImmutableMap<IRI, PreparedStatementInsertAction> DATA_PROPERTY_TABLE_INSERT_STM_MAP = ImmutableMap.<IRI, PreparedStatementInsertAction>builder()
-			.put(RDF.LANGSTRING, (stm, o) -> {
-				stm.setString(2, o.getValue());
-				stm.setString(4, o.getType().getLanguageTag().get().getFullString()); })
-			.put(XSD.STRING, (stm, o) -> stm.setString(2, o.getValue()))
-			.put(XSD.INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.INT, (stm, o) -> stm.setInt(2, Integer.parseInt(o.getValue())))
-			.put(XSD.UNSIGNED_INT, (stm, o) -> stm.setInt(2, Integer.parseInt(o.getValue())))
-			.put(XSD.NEGATIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.NON_NEGATIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.POSITIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.NON_POSITIVE_INTEGER, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.LONG, (stm, o) -> stm.setLong(2, Long.parseLong(o.getValue())))
-			.put(XSD.DECIMAL, (stm, o) -> stm.setBigDecimal(2, new BigDecimal(o.getValue())))
-			.put(XSD.FLOAT, (stm, o) -> stm.setDouble(2, Float.parseFloat(o.getValue())))
-			.put(XSD.DOUBLE, (stm, o) -> stm.setDouble(2, Double.parseDouble(o.getValue())))
-			.put(XSD.DATETIME, (stm, o) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
-			.put(XSD.BOOLEAN, (stm, o) -> stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(o.getValue())))
-			.put(XSD.DATETIMESTAMP, (stm, o) -> stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
+	private static final int VAL_PARAM_INDEX = 3;
+
+	private static final ImmutableMap<IRI, PreparedStatementInsertAction> DATA_PROPERTY_TABLE_INSERT_STM_MAP = ImmutableMap.<IRI, PreparedStatementInsertAction>builder()
+			.put(RDF.LANGSTRING, (stm, o) ->  stm.setString(VAL_PARAM_INDEX, o.getValue()))
+			.put(XSD.STRING, (stm, o) -> stm.setString(VAL_PARAM_INDEX, o.getValue()))
+			.put(XSD.INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.INT, (stm, o) -> stm.setInt(VAL_PARAM_INDEX, Integer.parseInt(o.getValue())))
+			.put(XSD.UNSIGNED_INT, (stm, o) -> stm.setInt(VAL_PARAM_INDEX, Integer.parseInt(o.getValue())))
+			.put(XSD.NEGATIVE_INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.NON_NEGATIVE_INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.POSITIVE_INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.NON_POSITIVE_INTEGER, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.LONG, (stm, o) -> stm.setLong(VAL_PARAM_INDEX, Long.parseLong(o.getValue())))
+			.put(XSD.DECIMAL, (stm, o) -> stm.setBigDecimal(VAL_PARAM_INDEX, new BigDecimal(o.getValue())))
+			.put(XSD.FLOAT, (stm, o) -> stm.setDouble(VAL_PARAM_INDEX, Float.parseFloat(o.getValue())))
+			.put(XSD.DOUBLE, (stm, o) -> stm.setDouble(VAL_PARAM_INDEX, Double.parseDouble(o.getValue())))
+			.put(XSD.DATETIME, (stm, o) -> stm.setTimestamp(VAL_PARAM_INDEX, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
+			.put(XSD.BOOLEAN, (stm, o) -> stm.setBoolean(VAL_PARAM_INDEX, XsdDatatypeConverter.parseXsdBoolean(o.getValue())))
+			.put(XSD.DATETIMESTAMP, (stm, o) -> stm.setTimestamp(VAL_PARAM_INDEX, XsdDatatypeConverter.parseXsdDateTime(o.getValue())))
 			.build();
+
+	private static final PreparedStatementInsertAction DEFAULT_TYPE_TABLE_INSERT_STM = (stm, o) -> stm.setString(VAL_PARAM_INDEX, o.getValue());
 
 	private final Map<RepositoryTableSlice.Identifier, RepositoryTableSlice> views = new HashMap<>(); // fully mutable - see getView
 
@@ -143,8 +152,13 @@ public class RepositoryTableManager {
 		RepositoryTableSlice.Identifier viewId = new RepositoryTableSlice.Identifier(type1, type2);
 
 		if (!views.containsKey(viewId))
-			if (type2 instanceof RDFDatatype)
-				addView(initLangStringDataProperty(type1, (RDFDatatype) type2));
+			if (type2 instanceof RDFDatatype) {
+				RDFDatatype t2 = (RDFDatatype)type2;
+				if (t2.getLanguageTag().isPresent())
+					addView(initLangStringDataProperty(type1, t2));
+				else
+					addView(initDefaultTypeDataProperty(type1, t2));
+			}
 			else
 				throw new UnexpectedRDFTermTypeException(type2);
 
@@ -152,44 +166,51 @@ public class RepositoryTableManager {
 	}
 
 	private RepositoryTableSlice initClass(ObjectRDFType type1) {
-		String value = getBooleanValue(type1.isBlankNode());
-		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, value);
+		String isBlankNode = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, isBlankNode);
 
 		String select = CLASS_TABLE.getSELECT(filter);
-		String insert = CLASS_TABLE.getINSERT("?, ?, " + value);
+		String insert = CLASS_TABLE.getINSERT(String.format("?, ?, %s", isBlankNode));
 		return new RepositoryTableSlice(type1, select, insert);
 	}
 
 	private RepositoryTableSlice initObjectProperty(ObjectRDFType type1, ObjectRDFType type2) {
-		String value1 = getBooleanValue(type1.isBlankNode());
-		String value2 = getBooleanValue(type2.isBlankNode());
-		String filter = String.format("%s = %s AND %s = %s AND ", ISBNODE_COLUMN, value1, ISBNODE2_COLUMN, value2);
+		String isBlankNode1 = getBooleanValue(type1.isBlankNode());
+		String isBlankNode2 = getBooleanValue(type2.isBlankNode());
+		String filter = String.format("%s = %s AND %s = %s AND ", ISBNODE_COLUMN, isBlankNode1, ISBNODE2_COLUMN, isBlankNode2);
 
 		String select = OBJECT_PROPERTY_TABLE.getSELECT(filter);
-		String insert = OBJECT_PROPERTY_TABLE.getINSERT("?, ?, ?, " + value1 + ", " + value2);
-		return new RepositoryTableSlice(type1, type2, select, insert);
+		String insert = OBJECT_PROPERTY_TABLE.getINSERT(String.format("?, ?, %s, ?, %s", isBlankNode1, isBlankNode2));
+		return new RepositoryTableSlice(type1, type2, select, insert, null);
 	}
 
 	private RepositoryTableSlice initDataProperty(ObjectRDFType type1, RDFDatatype type2, RepositoryTable table) {
-		String value = getBooleanValue(type1.isBlankNode());
-		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, value);
+		String isBlankNode = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, isBlankNode);
 
 		String select = table.getSELECT(filter);
-		String insert = table.getINSERT("?, ?, ?, " + value);
-		return new RepositoryTableSlice(type1, type2, select, insert);
+		String insert = table.getINSERT(String.format("?, ?, %s, ?", isBlankNode));
+		return new RepositoryTableSlice(type1, type2, select, insert, DATA_PROPERTY_TABLE_INSERT_STM_MAP.get(type2.getIRI()));
 	}
 
 	private RepositoryTableSlice initLangStringDataProperty(ObjectRDFType type1, RDFDatatype type2) {
-		String value = getBooleanValue(type1.isBlankNode());
-		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, value);
+		String isBlankNode = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, isBlankNode);
 
-		if (!type2.getLanguageTag().isPresent())
-			throw new UnexpectedRDFTermTypeException(type2);
+		String languageTag = type2.getLanguageTag().get().getFullString();
+		String select = LANGSTRING_DATA_PROPERTY_TABLE.getSELECT(filter + String.format("%s = '%s' AND ", LANG_COLUMN, languageTag));
+		String insert = LANGSTRING_DATA_PROPERTY_TABLE.getINSERT(String.format("?, ?, %s, ?, '%s'", isBlankNode, languageTag));
+		return new RepositoryTableSlice(type1, type2, select, insert, DATA_PROPERTY_TABLE_INSERT_STM_MAP.get(RDF.LANGSTRING));
+	}
 
-		LanguageTag languageTag = type2.getLanguageTag().get();
-		String select = LANGSTRING_DATA_PROPERTY_TABLE.getSELECT(filter + String.format("%s = '%s' AND ", LANG_COLUMN, languageTag.getFullString()));
-		String insert = LANGSTRING_DATA_PROPERTY_TABLE.getINSERT("?, ?, ?, ?, " + value);
-		return new RepositoryTableSlice(type1, type2, select, insert);
+	private RepositoryTableSlice initDefaultTypeDataProperty(ObjectRDFType type1, RDFDatatype type2) {
+		String isBlankNode = getBooleanValue(type1.isBlankNode());
+		String filter = String.format("%s = %s AND ", ISBNODE_COLUMN, isBlankNode);
+
+		String typeIri = type2.getIRI().getIRIString();
+		String select = DEFAULT_TYPE_DATA_PROPERTY_TABLE.getSELECT(filter + String.format("%s = '%s' AND ", TYPE_COLUMN, typeIri));
+		String insert = DEFAULT_TYPE_DATA_PROPERTY_TABLE.getINSERT(String.format("?, ?, %s, ?, '%s'", isBlankNode, typeIri));
+		return new RepositoryTableSlice(type1, type2, select, insert, DEFAULT_TYPE_TABLE_INSERT_STM);
 	}
 
 	private static String getBooleanValue(boolean b) {

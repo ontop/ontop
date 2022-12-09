@@ -139,6 +139,7 @@ public class SemanticIndexRepository {
                             .getIRI();
                     int counter = failures.getOrDefault(iri, 0);
                     failures.put(iri, counter + 1);
+                    System.out.println("FAIL: " + ax + " " + e.getMessage());
                 }
 
                 // Check if the batch count is already in the batch limit
@@ -222,8 +223,8 @@ public class SemanticIndexRepository {
 
             RepositoryTableSlice view =  views.getView(c1.getType());
             PreparedStatement stm = getPreparedStatement(view);
-            stm.setInt(1, uriId);
-            stm.setInt(2, idx);
+            stm.setInt(1, idx);
+            stm.setInt(2, uriId);
             stm.addBatch();
 
             // Register non emptiness
@@ -238,9 +239,9 @@ public class SemanticIndexRepository {
 
             RepositoryTableSlice view = views.getView(o1.getType(), o2.getType());
             PreparedStatement stm = getPreparedStatement(view);
-            stm.setInt(1, uriId1);
-            stm.setInt(2, uriId2);
-            stm.setInt(3, idx);
+            stm.setInt(1, idx);
+            stm.setInt(2, uriId1);
+            stm.setInt(3, uriId2);
             stm.addBatch();
 
             // Register non emptiness
@@ -255,19 +256,9 @@ public class SemanticIndexRepository {
 
             RepositoryTableSlice view =  views.getView(subject.getType(), object.getType());
             PreparedStatement stm = getPreparedStatement(view);
-            stm.setInt(1, uriId);
-
-            IRI typeIri = object.getType().getIRI();
-            RepositoryTableManager.PreparedStatementInsertAction insertStmValue = RepositoryTableManager.DATA_PROPERTY_TABLE_INSERT_STM_MAP.get(typeIri);
-            if (insertStmValue != null) {
-                insertStmValue.setValue(stm, object);
-            }
-            else {
-                LOGGER.warn("Ignoring assertion (unknown datatype): {} {} {}", dpe, subject, object);
-                return;
-            }
-
-            stm.setInt(3, idx);
+            stm.setInt(1, idx);
+            stm.setInt(2, uriId);
+            view.getInsertAction().setValue(stm, object);
             stm.addBatch();
 
             // register non-emptiness

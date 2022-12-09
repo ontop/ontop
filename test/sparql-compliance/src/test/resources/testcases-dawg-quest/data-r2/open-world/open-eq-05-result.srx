@@ -8,7 +8,6 @@
     <variable name="v"/>
   </head>
   <results>
-  <!-- Removed entry: Quest doesn't support custom datatypes.
     <result>
       <binding name="x">
         <uri>http://example/ns#x1</uri>
@@ -17,6 +16,5 @@
         <literal datatype="http://example/t#type1">a</literal>
       </binding>
     </result>
-  -->
   </results>
 </sparql>

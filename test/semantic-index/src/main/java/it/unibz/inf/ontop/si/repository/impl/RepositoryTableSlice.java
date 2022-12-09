@@ -54,18 +54,21 @@ public class RepositoryTableSlice {
 	private final Identifier id;
 	private final String selectCommand;
 	private final String insertCommand;
+	private final RepositoryTableManager.PreparedStatementInsertAction insertAction;
 	private final Set<Integer> indexes = new HashSet<>();
 	
-	public RepositoryTableSlice(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand) {
+	public RepositoryTableSlice(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand, RepositoryTableManager.PreparedStatementInsertAction insertAction) {
 		this.id = new Identifier(type1, type2);
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;
+		this.insertAction = insertAction;
 	}
 
 	public RepositoryTableSlice(ObjectRDFType type1, String selectCommand, String insertCommand) {
 		this.id = new Identifier(type1);
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;
+		this.insertAction = null;
 	}
 
 	public Identifier getId() {
@@ -79,6 +82,8 @@ public class RepositoryTableSlice {
 	public String getINSERT() {
 		return insertCommand;
 	}
+
+	public RepositoryTableManager.PreparedStatementInsertAction getInsertAction() { return insertAction; }
 	
 	public boolean isEmptyForIntervals(List<Interval> intervals) {
 		for (Interval interval : intervals) 

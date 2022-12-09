@@ -26,8 +26,8 @@ Some test have been modified  or are missing, respect to the original test case
 - DATA-R2: DATASET folder is missing
 
 - DATA-R2: EXPR-BUILTIN modification in the result files
-removed unknown datatype from
-expr-builtin/result-isliteral-1
+//removed unknown datatype from
+//expr-builtin/result-isliteral-1
 
 removed hierarchical language tag form
 expr-builtin/result-langMatches-2.ttl
@@ -39,8 +39,8 @@ modified string representation
 expr-builtin/result-str-1.ttl
 expr-builtin/result-str-2.ttl
 
-removed custom datatype
-expr-builtin/result-str-3.ttl
+//removed custom datatype
+//expr-builtin/result-str-3.ttl
 
 - DATA-R2: EXPR-EQUALS
 
@@ -150,7 +150,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			exprEqualsManifest + "eq-2-2",
 
 			// SI is not supporting arbitrary datatypes and lexical terms are normalized
-			exprEqualsManifest + "eq-2-1",
+			//exprEqualsManifest + "eq-2-1",
 
 			// Lexical "values" of doubles are not preserved by the Semantic Index, so cannot match a non-canonical one
 			exprEqualsManifest + "eq-graph-2",
@@ -162,16 +162,16 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			openWorldManifest +"date-3",
 
 			//TODO: check with there is no xsd:date in the mapping
-			openWorldManifest +"date-4",
+			//openWorldManifest +"date-4",
 
 			// Datatype unsupported by the SI
-			openWorldManifest +"open-cmp-02",
+			//openWorldManifest +"open-cmp-02",
 			
 			//Missing bindings: unsupported user-defined datatype
-			openWorldManifest +"open-eq-02",
+			//openWorldManifest +"open-eq-02",
 
 			//Unexpected bindings: should return empty result, we cannot know what is different from an unknown datatype
-			openWorldManifest +"open-eq-06",
+			//openWorldManifest +"open-eq-06",
 
 			//Missing bindings eaulity between variables
 			openWorldManifest +"open-eq-07",
@@ -225,7 +225,8 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			typePromotionManifest + "type-promotion-18",
 			typePromotionManifest + "type-promotion-15",
 			typePromotionManifest + "type-promotion-16",
-			typePromotionManifest + "type-promotion-17"
+			typePromotionManifest + "type-promotion-17",
+			typePromotionManifest + "type-promotion-27"
 
 
 	);
