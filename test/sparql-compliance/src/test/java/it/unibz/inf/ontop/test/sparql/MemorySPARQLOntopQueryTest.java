@@ -26,11 +26,6 @@ Some test have been modified  or are missing, respect to the original test case
 - DATA-R2: DATASET folder is missing
 
 - DATA-R2: EXPR-BUILTIN modification in the result files
-//removed unknown datatype from
-//expr-builtin/result-isliteral-1
-
-removed hierarchical language tag form
-expr-builtin/result-langMatches-2.ttl
 
 modified string representation and datatype
 expr-builtin/result-sameTerm.ttl
@@ -39,21 +34,13 @@ modified string representation
 expr-builtin/result-str-1.ttl
 expr-builtin/result-str-2.ttl
 
-//removed custom datatype
-//expr-builtin/result-str-3.ttl
-
 - DATA-R2: EXPR-EQUALS
 
 removed equality between different numerical datatypes
 expr-equals/data-eq.ttl
-expr-equals/result-eq-1.ttl
-expr-equals/result-eq-2.ttl
 
 removed mismatch in data representation, equality and custom datatype
 expr-equals/result-eq-2-1.ttl
-
-removed custom datatype
-expr-equals/result-eq2-2.ttl
 
 */
 
