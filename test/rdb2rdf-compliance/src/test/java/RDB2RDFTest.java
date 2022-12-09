@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.*;
@@ -317,7 +318,7 @@ public class RDB2RDFTest {
 
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();
 		Bootstrapper bootstrapper = Bootstrapper.defaultBootstrapper();
-		BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI);
+		BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI, new BootConf.Builder().build());
 
 		SQLPPMapping bootstrappedMapping = results.getPPMapping();
 

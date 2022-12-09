@@ -7,6 +7,7 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;
@@ -68,7 +69,7 @@ public class OntopBootstrap extends AbstractOntopCommand {
             OntopSQLOWLAPIConfiguration configuration = builder.build();
 
             Bootstrapper bootstrapper = Bootstrapper.defaultBootstrapper();
-            BootstrappingResults results = bootstrapper.bootstrap(configuration, baseIRI);
+            BootstrappingResults results = bootstrapper.bootstrap(configuration, baseIRI, new BootConf.Builder().build());
 
             File ontologyFile = new File(owlFile);
             File obdaFile = new File(mappingFile);
