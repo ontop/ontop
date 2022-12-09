@@ -119,8 +119,8 @@ public class AbstractRDF4JTest {
         assertEquals(expectedVValues, vValues);
     }
 
-    protected String reformulate(String queryString) {
-        return REPO_CONNECTION.reformulate(queryString);
+    protected String reformulateIntoNativeQuery(String queryString) {
+        return REPO_CONNECTION.reformulateIntoNativeQuery(queryString);
     }
 
     protected ImmutableList<String> runQuery(String queryString) {
