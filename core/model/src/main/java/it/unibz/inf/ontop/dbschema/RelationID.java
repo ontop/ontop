@@ -38,6 +38,8 @@ public interface RelationID {
 	RelationID getTableOnlyID();
 
 	int TABLE_INDEX = 0;
+	int SCHEMA_INDEX = 1;
+	int CATALOG_INDEX = 2;
 
 	/**
 	 *

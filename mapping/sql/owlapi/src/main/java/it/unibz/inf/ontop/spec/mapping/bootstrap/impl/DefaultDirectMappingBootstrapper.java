@@ -14,6 +14,6 @@ public class DefaultDirectMappingBootstrapper implements Bootstrapper {
     public BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI)
             throws MappingBootstrappingException, MappingException, OWLOntologyCreationException {
 
-        return DirectMappingEngine.bootstrap(configuration, baseIRI);
+        return DirectMappingEngine.bootstrapMappingAndOntology(configuration, baseIRI);
     }
 }
