@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.validation;
 
-import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
