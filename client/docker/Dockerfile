@@ -10,6 +10,7 @@ VOLUME /tmp
 EXPOSE 8080
 WORKDIR /opt/ontop
 ENTRYPOINT [ "./entrypoint.sh" ]
+HEALTHCHECK --interval=5s --timeout=5s --start-period=60s --retries=3 CMD [ "/bin/sh", "healthcheck.sh" ]
 
 # COMPILE STAGE triggered by 'image-from-sources' and using a Docker image of Maven for compiling
 # (note that except for generated binaries, content here will not end up in the built Ontop image)
@@ -19,7 +20,7 @@ COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn clean package -Pcli -Dassembly.cli.format=dir && \
     mv build/distribution/target/ontop-cli-* ontop && \
-    cp client/docker/entrypoint.sh ontop && \
+    cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop && \
     cd ontop && \
     rm -r ontop.bat ontop ontop-completion.sh jdbc
 

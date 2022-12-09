@@ -111,7 +111,7 @@ if [ "${TARGET}" = "image-from-binaries" ]; then
     rm -rf ${BINDIR}
     mv build/distribution/target/ontop-cli-* ${BINDIR}
     rm -r ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc}
-    cp client/docker/entrypoint.sh ${BINDIR}
+    cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
 fi
 
 # Build via Docker 'buildx', differentiating "simple" (local platform only) vs "cross" (linux/amd64 + linux/arm64) build
