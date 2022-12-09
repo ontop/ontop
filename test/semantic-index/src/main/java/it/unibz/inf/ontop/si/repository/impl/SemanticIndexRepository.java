@@ -33,8 +33,6 @@ public class SemanticIndexRepository {
 
     private final LoadingConfiguration loadingConfiguration;
 
-    private final IRIDictionaryImpl iriDictionary;
-
     private final ClassifiedTBox tbox;
 
     private final SemanticIndex semanticIndex;
@@ -47,13 +45,12 @@ public class SemanticIndexRepository {
         this.tbox = tbox;
         this.loadingConfiguration = loadingConfiguration;
 
-        iriDictionary = new IRIDictionaryImpl();
         semanticIndex = new SemanticIndex(tbox);
 
         TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
         views = new RepositoryTableManager(typeFactory);
 
-        mapping = new MappingProvider(iriDictionary, loadingConfiguration);
+        mapping = new MappingProvider(loadingConfiguration);
 
         LOGGER.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
     }
@@ -139,7 +136,7 @@ public class SemanticIndexRepository {
                             .getIRI();
                     int counter = failures.getOrDefault(iri, 0);
                     failures.put(iri, counter + 1);
-                    System.out.println("FAIL: " + ax + " " + e.getMessage());
+                    System.out.println("INSERT FAILURE: " + ax + " " + e);
                 }
 
                 // Check if the batch count is already in the batch limit
@@ -219,12 +216,12 @@ public class SemanticIndexRepository {
         void process(OClass cls, ObjectConstant c1) throws SQLException {
             int idx = semanticIndex.getRange(cls).getIndex();
 
-            int uriId = getObjectConstantUriId(c1);
+            String uri = getObjectConstantUri(c1);
 
             RepositoryTableSlice view =  views.getView(c1.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, idx);
-            stm.setInt(2, uriId);
+            stm.setString(2, uri);
             stm.addBatch();
 
             // Register non emptiness
@@ -234,14 +231,14 @@ public class SemanticIndexRepository {
         void process(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws SQLException {
             int	idx = semanticIndex.getRange(ope).getIndex();
 
-            int uriId1 = getObjectConstantUriId(o1);
-            int uriId2 = getObjectConstantUriId(o2);
+            String uri1 = getObjectConstantUri(o1);
+            String uri2 = getObjectConstantUri(o2);
 
             RepositoryTableSlice view = views.getView(o1.getType(), o2.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, idx);
-            stm.setInt(2, uriId1);
-            stm.setInt(3, uriId2);
+            stm.setString(2, uri1);
+            stm.setString(3, uri2);
             stm.addBatch();
 
             // Register non emptiness
@@ -252,12 +249,12 @@ public class SemanticIndexRepository {
         void process(DataPropertyExpression dpe, ObjectConstant subject, RDFLiteralConstant object) throws SQLException {
             int idx = semanticIndex.getRange(dpe).getIndex();
 
-            int uriId = getObjectConstantUriId(subject);
+            String uri = getObjectConstantUri(subject);
 
             RepositoryTableSlice view =  views.getView(subject.getType(), object.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, idx);
-            stm.setInt(2, uriId);
+            stm.setString(2, uri);
             view.getInsertAction().setValue(stm, object);
             stm.addBatch();
 
@@ -274,10 +271,8 @@ public class SemanticIndexRepository {
             return stm;
         }
 
-        int getObjectConstantUriId(ObjectConstant c) throws SQLException {
-            String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
-
-            return iriDictionary.getIdOrCreate(uri, null);
+        String getObjectConstantUri(ObjectConstant c)  {
+            return (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
         }
 
         void execute() throws SQLException {

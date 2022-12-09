@@ -33,7 +33,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static final String serviceManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/service/manifest#";
 
 
-	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
 			// TODO: support xsd:double cast
@@ -54,11 +54,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
-
-			//The SI does not support IRIs as ORDER BY conditions
-			functionsManifest + "plus-1",
-			//The SI does not support IRIs as ORDER BY conditions
-			functionsManifest + "plus-2",
 
 			//SHA1 is not supported in H2
 			functionsManifest + "sha1-01",
@@ -86,10 +81,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			constructManifest + "constructwhere04",
 
 			/* CSV */
-			// Sorting by IRI is not supported by the SI
-			csvTscResManifest + "tsv01",
-			// Sorting by IRI is not supported by the SI
-			csvTscResManifest + "tsv02",
 			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
 
@@ -103,11 +94,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			negationManifest + "subset-03",
 			negationManifest + "exists-01",
 			negationManifest + "exists-02",
-
-			// DISABLED DUE TO ORDER OVER IRI
-			negationManifest + "full-minuend",
-			// DISABLED DUE TO ORDER OVER IRI
-			negationManifest + "partial-minuend",
 
 			/* EXISTS
 			not supported yet */
@@ -174,13 +160,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// Quads are not yet supported by the SI
 			subqueryManifest + "subquery07",
 			// EXISTS is not supported yet
-			subqueryManifest + "subquery10",
-
-			//ORDER BY IRI (not supported by the SI)
-			subqueryManifest + "subquery11",
-
-			//ORDER BY IRI (not supported by the SI)
-			subqueryManifest + "subquery13"
+			subqueryManifest + "subquery10"
 	);
 
 	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,

@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.si.impl.LoadingConfiguration;
@@ -28,23 +26,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MappingProvider {
+
+    public static ImmutableList<String> MAPPING_VARIBLES = ImmutableList.of("X", "Y");
+
     private final static Logger LOGGER = LoggerFactory.getLogger(MappingProvider.class);
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
-    private final FunctionSymbol int2IRIStringFunctionSymbol;
-    private final RDFTermTypeConstant iriTypeConstant;
     private final SQLPPSourceQueryFactory sourceQueryFactory;
 
-    public MappingProvider(IRIDictionaryImpl uriMap, LoadingConfiguration loadingConfiguration) {
+    public MappingProvider(LoadingConfiguration loadingConfiguration) {
         this.termFactory = loadingConfiguration.getTermFactory();
         this.targetAtomFactory = loadingConfiguration.getTargetAtomFactory();
         this.sourceQueryFactory = loadingConfiguration.getSourceQueryFactory();
-
-        TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
-                dbTypeFactory.getDBTermType("INTEGER"), dbTypeFactory.getDBStringType(), uriMap);
-        iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
     }
 
     public ImmutableList<SQLPPTriplesMap> getMappings(ClassifiedTBox tbox, SemanticIndex semanticIndex, RepositoryTableManager views) {
@@ -98,18 +91,11 @@ public class MappingProvider {
     }
 
     private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
-        if (!type.isBlankNode()) {
-            ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
-                    int2IRIStringFunctionSymbol, var);
-            return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
-        }
-        else {
-            return termFactory.getRDFFunctionalTerm(var, termFactory.getRDFTermTypeConstant(type));
-        }
+        return termFactory.getRDFFunctionalTerm(var, termFactory.getRDFTermTypeConstant(type));
     }
 
     private TargetAtom constructClassTargetQuery(IRI iri, RepositoryTableSlice view) {
-        Variable X = termFactory.getVariable("X");
+        Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
 
         ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
         ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
@@ -119,8 +105,8 @@ public class MappingProvider {
     }
 
     private TargetAtom constructPropertyTargetQuery(IRI iri, RepositoryTableSlice view) {
-        Variable X = termFactory.getVariable("X");
-        Variable Y = termFactory.getVariable("Y");
+        Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
+        Variable Y = termFactory.getVariable(MAPPING_VARIBLES.get(1));
 
         ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
         IRIConstant iriTerm = termFactory.getConstantIRI(iri);

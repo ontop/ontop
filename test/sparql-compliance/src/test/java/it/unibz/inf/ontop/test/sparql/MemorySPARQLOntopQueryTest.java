@@ -66,7 +66,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 	private static final String typePromotionManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/type-promotion/manifest#";
 	private static final String optionalManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/optional/manifest#";
 
-	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			// Quads are not yet supported by the SI
 			optionalManifest + "dawg-optional-complex-2",
@@ -117,9 +117,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values + DISTINCT on IRI)
 			distinctManifest + "distinct-9",
 
-			// The DISTINCT blocks a CASE using the IRI dictionary function (SI limitation)
-			distinctManifest + "distinct-3",
-
 			//Incompatible with the SI mode: normalized lexical values + custom datatype
 			exprBuiltInManifest + "sameTerm-eq",
 
@@ -136,9 +133,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			//missing and unexpected bindings, no custom datatypes supported
 			exprEqualsManifest + "eq-2-2",
 
-			// SI is not supporting arbitrary datatypes and lexical terms are normalized
-			//exprEqualsManifest + "eq-2-1",
-
 			// Lexical "values" of doubles are not preserved by the Semantic Index, so cannot match a non-canonical one
 			exprEqualsManifest + "eq-graph-2",
 
@@ -148,19 +142,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// > for xsd:date is not part of SPARQL 1.1
 			openWorldManifest +"date-3",
 
-			//TODO: check with there is no xsd:date in the mapping
-			//openWorldManifest +"date-4",
-
-			// Datatype unsupported by the SI
-			//openWorldManifest +"open-cmp-02",
-			
-			//Missing bindings: unsupported user-defined datatype
-			//openWorldManifest +"open-eq-02",
-
-			//Unexpected bindings: should return empty result, we cannot know what is different from an unknown datatype
-			//openWorldManifest +"open-eq-06",
-
-			//Missing bindings eaulity between variables
+			//Missing bindings equality between variables
 			openWorldManifest +"open-eq-07",
 
 			//Missing bindings: problem handling language tags
@@ -170,10 +152,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			//Data conversion error converting "xyz"
 			openWorldManifest +"open-eq-12",
-
-			/* DATA-R2: REGEX
-			Missing bindings #string operation over URI is not supported in SI mode*/
-			regexManifest + "dawg-regex-004",
 
 			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
 			solutionSeqManifest + "limit-4",
@@ -186,12 +164,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			// TODO: support the xsd:integer cast
 			sortManifest + "dawg-sort-function",
-			// Sorted by an IRI, not supported by the SI
-			sortManifest + "dawg-sort-3",
-			// Sorted by an IRI, not supported by the SI
-			sortManifest + "dawg-sort-6",
-			// Sorted by an IRI, not supported by the SI
-			sortManifest + "dawg-sort-8",
 
 
 			/* DATA-R2: TYPE-PROMOTION
@@ -214,8 +186,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			typePromotionManifest + "type-promotion-16",
 			typePromotionManifest + "type-promotion-17",
 			typePromotionManifest + "type-promotion-27"
-
-
 	);
 
 	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,

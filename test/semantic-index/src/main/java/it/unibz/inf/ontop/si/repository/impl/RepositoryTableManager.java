@@ -31,7 +31,7 @@ public class RepositoryTableManager {
 	public static final String TYPE_COLUMN = "TYPE";
 
 	private static final String IDX_COLUMN_TYPE = "SMALLINT";
-	private static final String URI_COLUMN_TYPE = "INTEGER";
+	private static final String URI_COLUMN_TYPE = "VARCHAR(200)";
 	private static final String ISBNODE_COLUMN_TYPE = "BOOLEAN";
 	private static final String VAL_COLUMN_TYPE = "VARCHAR(1000)";
 	private static final String IRI_COLUMN_TYPE = "VARCHAR(200)";

@@ -10,8 +10,6 @@ import java.util.stream.IntStream;
 public class RepositoryTable {
     private final String tableName, createCommand, insertCommand, selectCommand;
 
-    private static final ImmutableList<String> VARIABLE_NAMES = ImmutableList.of("X", "Y", "Z");
-
     RepositoryTable(String tableName, ImmutableMap<String, String> columnDefinitions, String selectList) {
         this.tableName = tableName;
         this.createCommand = "CREATE TABLE " + tableName +
@@ -25,7 +23,7 @@ public class RepositoryTable {
 
     public static String getSelectListOf(String ... selectColumns) {
         return IntStream.range(0, selectColumns.length)
-                .mapToObj(i -> selectColumns[i] + " as " + VARIABLE_NAMES.get(i))
+                .mapToObj(i -> selectColumns[i] + " as " + MappingProvider.MAPPING_VARIBLES.get(i))
                 .collect(Collectors.joining(", "));
     }
 
