@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
+import org.apache.commons.rdf.api.RDF;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
@@ -25,9 +25,8 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.DirectMappingOntologyUtils;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -143,6 +142,10 @@ public abstract class AbstractBootstrappingEngine implements BootstrappingEngine
                 typeFactory,
                 true
         );
+    }
+
+    OWLOntology createEmptyOntology(String baseIRI) throws OWLOntologyCreationException {
+        return OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI));
     }
 
     protected final ImmutableList<NamedRelationDefinition> getDBMetadata() throws SQLException, MetadataExtractionException{
