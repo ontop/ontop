@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
@@ -31,7 +29,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -41,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -115,7 +111,7 @@ public class H2SameAsTest {
                 final OWLBindingSet bindingSet = rs.next();
                 for (String s : rs.getSignature()) {
 					OWLObject binding = bindingSet.getOWLObject(s);
-					String rendering = ToStringRenderer.getInstance().getRendering(binding);
+					String rendering = ToStringRenderer.getInstance().render(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
                 }

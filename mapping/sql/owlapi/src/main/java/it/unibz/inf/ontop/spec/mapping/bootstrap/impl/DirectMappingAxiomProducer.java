@@ -256,8 +256,9 @@ public class DirectMappingAxiomProducer {
 				builder.addColumn();
 			}
 
-			ImmutableList<Variable> arguments = pk.getAttributes().stream()
+			ImmutableList<ImmutableFunctionalTerm> arguments = pk.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+					.map(termFactory::getPartiallyDefinedConversionToString)
 					.collect(ImmutableCollectors.toList());
 
 			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);

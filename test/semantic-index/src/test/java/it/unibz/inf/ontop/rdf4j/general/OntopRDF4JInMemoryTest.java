@@ -83,7 +83,7 @@ public class OntopRDF4JInMemoryTest {
 				/*
 		 		* Repository must be always initialized first
 				 */
-			repository.initialize();
+			repository.init();
 		}
 	}
 

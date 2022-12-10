@@ -42,7 +42,7 @@ public class OntopEndpointNoPortalTest {
 
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
-        repo.initialize();
+        repo.init();
 
         try (RepositoryConnection conn = repo.getConnection()) {
             String queryString = "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +

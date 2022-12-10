@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 
-import it.unibz.inf.ontop.answering.resultset.OntopBinding;
-import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.query.resultset.OntopBinding;
+import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;

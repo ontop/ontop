@@ -22,15 +22,15 @@ public abstract class AbstractFactExtractor implements FactExtractor {
         // TODO: consider other facts
         return ontology
                 .map(o -> Stream.concat(
-                        selectAbox(o),
-                        extractTbox(o.tbox()))
+                        selectABox(o),
+                        extractTBox(o.tbox()))
                         .collect(ImmutableCollectors.toSet()))
                 .orElseGet(ImmutableSet::of);
     }
 
-    protected abstract Stream<RDFFact> extractTbox(ClassifiedTBox tbox);
+    protected abstract Stream<RDFFact> extractTBox(ClassifiedTBox tbox);
 
-    protected Stream<RDFFact> selectAbox(Ontology ontology) {
+    protected Stream<RDFFact> selectABox(Ontology ontology) {
         if (settings.isOntologyAnnotationQueryingEnabled())
             return ontology.abox().stream();
 

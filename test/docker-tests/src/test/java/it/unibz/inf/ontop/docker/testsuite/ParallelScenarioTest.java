@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.docker.QuestParallelScenario;
 import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -22,13 +22,14 @@ import java.util.List;
 
 @Ignore
 public class ParallelScenarioTest extends TestCase {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestParallelScenario.class);
 
 
     public interface ParallelFactory {
 
         QuestParallelScenario createQuestParallelScenarioTest(String suiteName,
-                                                              List<String> testURIs, List<String> names, List<String> queryFileURLs,
+                                                              List<String> testIRIs, List<String> names, List<String> queryFileURLs,
                                                               List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                                               String parameterFileURL);
 
@@ -46,7 +47,7 @@ public class ParallelScenarioTest extends TestCase {
 
         // Read manifest and create declared test cases
         Repository manifestRep = new SailRepository(new MemoryStore());
-        manifestRep.initialize();
+        manifestRep.init();
         RepositoryConnection con = manifestRep.getConnection();
 
         ScenarioManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
@@ -57,27 +58,28 @@ public class ParallelScenarioTest extends TestCase {
         // Extract test case information from the manifest file. Note that we only
         // select those test cases that are mentioned in the list.
         StringBuilder query = new StringBuilder(512);
-        query.append(" SELECT DISTINCT testURI, testName, resultFile, queryFile, owlFile, obdaFile, parameterFile \n");
-        query.append(" FROM {} rdf:first {testURI} \n");
+        query.append(" PREFIX mf: <http://obda.org/quest/tests/test-manifest#> \n");
+        query.append(" PREFIX obdat: <http://obda.org/quest/tests/test-scenario#> \n");
+        query.append(" PREFIX qt: <http://obda.org/quest/tests/test-query#> \n");
+        query.append(" SELECT DISTINCT ?testIRI ?testName ?resultFile ?queryFile ?owlFile ?obdaFile ?parameterFile \n");
+        query.append(" WHERE { [] rdf:first ?testIRI . \n");
         if (approvedOnly) {
-            query.append("    obdat:approval {obdat:Approved}; \n");
+            query.append(" ?testIRI obdat:approval obdat:Approved . \n");
         }
-        query.append("    mf:name {testName}; \n");
-        query.append("    mf:result {resultFile}; \n");
-        query.append("    mf:knowledgebase {owlFile}; \n");
-        query.append("    mf:mappings {obdaFile}; \n");
-        query.append("    [ mf:parameters {parameterFile} ]; \n");
-        query.append("    mf:action {action} qt:query {queryFile} \n");
-        query.append(" USING NAMESPACE \n");
-        query.append("    mf = <http://obda.org/quest/tests/test-manifest#>, \n");
-        query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
-        query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
-        TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+        query.append(" ?testIRI mf:name ?testName; \n");
+        query.append("    mf:result ?resultFile; \n");
+        query.append("    mf:knowledgebase ?owlFile; \n");
+        query.append("    mf:mappings ?obdaFile . \n");
+        query.append(" OPTIONAL { ?testIRI mf:parameters ?parameterFile . } \n");
+        query.append(" ?testIRI mf:action ?action . \n");
+        query.append(" ?action qt:query ?queryFile . }\n");
+
+        TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
         LOGGER.debug("Evaluating query..");
         TupleQueryResult testCases = testCaseQuery.evaluate();
 
-        List<String> testURIs = new ArrayList<>();
+        List<String> testIRIs = new ArrayList<>();
         List<String> testNames = new ArrayList<>();
         List<String> queryFiles = new ArrayList<>();
         List<String> resultFiles = new ArrayList<>();
@@ -93,7 +95,7 @@ public class ParallelScenarioTest extends TestCase {
         while (testCases.hasNext()) {
             BindingSet bindingSet = testCases.next();
 
-            URI testURI = (URI) bindingSet.getValue("testURI");
+            IRI testIRI = (IRI) bindingSet.getValue("testIRI");
             String testName = bindingSet.getValue("testName").toString();
             String resultFile = bindingSet.getValue("resultFile").toString();
             String queryFile = bindingSet.getValue("queryFile").toString();
@@ -128,13 +130,13 @@ public class ParallelScenarioTest extends TestCase {
 
             LOGGER.debug("Found test case: {}", testName);
 
-            testURIs.add(testURI.toString());
+            testIRIs.add(testIRI.toString());
             testNames.add(testName);
             queryFiles.add(queryFile);
             resultFiles.add(resultFile);
         }
 
-        QuestParallelScenario scenario = factory.createQuestParallelScenarioTest(suiteName, testURIs, testNames,
+        QuestParallelScenario scenario = factory.createQuestParallelScenarioTest(suiteName, testIRIs, testNames,
                 queryFiles, resultFiles, mainOwlFile, mainObdaFile, mainParameterFile);
 
         testCases.close();
@@ -151,9 +153,9 @@ public class ParallelScenarioTest extends TestCase {
             throws QueryEvaluationException, RepositoryException, MalformedQueryException
     {
         // Try to extract extractTest name from manifest file
-        TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
-                "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
+        TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+                "SELECT ?ManifestName WHERE { ?ManifestURL rdfs:label ?ManifestName }");
+        manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
         TupleQueryResult manifestNames = manifestNameQuery.evaluate();
         try {
             if (manifestNames.hasNext()) {

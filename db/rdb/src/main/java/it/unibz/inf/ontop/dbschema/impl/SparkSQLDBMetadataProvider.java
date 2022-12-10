@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 
 import java.sql.Connection;
 
-public class SparkSQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
+public class SparkSQLDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
 
     @AssistedInject
     SparkSQLDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {

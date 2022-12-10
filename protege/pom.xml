@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- important: no parent declaration to Ontop-->
+
+    <groupId>it.unibz.inf.ontop</groupId>
+    <artifactId>ontop-protege-parent</artifactId>
+    <version>5.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <description>Ontop OBDA plugin for protégé</description>
+    <url>https://ontop-vkg.org/</url>
+
+    <modules>
+        <module>dependencies</module>
+        <module>plugin</module>
+        <module>distribution</module>
+    </modules>
+
+    <properties>
+        <protege.version>5.5.0</protege.version>
+        <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
+        <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
+        <logback.version>1.2.9</logback.version>
+        <treelayout.version>1.0.3</treelayout.version>
+        <urlbuilder.version>2.0.9</urlbuilder.version>
+        <xerces.version>2.12.2</xerces.version>
+        <xml-apis.version>1.4.01</xml-apis.version>
+        <javax-json.version>1.0.4</javax-json.version>
+        <junit.version>4.13.2</junit.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <thrift.version>[0.12.0,)</thrift.version>
+        <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
+        <slf4j.version>1.7.13</slf4j.version>
+        <icu4j.version>58.2</icu4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-bundle-plugin.version>5.1.2</maven-bundle-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <jdk.version>11</jdk.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Protégé -->
+            <dependency>
+                <groupId>edu.stanford.protege</groupId>
+                <artifactId>protege-editor-core</artifactId>
+                <version>${protege.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.stanford.protege</groupId>
+                <artifactId>protege-editor-owl</artifactId>
+                <version>${protege.version}</version>
+            </dependency>
+
+            <!-- Protégé XML Catalog -->
+            <dependency>
+                <groupId>edu.stanford.protege</groupId>
+                <artifactId>org.protege.xmlcatalog</artifactId>
+                <version>${protege-xmlcatalog.version}</version>
+            </dependency>
+            
+            <!-- Ontop -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-optimization</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-obda-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-rdb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-sql-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-native</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-r2rml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-sql-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-ontology-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-mapping-sql-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-reformulation-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-reformulation-sql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-system-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-system-sql-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-system-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-system-sql-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-owlapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-rdf4j</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-semantic-index</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>failureaccess</artifactId>
+                <version>${guava-failureaccess.version}</version>
+            </dependency>
+
+            <!-- Logback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+            <!-- abego TreeLayout -->
+            <dependency>
+                <groupId>org.abego.treelayout</groupId>
+                <artifactId>org.abego.treelayout.core</artifactId>
+                <version>${treelayout.version}</version>
+            </dependency>
+
+            <!-- Xerces -->
+            <dependency>
+                <groupId>xerces</groupId>
+                <artifactId>xercesImpl</artifactId>
+                <version>${xerces.version}</version>
+            </dependency>
+
+            <!-- XML APIs -->
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>${xml-apis.version}</version>
+            </dependency>
+
+            <!-- Apache Thrift -->
+            <dependency>
+                <groupId>org.apache.thrift</groupId>
+                <artifactId>libthrift</artifactId>
+                <version>${thrift.version}</version>
+            </dependency>
+
+            <!-- OpenCSV -->
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>${opencsv.version}</version>
+            </dependency>
+
+            <!-- SLF4J -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j-jcl.version}</version>
+            </dependency>
+
+            <!-- JUnit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <!-- URL builder -->
+            <dependency>
+                <groupId>io.mikael</groupId>
+                <artifactId>urlbuilder</artifactId>
+                <version>${urlbuilder.version}</version>
+            </dependency>
+
+            <!-- ICU4J -->
+            <dependency>
+                <groupId>com.ibm.icu</groupId>
+                <artifactId>icu4j</artifactId>
+                <version>${icu4j.version}</version>
+            </dependency>
+
+            <!-- Javax JSON Processing API (JSR 353) -->
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.json</artifactId>
+                <version>${javax-json.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

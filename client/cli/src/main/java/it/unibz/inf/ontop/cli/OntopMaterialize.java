@@ -47,7 +47,7 @@ import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Command(name = "materialize",
         description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
-public class OntopMaterialize extends OntopReasoningCommandBase {
+public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     private enum PredicateType {
         CLASS("C"),
@@ -258,6 +258,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         if (ontopViewFile != null)
             configBuilder.ontopViewFile(ontopViewFile);
+
+        if (sparqlRulesFile != null)
+            configBuilder.sparqlRulesFile(sparqlRulesFile);
 
         Properties properties = OntopModelConfigurationImpl.extractProperties(
                 OntopModelConfigurationImpl.extractPropertyFile(propertiesFile));

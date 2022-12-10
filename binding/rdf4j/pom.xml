@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-binding</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-rdf4j</artifactId>
@@ -107,10 +107,10 @@
             <artifactId>jsonld-java</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-util</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.rdf4j</groupId>-->
+<!--            <artifactId>rdf4j-util</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-model</artifactId>

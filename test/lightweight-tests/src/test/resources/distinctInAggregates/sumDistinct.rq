@@ -1,0 +1,6 @@
+PREFIX : <http://www.example.org/test#>
+SELECT ?p (SUM(DISTINCT ?s) as ?sd)
+WHERE {
+?p :teaches ?c .
+?c :numberOfStudents ?s .
+} GROUP BY ?p

@@ -65,6 +65,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol sha256FunctionSymbol;
     // Created in init()
+    private DBFunctionSymbol sha384FunctionSymbol;
+    // Created in init()
     private DBFunctionSymbol sha512FunctionSymbol;
     // Created in init()
     private DBFunctionSymbol yearFromDatetimeFunctionSymbol;
@@ -389,6 +391,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         md5FunctionSymbol = createMD5FunctionSymbol();
         sha1FunctionSymbol = createSHA1FunctionSymbol();
         sha256FunctionSymbol = createSHA256FunctionSymbol();
+        sha384FunctionSymbol = createSHA384FunctionSymbol();
         sha512FunctionSymbol = createSHA512FunctionSymbol();
 
         yearFromDatetimeFunctionSymbol = createYearFromDatetimeFunctionSymbol();
@@ -816,6 +819,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBSha384() {
+        return sha384FunctionSymbol;
+    }
+
+    @Override
     public DBFunctionSymbol getDBSha512() {
         return sha512FunctionSymbol;
     }
@@ -1211,6 +1219,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBHashFunctionSymbolImpl("DB_SHA256", rootDBType, dbStringType, this::serializeSHA256);
     }
 
+    protected DBFunctionSymbol createSHA384FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_SHA384", rootDBType, dbStringType, this::serializeSHA384);
+    }
+
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
@@ -1384,6 +1396,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
+
+    protected abstract String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms,
+                                              Function<ImmutableTerm, String> termConverter,
+                                              TermFactory termFactory);
 
     protected abstract String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,

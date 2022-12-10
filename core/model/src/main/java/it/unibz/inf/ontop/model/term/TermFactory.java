@@ -497,6 +497,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
+	ImmutableFunctionalTerm getDBSha384(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
 
 //	ImmutableFunctionalTerm getDBIndexIn(Variable arg);

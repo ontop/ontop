@@ -41,7 +41,7 @@ public class RDF4JConstructDescribeTest {
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, properties)) {
 			REPOSITORY = OntopRepository.defaultRepository(loader.getConfiguration());
-			REPOSITORY.initialize();
+			REPOSITORY.init();
 		}
 	}
 	

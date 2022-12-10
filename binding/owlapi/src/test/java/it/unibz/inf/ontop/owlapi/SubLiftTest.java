@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 
@@ -33,7 +34,7 @@ public class SubLiftTest {
     private static final String DROP_SCRIPT = "src/test/resources/subLift/drop.sql";
     private static final String OWL_FILE = "src/test/resources/subLift/test.owl";
     private static final String MAPPING_FILE = "src/test/resources/subLift/test.obda";
-    private static final ToStringRenderer renderer = ToStringRenderer.getInstance();
+    private static final OWLObjectRenderer renderer = ToStringRenderer.getInstance();
 
     private static final String URL = "jdbc:h2:mem:job";
     private static final String USER = "sa";
@@ -129,6 +130,6 @@ public class SubLiftTest {
     }
 
     private String stringify(OWLObject owlObject) {
-        return renderer.getRendering(owlObject);
+        return renderer.render(owlObject);
     }
 }

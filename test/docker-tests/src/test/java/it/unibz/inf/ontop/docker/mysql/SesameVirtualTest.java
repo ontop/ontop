@@ -55,7 +55,7 @@ public class SesameVirtualTest extends TestCase {
 
 		Repository repo = OntopRepository.defaultRepository(configuration);
 
-		repo.initialize();
+		repo.init();
 
 		RepositoryConnection con = repo.getConnection();
 

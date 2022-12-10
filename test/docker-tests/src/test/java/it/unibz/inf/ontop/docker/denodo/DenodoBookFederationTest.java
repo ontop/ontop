@@ -27,7 +27,7 @@ public class DenodoBookFederationTest {
                 .build();
 
         repo = OntopRepository.defaultRepository(configuration);
-        repo.initialize();
+        repo.init();
     }
 
 

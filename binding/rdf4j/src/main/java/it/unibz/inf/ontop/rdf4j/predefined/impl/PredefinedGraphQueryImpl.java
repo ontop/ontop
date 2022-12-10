@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.input.*;
+import it.unibz.inf.ontop.query.*;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedGraphQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
 

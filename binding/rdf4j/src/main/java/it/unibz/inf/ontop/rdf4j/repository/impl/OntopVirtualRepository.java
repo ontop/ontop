@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.cache.HTTPCacheHeaders;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
@@ -30,13 +30,13 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
 
     @Nullable
     private OntopQueryEngine queryEngine;
-    private final RDF4JInputQueryFactory inputQueryFactory;
+    private final RDF4JQueryFactory inputQueryFactory;
     private final HTTPCacheHeaders cacheHeaders;
 
     public OntopVirtualRepository(OntopSystemConfiguration configuration) {
         this.configuration = configuration;
         Injector injector = configuration.getInjector();
-        inputQueryFactory = injector.getInstance(RDF4JInputQueryFactory.class);
+        inputQueryFactory = injector.getInstance(RDF4JQueryFactory.class);
         cacheHeaders = injector.getInstance(HTTPCacheHeaders.class);
         settings = configuration.getSettings();
     }

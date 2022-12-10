@@ -2,20 +2,27 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.NativeNode;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
+import it.unibz.inf.ontop.query.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.impl.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
+
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
+import org.eclipse.rdf4j.common.transaction.IsolationLevel;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.*;
 import org.eclipse.rdf4j.queryrender.RenderUtils;
@@ -39,7 +46,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
     private OntopRepository repository;
     private OntopConnection ontopConnection;
-    private final RDF4JInputQueryFactory inputQueryFactory;
+    private final RDF4JQueryFactory inputQueryFactory;
     private final OntopSystemSettings settings;
     private boolean isOpen;
     private boolean isActive;
@@ -48,7 +55,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
 
 
     OntopRepositoryConnectionImpl(OntopRepository rep, OntopConnection connection,
-                                  RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+                                  RDF4JQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         this.repository = rep;
         this.ontopConnection = connection;
         this.inputQueryFactory = inputQueryFactory;
@@ -203,7 +210,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         Set<String> keys = namesp.keySet();
         for (String key : keys) {
             //convert into namespace objects
-            namespSet.add(new NamespaceImpl(key, namesp.get(key)));
+            namespSet.add(new SimpleNamespace(key, namesp.get(key)));
         }
         return new RepositoryResult<Namespace>(new CloseableIteratorIteration<Namespace, RepositoryException>(
                 namespSet.iterator()));
@@ -257,7 +264,7 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     @Override
     public ValueFactory getValueFactory() {
         //Gets a ValueFactory for this OntopRepositoryConnection.
-        return new ValueFactoryImpl();
+        return SimpleValueFactory.getInstance();
     }
 
     @Override
@@ -614,9 +621,29 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     public String reformulate(String sparql)
             throws RepositoryException {
         try {
-            SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
+            SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
             return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
-        } catch (OntopReformulationException | OntopConnectionException e) {
+        } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
+            throw new RepositoryException(e);
+        }
+    }
+
+    @Override
+    public String reformulateIntoNativeQuery(String sparql)
+            throws RepositoryException {
+        try {
+            SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
+            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery)
+                    .getTree();
+
+            if (executableTree.getRootNode() instanceof ConstructionNode) {
+                IQTree child = executableTree.getChildren().get(0);
+                if (child instanceof NativeNode)
+                    return ((NativeNode) child).getNativeQueryString();
+            }
+            throw new MinorOntopInternalBugException("Unexpected structure of the executable IQTree: " + executableTree);
+
+        } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
     }

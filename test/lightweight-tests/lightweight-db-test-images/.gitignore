@@ -1,0 +1,34 @@
+# OS X generated files
+.DS_Store
+
+# Maven generated file
+target
+*.versionsBackup
+*.releaseBackup
+release.properties
+
+# Eclipse generated files
+.classpath
+.projecttmp.*
+.project
+.pydevproject
+bin
+.settings
+
+# Intellij generated files
+*.iml
+.idea
+
+# Protege generated files
+catalog-v*.xml
+
+# Temp files
+*~
+\#*
+tmp.*
+
+# Antlr generated files
+*.tokens
+
+# Ontop specific
+plugin-runtime
