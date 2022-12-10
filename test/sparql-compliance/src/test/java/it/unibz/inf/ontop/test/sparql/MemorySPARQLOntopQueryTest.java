@@ -102,17 +102,12 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// Results look correct. Possible problem from RD4J (graph isomorphism). TODO: test more recent RDF4J.
 			constructManifest + "construct-4",
 
-			/* DATA-R2: DISTINCT */
-			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values)
-			distinctManifest + "no-distinct-9",
-			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values + DISTINCT on IRI)
-			distinctManifest + "distinct-9",
+			/* DATA-R2: BUILT-IN */
 
 			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0"
 
 			/* DATA-R2: EXPR-EQUALS   */
 
-			exprEqualsManifest + "eq-graph-1", // ??
 			exprEqualsManifest + "eq-2-1", // JdbcSQLException: Data conversion error converting "1.0e0"
 			exprEqualsManifest + "eq-2-2", // JdbcSQLException: Data conversion error converting "1.0e0"
 
