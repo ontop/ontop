@@ -40,7 +40,7 @@ public class ValuesNodeComplexQueryOptimizationTest extends AbstractRDF4JTest {
                 "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Francis'), ('http://te.st/ValuesNodeTest#student/Anna'), " +
                 "('http://te.st/ValuesNodeTest#teacher/Jane'), ('http://te.st/ValuesNodeTest#teacher/Joe') AS V1 )";
 
-        String ontopSQLtranslation = reformulate(sparqlQueryString);
+        String ontopSQLtranslation = reformulateIntoNativeQuery(sparqlQueryString);
 
         assertTrue(ontopSQLtranslation.contains(expectedSQLQueryTranslation));
     }

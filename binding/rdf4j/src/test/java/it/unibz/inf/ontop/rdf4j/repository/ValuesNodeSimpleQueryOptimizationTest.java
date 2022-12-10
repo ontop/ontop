@@ -36,11 +36,9 @@ public class ValuesNodeSimpleQueryOptimizationTest extends AbstractRDF4JTest {
                 "}" +
                 "LIMIT 2";
 
-        String expectedSQLQueryTranslation = "SELECT V1.C1 AS \"v1m6\"\n" +
-                        "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Anna'), ('http://te.st/ValuesNodeTest#student/Francis') AS V1 )";
-
-        String ontopSQLtranslation = reformulate(sparqlQueryString);
-        assertTrue(ontopSQLtranslation.contains(expectedSQLQueryTranslation));
+        String ontopSQLtranslation = reformulateIntoNativeQuery(sparqlQueryString);
+        assertTrue(ontopSQLtranslation.contains("http://te.st/ValuesNodeTest#student/Francis"));
+        assertTrue(ontopSQLtranslation.contains("http://te.st/ValuesNodeTest#student/Anna"));
     }
 
 }
