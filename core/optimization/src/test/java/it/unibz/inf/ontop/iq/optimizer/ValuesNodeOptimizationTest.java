@@ -165,9 +165,9 @@ public class ValuesNodeOptimizationTest {
         IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                 ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1), dataNode),
                         IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR),
-                                ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))),
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1), dataNode)));
+                                ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR)))));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
@@ -190,14 +190,20 @@ public class ValuesNodeOptimizationTest {
                                 dataNode)));
 
         // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                ImmutableList.of(
-                        IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR),
-                                ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))),
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createSliceNode(0, 1),
-                                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
-                                        ImmutableList.of(dataNode, dataNode)))));
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createSliceNode(0, 4),
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                        ImmutableList.of(IQ_FACTORY.createValuesNode(ImmutableList.of(X),
+                                        ImmutableList.of(ImmutableList.of(ONE_STR),
+                                                ImmutableList.of(TWO_STR),
+                                                ImmutableList.of(THREE_STR))),
+                                IQ_FACTORY.createUnaryIQTree(
+                                    IQ_FACTORY.createSliceNode(0, 1),
+                                        dataNode),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createSliceNode(0, 1),
+                                        dataNode))));
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }

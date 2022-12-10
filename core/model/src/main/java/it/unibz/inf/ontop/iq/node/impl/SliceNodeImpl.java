@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
@@ -98,6 +97,10 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     ? iqFactory.createEmptyNode(newChild.getVariables())
                     : newChild;
 
+        // Optimizations for Values Node will apply under the following conditions
+        // Rule 1: For offset > 0, we do not perform any Values Node optimizations
+        // Rule 2: The optimization of the Slice can be controlled via the configuration properties
+        // Rule 3: Limit must not be null
         if ((offset == 0) && limit != null && !settings.isLimitOptimizationDisabled())
             return normalizeLimitNoOffset(limit.intValue(), newChild, variableGenerator, treeCache, hasChildChanged);
 
@@ -135,6 +138,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     /**
      * Limit > 0, no offset and limit optimization is enabled
+     *
      */
     private IQTree normalizeLimitNoOffset(int limit, IQTree newChild, VariableGenerator variableGenerator,
                                           IQTreeCache treeCache, Supplier<Boolean> hasChildChanged) {
@@ -143,23 +147,19 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             // Distinct can be eliminated
             return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, treeCache,
                     () -> true);
-
-            // Optimizations for Values Node will apply under the following conditions
-            // Rule 1: For offset > 0, we do not perform any Values Node optimizations
-            // Rule 2: The optimization of the Slice can be controlled via the configuration properties
-            // Rule 3: Limit must not be null
         if ((newChildRoot instanceof ValuesNode))
             return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
                     ((ValuesNode) newChildRoot).getValues().subList(0, limit));
-            // Only triggered if a Values Node is present directly under the UNION
+            // Only triggered if a child with a known cardinality is present directly under the UNION
         if ((newChildRoot instanceof UnionNode)
-                && newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode))
-            return simplifyUnionValues((UnionNode) newChildRoot, newChild);
-            // Scenario: SLICE UNION [CONSTRUCT] [DISTINCT] UNION [VALUES NONVALUES] pattern
-        if ((newChildRoot instanceof UnionNode)
-                && calculateMaxTotalValues(newChild) >= limit)
-            return simplifyConstructUnionValues((UnionNode) newChildRoot, newChild);
+                && newChild.getChildren().stream().anyMatch(c -> getKnownCardinality(c).isPresent())) {
+            Optional<IQTree> newTree = simplifyUnionWithChildrenOfKnownCardinality(
+                    (UnionNode) newChildRoot, newChild, limit, variableGenerator);
+            if (newTree.isPresent())
+                return newTree.get();
+            }
             // Scenario: SLICE DISTINCT UNION [VALUES ...] -> VALUES if VALUES is distinct
+            // TODO: generalize and merge the LIMIT DISTINCT UNION optimizations
         if ((newChildRoot instanceof DistinctNode)
                 && newChild.getChildren().size() == 1
                 && newChild.getChildren().stream().allMatch(c -> c.getRootNode() instanceof UnionNode)
@@ -192,119 +192,97 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                         : treeCache.declareAsNormalizedForOptimizationWithoutEffect());
     }
 
-    private IQTree simplifyUnionValues(UnionNode newChildRoot, IQTree newChild) {
+    private static Optional<Integer> getKnownCardinality(IQTree tree) {
+        if (tree instanceof TrueNode)
+            return Optional.of(1);
+        if (tree instanceof ValuesNode)
+            return Optional.of(((ValuesNode) tree).getValues().size());
 
-        /**
-          Only one Values Node should be present at this optimization step
-          @see it.unibz.inf.ontop.iq.node.impl.UnionNodeImpl#liftBindingFromLiftedChildrenAndFlatten(ImmutableList, VariableGenerator, IQTreeCache)
-         */
-        ValuesNode vNode = newChild.getChildren().stream()
-                .filter(c -> c instanceof ValuesNode)
-                .map(IQTree::getRootNode)
-                .map(v -> (ValuesNode) v)
-                .findFirst().get();
-
-        ImmutableList<IQTree> nonVnodeList = newChild.getChildren().stream()
-                .filter(c -> !(c instanceof ValuesNode))
-                .collect(ImmutableCollectors.toList());
-
-        // Retrieve the Values Node variables - we know at least one Values Node is present
-        ImmutableList<Variable> orderedVariables = newChild.getChildren().stream()
-                .filter(c -> c instanceof ValuesNode)
-                .map(c -> ((ValuesNode) c))
-                .map(ValuesNode::getOrderedVariables)
-                .findFirst().get();
-
-        // CASE 1: Values Node fully covers limit - Drop other non-Values Node (offset=0)
-        if (limit.intValue() <= calculateMaxTotalValues(newChild)) {
-            return iqFactory.createValuesNode(orderedVariables, vNode.getValues().subList(0, limit.intValue()));
-        // CASE 2: Values Node does not fully cover limit - Drop slice from values node, keep for non-values (remaining limit)
-        } else {
-            ImmutableList<ValuesNode> filteredValuesNodeList = ImmutableList.of(
-                    iqFactory.createValuesNode(orderedVariables,
-                    vNode.getValues().subList(0, Math.min(limit.intValue(), (int) calculateMaxTotalValues(newChild)))));
-
-            return iqFactory.createNaryIQTree(
-                newChildRoot,
-                Stream.concat(filteredValuesNodeList.stream(),
-                        ImmutableList.of(iqFactory.createUnaryIQTree(
-                                // New slice node with remaining limit
-                                iqFactory.createSliceNode(0, limit - calculateMaxTotalValues(newChild)),
-                                nonVnodeList.size() > 1
-                                    // CASE 3.1 - Multiple non-Values nodes - keep Union
-                                    ? iqFactory.createNaryIQTree(newChildRoot,nonVnodeList)
-                                    // CASE 3.2 - Single non-Values node - drop Union
-                                    : nonVnodeList.get(0)
-                                )).stream())
-                        .collect(ImmutableCollectors.toList()));
-        }
+        QueryNode rootNode = tree.getRootNode();
+        if (rootNode instanceof ConstructionNode)
+            return getKnownCardinality(tree.getChildren().get(0));
+        // TODO: shall we consider other nodes, like union nodes?
+        return Optional.empty();
     }
 
-    /**
-     * Method targets all CONSTRUCT [NON-VALUES] VALUES patterns to collect Values Nodes for limit optimizations
-     */
-    private IQTree simplifyConstructUnionValues(UnionNode newChildRoot, IQTree newChild) {
+    private Optional<IQTree> simplifyUnionWithChildrenOfKnownCardinality(UnionNode childRoot,
+                                                                         IQTree childTree, int limit,
+                                                                         VariableGenerator variableGenerator) {
 
-        // PATTERN 0: CONSTRUCT VALUES
-        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern0 = newChild.getChildren().stream()
-                .filter(c -> c.getRootNode() instanceof ConstructionNode)
-                .collect(ImmutableCollectors.toMap(
-                        IQTree::getRootNode,
-                        c -> c.getChildren().stream()
-                                .filter(n -> n instanceof ValuesNode)
-                                .map(v -> (ValuesNode) v).findFirst()));
+        ImmutableList<IQTree> children = childTree.getChildren();
 
-        // PATTERN 1: CONSTRUCT UNION VALUES
-        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern1 = newChild.getChildren().stream()
-                .filter(c -> c.getRootNode() instanceof ConstructionNode)
-                .collect(ImmutableCollectors.toMap(
-                        IQTree::getRootNode,
-                        c -> c.getChildren().stream()
-                                .filter(n -> n.getRootNode() instanceof UnionNode)
-                                .map(IQTree::getChildren)
-                                .flatMap(Collection::stream)
-                                .filter(n -> n instanceof ValuesNode)
-                                .map(v -> (ValuesNode) v)
-                                .findFirst()));
+        ImmutableMultimap<IQTree, Integer> cardinalityMultimap = children.stream()
+                .flatMap(c -> getKnownCardinality(c).stream()
+                        .map(card -> Maps.immutableEntry(c, card)))
+                .collect(ImmutableCollectors.toMultimap());
 
-        // PATTERN 2: CONSTRUCT DISTINCT UNION VALUES
-        ImmutableMap<QueryNode, Optional<ValuesNode>> treePattern2 = newChild.getChildren().stream()
-                .filter(c -> c.getRootNode() instanceof ConstructionNode)
-                .collect(ImmutableCollectors.toMap(
-                        IQTree::getRootNode,
-                        c -> c.getChildren().stream()
-                                .filter(n -> n.getRootNode() instanceof DistinctNode)
-                                .map(IQTree::getChildren)
-                                .flatMap(Collection::stream)
-                                .filter(n -> n.getRootNode() instanceof UnionNode)
-                                .map(IQTree::getChildren)
-                                .flatMap(Collection::stream)
-                                .filter(n -> n instanceof ValuesNode)
-                                .map(n -> (ValuesNode) n)
-                                .map(v -> iqFactory.createValuesNode(v.getOrderedVariables(),
-                                        v.getValues().stream().distinct().collect(ImmutableCollectors.toList())))
-                                .findFirst()));
+        Optional<Integer> maxChildCardinality = cardinalityMultimap.values().stream().max(Integer::compareTo);
 
-        // Merge all 3 patterns and drop any remaining CONSTRUCT nodes without VALUES child nodes
-        ImmutableMap<QueryNode, Optional<ValuesNode>> allValuesNodes =
-                Stream.concat(treePattern0.entrySet().stream(),
-                        Stream.concat(treePattern1.entrySet().stream(),
-                        treePattern2.entrySet().stream()))
-                .filter(c -> c.getValue().isPresent())
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
+        if (maxChildCardinality.isEmpty())
+            return Optional.empty();
 
-        // Final CONSTRUCT VALUES IQTrees - Construction Node needed to keep track of all projected variables
-        ImmutableList<IQTree> vNodesList = allValuesNodes.entrySet().stream()
-                .map(v -> iqFactory.createUnaryIQTree((ConstructionNode) v.getKey(), v.getValue().get()))
-                        .collect(ImmutableCollectors.toList());
+        if (maxChildCardinality.get() >= limit) {
+            IQTree largestChild = cardinalityMultimap.entries().stream()
+                    .filter(e -> e.getValue().equals(maxChildCardinality.get()))
+                    .map(Map.Entry::getKey)
+                    .findAny()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("There should be one child"));
 
-        // Final pattern - SLICE UNION VALUES (offset=0)
-        return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, limit.intValue()),
-                iqFactory.createNaryIQTree(newChildRoot, vNodesList)
-        );
+            return Optional.of(iqFactory.createUnaryIQTree(this, largestChild)
+                    .normalizeForOptimization(variableGenerator));
+        }
+
+        int sum = cardinalityMultimap.values().stream().reduce(Integer::sum)
+                .orElseThrow(() -> new MinorOntopInternalBugException("At least one child expected"));
+
+        if (sum >= limit) {
+            // Non-final
+            int remainingLimit = limit;
+            ImmutableList.Builder<IQTree> newChildrenBuilder = ImmutableList.builder();
+            for (Map.Entry<IQTree, Integer> entry : cardinalityMultimap.entries()) {
+                IQTree newChild = (entry.getValue() <= remainingLimit)
+                        ? entry.getKey()
+                        : iqFactory.createUnaryIQTree(
+                                iqFactory.createSliceNode(0, remainingLimit),
+                                entry.getKey());
+                newChildrenBuilder.add(newChild);
+                remainingLimit -= entry.getValue();
+                if (remainingLimit <= 0)
+                    break;
+            }
+            // Should have at least 2 children, otherwise it would have been already optimized
+            return Optional.of(
+                    iqFactory.createNaryIQTree(
+                            childRoot,
+                            newChildrenBuilder.build())
+                            .normalizeForOptimization(variableGenerator));
+        }
+
+        long countChildrenWithUnknownCardinality = children.stream()
+                .filter(c -> !cardinalityMultimap.containsKey(c))
+                .count();
+
+        if (countChildrenWithUnknownCardinality == 0)
+            // No more limit
+            return Optional.of(childTree);
+
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(c -> cardinalityMultimap.containsKey(c)
+                        ? c
+                        : iqFactory.createUnaryIQTree(
+                        iqFactory.createSliceNode(0, limit - sum),
+                        c))
+                .collect(ImmutableCollectors.toList());
+
+        IQTree newUnionTree = iqFactory.createNaryIQTree(childRoot, newChildren)
+                .normalizeForOptimization(variableGenerator);
+
+        return (countChildrenWithUnknownCardinality == 1)
+                ? Optional.of(newUnionTree)
+                : newUnionTree.equals(childTree)
+                    ? Optional.empty()
+                    : Optional.of(iqFactory.createUnaryIQTree(this, newUnionTree)
+                        .normalizeForOptimization(variableGenerator));
     }
 
     /**
