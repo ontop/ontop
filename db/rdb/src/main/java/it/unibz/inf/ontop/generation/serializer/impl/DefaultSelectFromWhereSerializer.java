@@ -248,6 +248,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationID alias = generateFreshViewAlias();
             String sql = String.format("(%s) %s", querySerializationList.stream()
                     .map(QuerySerialization::getString)
+                    .map(s -> "(" + s + ")")
                     .collect(Collectors.joining("UNION ALL \n")), alias.getSQLRendering());
 
             return new QuerySerializationImpl(sql,
