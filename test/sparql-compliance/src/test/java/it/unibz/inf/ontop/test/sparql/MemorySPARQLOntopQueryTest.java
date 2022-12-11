@@ -25,23 +25,6 @@ Some test have been modified  or are missing, respect to the original test case
 - DATA-R2: GRAPH folder is missing-
 - DATA-R2: DATASET folder is missing
 
-- DATA-R2: EXPR-BUILTIN modification in the result files
-
-modified string representation and datatype
-expr-builtin/result-sameTerm.ttl
-
-modified string representation
-expr-builtin/result-str-1.ttl
-expr-builtin/result-str-2.ttl
-
-- DATA-R2: EXPR-EQUALS
-
-removed equality between different numerical datatypes
-expr-equals/data-eq.ttl
-
-removed mismatch in data representation, equality and custom datatype
-expr-equals/result-eq-2-1.ttl
-
 */
 
 @RunWith(Parameterized.class)
@@ -94,13 +77,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			castManifest + "cast-int",
 			castManifest + "cast-dT",
 			castManifest + "cast-bool",
-
-			/* DATA-R2: CONSTRUCT Null pointer exception */
-
-			// Results look correct. Possible problem from RD4J (graph isomorphism). TODO: test more recent RDF4J.
-			constructManifest + "construct-3",
-			// Results look correct. Possible problem from RD4J (graph isomorphism). TODO: test more recent RDF4J.
-			constructManifest + "construct-4",
 
 			/* DATA-R2: BUILT-IN */
 
