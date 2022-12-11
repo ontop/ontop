@@ -32,40 +32,49 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     }
 
     @Override
-    public IQTree normalizeForOptimization(DistinctNode distinctNode, IQTree child,
+    public IQTree normalizeForOptimization(DistinctNode distinctNode, IQTree initialChild,
                                            VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
-        return liftBinding(distinctNode, normalizedChild, variableGenerator, treeCache);
-    }
+        IQTree child = initialChild.normalizeForOptimization(variableGenerator);
 
-    private IQTree liftBinding(DistinctNode distinctNode, IQTree newChild, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        QueryNode newChildRoot = newChild.getRootNode();
+        if (child.isDistinct())
+            return child;
 
-        if (newChildRoot instanceof ConstructionNode)
-            return liftBindingConstructionChild((ConstructionNode) newChildRoot, treeCache,
-                    (UnaryIQTree) newChild, variableGenerator);
-        else if (newChildRoot instanceof EmptyNode)
-            return newChild;
-        else if (newChildRoot instanceof ValuesNode) {
-            return iqFactory.createValuesNode(((ValuesNode) newChildRoot).getOrderedVariables(),
-                    ((ValuesNode) newChildRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
+        if (child.getVariables().isEmpty()) {
+            // No child variable -> replace by a LIMIT 1
+            IQTree limitTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createSliceNode(0, 1),
+                    child);
+
+            return limitTree.normalizeForOptimization(variableGenerator);
+        }
+
+        QueryNode childRoot = child.getRootNode();
+
+        if (childRoot instanceof ConstructionNode)
+            return liftBindingConstructionChild((ConstructionNode) childRoot, treeCache,
+                    (UnaryIQTree) child, variableGenerator);
+        else if (childRoot instanceof EmptyNode)
+            return child;
+        else if (childRoot instanceof ValuesNode) {
+            return iqFactory.createValuesNode(((ValuesNode) childRoot).getOrderedVariables(),
+                    ((ValuesNode) childRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
         }
         // DISTINCT UNION [VALUES T2 T3 ...] -> DISTINCT UNION [[DISTINCT VALUE] T2 T3 ...] pattern
-        else if ((newChildRoot instanceof UnionNode) &&
+        else if ((childRoot instanceof UnionNode) &&
                 // Check for Values Nodes present otherwise no optimization needed
-                newChild.getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
+                child.getChildren().stream().anyMatch(c -> c instanceof ValuesNode) &&
                 // Ensure tree not already optimized
                 !treeCache.isNormalizedForOptimization()) {
 
             // For code readability we separate the values and non-values nodes
-            ImmutableList<IQTree> vNodelist = newChild.getChildren().stream()
+            ImmutableList<IQTree> vNodelist = child.getChildren().stream()
                     .filter(c -> c instanceof ValuesNode)
                     .collect(ImmutableCollectors.toList());
-            ImmutableList<IQTree> nonVnodeList = newChild.getChildren().stream()
+            ImmutableList<IQTree> nonVnodeList = child.getChildren().stream()
                     .filter(c -> !(c instanceof ValuesNode))
                     .collect(ImmutableCollectors.toList());
 
-            /**
+            /*
              * Check if values node is already distinct, in that scenario, we do not push the DISTINCT further down
              * Since for this optimization under UnionNodeImpl, we merge all Values Nodes into 1, checking for the first
              * Values Node should prove sufficient
@@ -73,10 +82,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
               */
             return vNodelist.get(0).isDistinct()
                     // CASE 1: Values Node already distinct, no further optimization
-                    ? createDistinctTree(distinctNode, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect())
+                    ? createDistinctTree(distinctNode, child, treeCache.declareAsNormalizedForOptimizationWithEffect())
                     // CASE 2: Push DISTINCT further down as per case scenario
                     : iqFactory.createUnaryIQTree(distinctNode,
-                    iqFactory.createNaryIQTree((UnionNode) newChildRoot,
+                    iqFactory.createNaryIQTree((UnionNode) childRoot,
                             Stream.concat(
                                         Stream.of(
                                             iqFactory.createValuesNode(((ValuesNode) vNodelist.get(0)).getOrderedVariables(),
@@ -85,7 +94,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                                     .collect(ImmutableCollectors.toList())));
         }
         else
-            return createDistinctTree(distinctNode, newChild, treeCache.declareAsNormalizedForOptimizationWithEffect());
+            return createDistinctTree(distinctNode, child, treeCache.declareAsNormalizedForOptimizationWithEffect());
     }
 
     private IQTree createDistinctTree(DistinctNode distinctNode, IQTree child, IQTreeCache treeCache) {
