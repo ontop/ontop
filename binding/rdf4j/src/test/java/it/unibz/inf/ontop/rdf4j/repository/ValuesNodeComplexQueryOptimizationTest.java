@@ -7,7 +7,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Run tests on whether the SQL translation of the Slice Optimization for Values Node
@@ -36,12 +37,11 @@ public class ValuesNodeComplexQueryOptimizationTest extends AbstractRDF4JTest {
                 "}" +
                 "LIMIT 4";
 
-        String expectedSQLQueryTranslation = "SELECT V1.C1 AS \"v5m25\"\n" +
-                "FROM (VALUES  ('http://te.st/ValuesNodeTest#student/Francis'), ('http://te.st/ValuesNodeTest#student/Anna'), " +
-                "('http://te.st/ValuesNodeTest#teacher/Jane'), ('http://te.st/ValuesNodeTest#teacher/Joe') AS V1 )";
-
         String ontopSQLtranslation = reformulateIntoNativeQuery(sparqlQueryString);
+        int count = runQueryAndCount(sparqlQueryString);
 
-        assertTrue(ontopSQLtranslation.contains(expectedSQLQueryTranslation));
+        assertEquals(4, count);
+        assertFalse("SQL has an unexpected union: " + ontopSQLtranslation, ontopSQLtranslation.toLowerCase().contains("union"));
+        assertFalse("SQL has an unexpected limit: " + ontopSQLtranslation, ontopSQLtranslation.toLowerCase().contains("limit"));
     }
 }

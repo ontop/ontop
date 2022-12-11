@@ -33,7 +33,10 @@ public class ValuesNodeOptimizationTest {
 
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR)));
+                .createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                                SUBSTITUTION_FACTORY.getSubstitution(X,  ONE_STR)),
+                        IQ_FACTORY.createTrueNode());
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }
@@ -47,9 +50,11 @@ public class ValuesNodeOptimizationTest {
                 IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
 
         // Create expected Tree
-        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createSliceNode(1, 1),
-                IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR), ImmutableList.of(THREE_STR))));
+        IQTree expectedTree = IQ_FACTORY
+                .createUnaryIQTree(
+                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                                SUBSTITUTION_FACTORY.getSubstitution(X,  TWO_STR)),
+                        IQ_FACTORY.createTrueNode());
 
         assertTrue(baseTestNormalization(initialTree, expectedTree));
     }

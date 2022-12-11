@@ -67,7 +67,7 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
         assertTrue(sql.toUpperCase().contains("UNION ALL"));
         // TODO: feel free to update it according to changes in the SQL generation.
         //  It must project the same variables as in the SPARQL query.
-        assertTrue(sql.startsWith("SELECT V5.\"h\" AS \"h\", V5.\"posColor\" AS \"posColor\", V5.\"posLabel\" AS \"posLabel\""));
+        assertTrue(sql.startsWith("SELECT V9.\"h\" AS \"h\", V9.\"posColor\" AS \"posColor\", V9.\"posLabel\" AS \"posLabel\""));
         assertEquals(1, count);
     }
 

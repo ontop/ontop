@@ -73,7 +73,7 @@
   },
   "ontop.disableLimitOptimization": {
     "type": "Boolean",
-    "description": "Since 4.3.0. Default value: `false`. If `true` use cases are when query contains Order By clauses; risk of getting different results on unordered queries and still be semantically correct"
+    "description": "Since 5.0.0. Default value: `false`. If `true`, most limit optimizations won't be applied."
   },
   "mapping.baseIri": {
     "type": "IRI",
