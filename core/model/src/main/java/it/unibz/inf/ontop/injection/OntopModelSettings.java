@@ -13,14 +13,12 @@ public interface OntopModelSettings {
     boolean isTestModeEnabled();
 
     /**
-     * If true, no Slice Node optimizations are present
-     * If false, Slice Node optimizations are present to speed up Slice Queries with Values Node
+     * If true, most limit optimizations are disabled.
      */
     boolean isLimitOptimizationDisabled();
 
     /**
      * Not for end-users!
-     *
      * Please avoid using that class.
      */
     Optional<String> getProperty(String key);
