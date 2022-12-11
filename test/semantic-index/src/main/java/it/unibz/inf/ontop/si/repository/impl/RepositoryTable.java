@@ -13,12 +13,13 @@ public class RepositoryTable {
     RepositoryTable(String tableName, ImmutableMap<String, String> columnDefinitions, String selectList) {
         this.tableName = tableName;
         this.createCommand = "CREATE TABLE " + tableName +
-                " ( " + columnDefinitions.entrySet().stream()
-                .map(e -> e.getKey() + " " + e.getValue() + " NOT NULL")
-                .collect(Collectors.joining(", ")) + " )";
+                columnDefinitions.entrySet().stream()
+                        .map(e -> e.getKey() + " " + e.getValue())
+                        .collect(Collectors.joining(", ", " (", ")"));
         this.insertCommand = "INSERT INTO " + tableName +
-                " (" + Joiner.on(", ").join(columnDefinitions.keySet()) + ") VALUES ";
-        this.selectCommand = "SELECT " +  selectList + " FROM " + tableName;
+                columnDefinitions.keySet().stream()
+                        .collect(Collectors.joining(", ", " (", ") VALUES "));
+        this.selectCommand = "SELECT " +  selectList + " FROM " + tableName + " WHERE ";
     }
 
     public static String getSelectListOf(String ... selectColumns) {
@@ -27,12 +28,29 @@ public class RepositoryTable {
                 .collect(Collectors.joining(", "));
     }
 
+    public static String getNotNull(String type) {
+        return type + " NOT NULL";
+    }
+
+    public static String getStringLiteral(String v) {
+        return "'" + v + "'";
+    }
+
+    public static String getBooleanLiteral(boolean b) {
+        return b ? "TRUE" : "FALSE";
+    }
+
+
+    public static String getEq(String v1, String v2) {
+        return v1 + " = " + v2;
+    }
+
     String getINSERT(String values) {
         return insertCommand + "(" + values + ")";
     }
 
-    String getSELECT(String filter) {
-        return selectCommand +  " WHERE " + filter;
+    String getSELECT(ImmutableList<String> filter) {
+        return selectCommand + String.join(" AND ", filter);
     }
 
     String getCREATE() { return createCommand; }

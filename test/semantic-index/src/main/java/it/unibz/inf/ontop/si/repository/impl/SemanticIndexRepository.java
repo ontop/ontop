@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.LoadingConfiguration;
@@ -47,8 +48,7 @@ public class SemanticIndexRepository {
 
         semanticIndex = new SemanticIndex(tbox);
 
-        TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
-        views = new RepositoryTableManager(typeFactory);
+        views = new RepositoryTableManager();
 
         mapping = new MappingProvider(loadingConfiguration);
 
@@ -175,7 +175,7 @@ public class SemanticIndexRepository {
 
     private final class BatchProcessor implements AutoCloseable {
         private final Connection conn;
-        private final Map<RepositoryTableSlice.Identifier, PreparedStatement> stmMap;
+        private final Map<ImmutableList<RDFTermType>, PreparedStatement> stmMap;
 
         BatchProcessor(Connection conn) throws SQLException {
             this.conn = conn;
@@ -228,13 +228,13 @@ public class SemanticIndexRepository {
             view.addIndex(idx);
         }
 
-        void process(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws SQLException {
+        void process(ObjectPropertyExpression ope, ObjectConstant subject, ObjectConstant object) throws SQLException {
             int	idx = semanticIndex.getRange(ope).getIndex();
 
-            String uri1 = getObjectConstantUri(o1);
-            String uri2 = getObjectConstantUri(o2);
+            String uri1 = getObjectConstantUri(subject);
+            String uri2 = getObjectConstantUri(object);
 
-            RepositoryTableSlice view = views.getView(o1.getType(), o2.getType());
+            RepositoryTableSlice view = views.getView(subject.getType(), object.getType());
             PreparedStatement stm = getPreparedStatement(view);
             stm.setInt(1, idx);
             stm.setString(2, uri1);

@@ -67,27 +67,14 @@ public class MappingProvider {
     }
 
     private Stream<SQLPPTriplesMap> getTripleMaps(RepositoryTableManager views, SemanticIndexRange range, IRI iri, BiFunction<IRI, RepositoryTableSlice, TargetAtom> transformer) {
-        List<Interval> intervals = range.getIntervals();
-        String filter = intervals.stream()
-                .map(MappingProvider::getIntervalString)
-                .collect(Collectors.joining(" OR "));
-
         return views.getViewsStream()
-                .filter(v -> !v.isEmptyForIntervals(intervals))
+                .filter(v -> !v.isEmptyForIntervals(range.getIntervals()))
                 .map(v -> {
-                    SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(v.getSELECT(filter));
+                    SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(v.getSELECT(range));
                     TargetAtom targetAtom = transformer.apply(iri, v);
                     return new OntopNativeSQLPPTriplesMap(
                             IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, ImmutableList.of(targetAtom));
                 });
-    }
-
-    private static String getIntervalString(Interval interval) {
-        if (interval.getStart() == interval.getEnd())
-            return String.format("%s = %d", RepositoryTableManager.IDX_COLUMN, interval.getStart());
-        else
-            return String.format("%s >= %d AND %s <= %d", RepositoryTableManager.IDX_COLUMN, interval.getStart(),
-                    RepositoryTableManager.IDX_COLUMN, interval.getEnd());
     }
 
     private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
@@ -97,7 +84,7 @@ public class MappingProvider {
     private TargetAtom constructClassTargetQuery(IRI iri, RepositoryTableSlice view) {
         Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
 
-        ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
+        ImmutableFunctionalTerm subjectTerm = getTerm((ObjectRDFType)view.getId().get(0), X);
         ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
         IRIConstant classTerm = termFactory.getConstantIRI(iri);
 
@@ -108,10 +95,10 @@ public class MappingProvider {
         Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
         Variable Y = termFactory.getVariable(MAPPING_VARIBLES.get(1));
 
-        ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().getType1(), X);
+        ImmutableFunctionalTerm subjectTerm = getTerm((ObjectRDFType)view.getId().get(0), X);
         IRIConstant iriTerm = termFactory.getConstantIRI(iri);
 
-        RDFTermType type2 = view.getId().getType2();
+        RDFTermType type2 = view.getId().get(1);
         final ImmutableFunctionalTerm objectTerm;
         if (type2 instanceof ObjectRDFType) {
             objectTerm = getTerm((ObjectRDFType)type2, Y);

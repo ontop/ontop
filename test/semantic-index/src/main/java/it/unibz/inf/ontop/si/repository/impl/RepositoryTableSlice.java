@@ -1,84 +1,50 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RepositoryTableSlice {
 
-	static final class Identifier {
-		private final ObjectRDFType type1;
-		@Nullable
-		private final RDFTermType type2;
-
-		public Identifier(ObjectRDFType type1, RDFTermType type2) {
-			this.type1 = type1;
-			this.type2 = type2;
-		}
-
-		public Identifier(ObjectRDFType type1) {
-			this.type1 = type1;
-			this.type2 = null;
-		}
-
-		public ObjectRDFType getType1() {
-			return type1;
-		}
-
-		public RDFTermType getType2() {
-			return type2;
-		}
-
-		@Override
-		public String toString() {
-			return " T1: " + type1 + (type2 != null ? ", T2: " + type2 : "");
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof Identifier) {
-				Identifier other = (Identifier) obj;
-				return Objects.equals(this.type1, other.type1) && Objects.equals(this.type2, other.type2);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(type1, type2);
-		}
-	}
-
-	private final Identifier id;
+	private final ImmutableList<RDFTermType> id;
 	private final String selectCommand;
 	private final String insertCommand;
 	private final RepositoryTableManager.PreparedStatementInsertAction insertAction;
 	private final Set<Integer> indexes = new HashSet<>();
 	
-	public RepositoryTableSlice(ObjectRDFType type1, RDFTermType type2, String selectCommand, String insertCommand, RepositoryTableManager.PreparedStatementInsertAction insertAction) {
-		this.id = new Identifier(type1, type2);
+	public RepositoryTableSlice(ImmutableList<RDFTermType> id, String selectCommand, String insertCommand, RepositoryTableManager.PreparedStatementInsertAction insertAction) {
+		this.id = id;
 		this.selectCommand = selectCommand;
 		this.insertCommand = insertCommand;
 		this.insertAction = insertAction;
 	}
 
-	public RepositoryTableSlice(ObjectRDFType type1, String selectCommand, String insertCommand) {
-		this.id = new Identifier(type1);
-		this.selectCommand = selectCommand;
-		this.insertCommand = insertCommand;
-		this.insertAction = null;
-	}
-
-	public Identifier getId() {
+	public ImmutableList<RDFTermType> getId() {
 		return id;
 	}
 	
-	public String getSELECT(String filter) {
-		return selectCommand + filter;
+	public String getSELECT(SemanticIndexRange range) {
+		List<Interval> intervals = range.getIntervals();
+		String filter = intervals.stream()
+				.map(RepositoryTableSlice::getIntervalString)
+				.collect(Collectors.joining(" OR "));
+
+		return selectCommand + " AND " + filter;
 	}
-	
+
+	private static String getIntervalString(Interval interval) {
+		if (interval.getStart() == interval.getEnd())
+			return String.format("%s = %d", RepositoryTableManager.IDX_COLUMN, interval.getStart());
+		else
+			return String.format("%s >= %d AND %s <= %d", RepositoryTableManager.IDX_COLUMN, interval.getStart(),
+					RepositoryTableManager.IDX_COLUMN, interval.getEnd());
+	}
+
+
 	public String getINSERT() {
 		return insertCommand;
 	}
