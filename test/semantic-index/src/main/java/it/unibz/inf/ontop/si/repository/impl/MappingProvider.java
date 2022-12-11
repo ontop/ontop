@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -20,9 +21,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MappingProvider {
@@ -77,43 +76,38 @@ public class MappingProvider {
                 });
     }
 
-    private ImmutableFunctionalTerm getTerm(ObjectRDFType type, Variable var) {
-        return termFactory.getRDFFunctionalTerm(var, termFactory.getRDFTermTypeConstant(type));
+    private ImmutableFunctionalTerm getTerm(RDFTermType type, Variable var) {
+        if (type instanceof ObjectRDFType) {
+            return termFactory.getRDFFunctionalTerm(var, termFactory.getRDFTermTypeConstant(type));
+        }
+        else if (type instanceof RDFDatatype) {
+            RDFDatatype datatype = (RDFDatatype) type;
+            if (datatype.getLanguageTag().isPresent()) {
+                LanguageTag languageTag = datatype.getLanguageTag().get();
+                return termFactory.getRDFLiteralFunctionalTerm(var, languageTag.getFullString());
+            }
+            else {
+                return termFactory.getRDFLiteralFunctionalTerm(var, datatype);
+            }
+        }
+        else
+            throw new MinorOntopInternalBugException("Unexpected type" + type);
     }
 
     private TargetAtom constructClassTargetQuery(IRI iri, RepositoryTableSlice view) {
         Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
-
-        ImmutableFunctionalTerm subjectTerm = getTerm((ObjectRDFType)view.getId().get(0), X);
+        ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().get(0), X);
         ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
         IRIConstant classTerm = termFactory.getConstantIRI(iri);
-
         return targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm, classTerm);
     }
 
     private TargetAtom constructPropertyTargetQuery(IRI iri, RepositoryTableSlice view) {
         Variable X = termFactory.getVariable(MAPPING_VARIBLES.get(0));
-        Variable Y = termFactory.getVariable(MAPPING_VARIBLES.get(1));
-
-        ImmutableFunctionalTerm subjectTerm = getTerm((ObjectRDFType)view.getId().get(0), X);
+        ImmutableFunctionalTerm subjectTerm = getTerm(view.getId().get(0), X);
         IRIConstant iriTerm = termFactory.getConstantIRI(iri);
-
-        RDFTermType type2 = view.getId().get(1);
-        final ImmutableFunctionalTerm objectTerm;
-        if (type2 instanceof ObjectRDFType) {
-            objectTerm = getTerm((ObjectRDFType)type2, Y);
-        }
-        else {
-            RDFDatatype datatype = (RDFDatatype) type2;
-            if (datatype.getLanguageTag().isPresent()) {
-                LanguageTag languageTag = datatype.getLanguageTag().get();
-                objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, languageTag.getFullString());
-            }
-            else {
-                objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, datatype);
-            }
-        }
-
+        Variable Y = termFactory.getVariable(MAPPING_VARIBLES.get(1));
+        ImmutableFunctionalTerm objectTerm = getTerm(view.getId().get(1), Y);
         return targetAtomFactory.getTripleTargetAtom(subjectTerm, iriTerm, objectTerm);
     }
 }

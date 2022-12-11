@@ -28,8 +28,7 @@ public class RepositoryTableSlice {
 	}
 	
 	public String getSELECT(SemanticIndexRange range) {
-		List<Interval> intervals = range.getIntervals();
-		String filter = intervals.stream()
+		String filter = range.getIntervals().stream()
 				.map(RepositoryTableSlice::getIntervalString)
 				.collect(Collectors.joining(" OR "));
 
