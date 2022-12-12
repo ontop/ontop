@@ -11,6 +11,9 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -122,14 +125,28 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         QueryNode unionRoot = unionChild.getRootNode();
 
         if (unionRoot instanceof ConstructionNode) {
-            // Child without projected variable -> inserts a LIMIT 1
-            if (unionChild.getChildren().get(0).getVariables().isEmpty())
+            // Child without projected variable and no non-deterministic function used -> inserts a LIMIT 1
+            if (unionChild.getChildren().get(0).getVariables().isEmpty()
+                    && ((ConstructionNode) unionRoot).getSubstitution().getImmutableMap().values()
+                    .stream().allMatch(this::isConstantOrDeterministic))
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createSliceNode(0, 1),
                         unionChild)
                         .normalizeForOptimization(variableGenerator);
         }
         return unionChild;
+    }
+
+    private boolean isConstantOrDeterministic(ImmutableTerm term) {
+        if (term instanceof Constant)
+            return true;
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            if (!functionalTerm.getFunctionSymbol().isDeterministic())
+                return false;
+            return functionalTerm.getTerms().stream().allMatch(this::isConstantOrDeterministic);
+        }
+        throw new MinorOntopInternalBugException("The term was expected to be grounded");
     }
 
     private IQTree createNormalizedTree(InjectiveBindingLiftState state, IQTreeCache treeCache, VariableGenerator variableGenerator) {
