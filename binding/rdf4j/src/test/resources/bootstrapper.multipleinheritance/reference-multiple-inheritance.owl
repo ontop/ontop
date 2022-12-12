@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/a"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/b"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/c"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/d"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/e"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/f"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/g"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/skyserver/h"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/a#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/b#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/c#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/d#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/e#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/f#id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id1"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id1"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id2"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/a"/>
+        <Class IRI="http://semanticweb.org/skyserver/b"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/a"/>
+        <Class IRI="http://semanticweb.org/skyserver/c"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/b"/>
+        <Class IRI="http://semanticweb.org/skyserver/e"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/c"/>
+        <Class IRI="http://semanticweb.org/skyserver/d"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/c"/>
+        <Class IRI="http://semanticweb.org/skyserver/e"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/e"/>
+        <Class IRI="http://semanticweb.org/skyserver/f"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/f"/>
+        <Class IRI="http://semanticweb.org/skyserver/a"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://semanticweb.org/skyserver/h"/>
+        <Class IRI="http://semanticweb.org/skyserver/g"/>
+    </SubClassOf>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/a#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/a"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/b#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/b"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/c#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/c"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/d#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/d"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/e#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/e"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/f#id"/>
+        <Class IRI="http://semanticweb.org/skyserver/f"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id1"/>
+        <Class IRI="http://semanticweb.org/skyserver/g"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id2"/>
+        <Class IRI="http://semanticweb.org/skyserver/g"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id1"/>
+        <Class IRI="http://semanticweb.org/skyserver/h"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id2"/>
+        <Class IRI="http://semanticweb.org/skyserver/h"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/a#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/b#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/c#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/d#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/e#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/f#id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id1"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/g#id2"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id1"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/skyserver/h#id2"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 5.1.20) https://github.com/owlcs/owlapi/ -->
+
+

@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 public class SHPatternTest {
     // Reference
-    private static final String referenceOBDAPath = "src/test/resources/bootstrapper.multipleinheritance/reference_multiple-inheritance.obda";
-    private static final String referenceOWLPath = "src/test/resources/bootstrapper.multipleinheritance/reference_multiple-inheritance.owl";
+    private static final String referenceOBDAPath = "src/test/resources/bootstrapper.multipleinheritance/reference-multiple-inheritance.obda";
+    private static final String referenceOWLPath = "src/test/resources/bootstrapper.multipleinheritance/reference-multiple-inheritance.owl";
 
     // DB-connection
     private static final String owlPath = "src/test/resources/bootstrapper.multipleinheritance/multiple-inheritance.owl";

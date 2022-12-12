@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class TermsProducer {
 
     private final String baseIRI;
-
     private final TermFactory termFactory;
     private final RDF rdfFactory;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
@@ -261,7 +260,9 @@ public class TermsProducer {
     }
 
 
-    // Parent table present: Generate template according to the "from" of the fkey (case pkey -> pkey)
+    /**
+     * Pattern SH only: If parent table present, then generate template according to the "from" of the fkey (case pkey -> pkey)
+     */
     private ImmutableList<Variable> generateArguments(String varNamePrefix, NamedRelationDefinition td) {
         for( ForeignKeyConstraint fkey : td.getForeignKeys() ){
             if( SourceProducer.checkWhetherSubclassFkey(fkey) ){
@@ -274,10 +275,27 @@ public class TermsProducer {
         throw new RuntimeException("Searching for a non-existing subclass-fkey");
     }
 
+    /**
+     * Helper function to generate the arguments of a URI template, according to the provided "pk"
+     * @param pk
+     * @param varNamePrefix
+     * @return
+     */
     private ImmutableList<Variable> generateArguments(UniqueConstraint pk, String varNamePrefix) {
         return pk.getAttributes().stream()
                 .map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
                 .collect(ImmutableCollectors.toList());
+    }
+
+    /**
+     * Generate a URI from a join pair:
+     *     (T.C1,T.C2) = (T1.C3,T1.C4) -> T#join-C1;C2
+     */
+    public IRI getReferencePropertyIRI(Pair<List<QualifiedAttributeID>, List<QualifiedAttributeID>> joinPair, NamedRelationDefinition table) {
+        return rdfFactory.createIRI(getTableIRIString(table)
+                + "#join-" + joinPair.first().stream()
+                .map(attsID -> R2RMLIRISafeEncoder.encode(attsID.getAttribute().getName()))
+                .collect(Collectors.joining(";")));
     }
 
     /*
@@ -296,25 +314,16 @@ public class TermsProducer {
         if( bootConf.getDictionary().isEmpty() )
             return getReferencePropertyIRI(fk);
 
-        // TODO: Apply dictionary, if provided
-        if( isFkeyAliased(fk, bootConf) ){
-            return fkeyAlias(fk,bootConf);
+        IRI result = fkeyAlias(fk,bootConf);
+        if( result == null ){
+            String tableName = fk.getRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName();
+            result = rdfFactory.createIRI(getTableIRIString(fk.getRelation(), bootConf.getDictionary())
+                    + "#ref-" + fk.getComponents().stream()
+                    .map(c -> R2RMLIRISafeEncoder.encode(
+                            bootConf.getDictionary().getAttributeAlias(tableName,c.getAttribute().getID().getName())))
+                    .collect(Collectors.joining(";")));
         }
-
-        String tableName = fk.getRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName();
-        return rdfFactory.createIRI(getTableIRIString(fk.getRelation(), bootConf.getDictionary())
-                + "#ref-" + fk.getComponents().stream()
-                .map(c -> R2RMLIRISafeEncoder.encode(
-                        bootConf.getDictionary().getAttributeAlias(tableName,c.getAttribute().getID().getName())))
-                .collect(Collectors.joining(";")));
-    }
-
-    // (T.C1,T.C2) = (T1.C3,T1.C4) -> T#join-C1;C2
-    public IRI getReferencePropertyIRI(Pair<List<QualifiedAttributeID>, List<QualifiedAttributeID>> joinPair, NamedRelationDefinition table) {
-        return rdfFactory.createIRI(getTableIRIString(table)
-                + "#join-" + joinPair.first().stream()
-                .map(attsID -> R2RMLIRISafeEncoder.encode(attsID.getAttribute().getName()))
-                .collect(Collectors.joining(";")));
+        return result;
     }
 
     /*
@@ -336,7 +345,10 @@ public class TermsProducer {
                 .collect(Collectors.joining(";")));
     }
 
-    // baseURI + tableAlias#joinAlias
+    /**
+     * If, in bootConf, a "joinAlias" has been defined for foreign key "fk", then the aliased object property will have name:
+     *    baseURI + tableAlias#joinAlias
+     */
     private IRI fkeyAlias(ForeignKeyConstraint fk, BootConf bootConf) {
         for (Dictionary.DictEntry entry : bootConf.getDictionary().getDictEntries()) {
             for (Dictionary.DictEntry.Reference ref : entry.getReferences()) {
@@ -356,26 +368,5 @@ public class TermsProducer {
             }
         }
         return null;
-    }
-
-    private static boolean isFkeyAliased(ForeignKeyConstraint fk, BootConf bootConf) {
-        for (Dictionary.DictEntry entry : bootConf.getDictionary().getDictEntries()) {
-            for (Dictionary.DictEntry.Reference ref : entry.getReferences()) {
-                String fromTable = entry.getTableName();
-                String toTable = ref.getToTable();
-                if (fromTable.equals(fk.getRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName())) {
-                    if (toTable.equals(fk.getReferencedRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName())) {
-                        List<String> compFromAtts = fk.getComponents().stream()
-                                .map(c -> c.getAttribute().getID().getName().toLowerCase()).collect(Collectors.toList());
-                        List<String> compToAtts = fk.getComponents().stream()
-                                .map(c -> c.getReferencedAttribute().getID().getName().toLowerCase()).collect(Collectors.toList());
-                        if( ref.getFromAtts().equals(compFromAtts) && ref.getToAtts().equals(compToAtts) ){
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 }
