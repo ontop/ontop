@@ -61,12 +61,25 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     ((ValuesNode) childRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
         }
         else if (childRoot instanceof UnionNode) {
-            Optional<IQTree> newTree = simplifyUnion(child, distinctNode, null, variableGenerator);
+            Optional<IQTree> newTree = simplifyUnion(child, distinctNode, null, null, variableGenerator);
+            if (newTree.isPresent())
+                return newTree.get();
+        }
+        else if ((childRoot instanceof OrderByNode) && (child.getChildren().get(0).getRootNode() instanceof UnionNode)) {
+            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0), distinctNode, (OrderByNode) childRoot, null, variableGenerator);
+            if (newTree.isPresent())
+                return newTree.get();
+        }
+        else if ((childRoot instanceof OrderByNode)
+                && (child.getChildren().get(0).getRootNode() instanceof FilterNode)
+                && (child.getChildren().get(0).getChildren().get(0).getRootNode() instanceof UnionNode)) {
+            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0).getChildren().get(0), distinctNode, (OrderByNode) childRoot,
+                    (FilterNode) child.getChildren().get(0).getRootNode(), variableGenerator);
             if (newTree.isPresent())
                 return newTree.get();
         }
         else if ((childRoot instanceof FilterNode) && (child.getChildren().get(0).getRootNode() instanceof UnionNode)) {
-            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0), distinctNode, (FilterNode) childRoot, variableGenerator);
+            Optional<IQTree> newTree = simplifyUnion(child.getChildren().get(0), distinctNode, null, (FilterNode) childRoot, variableGenerator);
             if (newTree.isPresent())
                 return newTree.get();
         }
@@ -101,10 +114,10 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
     }
 
     /**
-     * DISTINCT [FILTER] UNION
+     * DISTINCT [ORDER BY] [FILTER] UNION
      */
-    private Optional<IQTree> simplifyUnion(IQTree child, DistinctNode distinctNode, @Nullable FilterNode filterNode,
-                                           VariableGenerator variableGenerator) {
+    private Optional<IQTree> simplifyUnion(IQTree child, DistinctNode distinctNode, @Nullable OrderByNode orderByNode,
+                                           @Nullable FilterNode filterNode, VariableGenerator variableGenerator) {
         ImmutableList<IQTree> unionChildren = child.getChildren();
 
         ImmutableList<IQTree> newUnionChildren = unionChildren.stream()
@@ -116,11 +129,17 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree newUnionTree = iqFactory.createNaryIQTree((UnionNode) child.getRootNode(), newUnionChildren);
 
+        IQTree newFilterTree = Optional.ofNullable(filterNode)
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newUnionTree))
+                .orElse(newUnionTree);
+
+        IQTree newOrderByTree = Optional.ofNullable(orderByNode)
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newFilterTree))
+                .orElse(newFilterTree);
+
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(
                 distinctNode,
-                Optional.ofNullable(filterNode)
-                        .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newUnionTree))
-                        .orElse(newUnionTree));
+                newOrderByTree);
 
         return Optional.of(newTree.normalizeForOptimization(variableGenerator));
     }
