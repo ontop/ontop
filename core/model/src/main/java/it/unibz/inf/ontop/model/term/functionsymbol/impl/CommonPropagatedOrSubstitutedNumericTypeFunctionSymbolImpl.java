@@ -62,12 +62,9 @@ public class CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl extends 
     protected Optional<RDFTermTypeConstant> evaluateCombination(ImmutableList<RDFTermTypeConstant> constants,
                                                                 Optional<RDFTermTypeConstant> optionalMergedTypeConstant,
                                                                 TermFactory termFactory) {
-        return optionalMergedTypeConstant
+        return evaluateCombination(optionalMergedTypeConstant
                 .map(c -> Stream.concat(Stream.of(c), constants.stream()))
-                .orElseGet(constants::stream)
-                .reduce((c1, c2) -> termFactory.getRDFTermTypeConstant(
-                        (RDFTermType) c1.getRDFTermType().getCommonDenominator(c2.getRDFTermType())))
-                .filter(c -> !c.getRDFTermType().isAbstract());
+                .orElseGet(constants::stream), termFactory);
     }
 
     private Optional<RDFTermTypeConstant> evaluateCombination(Stream<RDFTermTypeConstant> typeConstantStream, TermFactory termFactory) {

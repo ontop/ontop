@@ -93,7 +93,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// > for xsd:date is not part of SPARQL 1.1
 			openWorldManifest +"date-3", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z"
 
-			openWorldManifest +"open-eq-07", // JdbcSQLException: Data conversion error converting "xyz"
+			openWorldManifest +"open-eq-07", // JdbcSQLException: Data conversion error converting "xyz" (input data)
 			openWorldManifest +"open-eq-08", // JdbcSQLException: Data conversion error converting "xyz"
 			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz"
 			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz"
@@ -109,23 +109,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			/* DATA-R2: SORT */
 			// TODO: support the xsd:integer cast
-			sortManifest + "dawg-sort-function",
-
-			/* DATA-R2: TYPE-PROMOTION */
-			// TODO: double-check why it is the case
-			typePromotionManifest + "type-promotion-13",
-			typePromotionManifest + "type-promotion-11",
-			typePromotionManifest + "type-promotion-10",
-			typePromotionManifest + "type-promotion-09",
-			typePromotionManifest + "type-promotion-14",
-			typePromotionManifest + "type-promotion-08",
-			typePromotionManifest + "type-promotion-19",
-			typePromotionManifest + "type-promotion-12",
-			typePromotionManifest + "type-promotion-18",
-			typePromotionManifest + "type-promotion-15",
-			typePromotionManifest + "type-promotion-16",
-			typePromotionManifest + "type-promotion-17",
-			typePromotionManifest + "type-promotion-27"
+			sortManifest + "dawg-sort-function"
 	);
 
 	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,
