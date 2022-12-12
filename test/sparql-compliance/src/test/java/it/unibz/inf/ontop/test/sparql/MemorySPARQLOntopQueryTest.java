@@ -16,11 +16,6 @@ import java.util.Set;
 
 /*Test of SPARQL 1.0 compliance
 Some test have been modified  or are missing, respect to the original test case
-- DATA-R2: ALGEBRA not well designed queries actually return correct results :
-			:nested-opt-1
-			:nested-opt-2
-			:opt-filter-1
-			:opt-filter-2
 
 - DATA-R2: GRAPH folder is missing-
 - DATA-R2: DATASET folder is missing
@@ -51,25 +46,16 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			// Quads are not yet supported by the SI
-			optionalManifest + "dawg-optional-complex-2",
-			// Quads are not yet supported by the SI
-			optionalManifest + "dawg-optional-complex-3",
+			optionalManifest + "dawg-optional-complex-2", // quads are not supported by the SI
+			optionalManifest + "dawg-optional-complex-3", // quads are not supported by the SI
 
-			// Quads are not yet supported by the SI
-			algebraManifest + "join-combo-2",
+			algebraManifest + "join-combo-2", // quads are not supported by the SI
 
-			/* DATA-R2: BASIC*/
+			// RDF4J SPARQL parser bug ("." after an integer is considered a triple separator rather than part of the decimal)
+			basicManifest + "term-6",  // missing result
+			basicManifest + "term-7", // org.eclipse.rdf4j.query.MalformedQueryException: Encountered "."
 
-			//missing result "." is not considered as part of the decimal (error is already in the sparql algebra)
-			basicManifest + "term-6",
-
-			//MalformedQueryException SPARQL Parser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
-			basicManifest + "term-7",
-
-			/* DATA-R2: CAST
-			Cast with function call on the datatype is not yet supported e.g. FILTER(datatype(xsd:double(?v)) = xsd:double) . */
-
+			// SPARQL cast with function call on the datatype is not supported, e.g., FILTER(datatype(xsd:double(?v)) = xsd:double)
 			castManifest + "cast-str",
 			castManifest + "cast-flt",
 			castManifest + "cast-dbl",
@@ -78,38 +64,21 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			castManifest + "cast-dT",
 			castManifest + "cast-bool",
 
-			/* DATA-R2: BUILT-IN */
+			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
 
-			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0"
+			exprEqualsManifest + "eq-2-1", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
+			exprEqualsManifest + "eq-2-2", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
 
-			/* DATA-R2: EXPR-EQUALS   */
+			openWorldManifest +"date-2", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z" (H2 issue: "2006-08-23Z"^^xsd:date in the data & result)
+			openWorldManifest +"date-3", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z" (H2 issue: "2006-08-23Z"^^xsd:date in the data & result)
+			openWorldManifest +"open-eq-07", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
+			openWorldManifest +"open-eq-08", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
+			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data ONLY)
+			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
+			openWorldManifest +"open-eq-11", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
+			openWorldManifest +"open-eq-12", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
 
-			exprEqualsManifest + "eq-2-1", // JdbcSQLException: Data conversion error converting "1.0e0"
-			exprEqualsManifest + "eq-2-2", // JdbcSQLException: Data conversion error converting "1.0e0"
-
-			/* DATA-R2: OPEN_WORLD   */
-			//TODO: double-check
-			openWorldManifest +"date-2", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z"
-			// > for xsd:date is not part of SPARQL 1.1
-			openWorldManifest +"date-3", // JdbcSQLException: Cannot parse "DATE" constant "2006-08-23Z"
-
-			openWorldManifest +"open-eq-07", // JdbcSQLException: Data conversion error converting "xyz" (input data)
-			openWorldManifest +"open-eq-08", // JdbcSQLException: Data conversion error converting "xyz"
-			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz"
-			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz"
-			openWorldManifest +"open-eq-11", // JdbcSQLException: Data conversion error converting "xyz"
-			openWorldManifest +"open-eq-12", // JdbcSQLException: Data conversion error converting "xyz"
-
-			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
-			solutionSeqManifest + "limit-4",
-			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
-			solutionSeqManifest + "offset-4",
-			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
-			solutionSeqManifest + "slice-5",
-
-			/* DATA-R2: SORT */
-			// TODO: support the xsd:integer cast
-			sortManifest + "dawg-sort-function"
+			sortManifest + "dawg-sort-function" // SPARQL cast with function call on the datatype is not supported, e.g., ORDER BY xsd:integer(?o)
 	);
 
 	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,

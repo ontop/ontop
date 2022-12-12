@@ -34,8 +34,10 @@ public class RDF4JGraphLoading {
             throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphURLs = new HashSet<>();
-        graphURLs.addAll(dataset.getDefaultGraphs());
-        graphURLs.addAll(dataset.getNamedGraphs());
+        if (dataset != null) {
+            graphURLs.addAll(dataset.getDefaultGraphs());
+            graphURLs.addAll(dataset.getNamedGraphs());
+        }
 
         LoadingConfiguration loadingConfiguration = new LoadingConfiguration();
 
