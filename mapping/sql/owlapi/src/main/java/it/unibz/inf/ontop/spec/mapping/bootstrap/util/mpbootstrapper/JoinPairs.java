@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;

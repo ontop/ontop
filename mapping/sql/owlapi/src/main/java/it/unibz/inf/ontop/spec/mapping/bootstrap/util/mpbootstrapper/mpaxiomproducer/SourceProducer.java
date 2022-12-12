@@ -1,8 +1,10 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +27,7 @@ public class SourceProducer {
                 return String.format("SELECT %s FROM %s", columns, table.getID().getSQLRendering());
             }
         }
-        return DirectMappingAxiomProducer.getSQL(table);
+        return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
     }
 
     public String getClusteringSQL(String clusteringMapEntryKey, String clusteringAttribute, NamedRelationDefinition table, BootConf.NullValue nullValue) {
@@ -229,5 +231,31 @@ public class SourceProducer {
                 && fkeyReferringAtts.containsAll(referringTablePkeyAtts);
 
         return containmentCheck && referredTablePkeyAtts.equals(fkeyReferredAtts);
+    }
+
+    /**
+     *
+     * @param table
+     * @return If a pkey is present, pkey attributes. Else, all attributes.
+     */
+    static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
+        Optional<UniqueConstraint> pk = table.getPrimaryKey();
+        return pk.map(UniqueConstraint::getAttributes)
+                .orElse(table.getAttributes());
+    }
+
+    private static String getQualifiedColumnName(Attribute attr) {
+        return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
+    }
+
+    private static String getColumnAlias(Attribute attr) {
+        String rendering = attr.getID().getSQLRendering();
+        String name = attr.getID().getName(); // TODO: find a better way of constructing IDs
+        return rendering.replace(name,
+                getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + name);
+    }
+
+    private static String getTableName(NamedRelationDefinition relation) {
+        return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
     }
 }

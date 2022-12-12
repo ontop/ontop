@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util.shdefinitions;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.shdefinitions;
 
 import java.util.Objects;
 

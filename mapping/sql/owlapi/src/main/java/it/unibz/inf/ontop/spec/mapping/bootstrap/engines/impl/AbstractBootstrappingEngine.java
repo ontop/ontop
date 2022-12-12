@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.engines.BootstrappingEngine;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.DirectMappingOntologyUtils;

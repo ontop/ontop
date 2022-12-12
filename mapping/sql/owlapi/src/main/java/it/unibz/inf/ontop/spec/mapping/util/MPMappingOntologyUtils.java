@@ -11,10 +11,10 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.MPMappingAssertionProducer;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.Pair;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer.MPMappingAxiomProducer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.semanticweb.owlapi.model.*;
@@ -36,7 +36,7 @@ public class MPMappingOntologyUtils {
                                                                           TypeFactory typeFactory,
                                                                           boolean bootstrappedMapping,
                                                                           ImmutableList<NamedRelationDefinition> tables,
-                                                                          MPMappingAssertionProducer dmap, BootConf bootConf, MetadataProvider metadataProvider){
+                                                                          MPMappingAxiomProducer dmap, BootConf bootConf, MetadataProvider metadataProvider){
 
         OWLDataFactory dataFactory = manager.getOWLDataFactory();
 
@@ -89,7 +89,7 @@ public class MPMappingOntologyUtils {
                         // it is an object-property induced by a joinPair
                         // Generate dom/range for the joinPair
                         for( Pair<List<QualifiedAttributeID>, List<QualifiedAttributeID>> joinPair : allPairs ){
-                            NamedRelationDefinition joinPairLeftTable = MPMappingAssertionProducer.retrieveDatabaseTableDefinition(tables, joinPair.first().get(0).getRelation());
+                            NamedRelationDefinition joinPairLeftTable = MPMappingAxiomProducer.retrieveDatabaseTableDefinition(tables, joinPair.first().get(0).getRelation());
                             if( tableDef.equals(joinPairLeftTable) ){
                                 // The current table is the left-table in the joinPair
                                 axiomsSet.addAll(getDomRangeAxiomsForJoinPair(objProp, dmap, tables, tableDef, bootConf, joinPair, dataFactory));
@@ -110,7 +110,7 @@ public class MPMappingOntologyUtils {
 
     /** Similar to the method for fkeys, with the difference that the referenced table becomes
      * now the (unique) table occurring in the RHS of a joinPair. **/
-    private static Collection<? extends OWLObjectPropertyAxiom> getDomRangeAxiomsForJoinPair(OWLObjectProperty objProp, MPMappingAssertionProducer dmap, ImmutableList<NamedRelationDefinition> tables,
+    private static Collection<? extends OWLObjectPropertyAxiom> getDomRangeAxiomsForJoinPair(OWLObjectProperty objProp, MPMappingAxiomProducer dmap, ImmutableList<NamedRelationDefinition> tables,
                                                                                              NamedRelationDefinition tableDef,
                                                                                              BootConf bootConf,
                                                                                              Pair<List<QualifiedAttributeID>, List<QualifiedAttributeID>> joinPair,
@@ -120,7 +120,7 @@ public class MPMappingOntologyUtils {
         org.apache.commons.rdf.api.IRI referencedPropIRI = dmap.getReferencePropertyIRI(joinPair, tableDef);
 
         if (referencedPropIRI.getIRIString().equals(objProp.getIRI().toString())) {
-            NamedRelationDefinition rightTable = MPMappingAssertionProducer.retrieveDatabaseTableDefinition(tables, joinPair.second().get(0).getRelation());
+            NamedRelationDefinition rightTable = MPMappingAxiomProducer.retrieveDatabaseTableDefinition(tables, joinPair.second().get(0).getRelation());
             String tableIRI = dmap.getTableIRIString(tableDef, bootConf.getDictionary());
             String referencedTableIRI = dmap.getTableIRIString(rightTable, bootConf.getDictionary());
 
@@ -154,7 +154,7 @@ public class MPMappingOntologyUtils {
         return result;
     }
 
-    private static Collection<? extends OWLObjectPropertyAxiom> getDomRangeAxiomsForFkey(OWLObjectProperty objProp, MPMappingAssertionProducer dmap, NamedRelationDefinition tableDef, BootConf bootConf, ForeignKeyConstraint fkey, OWLDataFactory dataFactory) {
+    private static Collection<? extends OWLObjectPropertyAxiom> getDomRangeAxiomsForFkey(OWLObjectProperty objProp, MPMappingAxiomProducer dmap, NamedRelationDefinition tableDef, BootConf bootConf, ForeignKeyConstraint fkey, OWLDataFactory dataFactory) {
 
         Set<OWLObjectPropertyAxiom> axiomsSet = new HashSet<>();
 
@@ -283,7 +283,7 @@ public class MPMappingOntologyUtils {
         // 2) if the dictionary is empty
         for( NamedRelationDefinition table : tables ){
             if( dictionary.isEmpty() || dictionary.containsTable(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName())) {
-                List<NamedRelationDefinition> parentTables = MPMappingAssertionProducer.retrieveParentTables(table);
+                List<NamedRelationDefinition> parentTables = MPMappingAxiomProducer.retrieveParentTables(table);
                 for (NamedRelationDefinition pT : parentTables) {
                     if (dictionary.isEmpty() || dictionary.containsTable(pT.getID().getComponents().get(RelationID.TABLE_INDEX).getName())) {
                         String tableAlias = dictionary.isEmpty() ? table.getID().getComponents().get(RelationID.TABLE_INDEX).getName() : dictionary.getTableAlias(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());

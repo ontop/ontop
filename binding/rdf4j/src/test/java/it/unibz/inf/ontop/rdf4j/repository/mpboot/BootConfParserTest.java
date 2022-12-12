@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.repository.mpboot;
 
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.bootconfparser.BootConfParser;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.clusters.Cluster;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.shdefinitions.SHDefinition;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.clusters.Cluster;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.shdefinitions.SHDefinition;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 

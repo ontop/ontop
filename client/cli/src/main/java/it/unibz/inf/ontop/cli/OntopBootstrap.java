@@ -7,7 +7,7 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper.BootstrappingResults;

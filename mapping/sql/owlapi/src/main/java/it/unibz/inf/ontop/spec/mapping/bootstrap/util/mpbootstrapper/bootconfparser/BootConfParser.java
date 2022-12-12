@@ -1,13 +1,13 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util.bootconfparser;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.clusters.Cluster;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.shdefinitions.SHDefinition;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.clusters.Cluster;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.shdefinitions.SHDefinition;
 
 import java.io.IOException;
 import java.nio.file.Files;

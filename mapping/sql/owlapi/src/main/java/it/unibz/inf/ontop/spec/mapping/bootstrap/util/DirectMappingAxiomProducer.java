@@ -48,22 +48,21 @@ import java.util.stream.Stream;
 // TODO> Re-implement this
 public class DirectMappingAxiomProducer {
 
-	protected final String baseIRI;
+	private final String baseIRI;
 
-	protected final TermFactory termFactory;
-	protected final org.apache.commons.rdf.api.RDF rdfFactory;
-	protected final DBFunctionSymbolFactory dbFunctionSymbolFactory;
-	protected final TargetAtomFactory targetAtomFactory;
-	protected final TypeFactory typeFactory;
+	private final TermFactory termFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+	private final TargetAtomFactory targetAtomFactory;
+	private final TypeFactory typeFactory;
 
 	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
-                                      org.apache.commons.rdf.api.RDF rdfFactory,
-                                      DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
+									  org.apache.commons.rdf.api.RDF rdfFactory,
+									  DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
 
 		this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
-		
-		this.termFactory = termFactory;
 
+		this.termFactory = termFactory;
 		this.targetAtomFactory = targetAtomFactory;
 		this.rdfFactory = rdfFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
@@ -76,20 +75,20 @@ public class DirectMappingAxiomProducer {
 	}
 
 	/***
-     * Definition reference triple: an RDF triple with:
-     * <p/>
-     * subject: the row node for the row.
-     * predicate: the reference property IRI for the columns.
-     * object: the row node for the referenced row.
-     *
-     * @param fk
-     * @return
-     */
-    public String getRefSQL(ForeignKeyConstraint fk) {
+	 * Definition reference triple: an RDF triple with:
+	 * <p/>
+	 * subject: the row node for the row.
+	 * predicate: the reference property IRI for the columns.
+	 * object: the row node for the referenced row.
+	 *
+	 * @param fk
+	 * @return
+	 */
+	public String getRefSQL(ForeignKeyConstraint fk) {
 
-    	String columns = Stream.concat(
-    				getIdentifyingAttributes(fk.getRelation()).stream(),
-					getIdentifyingAttributes(fk.getReferencedRelation()).stream())
+		String columns = Stream.concat(
+						getIdentifyingAttributes(fk.getRelation()).stream(),
+						getIdentifyingAttributes(fk.getReferencedRelation()).stream())
 				.map(a -> getQualifiedColumnName(a) + " AS " + getColumnAlias(a))
 				.collect(Collectors.joining(", "));
 
@@ -103,41 +102,43 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);
 	}
 
-	/**
-	 *
-	 * @param table
-	 * @return If a pkey is present, pkey attributes. Else, all attributes.
-	 */
-	static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
+	private static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());
 	}
 
-	// TODO: check use of quotation marks here and for variables names too
-	public static String getColumnAlias(Attribute attr) {
-		 return ((NamedRelationDefinition)attr.getRelation()).getID().getComponents().get(RelationID.TABLE_INDEX).getName() + "_" + attr.getID().getName();
+	private static String getTableName(NamedRelationDefinition relation) {
+		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
 	}
-	
-	public static String getQualifiedColumnName(Attribute attr) {
-		 return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
+	private static String getColumnAlias(Attribute attr) {
+		String rendering = attr.getID().getSQLRendering();
+		String name = attr.getID().getName(); // TODO: find a better way of constructing IDs
+		return rendering.replace(name,
+				getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + name);
+	}
+
+	private static String getQualifiedColumnName(Attribute attr) {
+		return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
 	}
 
 
-    /**
-     * Definition row graph: an RDF graph consisting of the following triples:
-     * <p/>
-     *   - the row type triple.
-     *   - a literal triple for each column in a table where the column value is non-NULL.
-     *
-     */
-    public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+	/**
+	 * Definition row graph: an RDF graph consisting of the following triples:
+	 * <p/>
+	 *   - the row type triple.
+	 *   - a literal triple for each column in a table where the column value is non-NULL.
+	 *
+	 */
+	public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
 		//Class Atom
 		ImmutableTerm sub = generateTerm(table, "", bnodeTemplateMap);
-		atoms.add(getAtom(rdfFactory.createIRI(getTableIRIString(table)), sub));
+		atoms.add(targetAtomFactory.getTripleTargetAtom(sub,
+				termFactory.getConstantIRI(RDF.TYPE),
+				termFactory.getConstantIRI(rdfFactory.createIRI(getTableIRIString(table)))));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
@@ -148,100 +149,105 @@ public class DirectMappingAxiomProducer {
 
 			Variable objV = termFactory.getVariable(att.getID().getName());
 			ImmutableTerm obj = termFactory.getRDFLiteralFunctionalTerm(objV, typeIRI);
-			
-			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
+
+			atoms.add(targetAtomFactory.getTripleTargetAtom(sub,
+					termFactory.getConstantIRI(getLiteralPropertyIRI(att)),
+					obj));
 		}
 
 		return atoms.build();
 	}
 
-    /**
-     * Definition row graph: an RDF graph consisting of the following triples:
-     *
-     * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
-     *
-     */
+	/**
+	 * Definition row graph: an RDF graph consisting of the following triples:
+	 *
+	 * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
+	 *
+	 */
 	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk,
 											  Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableTerm sub = generateTerm(fk.getRelation(),
-				fk.getRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getRelation()) + "_", bnodeTemplateMap);
 		ImmutableTerm obj = generateTerm(fk.getReferencedRelation(),
-				fk.getReferencedRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getReferencedRelation()) + "_", bnodeTemplateMap);
 
-		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
+		TargetAtom atom = targetAtomFactory.getTripleTargetAtom(sub,
+				termFactory.getConstantIRI(getReferencePropertyIRI(fk)),
+				obj);
 		return ImmutableList.of(atom);
 	}
 
 
-    /**
-     *
-     * table IRI:
-     *      the IRI consisting of the percent-encoded form of the table name.
-     *
-     * @return table IRI
-     */
-	String getTableIRIString(NamedRelationDefinition table) {
-		return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
+	/**
+	 *
+	 * table IRI:
+	 *      the IRI consisting of the percent-encoded form of the table name.
+	 *
+	 * @return table IRI
+	 */
+	private String getTableIRIString(NamedRelationDefinition table) {
+		return baseIRI + R2RMLIRISafeEncoder.encode(getTableName(table));
 	}
 
-    /**
-     * Generate an URI for datatype property from a string(name of column) The
-     * style should be "baseIRI/tablename#columnname" as required in Direct
-     * Mapping Definition
-     *
-     * A column in a table forms a literal property IRI:
-     *
-     * Definition literal property IRI: the concatenation of:
-     *   - the percent-encoded form of the table name,
-     *   - the hash character '#',
-     *   - the percent-encoded form of the column name.
-     */
-	IRI getLiteralPropertyIRI(Attribute attr) {
-        return rdfFactory.createIRI(getTableIRIString((NamedRelationDefinition)attr.getRelation())
-                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
-    }
+	/**
+	 * Generate an URI for datatype property from a string(name of column) The
+	 * style should be "baseIRI/tablename#columnname" as required in Direct
+	 * Mapping Definition
+	 *
+	 * A column in a table forms a literal property IRI:
+	 *
+	 * Definition literal property IRI: the concatenation of:
+	 *   - the percent-encoded form of the table name,
+	 *   - the hash character '#',
+	 *   - the percent-encoded form of the column name.
+	 */
+	private IRI getLiteralPropertyIRI(Attribute attr) {
+		return rdfFactory.createIRI(getTableIRIString((NamedRelationDefinition)attr.getRelation())
+				+ "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
+	}
 
-    /*
-     * Generate an URI for object property from a string (name of column)
-     *
-     * A foreign key in a table forms a reference property IRI:
-     *
-     * Definition reference property IRI: the concatenation of:
-     *   - the percent-encoded form of the table name,
-     *   - the string '#ref-',
-     *   - for each column in the foreign key, in order:
-     *     - the percent-encoded form of the column name,
-     *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
-     */
-    public IRI getReferencePropertyIRI(ForeignKeyConstraint fk) {
-        return rdfFactory.createIRI(getTableIRIString(fk.getRelation())
-                + "#ref-" + fk.getComponents().stream()
+	/*
+	 * Generate an URI for object property from a string (name of column)
+	 *
+	 * A foreign key in a table forms a reference property IRI:
+	 *
+	 * Definition reference property IRI: the concatenation of:
+	 *   - the percent-encoded form of the table name,
+	 *   - the string '#ref-',
+	 *   - for each column in the foreign key, in order:
+	 *     - the percent-encoded form of the column name,
+	 *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
+	 */
+	private IRI getReferencePropertyIRI(ForeignKeyConstraint fk) {
+		return rdfFactory.createIRI(getTableIRIString(fk.getRelation())
+				+ "#ref-" + fk.getComponents().stream()
 				.map(c -> R2RMLIRISafeEncoder.encode(c.getAttribute().getID().getName()))
 				.collect(Collectors.joining(";")));
-    }
+	}
 
-    /**
-     * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
-     *   - the percent-encoded form of the table name,
-     *   - the SOLIDUS character '/',
-     *   - for each column in the primary key, in order:
-     *     - the percent-encoded form of the column name,
-     *     - a EQUALS SIGN character '=',
-     *     - the percent-encoded lexical form of the canonical RDF literal representation of the column value as defined in R2RML section 10.2 Natural Mapping of SQL Values [R2RML],
-     *     - if it is not the last column in the primary key, a SEMICOLON character ';'
-     * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
-     *
-     * @param td
-     * @param bnodeTemplateMap
+	/**
+	 * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
+	 *   - the percent-encoded form of the table name,
+	 *   - the SOLIDUS character '/',
+	 *   - for each column in the primary key, in order:
+	 *     - the percent-encoded form of the column name,
+	 *     - a EQUALS SIGN character '=',
+	 *     - the percent-encoded lexical form of the canonical RDF literal representation of the column value as defined in R2RML section 10.2 Natural Mapping of SQL Values [R2RML],
+	 *     - if it is not the last column in the primary key, a SEMICOLON character ';'
+	 * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
+	 *
+	 * @param td
+	 * @param bnodeTemplateMap
 	 * @return
-     */
-	ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
-							   Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+	 */
+	private ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
+									   Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		Optional<UniqueConstraint> pko = td.getPrimaryKey();
 		if (pko.isPresent()) {
 			UniqueConstraint pk = pko.get();
+
 			Template.Builder builder = Template.builder();
 
 			// TODO: IMPROVE
@@ -259,7 +265,6 @@ public class DirectMappingAxiomProducer {
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
 					.map(termFactory::getPartiallyDefinedConversionToString)
 					.collect(ImmutableCollectors.toList());
-
 
 			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
 		}
@@ -281,15 +286,5 @@ public class DirectMappingAxiomProducer {
 		}
 	}
 
-	TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
-		return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getConstantIRI(iri),
-				o);
-	}
 
-	TargetAtom getAtom(IRI iri, ImmutableTerm s) {
-    	return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getConstantIRI(RDF.TYPE),
-				termFactory.getConstantIRI(iri));
-	}
 }

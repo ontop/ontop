@@ -1,9 +1,9 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper;
 
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.clusters.Cluster;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.clusters.Cluster;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 
 import java.util.*;
 
@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class BootConf {
 
-  private final it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary dictionary;
+  private final it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary dictionary;
   private final JoinPairs joinPairs;
   private final boolean enableSH;
   private final NullValue nullValue;

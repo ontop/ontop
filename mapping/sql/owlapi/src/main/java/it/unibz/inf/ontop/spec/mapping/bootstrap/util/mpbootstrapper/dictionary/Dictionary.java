@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary;
 
 import java.util.LinkedList;
 import java.util.List;

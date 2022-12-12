@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util.clusters;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.clusters;
 
 import java.util.ArrayList;
 import java.util.List;

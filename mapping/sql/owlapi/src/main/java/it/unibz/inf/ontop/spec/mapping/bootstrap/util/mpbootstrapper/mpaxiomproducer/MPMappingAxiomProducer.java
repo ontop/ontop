@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
@@ -11,6 +11,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.DirectMappingAxiomProducer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
@@ -21,12 +24,12 @@ import java.util.Map;
  * @author Davide Lanti
  * Mapping Pattern Axiom Producer
  */
-public class MPMappingAssertionProducer extends DirectMappingAxiomProducer {
+public class MPMappingAxiomProducer extends DirectMappingAxiomProducer {
 	private TargetProducer targetProducer;
 	private SourceProducer sourceProducer;
 	private TermsProducer termsProducer;
 
-    public MPMappingAssertionProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
+    public MPMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
         super(baseIRI, termFactory, targetAtomFactory, rdfFactory, dbFunctionSymbolFactory, typeFactory);
         this.sourceProducer = new SourceProducer();
 		this.termsProducer = new TermsProducer(baseIRI, termFactory, targetAtomFactory, rdfFactory, dbFunctionSymbolFactory, typeFactory);
@@ -144,7 +147,7 @@ public class MPMappingAssertionProducer extends DirectMappingAxiomProducer {
 	 *
 	 * @return table IRI
 	 */
-	public String getTableIRIString(NamedRelationDefinition table, it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary dictionary) {
+	public String getTableIRIString(NamedRelationDefinition table, it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary dictionary) {
 		return termsProducer.getTableIRIString(table, dictionary);
 	}
 

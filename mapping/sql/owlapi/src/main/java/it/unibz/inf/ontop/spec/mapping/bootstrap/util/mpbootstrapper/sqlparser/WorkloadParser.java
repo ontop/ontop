@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util.sqlparser;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.sqlparser;
 
 import it.unibz.inf.ontop.exception.InvalidQueryException;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.JoinPairs;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.Pair;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.JoinPairs;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;

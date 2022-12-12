@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
@@ -11,7 +11,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFuncti
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import org.apache.commons.rdf.api.IRI;
@@ -158,12 +160,8 @@ public class TermsProducer {
      *
      * @return table IRI
      */
-    public String getTableIRIString(NamedRelationDefinition table, Dictionary dictionary) {
-        if(dictionary.isEmpty()){
-            return getTableIRIString(table);
-        }
-        String alias = dictionary.getTableAlias(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
-        return baseIRI + R2RMLIRISafeEncoder.encode(alias);
+    String getTableIRIString(NamedRelationDefinition table) {
+        return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
     }
 
     /**
@@ -173,12 +171,16 @@ public class TermsProducer {
      *
      * @return table IRI
      */
-    String getTableIRIString(NamedRelationDefinition table) {
-        return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
+    public String getTableIRIString(NamedRelationDefinition table, Dictionary dictionary) {
+        if(dictionary.isEmpty()){
+            return getTableIRIString(table);
+        }
+        String alias = dictionary.getTableAlias(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
+        return baseIRI + R2RMLIRISafeEncoder.encode(alias);
     }
 
     /**
-     *
+     * Clustering Mapping Pattern (CE2C)
      * table IRI:
      *      the IRI consisting of the percent-encoded form of the table name.
      *

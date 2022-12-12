@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.bootstrap.util;
+package it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -22,29 +24,6 @@ public class TargetProducer {
         this.termsProducer = termsProducer;
     }
 
-    public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
-        ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
-
-        //Class Atom
-        ImmutableTerm sub = termsProducer.generateTerm(table, "", bnodeTemplateMap);
-        atoms.add(getAtom(termsProducer.getRdfFactory().createIRI(termsProducer.getTableIRIString(table)), sub));
-
-        //DataType Atoms
-        for (Attribute att : table.getAttributes()) {
-            // TODO: check having a default datatype is ok
-            IRI typeIRI = att.getTermType().getNaturalRDFDatatype()
-                    .map(RDFDatatype::getIRI)
-                    .orElse(XSD.STRING);
-
-            Variable objV = termsProducer.getTermFactory().getVariable(att.getID().getName());
-            ImmutableTerm obj = termsProducer.getTermFactory().getRDFLiteralFunctionalTerm(objV, typeIRI);
-
-            atoms.add(getAtom(termsProducer.getLiteralPropertyIRI(att), sub, obj));
-        }
-
-        return atoms.build();
-    }
-
     /**
      * Definition row graph: an RDF graph consisting of the following triples:
      * <p/>
@@ -55,10 +34,6 @@ public class TargetProducer {
     public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table,
                                            Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
                                            BootConf bootConf) {
-
-//		if (bootConf.getDictionary().isEmpty() ) {
-//			return this.getCQ(table, bnodeTemplateMap);
-//		} // TODO> Now removed, see whether to be re-included
 
         ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 

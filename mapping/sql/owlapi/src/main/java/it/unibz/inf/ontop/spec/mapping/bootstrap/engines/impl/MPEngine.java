@@ -15,11 +15,11 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFuncti
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.MPMappingAssertionProducer;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.Pair;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.SourceProducer;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.clusters.Cluster;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.dictionary.Dictionary;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer.MPMappingAxiomProducer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.Pair;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.mpaxiomproducer.SourceProducer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.clusters.Cluster;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MPMappingOntologyUtils;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.semanticweb.owlapi.model.*;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 public class MPEngine extends AbstractBootstrappingEngine {
 
-    private MPMappingAssertionProducer dmap = null;
+    private MPMappingAxiomProducer dmap = null;
 
     @Inject
     private MPEngine(OntopSQLCredentialSettings settings,
@@ -331,7 +331,7 @@ public class MPEngine extends AbstractBootstrappingEngine {
                                                       AtomicInteger mappingIndex,
                                                       BootConf bootConf) {
         if(this.dmap == null)
-            dmap = new MPMappingAssertionProducer(baseIRI, termFactory, targetAtomFactory,rdfFactory, dbFunctionSymbolFactory, typeFactory);
+            dmap = new MPMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,rdfFactory, dbFunctionSymbolFactory, typeFactory);
 
         // TODO Here I could look for clusters, in case the auto-clusters option is enabled.
         // ... how are these auto-clusters supposed to work? What if there's more than one clustering attribute?
@@ -347,7 +347,7 @@ public class MPEngine extends AbstractBootstrappingEngine {
                         Stream.concat(
                                 Stream.of(Maps.immutableEntry(dmap.getSQL(table, bootConf.getNullValue()), dmap.getCQ(table, bnodeTemplateMap, bootConf))), // Class defs and data props
                                 table.getForeignKeys().stream()
-                                        .filter(fk -> MPMappingAssertionProducer.retrieveParentTables(table).isEmpty() || !bootConf.isEnableSH()) // If the fkey conforms to the Schema-Hierarchy pattern, ignore
+                                        .filter(fk -> MPMappingAxiomProducer.retrieveParentTables(table).isEmpty() || !bootConf.isEnableSH()) // If the fkey conforms to the Schema-Hierarchy pattern, ignore
                                         .filter(fk -> bootConf.getDictionary().isEmpty() || bootConf.getDictionary().containsTable(fk.getReferencedRelation().getID().getComponents().get(RelationID.TABLE_INDEX).getName()))
                                         .map(fk -> Maps.immutableEntry(dmap.getRefSQL(fk, bootConf), dmap.getRefCQ(fk, bnodeTemplateMap, bootConf))))
                 )// Objet props
@@ -387,7 +387,7 @@ public class MPEngine extends AbstractBootstrappingEngine {
             BootConf bootConf) {
 
         if(this.dmap == null )
-            dmap = new MPMappingAssertionProducer(baseIRI, termFactory, targetAtomFactory,rdfFactory, dbFunctionSymbolFactory, typeFactory);
+            dmap = new MPMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,rdfFactory, dbFunctionSymbolFactory, typeFactory);
 
         List<Pair<List<QualifiedAttributeID>, List<QualifiedAttributeID>>> joinPairs = bootConf.getJoinPairs(this.metadataProvider);
         ImmutableList<SQLPPTriplesMap> workloadList = null;
