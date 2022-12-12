@@ -137,13 +137,15 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             .collect(ImmutableCollectors.toList()));
         }
 
-        QueryNode unionRoot = unionChild.getRootNode();
+        QueryNode unionChildRoot = unionChild.getRootNode();
 
-        if (unionRoot instanceof ConstructionNode) {
-            // Child without projected variable and no non-deterministic function used -> inserts a LIMIT 1
-            if (unionChild.getChildren().get(0).getVariables().isEmpty()
-                    && ((ConstructionNode) unionRoot).getSubstitution().getImmutableMap().values()
-                    .stream().allMatch(this::isConstantOrDeterministic))
+        if (unionChildRoot instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) unionChildRoot;
+
+            // No child variable and no non-deterministic function used -> inserts a LIMIT 1
+            if (constructionNode.getChildVariables().isEmpty()
+                    && (constructionNode.getSubstitution().getImmutableMap().values()
+                    .stream().allMatch(this::isConstantOrDeterministic)))
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createSliceNode(0, 1),
                         unionChild)
