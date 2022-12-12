@@ -20,11 +20,11 @@ public interface Bootstrapper {
     BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI, BootConf dictionary)
             throws MappingBootstrappingException, MappingException, OWLOntologyCreationException;
 
-    static Bootstrapper defaultBootstrapper() {
+    static DefaultDirectMappingBootstrapper defaultBootstrapper() {
         return new DefaultDirectMappingBootstrapper();
     }
 
-    static Bootstrapper mpBootstrapper() { return new MPBootstrapper(); }
+    static MPBootstrapper mpBootstrapper() { return new MPBootstrapper(); }
 
     interface BootstrappingResults {
 

@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.engines.DirectMappingAxiomProducer;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
@@ -59,10 +58,10 @@ public class MPMappingAssertionProducer extends DirectMappingAxiomProducer {
 	 *   - a literal triple for each column in a table where the column value is non-NULL.
 	 *
 	 */
-	@Override
-	public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
-		return targetProducer.getCQ(table, bnodeTemplateMap);
-	}
+//	@Override TODO> Completely remove?
+//	public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+//		return targetProducer.getCQ(table, bnodeTemplateMap);
+//	}
 
     /**
      * Definition row graph: an RDF graph consisting of the following triples:

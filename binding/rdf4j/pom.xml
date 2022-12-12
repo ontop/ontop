@@ -155,9 +155,23 @@
             <artifactId>rdf4j-queryrender</artifactId>
         </dependency>
 
+        <!-- Databases -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.teiid</groupId>
+            <artifactId>teiid</artifactId>
+            <version>15.0.1</version>
+            <classifier>jdbc</classifier>
             <scope>test</scope>
         </dependency>
 

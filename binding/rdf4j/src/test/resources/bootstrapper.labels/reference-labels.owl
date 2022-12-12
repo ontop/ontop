@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/labels/a_alias"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/labels/b_alias"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/labels/a_alias#join_alias"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/labels/a_alias#id_alias"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/labels/b_alias#id_alias"/>
+    </Declaration>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/labels/a_alias#join_alias"/>
+        <Class IRI="http://semanticweb.org/labels/a_alias"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/labels/a_alias#join_alias"/>
+        <Class IRI="http://semanticweb.org/labels/b_alias"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/labels/a_alias#id_alias"/>
+        <Class IRI="http://semanticweb.org/labels/a_alias"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/labels/b_alias#id_alias"/>
+        <Class IRI="http://semanticweb.org/labels/b_alias"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/labels/a_alias#id_alias"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/labels/b_alias#id_alias"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://semanticweb.org/labels/a_alias</IRI>
+        <Literal>This is table a</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias</IRI>
+        <Literal>a_lab1</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias</IRI>
+        <Literal>a_lab2</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/b_alias</IRI>
+        <Literal>b_lab1</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/b_alias</IRI>
+        <Literal>b_lab2</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://semanticweb.org/labels/a_alias#id_alias</IRI>
+        <Literal>This is a comment to attribute id.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias#id_alias</IRI>
+        <Literal>id_lab1</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias#id_alias</IRI>
+        <Literal>id_lab2</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias#join_alias</IRI>
+        <Literal>label1</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/a_alias#join_alias</IRI>
+        <Literal>label2</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/b_alias#id_alias</IRI>
+        <Literal>id_lab1</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://semanticweb.org/labels/b_alias#id_alias</IRI>
+        <Literal>id_lab2</Literal>
+    </AnnotationAssertion>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 5.1.20) https://github.com/owlcs/owlapi/ -->
+
+

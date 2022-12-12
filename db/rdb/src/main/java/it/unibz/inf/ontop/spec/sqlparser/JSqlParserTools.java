@@ -5,11 +5,15 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -57,5 +61,27 @@ public class JSqlParserTools {
 
         //String s = table.getFullyQualifiedName();
         //return idfac.createRelationID(s.split("\\."));
+    }
+
+    /**
+     * TODO> It was removed from Ontop codebase, still needed in WorkloadParser class though. Check whether it can be removed once and for all
+     * @param selectBody
+     * @return
+     */
+    public static PlainSelect getPlainSelect(SelectBody selectBody) {
+        // other subclasses of SelectBody are
+        //      SelectOperationList (INTERSECT, EXCEPT, MINUS, UNION),
+        //      ValuesStatement (VALUES)
+        //      WithItem ([RECURSIVE]...)
+
+        if (!(selectBody instanceof PlainSelect))
+            throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
+
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+
+        if (plainSelect.getIntoTables() != null)
+            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
+
+        return plainSelect;
     }
 }

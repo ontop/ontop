@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl:		http://www.w3.org/2002/07/owl#
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+mappingId	BOOTSTRAPPED-MAPPING-ID1
+target		<http://semanticweb.org/labels/a_alias/id_alias={id}> a <http://semanticweb.org/labels/a_alias> ; <http://semanticweb.org/labels/a_alias#id_alias> {id}^^xsd:integer . 
+source		SELECT * FROM "a"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID2
+target		<http://semanticweb.org/labels/a_alias/id_alias={a_id}> <http://semanticweb.org/labels/a_alias#join_alias> <http://semanticweb.org/labels/b_alias/id_alias={b_id}> . 
+source		SELECT "a"."id" AS a_id, "b"."id" AS b_id FROM "a", "b" WHERE "a"."id" = "b"."id"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID3
+target		<http://semanticweb.org/labels/b_alias/id_alias={id}> a <http://semanticweb.org/labels/b_alias> ; <http://semanticweb.org/labels/b_alias#id_alias> {id}^^xsd:integer . 
+source		SELECT * FROM "b"
+]]
+

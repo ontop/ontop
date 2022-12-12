@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
+// TODO> Re-implement this
 public class DirectMappingAxiomProducer {
 
 	protected final String baseIRI;
@@ -242,25 +242,26 @@ public class DirectMappingAxiomProducer {
 		Optional<UniqueConstraint> pko = td.getPrimaryKey();
 		if (pko.isPresent()) {
 			UniqueConstraint pk = pko.get();
-
-//          TODO Remove this old code
-//			String template = getTableIRIString(td) + "/"
-//					+ pk.getAttributes().stream()
-//						.map(a -> R2RMLIRISafeEncoder.encode(a.getID().getName()) + "={}")
-//						.collect(Collectors.joining(";"));
-
 			Template.Builder builder = Template.builder();
-			builder.addSeparator(getTableIRIString(td)).addSeparator("/");
-			for( Attribute att: pk.getAttributes() ){
-				builder.addColumn(R2RMLIRISafeEncoder.encode(att.getID().getName()))
-						.addSeparator(";");
+
+			// TODO: IMPROVE
+			builder.addSeparator(getTableIRIString(td) + "/" +
+					R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "=");
+			builder.addColumn();
+
+			for (int i = 1; i < pk.getAttributes().size(); i++) {
+				builder.addSeparator(
+						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "=");
+				builder.addColumn();
 			}
 
-			ImmutableList<Variable> arguments = pk.getAttributes().stream()
+			ImmutableList<ImmutableFunctionalTerm> arguments = pk.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+					.map(termFactory::getPartiallyDefinedConversionToString)
 					.collect(ImmutableCollectors.toList());
 
-			 return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
+
+			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
 		}
 		else {
 			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()

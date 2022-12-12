@@ -1,0 +1,61 @@
+{
+  "dictionary" : [
+    {
+      "tableName" : "a",
+      "tableAlias" : "a_alias",
+      "tableLabels" : ["a_lab1", "a_lab2"],
+      "tableSchema" : "public",
+      "tableComment" : "This is table a",
+      "attAliases" : [
+        {
+          "attName" : "id",
+          "attAlias" : "id_alias",
+          "attLabels" : ["id_lab1", "id_lab2"],
+          "attComment" : "This is a comment to attribute id."
+        }
+      ],
+      "references" : [
+        {"fromAtts" : ["id"], "toTable" : "b", "toAtts" : ["id"], "joinAlias" : "join_alias", "joinLabels" : ["label1", "label2"] }
+      ]
+    },
+    {
+      "tableName" : "b",
+      "tableAlias" : "b_alias",
+      "tableLabels" : ["b_lab1", "b_lab2"],
+      "tableSchema" : "public",
+      "attAliases" : [
+        {
+          "attName" : "id",
+          "attAlias" : "id_alias",
+          "attLabels" : ["id_lab1", "id_lab2"]
+        }
+      ]
+    }
+  ],
+  "enableSH" : false,
+  "clusters" : [
+    {
+      "type" : "class",
+      "tableSchema" : "public",
+      "tableName": "a",
+      "clusteringAttribute" : "ca",
+      "clusteringMap" : [
+        {"key" : "key", "value" : "value"},
+        {"key" : "key", "value" : "value"}
+      ]
+    },
+    {
+      "type" : "obj-prop",
+      "tableSchema" : "public",
+      "tableName": "b",
+      "clusteringAttribute" : "ca"
+    },
+    {
+      "type" : "data-prop",
+      "tableSchema" : "public",
+      "tableName": "c",
+      "clusteringAttribute" : "ca"
+    }
+  ],
+  "auto-clusters" : 0.001
+}

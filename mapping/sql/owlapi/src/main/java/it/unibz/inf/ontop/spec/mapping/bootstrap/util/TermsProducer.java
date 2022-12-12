@@ -38,14 +38,11 @@ public class TermsProducer {
                                       DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
 
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
-
         this.termFactory = termFactory;
-
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.typeFactory = typeFactory;
-
     }
 
     public TermFactory getTermFactory(){
@@ -77,26 +74,10 @@ public class TermsProducer {
 
         Optional<UniqueConstraint> pko = td.getPrimaryKey();
         if (pko.isPresent()) {
-            UniqueConstraint pk = pko.get();
+            ImmutableList<Template.Component> template = generateTemplate(pko.get(), td, new Dictionary()); // use empty dict
+            ImmutableList<Variable> arguments = generateArguments(pko.get(), varNamePrefix);
 
-//            TODO: Remove
-//            String template = getTableIRIString(td) + "/"
-//                    + pk.getAttributes().stream()
-//                    .map(a -> R2RMLIRISafeEncoder.encode(a.getID().getName()) + "={}")
-//                    .collect(Collectors.joining(";"));
-
-            Template.Builder builder = Template.builder();
-            builder.addSeparator(getTableIRIString(td)).addSeparator("/");
-            for( Attribute att: pk.getAttributes() ){
-                builder.addColumn(R2RMLIRISafeEncoder.encode(att.getID().getName()))
-                        .addSeparator(";");
-            }
-
-            ImmutableList<Variable> arguments = pk.getAttributes().stream()
-                    .map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
-                    .collect(ImmutableCollectors.toList());
-
-            return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
+            return termFactory.getIRIFunctionalTerm(template, arguments);
         }
         else {
             ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()
@@ -197,17 +178,6 @@ public class TermsProducer {
         return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
     }
 
-    static String encodedTableName(NamedRelationDefinition table){
-        return R2RMLIRISafeEncoder.encode(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
-    }
-
-    static String encodedTableName(NamedRelationDefinition table, Dictionary dictionary){
-        if(dictionary.isEmpty()){
-            return encodedTableName(table);
-        }
-        return dictionary.getTableAlias(table.getID().getComponents().get(RelationID.TABLE_INDEX).getName());
-    }
-
     /**
      *
      * table IRI:
@@ -263,45 +233,33 @@ public class TermsProducer {
                 + "#" + R2RMLIRISafeEncoder.encode(dictionary.getAttributeAlias(tableName, attName)));
     }
 
-    /**
-     * With dictionary
-     */
-    private ImmutableList<Template.Component> generateTemplate(UniqueConstraint pk, NamedRelationDefinition td, Dictionary dictionary){
-        return generateTemplate(pk, td, encodedTableName(td, dictionary), dictionary);
-    }
 
     /**
      * entityName = tName or tName + / + clusterName
      * e.g. baseIRI/tName/clusterName/pk1={};pk2={}
      */
-    private ImmutableList<Template.Component> generateTemplate(UniqueConstraint keyAtts, NamedRelationDefinition td, String entityName, Dictionary dictionary){
+    private ImmutableList<Template.Component> generateTemplate(UniqueConstraint keyAtts, NamedRelationDefinition td, Dictionary dictionary){
 
         Template.Builder builder = Template.builder();
-        builder.addSeparator(baseIRI + entityName + "/");
-        for( Attribute att: keyAtts.getAttributes() ){
-            builder.addColumn(
-                    R2RMLIRISafeEncoder.encode(
-                            dictionary.containsAttribute(td.getID().getComponents().get(RelationID.TABLE_INDEX).getName(), att.getID().getName())
-                                    ? dictionary.getAttributeAlias(td.getID().getComponents().get(RelationID.TABLE_INDEX).getName(), att.getID().getName())
-                                    : att.getID().getName())
-                    )
-                    .addSeparator(";");
+        // TODO: IMPROVE
+        builder.addSeparator(getTableIRIString(td, dictionary) + "/" +
+                R2RMLIRISafeEncoder.encode(getAttributeName(keyAtts.getAttributes().get(0), td, dictionary)) + "=");
+        builder.addColumn();
+
+        for (int i = 1; i < keyAtts.getAttributes().size(); i++) {
+                builder.addSeparator(
+                        ";" + R2RMLIRISafeEncoder.encode(getAttributeName(keyAtts.getAttributes().get(i), td, dictionary)) + "=");
+                builder.addColumn();
         }
         return builder.build();
-        // return baseIRI + entityName + '/' + keyAttsToTemplateIDs(keyAtts, td, dictionary);
     }
 
-//    TODO: Remove
-//    private static String keyAttsToTemplateIDs(UniqueConstraint keyAtts, NamedRelationDefinition td, Dictionary dictionary){
-//
-//        return keyAtts.getAttributes().stream()
-//                .map(a ->
-//                        R2RMLIRISafeEncoder.encode(dictionary.containsAttribute(td.getID().getTableID().getName(), a.getID().getName())
-//                                ? dictionary.getAttributeAlias(td.getID().getTableID().getName(), a.getID().getName())
-//                                : a.getID().getName()) + "={}"
-//                )
-//                .collect(Collectors.joining(";"));
-//    }
+    private static String getAttributeName(Attribute att, NamedRelationDefinition td, Dictionary dictionary){
+        if(dictionary.containsAttribute(td.getID().getComponents().get(RelationID.TABLE_INDEX).getName(), att.getID().getName()))
+            return dictionary.getAttributeAlias(td.getID().getComponents().get(RelationID.TABLE_INDEX).getName(), att.getID().getName());
+        return att.getID().getName();
+    }
+
 
     // Parent table present: Generate template according to the "from" of the fkey (case pkey -> pkey)
     private ImmutableList<Variable> generateArguments(String varNamePrefix, NamedRelationDefinition td) {

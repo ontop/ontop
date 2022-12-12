@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#join-Airline"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-DestAirport"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-SourceAirport"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Abbreviation"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Airline"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Country"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#uid"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportCode"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#City"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#Country"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#CountryAbbrev"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#Airline"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#DestAirport"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#FlightNo"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#SourceAirport"/>
+    </Declaration>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#join-Airline"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-DestAirport"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-SourceAirport"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#join-Airline"/>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-DestAirport"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/flights/flights#ref-SourceAirport"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Abbreviation"/>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Airline"/>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Country"/>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#uid"/>
+        <Class IRI="http://semanticweb.org/flights/airlines"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportCode"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportName"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#City"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#Country"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#CountryAbbrev"/>
+        <Class IRI="http://semanticweb.org/flights/airports"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#Airline"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#DestAirport"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#FlightNo"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#SourceAirport"/>
+        <Class IRI="http://semanticweb.org/flights/flights"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Abbreviation"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Airline"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#Country"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airlines#uid"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportCode"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#AirportName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#City"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#Country"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/airports#CountryAbbrev"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#Airline"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#DestAirport"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#FlightNo"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/flights/flights#SourceAirport"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 5.1.20) https://github.com/owlcs/owlapi/ -->
+
+

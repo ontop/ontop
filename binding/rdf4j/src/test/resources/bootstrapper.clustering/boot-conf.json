@@ -1,0 +1,27 @@
+{
+  "clusters" : [
+    {
+      "type" : "class",
+      "tableSchema" : "public",
+      "tableName": "a",
+      "clusteringAttribute" : "ca",
+      "clusteringMap" : [
+        {"key" : "1", "value" : "Male"},
+        {"key" : "2", "value" : "Female"}
+      ]
+    },
+    {
+      "type" : "obj-prop",
+      "tableSchema" : "public",
+      "tableName": "b",
+      "clusteringAttribute" : "ca"
+    },
+    {
+      "type" : "data-prop",
+      "tableSchema" : "public",
+      "tableName": "c",
+      "clusteringAttribute" : "ca"
+    }
+  ],
+  "autoClusters" : 0.001
+}

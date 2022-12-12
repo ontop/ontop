@@ -1,0 +1,37 @@
+[PrefixDeclaration]
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl:		http://www.w3.org/2002/07/owl#
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+mappingId	BOOTSTRAPPED-MAPPING-ID1
+target		<http://semanticweb.org/spider_orchestra/performance/performance_id={performance_id}> a <http://semanticweb.org/spider_orchestra/performance> ; <http://semanticweb.org/spider_orchestra/performance#performance_id> {performance_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/performance#orchestra_id> {orchestra_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/performance#type> {type}^^xsd:string ; <http://semanticweb.org/spider_orchestra/performance#date> {date}^^xsd:string ; <http://semanticweb.org/spider_orchestra/performance#official_ratings_millions> {official_ratings_millions}^^xsd:double ; <http://semanticweb.org/spider_orchestra/performance#weekly_rank> {weekly_rank}^^xsd:string ; <http://semanticweb.org/spider_orchestra/performance#share> {share}^^xsd:string . 
+source		SELECT * FROM "performance"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID2
+target		<http://semanticweb.org/spider_orchestra/performance/performance_id={performance_performance_id}> <http://semanticweb.org/spider_orchestra/performance#ref-orchestra_id> <http://semanticweb.org/spider_orchestra/orchestra/orchestra_id={orchestra_orchestra_id}> . 
+source		SELECT "performance"."performance_id" AS performance_performance_id, "orchestra"."orchestra_id" AS orchestra_orchestra_id FROM "performance", "orchestra" WHERE "performance"."orchestra_id" = "orchestra"."orchestra_id"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID3
+target		<http://semanticweb.org/spider_orchestra/orchestra/orchestra_id={orchestra_id}> a <http://semanticweb.org/spider_orchestra/orchestra> ; <http://semanticweb.org/spider_orchestra/orchestra#orchestra_id> {orchestra_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/orchestra#orchestra> {orchestra}^^xsd:string ; <http://semanticweb.org/spider_orchestra/orchestra#conductor_id> {conductor_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/orchestra#record_company> {record_company}^^xsd:string ; <http://semanticweb.org/spider_orchestra/orchestra#year_of_founded> {year_of_founded}^^xsd:double ; <http://semanticweb.org/spider_orchestra/orchestra#major_record_format> {major_record_format}^^xsd:string . 
+source		SELECT * FROM "orchestra"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID4
+target		<http://semanticweb.org/spider_orchestra/orchestra/orchestra_id={orchestra_orchestra_id}> <http://semanticweb.org/spider_orchestra/orchestra#ref-conductor_id> <http://semanticweb.org/spider_orchestra/conductor/conductor_id={conductor_conductor_id}> . 
+source		SELECT "orchestra"."orchestra_id" AS orchestra_orchestra_id, "conductor"."conductor_id" AS conductor_conductor_id FROM "orchestra", "conductor" WHERE "orchestra"."conductor_id" = "conductor"."conductor_id"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID5
+target		_:ontop-bnode-1/{show_id_coal}/{performance_id_coal}/{result_coal}/{if_first_show_coal}/{attendance_coal} a <http://semanticweb.org/spider_orchestra/show> ; <http://semanticweb.org/spider_orchestra/show#show_id> {show_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/show#performance_id> {performance_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/show#result> {result}^^xsd:string ; <http://semanticweb.org/spider_orchestra/show#if_first_show> {if_first_show}^^xsd:boolean ; <http://semanticweb.org/spider_orchestra/show#attendance> {attendance}^^xsd:double . 
+source		SELECT COALESCE("show"."show_id", 0) AS show_id_coal, ("show"."show_id") AS show_id, COALESCE("show"."performance_id", 0) AS performance_id_coal, ("show"."performance_id") AS performance_id, COALESCE("show"."result", 'FALSE') AS result_coal, ("show"."result") AS result, COALESCE("show"."if_first_show", 'FALSE') AS if_first_show_coal, ("show"."if_first_show") AS if_first_show, COALESCE("show"."attendance", 0) AS attendance_coal, ("show"."attendance") AS attendance FROM "show"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID6
+target		_:ontop-bnode-1/{show_show_id_coal}/{show_performance_id_coal}/{show_result_coal}/{show_if_first_show_coal}/{show_attendance_coal} <http://semanticweb.org/spider_orchestra/show#ref-performance_id> <http://semanticweb.org/spider_orchestra/performance/performance_id={performance_performance_id}> . 
+source		SELECT COALESCE("show"."show_id", 0) AS show_show_id_coal, ("show"."show_id") AS show_show_id, COALESCE("show"."performance_id", 0) AS show_performance_id_coal, ("show"."performance_id") AS show_performance_id, COALESCE("show"."result", 'FALSE') AS show_result_coal, ("show"."result") AS show_result, COALESCE("show"."if_first_show", 'FALSE') AS show_if_first_show_coal, ("show"."if_first_show") AS show_if_first_show, COALESCE("show"."attendance", 0) AS show_attendance_coal, ("show"."attendance") AS show_attendance, "performance"."performance_id" AS performance_performance_id FROM "show", "performance" WHERE "show"."performance_id" = "performance"."performance_id"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID7
+target		<http://semanticweb.org/spider_orchestra/conductor/conductor_id={conductor_id}> a <http://semanticweb.org/spider_orchestra/conductor> ; <http://semanticweb.org/spider_orchestra/conductor#conductor_id> {conductor_id}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/conductor#name> {name}^^xsd:string ; <http://semanticweb.org/spider_orchestra/conductor#age> {age}^^xsd:integer ; <http://semanticweb.org/spider_orchestra/conductor#nationality> {nationality}^^xsd:string ; <http://semanticweb.org/spider_orchestra/conductor#year_of_work> {year_of_work}^^xsd:integer . 
+source		SELECT * FROM "conductor"
+]]
+

@@ -1,0 +1,86 @@
+{
+  "dictionary" : [
+    {
+      "tableName" : "name",
+      "tableAlias" : "alias",
+      "tableLabels" : ["label1", "label2"],
+      "tableSchema" : "schemaName",
+      "attAliases" : [
+        {
+          "attName" : "name",
+          "attAlias" : "alias1",
+          "attLabels" : ["label1", "label2"]
+        },
+        {
+          "attName" : "name",
+          "attAlias" : "alias1",
+          "attLabels" : ["label1", "label2"]
+        }
+      ],
+      "references" : [
+        {"fromAtts" : ["att1", "att2"], "toTable" : "table", "toAtts" : ["att1", "att2"], "joinAlias" : "alias", "joinLabels" : ["label1", "label2"] },
+        {"fromAtts" : ["att1", "att2"], "toTable" : "table", "toAtts" : ["att1", "att2"], "joinAlias" : "alias" }
+      ]
+    },
+    {
+      "tableName" : "name",
+      "tableAlias" : "alias",
+      "tableSchema" : "schemaName",
+      "attAliases" : [
+        { "attName" : "name",
+          "attAlias" : "alias1"
+        },
+        { "attName" : "name",
+          "attAlias" : "alias1",
+          "attLabels" : ["label1", "label2"]
+        }
+      ]
+    }
+  ],
+  "nullValue" : {
+    "string" : "NULL",
+    "numeric" : "0"
+  },
+  "enableSH" : true,
+  "generateOnly" : [
+    {
+      "tableName" : "name",
+      "tableSchema" : "schemaName",
+      "attributes" : ["att1", "att2", "att3"]
+    },
+    {
+      "tableName" : "name1",
+      "tableSchema" : "schemaName",
+      "attributes" : ["att1", "att2", "att3"]
+    }
+  ],
+  "sh" : [
+    {"child" : "child1", "parent" : "parent1" },
+    {"child" : "child2", "parent" : "parent2" }
+  ],
+  "clusters" : [
+    {
+      "type" : "class",
+      "tableSchema" : "public",
+      "tableName": "a",
+      "clusteringAttribute" : "ca",
+      "clusteringMap" : [
+        {"key" : "key", "value" : "value"},
+        {"key" : "key", "value" : "value"}
+      ]
+    },
+    {
+      "type" : "obj-prop",
+      "tableSchema" : "public",
+      "tableName": "b",
+      "clusteringAttribute" : "ca"
+    },
+    {
+      "type" : "data-prop",
+      "tableSchema" : "public",
+      "tableName": "c",
+      "clusteringAttribute" : "ca"
+    }
+  ],
+  "auto-clusters" : 0.001
+}

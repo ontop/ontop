@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#ref-conductor_id"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/performance#ref-orchestra_id"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/show#ref-performance_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#age"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#conductor_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#name"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#nationality"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#year_of_work"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#conductor_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#major_record_format"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#record_company"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#year_of_founded"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#date"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#official_ratings_millions"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#orchestra_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#performance_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#share"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#type"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#weekly_rank"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#attendance"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#if_first_show"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#performance_id"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#result"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#show_id"/>
+    </Declaration>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#ref-conductor_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/performance#ref-orchestra_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/show#ref-performance_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#ref-conductor_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/performance#ref-orchestra_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="http://semanticweb.org/spider_orchestra/show#ref-performance_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#age"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#conductor_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#name"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#nationality"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#year_of_work"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/conductor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#conductor_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#major_record_format"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#record_company"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#year_of_founded"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/orchestra"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#date"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#official_ratings_millions"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#orchestra_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#performance_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#share"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#type"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#weekly_rank"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/performance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#attendance"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#if_first_show"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#performance_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#result"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#show_id"/>
+        <Class IRI="http://semanticweb.org/spider_orchestra/show"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#age"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#conductor_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#name"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#nationality"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/conductor#year_of_work"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#conductor_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#major_record_format"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#orchestra_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#record_company"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/orchestra#year_of_founded"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#date"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#official_ratings_millions"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#orchestra_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#performance_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#share"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#type"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/performance#weekly_rank"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#attendance"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#if_first_show"/>
+        <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#performance_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#result"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="http://semanticweb.org/spider_orchestra/show#show_id"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 5.1.20) https://github.com/owlcs/owlapi/ -->
+
+

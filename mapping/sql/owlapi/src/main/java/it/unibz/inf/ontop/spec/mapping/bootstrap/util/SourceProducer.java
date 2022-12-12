@@ -72,6 +72,18 @@ public class SourceProducer {
                 || a.getTermType().getCategory().equals(DBTermType.Category.FLOAT_DOUBLE);
     }
 
+    public static String schemaName(NamedRelationDefinition table){
+        if( table.getID().getComponents().size() > 1 )
+            return table.getID().getComponents().get(RelationID.SCHEMA_INDEX).getName();
+        return null;
+    }
+
+    public static String tableName(NamedRelationDefinition table){
+        if( table.getID().getComponents().size() > 0 )
+            return table.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
+        return null;
+    }
+
     /***
      * Definition reference triple: an RDF triple with:
      * <p/>

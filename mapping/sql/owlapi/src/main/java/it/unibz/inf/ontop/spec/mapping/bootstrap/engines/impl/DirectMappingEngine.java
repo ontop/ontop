@@ -35,7 +35,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.engines.DirectMappingAxiomProducer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.util.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.BootConf;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
