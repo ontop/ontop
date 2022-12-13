@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.engines.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
