@@ -16,11 +16,11 @@ source		SELECT * FROM "flights"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID3
 target		<http://semanticweb.org/flights/flights/Airline={flights_Airline};FlightNo={flights_FlightNo}> <http://semanticweb.org/flights/flights#ref-DestAirport> <http://semanticweb.org/flights/airports/AirportCode={airports_AirportCode}> . 
-source		SELECT "flights"."Airline" AS flights_Airline, "flights"."FlightNo" AS flights_FlightNo, "airports"."AirportCode" AS airports_AirportCode FROM "flights", "airports" WHERE "flights"."DestAirport" = "airports"."AirportCode"
+source		SELECT "flights"."Airline" AS "flights_Airline", "flights"."FlightNo" AS "flights_FlightNo", "airports"."AirportCode" AS "airports_AirportCode" FROM "flights", "airports" WHERE "flights"."DestAirport" = "airports"."AirportCode"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID4
 target		<http://semanticweb.org/flights/flights/Airline={flights_Airline};FlightNo={flights_FlightNo}> <http://semanticweb.org/flights/flights#ref-SourceAirport> <http://semanticweb.org/flights/airports/AirportCode={airports_AirportCode}> . 
-source		SELECT "flights"."Airline" AS flights_Airline, "flights"."FlightNo" AS flights_FlightNo, "airports"."AirportCode" AS airports_AirportCode FROM "flights", "airports" WHERE "flights"."SourceAirport" = "airports"."AirportCode"
+source		SELECT "flights"."Airline" AS "flights_Airline", "flights"."FlightNo" AS "flights_FlightNo", "airports"."AirportCode" AS "airports_AirportCode" FROM "flights", "airports" WHERE "flights"."SourceAirport" = "airports"."AirportCode"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID5
 target		<http://semanticweb.org/flights/airports/AirportCode={AirportCode}> a <http://semanticweb.org/flights/airports> ; <http://semanticweb.org/flights/airports#City> {City}^^xsd:string ; <http://semanticweb.org/flights/airports#AirportCode> {AirportCode}^^xsd:string ; <http://semanticweb.org/flights/airports#AirportName> {AirportName}^^xsd:string ; <http://semanticweb.org/flights/airports#Country> {Country}^^xsd:string ; <http://semanticweb.org/flights/airports#CountryAbbrev> {CountryAbbrev}^^xsd:string . 
@@ -28,6 +28,6 @@ source		SELECT * FROM "airports"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID6
 target		<http://semanticweb.org/flights/flights/Airline={flights_Airline};FlightNo={flights_FlightNo}> <http://semanticweb.org/flights/flights#join-Airline> <http://semanticweb.org/flights/airlines/uid={airlines_uid}> . 
-source		SELECT "flights"."Airline" AS flights_Airline, "flights"."FlightNo" AS flights_FlightNo, "airlines"."uid" AS airlines_uid FROM "flights", "airlines" WHERE flights."Airline" = airlines.uid
+source		SELECT "flights"."Airline" AS "flights_Airline", "flights"."FlightNo" AS "flights_FlightNo", "airlines"."uid" AS "airlines_uid" FROM "flights", "airlines" WHERE flights."Airline" = airlines.uid
 ]]
 

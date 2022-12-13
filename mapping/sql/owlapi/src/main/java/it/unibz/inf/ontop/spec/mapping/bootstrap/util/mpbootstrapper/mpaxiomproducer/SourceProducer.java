@@ -47,15 +47,17 @@ public class SourceProducer {
 
     private static String getCoalesceString(Attribute a, BootConf.NullValue nullValue, String attributeString){
         String result;
+        String unquoted = attributeString.replaceAll("\"", "");
+
         if( a.isNullable() ){
             if( isNumericAttribute(a) ){
-                result = "COALESCE(" + getQualifiedColumnName(a) + ", " + nullValue.getIntNull() + ") AS " + attributeString + "_coal" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
+                result = "COALESCE(" + getQualifiedColumnName(a) + ", " + nullValue.getIntNull() + ") AS " + "\"" + unquoted + "_coal\"" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
             }
             else if ( isDateAttribute(a) ){
-                result = "COALESCE(" + getQualifiedColumnName(a) + ", '" + nullValue.getDateNull() + "') AS " + attributeString + "_coal" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
+                result = "COALESCE(" + getQualifiedColumnName(a) + ", '" + nullValue.getDateNull() + "') AS " + "\"" + unquoted + "_coal\"" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
             }
             else{ // String null value
-                result = "COALESCE(" + getQualifiedColumnName(a) + ", '" + nullValue.getStringNull() + "') AS " + attributeString + "_coal" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
+                result = "COALESCE(" + getQualifiedColumnName(a) + ", '" + nullValue.getStringNull() + "') AS " + "\"" + unquoted + "_coal\"" + ", " + "(" + getQualifiedColumnName(a) + ") AS " + attributeString;
             }
         }
         else {

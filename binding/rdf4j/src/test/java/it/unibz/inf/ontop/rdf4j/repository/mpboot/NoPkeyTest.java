@@ -39,8 +39,8 @@ import static org.junit.Assert.assertTrue;
 public class NoPkeyTest {
 
     // Reference and to-be--compared files
-    private static final String referenceOBDA = "src/test/resources/bootstrapper.spider_wta_1/reference-boot-spider_wta_1.obda";
-    private static final String referenceOWL = "src/test/resources/bootstrapper.spider_wta_1/reference-boot-spider_wta_1.owl";
+    private static final String referenceOBDA = "src/test/resources/bootstrapper.spider_wta_1/reference-spider_wta_1.obda";
+    private static final String referenceOWL = "src/test/resources/bootstrapper.spider_wta_1/reference-spider_wta_1.owl";
 
     // Queries
     private static final String testQueries = "src/test/resources/bootstrapper.spider_wta_1/spider_wta_1_workload.json";

@@ -12,7 +12,7 @@ source		SELECT * FROM "a"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID2
 target		<http://semanticweb.org/labels/a_alias/id_alias={a_id}> <http://semanticweb.org/labels/a_alias#join_alias> <http://semanticweb.org/labels/b_alias/id_alias={b_id}> . 
-source		SELECT "a"."id" AS a_id, "b"."id" AS b_id FROM "a", "b" WHERE "a"."id" = "b"."id"
+source		SELECT "a"."id" AS "a_id", "b"."id" AS "b_id" FROM "a", "b" WHERE "a"."id" = "b"."id"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID3
 target		<http://semanticweb.org/labels/b_alias/id_alias={id}> a <http://semanticweb.org/labels/b_alias> ; <http://semanticweb.org/labels/b_alias#id_alias> {id}^^xsd:integer . 
