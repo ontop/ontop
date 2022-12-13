@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
-import it.unibz.inf.ontop.answering.resultset.OntopBinding;
+import it.unibz.inf.ontop.query.resultset.OntopBinding;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;

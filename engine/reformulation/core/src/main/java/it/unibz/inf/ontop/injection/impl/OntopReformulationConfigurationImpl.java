@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
@@ -16,12 +15,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.*;
 
-
-public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopReformulationConfiguration {
-
-    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
+public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurationImpl implements OntopReformulationConfiguration {
     private final OntopReformulationSettings settings;
 
     @Nullable
@@ -29,10 +24,9 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
 
     OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options,
                                         SpecificationLoader specificationLoader) {
-        super(settings, options.obdaOptions);
+        super(settings, options.queryOptions);
         this.settings = settings;
         this.specificationLoader = specificationLoader;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     /**
@@ -42,17 +36,14 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
      *
      */
     OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options) {
-        super(settings, options.obdaOptions);
+        super(settings, options.queryOptions);
         this.settings = settings;
         this.specificationLoader = null;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
-                Stream.concat(
-                        super.buildGuiceModules(),
-                        optimizationConfiguration.buildGuiceModules()),
+                super.buildGuiceModules(),
                 Stream.of(new OntopTranslationModule(this)));
     }
 
@@ -82,19 +73,16 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     }
 
     @Override
-    public InputQueryFactory getInputQueryFactory() {
+    public KGQueryFactory getKGQueryFactory() {
         return getInjector()
-                .getInstance(InputQueryFactory.class);
+                .getInstance(KGQueryFactory.class);
     }
 
     static class OntopReformulationOptions {
-        final OntopOBDAOptions obdaOptions;
-        final OntopOptimizationOptions optimizationOptions;
+        final OntopKGQueryOptions queryOptions;
 
-        OntopReformulationOptions(OntopOBDAOptions obdaOptions,
-                                  OntopOptimizationOptions optimizationOptions) {
-            this.obdaOptions = obdaOptions;
-            this.optimizationOptions = optimizationOptions;
+        OntopReformulationOptions(OntopKGQueryOptions queryOptions) {
+            this.queryOptions = queryOptions;
         }
     }
 
@@ -123,23 +111,20 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             return p;
         }
 
-        final OntopReformulationOptions generateReformulationOptions(OntopOBDAOptions obdaOptions,
-                                                                     OntopOptimizationOptions optimizationOptions) {
-            return new OntopReformulationOptions(obdaOptions, optimizationOptions);
+        final OntopReformulationOptions generateReformulationOptions(OntopKGQueryOptions queryOptions) {
+            return new OntopReformulationOptions(queryOptions);
         }
     }
 
     static abstract class OntopReformulationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
-            extends OntopOBDAConfigurationBuilderMixin<B>
+            extends OntopKGQueryBuilderMixin<B>
             implements OntopReformulationConfiguration.Builder<B> {
 
         private final DefaultOntopReformulationBuilderFragment<B> localBuilderFragment;
-        private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
 
         OntopReformulationBuilderMixin() {
             B builder = (B) this;
             localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>(builder);
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
         }
 
         @Override
@@ -155,9 +140,8 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
         }
 
         OntopReformulationOptions generateReformulationOptions() {
-            OntopOBDAOptions obdaOptions = generateOBDAOptions();
-            return localBuilderFragment.generateReformulationOptions(obdaOptions,
-                    optimizationBuilderFragment.generateOptimizationOptions(obdaOptions.modelOptions));
+            OntopKGQueryOptions queryOptions = generateKGQueryOptions();
+            return localBuilderFragment.generateReformulationOptions(queryOptions);
         }
     }
 

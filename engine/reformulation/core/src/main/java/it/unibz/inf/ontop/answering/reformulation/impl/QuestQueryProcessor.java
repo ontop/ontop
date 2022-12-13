@@ -6,12 +6,12 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.query.KGQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -32,35 +32,36 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestQueryProcessor.class);
 
 	private final QueryRewriter rewriter;
-	private final NativeQueryGenerator datasourceQueryGenerator;
+	protected final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
 
-	private final InputQueryTranslator inputQueryTranslator;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryTranslator inputQueryTranslator;
+	private final KGQueryFactory kgQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
 
 	@AssistedInject
-	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
+	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								QueryCache queryCache,
+								QueryUnfolder.Factory queryUnfolderFactory,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
-								InputQueryFactory inputQueryFactory,
-								InputQueryTranslator inputQueryTranslator,
+								KGQueryFactory kgQueryFactory,
+								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								QueryPlanner queryPlanner,
 								QueryLogger.Factory queryLoggerFactory) {
-		this.inputQueryFactory = inputQueryFactory;
+		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
 		this.queryLoggerFactory = queryLoggerFactory;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
-		this.queryUnfolder = translationFactory.create(obdaSpecification.getSaturatedMapping());
+		this.queryUnfolder = queryUnfolderFactory.create(obdaSpecification.getSaturatedMapping());
 		this.datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
 
 		this.inputQueryTranslator = inputQueryTranslator;
@@ -70,7 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(InputQuery inputQuery, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery inputQuery, QueryLogger queryLogger)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
@@ -82,7 +83,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		try {
-			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getInputString());
+			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getOriginalString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
@@ -121,6 +122,16 @@ public class QuestQueryProcessor implements QueryReformulator {
                 throw e;
             }
         }
+		catch (OntopInvalidKGQueryException e) {
+			OntopInvalidInputQueryException reformulationException = new OntopInvalidInputQueryException(e.getMessage());
+			queryLogger.declareReformulationException(reformulationException);
+			throw reformulationException;
+		}
+		catch (OntopUnsupportedKGQueryException e) {
+			OntopUnsupportedInputQueryException reformulationException = new OntopUnsupportedInputQueryException(e.getMessage());
+			queryLogger.declareReformulationException(reformulationException);
+			throw reformulationException;
+		}
 		/*
 		 * Bug: should normally not be reached
 		 * TODO: remove it
@@ -133,7 +144,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private IQ generateExecutableQuery(IQ iq) {
+	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
@@ -147,25 +158,30 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		LOGGER.debug("SPARQL query:\n{}\n", query.getInputString());
-
-		IQ convertedIQ = query.translate(inputQueryTranslator);
-		LOGGER.debug("Parsed query converted into IQ:\n{}\n", convertedIQ);
+	public String getRewritingRendering(KGQuery query) throws OntopReformulationException {
+		LOGGER.debug("SPARQL query:\n{}\n", query.getOriginalString());
 
 		try {
-			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
-			return rewrittenIQ.toString();
+			IQ convertedIQ = query.translate(inputQueryTranslator);
+			LOGGER.debug("Parsed query converted into IQ:\n{}\n", convertedIQ);
+
+			try {
+				IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
+				return rewrittenIQ.toString();
+			} catch (EmptyQueryException ignored) {
+				return "EMPTY REWRITING";
+			}
+		} catch (OntopInvalidKGQueryException e) {
+			throw new OntopInvalidInputQueryException(e.getMessage());
 		}
-		catch (EmptyQueryException e) {
-			e.printStackTrace();
-		}
-		return "EMPTY REWRITING";
+		 catch (OntopUnsupportedKGQueryException e) {
+			throw new OntopUnsupportedInputQueryException(e.getMessage());
+		 }
 	}
 
 	@Override
-	public InputQueryFactory getInputQueryFactory() {
-		return inputQueryFactory;
+	public KGQueryFactory getInputQueryFactory() {
+		return kgQueryFactory;
 	}
 
 	@Override

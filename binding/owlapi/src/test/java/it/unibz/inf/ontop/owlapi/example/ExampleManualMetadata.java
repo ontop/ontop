@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlapi.example;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -51,7 +51,7 @@ public class ExampleManualMetadata {
 		 */
 
 		OntopConnection conn = queryEngine.getConnection();
-		OWLConnection connOWL = new DefaultOntopOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
+		OWLConnection connOWL = new DefaultOntopOWLConnection(conn, injector.getInstance(KGQueryFactory.class));
 		qst = connOWL.createStatement();
 	}
 

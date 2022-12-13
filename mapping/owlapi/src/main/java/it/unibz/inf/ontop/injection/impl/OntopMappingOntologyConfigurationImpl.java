@@ -114,14 +114,4 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         }
     }
 
-    static class OntopMappingOWLAPIOptions {
-
-        private final Optional<OWLOntology> ontology;
-        final OntopMappingOntologyOptions mappingOntologyOptions;
-
-        OntopMappingOWLAPIOptions(Optional<OWLOntology> ontology, OntopMappingOntologyOptions mappingOntologyOptions) {
-            this.ontology = ontology;
-            this.mappingOntologyOptions = mappingOntologyOptions;
-        }
-    }
 }

@@ -22,6 +22,7 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
 - `ONTOP_DB_METADATA_FILE` (optional). Corresponds to the argument `--db-metadata`. Added in 4.1.0.
 - `ONTOP_VIEW_FILE` (optional). Corresponds to the argument `--ontop-views`. Added in 4.1.0.
+- `ONTOP_SPARQL_RULES_FILE` (optional). Corresponds to the argument `--sparql-rules`. Added in 5.0.0.
 - `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.
 - `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
 - `ONTOP_DISABLE_PORTAL_PAGE` (optional). Corresponds to the argument `--disable-portal-page`. Added in 4.2.0.
