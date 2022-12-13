@@ -6,6 +6,15 @@ FROM eclipse-temurin:11-jre-focal AS common
 RUN apt-get update && \
     apt-get install -y netcat && \
     rm -rf /var/cache/apt/archives /var/lib/apt/lists
+LABEL \
+    org.opencontainers.image.url="https://github.com/ontop/ontop/tree/version5/client/docker" \
+    org.opencontainers.image.documentation="https://ontop-vkg.org/guide/cli.html" \
+    org.opencontainers.image.source="https://github.com/ontop/ontop/" \
+    org.opencontainers.image.title="Ontop" \
+    org.opencontainers.image.description="Ontop is a platform to query relational databases as Virtual RDF Knowledge Graphs using SPARQL" \
+    org.opencontainers.image.vendor="Ontop developers: https://github.com/ontop" \
+    org.opencontainers.image.authors="Email: https://groups.google.com/g/ontop4obda, Issues: https://github.com/ontop/ontop/issues" \
+    org.opencontainers.image.licenses="Apache-2.0"
 VOLUME /tmp
 EXPOSE 8080
 WORKDIR /opt/ontop

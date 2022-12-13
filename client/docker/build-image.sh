@@ -17,6 +17,11 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"/../..
 # Extract the Ontop version from pom.xml (to be used in Docker image tag, if not overridden)
 VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep '<version>' | sed -E 's/.*>(.*)<.*/\1/' )
 
+# Extract the Git revision, in case this script is running within a git working copy
+# This allows browsing the exact sources that contributed to the image:
+# https://github.com/ontop/ontop/tree/${REVISION}
+REVISION="$( git rev-parse HEAD 2> /dev/null )"
+
 # Build variables customizable via command line options
 TARGET="image-from-binaries"
 CLEANARG=
@@ -29,8 +34,15 @@ PUSH="false"
 
 # Build variables non-customizable (edit in this script, and ensure BINDIR is relative to Ontop root)
 BINDIR="build/distribution/target/ontop"
-BUILDARGS="--build-arg ONTOP_CLI_BINDIR=${BINDIR}"
 PLATFORMS="linux/amd64,linux/arm64"
+
+# Initialize BUILDARGS and LABELARGS (revision-specific labels added to the latter, if info is available)
+BUILDARGS="--build-arg ONTOP_CLI_BINDIR=${BINDIR}"
+LABELARGS="--label org.opencontainers.image.version=${VERSION} --label org.opencontainers.image.created=$( date -u +'%Y-%m-%dT%H:%M:%SZ' )"
+if [ "${REVISION:+x}" ]; then
+    LABELARGS=${LABELARGS}" --label org.opencontainers.image.revision=${REVISION}"
+    LABELARGS=${LABELARGS}" --label org.opencontainers.image.source=https://github.com/ontop/ontop/tree/${REVISION}"
+fi
 
 # Handle -h or --help command line options
 if [[ "$@" = *--help ]] || [[ "$@" = *-h ]]; then cat <<EOF
@@ -55,6 +67,7 @@ Options:
     -x            cross build for linux/amd64 and linux/arm64; automatically pushes
                   (if not used, only the image for the local OS/arch platform is built)
     -b key=value  supply additional --build-arg to Docker (can be used multiple times)
+    -l key=value  supply additional --label to Docker (can be used multiple times)
     -q            suppress output
     -h, --help    display command line usage
 
@@ -88,6 +101,7 @@ do
         p) PUSH=1;;
         x) CROSS_BUILD=1; PUSH=1;;
         b) BUILDARGS=${BUILDARGS}" --build-arg "${OPTARG};;
+        l) LABELARGS=${LABELARGS}" --label "${OPTARG};;
         q) QUIETARG="-q";;
     esac
 done
@@ -118,11 +132,11 @@ fi
 if [ "${CROSS_BUILD}" != "false" ]; then
     # When cross-building, the generated multi-platform image cannot be stored locally but need to be pushed to a Docker repository
     log "Building & pushing multi-platform image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --push --platform "${PLATFORMS}" .
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --push --platform "${PLATFORMS}" .
 else
     # When not cross-building, pushing the image is optional and is triggered by supplying option '-p'
     log "Building image ${NAMETAG}"
-    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} --load .
+    docker buildx build -f client/docker/Dockerfile --target ${TARGET} -t "${NAMETAG}" ${NOCACHEARG} ${QUIETARG} ${BUILDARGS} ${LABELARGS} --load .
     if [ "${PUSH}" != "false" ]; then
         log "Pushing image ${NAMETAG}"
         docker push ${QUIETARG} "${NAMETAG}"
