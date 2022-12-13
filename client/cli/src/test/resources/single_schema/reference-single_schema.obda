@@ -1,0 +1,45 @@
+[PrefixDeclaration]
+obda:		https://w3id.org/obda/vocabulary#
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID1
+target		<http://semanticweb.org/single_schema/restaurant_type/restypeid={restypeid}> a <http://semanticweb.org/single_schema/restaurant_type> ; <http://semanticweb.org/single_schema/restaurant_type#restypeid> {restypeid}^^xsd:integer ; <http://semanticweb.org/single_schema/restaurant_type#restypename> {restypename}^^xsd:string ; <http://semanticweb.org/single_schema/restaurant_type#restypedescription> {restypedescription}^^xsd:string . 
+source		SELECT * FROM "restaurant_1"."restaurant_type"
+
+mappingId	MAPPING-ID2
+target		_:ontop-bnode-1/{stuid}/{resid}/{time}/{spent} a <http://semanticweb.org/single_schema/visits_restaurant> ; <http://semanticweb.org/single_schema/visits_restaurant#stuid> {stuid}^^xsd:integer ; <http://semanticweb.org/single_schema/visits_restaurant#resid> {resid}^^xsd:integer ; <http://semanticweb.org/single_schema/visits_restaurant#time> {time}^^xsd:dateTime ; <http://semanticweb.org/single_schema/visits_restaurant#spent> {spent}^^xsd:double . 
+source		SELECT * FROM "restaurant_1"."visits_restaurant"
+
+mappingId	MAPPING-ID3
+target		_:ontop-bnode-1/{visits_restaurant_stuid}/{visits_restaurant_resid}/{visits_restaurant_time}/{visits_restaurant_spent} <http://semanticweb.org/single_schema/visits_restaurant#ref-resid> <http://semanticweb.org/single_schema/restaurant/resid={restaurant_resid}> . 
+source		SELECT "restaurant_1"."visits_restaurant"."stuid" AS visits_restaurant_stuid, "restaurant_1"."visits_restaurant"."resid" AS visits_restaurant_resid, "restaurant_1"."visits_restaurant"."time" AS visits_restaurant_time, "restaurant_1"."visits_restaurant"."spent" AS visits_restaurant_spent, "restaurant_1"."restaurant"."resid" AS restaurant_resid FROM "restaurant_1"."visits_restaurant", "restaurant_1"."restaurant" WHERE "restaurant_1"."visits_restaurant"."resid" = "restaurant_1"."restaurant"."resid"
+
+mappingId	MAPPING-ID4
+target		_:ontop-bnode-1/{visits_restaurant_stuid}/{visits_restaurant_resid}/{visits_restaurant_time}/{visits_restaurant_spent} <http://semanticweb.org/single_schema/visits_restaurant#ref-stuid> <http://semanticweb.org/single_schema/student/stuid={student_stuid}> . 
+source		SELECT "restaurant_1"."visits_restaurant"."stuid" AS visits_restaurant_stuid, "restaurant_1"."visits_restaurant"."resid" AS visits_restaurant_resid, "restaurant_1"."visits_restaurant"."time" AS visits_restaurant_time, "restaurant_1"."visits_restaurant"."spent" AS visits_restaurant_spent, "restaurant_1"."student"."stuid" AS student_stuid FROM "restaurant_1"."visits_restaurant", "restaurant_1"."student" WHERE "restaurant_1"."visits_restaurant"."stuid" = "restaurant_1"."student"."stuid"
+
+mappingId	MAPPING-ID5
+target		_:ontop-bnode-2/{resid}/{restypeid} a <http://semanticweb.org/single_schema/type_of_restaurant> ; <http://semanticweb.org/single_schema/type_of_restaurant#resid> {resid}^^xsd:integer ; <http://semanticweb.org/single_schema/type_of_restaurant#restypeid> {restypeid}^^xsd:integer . 
+source		SELECT * FROM "restaurant_1"."type_of_restaurant"
+
+mappingId	MAPPING-ID6
+target		_:ontop-bnode-2/{type_of_restaurant_resid}/{type_of_restaurant_restypeid} <http://semanticweb.org/single_schema/type_of_restaurant#ref-resid> <http://semanticweb.org/single_schema/restaurant/resid={restaurant_resid}> . 
+source		SELECT "restaurant_1"."type_of_restaurant"."resid" AS type_of_restaurant_resid, "restaurant_1"."type_of_restaurant"."restypeid" AS type_of_restaurant_restypeid, "restaurant_1"."restaurant"."resid" AS restaurant_resid FROM "restaurant_1"."type_of_restaurant", "restaurant_1"."restaurant" WHERE "restaurant_1"."type_of_restaurant"."resid" = "restaurant_1"."restaurant"."resid"
+
+mappingId	MAPPING-ID7
+target		_:ontop-bnode-2/{type_of_restaurant_resid}/{type_of_restaurant_restypeid} <http://semanticweb.org/single_schema/type_of_restaurant#ref-restypeid> <http://semanticweb.org/single_schema/restaurant_type/restypeid={restaurant_type_restypeid}> . 
+source		SELECT "restaurant_1"."type_of_restaurant"."resid" AS type_of_restaurant_resid, "restaurant_1"."type_of_restaurant"."restypeid" AS type_of_restaurant_restypeid, "restaurant_1"."restaurant_type"."restypeid" AS restaurant_type_restypeid FROM "restaurant_1"."type_of_restaurant", "restaurant_1"."restaurant_type" WHERE "restaurant_1"."type_of_restaurant"."restypeid" = "restaurant_1"."restaurant_type"."restypeid"
+
+mappingId	MAPPING-ID8
+target		<http://semanticweb.org/single_schema/restaurant/resid={resid}> a <http://semanticweb.org/single_schema/restaurant> ; <http://semanticweb.org/single_schema/restaurant#resid> {resid}^^xsd:integer ; <http://semanticweb.org/single_schema/restaurant#resname> {resname}^^xsd:string ; <http://semanticweb.org/single_schema/restaurant#address> {address}^^xsd:string ; <http://semanticweb.org/single_schema/restaurant#rating> {rating}^^xsd:integer . 
+source		SELECT * FROM "restaurant_1"."restaurant"
+
+mappingId	MAPPING-ID9
+target		<http://semanticweb.org/single_schema/student/stuid={stuid}> a <http://semanticweb.org/single_schema/student> ; <http://semanticweb.org/single_schema/student#stuid> {stuid}^^xsd:integer ; <http://semanticweb.org/single_schema/student#lname> {lname}^^xsd:string ; <http://semanticweb.org/single_schema/student#fname> {fname}^^xsd:string ; <http://semanticweb.org/single_schema/student#age> {age}^^xsd:integer ; <http://semanticweb.org/single_schema/student#sex> {sex}^^xsd:string ; <http://semanticweb.org/single_schema/student#major> {major}^^xsd:integer ; <http://semanticweb.org/single_schema/student#advisor> {advisor}^^xsd:integer ; <http://semanticweb.org/single_schema/student#city_code> {city_code}^^xsd:string . 
+source		SELECT * FROM "restaurant_1"."student"
+]]
+

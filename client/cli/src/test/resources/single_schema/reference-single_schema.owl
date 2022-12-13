@@ -1,0 +1,155 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+_:genid1 a owl:Ontology .
+# 
+# 
+# #################################################################
+# #
+# #    Object Properties
+# #
+# #################################################################
+# 
+# 
+# http://semanticweb.org/single_schema/type_of_restaurant#ref-resid
+
+<http://semanticweb.org/single_schema/type_of_restaurant#ref-resid> a owl:ObjectProperty .
+# 
+# http://semanticweb.org/single_schema/type_of_restaurant#ref-restypeid
+
+<http://semanticweb.org/single_schema/type_of_restaurant#ref-restypeid> a owl:ObjectProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#ref-resid
+
+<http://semanticweb.org/single_schema/visits_restaurant#ref-resid> a owl:ObjectProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#ref-stuid
+
+<http://semanticweb.org/single_schema/visits_restaurant#ref-stuid> a owl:ObjectProperty .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Data properties
+# #
+# #################################################################
+# 
+# 
+# http://semanticweb.org/single_schema/restaurant#address
+
+<http://semanticweb.org/single_schema/restaurant#address> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant#rating
+
+<http://semanticweb.org/single_schema/restaurant#rating> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant#resid
+
+<http://semanticweb.org/single_schema/restaurant#resid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant#resname
+
+<http://semanticweb.org/single_schema/restaurant#resname> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant_type#restypedescription
+
+<http://semanticweb.org/single_schema/restaurant_type#restypedescription> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant_type#restypeid
+
+<http://semanticweb.org/single_schema/restaurant_type#restypeid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/restaurant_type#restypename
+
+<http://semanticweb.org/single_schema/restaurant_type#restypename> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#advisor
+
+<http://semanticweb.org/single_schema/student#advisor> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#age
+
+<http://semanticweb.org/single_schema/student#age> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#city_code
+
+<http://semanticweb.org/single_schema/student#city_code> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#fname
+
+<http://semanticweb.org/single_schema/student#fname> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#lname
+
+<http://semanticweb.org/single_schema/student#lname> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#major
+
+<http://semanticweb.org/single_schema/student#major> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#sex
+
+<http://semanticweb.org/single_schema/student#sex> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/student#stuid
+
+<http://semanticweb.org/single_schema/student#stuid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/type_of_restaurant#resid
+
+<http://semanticweb.org/single_schema/type_of_restaurant#resid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/type_of_restaurant#restypeid
+
+<http://semanticweb.org/single_schema/type_of_restaurant#restypeid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#resid
+
+<http://semanticweb.org/single_schema/visits_restaurant#resid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#spent
+
+<http://semanticweb.org/single_schema/visits_restaurant#spent> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#stuid
+
+<http://semanticweb.org/single_schema/visits_restaurant#stuid> a owl:DatatypeProperty .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant#time
+
+<http://semanticweb.org/single_schema/visits_restaurant#time> a owl:DatatypeProperty .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Classes
+# #
+# #################################################################
+# 
+# 
+# http://semanticweb.org/single_schema/restaurant
+
+<http://semanticweb.org/single_schema/restaurant> a owl:Class .
+# 
+# http://semanticweb.org/single_schema/restaurant_type
+
+<http://semanticweb.org/single_schema/restaurant_type> a owl:Class .
+# 
+# http://semanticweb.org/single_schema/student
+
+<http://semanticweb.org/single_schema/student> a owl:Class .
+# 
+# http://semanticweb.org/single_schema/type_of_restaurant
+
+<http://semanticweb.org/single_schema/type_of_restaurant> a owl:Class .
+# 
+# http://semanticweb.org/single_schema/visits_restaurant
+
+<http://semanticweb.org/single_schema/visits_restaurant> a owl:Class .
+# 
+# Generated by the OWL API (version 4.5.9) https://github.com/owlcs/owlapi

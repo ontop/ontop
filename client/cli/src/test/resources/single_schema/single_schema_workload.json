@@ -1,0 +1,14 @@
+[
+{ "query": "SELECT ResName FROM Restaurant;"},
+{ "query": "SELECT ResTypeName FROM Restaurant_Type;"},
+{ "query": "SELECT ResName , Rating FROM Restaurant ORDER BY Rating DESC LIMIT 1;"},
+{ "query": "SELECT Fname , Lname FROM Student WHERE Major  =  600;"},
+{ "query": "SELECT count(*) FROM Student WHERE Advisor =  1121;"},
+{ "query": "SELECT Advisor ,  count(*) FROM Student GROUP BY Advisor ORDER BY count(Advisor) DESC LIMIT 1;"},
+{ "query": "SELECT Major ,  count(*) FROM Student GROUP BY Major ORDER BY count(Major) ASC LIMIT 1;"},
+{ "query": "SELECT Major ,  count(*) FROM Student GROUP BY Major HAVING count(Major) BETWEEN 2 AND 30;"},
+{ "query": "SELECT Fname , Lname FROM Student WHERE Age  >  18 AND Major = 600;"},
+{ "query": "SELECT Fname , Lname FROM Student WHERE Age  >  18 AND Major != 600 AND Sex = 'F';"},
+{ "query": "SELECT Restaurant.ResName ,  sum(Visits_Restaurant.Spent) FROM Visits_Restaurant JOIN Restaurant ON Visits_Restaurant.ResID = Restaurant.ResID GROUP BY Restaurant.ResID ORDER BY sum(Visits_Restaurant.Spent) ASC LIMIT 1;"},
+{ "query": "SELECT Student.Fname , Student.Lname FROM Student JOIN Visits_Restaurant ON Student.StuID = Visits_Restaurant.StuID GROUP BY Student.StuID ORDER BY count(*) DESC LIMIT 1;"}
+]

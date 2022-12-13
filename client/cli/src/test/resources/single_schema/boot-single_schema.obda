@@ -1,0 +1,45 @@
+[PrefixDeclaration]
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl:		http://www.w3.org/2002/07/owl#
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+mappingId	BOOTSTRAPPED-MAPPING-ID1
+target		<http://www.example.org/restaurant_type/restypeid={restypeid}> a <http://www.example.org/restaurant_type> ; <http://www.example.org/restaurant_type#restypeid> {restypeid}^^xsd:integer ; <http://www.example.org/restaurant_type#restypename> {restypename}^^xsd:string ; <http://www.example.org/restaurant_type#restypedescription> {restypedescription}^^xsd:string . 
+source		SELECT * FROM "restaurant_1"."restaurant_type"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID2
+target		_:ontop-bnode-1/{stuid_coal}/{resid_coal}/{time_coal}/{spent_coal} a <http://www.example.org/visits_restaurant> ; <http://www.example.org/visits_restaurant#stuid> {stuid}^^xsd:integer ; <http://www.example.org/visits_restaurant#resid> {resid}^^xsd:integer ; <http://www.example.org/visits_restaurant#time> {time}^^xsd:dateTime ; <http://www.example.org/visits_restaurant#spent> {spent}^^xsd:double . 
+source		SELECT * FROM "restaurant_1"."visits_restaurant"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID3
+target		_:ontop-bnode-1/{visits_restaurant_stuid_coal}/{visits_restaurant_resid_coal}/{visits_restaurant_time_coal}/{visits_restaurant_spent_coal} <http://www.example.org/visits_restaurant#ref-resid> <http://www.example.org/restaurant/resid={restaurant_resid}> . 
+source		SELECT "restaurant_1"."visits_restaurant"."stuid" AS "visits_restaurant_stuid", "restaurant_1"."visits_restaurant"."resid" AS "visits_restaurant_resid", "restaurant_1"."visits_restaurant"."time" AS "visits_restaurant_time", "restaurant_1"."visits_restaurant"."spent" AS "visits_restaurant_spent", "restaurant_1"."restaurant"."resid" AS "restaurant_resid" FROM "restaurant_1"."visits_restaurant", "restaurant_1"."restaurant" WHERE "restaurant_1"."visits_restaurant"."resid" = "restaurant_1"."restaurant"."resid"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID4
+target		_:ontop-bnode-1/{visits_restaurant_stuid_coal}/{visits_restaurant_resid_coal}/{visits_restaurant_time_coal}/{visits_restaurant_spent_coal} <http://www.example.org/visits_restaurant#ref-stuid> <http://www.example.org/student/stuid={student_stuid}> . 
+source		SELECT "restaurant_1"."visits_restaurant"."stuid" AS "visits_restaurant_stuid", "restaurant_1"."visits_restaurant"."resid" AS "visits_restaurant_resid", "restaurant_1"."visits_restaurant"."time" AS "visits_restaurant_time", "restaurant_1"."visits_restaurant"."spent" AS "visits_restaurant_spent", "restaurant_1"."student"."stuid" AS "student_stuid" FROM "restaurant_1"."visits_restaurant", "restaurant_1"."student" WHERE "restaurant_1"."visits_restaurant"."stuid" = "restaurant_1"."student"."stuid"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID5
+target		_:ontop-bnode-2/{resid_coal}/{restypeid_coal} a <http://www.example.org/type_of_restaurant> ; <http://www.example.org/type_of_restaurant#resid> {resid}^^xsd:integer ; <http://www.example.org/type_of_restaurant#restypeid> {restypeid}^^xsd:integer . 
+source		SELECT * FROM "restaurant_1"."type_of_restaurant"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID6
+target		_:ontop-bnode-2/{type_of_restaurant_resid_coal}/{type_of_restaurant_restypeid_coal} <http://www.example.org/type_of_restaurant#ref-resid> <http://www.example.org/restaurant/resid={restaurant_resid}> . 
+source		SELECT "restaurant_1"."type_of_restaurant"."resid" AS "type_of_restaurant_resid", "restaurant_1"."type_of_restaurant"."restypeid" AS "type_of_restaurant_restypeid", "restaurant_1"."restaurant"."resid" AS "restaurant_resid" FROM "restaurant_1"."type_of_restaurant", "restaurant_1"."restaurant" WHERE "restaurant_1"."type_of_restaurant"."resid" = "restaurant_1"."restaurant"."resid"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID7
+target		_:ontop-bnode-2/{type_of_restaurant_resid_coal}/{type_of_restaurant_restypeid_coal} <http://www.example.org/type_of_restaurant#ref-restypeid> <http://www.example.org/restaurant_type/restypeid={restaurant_type_restypeid}> . 
+source		SELECT "restaurant_1"."type_of_restaurant"."resid" AS "type_of_restaurant_resid", "restaurant_1"."type_of_restaurant"."restypeid" AS "type_of_restaurant_restypeid", "restaurant_1"."restaurant_type"."restypeid" AS "restaurant_type_restypeid" FROM "restaurant_1"."type_of_restaurant", "restaurant_1"."restaurant_type" WHERE "restaurant_1"."type_of_restaurant"."restypeid" = "restaurant_1"."restaurant_type"."restypeid"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID8
+target		<http://www.example.org/restaurant/resid={resid}> a <http://www.example.org/restaurant> ; <http://www.example.org/restaurant#resid> {resid}^^xsd:integer ; <http://www.example.org/restaurant#resname> {resname}^^xsd:string ; <http://www.example.org/restaurant#address> {address}^^xsd:string ; <http://www.example.org/restaurant#rating> {rating}^^xsd:integer . 
+source		SELECT * FROM "restaurant_1"."restaurant"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID9
+target		<http://www.example.org/student/stuid={stuid}> a <http://www.example.org/student> ; <http://www.example.org/student#stuid> {stuid}^^xsd:integer ; <http://www.example.org/student#lname> {lname}^^xsd:string ; <http://www.example.org/student#fname> {fname}^^xsd:string ; <http://www.example.org/student#age> {age}^^xsd:integer ; <http://www.example.org/student#sex> {sex}^^xsd:string ; <http://www.example.org/student#major> {major}^^xsd:integer ; <http://www.example.org/student#advisor> {advisor}^^xsd:integer ; <http://www.example.org/student#city_code> {city_code}^^xsd:string . 
+source		SELECT * FROM "restaurant_1"."student"
+]]
+

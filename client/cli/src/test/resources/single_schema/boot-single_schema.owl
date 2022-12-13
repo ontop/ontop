@@ -1,0 +1,337 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.example.org/"
+     xml:base="http://www.example.org/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.example.org/"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.example.org/type_of_restaurant#ref-resid -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.example.org/type_of_restaurant#ref-resid">
+        <rdfs:domain rdf:resource="http://www.example.org/type_of_restaurant"/>
+        <rdfs:range rdf:resource="http://www.example.org/restaurant"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.example.org/type_of_restaurant#ref-restypeid -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.example.org/type_of_restaurant#ref-restypeid">
+        <rdfs:domain rdf:resource="http://www.example.org/type_of_restaurant"/>
+        <rdfs:range rdf:resource="http://www.example.org/restaurant_type"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#ref-resid -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.example.org/visits_restaurant#ref-resid">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.example.org/restaurant"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#ref-stuid -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.example.org/visits_restaurant#ref-stuid">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.example.org/student"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.example.org/restaurant#address -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant#address">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant#rating -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant#rating">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant#resid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant#resid">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant#resname -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant#resname">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant_type#restypedescription -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant_type#restypedescription">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant_type"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant_type#restypeid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant_type#restypeid">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant_type"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/restaurant_type#restypename -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/restaurant_type#restypename">
+        <rdfs:domain rdf:resource="http://www.example.org/restaurant_type"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#advisor -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#advisor">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#age -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#age">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#city_code -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#city_code">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#fname -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#fname">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#lname -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#lname">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#major -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#major">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#sex -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#sex">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/student#stuid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/student#stuid">
+        <rdfs:domain rdf:resource="http://www.example.org/student"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/type_of_restaurant#resid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/type_of_restaurant#resid">
+        <rdfs:domain rdf:resource="http://www.example.org/type_of_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/type_of_restaurant#restypeid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/type_of_restaurant#restypeid">
+        <rdfs:domain rdf:resource="http://www.example.org/type_of_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#resid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/visits_restaurant#resid">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#spent -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/visits_restaurant#spent">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#stuid -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/visits_restaurant#stuid">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant#time -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/visits_restaurant#time">
+        <rdfs:domain rdf:resource="http://www.example.org/visits_restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.example.org/restaurant -->
+
+
+    <owl:Class rdf:about="http://www.example.org/restaurant"/>
+    
+
+
+    <!-- http://www.example.org/restaurant_type -->
+
+
+    <owl:Class rdf:about="http://www.example.org/restaurant_type"/>
+    
+
+
+    <!-- http://www.example.org/student -->
+
+
+    <owl:Class rdf:about="http://www.example.org/student"/>
+    
+
+
+    <!-- http://www.example.org/type_of_restaurant -->
+
+
+    <owl:Class rdf:about="http://www.example.org/type_of_restaurant"/>
+    
+
+
+    <!-- http://www.example.org/visits_restaurant -->
+
+
+    <owl:Class rdf:about="http://www.example.org/visits_restaurant"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.1.20) https://github.com/owlcs/owlapi/ -->
+
+
