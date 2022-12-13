@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
-import it.unibz.inf.ontop.si.repository.impl.SIRepository;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRepository;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
@@ -34,8 +34,10 @@ public class RDF4JGraphLoading {
             throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphURLs = new HashSet<>();
-        graphURLs.addAll(dataset.getDefaultGraphs());
-        graphURLs.addAll(dataset.getNamedGraphs());
+        if (dataset != null) {
+            graphURLs.addAll(dataset.getDefaultGraphs());
+            graphURLs.addAll(dataset.getNamedGraphs());
+        }
 
         LoadingConfiguration loadingConfiguration = new LoadingConfiguration();
 
@@ -47,7 +49,7 @@ public class RDF4JGraphLoading {
         }
         Ontology vocabulary = collectVocabulary.vb.build();
 
-        SIRepository repo = new SIRepository(vocabulary.tbox(), loadingConfiguration);
+        SemanticIndexRepository repo = new SemanticIndexRepository(vocabulary.tbox(), loadingConfiguration);
         Connection connection = repo.createConnection();
 
         //  Load the data
@@ -91,18 +93,18 @@ public class RDF4JGraphLoading {
 
     private static final class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
-        private final SIRepository repository;
+        private final SemanticIndexRepository repository;
         private final Connection connection;
         private final TypeFactory typeFactory;
         private final TermFactory termFactory;
 
         private static final int MAX_BUFFER_SIZE = 5000;
 
-        private List<Statement> buffer = new ArrayList<>(MAX_BUFFER_SIZE);
+        private final List<Statement> buffer = new ArrayList<>(MAX_BUFFER_SIZE);
         private int count = 0;
         private final RDF rdfFactory;
 
-        public SemanticIndexRDFHandler(SIRepository repository, Connection connection,
+        public SemanticIndexRDFHandler(SemanticIndexRepository repository, Connection connection,
                                        TypeFactory typeFactory, TermFactory termFactory,
                                        RDF rdfFactory) {
             this.repository = repository;
@@ -129,7 +131,7 @@ public class RDF4JGraphLoading {
         private void loadBuffer() throws RDFHandlerException {
             try {
                 Iterator<RDFFact> assertionIterator = buffer.stream()
-                        .map(st -> constructAssertion(st))
+                        .map(this::constructAssertion)
                         .iterator();
                 count += repository.insertData(connection, assertionIterator);
                 buffer.clear();

@@ -1,16 +1,15 @@
 package it.unibz.inf.ontop.si.impl;
 
 
-import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
-import it.unibz.inf.ontop.si.repository.impl.SIRepository;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRepository;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -37,15 +37,22 @@ public class OWLAPIABoxLoading {
         OWLAPITranslatorOWL2QL translatorOWL2QL = loadingConfiguration.getTranslatorOWL2QL();
 
         Ontology ontology = translatorOWL2QL.translateAndClassify(owlOntology);
+        ClassifiedTBox tbox = ontology.tbox();
 
-        SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
+        SemanticIndexRepository repo = new SemanticIndexRepository(ontology.tbox(), loadingConfiguration);
+
 
         try {
             Connection connection = repo.createConnection();
 
             // load the data
             Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox(), translatorOWL2QL);
+            Iterator<RDFFact> aBoxIter = ontologyClosure.stream()
+                    .flatMap(o -> o.getAxioms().stream())
+                    .map(ax -> translate(translatorOWL2QL, tbox, ax))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .iterator();
             int count = repo.insertData(connection, aBoxIter);
             LOG.debug("Inserted {} triples from the ontology.", count);
 
@@ -55,6 +62,22 @@ public class OWLAPIABoxLoading {
         catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
         }
+    }
+
+    private static Optional<RDFFact> translate(OWLAPITranslatorOWL2QL translatorOWL2QL, ClassifiedTBox tbox, OWLAxiom axiom) {
+
+        try {
+            if (axiom instanceof OWLClassAssertionAxiom)
+                return Optional.of(translatorOWL2QL.translate((OWLClassAssertionAxiom)axiom, tbox.classes()));
+            else if (axiom instanceof OWLObjectPropertyAssertionAxiom)
+                return Optional.of(translatorOWL2QL.translate((OWLObjectPropertyAssertionAxiom)axiom, tbox.objectProperties()));
+            else if (axiom instanceof OWLDataPropertyAssertionAxiom)
+                return Optional.of(translatorOWL2QL.translate((OWLDataPropertyAssertionAxiom)axiom, tbox.dataProperties()));
+        }
+        catch (OWLAPITranslatorOWL2QL.TranslationException e) {
+            return Optional.empty();
+        }
+        return Optional.empty();
     }
 
     public static OWLOntology extractTBox(OWLOntology ontology) throws SemanticIndexException {

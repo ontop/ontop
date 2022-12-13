@@ -1,7 +1,7 @@
 @prefix    :        <http://example.org/things#> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
 
-:xi1 :p  "1"^^xsd:integer .
+:xi1 :p  1 .
 :xi2 :p  "1"^^xsd:integer .
 :xi3 :p  "01"^^xsd:integer .
 

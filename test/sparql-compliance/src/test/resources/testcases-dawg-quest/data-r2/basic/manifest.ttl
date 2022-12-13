@@ -33,7 +33,6 @@
       :term-6 # ERROR
       :term-7 # ERROR
       :term-8 # DISABLED
-      :term-8-modified
       :term-9
 
        :var-1
@@ -281,15 +280,6 @@
          [ qt:query  <term-8.rq> ;
            qt:data   <data-4.ttl> ] ;
     mf:result  <term-8.srx>
-    .
-
-:term-8-modified rdf:type mf:QueryEvaluationTest ;
-    mf:name    "Basic - Term 8 - modified (SI)" ;
-    dawgt:approval dawgt:Approved ;
-    mf:action
-         [ qt:query  <term-8.rq> ;
-           qt:data   <data-4.ttl> ] ;
-    mf:result  <term-8-modified.srx>
     .
 
 :term-9 rdf:type mf:QueryEvaluationTest ;
