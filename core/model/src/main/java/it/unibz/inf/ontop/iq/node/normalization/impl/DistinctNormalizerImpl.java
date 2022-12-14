@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
-import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
@@ -53,9 +52,16 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         QueryNode childRoot = child.getRootNode();
 
-        if (childRoot instanceof ConstructionNode)
-            return liftBindingConstructionChild((ConstructionNode) childRoot, treeCache,
+        if (childRoot instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) childRoot;
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(constructionNode))
+                // Replaces the DISTINCT by a LIMIT 1
+                return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child)
+                        .normalizeForOptimization(variableGenerator);
+
+            return liftBindingConstructionChild(constructionNode, treeCache,
                     (UnaryIQTree) child, variableGenerator);
+        }
         else if (childRoot instanceof ValuesNode) {
             return iqFactory.createValuesNode(((ValuesNode) childRoot).getOrderedVariables(),
                     ((ValuesNode) childRoot).getValues().stream().distinct().collect(ImmutableCollectors.toList()));
@@ -162,9 +168,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             ConstructionNode constructionNode = (ConstructionNode) unionChildRoot;
 
             // No child variable and no non-deterministic function used -> inserts a LIMIT 1
-            if (constructionNode.getChildVariables().isEmpty()
-                    && (constructionNode.getSubstitution().getImmutableMap().values()
-                    .stream().allMatch(this::isConstantOrDeterministic)))
+            if (isConstructionNodeWithoutChildVariablesAndDeterministic(constructionNode))
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createSliceNode(0, 1),
                         unionChild)
@@ -172,6 +176,13 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         }
         return unionChild;
     }
+
+    private boolean isConstructionNodeWithoutChildVariablesAndDeterministic(ConstructionNode constructionNode) {
+        return constructionNode.getChildVariables().isEmpty()
+                && (constructionNode.getSubstitution().getImmutableMap().values()
+                .stream().allMatch(this::isConstantOrDeterministic));
+    }
+
 
     private boolean isConstantOrDeterministic(ImmutableTerm term) {
         if (term instanceof Constant)
