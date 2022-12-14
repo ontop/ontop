@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;

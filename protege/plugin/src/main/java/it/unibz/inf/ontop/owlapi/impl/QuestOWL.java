@@ -4,9 +4,9 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.AskQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -63,7 +63,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	/* Used to enable use of same as in mappings. */
 
 	private final OntopQueryEngine queryEngine;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryFactory kgQueryFactory;
 
 	/**
 	 * End-users: use the QuestOWLFactory instead
@@ -98,7 +98,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			throw new IllegalConfigurationException(e, owlConfiguration);
 		}
 
-		inputQueryFactory = ontopConfiguration.getInputQueryFactory();
+		kgQueryFactory = ontopConfiguration.getKGQueryFactory();
 
 		pm = owlConfiguration.getProgressMonitor();
 
@@ -182,7 +182,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 		try {
 			OntopConnection conn = queryEngine.getConnection();
-			return new DefaultOntopOWLConnection(conn, inputQueryFactory);
+			return new DefaultOntopOWLConnection(conn, kgQueryFactory);
 		}
 		catch (OntopConnectionException e) {
 			// TODO: find a better exception?
@@ -408,7 +408,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		try (OntopConnection connection = queryEngine.getConnection();
 			 OntopStatement st = connection.createStatement()) {
 
-			AskQuery query = inputQueryFactory.createAskQuery(strQuery);
+			AskQuery query = kgQueryFactory.createAskQuery(strQuery);
 			BooleanResultSet trs = st.execute(query);
 			if (trs != null) {
 				boolean b = trs.getValue();

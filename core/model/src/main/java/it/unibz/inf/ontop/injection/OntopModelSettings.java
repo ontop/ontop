@@ -13,8 +13,12 @@ public interface OntopModelSettings {
     boolean isTestModeEnabled();
 
     /**
+     * If true, most limit optimizations are disabled.
+     */
+    boolean isLimitOptimizationDisabled();
+
+    /**
      * Not for end-users!
-     *
      * Please avoid using that class.
      */
     Optional<String> getProperty(String key);
@@ -44,4 +48,5 @@ public interface OntopModelSettings {
 
     String CARDINALITY_MODE = "ontop.cardinalityMode";
     String TEST_MODE = "ontop.testMode";
+    String DISABLE_LIMIT_OPTIMIZATION = "ontop.disableLimitOptimization";
 }

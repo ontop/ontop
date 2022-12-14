@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.query;
 
-import it.unibz.inf.ontop.answering.resultset.OntopCloseableIterator;
+import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;

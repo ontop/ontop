@@ -7,12 +7,12 @@ import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.answering.resultset.OntopCloseableIterator;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -33,7 +33,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     private final TermFactory termFactory;
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
-    private final InputQueryFactory inputQueryFactory;
+    private final KGQueryFactory kgQueryFactory;
     private final boolean canBeIncomplete;
 
     private final OntopQueryEngine queryEngine;
@@ -57,7 +57,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
                                       OntopQueryEngine queryEngine,
-                                      InputQueryFactory inputQueryFactory,
+                                      KGQueryFactory kgQueryFactory,
                                       TermFactory termFactory,
                                       org.apache.commons.rdf.api.RDF rdfFactory) {
 
@@ -67,7 +67,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
         this.queryEngine = queryEngine;
         this.canBeIncomplete = params.canMaterializationBeIncomplete();
-        this.inputQueryFactory = inputQueryFactory;
+        this.kgQueryFactory = kgQueryFactory;
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
 
         counter = 0;
@@ -123,9 +123,9 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
              */
             VocabularyEntry predicate = vocabularyIterator.next();
 
-            SelectQuery query = inputQueryFactory.createSelectQuery(predicate.getSelectQuery());
-
             try {
+                SelectQuery query = kgQueryFactory.createSelectQuery(predicate.getSelectQuery());
+
                 tmpStatement = ontopConnection.createStatement();
                 tmpContextResultSet = tmpStatement.execute(query);
 
@@ -144,6 +144,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                     LOGGER.error("Problem materializing the class/property " + predicate);
                     throw e;
                 }
+            } catch (OntopInvalidKGQueryException e) {
+                throw new OntopInvalidInputQueryException(e.getMessage());
             }
         }
 

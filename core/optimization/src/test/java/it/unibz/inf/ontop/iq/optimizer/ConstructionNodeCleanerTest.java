@@ -312,8 +312,9 @@ public class ConstructionNodeCleanerTest {
                 IQ_FACTORY.createUnaryIQTree(constructionNode5,
                         IQ_FACTORY.createUnaryIQTree(limit100,
                                 IQ_FACTORY.createNaryIQTree(unionNode1, ImmutableList.of(
-                                        dataNode1,
-                                        IQ_FACTORY.createUnaryIQTree(constructionNode6, dataNode2))))));
+                                        IQ_FACTORY.createUnaryIQTree(limit100, dataNode1),
+                                        IQ_FACTORY.createUnaryIQTree(constructionNode6,
+                                                IQ_FACTORY.createUnaryIQTree(limit100,dataNode2)))))));
 
 
         optimizeAndCompare(query1, query2);

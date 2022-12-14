@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.owlapi.connection.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.input.*;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.*;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -36,11 +36,11 @@ import java.security.SecureRandom;
  */
 public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	private OntopStatement st;
-	private final InputQueryFactory inputQueryFactory;
+	private final KGQueryFactory kgQueryFactory;
 
-	public DefaultOntopOWLStatement(OntopStatement st, InputQueryFactory inputQueryFactory) {
+	public DefaultOntopOWLStatement(OntopStatement st, KGQueryFactory kgQueryFactory) {
 		this.st = st;
-		this.inputQueryFactory = inputQueryFactory;
+		this.kgQueryFactory = kgQueryFactory;
 	}
 
 	public void cancel() throws OntopOWLException {
@@ -63,14 +63,14 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public TupleOWLResultSet executeSelectQuery(String inputQuery) throws OntopOWLException {
 		try {
-			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
+			SelectQuery query = kgQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
 
 
 
 			return new OntopTupleOWLResultSet(resultSet, generateSalt());
 
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -85,12 +85,12 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public BooleanOWLResultSet executeAskQuery(String inputQuery) throws OntopOWLException {
 		try {
-			AskQuery query = inputQueryFactory.createAskQuery(inputQuery);
+			AskQuery query = kgQueryFactory.createAskQuery(inputQuery);
 			BooleanResultSet resultSet = st.execute(query);
 
 			return new OntopBooleanOWLResultSet(resultSet);
 
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -98,9 +98,9 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeConstructQuery(String inputQuery) throws OntopOWLException {
 		try {
-			ConstructQuery query = inputQueryFactory.createConstructQuery(inputQuery);
+			ConstructQuery query = kgQueryFactory.createConstructQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -108,9 +108,9 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeDescribeQuery(String inputQuery) throws OntopOWLException {
 		try {
-			DescribeQuery query = inputQueryFactory.createDescribeQuery(inputQuery);
+			DescribeQuery query = kgQueryFactory.createDescribeQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -118,9 +118,9 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	@Override
 	public GraphOWLResultSet executeGraphQuery(String inputQuery) throws OntopOWLException {
 		try {
-			GraphSPARQLQuery query = inputQueryFactory.createGraphQuery(inputQuery);
+			GraphSPARQLQuery query = kgQueryFactory.createGraphQuery(inputQuery);
 			return executeGraph(query);
-		} catch (OntopQueryEngineException e) {
+		} catch (OntopQueryEngineException | OntopKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -209,10 +209,10 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	/**
 	 * In contexts where we don't know the precise type
 	 */
-	private InputQuery parseQueryString(String queryString) throws OntopOWLException {
+	private KGQuery parseQueryString(String queryString) throws OntopOWLException {
 		try {
-			return inputQueryFactory.createSPARQLQuery(queryString);
-		} catch (OntopInvalidInputQueryException | OntopUnsupportedInputQueryException e) {
+			return kgQueryFactory.createSPARQLQuery(queryString);
+		} catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {
 			throw new OntopOWLException(e);
 		}
 	}

@@ -26,41 +26,16 @@ package it.unibz.inf.ontop.si.repository.impl;
  *
  * @author Sergejs Pugacs
  */
-public class Interval implements Comparable<Interval> {
+public class Interval {
 
-	private final int start;
-	private final int end;
+	private final int start, end;
 
     public Interval(int start, int end) {
+        if (start > end)
+            throw new IllegalArgumentException("Invalid interval [" + start + ", " + end + "]");
+
         this.start = start;
         this.end = end;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Interval) {
-        Interval otherInterval = (Interval) other;
-        	return (this.start == otherInterval.start) && (this.end == otherInterval.end);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result += 37 * result + start;
-        result += 37 * result + end;
-        return result;
-    }
-
-    @Override
-    public int compareTo(Interval o) {
-        return this.start - o.start;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("[%s:%s]", start, end);
     }
 
     public int getStart() {
@@ -69,5 +44,19 @@ public class Interval implements Comparable<Interval> {
 
     public int getEnd() {
         return end;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s:%s]", start, end);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Interval) {
+            Interval other = (Interval) obj;
+        	return this.start == other.start && this.end == other.end;
+        }
+        return false;
     }
 }

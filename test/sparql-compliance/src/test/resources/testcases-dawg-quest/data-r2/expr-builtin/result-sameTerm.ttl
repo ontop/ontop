@@ -95,68 +95,58 @@
                                 rs:variable "v2"
                               ]
                 ] ;
-    # Removed entry: The reason is because DBMS may modify the string representation
-    #     of the original data, i.e., "1.0e0"^^xsd:double --> 1.0
-    # rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xd1> ;
-    #                             rs:variable "x1"
-    #                           ] ,
-    #                           [ rs:value    "1.0e0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-    #                             rs:variable "v1"
-    #                           ] ,
-    #                           [ rs:value    <http://example.org/things#xd1> ;
-    #                             rs:variable "x2"
-    #                           ] ,
-    #                           [ rs:value    "1.0e0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-    #                             rs:variable "v2"
-    #                           ]
-    #             ] ;
-    
-    # Removed entry: The reason is because DBMS may modify the string representation
-    #     of the original data, i.e., "01"^^xsd:integer --> 1
-    # rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xi3> ;
-    #                             rs:variable "x1"
-    #                           ] ,
-    #                           [ rs:value    "01"^^<http://www.w3.org/2001/XMLSchema#integer> ;
-    #                             rs:variable "v1"
-    #                           ] ,
-    #                           [ rs:value    <http://example.org/things#xi3> ;
-    #                             rs:variable "x2"
-    #                           ] ,
-    #                           [ rs:value    "01"^^<http://www.w3.org/2001/XMLSchema#integer> ;
-    #                             rs:variable "v2"
-    #                           ]
-    #             ] ;
-    
-    # Removed entry: Quest doesn't support custom datatype
-    # rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xt1> ;
-    #                             rs:variable "x1"
-    #                           ] ,
-    #                           [ rs:value    "zzz"^^<http://example.org/things#myType> ;
-    #                             rs:variable "v1"
-    #                           ] ,
-    #                           [ rs:value    <http://example.org/things#xt1> ;
-    #                             rs:variable "x2"
-    #                           ] ,
-    #                           [ rs:value    "zzz"^^<http://example.org/things#myType> ;
-    #                             rs:variable "v2"
-    #                           ]
-    #             ] ;
-    
-    # Removed entry: The reason is because DBMS may modify the string representation
-    #     of the original data, i.e., "1"^^xsd:double --> 1.0
-    # rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xd3> ;
-    #                             rs:variable "x1"
-    #                           ] ,
-    #                           [ rs:value    "1"^^<http://www.w3.org/2001/XMLSchema#double> ;
-    #                             rs:variable "v1"
-    #                           ] ,
-    #                           [ rs:value    <http://example.org/things#xd3> ;
-    #                             rs:variable "x2"
-    #                           ] ,
-    #                           [ rs:value    "1"^^<http://www.w3.org/2001/XMLSchema#double> ;
-    #                             rs:variable "v2"
-    #                           ]
-    #             ] ;
+    rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xd1> ;
+                                rs:variable "x1"
+                              ] ,
+                              [ rs:value    "1.0e0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                                rs:variable "v1"
+                              ] ,
+                              [ rs:value    <http://example.org/things#xd1> ;
+                                rs:variable "x2"
+                              ] ,
+                              [ rs:value    "1.0e0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                                rs:variable "v2"
+                              ]
+                ] ;
+    rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xi3> ;
+                                rs:variable "x1"
+                              ] ,
+                              [ rs:value    "01"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+                                rs:variable "v1"
+                              ] ,
+                              [ rs:value    <http://example.org/things#xi3> ;
+                                rs:variable "x2"
+                              ] ,
+                              [ rs:value    "01"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+                                rs:variable "v2"
+                              ]
+                ] ;
+    rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xt1> ;
+                                rs:variable "x1"
+                              ] ,
+                              [ rs:value    "zzz"^^<http://example.org/things#myType> ;
+                                rs:variable "v1"
+                              ] ,
+                              [ rs:value    <http://example.org/things#xt1> ;
+                                rs:variable "x2"
+                              ] ,
+                              [ rs:value    "zzz"^^<http://example.org/things#myType> ;
+                                rs:variable "v2"
+                              ]
+                ] ;
+    rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xd3> ;
+                                rs:variable "x1"
+                              ] ,
+                              [ rs:value    "1"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                                rs:variable "v1"
+                              ] ,
+                              [ rs:value    <http://example.org/things#xd3> ;
+                                rs:variable "x2"
+                              ] ,
+                              [ rs:value    "1"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                                rs:variable "v2"
+                              ]
+                ] ;
     rs:solution [ rs:binding  [ rs:value    <http://example.org/things#xi1> ;
                                 rs:variable "x1"
                               ] ,

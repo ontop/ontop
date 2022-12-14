@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.impl.ToFullNativeQueryReformulator;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -10,10 +11,9 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Properties;
 
-public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implements OntopReformulationSettings {
+public class OntopReformulationSettingsImpl extends OntopKGQuerySettingsImpl implements OntopReformulationSettings {
 
     private static final String DEFAULT_FILE = "reformulation-default.properties";
-    private final OntopOptimizationSettings optimizationSettings;
 
     // LAZY
     @Nullable
@@ -21,13 +21,16 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
 
     OntopReformulationSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
-        optimizationSettings = new OntopOptimizationSettingsImpl(copyProperties());
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopOptimizationSettingsImpl.loadDefaultOptimizationProperties();
-        properties.putAll(loadDefaultRuntimeProperties());
+        Properties properties = loadDefaultRuntimeProperties();
         properties.putAll(userProperties);
+
+        if (Boolean.parseBoolean(userProperties.getProperty(REFORMULATE_TO_FULL_NATIVE_QUERY, "false"))
+            && (!userProperties.contains(QueryReformulator.class.getCanonicalName())))
+            properties.put(QueryReformulator.class.getCanonicalName(), ToFullNativeQueryReformulator.class.getCanonicalName());
+
         return properties;
     }
 
@@ -90,10 +93,6 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
         return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE);
     }
 
-    @Override
-    public boolean isFixedObjectIncludedInDescribe() {
-        return getRequiredBoolean(INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE);
-    }
 
     @Override
     public long getQueryCacheMaxSize() {

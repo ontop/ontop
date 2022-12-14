@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;

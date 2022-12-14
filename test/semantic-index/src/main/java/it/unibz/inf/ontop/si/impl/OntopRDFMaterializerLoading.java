@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.si.repository.impl.SIRepository;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRepository;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
@@ -41,7 +41,7 @@ public class OntopRDFMaterializerLoading {
             OWLAPITranslatorOWL2QL translatorOWL2QL = loadingConfiguration.getTranslatorOWL2QL();
 
             Ontology ontology = translatorOWL2QL.translateAndClassify(inputOntology);
-            SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
+            SemanticIndexRepository repo = new SemanticIndexRepository(ontology.tbox(), loadingConfiguration);
 
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
                     .build();

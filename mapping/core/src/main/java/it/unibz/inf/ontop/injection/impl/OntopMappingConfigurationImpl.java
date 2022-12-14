@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
@@ -8,8 +7,6 @@ import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -27,25 +24,22 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopMappingConfiguration {
+public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl implements OntopMappingConfiguration {
 
     private final OntopMappingSettings settings;
     private final OntopMappingOptions options;
-    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options) {
-        super(settings, options.obdaOptions);
+        super(settings, options.queryOptions);
         this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options,
                                   Supplier<Injector> injectorSupplier) {
-        super(settings, options.obdaOptions, injectorSupplier);
+        super(settings, options.queryOptions, injectorSupplier);
         this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     @Override
@@ -110,6 +104,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 .ifPresent(specInputBuilder::addOntopViewFile);
         ontopViewReaderSupplier.get()
                 .ifPresent(specInputBuilder::addOntopViewReader);
+        options.sparqlRulesFile
+                .ifPresent(specInputBuilder::addSparqlRuleFile);
+        options.sparqlRulesReader
+                .ifPresent(specInputBuilder::addSparqlRuleReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
@@ -152,23 +150,25 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
-                Stream.concat(
-                        super.buildGuiceModules(),
-                        optimizationConfiguration.buildGuiceModules()),
+                super.buildGuiceModules(),
                 Stream.of(new OntopMappingModule(this)));
     }
 
     static class OntopMappingOptions {
 
-        final OntopOBDAOptions obdaOptions;
-        final OntopOptimizationOptions optimizationOptions;
+        final OntopKGQueryOptions queryOptions;
         private final Optional<TMappingExclusionConfig> excludeFromTMappings;
 
+        final Optional<File> sparqlRulesFile;
+
+        final Optional<Reader> sparqlRulesReader;
+
         private OntopMappingOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
-                                    OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
+                                    Optional<File> sparqlRulesFile, Optional<Reader> sparqlRulesReader, OntopKGQueryOptions queryOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
-            this.obdaOptions = obdaOptions;
-            this.optimizationOptions = optimizationOptions;
+            this.queryOptions = queryOptions;
+            this.sparqlRulesFile = sparqlRulesFile;
+            this.sparqlRulesReader = sparqlRulesReader;
         }
     }
 
@@ -179,6 +179,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> inferDefaultDatatype =  Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
+
+        private Optional<File> sparqlRulesFile = Optional.empty();
+
+        private Optional<Reader> sparqlRulesReader = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder, Runnable declareDBMetadataCB) {
             this.builder = builder;
@@ -202,9 +206,25 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
-                                                         OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
+        @Override
+        public B sparqlRulesFile(@Nonnull File file) {
+            this.sparqlRulesFile = Optional.of(file);
+            return builder;
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull String path) {
+            return sparqlRulesFile(new File(path));
+        }
+
+        @Override
+        public B sparqlRulesReader(@Nonnull Reader reader) {
+            this.sparqlRulesReader = Optional.of(reader);
+            return builder;
+        }
+
+        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+            return new OntopMappingOptions(excludeFromTMappings, sparqlRulesFile, sparqlRulesReader, queryOptions);
         }
 
         Properties generateProperties() {
@@ -218,12 +238,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
-        extends OntopOBDAConfigurationBuilderMixin<B>
+        extends OntopKGQueryBuilderMixin<B>
         implements OntopMappingConfiguration.Builder<B> {
 
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
-        private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
-        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
         private boolean isOntopViewDefined;
@@ -232,8 +250,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             B builder = (B) this;
             this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
                     this::declareDBMetadataDefined);
-            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
             this.isMappingDefined = false;
             this.isDBMetadataDefined = false;
         }
@@ -253,27 +269,38 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return mappingBuilderFragment.enableDefaultDatatypeInference(inferDefaultDatatype);
         }
 
+        @Override
+        public B sparqlRulesFile(@Nonnull File file) {
+            return mappingBuilderFragment.sparqlRulesFile(file);
+        }
+
+        @Override
+        public B sparqlRulesFile(@Nonnull String path) {
+            return mappingBuilderFragment.sparqlRulesFile(path);
+        }
+
+        @Override
+        public B sparqlRulesReader(@Nonnull Reader reader) {
+            return mappingBuilderFragment.sparqlRulesReader(reader);
+        }
+
         final OntopMappingOptions generateMappingOptions() {
             return generateMappingOptions(generateOBDAOptions());
         }
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return generateMappingOptions(obdaOptions, optimizationBuilderFragment.generateOptimizationOptions(
-                    obdaOptions.modelOptions));
+            return generateMappingOptions(generateKGQueryOptions(obdaOptions));
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
-                                                         OntopOptimizationOptions optimizationOptions) {
-            return mappingBuilderFragment.generateMappingOptions(obdaOptions, optimizationOptions);
+        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+            return mappingBuilderFragment.generateMappingOptions(queryOptions);
         }
 
         @Override
         protected Properties generateProperties() {
             Properties properties = new Properties();
             properties.putAll(super.generateProperties());
-            properties.putAll(modelBuilderFragment.generateProperties());
             properties.putAll(mappingBuilderFragment.generateProperties());
-            properties.putAll(optimizationBuilderFragment.generateProperties());
 
             return properties;
         }
@@ -326,25 +353,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return isMappingDefined;
         }
 
-        @Override
-        public B properties(@Nonnull Properties properties) {
-            return modelBuilderFragment.properties(properties);
-        }
-
-        @Override
-        public B propertyFile(String propertyFilePath) {
-            return modelBuilderFragment.propertyFile(propertyFilePath);
-        }
-
-        @Override
-        public B propertyFile(File propertyFile) {
-            return modelBuilderFragment.propertyFile(propertyFile);
-        }
-
-        @Override
-        public B enableTestMode() {
-            return modelBuilderFragment.enableTestMode();
-        }
     }
 
     public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>
@@ -359,7 +367,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
             return new OntopMappingConfigurationImpl(settings, options);
         }
-
     }
 
 }

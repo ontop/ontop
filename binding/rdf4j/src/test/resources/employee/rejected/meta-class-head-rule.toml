@@ -1,0 +1,26 @@
+rules = [
+    """
+    PREFIX : <http://employee.example.org/voc#>
+
+    INSERT {
+      ?e :fullName ?fullName .
+    } WHERE {
+      ?e a :Employee ;
+         :firstName ?firstName ;
+         :lastName ?lastName .
+      BIND (CONCAT(?firstName, ' ', ?lastName) AS ?fullName)
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?clone a ?c .
+    } WHERE {
+      ?employee a :Employee  .
+      VALUES ?c {:Clone :ClonedEmployee }
+      BIND(IRI(CONCAT(str(?employee), '/clone')) AS ?clone)
+    }
+    """
+]
