@@ -12,13 +12,6 @@ dctype:		http://purl.org/dc/dcmitype/Image#
 dcterms:		http://purl.org/dc/terms/
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
-[SourceDeclaration]
-sourceUri	sourceGCC
-connectionUrl	jdbc:db2://obdawin.inf.unibz.it:50000/
-username	obda
-password	obda09
-driverClass	com.ibm.db2.jcc.DB2Driver
-
 [MappingDeclaration] @collection [[
 mappingId	M:1 - Cliente,NGR,timestampI
 target		:Cl-{cd_ngr} a :Cliente ; :NGR {cd_ngr} ; :timestampI {ts_iniz} . 
@@ -45,11 +38,11 @@ target		:Comp-{cd_ngr2}_{cd_ngr2}_{ts_iniz_val} :timestampF {ts_fine_val} .
 source		select cd_ngr1, cd_ngr2, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_tp_legame = 504 and cd_stato_rich = 'C'
 
 mappingId	M:7 - NGR, Capofila, timestampI, haComposizione, inComposizione
-target		:Cl-{cd_ngr} :NGR {cd_ngr} ; :haComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) . :Cl-{cd_ngr_cf} :inComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) . :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) a :Capofila; :timestampI {ts_iniz_val} . 
+target		:Cl-{cd_ngr} :NGR {cd_ngr} ; :haComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val} . :Cl-{cd_ngr_cf} :inComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val} . :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val} a :Capofila; :timestampI {ts_iniz_val} .
 source		select cd_ngr, cd_ngr_cf, ts_iniz_val from gruppo.gz0015e_gge where cd_stato_rich = 'C' and cd_ngr_cf > 0
 
 mappingId	M:8 - timestampF
-target		:Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) :timestampF {ts_fine_val} . 
+target		:Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val} :timestampF {ts_fine_val} .
 source		select cd_ngr, cd_ngr_cf, ts_iniz_val, ts_fine_val from gruppo.gz0015e_gge where cd_stato_rich = 'C' and cd_ngr_cf > 0 
 
 mappingId	M:9 - DatiBilancio, haDatiBilancio, timestampI, dataBilancio
@@ -130,7 +123,8 @@ source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where f
 
 mappingId	M:28 - inAreaConsolidamento
 target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} a :InAreaConsolidamento . 
-source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where fg_area_cons = 'S' and cd_stato_rich = 'C' and id_gruppo > 0
+source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita
+ where fg_area_cons = 'S' and cd_stato_rich = 'C' and id_gruppo > 0
 
 mappingId	M:29 - GruppoAziendale, IGA, timestampI
 target		:Grup-{id_gruppo} a :GruppoAziendale; :IGA {id_gruppo} ; :timestampI {ts_min} . 
@@ -194,7 +188,8 @@ source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and 
 
 mappingId	M:44 - LegameGaranziaConsolidato
 target		:LegGar-{id_leg} a :LegameGaranziaConsolidato . 
-source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301
+source		select id_leg from gruppo.gz0003r_leg_gar
+ where cd_stato_rich = 'C' and cd_tp_legame = 301
 
 mappingId	M:45 - timestampF
 target		:LegGar-{id_leg} :timestampF {ts} . 

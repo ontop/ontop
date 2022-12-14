@@ -22,9 +22,12 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -40,28 +43,17 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 // TODO: find proper location fot the test
 
-public class MetaMappingTargetQueryValidatorTest extends TestCase {
+public class MetaMappingTargetQueryValidatorTest {
 
-	private static final String obdafile = "src/test/resources/metamapping.obda";
-
-	private static final String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
-	private static final String username = "sa";
-	private static final String password = "";
-
+	@Test
 	public void testValidate() throws MappingException {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
+				.nativeOntopMappingFile("src/test/resources/metamapping.obda")
+				.jdbcUrl("dummy")
+				.jdbcDriver("dummy")
 				.build();
 
 		SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
-
-		/**
-		 * TODO: do we want to consider a non-empty vocabulary?
-		 */
-		//MutableOntologyVocabulary vocabulary = new MutableOntologyVocabularyImpl();
 
         // run validator
 		try {

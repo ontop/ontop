@@ -12,13 +12,6 @@ dctype:		http://purl.org/dc/dcmitype/Image#
 dcterms:		http://purl.org/dc/terms/
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
-[SourceDeclaration]
-sourceUri	datasource
-connectionUrl	jdbc:postgresql://localhost/
-username	kbdbhabana
-password	habana10
-driverClass	org.postgresql.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	M1:Editor
 target		:Editor-{ed_code} a :Editor ; :name {ed_name} . 
@@ -41,7 +34,7 @@ target		:Book-{bk_code} a :IneditedBook .
 source		SELECT bk_code FROM tb_books WHERE bk_code NOT IN ( SELECT bk_id FROM tb_edition )
 
 mappingId	M6:genre
-target		:bk($id_bk) :genre {gen_name} . 
+target		:bk-{id_bk} :genre {gen_name} .
 source		SELECT id_bk, gen_name FROM tb_bk_gen
 
 mappingId	M7:writtenBy

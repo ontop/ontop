@@ -5,14 +5,12 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 
 public abstract class AbstractBasicMappingMistakeTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
+    protected static final String ROOT = "src/test/resources/mistake/";
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -25,15 +23,15 @@ public abstract class AbstractBasicMappingMistakeTest {
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {
-        try {
-            OntopMappingSQLAllConfiguration configuration = createConfiguration(mappingFile);
-            configuration.loadSpecification();
-        }
-        catch (Exception e) {
-            LOGGER.info(e.toString());
-            throw e;
-        }
+        OntopMappingSQLAllConfiguration.Builder<? extends OntopMappingSQLAllConfiguration.Builder<?>> builder =
+                OntopMappingSQLAllConfiguration.defaultBuilder()
+                        .jdbcUrl("jdbc:h2:mem:dummy"); // need a database connection
+        builder = createConfiguration(builder, mappingFile);
+        OntopMappingSQLAllConfiguration configuration = builder.build();
+
+        configuration.loadSpecification();
     }
 
-    protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
+    protected abstract <T extends OntopMappingSQLAllConfiguration.Builder<T>> OntopMappingSQLAllConfiguration.Builder<T>
+                createConfiguration(OntopMappingSQLAllConfiguration.Builder<T> builder, String mappingFile);
 }
