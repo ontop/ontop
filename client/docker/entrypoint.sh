@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ "${ONTOP_LOG_ENTRYPOINT-false}" != "false" ] && set -x -v
+
 ONTOP_HOME=/opt/ontop
 
 if [ $# -eq 0 ]; then
@@ -7,7 +9,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ "${MAPPING_FILE+x}" ]; then
-  ONTOP_MAPPING_FILE=${MAPPING_FILE}
+  export ONTOP_MAPPING_FILE=${MAPPING_FILE}
   echo "WARNING: environment variable MAPPING_FILE is deprecated. Please use ONTOP_MAPPING_FILE instead"
 fi
 
@@ -18,7 +20,7 @@ elif [ "$1" = "endpoint" ]; then
 fi
 
 if [ "${ONTOLOGY_FILE+x}" ]; then
-  ONTOP_ONTOLOGY_FILE=${ONTOLOGY_FILE}
+  export ONTOP_ONTOLOGY_FILE=${ONTOLOGY_FILE}
   echo "WARNING: environment variable ONTOLOGY_FILE is deprecated. Please use ONTOP_ONTOLOGY_FILE instead"
 fi
 
@@ -27,7 +29,7 @@ if [ "${ONTOP_ONTOLOGY_FILE+x}" ]; then
 fi
 
 if [ "${PROPERTIES_FILE+x}" ]; then
-  ONTOP_PROPERTIES_FILE=${PROPERTIES_FILE}
+  export ONTOP_PROPERTIES_FILE=${PROPERTIES_FILE}
   echo "WARNING: environment variable PROPERTIES_FILE is deprecated. Please use ONTOP_PROPERTIES_FILE instead"
 fi
 
@@ -108,39 +110,55 @@ if [ "${ONTOP_CONTEXTS+x}" ]; then
   set -- "$@" "--contexts=${ONTOP_CONTEXTS}"
 fi
 
-if [ "${ONTOP_DEV_MODE+x}" ] && [ "${ONTOP_DEV_MODE}" != "false" ]; then
+if [ "${ONTOP_DEV_MODE-false}" != "false" ]; then
   set -- "$@" "--dev"
 fi
 
-if [ "${ONTOP_LAZY_INIT+x}" ] && [ "${ONTOP_LAZY_INIT}" != "false" ]; then
+if [ "${ONTOP_LAZY_INIT-false}" != "false" ]; then
   set -- "$@" "--lazy"
 fi
 
-if [ "${ONTOP_DISABLE_PORTAL_PAGE+x}" ] && [ "${ONTOP_DISABLE_PORTAL_PAGE}" != "false" ]; then
+if [ "${ONTOP_DISABLE_PORTAL_PAGE-false}" != "false" ]; then
   set -- "$@" "--disable-portal-page"
 fi
 
-if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY+x}" ] && [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY}" != "false" ]; then
+if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY-false}" != "false" ]; then
   set -- "$@" "--enable-download-ontology"
 fi
 
-if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then
-  ONTOP_JAVA_ARGS="-Xmx512m"
+if [ "${ONTOP_JAVA_ARGS#*-Xmx}" = "${ONTOP_JAVA_ARGS}" ]; then
+  export ONTOP_JAVA_ARGS="-Xmx512m ${ONTOP_JAVA_ARGS}"
 fi
 
-if [ "${ONTOP_DEBUG+x}" ] && [ "${ONTOP_DEBUG}" != "false" ]; then
-  LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback-debug.xml
-else
-  LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback.xml
+if [ "${ONTOP_JAVA_ARGS#*-Dfile.encoding=}" = "${ONTOP_JAVA_ARGS}" ]; then
+  export ONTOP_JAVA_ARGS="-Dfile.encoding=${ONTOP_FILE_ENCODING:-UTF-8} ${ONTOP_JAVA_ARGS}"
+elif [ ${ONTOP_FILE_ENCODING+x} ]; then
+  echo "WARNING: environment variable ONTOP_FILE_ENCODING ignored due to -Dfile.encoding specified in ONTOP_JAVA_ARGS"
 fi
 
-if [ -z "${ONTOP_FILE_ENCODING}" ]; then
-  ONTOP_FILE_ENCODING="UTF-8"
+if [ "${ONTOP_JAVA_ARGS#*-Dlogging.config=}" = "${ONTOP_JAVA_ARGS}" ]; then
+  export ONTOP_JAVA_ARGS="-Dlogging.config=${ONTOP_LOG_CONFIG:-${ONTOP_HOME}/log/logback.xml} ${ONTOP_JAVA_ARGS}"
+elif [ ${ONTOP_LOG_CONFIG+x} ]; then
+  echo "WARNING: environment variable ONTOP_LOG_CONFIG ignored due to -Dlogging.config specified in ONTOP_JAVA_ARGS"
 fi
 
-if [ "${ONTOP_DEBUG_CMD+x}" ] && [ "${ONTOP_DEBUG_CMD}" != "false" ]; then
-  echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
-    it.unibz.inf.ontop.cli.Ontop "$@"
+if [ -z "${ONTOP_LOG_LEVEL}" ]; then
+  [ "${ONTOP_DEBUG-false}" != "false" ] && ONTOP_LOG_LEVEL="debug" || ONTOP_LOG_LEVEL="info"
+  export ONTOP_LOG_LEVEL
+elif [ ${ONTOP_DEBUG+x} ]; then
+  echo "WARNING: environment variable ONTOP_DEBUG ignored due to ONTOP_LOG_LEVEL being specified"
+fi
+
+if [ "${ONTOP_CONFIGURE_JMX-false}" != "false" ]; then
+  HOSTNAME=$( hostname -i | cut -d" " -f1 )
+  JMX=       "-Dcom.sun.management.jmxremote"
+  JMX="${JMX} -Dcom.sun.management.jmxremote.ssl=false"
+  JMX="${JMX} -Dcom.sun.management.jmxremote.authenticate=false"
+  JMX="${JMX} -Dcom.sun.management.jmxremote.local.only=false"
+  JMX="${JMX} -Dcom.sun.management.jmxremote.port=8686"
+  JMX="${JMX} -Dcom.sun.management.jmxremote.rmi.port=8686"
+  JMX="${JMX} -Djava.rmi.server.hostname=${HOSTNAME}"
+  export ONTOP_JAVA_ARGS="${JMX} ${ONTOP_JAVA_ARGS}"
 fi
 
 if [ "${ONTOP_WAIT_FOR}" ]; then
@@ -164,5 +182,4 @@ if [ "${ONTOP_WAIT_FOR}" ]; then
   done
 fi
 
-exec java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
-  it.unibz.inf.ontop.cli.Ontop "$@"
+exec java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" it.unibz.inf.ontop.cli.Ontop "$@"

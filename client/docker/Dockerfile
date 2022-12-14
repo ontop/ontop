@@ -3,9 +3,12 @@
 # amd64 and arm64, extended with nc (netcat) support used by wait-for-it.sh and our entrypoint.sh
 # scripts (note: Temurin JRE 11 on Alpine supports only amd64 likely due use of non-glibc library).
 FROM eclipse-temurin:11-jre-focal AS common
+WORKDIR /opt/ontop
 RUN apt-get update && \
     apt-get install -y netcat && \
-    rm -rf /var/cache/apt/archives /var/lib/apt/lists
+    rm -rf /var/cache/apt/archives /var/lib/apt/lists && \
+    groupadd -r ontop && \
+    useradd -r -g ontop -d /opt/ontop -s /sbin/nologin -c "Ontop unprivileged user" ontop
 LABEL \
     org.opencontainers.image.url="https://github.com/ontop/ontop/tree/version5/client/docker" \
     org.opencontainers.image.documentation="https://ontop-vkg.org/guide/cli.html" \
@@ -15,9 +18,9 @@ LABEL \
     org.opencontainers.image.vendor="Ontop developers: https://github.com/ontop" \
     org.opencontainers.image.authors="Email: https://groups.google.com/g/ontop4obda, Issues: https://github.com/ontop/ontop/issues" \
     org.opencontainers.image.licenses="Apache-2.0"
+USER ontop
 VOLUME /tmp
 EXPOSE 8080
-WORKDIR /opt/ontop
 ENTRYPOINT [ "./entrypoint.sh" ]
 HEALTHCHECK --interval=5s --timeout=5s --start-period=60s --retries=3 CMD [ "/bin/sh", "healthcheck.sh" ]
 
