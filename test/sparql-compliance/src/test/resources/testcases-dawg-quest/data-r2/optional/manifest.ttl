@@ -28,7 +28,7 @@
     dawgt:approvedBy <http://lists.w3.org/Archives/Public/public-rdf-dawg/2007JulSep/att-0096/21-dawg-minutes.html> ;
     mf:action
     [ qt:query  <q-opt-complex-1.rq> ;
-      qt:data   <complex-data-1-uri.ttl> ] ;
+      qt:data   <complex-data-1.ttl> ] ;
     mf:result  <result-opt-complex-1.ttl> .
 
 :dawg-optional-complex-2 a mf:QueryEvaluationTest ;

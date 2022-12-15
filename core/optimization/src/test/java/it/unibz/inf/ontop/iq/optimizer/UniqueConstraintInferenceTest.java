@@ -11,8 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.template.Template;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR2;
-import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR3;
+import static it.unibz.inf.ontop.DependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
@@ -289,6 +288,28 @@ public class UniqueConstraintInferenceTest {
         IQTree tree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
                 ImmutableList.of(child1, child3));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion9() {
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR1, ImmutableMap.of(0, A));
+
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                dataNode);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2_1, ImmutableList.of(A, ONE)))),
+                dataNode);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(child1, child2, child2));
         assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
     }
 }

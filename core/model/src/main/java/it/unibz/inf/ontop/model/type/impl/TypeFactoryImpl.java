@@ -41,12 +41,10 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype, xsdBase64Datatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
-	private final RDF rdfFactory;
 	private final DBTypeFactory dbTypeFactory;
 
 	@Inject
 	private TypeFactoryImpl(DBTypeFactory.Factory dbTypeFactoryFactory, RDF rdfFactory) {
-		this.rdfFactory = rdfFactory;
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 
@@ -77,17 +75,18 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		owlRealDatatype = createAbstractNumericTermType(OWL.REAL, numericDatatype.getAncestry());
 		registerDatatype(owlRealDatatype);
-		// Type promotion: an owl:rational can be promoted into a xsd:float
 		owlRationalDatatype = createConcreteNumericTermType(OWL.RATIONAL, owlRealDatatype.getAncestry(),
-				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true,
+				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), false,
 				// TODO: is there a better type?
-				DBTypeFactory::getDBDecimalType
-				);
+				DBTypeFactory::getDBDecimalType);
 		registerDatatype(owlRationalDatatype);
-		xsdDecimalDatatype = createConcreteNumericTermType(XSD.DECIMAL, owlRationalDatatype, true,
+		// Type promotion: an xsd:decimal can be promoted into a xsd:float
+		xsdDecimalDatatype = createConcreteNumericTermType(XSD.DECIMAL, owlRationalDatatype.getAncestry(),
+				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true,
 				// TODO: is there a better type?
 				DBTypeFactory::getDBDecimalType);
 		registerDatatype(xsdDecimalDatatype);
+		// Type promotion: an xsd:integer can be promoted into a xsd:decimal
 		xsdIntegerDatatype = createConcreteNumericTermType(XSD.INTEGER, xsdDecimalDatatype, true,
 				// TODO: check
 				DBTypeFactory::getDBLargeIntegerType);

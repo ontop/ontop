@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import it.unibz.inf.ontop.si.repository.impl.Interval;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -51,7 +53,7 @@ public class S_Indexes_CompareTest extends TestCase {
 		for (String fileInput: input) {
 			ClassifiedTBox dag = loadOntologyFromFileAndClassify(fileInput);
 
-			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+			SemanticIndex engine = new SemanticIndex(dag);
 
 			log.debug("Input {}", fileInput);
 
@@ -60,7 +62,7 @@ public class S_Indexes_CompareTest extends TestCase {
 	}
 
 
-	private boolean testIndexes(SemanticIndexBuilder engine, ClassifiedTBox reasoner) {
+	private boolean testIndexes(SemanticIndex engine, ClassifiedTBox reasoner) {
 		
 		boolean result = true;
 		
@@ -71,7 +73,7 @@ public class S_Indexes_CompareTest extends TestCase {
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
 			for (ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex.getKey())){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index));			
+				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}
@@ -82,18 +84,18 @@ public class S_Indexes_CompareTest extends TestCase {
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
 			for (DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex.getKey())) {
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index));			
+				result = contains(engine.getRange(parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}
 		}
 		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
 						= SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG());
-		for (Entry<ClassExpression, SemanticIndexRange> vertex: engine.getIndexedClasses()) { 
+		for (Entry<OClass, SemanticIndexRange> vertex: engine.getIndexedClasses()) {
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);			
 			for (ClassExpression parent: Graphs.successorListOf(namedCL, vertex.getKey())) {
-				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index));
+				result = contains(engine.getRange((OClass)parent), new SemanticIndexRange(index));
 				if (!result)
 					return result;
 			}
@@ -101,4 +103,20 @@ public class S_Indexes_CompareTest extends TestCase {
 		
 		return result;
 	}
+
+	public static boolean contains(SemanticIndexRange r1, SemanticIndexRange r2) {
+		for (Interval it2: r2.getIntervals()) {
+			boolean contained = false;
+			for (Interval it1 : r1.getIntervals()) {
+				if ((it1.getStart() <= it2.getStart()) && (it1.getEnd() >= it2.getEnd())) {
+					contained = true;
+					break;
+				}
+			}
+			if (!contained)
+				return false;
+		}
+		return true;
+	}
+
 }
