@@ -347,14 +347,18 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
-        if (children.size() < 2)
+        int childrenCount = children.size();
+        if (childrenCount < 2)
             throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
 
         IQTree firstChild = children.get(0);
         return firstChild.inferUniqueConstraints().stream()
                 .filter(uc -> children.stream()
                         .skip(1)
-                        .allMatch(c -> c.inferUniqueConstraints().contains(uc) && areDisjoint(firstChild, c, uc)))
+                        .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
+                .filter(uc -> IntStream.range(0, childrenCount)
+                        .allMatch(i -> IntStream.range(i+1, childrenCount)
+                                .allMatch(j -> areDisjoint(children.get(i), children.get(j), uc))))
                 .collect(ImmutableCollectors.toSet());
     }
 
