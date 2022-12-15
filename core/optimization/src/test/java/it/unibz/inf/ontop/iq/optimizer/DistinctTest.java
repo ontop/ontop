@@ -42,6 +42,30 @@ public class DistinctTest {
         normalizeAndCompare(initialTree, expectedTree, projectionAtom);
     }
 
+    @Test
+    public void testDistinctConstructionConstant2() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR2, ImmutableMap.of(1, B));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(A, ONE));
+
+        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                IQ_FACTORY.createUnaryIQTree(
+                        constructionNode,
+                        dataNode));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        dataNode));
+
+        normalizeAndCompare(initialTree, expectedTree, projectionAtom);
+    }
+
     private static void normalizeAndCompare(IQTree initialTree, IQTree expectedTree, DistinctVariableOnlyDataAtom projectionAtom) {
         normalizeAndCompare(
                 IQ_FACTORY.createIQ(projectionAtom, initialTree),
