@@ -139,12 +139,12 @@ if [ "${JDEPS}" ]; then
     log "Detecting required Java modules via jdep (for jlink --add-modules)"
     jdeps \
         --print-module-deps \
-	    --ignore-missing-deps \
-	    --recursive \
+        --ignore-missing-deps \
+        --recursive \
         --multi-release 11 \
-	    --class-path="${BINDIR}/lib/*" \
-	    --module-path="${BINDIR}/lib/*" \
-	    ${BINDIR}/lib/ontop-cli-5.0.0-SNAPSHOT.jar
+        --class-path="${BINDIR}/lib/*" \
+        --module-path="${BINDIR}/lib/*" \
+        ${BINDIR}/lib/ontop-cli-5.0.0-SNAPSHOT.jar
     exit 0
 fi
 
