@@ -41,13 +41,18 @@ public class LeftJoinProfSnowflakeTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"18.00000\"^^xsd:decimal", "\"20.00000\"^^xsd:decimal", "\"84.50000\"^^xsd:decimal");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"18.0000000000\"^^xsd:decimal", "\"20.0000000000\"^^xsd:decimal", "\"84.5000000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1() {
+        return ImmutableList.of("\"31.0000000000\"^^xsd:decimal", "\"32.0000000000\"^^xsd:decimal", "\"115.5000000000\"^^xsd:decimal");
     }
 
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("\"15.500000\"^^xsd:decimal", "\"16.000000\"^^xsd:decimal", "\"19.250000\"^^xsd:decimal");
+        return ImmutableList.of("\"15.500000000000\"^^xsd:decimal", "\"16.000000000000\"^^xsd:decimal", "\"19.250000000000\"^^xsd:decimal");
     }
 
 }

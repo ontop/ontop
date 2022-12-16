@@ -1,7 +1,7 @@
 CREATE SCHEMA ontop_test.university;
 
 CREATE TABLE professors (
-    prof_id int PRIMARY KEY,
+    prof_id number(19) PRIMARY KEY,
 	first_name varchar(100) NOT NULL,
 	last_name varchar(100) NOT NULL,
     nickname varchar(100)
@@ -18,8 +18,8 @@ INSERT INTO professors (prof_id, first_name, last_name) VALUES (8, 'Mary', 'Popp
 
 CREATE TABLE course (
 	course_id varchar(100) PRIMARY KEY,
-	nb_students int NOT NULL,
-	duration decimal NOT NULL
+	nb_students number(19) NOT NULL,
+	duration number(10,5) NOT NULL
 );
 
 INSERT INTO course (course_id, nb_students, duration) VALUES ('LinearAlgebra', 10, 24.5);
@@ -30,7 +30,7 @@ INSERT INTO course (course_id, nb_students, duration) VALUES ('OperatingSystems'
 
 CREATE TABLE teaching (
 	course_id varchar(100) NOT NULL,
-	prof_id int NOT NULL,
+	prof_id number(19) NOT NULL,
 	PRIMARY KEY (course_id, prof_id),
 	FOREIGN KEY (prof_id) REFERENCES professors(prof_id),
 	FOREIGN KEY (course_id) REFERENCES course(course_id)

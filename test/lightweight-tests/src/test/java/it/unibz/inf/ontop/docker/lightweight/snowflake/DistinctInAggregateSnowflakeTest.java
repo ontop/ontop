@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.snowflake;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -23,5 +25,23 @@ public class DistinctInAggregateSnowflakeTest extends AbstractDistinctInAggregat
     @AfterAll
     public static void after() throws SQLException {
         release();
+    }
+
+    @Override
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "ad", "\"10.500\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "ad", "\"12.000\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "ad", "\"13.000\"^^xsd:decimal"
+                )
+        );
     }
 }
