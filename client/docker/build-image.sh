@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 #
-# Script to build (and possibly push) the Ontop Docker image from sources, integrating with Maven build
+# ONTOP DOCKER IMAGE BUILD SCRIPT
+#
+# Builds (and possibly pushes) the Ontop Docker image from sources, integrating with Maven build
 # (Maven cache and pre-built artifacts are reused) and supporting generating a multiplaform image
 # (linux/amd64 + linux/arm64).
 #
@@ -23,7 +25,8 @@ VERSION=$( grep '<artifactId>ontop</artifactId>' pom.xml -C3 | grep '<version>' 
 REVISION="$( git rev-parse HEAD 2> /dev/null )"
 
 # Build variables customizable via command line options
-TARGET="image-from-binaries"
+JDEPS=
+TARGET="ontop-image-from-binaries"
 CLEANARG=
 NOCACHEARG=
 QUIETARG=
@@ -68,6 +71,8 @@ Options:
                   (if not used, only the image for the local OS/arch platform is built)
     -b key=value  supply additional --build-arg to Docker (can be used multiple times)
     -l key=value  supply additional --label to Docker (can be used multiple times)
+    -d            compile Ontop and run jdep to list required Java modules for jlink
+                  (does not build and/or push a Docker image)
     -q            suppress output
     -h, --help    display command line usage
 
@@ -89,11 +94,11 @@ exit 0
 fi
 
 # Parse script options, updating corresponding build variables
-while getopts cCnt:T:N:pxb:q option
+while getopts cCnt:T:N:pxb:dq option
 do
     case "${option}" in
         c) CLEANARG="clean";;
-        C) TARGET="image-from-sources";;
+        C) TARGET="ontop-image-from-sources";;
         n) NOCACHEARG="--no-cache";;
         t) NAMETAG=${OPTARG};;
         T) TAG=${OPTARG};;
@@ -102,6 +107,7 @@ do
         x) CROSS_BUILD=1; PUSH=1;;
         b) BUILDARGS=${BUILDARGS}" --build-arg "${OPTARG};;
         l) LABELARGS=${LABELARGS}" --label "${OPTARG};;
+        d) JDEPS=1;;
         q) QUIETARG="-q";;
     esac
 done
@@ -114,8 +120,8 @@ function log {
     [ -z "$QUIETARG" ] && echo -e "[$(date "+%Y-%m-%d %H:%M:%S")] $1" || true
 }
 
-# Compile outside Docker (if -C not used), integrating with local Maven build workflow
-if [ "${TARGET}" = "image-from-binaries" ]; then
+# Compile outside Docker (if -C not used or -d used), integrating with local Maven build workflow
+if [ "${TARGET}" = "ontop-image-from-binaries" ] || [ "${JDEPS}" ]; then
     # Compile via Maven ('clean' triggered by -c option; ontop-cli assembly not zipped)
     log "Compiling Ontop ${VERSION}"
     ./mvnw ${QUIETARG} ${CLEANARG} package -Pcli -Dassembly.cli.format=dir
@@ -124,8 +130,22 @@ if [ "${TARGET}" = "image-from-binaries" ]; then
     log "Assembling content of image ${NAMETAG}"
     rm -rf ${BINDIR}
     mv build/distribution/target/ontop-cli-* ${BINDIR}
-    rm -r ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc}
+    rm -rf ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
     cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
+fi
+
+# Run 'jdeps' on generated binaries, to list required Java modules for 'jlink --add-modules'
+if [ "${JDEPS}" ]; then
+    log "Detecting required Java modules via jdep (for jlink --add-modules)"
+    jdeps \
+        --print-module-deps \
+	    --ignore-missing-deps \
+	    --recursive \
+        --multi-release 11 \
+	    --class-path="${BINDIR}/lib/*" \
+	    --module-path="${BINDIR}/lib/*" \
+	    ${BINDIR}/lib/ontop-cli-5.0.0-SNAPSHOT.jar
+    exit 0
 fi
 
 # Build via Docker 'buildx', differentiating "simple" (local platform only) vs "cross" (linux/amd64 + linux/arm64) build

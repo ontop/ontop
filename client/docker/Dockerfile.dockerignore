@@ -23,4 +23,4 @@ test/*/src
 # them (as changing them will not invalidate Docker cache and trigger a Maven build)
 client/docker/Dockerfile
 client/docker/Dockerfile.dockerignore
-client/docker/Dockerfile.build-image.sh
+client/docker/build-image.sh
