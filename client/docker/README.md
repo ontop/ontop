@@ -1,12 +1,12 @@
-# Ontop-endpoint
+# Ontop
 
 ## Introduction
 
-The image `ontop/ontop-endpoint` is the standard solution for setting up Ontop SPARQL endpoint. 
-One can either use `ontop/ontop-endpoint` directly, or create a dedicated image based on this image.
+The image `ontop/ontop` is the standard solution for running Ontop. It supports setting up Ontop SPARQL endpoint, as well as running any Ontop CLI command.
+One can either use `ontop/ontop` directly, or create a dedicated image based on this image.
 
 ## Environment variables
-Here is a list of environment variables. Most of them directly correspond to arguments of the CLI `ontop-endpoint`command. Please refer to [its documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html#ontop-endpoint). All optional settings have reasonable defaults. Boolean flags can be enabled by setting the corresponding variable to any value (even empty) different from `false`. Invalid settings are reported via `WARNING` (non-fatal) or `ERROR` (fatal) messages.
+Here is a list of environment variables. Most of them directly correspond to arguments of the CLI `ontop` and `ontop-endpoint`commands. Please refer to [its documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html#ontop-endpoint). All optional settings have reasonable defaults. Boolean flags can be enabled by setting the corresponding variable to any value (even empty) different from `false`. Invalid settings are reported via `WARNING` (non-fatal) or `ERROR` (fatal) messages.
 
 ### Core Configuration
 
