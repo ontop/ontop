@@ -36,7 +36,7 @@ public class LeftJoinProfSnowflakeTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"10.333333\"^^xsd:decimal","\"12.000000\"^^xsd:decimal", "\"13.000000\"^^xsd:decimal");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"10.333333\"^^xsd:decimal","\"12.000000\"^^xsd:decimal", "\"13.000000\"^^xsd:decimal");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class LeftJoinProfSnowflakeTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("\"15.50000000000\"^^xsd:decimal", "\"16.00000000000\"^^xsd:decimal", "\"19.25000000000\"^^xsd:decimal");
+        return ImmutableList.of("\"15.500000\"^^xsd:decimal", "\"16.000000\"^^xsd:decimal", "\"19.250000\"^^xsd:decimal");
     }
 
 }
