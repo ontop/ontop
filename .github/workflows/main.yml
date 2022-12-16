@@ -60,6 +60,10 @@ jobs:
       - name: Set maven opts
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Run CI for Snowflake lightweight tests
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USER: ${{ secrets.SF_USER }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="snowflakelighttests" -DskipTests=false -Dsnowflake.account=${SF_ACCOUNT} -Dsnowflake.user=${SF_USER} -Dsnowflake.password=${SF_PASSWORD} --fail-at-end
 
   run-postgresql:
