@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.si.dag;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
+import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
@@ -54,7 +54,7 @@ public class DAGEquivalenceTest extends TestCase {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
 		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceClasses);
 
-		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		SemanticIndex engine = new SemanticIndex(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classesDAG()
 					.getVertex(dag.classes().get(getIRI(testURI, "B1"))).getRepresentative()).getIntervals();
 		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
@@ -84,7 +84,7 @@ public class DAGEquivalenceTest extends TestCase {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
 		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceRoles);
 		// generate named DAG
-		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		SemanticIndex engine = new SemanticIndex(dag);
 
 		List<Interval> nodeInterval = engine.getRange(dag.objectPropertiesDAG()
 				.getVertex(dag.objectProperties().get(getIRI(testURI, "R1"))).getRepresentative()).getIntervals();
@@ -115,7 +115,7 @@ public class DAGEquivalenceTest extends TestCase {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
 		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
 		// generate named DAG
-		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		SemanticIndex engine = new SemanticIndex(dag);
 		EquivalencesDAG<ObjectPropertyExpression> properties = dag.objectPropertiesDAG();
 
 

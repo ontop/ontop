@@ -16,6 +16,7 @@
         <module>model</module>
         <module>obda</module>
         <module>optimization</module>
+        <module>kg-query</module>
     </modules>
 
 </project>

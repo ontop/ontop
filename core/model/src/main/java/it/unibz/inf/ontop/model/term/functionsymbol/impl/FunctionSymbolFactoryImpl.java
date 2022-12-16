@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
@@ -82,6 +81,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
     private final FunctionSymbol commonNumericTypeFunctionSymbol;
     private final FunctionSymbol EBVSPARQLLikeFunctionSymbol;
+    private final FunctionSymbol extractLexicalTermFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -96,6 +96,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
      * Created in init()
      */
     private ImmutableTable<String, Integer, SPARQLFunctionSymbol> distinctSparqlAggregateFunctionTable;
+
 
 
     @Inject
@@ -137,6 +138,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
                 typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
+        this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(), dbStringType);
     }
 
     @Inject
@@ -606,6 +608,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                                                              DBTermType targetType) {
         return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, metaRDFType, targetType,
                 dbFunctionSymbolFct);
+    }
+
+    @Override
+    public FunctionSymbol getExtractLexicalTermFromRDFTerm() {
+        return extractLexicalTermFunctionSymbol;
     }
 
 }

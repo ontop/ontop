@@ -29,7 +29,7 @@ public class TypePropagationSubstitutionHierarchyImpl extends TermTypeHierarchyI
     @Override
     public TypePropagationSubstitutionHierarchy newHierarchy(ConcreteNumericRDFDatatype childType) {
         return new TypePropagationSubstitutionHierarchyImpl(
-                Stream.concat(getTermTypes(), Stream.of(childType))
+                Stream.concat(Stream.of(childType), getTermTypes()) // most preferable for promotion type first
                     .collect(ImmutableCollectors.toList()));
     }
 

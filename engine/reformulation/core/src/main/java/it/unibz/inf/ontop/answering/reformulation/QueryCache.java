@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation;
 
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.iq.IQ;
 
 /**
@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.iq.IQ;
  *
  */
 public interface QueryCache {
-    IQ get(InputQuery inputQuery);
+    IQ get(KGQuery inputQuery);
 
-    void put(InputQuery inputQuery, IQ executableQuery);
+    void put(KGQuery inputQuery, IQ executableQuery);
 
     void clear();
 }

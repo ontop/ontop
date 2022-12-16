@@ -9,14 +9,7 @@
     rdfs:comment "Some SPARQL test cases - equality of values" ;
     mf:entries
     ( 
-        :eq-1
-        :eq-2
-        :eq-3 # ERROR: The case of Literal or String datatype in the filter
-        :eq-4 # Already failing in V1. Bad datatype handling by the classic mode.
-        :eq-5 
-        :eq-2-1
-        :eq-2-1-modified
-        :eq-2-2 # WON'T FIX
+        :eq-1 :eq-2 :eq-3 :eq-4 :eq-5 :eq-2-1 :eq-2-2
         :eq-graph-1 :eq-graph-2 :eq-graph-3 :eq-graph-4 :eq-graph-5
     ).
 
@@ -80,17 +73,6 @@
               qt:data   <data-eq.ttl> ] ;
          mf:result  <result-eq2-1.ttl>
       .
-# Ontop-specific
-:eq-2-1-modified a mf:QueryEvaluationTest ;
-        dawgt:approval dawgt:Approved ;
-        dawgt:approvedBy <http://www.w3.org/2007/06/19-dawg-minutes.html> ;
-         mf:name    "Equality - 2 var - test equals - modified" ;
-         rdfs:comment "= in FILTER is value equality (modified)" ;
-         mf:action
-            [ qt:query  <query-eq2-1.rq> ;
-              qt:data   <data-eq-modified.ttl> ] ;
-         mf:result  <result-eq2-1-modified.ttl>
-      .
 
 :eq-2-2 a mf:QueryEvaluationTest ;
         dawgt:approval dawgt:Approved ;
@@ -98,9 +80,9 @@
         rdfs:comment "!= in FILTER is value inequality" ;
          mf:name    "Equality - 2 var - test not equals " ;
          mf:action
-            [ qt:query  <query-eq2-2.rq> ;
+            [ qt:query  <query-eq2-1.rq> ;
               qt:data   <data-eq.ttl> ] ;
-         mf:result  <result-eq2-2.ttl>
+         mf:result  <result-eq2-1.ttl>
       .
 
     # Graph versions of the equality tests

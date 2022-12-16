@@ -117,6 +117,10 @@ if [ "${ONTOP_VIEW_FILE+x}" ]; then
   set -- "$@" "--ontop-views=${ONTOP_VIEW_FILE}"
 fi
 
+if [ "${ONTOP_SPARQL_RULES_FILE+x}" ]; then
+  args_array+=("--sparql-rules=${ONTOP_SPARQL_RULES_FILE}")
+fi
+
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
   set -- "$@" "--cors-allowed-origins=${ONTOP_CORS_ALLOWED_ORIGINS}"
 fi

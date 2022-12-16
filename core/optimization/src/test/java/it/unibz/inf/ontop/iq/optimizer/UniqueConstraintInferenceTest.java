@@ -11,14 +11,15 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.template.Template;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR2;
-import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR3;
+import static it.unibz.inf.ontop.DependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertEquals;
 
 public class UniqueConstraintInferenceTest {
 
     private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2 = Template.of("http://example.org/ds1/", 0, "/", 1);
+
+    private final ImmutableList<Template.Component> URI_TEMPLATE_INJECTIVE_2_1 = Template.of("http://example.org/ds3/", 0, "/", 1);
 
     private final ImmutableList<Template.Component> URI_TEMPLATE_NOT_INJECTIVE_2 = Template.of("http://example.org/ds2/", 0, "", 1);
 
@@ -134,5 +135,181 @@ public class UniqueConstraintInferenceTest {
                         SUBSTITUTION_FACTORY.getSubstitution(X, A, Y, A)),
                 DATA_NODE_1);
         assertEquals(ImmutableSet.of(ImmutableSet.of(X), ImmutableSet.of(Y), ImmutableSet.of(A)), tree.inferUniqueConstraints());
+    }
+
+    /**
+     * Unique constraint but not disjoint
+     */
+    @Test
+    public void testUnion1() {
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B)),
+                ImmutableList.of(DATA_NODE_1, DATA_NODE_1));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion2() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, B)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2_1, ImmutableList.of(A, B)))),
+                DATA_NODE_1);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, A, B)),
+                ImmutableList.of(child1, child2));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X)), tree.inferUniqueConstraints());
+    }
+
+    /**
+     * Same template, not disjoint
+     */
+    @Test
+    public void testUnion3() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, B)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, B)))),
+                DATA_NODE_1);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, A, B)),
+                ImmutableList.of(child1, child2));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion4() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, TWO)))),
+                DATA_NODE_1);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, A, B)),
+                ImmutableList.of(child1, child2));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion5() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(ONE, B)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, A, B),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(TWO, B)))),
+                DATA_NODE_1);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X, A, B)),
+                ImmutableList.of(child1, child2));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion6() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, TWO)))),
+                DATA_NODE_1);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(child1, child2));
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X)), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion7() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                DATA_NODE_1);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, TWO)))),
+                DATA_NODE_1);
+
+        // Not distinct
+        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE, ONE)));
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(child1, child2, child3));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion8() {
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                DATA_NODE_1);
+
+        // Not distinct
+        ValuesNode child3 = IQ_FACTORY.createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE, ONE)));
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(child1, child3));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+    }
+
+    @Test
+    public void testUnion9() {
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR1, ImmutableMap.of(0, A));
+
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2, ImmutableList.of(A, ONE)))),
+                dataNode);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_INJECTIVE_2_1, ImmutableList.of(A, ONE)))),
+                dataNode);
+
+        IQTree tree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(child1, child2, child2));
+        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
     }
 }

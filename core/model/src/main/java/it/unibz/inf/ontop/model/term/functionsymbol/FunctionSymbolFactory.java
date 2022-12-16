@@ -126,4 +126,6 @@ public interface FunctionSymbolFactory {
 
     FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                       DBTermType targetType);
+
+    FunctionSymbol getExtractLexicalTermFromRDFTerm();
 }

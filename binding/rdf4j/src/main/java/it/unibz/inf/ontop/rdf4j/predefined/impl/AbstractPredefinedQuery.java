@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
+import it.unibz.inf.ontop.query.RDF4JQuery;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;
@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
+public class AbstractPredefinedQuery<Q extends RDF4JQuery> implements PredefinedQuery<Q> {
 
     private final String id;
     protected final PredefinedQueryConfigEntry queryConfig;

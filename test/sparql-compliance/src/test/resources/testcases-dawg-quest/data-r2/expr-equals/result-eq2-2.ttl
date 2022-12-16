@@ -6,16 +6,14 @@
 []    rdf:type    rs:ResultSet ;
       rs:resultVariable  "v1" ;
       rs:resultVariable  "v2" ;
-      
-      # Removed entry: Quest doesn't support custom datatype
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :z ;
-      #                             rs:variable  "v2"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v1"
-      #                           ]
-      #             ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    :z ;
+                                  rs:variable  "v2"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v1"
+                                ]
+                  ] ;
       rs:solution
                   [ rs:binding  [ rs:value    :z ;
                                   rs:variable  "v1"
@@ -32,17 +30,14 @@
                                   rs:variable  "v1"
                                 ]
                   ] ;
-
-      # Removed entry: Quest doesn't support custom datatype
-      # rs:solution
-      #             [ rs:binding  [ rs:value    "1" ;
-      #                             rs:variable  "v2"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v1"
-      #                           ]
-      #             ] ;
-      
+      rs:solution
+                  [ rs:binding  [ rs:value    "1" ;
+                                  rs:variable  "v2"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v1"
+                                ]
+                  ] ;
       rs:solution
                   [ rs:binding  [ rs:value    "1" ;
                                   rs:variable  "v2"
@@ -59,47 +54,38 @@
                                   rs:variable  "v1"
                                 ]
                   ] ;
-
-	  # Removed entry: Quest doesn't support custom datatype
-	  # rs:solution
-      #             [ rs:binding  [ rs:value    "zzz" ;
-      #                             rs:variable  "v1"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v2"
-      #                           ]
-      #             ] ;
- 
-      # Removed entry: Quest doesn't support custom datatype
-      # rs:solution
-      #             [ rs:binding  [ rs:value    "1" ;
-      #                             rs:variable  "v1"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v2"
-      #                           ]
-      #             ] ;
-      
-      # Removed entry: Quest doesn't support custom datatype
-      # rs:solution
-      #             [ rs:binding  [ rs:value    "zzz" ;
-      #                             rs:variable  "v2"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v1"
-      #                           ]
-      #             ] ;
-      
-      # Removed entry: Quest doesn't support custom datatype
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :z ;
-      #                             rs:variable  "v1"
-      #                           ] ;
-      #               rs:binding  [ rs:value    "zzz"^^:myType ;
-      #                             rs:variable  "v2"
-      #                           ]
-      #            ] ;
-      
+      rs:solution
+                  [ rs:binding  [ rs:value    "zzz" ;
+                                  rs:variable  "v1"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v2"
+                                ]
+                  ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    "1" ;
+                                  rs:variable  "v1"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v2"
+                                ]
+                  ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    "zzz" ;
+                                  rs:variable  "v2"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v1"
+                                ]
+                  ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    :z ;
+                                  rs:variable  "v1"
+                                ] ;
+                    rs:binding  [ rs:value    "zzz"^^:myType ;
+                                  rs:variable  "v2"
+                                ]
+                  ] ;
       rs:solution
                   [ rs:binding  [ rs:value    "1" ;
                                   rs:variable  "v1"

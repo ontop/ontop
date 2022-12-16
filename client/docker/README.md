@@ -24,6 +24,7 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - **`ONTOP_DB_METADATA_FILE`** *(file path, optional)* - Specifies a user-supplied DB metadata file. Corresponds to the argument `--db-metadata`. Added in 4.1.0.
 - **`ONTOP_CONSTRAINT_FILE`** *(file path, optional)* - Specifies a user-supplied DB constraint file. Corresponds to the argument `--constraint`.
 - **`ONTOP_VIEW_FILE`** *(file path, optional)* - Specifies a user-supplied view file. Corresponds to the argument `--ontop-views`. Added in 4.1.0.
+- **`ONTOP_SPARQL_RULES_FILE`** (file path, optional) - Specifies a user-supplied SPARQL rules file. Corresponds to the argument `--sparql-rules`. Added in 5.0.0.
 - **`ONTOP_CORS_ALLOWED_ORIGINS`** *(string, optional)* - Specifies the value of the `Access-Control-Allow-Origin` [response header](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing#Response_headers). Corresponds to the argument `--cors-allowed-origins`.
 
   *Note: suggest configuring DB settings via environment variable (possibly using their `_FILE` variants) to avoid storing or exposing sensitive data such as DB passwords.*

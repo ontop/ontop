@@ -785,7 +785,10 @@ public class FunctionalDependencyTest {
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newConstructionNode,
-                        IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A)), dataNode3)));
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createSliceNode(0, 1),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A)), dataNode3))));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }

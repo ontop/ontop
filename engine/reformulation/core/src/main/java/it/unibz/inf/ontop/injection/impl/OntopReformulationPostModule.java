@@ -6,11 +6,10 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DummyRewriter;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.injection.TranslationFactory;
@@ -39,11 +38,9 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
         }
 
         bindFromSettings(QueryCache.class);
-        bindFromSettings(InputQueryTranslator.class);
 
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
-                        QueryUnfolder.class,
                         NativeQueryGenerator.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);

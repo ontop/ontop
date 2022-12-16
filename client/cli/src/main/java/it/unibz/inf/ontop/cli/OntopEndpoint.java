@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 @Command(name = "endpoint",
         description = "Start a SPARQL endpoint powered by Ontop")
-public class OntopEndpoint extends OntopReasoningCommandBase {
+public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--portal"}, title = "endpoint portal file",
             description = "endpoint portal file (including title and queries)")
@@ -95,6 +95,9 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (this.ontopViewFile != null)
             argList.add("--ontop-views=" + this.ontopViewFile);
+
+        if (this.sparqlRulesFile != null)
+            argList.add("--sparql-rules=" + this.sparqlRulesFile);
 
         if (this.portalFile != null)
             argList.add("--portal=" + this.portalFile);

@@ -43,12 +43,7 @@ public class TargetAtomImpl implements TargetAtom {
                 .map(substitution::applyToVariable)
                 .collect(ImmutableCollectors.toList());
     }
-
-    @Override
-    public TargetAtom changeSubstitution(ImmutableSubstitution<ImmutableTerm> newSubstitution) {
-        return new TargetAtomImpl(atom, newSubstitution);
-    }
-
+    
     @Override
     public Optional<IRI> getPredicateIRI() {
         return Optional.of(atom.getPredicate())
