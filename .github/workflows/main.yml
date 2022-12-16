@@ -38,6 +38,30 @@ jobs:
       - name: Run CI without docker tests
         run: ./mvnw install --fail-at-end
 
+  run-snowflake:
+    needs: build-run-non-docker-tests
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      # The java versions the job will run on
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Run CI for Snowflake lightweight tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="snowflakelighttests" -DskipTests=false -Dsnowflake.account=${SF_ACCOUNT} -Dsnowflake.user=${SF_USER} -Dsnowflake.password=${SF_PASSWORD} --fail-at-end
+
   run-postgresql:
     needs: build-run-non-docker-tests
     # The type of runner that the job will run on
