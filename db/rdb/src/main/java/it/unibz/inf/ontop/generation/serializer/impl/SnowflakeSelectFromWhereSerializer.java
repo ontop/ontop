@@ -32,6 +32,16 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
         return selectFromWhere.acceptVisitor(
                 new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
 
+                    @Override
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
+                        return String.format("LIMIT %d OFFSET %d", limit, offset);
+                    }
+
+                    @Override
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
+                        return String.format("LIMIT NULL OFFSET %d", offset);
+                    }
+
                     /**
                      * Variables in the VALUES block needs to be without lower case!
                      * (limitation of Snowflake)

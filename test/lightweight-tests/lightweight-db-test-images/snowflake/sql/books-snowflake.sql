@@ -4,7 +4,7 @@ CREATE TABLE books (
                        id integer NOT NULL,
                        title character varying(100),
                        price integer,
-                       discount numeric,
+                       discount number(10,2),
                        description character varying(100),
                        lang character varying(100),
                        publication_date timestamp
