@@ -1289,7 +1289,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDBRowUniqueStr() {
         return new DBFunctionSymbolWithSerializerImpl("ROW_UNIQUE_STR", ImmutableList.of(), dbStringType, true,
-                (t, c, f) -> serializeDBRowUniqueStr(c, f));
+                (t, c, f) -> serializeDBRowUniqueStr(c, f)) {
+            @Override
+            public boolean isDeterministic() {
+                return false;
+            }
+        };
     }
 
     protected DBFunctionSymbol createDBRowNumber() {

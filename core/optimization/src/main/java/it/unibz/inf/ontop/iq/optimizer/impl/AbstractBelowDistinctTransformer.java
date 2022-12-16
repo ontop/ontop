@@ -17,13 +17,13 @@ import java.util.Optional;
  */
 public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursiveIQTreeTransformer {
 
-    private final IQTreeTransformer lookForDistinctTransformer;
+    private final IQTreeTransformer lookForDistinctOrLimit1Transformer;
     protected final CoreSingletons coreSingletons;
 
-    protected AbstractBelowDistinctTransformer(IQTreeTransformer lookForDistinctTransformer,
+    protected AbstractBelowDistinctTransformer(IQTreeTransformer lookForDistinctOrLimit1Transformer,
                                                CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.lookForDistinctTransformer = lookForDistinctTransformer;
+        this.lookForDistinctOrLimit1Transformer = lookForDistinctOrLimit1Transformer;
     }
 
     @Override
@@ -110,14 +110,14 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
      * By default, switch back to the "LookForDistinctTransformer"
      */
     protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return lookForDistinctTransformer.transform(tree);
+        return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 
     /**
      * By default, switch back to the "LookForDistinctTransformer"
      */
     protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return lookForDistinctTransformer.transform(tree);
+        return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 
     /**
@@ -125,6 +125,6 @@ public abstract class AbstractBelowDistinctTransformer extends DefaultNonRecursi
      */
     protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                        IQTree leftChild, IQTree rightChild) {
-        return lookForDistinctTransformer.transform(tree);
+        return lookForDistinctOrLimit1Transformer.transform(tree);
     }
 }

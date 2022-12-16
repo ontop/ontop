@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctTransformerImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -52,7 +52,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
 
-        IQTreeVisitingTransformer transformer = new LookForDistinctTransformerImpl(
+        IQTreeVisitingTransformer transformer = new LookForDistinctOrLimit1TransformerImpl(
                 (childTree, parentTransformer) -> new CardinalityInsensitiveTransformer(
                         parentTransformer,
                         childTree::getVariableNullability,

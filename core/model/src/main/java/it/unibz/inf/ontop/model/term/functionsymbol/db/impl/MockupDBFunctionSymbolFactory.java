@@ -767,7 +767,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new DefaultNonDeterministicNullaryFunctionSymbol("RAND", uuid, dbTypeFactory.getDBDoubleType());
     }
 
     /**

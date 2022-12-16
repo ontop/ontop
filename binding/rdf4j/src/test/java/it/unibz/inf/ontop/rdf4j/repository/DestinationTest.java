@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DestinationTest extends AbstractRDF4JTest {
 
@@ -114,6 +116,52 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 1\n");
         assertEquals(1, count);
+    }
+
+    @Test
+    public void testAllProperties() {
+        String sparql = "SELECT DISTINCT ?p\n" +
+                "WHERE {\n" +
+                        "?s ?p ?o" +
+                "}";
+
+        int count = runQueryAndCount(sparql);
+        assertEquals(83, count);
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(87, StringUtils.countMatches(sql, "LIMIT 1"));
+        assertTrue(StringUtils.countMatches(sql.toUpperCase(), "DISTINCT") <= 1);
+    }
+
+    @Test
+    public void testAllPropertiesWithOrder() {
+        String sparql = "SELECT DISTINCT ?p\n" +
+                "WHERE {\n" +
+                "?s ?p ?o" +
+                "}\n" +
+                "ORDER BY ?p";
+
+        int count = runQueryAndCount(sparql);
+        assertEquals(83, count);
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(87, StringUtils.countMatches(sql, "LIMIT 1"));
+        assertTrue(StringUtils.countMatches(sql.toUpperCase(), "DISTINCT") <= 1);
+    }
+
+    @Test
+    public void testAllClasses() {
+        String sparql = "SELECT DISTINCT ?c\n" +
+                "WHERE {\n" +
+                "?s a ?c" +
+                "}";
+
+        int count = runQueryAndCount(sparql);
+        assertEquals(271, count);
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        assertEquals(46, StringUtils.countMatches(sql, "LIMIT 1"));
+        assertEquals(0, StringUtils.countMatches(sql.toUpperCase(), "DISTINCT"));
     }
 
 }

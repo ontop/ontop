@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -26,7 +25,7 @@ public class BelowDistinctJoinWithClassUnionOptimizerImpl implements BelowDistin
     protected BelowDistinctJoinWithClassUnionOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory,
                                                            RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
         this.iqFactory = iqFactory;
-        this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
+        this.lookForDistinctTransformer = new LookForDistinctOrLimit1TransformerImpl(
                 t -> new JoinWithClassUnionTransformer(t, coreSingletons, requiredExtensionalDataNodeExtractor),
                 coreSingletons);
     }
