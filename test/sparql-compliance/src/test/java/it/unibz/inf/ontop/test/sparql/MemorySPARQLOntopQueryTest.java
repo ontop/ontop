@@ -64,6 +64,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			castManifest + "cast-dT",
 			castManifest + "cast-bool",
 
+			exprBuiltInManifest + "sameTerm-eq", // JdbcSQLException: Data conversion error converting "zzz"
 			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
 
 			exprEqualsManifest + "eq-2-1", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
