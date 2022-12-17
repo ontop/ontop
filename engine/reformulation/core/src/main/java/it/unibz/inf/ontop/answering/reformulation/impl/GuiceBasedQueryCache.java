@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.IQ;
@@ -14,7 +14,7 @@ public class GuiceBasedQueryCache implements QueryCache {
 
     // NB: still present in more recent versions of Guava
     @SuppressWarnings("UnstableApiUsage")
-    private final Cache<InputQuery, IQ> cache;
+    private final Cache<KGQuery, IQ> cache;
 
     @Inject
     private GuiceBasedQueryCache(OntopReformulationSettings settings) {
@@ -25,12 +25,12 @@ public class GuiceBasedQueryCache implements QueryCache {
 
     @Nullable
     @Override
-    public IQ get(InputQuery inputQuery) {
+    public IQ get(KGQuery inputQuery) {
         return cache.getIfPresent(inputQuery);
     }
 
     @Override
-    public void put(InputQuery inputQuery, IQ executableQuery) {
+    public void put(KGQuery inputQuery, IQ executableQuery) {
         cache.put(inputQuery, executableQuery);
     }
 

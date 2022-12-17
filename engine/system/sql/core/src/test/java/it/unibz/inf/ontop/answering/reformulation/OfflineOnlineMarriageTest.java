@@ -6,11 +6,11 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
-import it.unibz.inf.ontop.answering.resultset.OntopBinding;
-import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.SelectQuery;
+import it.unibz.inf.ontop.query.resultset.OntopBinding;
+import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
@@ -77,11 +77,11 @@ public class OfflineOnlineMarriageTest {
     }
 
     @Test
-    public void testQueryReformulator() throws OBDASpecificationException, OntopReformulationException {
+    public void testQueryReformulator() throws OBDASpecificationException, OntopReformulationException, OntopInvalidKGQueryException {
         QueryReformulator queryReformulator = createReformulator();
-        InputQueryFactory inputQueryFactory = queryReformulator.getInputQueryFactory();
+        KGQueryFactory kgQueryFactory = queryReformulator.getInputQueryFactory();
 
-        SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
+        SelectQuery query = kgQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
 
         IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
@@ -127,15 +127,15 @@ public class OfflineOnlineMarriageTest {
 
     @Test
     public void testQueryEngine() throws OBDASpecificationException, OntopConnectionException,
-            OntopReformulationException, OntopResultConversionException, OntopQueryEvaluationException {
+            OntopReformulationException, OntopResultConversionException, OntopQueryEvaluationException, OntopInvalidKGQueryException {
         try (OntopQueryEngine queryEngine = createQueryEngine()) {
             queryEngine.connect();
 
             try (OntopConnection connection = queryEngine.getConnection();
                  OntopStatement statement = connection.createStatement()) {
-                InputQueryFactory inputQueryFactory = connection.getInputQueryFactory();
+                KGQueryFactory kgQueryFactory = connection.getInputQueryFactory();
 
-                SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
+                SelectQuery query = kgQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
                 TupleResultSet resultSet = statement.execute(query);
 
                 ImmutableSet.Builder<String> answerBuilder = ImmutableSet.builder();

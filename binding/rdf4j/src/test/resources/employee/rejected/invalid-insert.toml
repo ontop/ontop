@@ -1,0 +1,18 @@
+rules = [
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?d a :ITProfessional .
+      OPTIONAL {
+        ?d :name ?firstName .
+      }
+    } WHERE {
+      ?d a :Developer .
+      OPTIONAL {
+        ?d :firstName ?firstName .
+      }
+    }
+    """
+]

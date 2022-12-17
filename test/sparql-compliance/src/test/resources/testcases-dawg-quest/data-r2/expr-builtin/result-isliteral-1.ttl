@@ -18,11 +18,10 @@
                                   rs:variable  "x"
                                 ] ;
                   ],
-                  # Removed entry: Quest doesn't support custom datatype
-                  # [ rs:binding  [ rs:value    :x4 ;
-                  #                 rs:variable  "x"
-                  #               ] ;
-                  # ],
+                  [ rs:binding  [ rs:value    :x4 ;
+                                  rs:variable  "x"
+                                ] ;
+                  ],
                   [ rs:binding  [ rs:value    :x5 ;
                                   rs:variable  "x"
                                 ] ;

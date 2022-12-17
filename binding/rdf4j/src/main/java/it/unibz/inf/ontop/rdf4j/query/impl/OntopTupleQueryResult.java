@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 
 import java.util.HashSet;
 import java.util.List;

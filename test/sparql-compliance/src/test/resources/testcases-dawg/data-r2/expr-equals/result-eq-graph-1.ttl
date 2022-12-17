@@ -6,10 +6,10 @@
 []    rdf:type      rs:ResultSet ;
       rs:resultVariable  "x" ;
 # "1" not same term as "01"
-      rs:solution   [ rs:binding    [ rs:value      :xi3 ;
-                                      rs:variable   "x"
-                                    ]
-                    ] ;
+#      rs:solution   [ rs:binding    [ rs:value      :xi3 ;
+#                                      rs:variable   "x"
+#                                    ]
+#                    ] ;
       rs:solution   [ rs:binding    [ rs:value      :xi2 ;
                                       rs:variable   "x"
                                     ]

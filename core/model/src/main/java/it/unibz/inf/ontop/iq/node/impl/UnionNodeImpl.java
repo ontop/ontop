@@ -23,11 +23,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -157,13 +153,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * Returns true if we are sure the two children can only return different tuples
      */
     private boolean areDisjoint(IQTree child1, IQTree child2) {
+        return areDisjoint(child1, child2, projectedVariables);
+    }
+
+    private boolean areDisjoint(IQTree child1, IQTree child2, ImmutableSet<Variable> variables) {
         VariableNullability variableNullability1 = child1.getVariableNullability();
         VariableNullability variableNullability2 = child2.getVariableNullability();
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs1 = child1.getPossibleVariableDefinitions();
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs2 = child2.getPossibleVariableDefinitions();
 
-        return projectedVariables.stream()
+        return variables.stream()
                 // We don't consider variables nullable on both side
                 .filter(v -> !(variableNullability1.isPossiblyNullable(v) && variableNullability2.isPossiblyNullable(v)))
                 .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
@@ -343,15 +343,27 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     /**
-     * TODO: implement it seriously
+     * TODO: generalize it and merge it with the isDistinct() method implementation
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
-        return ImmutableSet.of();
+        int childrenCount = children.size();
+        if (childrenCount < 2)
+            throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
+
+        IQTree firstChild = children.get(0);
+        return firstChild.inferUniqueConstraints().stream()
+                .filter(uc -> children.stream()
+                        .skip(1)
+                        .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
+                .filter(uc -> IntStream.range(0, childrenCount)
+                        .allMatch(i -> IntStream.range(i+1, childrenCount)
+                                .allMatch(j -> areDisjoint(children.get(i), children.get(j), uc))))
+                .collect(ImmutableCollectors.toSet());
     }
 
     /**
-     * All the variables of an union could be projected out
+     * All the variables of a union could be projected out
      */
     @Override
     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
@@ -413,7 +425,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, treeCache);
+                return tryToMergeSomeChildrenInAValuesNode(
+                        liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, treeCache),
+                        variableGenerator, treeCache);
         }
     }
 
@@ -474,16 +488,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
 
     /**
-     * Has at least two children
+     * Has at least two children.
+     * The returned tree may be opportunistically marked as "normalized" in case no further optimization is applied in this class.
+     * Such a flag won't be taken seriously until leaving this class.
+     *
      */
     private IQTree liftBindingFromLiftedChildrenAndFlatten(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
                                                            IQTreeCache treeCache) {
-
         /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
+            // Opportunistically flagged as normalized. May be discarded later on
             return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
 
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
@@ -496,6 +513,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     projectedVariables, tmpNormalizedChildSubstitutions, variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
+            // Opportunistically flagged as normalized. May be discarded later on
             return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
         }
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
@@ -515,7 +533,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                 : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
                         .collect(ImmutableCollectors.toList()));
 
-        return iqFactory.createUnaryIQTree(newRootNode, unionIQ);
+        return iqFactory.createUnaryIQTree(newRootNode, unionIQ)
+                // TODO: see if needed or if we could opportunistically mark the tree as normalized
+                .normalizeForOptimization(variableGenerator);
     }
 
     private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> liftedChildren) {
@@ -693,5 +713,159 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return substitutionPair.bindings.isEmpty()
                 ? newChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+    }
+
+    private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        QueryNode rootNode = tree.getRootNode();
+
+        if (rootNode instanceof ConstructionNode) {
+            IQTree subTree = tree.getChildren().get(0);
+            IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(subTree, variableGenerator, treeCache, false);
+            return (subTree == newSubTree)
+                    ? tree
+                    : iqFactory.createUnaryIQTree((ConstructionNode) rootNode, newSubTree,
+                    treeCache.declareAsNormalizedForOptimizationWithEffect());
+        }
+        else
+            return tryToMergeSomeChildrenInAValuesNode(tree, variableGenerator, treeCache, true);
+    }
+
+
+    private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache,
+                                                       boolean isRoot) {
+        QueryNode rootNode = tree.getRootNode();
+        if (!(rootNode instanceof UnionNode))
+            return tree;
+
+        UnionNode unionNode = (UnionNode) rootNode;
+
+        ImmutableList<IQTree> children = tree.getChildren();
+
+        ImmutableList<IQTree> nonMergedChildren = children.stream()
+                .filter(t -> !isMergeableInValuesNode(t))
+                .collect(ImmutableCollectors.toList());
+
+        // At least 2 mergeable children are needed
+        if (nonMergedChildren.size() >= children.size() - 1)
+            return tree;
+
+        // Tries to reuse the ordered value list of a values node
+        ImmutableList<Variable> valuesVariables = children.stream()
+                .map(IQTree::getRootNode)
+                .filter(n -> n instanceof ValuesNode)
+                .map(n -> ((ValuesNode) n).getOrderedVariables())
+                .findAny()
+                // Otherwise creates an arbitrary order
+                .orElseGet(() -> ImmutableList.copyOf(unionNode.getVariables()));
+
+        ImmutableList<ImmutableList<Constant>> values = children.stream()
+                .filter(this::isMergeableInValuesNode)
+                .flatMap(c -> extractValues(c, valuesVariables))
+                .collect(ImmutableCollectors.toList());
+
+        IQTree mergedSubTree = iqFactory.createValuesNode(valuesVariables, values)
+                // NB: some columns may be extracted and put into a construction node
+                .normalizeForOptimization(variableGenerator);
+
+        if (nonMergedChildren.isEmpty())
+            return mergedSubTree;
+
+        ImmutableList<IQTree> newChildren = Stream.concat(
+                        Stream.of(mergedSubTree),
+                        nonMergedChildren.stream())
+                .collect(ImmutableCollectors.toList());
+
+        return isRoot
+                // Merging values nodes cannot trigger new binding lift opportunities
+                ? iqFactory.createNaryIQTree(unionNode, newChildren,
+                        treeCache.declareAsNormalizedForOptimizationWithEffect())
+                : iqFactory.createNaryIQTree(unionNode, newChildren);
+    }
+
+    /**
+     * TODO: relax these constraints once we are sure non-DB constants in values nodes
+     * are lifted or transformed properly in the rest of the code
+     */
+    private boolean isMergeableInValuesNode(IQTree tree) {
+        QueryNode rootNode = tree.getRootNode();
+        if ((rootNode instanceof ValuesNode) || (rootNode instanceof TrueNode))
+            return true;
+
+        if (!(rootNode instanceof ConstructionNode))
+            return false;
+
+        IQTree child = tree.getChildren().get(0);
+
+        if (!((child instanceof TrueNode) || (child instanceof ValuesNode)))
+            return false;
+
+        ConstructionNode constructionNode = (ConstructionNode) rootNode;
+
+        //NB: RDF constants are already expected to be decomposed
+        return constructionNode.getSubstitution().getImmutableMap().values().stream()
+                .allMatch(v -> (v instanceof DBConstant) || v.isNull());
+    }
+
+    private Stream<ImmutableList<Constant>> extractValues(IQTree tree, ImmutableList<Variable> outputOrderedVariables) {
+        if (tree instanceof ValuesNode)
+            return extractValuesFromValuesNode((ValuesNode) tree, outputOrderedVariables);
+
+        if (tree instanceof TrueNode)
+            return Stream.of(ImmutableList.of());
+
+        QueryNode rootNode = tree.getRootNode();
+        if (!(rootNode instanceof ConstructionNode))
+            throw new MinorOntopInternalBugException("Was expecting either a ValuesNode, a TrueNode or a ConstructionNode");
+
+        ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+        IQTree child = tree.getChildren().get(0);
+
+        if (child instanceof TrueNode)
+            return Stream.of(
+                    outputOrderedVariables.stream()
+                        .map(v -> Optional.ofNullable(substitution.get(v))
+                                .orElseThrow(() -> new MinorOntopInternalBugException("The variable should have been defined")))
+                        .map(t -> (Constant) t)
+                        .collect(ImmutableCollectors.toList()));
+
+        if (child instanceof ValuesNode)
+            return extractValuesFromValuesNode((ValuesNode) child, outputOrderedVariables, substitution);
+
+        throw new MinorOntopInternalBugException("Unexpected child: " + child);
+    }
+
+    private Stream<ImmutableList<Constant>> extractValuesFromValuesNode(ValuesNode valuesNode, ImmutableList<Variable> outputOrderedVariables) {
+        ImmutableList<Variable> nodeOrderedVariables = valuesNode.getOrderedVariables();
+        if (nodeOrderedVariables.equals(outputOrderedVariables))
+            return valuesNode.getValues().stream();
+
+        ImmutableList<Integer> indexes = outputOrderedVariables.stream()
+                .map(nodeOrderedVariables::indexOf)
+                .collect(ImmutableCollectors.toList());
+
+        return valuesNode.getValues().stream()
+                .map(vs -> indexes.stream()
+                        .map(vs::get)
+                        .collect(ImmutableCollectors.toList()));
+    }
+
+    private Stream<ImmutableList<Constant>> extractValuesFromValuesNode(ValuesNode valuesNode,
+                                                                        ImmutableList<Variable> outputOrderedVariables,
+                                                                        ImmutableSubstitution<ImmutableTerm> substitution) {
+        ImmutableList<Variable> nodeOrderedVariables = valuesNode.getOrderedVariables();
+        ImmutableMap<Variable, Integer> indexMap = outputOrderedVariables.stream()
+                .collect(ImmutableCollectors.toMap(
+                        v -> v,
+                        nodeOrderedVariables::indexOf));
+
+        return valuesNode.getValues().stream()
+                .map(vs -> outputOrderedVariables.stream()
+                        .map(v -> {
+                            int index = indexMap.get(v);
+                            return index == -1
+                                    ? (Constant) substitution.get(v)
+                                    : vs.get(index);
+                        })
+                        .collect(ImmutableCollectors.toList()));
     }
 }

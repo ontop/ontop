@@ -47,6 +47,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
     private final FunctionSymbol commonNumericTypeFunctionSymbol;
     private final FunctionSymbol EBVSPARQLLikeFunctionSymbol;
+    private final FunctionSymbol extractLexicalTermFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -61,6 +62,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
      * Created in init()
      */
     private ImmutableTable<String, Integer, SPARQLFunctionSymbol> distinctSparqlAggregateFunctionTable;
+
 
 
     @Inject
@@ -102,6 +104,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
                 typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
+        this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(), dbStringType);
     }
 
     @Inject
@@ -571,6 +574,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                                                              DBTermType targetType) {
         return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, metaRDFType, targetType,
                 dbFunctionSymbolFct);
+    }
+
+    @Override
+    public FunctionSymbol getExtractLexicalTermFromRDFTerm() {
+        return extractLexicalTermFunctionSymbol;
     }
 
 }

@@ -1,0 +1,22 @@
+rules = [
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?d :hasPosition [ a :Position ; rdfs:label "Developer" ] .
+    } WHERE {
+      ?d a :Developer .
+    }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT {
+      ?employee a :Developer .
+    } WHERE {
+       ?employee :hasPosition / rdfs:label "Developer" .
+    }
+    """
+]

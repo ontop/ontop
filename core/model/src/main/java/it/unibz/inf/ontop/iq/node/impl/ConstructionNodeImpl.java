@@ -174,7 +174,17 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
-        return !inferUniqueConstraints(child).isEmpty();
+        if (!inferUniqueConstraints(child).isEmpty())
+            return true;
+        if (child instanceof TrueNode)
+            return true;
+
+        QueryNode childRoot = child.getRootNode();
+        if ((childRoot instanceof SliceNode)
+                && ((SliceNode) childRoot).getLimit().filter(l -> l == 1).isPresent())
+            return true;
+
+        return false;
     }
 
     @Override

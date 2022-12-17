@@ -108,7 +108,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         OntopReformulationSQLOptions generateSQLReformulationOptions() {
             OntopReformulationOptions reformulationOptions = generateReformulationOptions();
             OntopSQLCoreOptions sqlOptions = sqlBuilderFragment.generateSQLCoreOptions(
-                    reformulationOptions.obdaOptions.modelOptions);
+                    reformulationOptions.queryOptions.obdaOptions.modelOptions);
 
             return new OntopReformulationSQLOptions(reformulationOptions, sqlOptions);
         }

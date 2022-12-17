@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
@@ -12,7 +11,6 @@ import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSy
 import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.DefaultOntopReformulationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopReformulationSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopReformulationSQLOptions;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -42,9 +40,9 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     }
 
     @Override
-    public InputQueryFactory getInputQueryFactory() {
+    public KGQueryFactory getKGQueryFactory() {
         return getInjector()
-                .getInstance(InputQueryFactory.class);
+                .getInstance(KGQueryFactory.class);
     }
 
     @Override
@@ -105,8 +103,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
             OntopReformulationConfigurationImpl.OntopReformulationOptions translationOptions =
                     this.translationFragmentBuilder.generateReformulationOptions(
-                        sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
-                        sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
+                        sqlMappingOptions.mappingSQLOptions.mappingOptions.queryOptions);
 
             OntopSQLCredentialOptions sqlOptions = sqlMappingOptions.mappingSQLOptions.sqlOptions;
 

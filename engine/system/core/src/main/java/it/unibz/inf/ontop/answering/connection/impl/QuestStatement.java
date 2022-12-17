@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.input.*;
-import it.unibz.inf.ontop.answering.resultset.*;
-import it.unibz.inf.ontop.answering.resultset.impl.DefaultDescribeGraphResultSet;
+import it.unibz.inf.ontop.query.*;
+import it.unibz.inf.ontop.query.resultset.impl.DefaultDescribeGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.query.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +42,7 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * Execution thread
 	 */
-	private class QueryExecutionThread<R extends OBDAResultSet, Q extends InputQuery<R>> extends Thread {
+	private class QueryExecutionThread<R extends OBDAResultSet, Q extends KGQuery<R>> extends Thread {
 
 		private final Q inputQuery;
 		private final QueryLogger queryLogger;
@@ -184,13 +187,13 @@ public abstract class QuestStatement implements OntopStatement {
 	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
+	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery) throws OntopConnectionException,
 			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 		return execute(inputQuery, ImmutableMultimap.of());
 	}
 
 	@Override
-	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
+	public <R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 
 		if (inputQuery instanceof SelectQuery) {
@@ -214,12 +217,12 @@ public abstract class QuestStatement implements OntopStatement {
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
-			Evaluator<R, Q> evaluator)
+	private <R extends OBDAResultSet, Q extends KGQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
+																			  Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
 		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
 
-		queryLogger.setSparqlQuery(inputQuery.getInputString());
+		queryLogger.setSparqlQuery(inputQuery.getOriginalString());
 
 		CountDownLatch monitor = new CountDownLatch(1);
 
@@ -274,12 +277,12 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public <R extends OBDAResultSet> String getRewritingRendering(InputQuery<R> query) throws OntopReformulationException {
+	public <R extends OBDAResultSet> String getRewritingRendering(KGQuery<R> query) throws OntopReformulationException {
 		return engine.getRewritingRendering(query);
 	}
 
 	@Override
-	public  <R extends OBDAResultSet>  IQ getExecutableQuery(InputQuery<R> inputQuery) throws OntopReformulationException {
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery) throws OntopReformulationException {
 		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 

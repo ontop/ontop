@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
+import it.unibz.inf.ontop.query.RDF4JQueryFactory;
+import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -22,10 +22,10 @@ import java.util.List;
 
 public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 
-	private final RDF4JInputQueryFactory factory;
+	private final RDF4JQueryFactory factory;
 
 	public OntopTupleQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection conn,
-						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
+                           ImmutableMultimap<String, String> httpHeaders, RDF4JQueryFactory factory, OntopSystemSettings settings) {
 		super(queryString, baseIRI, parsedQuery, conn, httpHeaders, settings);
 		this.factory = factory;
 	}

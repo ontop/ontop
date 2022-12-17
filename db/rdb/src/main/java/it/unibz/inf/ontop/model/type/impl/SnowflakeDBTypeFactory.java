@@ -19,6 +19,7 @@ import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String NUMBER_STR = "NUMBER";
+    public static final String NUMBER_38_10_STR = "NUMBER(38,10)";
     public static final String NUMBER_19_STR = "NUMBER(19)";
     public static final String TIMESTAMP_LOCAL_TZ_STR = "TIMESTAMP_LTZ";
     public static final String TIMESTAMPLTZ_STR = "TIMESTAMPLTZ";
@@ -38,6 +39,8 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         DBTermType numberType = new NumberDBTermType(NUMBER_STR, rootAncestry, typeFactory.getXsdDecimalDatatype(), DECIMAL);
 
+        DBTermType number3810Type = new NumberDBTermType(NUMBER_38_10_STR, rootAncestry, typeFactory.getXsdDecimalDatatype(), DECIMAL);
+
         // BIGINT in other DBMSes have a precision close to NUMBER(19) while Oracle could go in theory up to NUMBER(38)
         // NB: 2019-04: This type is NOT extracted by the DBMetadataExtractor -> integers are always inferred as decimal in the mapping
         DBTermType number19Type = new NumberDBTermType(NUMBER_19_STR, rootAncestry, typeFactory.getXsdIntegerDatatype(), INTEGER);
@@ -49,6 +52,7 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NUMBER_STR, numberType);
+        map.put(NUMBER_38_10_STR, number3810Type);
         map.put(NUMBER_19_STR, number19Type);
         map.put(TIMESTAMP_LOCAL_TZ_STR, timestampLTZType);
         map.put(TIMESTAMP_TZ_STR, timestampTZType);
@@ -63,7 +67,7 @@ public class SnowflakeDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.HEXBINARY, BINARY_STR);
-        map.put(DefaultTypeCode.DECIMAL, NUMBER_STR);
+        map.put(DefaultTypeCode.DECIMAL, NUMBER_38_10_STR);
         map.put(DefaultTypeCode.LARGE_INTEGER, NUMBER_19_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_TZ_STR);
         return ImmutableMap.copyOf(map);

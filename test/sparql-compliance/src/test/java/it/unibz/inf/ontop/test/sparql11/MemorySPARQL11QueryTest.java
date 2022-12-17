@@ -33,149 +33,91 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static final String serviceManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/service/manifest#";
 
 
-	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
-			// TODO: support xsd:double cast
-			aggregatesManifest + "agg-err-02",
+			aggregatesManifest + "agg-err-02", // SPARQL cast with function call on the datatype is not supported, e.g., COALESCE(xsd:double(?p),0)))
+
+			aggregatesManifest + "agg-groupconcat-01", // Function "LISTAGG" not found (H2 issue)
+			aggregatesManifest + "agg-groupconcat-02", // Function "LISTAGG" not found (H2 issue)
+			aggregatesManifest + "agg-groupconcat-03", // Function "LISTAGG" not found (H2 issue)
 
 			/* FUNCTIONS*/
+			functionsManifest + "hours", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)
+			functionsManifest + "day", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)
+			functionsManifest + "tz", // TZ is not supported in H2
 
-			// the SI does not preserve the original timezone
-			functionsManifest + "hours",
-			// the SI does not preserve the original timezone
-			functionsManifest + "day",
+			functionsManifest + "md5-01", // not supported in H2
+			functionsManifest + "md5-02", // not supported in H2
+			functionsManifest + "sha1-01", // not supported in H2
+			functionsManifest + "sha1-02", // not supported in H2
+			functionsManifest + "sha512-01", // not supported in H2
+			functionsManifest + "sha512-02", // not supported in H2
 
-			//not supported in H2 transformation
-			functionsManifest + "md5-01",
-			functionsManifest + "md5-02",
+			functionsManifest + "strdt01", // STRDT(?o,xsd:string) is not supported by the SPARQL-to-IQ translation
+			functionsManifest + "strdt02", // STRDT(?o,xsd:string) is not supported by the SPARQL-to-IQ translation
+			functionsManifest + "strdt03", // STRDT(?o,xsd:string) is not supported by the SPARQL-to-IQ translation
 
-			//The SI does not support IRIs as ORDER BY conditions
-			functionsManifest + "plus-1",
-			//The SI does not support IRIs as ORDER BY conditions
-			functionsManifest + "plus-2",
+			functionsManifest + "strlang01", // STRLANG(?str,"en-US") is not supported by the SPARQL-to-IQ translation
+			functionsManifest + "strlang02", // STRLANG(?str,"en-US") is not supported by the SPARQL-to-IQ translation
+			functionsManifest + "strlang03", // STRLANG(?str,"en-US") is not supported by the SPARQL-to-IQ translation
 
-			//SHA1 is not supported in H2
-			functionsManifest + "sha1-01",
-			functionsManifest + "sha1-02",
+			functionsManifest + "timezone", // TIMEZONE(?date) is not supported by the SPARQL-to-IQ translation
 
-			//SHA512 is not supported in H2
-			functionsManifest + "sha512-01",
-			functionsManifest + "sha512-02",
+			/* CONSTRUCT */
+			// TODO: throw an exception for the FROM clause
+			constructManifest + "constructwhere04", // CONSTRUCT FROM <data.ttl> not supported by the SPARQL-to-IQ translation
 
-			//not supported in SPARQL transformation
-			functionsManifest + "strdt01",
-			functionsManifest + "strdt02",
-			functionsManifest + "strdt03",
-			functionsManifest + "strlang01",
-			functionsManifest + "strlang02",
-			functionsManifest + "strlang03",
+			/* NEGATION */
+            negationManifest + "subset-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "temporal-proximity-by-exclusion-nex-1", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "subset-01", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "subset-02", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "set-equals-1", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "subset-03", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "exists-01", // EXISTS not supported by the SPARQL-to-IQ translation
+			negationManifest + "exists-02", // EXISTS not supported by the SPARQL-to-IQ translation
 
-			//not supported in SPARQL transformation
-			functionsManifest + "timezone",
+			/* EXISTS */
+			existsManifest + "exists01", // EXISTS not supported by the SPARQL-to-IQ translation
+			existsManifest + "exists02", // EXISTS not supported by the SPARQL-to-IQ translation
+			existsManifest + "exists03", // EXISTS not supported by the SPARQL-to-IQ translation
+			existsManifest + "exists04", // EXISTS not supported by the SPARQL-to-IQ translation
+			existsManifest + "exists05", // EXISTS not supported by the SPARQL-to-IQ translation
 
-			//TZ is not supported in H2
-			functionsManifest + "tz",
+			/* PROPERTY PATH */
+			propertyPathManifest + "pp02",  // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp07", // quads are not supported by the SI
+			propertyPathManifest + "pp12", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp14", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp16", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp21", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp23", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp25", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp28a", // ZeroLengthPath not supported
+			propertyPathManifest + "pp34", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp35", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp36", // ArbitraryLengthPath not supported
+			propertyPathManifest + "pp37", // ArbitraryLengthPath not supported
 
-			//problem importing dataset
-			constructManifest + "constructwhere04",
-
-			/* CSV */
-			// Sorting by IRI is not supported by the SI
-			csvTscResManifest + "tsv01",
-			// Sorting by IRI is not supported by the SI
-			csvTscResManifest + "tsv02",
-			//different format for number and not supported custom datatype
-			csvTscResManifest + "tsv03",
-
-			/* NEGATION
-			not supported yet */
-            negationManifest + "subset-by-exclusion-nex-1",
-			negationManifest + "temporal-proximity-by-exclusion-nex-1",
-			negationManifest + "subset-01",
-			negationManifest + "subset-02",
-			negationManifest + "set-equals-1",
-			negationManifest + "subset-03",
-			negationManifest + "exists-01",
-			negationManifest + "exists-02",
-
-			// DISABLED DUE TO ORDER OVER IRI
-			negationManifest + "full-minuend",
-			// DISABLED DUE TO ORDER OVER IRI
-			negationManifest + "partial-minuend",
-
-			/* EXISTS
-			not supported yet */
-			existsManifest + "exists01",
-			existsManifest + "exists02",
-			existsManifest + "exists03",
-			existsManifest + "exists04",
-			existsManifest + "exists05",
-
-			/* PROPERTY PATH*/
-			// Not supported: ArbitraryLengthPath
-			propertyPathManifest + "pp02",
-
-			//wrong result, unexpected binding
-			propertyPathManifest + "pp06",
-
-			// Quads are not yet supported by the SI
-			propertyPathManifest + "pp07",
-
-			// Not supported: ArbitraryLengthPath
-			propertyPathManifest + "pp12",
-			propertyPathManifest + "pp14",
-			propertyPathManifest + "pp16",
-			propertyPathManifest + "pp21",
-			propertyPathManifest + "pp23",
-			propertyPathManifest + "pp25",
-
-			//Not supported: ZeroLengthPath
-			propertyPathManifest + "pp28a",
-
-			// Not supported: ArbitraryLengthPath
-			propertyPathManifest + "pp34",
-			propertyPathManifest + "pp35",
-			propertyPathManifest + "pp36",
-			propertyPathManifest + "pp37",
-
-			/* SERVICE
-			not supported yet */
+			/* SERVICE not supported */
 			serviceManifest + "service1",
-
-			//no loading of the dataset
 			serviceManifest + "service2",
 			serviceManifest + "service3",
-
 			serviceManifest + "service4a",
 			serviceManifest + "service5",
-			//no loading of the dataset
 			serviceManifest + "service6",
 			serviceManifest + "service7",
 
+			/* SUBQUERY */
+			subqueryManifest + "subquery01", // quads are not supported by the SI
+			subqueryManifest + "subquery02", // quads are not supported by the SI
+			subqueryManifest + "subquery03", // quads are not supported by the SI
+			subqueryManifest + "subquery04", // quads are not supported by the SI
+			subqueryManifest + "subquery05", // quads are not supported by the SI
+			subqueryManifest + "subquery07", // quads are not supported by the SI
 
-			/* SUBQUERY
-			*/
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery01",
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery02",
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery03",
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery04",
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery05",
-			// Quads are not yet supported by the SI
-			subqueryManifest + "subquery07",
-			// EXISTS is not supported yet
-			subqueryManifest + "subquery10",
-
-			//ORDER BY IRI (not supported by the SI)
-			subqueryManifest + "subquery11",
-
-			//ORDER BY IRI (not supported by the SI)
-			subqueryManifest + "subquery13"
+			subqueryManifest + "subquery10" // EXISTS not supported by the SPARQL-to-IQ translation
 	);
 
 	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,

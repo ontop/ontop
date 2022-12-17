@@ -1957,7 +1957,9 @@ public class LeftJoinOptimizationTest {
         ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B, 2, C));
         IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
-                ImmutableList.of(newDataNode1, unionTree));
+                ImmutableList.of(newDataNode1, IQ_FACTORY.createValuesNode(
+                        ImmutableList.of(C),
+                        ImmutableList.of(ImmutableList.of(ONE), ImmutableList.of(TWO)))));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newJoinTree);
 

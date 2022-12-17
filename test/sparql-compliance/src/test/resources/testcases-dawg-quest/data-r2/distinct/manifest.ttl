@@ -9,16 +9,16 @@
     rdfs:label "DISTINCT" ;
     mf:entries
     ( 
-       :no-distinct-1 # WON'T FIX: Union causes duplications
-       :distinct-1 # WON'T FIX: Different lexical representation
+      :no-distinct-1
+      :distinct-1
       :no-distinct-2
       :distinct-2
       :no-distinct-3
       :distinct-3
       :no-distinct-4
       :distinct-4
-       :no-distinct-9 # WON'T FIX: Union causes duplications
-       :distinct-9 # WON'T FIX: Different lexical representation
+      :no-distinct-9
+      :distinct-9
       :distinct-star-1
     ) .
 
@@ -111,7 +111,8 @@
     dawgt:approvedBy <http://www.w3.org/2007/07/17-dawg-minutes> ;
     mf:action
             [ qt:query  <no-distinct-1.rq> ;
-              qt:data   <data-num.ttl> , <data-str.ttl> , <data-node.ttl>
+              ##qt:data   <data-num.ttl> , <data-str.ttl> , <data-node.ttl> 
+              qt:data <data-all.ttl>
             ] ;
     mf:result  <no-distinct-all.srx> .
 
@@ -121,6 +122,7 @@
     dawgt:approvedBy <http://www.w3.org/2007/07/17-dawg-minutes> ;
     mf:action
             [ qt:query  <distinct-1.rq> ;
-              qt:data   <data-num.ttl> , <data-str.ttl> , <data-node.ttl>
+              ##qt:data   <data-num.ttl> , <data-str.ttl> , <data-node.ttl> 
+              qt:data <data-all.ttl>
             ] ;
     mf:result  <distinct-all.srx> .
