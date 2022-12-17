@@ -99,12 +99,6 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0, 43\"^^xsd:string", "\"0, 23\"^^xsd:string", "\"0, 34\"^^xsd:string",
-                "\"0, 10\"^^xsd:string");
-    }
-
-    @Override
     protected ImmutableList<String> getDatatypeExpectedValues() {
         return ImmutableList.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
                 "\"0.15\"^^xsd:decimal");
