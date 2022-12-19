@@ -10,6 +10,14 @@
 
 [ "${ONTOP_LOG_ENTRYPOINT-false}" != "false" ] && set -x -v
 
+if [ $# -eq 0 ] || [ "${1#-}" != "$1" ]; then
+  set -- "endpoint" "$@"
+elif [ "$1" = "ontop" ]; then
+  shift
+else
+  exec "$@"
+fi
+
 ONTOP_HOME=/opt/ontop
 
 rm -f /tmp/.healthcheck  # reset status of healtcheck.sh (for 'query' healtcheck strategy)
@@ -30,10 +38,6 @@ assign_from_java_args_if_undef() {
     fi
   done
 }
-
-if [ $# -eq 0 ]; then
-  set -- "endpoint"
-fi
 
 if [ "${MAPPING_FILE+x}" ]; then
   ONTOP_MAPPING_FILE=${MAPPING_FILE}
@@ -151,6 +155,10 @@ fi
 
 if [ "${ONTOP_LAZY_INIT-false}" != "false" ]; then
   set -- "$@" "--lazy"
+fi
+
+if [ "${ONTOP_ENABLE_ANNOTATIONS-false}" != "false" ]; then
+  set -- "$@" "--enable-annotations"
 fi
 
 if [ "${ONTOP_ENABLE_DOWNLOAD_ONTOLOGY-false}" != "false" ]; then
