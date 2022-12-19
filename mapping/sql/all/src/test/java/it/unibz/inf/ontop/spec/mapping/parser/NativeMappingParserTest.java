@@ -9,7 +9,12 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import org.junit.jupiter.api.Test;
@@ -18,31 +23,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-public class NativeMappingParserMistakesTest {
+public class NativeMappingParserTest {
 
     private static final String ROOT = "src/test/resources/it/unibz/inf/ontop/io/";
     private static final String ROOT2 = "src/test/resources/format/obda/";
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
+    private final TargetQueryParser targetQueryParser;
 
-    private String[][] mappings = {
-            { "M1", "select id, fname, lname, age from student",
-                    ":P{id} a :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:int ." },
-            { "M2", "select id, title, lecturer, description from course",
-                    ":C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; :description {description}@en-US ." },
-            { "M3", "select sid, cid from enrollment",
-                    ":P{sid} :hasEnrollment :C{cid} ." },
-                    
-            { "M4", "select id, nome, cognome, eta from studenti",
-                    ":P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:int ." },
-            { "M5", "select id, titolo, professore, descrizione from corso",
-                    ":C{id} a :Course ; :title {titolo} ; :hasLecturer :L{id} ; :description {decrizione}@it ." },
-            { "M6", "select sid, cid from registrare", 
-                    ":P{sid} :hasEnrollment :C{cid} ." }
-    };
-
-    public NativeMappingParserMistakesTest() {
+    public NativeMappingParserTest() {
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .jdbcUrl("dummy")
                 .jdbcDriver("dummy")
@@ -53,18 +44,46 @@ public class NativeMappingParserMistakesTest {
 
         mappingParser = injector.getInstance(SQLMappingParser.class);
         ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
+        sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
+        TargetQueryParserFactory targetQueryParserFactory = injector.getInstance(TargetQueryParserFactory.class);
+        targetQueryParser = targetQueryParserFactory.createParser(specificationFactory.createPrefixManager(
+                ImmutableMap.of(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#")));
     }
 
     @Test
     public void testRegularFile() throws Exception {
-        SQLPPMapping ppMapping0 = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
+        String[][] mappings = {
+                { "M1", "select id, fname, lname, age from student",
+                        ":P{id} a :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:int ." },
+                { "M2", "select id, title, lecturer, description from course",
+                        ":C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; :description {description}@en-US ." },
+                { "M3", "select sid, cid from enrollment",
+                        ":P{sid} :hasEnrollment :C{cid} ." },
+                { "M4", "select id, nome, cognome, eta from studenti",
+                        ":P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:int ." },
+                { "M5", "select id, titolo, professore, descrizione from corso",
+                        ":C{id} a :Course ; :title {titolo} ; :hasLecturer :L{id} ; :description {decrizione}@it ." },
+                { "M6", "select sid, cid from registrare",
+                        ":P{sid} :hasEnrollment :C{cid} ." }
+        };
+
+        ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+        for (String[] m : mappings) {
+            builder.add(new OntopNativeSQLPPTriplesMap(
+                    m[0],
+                    sourceQueryFactory.createSourceQuery(m[1]),
+                    m[2],
+                    targetQueryParser.parse(m[2])));
+        }
+        
+        SQLPPMapping ppMapping0 = ppMappingFactory.createSQLPreProcessedMapping(builder.build(),
                 specificationFactory.createPrefixManager(ImmutableMap.of()));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
         writer.write(new File(ROOT + "SchoolRegularFile.obda"), ppMapping0);
 
         SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "SchoolRegularFile.obda"));
         assertEquals(5, ppMapping.getPrefixManager().getPrefixMap().size());
-        assertEquals(0, ppMapping.getTripleMaps().size());
+        assertEquals(6, ppMapping.getTripleMaps().size());
     }
 
     @Test

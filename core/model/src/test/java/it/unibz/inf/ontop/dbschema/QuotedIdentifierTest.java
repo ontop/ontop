@@ -1,12 +1,11 @@
-package it.unibz.inf.ontop.spec.dbschema;
+package it.unibz.inf.ontop.dbschema;
 
-import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
+import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataProviderBuilder;
 import static org.junit.Assert.*;
 
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class QuotedIdentifierTest {
 				fac.createAttributeID("aaa"),
 				fac.createAttributeID("\"AAA\""));
 		
-		assertEquals(s.size(), 1);
+		assertEquals(1, s.size());
 	}
 
 	@Test
@@ -70,23 +69,4 @@ public class QuotedIdentifierTest {
 		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createAttributeID("\"AAA\""));
 		assertEquals(a1, a2);
 	}
-
-
-	public void test2() {
-		String s = "SELECT Able.\"id\", bB.Col4 AS c FROM TaBle1 able, (SELECT col4 FROM Bable) Bb, " +
-					"c JOIN d ON c.id = d.Id " +
-					"WHERE \"AblE\".Col = Able.col2";
-		// TODO
-	}
-
-	public void test2b() throws Exception {
-		String s = "SELECT a.id AS c FROM A";
-		// TODO
-	}
-	
-	public void test3() throws Exception {
-		String s = "SELECT * FROM A JOIN B ON NOT (a.id <> b.id)";
-		// TODO
-	}
-	
 }

@@ -17,13 +17,13 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class R2rmlConversionTest {
+public class R2RMLConversionTest {
 
     private static final String ROOT = "src/test/resources/";
     private final SQLMappingParser mappingParser;
     private final RDF rdfFactory;
 
-    R2rmlConversionTest() {
+    R2RMLConversionTest() {
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .jdbcDriver("dummy")
                 .jdbcUrl("dummy")
