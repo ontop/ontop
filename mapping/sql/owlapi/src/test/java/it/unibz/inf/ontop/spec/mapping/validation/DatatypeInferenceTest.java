@@ -4,14 +4,13 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.OBDASpecification;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.spec.mapping.validation.TestConnectionManager.getDatatype;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -32,50 +31,50 @@ public class DatatypeInferenceTest {
     @Test
     public void testMappingOntologyConflict() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :firstName {first_name}^^xsd:integer ."));
     }
 
     @Test
     public void testRangeInferredDatatype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :firstName {first_name} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testNoRangeMappingDatatype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :untypedName {first_name}^^xsd:integer .");
-        assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.INTEGER), datatype);
     }
 
     @Test
     public void testNoRangeColtype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :untypedName {first_name} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testUnknownMappingDatatype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :someName {first_name}^^xsd:integer .");
-        assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.INTEGER), datatype);
     }
 
     @Test
     public void testUnknownStringColtype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :someName {first_name} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testUnknownIntegerColtype() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :someInteger {id} .");
-        assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.INTEGER), datatype);
     }
 
     @BeforeAll

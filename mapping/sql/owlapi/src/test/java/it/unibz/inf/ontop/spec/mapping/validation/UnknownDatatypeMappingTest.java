@@ -4,15 +4,14 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import java.util.Optional;
 
+import org.apache.commons.rdf.api.IRI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static it.unibz.inf.ontop.spec.mapping.validation.TestConnectionManager.getDatatype;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -31,48 +30,48 @@ public class UnknownDatatypeMappingTest {
 
     @Test
     public void testUpperFunction() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                 "SELECT \"id\", UPPER(\"first_name\") as \"first_name\"  FROM \"person\"",
                 "<http://example.com/person/{id}> :firstName {first_name} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testMappingUnknownStringFunction() {
         assertThrows(UnknownDatatypeException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                         "SELECT \"id\", LTRIM(\"first_name\") as \"first_name\"  FROM \"person\"",
                     "<http://example.com/person/{id}> :firstName {first_name} ."));
     }
 
     @Test
     public void testMappingFunction() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                 "SELECT \"id\", CONCAT(\"first_name\", \"last_name\" ) as \"name\"  FROM \"person\"",
                 "<http://example.com/person/{id}> :firstName {name} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testMappingTargetFunction() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                 "SELECT \"id\", \"first_name\", \"last_name\"  FROM \"person\"",
                 "<http://example.com/person/{id}> :firstName \"{first_name}||{last_name}\" .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testMappingIntFunction() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                 "SELECT \"id\", CONCAT(\"spouse\", \"id\" ) as \"nameCode\"  FROM \"person\"",
                 "<http://example.com/person/{id}> :untypedName {nameCode} .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testMappingToCharFunction() {
         assertThrows(UnknownDatatypeException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                         "SELECT \"id\", TO_CHAR(\"spouse\") as \"name\"  FROM \"person\"",
                         "<http://example.com/person/{id}> :firstName {name} ."));
     }
@@ -80,7 +79,7 @@ public class UnknownDatatypeMappingTest {
     @Test
     public void testMappingRDFSLiteralFunction() {
         assertThrows(UnknownDatatypeException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE,
                         "SELECT \"id\", LTRIM(\"first_name\") as \"first_name\"  FROM \"person\"",
                         "<http://example.com/person/{id}> :untypedName \"{first_name}\"^^rdfs:Literal ."));
     }
@@ -94,5 +93,4 @@ public class UnknownDatatypeMappingTest {
     public static void tearDown() throws Exception {
         TEST_MANAGER.close();
     }
-
 }

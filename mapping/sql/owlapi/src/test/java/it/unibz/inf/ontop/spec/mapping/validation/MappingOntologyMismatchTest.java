@@ -5,14 +5,13 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.OBDASpecification;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.spec.mapping.validation.TestConnectionManager.getDatatype;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,92 +33,92 @@ public class MappingOntologyMismatchTest {
 
     @Test
     public void testValidUsageObjectProperty() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :hasSpouse <http://example.com/person/{spouse}> .");
-        assertEquals(Optional.empty(), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.empty(), datatype);
     }
 
     @Test
     public void testValidUsageDataProperty() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :firstName {first_name}^^xsd:string .");
-        assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.of(XSD.STRING), datatype);
     }
 
     @Test
     public void testValidUsageClass() throws OBDASpecificationException, TargetQueryParserException {
-        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+        Optional<IRI> datatype = TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> a :Person .");
-        assertEquals(Optional.empty(), getDatatype(spec.getSaturatedMapping()));
+        assertEquals(Optional.empty(),datatype);
     }
 
     @Test
     public void testAbusiveTypedDataPropertyUsageInsteadOfObject() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :hasSpouse \"{spouse}\"^^xsd:string ."));
     }
 
     @Test
     public void testAbusiveTypedDataPropertyUsageInsteadOfClass() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :Person \"{spouse}\"^^xsd:string ."));
     }
 
     @Test
     public void testAbusiveUntypedDataPropertyUsageInsteadOfObject() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                 "<http://example.com/person/{id}> :hasSpouse {spouse} ."));
     }
 
     @Test
     public void testAbusiveObjectPropertyUsageInsteadOfData1() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :firstName <{first_name}> ."));
     }
 
     @Test
     public void testAbusiveObjectPropertyUsageInsteadOfData2() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :firstName <http://localhost/{first_name}> ."));
     }
 
     @Test
     public void testAbusiveObjectPropertyUsageInsteadOfClass() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :Person <http://example.com/person/{spouse}> ."));
     }
 
     @Test
     public void testAbusiveClass() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> a :firstName ."));
     }
 
     @Test
     public void testWrongDatatype1() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :firstName {first_name}^^xsd:integer ."));
     }
 
     @Test
     public void testWrongDatatype2() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :age {age}^^xsd:string ."));
     }
 
     @Test
     public void testTooGenericDatatype() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                () -> TEST_MANAGER.getMappingObjectDatatype(DEFAULT_OWL_FILE, SELECT_QUERY,
                         "<http://example.com/person/{id}> :specializedAge \"{age}\"^^xsd:integer ."));
     }
 
@@ -132,5 +131,4 @@ public class MappingOntologyMismatchTest {
     public static void tearDown() throws Exception {
         TEST_MANAGER.close();
     }
-
 }

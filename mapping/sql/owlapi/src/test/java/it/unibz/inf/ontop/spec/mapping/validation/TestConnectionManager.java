@@ -94,28 +94,28 @@ public class TestConnectionManager implements Closeable {
         }
     }
 
-    public OBDASpecification loadSpecification(String owlFile, String source, String targetString) throws OBDASpecificationException, TargetQueryParserException {
+    public Optional<IRI> getMappingObjectDatatype(String owlFile, String source, String target) throws OBDASpecificationException, TargetQueryParserException {
         PrefixManager prefixManager = MAPPING_FACTORY.createPrefixManager(
                 ImmutableMap.of(PrefixManager.DEFAULT_PREFIX, "http://example.org/marriage/voc#",
                         "xsd:", "http://www.w3.org/2001/XMLSchema#"));
 
         TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(prefixManager);
 
-        SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
-                SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
+        SQLPPTriplesMap triplesMap = new OntopNativeSQLPPTriplesMap("MAPID-0",
+                SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(target));
 
         OntopMappingSQLAllOWLAPIConfiguration configuration = OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(getClass().getResource(owlFile).getFile())
-                .ppMapping(new SQLPPMappingImpl(ImmutableList.of(mapping), prefixManager))
+                .ppMapping(new SQLPPMappingImpl(ImmutableList.of(triplesMap), prefixManager))
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(dbUser)
                 .jdbcPassword(dbPassword)
                 .build();
-        return configuration.loadSpecification();
-    }
 
+        OBDASpecification spec = configuration.loadSpecification();
 
-    public static Optional<IRI> getDatatype(Mapping mapping) {
+        Mapping mapping = spec.getSaturatedMapping();
+
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
