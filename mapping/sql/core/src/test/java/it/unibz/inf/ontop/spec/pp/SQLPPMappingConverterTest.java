@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -72,7 +73,7 @@ public class SQLPPMappingConverterTest {
 	private ImmutableList<IQ> getIQs(String source, String targetString) throws Exception {
 
 		TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(MAPPING_FACTORY.createPrefixManager(
-				ImmutableMap.of(":", "http://www.example.org/university#")));
+				ImmutableMap.of(PrefixManager.DEFAULT_PREFIX, "http://www.example.org/university#")));
 
 		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));

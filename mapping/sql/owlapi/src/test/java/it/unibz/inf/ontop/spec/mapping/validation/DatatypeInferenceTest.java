@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.jupiter.api.AfterAll;
@@ -24,54 +25,56 @@ public class DatatypeInferenceTest {
     private static final String CREATE_SCRIPT = DIR + "create-db.sql";
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
+    private static final String SELECT_QUERY = "SELECT * FROM \"person\"";
     private static TestConnectionManager TEST_MANAGER;
 
 
     @Test
     public void testMappingOntologyConflict() {
         assertThrows(MappingOntologyMismatchException.class,
-                () -> TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_invalid_datatype.obda"));
+                () -> TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                        "<http://example.com/person/{id}> :firstName {first_name}^^xsd:integer ."));
     }
 
     @Test
-    public void testRangeInferredDatatype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_range_datatype.obda");
+    public void testRangeInferredDatatype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :firstName {first_name} .");
         assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
     }
 
     @Test
-    public void testNoRangeMappingDatatype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_no_range_prop_mapping_datatype.obda");
+    public void testNoRangeMappingDatatype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :untypedName {first_name}^^xsd:integer .");
         assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
     }
 
     @Test
-    public void testNoRangeColtype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_no_range_prop_coltype.obda");
+    public void testNoRangeColtype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :untypedName {first_name} .");
         assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
     }
 
     @Test
-    public void testUnknownMappingDatatype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_unknown_prop_mapping_datatype.obda");
+    public void testUnknownMappingDatatype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :someName {first_name}^^xsd:integer .");
         assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
     }
 
     @Test
-    public void testUnknownStringColtype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_unknown_prop_coltype.obda");
+    public void testUnknownStringColtype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :someName {first_name} .");
         assertEquals(Optional.of(XSD.STRING), getDatatype(spec.getSaturatedMapping()));
     }
 
     @Test
-    public void testUnknownIntegerColtype() throws OBDASpecificationException {
-        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
-                DIR + "marriage_unknown_prop_coltype_int.obda");
+    public void testUnknownIntegerColtype() throws OBDASpecificationException, TargetQueryParserException {
+        OBDASpecification spec = TEST_MANAGER.loadSpecification(DEFAULT_OWL_FILE, SELECT_QUERY,
+                "<http://example.com/person/{id}> :someInteger {id} .");
         assertEquals(Optional.of(XSD.INTEGER), getDatatype(spec.getSaturatedMapping()));
     }
 

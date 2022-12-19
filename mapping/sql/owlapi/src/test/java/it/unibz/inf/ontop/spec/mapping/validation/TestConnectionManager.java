@@ -1,7 +1,11 @@
 package it.unibz.inf.ontop.spec.mapping.validation;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -9,6 +13,12 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.apache.commons.rdf.api.IRI;
 
 import java.io.BufferedReader;
@@ -29,6 +39,9 @@ public class TestConnectionManager implements Closeable {
     private final String dbPassword;
     private final String createScriptFilePath;
     private final String dropScriptFilePath;
+    private final SpecificationFactory MAPPING_FACTORY;
+    private final SQLPPSourceQueryFactory SOURCE_QUERY_FACTORY;
+    private final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
     private Connection connection;
 
     public TestConnectionManager(String jdbcUrl, String dbUser, String dbPassword, String createScriptFilePath,
@@ -39,6 +52,17 @@ public class TestConnectionManager implements Closeable {
         this.createScriptFilePath = createScriptFilePath;
         this.dropScriptFilePath = dropScriptFilePath;
         createTables();
+
+        OntopMappingSQLAllOWLAPIConfiguration defaultConfiguration = OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder()
+                .jdbcUrl("dummy")
+                .jdbcDriver("dummy")
+                .enableTestMode()
+                .build();
+
+        Injector injector = defaultConfiguration.getInjector();
+        MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
+        SOURCE_QUERY_FACTORY = injector.getInstance(SQLPPSourceQueryFactory.class);
+        TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
     }
 
     private void createTables() throws IOException, SQLException {
@@ -70,10 +94,19 @@ public class TestConnectionManager implements Closeable {
         }
     }
 
-    public OBDASpecification extractSpecification(String owlFile, String obdaFile) throws OBDASpecificationException {
+    public OBDASpecification loadSpecification(String owlFile, String source, String targetString) throws OBDASpecificationException, TargetQueryParserException {
+        PrefixManager prefixManager = MAPPING_FACTORY.createPrefixManager(
+                ImmutableMap.of(PrefixManager.DEFAULT_PREFIX, "http://example.org/marriage/voc#",
+                        "xsd:", "http://www.w3.org/2001/XMLSchema#"));
+
+        TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(prefixManager);
+
+        SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
+                SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
+
         OntopMappingSQLAllOWLAPIConfiguration configuration = OntopMappingSQLAllOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(getClass().getResource(owlFile).getFile())
-                .nativeOntopMappingFile(getClass().getResource(obdaFile).getFile())
+                .ppMapping(new SQLPPMappingImpl(ImmutableList.of(mapping), prefixManager))
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(dbUser)
                 .jdbcPassword(dbPassword)
