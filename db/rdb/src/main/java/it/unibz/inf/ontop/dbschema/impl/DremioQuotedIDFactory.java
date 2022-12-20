@@ -27,7 +27,9 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
         if (components.length == 1)
             return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
 
-        QuotedID schemaId = createFromString(
+        QuotedID schemaId = components.length == 2
+                ? createFromString(components[0])
+                : createFromString(
                 String.join(".", Arrays.stream(components)
                         .limit(components.length - 1) //First (N-1) components are schema, last is table name
                         .map(name -> name.replace("\"", "")) //Remove quotes in-between
