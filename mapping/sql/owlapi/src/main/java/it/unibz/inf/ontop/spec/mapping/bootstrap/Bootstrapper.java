@@ -13,7 +13,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 /**
  * Bootstraps the mapping according to the RDB Direct Mapping W3C Recommendation
  * https://www.w3.org/TR/rdb-direct-mapping/
- *
+ * TODO: Update this comment
  */
 public interface Bootstrapper {
 
