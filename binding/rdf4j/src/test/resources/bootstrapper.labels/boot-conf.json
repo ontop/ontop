@@ -3,31 +3,31 @@
     {
       "tableName" : "a",
       "tableAlias" : "a_alias",
-      "tableLabels" : ["a_lab1", "a_lab2"],
+      "tableLabel" : "a_lab1",
       "tableSchema" : "public",
       "tableComment" : "This is table a",
       "attAliases" : [
         {
           "attName" : "id",
           "attAlias" : "id_alias",
-          "attLabels" : ["id_lab1", "id_lab2"],
+          "attLabel" : "id_lab1",
           "attComment" : "This is a comment to attribute id."
         }
       ],
       "references" : [
-        {"fromAtts" : ["id"], "toTable" : "b", "toAtts" : ["id"], "joinAlias" : "join_alias", "joinLabels" : ["label1", "label2"] }
+        {"fromAtts" : ["id"], "toTable" : "b", "toAtts" : ["id"], "joinAlias" : "join_alias", "joinLabels" : ["label1", "label2"], "joinComment" : "This is a join comment" }
       ]
     },
     {
       "tableName" : "b",
       "tableAlias" : "b_alias",
-      "tableLabels" : ["b_lab1", "b_lab2"],
+      "tableLabels" : "b_lab1",
       "tableSchema" : "public",
       "attAliases" : [
         {
           "attName" : "id",
           "attAlias" : "id_alias",
-          "attLabels" : ["id_lab1", "id_lab2"]
+          "attLabels" : "id_lab1"
         }
       ]
     }

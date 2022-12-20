@@ -38,11 +38,11 @@ public class BootConfParser {
                         String tSchema = elObj.has("tableSchema") ? elObj.get("tableSchema").getAsString() : "";
                         String tAlias = elObj.get("tableAlias").getAsString();
                         String tComment = elObj.has("tableComment") ? elObj.get("tableComment").getAsString() : "";
-                        List<String> tLabels = elObj.has("tableLabels") ? toList(elObj.getAsJsonArray("tableLabels")) : new LinkedList<>();
+                        String tLabel = elObj.has("tableLabel") ? elObj.get("tableLabel").getAsString() : "";
                         List<Dictionary.DictEntry.AttAlias> attAliases = elObj.has("attAliases") ? toAttributeEntryList(elObj.get("attAliases")) : new LinkedList<>();
                         List<Dictionary.DictEntry.Reference> references = elObj.has("references") ? toReferenceEntryList(elObj.get("references")) : new LinkedList<>();
 
-                        Dictionary.DictEntry entry = new Dictionary.DictEntry(tName, tSchema, tAlias, tComment, tLabels, attAliases, references);
+                        Dictionary.DictEntry entry = new Dictionary.DictEntry(tName, tSchema, tAlias, tComment, tLabel, attAliases, references);
                         entries.add(entry);
                     }
                 }
@@ -101,9 +101,10 @@ public class BootConfParser {
             String toTable = obj.get("toTable").getAsString();
             List<String> toAtts = toList(obj.get("toAtts").getAsJsonArray());
             String joinAlias = obj.get("joinAlias").getAsString();
-            List<String> joinLabels = obj.has("joinLabels") ? toList(obj.getAsJsonArray("joinLabels")) : new LinkedList<>();
+            String joinLabel = obj.has("joinLabel") ? obj.get("joinLabel").getAsString() : "";
+            String joinComment = obj.has("joinComment") ? obj.get("joinComment").getAsString() : "";
 
-            result.add(new Dictionary.DictEntry.Reference(fromAtts, toTable, toAtts, joinAlias, joinLabels));
+            result.add(new Dictionary.DictEntry.Reference(fromAtts, toTable, toAtts, joinAlias, joinLabel, joinComment));
         }
 
         return result;
@@ -118,8 +119,8 @@ public class BootConfParser {
             String attName = obj.get("attName").getAsString();
             String attAlias = obj.get("attAlias").getAsString();
             String attComment = obj.has("attComment") ? obj.get("attComment").getAsString() : "";
-            List<String> attLabels = obj.has("attLabels") ? toList(obj.getAsJsonArray("attLabels")) : new LinkedList<>();
-            result.add(new Dictionary.DictEntry.AttAlias(attName, attAlias, attComment, attLabels));
+            String attLabel = obj.has("attLabel") ? obj.get("attLabel").getAsString() : "";
+            result.add(new Dictionary.DictEntry.AttAlias(attName, attAlias, attComment, attLabel));
         }
         return result;
     }

@@ -150,8 +150,7 @@ public class MPMappingOntologyUtils {
     // FIXME> Render this safer, probably by adding a boolean in SQLPPTriplesMap.
     private static boolean isBootstrapped(SQLPPTriplesMap triplesMap) {
         String id = triplesMap.getId();
-        boolean result = id.matches("BOOTSTRAPPED-MAPPING-ID[0-9]+");
-        return result;
+        return id.matches("BOOTSTRAPPED-MAPPING-ID[0-9]+");
     }
 
     private static Collection<? extends OWLObjectPropertyAxiom> getDomRangeAxiomsForFkey(OWLObjectProperty objProp, MPMappingAxiomProducer dmap, NamedRelationDefinition tableDef, BootConf bootConf, ForeignKeyConstraint fkey, OWLDataFactory dataFactory) {
@@ -327,31 +326,41 @@ public class MPMappingOntologyUtils {
     private static Collection<? extends OWLAxiom> generateAnnotationsForObjectProperty(OWLDeclarationAxiom axiom, OWLDataFactory dataFactory, Dictionary dict) {
         OWLAnnotationProperty labelProp = dataFactory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
         OWLAnnotationProperty commentProp = dataFactory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_COMMENT.getIRI());
-        IRI iri = ((OWLObjectProperty) axiom.getEntity()).getIRI();
+
+         Set<OWLAxiom> result = new HashSet<>();
+
+        IRI iri = axiom.getEntity().getIRI();
         String tableAlias = iri.toString().substring(iri.getNamespace().lastIndexOf("/") + 1, iri.getNamespace().indexOf("#"));
         String joinAlias = iri.getFragment();
-        // TODO Add object property comments
-        return getJoinLabelsForTableAndJoinAlias(tableAlias, joinAlias, dict)
-                .stream()
-                .map(label -> dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(label))))
-                .collect(Collectors.toSet());
+
+        String joinLabel = getJoinLabelForTableAndJoinAlias(tableAlias, joinAlias, dict);
+        String joinComment = getJoinCommentForTableAndJoinAlias(tableAlias, joinAlias, dict);
+        if( !joinComment.equals("") ){
+            result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(joinLabel))));
+        }
+        if( !joinLabel.equals("") ){
+            result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(commentProp, dataFactory.getOWLLiteral(joinComment))));
+        }
+        return result;
     }
 
     private static Set<OWLAxiom> generateAnnotationsForDataProperty(OWLDeclarationAxiom axiom, OWLDataFactory dataFactory, Dictionary dict) {
+        Set<OWLAxiom> result = new HashSet<>();
         OWLAnnotationProperty labelProp = dataFactory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
         OWLAnnotationProperty commentProp = dataFactory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_COMMENT.getIRI());
         IRI iri = ((OWLDataProperty) axiom.getEntity()).getIRI();
         String tableAlias = iri.toString().substring(iri.getNamespace().lastIndexOf("/") + 1, iri.getNamespace().indexOf("#"));
         String attAlias = iri.getFragment();
+
         String comment = getCommentForAttribute(tableAlias, attAlias, dict);
-        Set<OWLAxiom> result = new HashSet<>();
+        String attLabel = getLabelForAttribute(tableAlias, attAlias, dict);
         if( !comment.equals("") ){
             result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(commentProp, dataFactory.getOWLLiteral(comment))));
         }
-        result.addAll(getLabelsForAttribute(tableAlias, attAlias, dict)
-                .stream()
-                .map(label -> dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(label))))
-                .collect(Collectors.toSet()));
+        if( !attLabel.equals("") ){
+            result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(attLabel))));
+        }
+
         return result;
     }
 
@@ -378,20 +387,19 @@ public class MPMappingOntologyUtils {
         if( !comment.equals("") ){
             result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(commentProp, dataFactory.getOWLLiteral(comment))));
         }
-        result.addAll(getLabelsForTable(tableAlias, dict)
-                .stream()
-                .map(label -> dataFactory
-                        .getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(label))))
-                .collect(Collectors.toSet()));
+        String tableLabel = getLabelForTable(tableAlias, dict);
+        if( !tableLabel.equals("") ){
+            result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(tableLabel))));
+        }
         return result;
     }
 
-    private static List<String> getLabelsForTable(String tableAlias, Dictionary dict){
+    private static String getLabelForTable(String tableAlias, Dictionary dict){
         for(Dictionary.DictEntry de : dict.getDictEntries() ){
             if(de.getTableAlias().equals(tableAlias))
-                return de.getTableLabels();
+                return de.getTableLabel();
         }
-        return new LinkedList<>();
+        return "";
     }
 
     private static String getCommentForTable(String tableAlias, Dictionary dict){
@@ -402,28 +410,40 @@ public class MPMappingOntologyUtils {
         return "";
     }
 
-    private static List<String> getJoinLabelsForTableAndJoinAlias(String tableAlias, String joinAlias, Dictionary dict){
+    private static String getJoinLabelForTableAndJoinAlias(String tableAlias, String joinAlias, Dictionary dict){
         for(Dictionary.DictEntry de : dict.getDictEntries() ){
             if(de.getTableAlias().equals(tableAlias))
                 for( Dictionary.DictEntry.Reference ref : de.getReferences() ){
                     if( ref.getJoinAlias().equals(joinAlias) ){
-                        return ref.getJoinLabels();
+                        return ref.getJoinLabel();
                     }
                 }
         }
-        return new LinkedList<>();
+        return "";
     }
 
-    private static List<String> getLabelsForAttribute(String tableAlias, String attAlias, Dictionary dict){
+    private static String getJoinCommentForTableAndJoinAlias(String tableAlias, String joinAlias, Dictionary dict){
+        for(Dictionary.DictEntry de : dict.getDictEntries() ){
+            if(de.getTableAlias().equals(tableAlias))
+                for( Dictionary.DictEntry.Reference ref : de.getReferences() ){
+                    if( ref.getJoinAlias().equals(joinAlias) ){
+                        return ref.getJoinComment();
+                    }
+                }
+        }
+        return "";
+    }
+
+    private static String getLabelForAttribute(String tableAlias, String attAlias, Dictionary dict){
         for( Dictionary.DictEntry de : dict.getDictEntries() ){
             if( de.getTableAlias().equals(tableAlias) ){
                 for( Dictionary.DictEntry.AttAlias attAlias1 : de.getAttAliases() ){
                     if( attAlias1.getAttAlias().equals(attAlias) ){
-                        return attAlias1.getAttLabels();
+                        return attAlias1.getAttLabel();
                     }
                 }
             }
         }
-        return new LinkedList<>();
+        return "";
     }
 }

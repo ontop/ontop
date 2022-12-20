@@ -1,38 +1,38 @@
 {
   "dictionary" : [
     {
-      "tableName" : "name",
-      "tableAlias" : "alias",
-      "tableLabels" : ["label1", "label2"],
-      "tableSchema" : "schemaName",
+      "tableName" : "tableName1",
+      "tableAlias" : "tableAlias1",
+      "tableLabel" : "tableLabel1",
+      "tableSchema" : "schemaName1",
       "attAliases" : [
         {
-          "attName" : "name",
-          "attAlias" : "alias1",
-          "attLabels" : ["label1", "label2"]
+          "attName" : "attName1",
+          "attAlias" : "attAlias1",
+          "attLabel" : "attLabel1"
         },
         {
-          "attName" : "name",
-          "attAlias" : "alias1",
-          "attLabels" : ["label1", "label2"]
+          "attName" : "attName2",
+          "attAlias" : "attAlias2",
+          "attLabel" : "attLabel2"
         }
       ],
       "references" : [
-        {"fromAtts" : ["att1", "att2"], "toTable" : "table", "toAtts" : ["att1", "att2"], "joinAlias" : "alias", "joinLabels" : ["label1", "label2"] },
-        {"fromAtts" : ["att1", "att2"], "toTable" : "table", "toAtts" : ["att1", "att2"], "joinAlias" : "alias" }
+        {"fromAtts" : ["att1", "att2"], "toTable" : "table", "toAtts" : ["att1", "att2"], "joinAlias" : "joinAlias1", "joinLabel" : "joinLabel" },
+        {"fromAtts" : ["att3", "att4"], "toTable" : "table", "toAtts" : ["att4", "att5"], "joinAlias" : "joinAlias2" }
       ]
     },
     {
-      "tableName" : "name",
-      "tableAlias" : "alias",
-      "tableSchema" : "schemaName",
+      "tableName" : "tableName2",
+      "tableAlias" : "tableAlias2",
+      "tableSchema" : "schemaName2",
       "attAliases" : [
-        { "attName" : "name",
-          "attAlias" : "alias1"
+        { "attName" : "attName3",
+          "attAlias" : "attAlias3"
         },
-        { "attName" : "name",
-          "attAlias" : "alias1",
-          "attLabels" : ["label1", "label2"]
+        { "attName" : "attName4",
+          "attAlias" : "attAlias4",
+          "attLabel" : "attLabel4"
         }
       ]
     }

@@ -86,7 +86,7 @@ public class BootLabelsAndAliasesTest {
             throws OWLOntologyCreationException, MappingException, MappingBootstrappingException {
         MPBootstrapper bootstrapper = (MPBootstrapper) Bootstrapper.mpBootstrapper();
 
-        // Davide> The bootstrappped mappings are appended to those already in "initialConfiguration"
+        // The bootstrappped mappings are appended to those already present in "initialConfiguration"
         Bootstrapper.BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI, bootConf);
 
         return results;

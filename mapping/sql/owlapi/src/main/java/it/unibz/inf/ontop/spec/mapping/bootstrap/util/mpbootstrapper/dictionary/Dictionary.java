@@ -16,17 +16,17 @@ public class Dictionary {
         this.dictEntries = entries;
     }
 
-    public void addDictEntry(String tableName,
-                             String tableSchema,
-                             String tableAlias,
-                             String tableComment,
-                             List<String> tableLabels,
-                             List<DictEntry.AttAlias> attAliases,
-                             List<DictEntry.Reference> references
-    ){
-        DictEntry toAdd = new DictEntry(tableName, tableSchema, tableAlias, tableComment, tableLabels, attAliases, references);
-        this.dictEntries.add(toAdd);
-    }
+//    public void addDictEntry(String tableName,
+//                             String tableSchema,
+//                             String tableAlias,
+//                             String tableComment,
+//                             List<String> tableLabels,
+//                             List<DictEntry.AttAlias> attAliases,
+//                             List<DictEntry.Reference> references
+//    ){
+//        DictEntry toAdd = new DictEntry(tableName, tableSchema, tableAlias, tableComment, tableLabels, attAliases, references);
+//        this.dictEntries.add(toAdd);
+//    }
 
     public boolean containsTable(String tableName){
         for( DictEntry entry : this.dictEntries ){
@@ -55,11 +55,11 @@ public class Dictionary {
         return this.getTableEntry(tableName).tableAlias;
     }
 
-    public List<String> getTableLabels(String tableName){
+    public String getTableLabel(String tableName){
         if( !this.containsTable(tableName) ){
             throw new RuntimeException("Asking for the labels of table "+ tableName +", which is not present in the dictionary"); // Use of Runtime exception because of programming error
         }
-        return this.getTableEntry(tableName).tableLabels;
+        return this.getTableEntry(tableName).tableLabel;
     }
 
     public String getAttributeAlias(String tableName, String attributeName){
@@ -81,12 +81,12 @@ public class Dictionary {
      * @param attributeName
      * @return the labels of attribute tableName.attributeName
      */
-    public List<String> getAttributeLabels(String tableName, String attributeName){
+    public String getAttributeLabel(String tableName, String attributeName){
         for( DictEntry entry : this.dictEntries ){
             if( entry.tableName.equalsIgnoreCase(tableName) ){
                 for(DictEntry.AttAlias attAlias : entry.attAliases ){
                     if( attAlias.attName.equalsIgnoreCase(attributeName) ){
-                        return attAlias.attLabels;
+                        return attAlias.attLabel;
                     }
                 }
             }
@@ -108,16 +108,16 @@ public class Dictionary {
         private final String tableName;
         private final String tableSchema;
         private final String tableAlias;
-        private final List<String> tableLabels;
+        private final String tableLabel;
         private final List<AttAlias> attAliases;
         private final List<Reference> references;
 
-        public DictEntry(String tableName, String tableSchema, String tableAlias, String tableComment, List<String> tableLabels, List<AttAlias> attAliases, List<Reference> references) {
+        public DictEntry(String tableName, String tableSchema, String tableAlias, String tableComment, String tableLabel, List<AttAlias> attAliases, List<Reference> references) {
             this.tableName = tableName;
             this.tableSchema = tableSchema;
             this.tableComment = tableComment;
             this.tableAlias = tableAlias;
-            this.tableLabels = tableLabels;
+            this.tableLabel = tableLabel;
             this.attAliases = attAliases;
             this.references = references;
         }
@@ -127,30 +127,34 @@ public class Dictionary {
         }
 
         public static class AttAlias {
-            private final String attName;
-            private final String attAlias;
-            private final String attComment;
-            private final List<String> attLabels;
+            private final String attName;  // Name of the attribute in the DB
+            private final String attAlias;  // Name of the attribute in the RDF graph
+            private final String attComment;  // rdfs:comment
+            private final String attLabel;  // rdfs:label
 
-            public AttAlias(String attName, String attAlias, String attComment, List<String> attLabels) {
+            public AttAlias(String attName, String attAlias, String attComment, String attLabel) {
                 this.attName = attName;
                 this.attAlias = attAlias;
                 this.attComment = attComment;
-                this.attLabels = attLabels;
+                this.attLabel = attLabel;
             }
 
+            /** Name of the attribute in the DB **/
             public String getAttName() {
                 return attName;
             }
 
+            /** Name of the attribute in the RDF graph **/
             public String getAttAlias() {
                 return attAlias;
             }
 
+            /** rdfs:comment **/
             public String getAttComment() {return attComment; }
 
-            public List<String> getAttLabels() {
-                return attLabels;
+            /** rdfs:label **/
+            public String getAttLabel() {
+                return attLabel;
             }
 
             @Override
@@ -158,7 +162,7 @@ public class Dictionary {
                 return "AttAlias{" +
                         "attName='" + attName + '\'' +
                         ", attAlias='" + attAlias + '\'' +
-                        ", attLabels=" + attLabels +
+                        ", attLabel='" + attLabel + '\'' +
                         '}';
             }
         }
@@ -168,14 +172,17 @@ public class Dictionary {
             private final String toTable;
             private final List<String> toAtts;
             private final String joinAlias;
-            private final List<String> joinLabels;
+            private final String joinLabel;
 
-            public Reference(List<String> fromAtts, String toTable, List<String> toAtts, String joinAlias, List<String> joinLabels) {
+            private final String joinComment;
+
+            public Reference(List<String> fromAtts, String toTable, List<String> toAtts, String joinAlias, String joinLabel, String joinComment) {
                 this.fromAtts = fromAtts;
                 this.toTable = toTable;
                 this.toAtts = toAtts;
                 this.joinAlias = joinAlias;
-                this.joinLabels = joinLabels;
+                this.joinLabel = joinLabel;
+                this.joinComment = joinComment;
             }
 
             public List<String> getFromAtts() {
@@ -194,8 +201,12 @@ public class Dictionary {
                 return joinAlias;
             }
 
-            public List<String> getJoinLabels() {
-                return joinLabels;
+            public String getJoinLabel() {
+                return joinLabel;
+            }
+
+            public String getJoinComment(){
+                return joinComment;
             }
 
             @Override
@@ -205,7 +216,8 @@ public class Dictionary {
                         ", toTable='" + toTable + '\'' +
                         ", toAtts=" + toAtts +
                         ", joinAlias='" + joinAlias + '\'' +
-                        ", joinLabels=" + joinLabels +
+                        ", joinLabel='" + joinLabel + '\'' +
+                        ", joinComment='" + joinComment + '\'' +
                         '}';
             }
         }
@@ -216,7 +228,7 @@ public class Dictionary {
                     "tableName='" + tableName + '\'' +
                     ", tableSchema='" + tableSchema + '\'' +
                     ", tableAlias='" + tableAlias + '\'' +
-                    ", tableLabels=" + tableLabels +
+                    ", tableLabel='" + tableLabel + '\'' +
                     ", attAliases=" + attAliases +
                     ", references=" + references +
                     '}';
@@ -234,8 +246,8 @@ public class Dictionary {
             return tableAlias;
         }
 
-        public List<String> getTableLabels() {
-            return tableLabels;
+        public String getTableLabel() {
+            return tableLabel;
         }
 
         public List<AttAlias> getAttAliases() {
