@@ -335,10 +335,10 @@ public class MPMappingOntologyUtils {
 
         String joinLabel = getJoinLabelForTableAndJoinAlias(tableAlias, joinAlias, dict);
         String joinComment = getJoinCommentForTableAndJoinAlias(tableAlias, joinAlias, dict);
-        if( !joinComment.equals("") ){
+        if( !joinLabel.equals("") ){
             result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(labelProp, dataFactory.getOWLLiteral(joinLabel))));
         }
-        if( !joinLabel.equals("") ){
+        if( !joinComment.equals("") ){
             result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(commentProp, dataFactory.getOWLLiteral(joinComment))));
         }
         return result;
@@ -352,8 +352,8 @@ public class MPMappingOntologyUtils {
         String tableAlias = iri.toString().substring(iri.getNamespace().lastIndexOf("/") + 1, iri.getNamespace().indexOf("#"));
         String attAlias = iri.getFragment();
 
-        String comment = getCommentForAttribute(tableAlias, attAlias, dict);
         String attLabel = getLabelForAttribute(tableAlias, attAlias, dict);
+        String comment = getCommentForAttribute(tableAlias, attAlias, dict);
         if( !comment.equals("") ){
             result.add(dataFactory.getOWLAnnotationAssertionAxiom(iri, dataFactory.getOWLAnnotation(commentProp, dataFactory.getOWLLiteral(comment))));
         }
