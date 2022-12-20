@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -50,6 +52,9 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private VariableNullability variableNullability;
     // LAZY
     private Boolean isDistinct;
+
+    // LAZY
+    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
 
     @AssistedInject
@@ -385,6 +390,24 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .isEffectiveFalse())
                 .collect(ImmutableCollectors.toList());
         return iqFactory.createValuesNode(getOrderedVariables(), newValues);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (possibleVariableDefinitions == null) {
+            Stream<ImmutableList<Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
+                    ? values.stream()
+                    : values.stream().distinct();
+
+
+            possibleVariableDefinitions = distinctValuesStream
+                    .map(row -> IntStream.range(0, getVariables().size())
+                            .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), (NonVariableTerm) row.get(i)))
+                            .collect(ImmutableCollectors.toMap()))
+                    .map(substitutionFactory::getSubstitution)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return possibleVariableDefinitions;
     }
 
     @Override

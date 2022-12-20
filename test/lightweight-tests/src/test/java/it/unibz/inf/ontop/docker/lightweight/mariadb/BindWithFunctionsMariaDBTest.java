@@ -30,12 +30,6 @@ public class BindWithFunctionsMariaDBTest extends AbstractBindTestWithFunctions 
     }
 
     @Override
-    protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0, 43\"^^xsd:string", "\"0, 23\"^^xsd:string", "\"0, 34\"^^xsd:string",
-                "\"0, 10\"^^xsd:string");
-    }
-
-    @Override
     protected ImmutableList<String> getAbsExpectedValues() {
         return ImmutableList.of("\"8.6000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.8000\"^^xsd:decimal",
                 "\"1.5000\"^^xsd:decimal");

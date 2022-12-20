@@ -24,6 +24,10 @@
         <docker.mariadb.password>mariadb</docker.mariadb.password>
         <docker.oracle.password>oracle</docker.oracle.password>
         <docker.pgsql.password>postgres2</docker.pgsql.password>
+        <snowflake.account>fakeaccount</snowflake.account>
+        <snowflake.user>fake</snowflake.user>
+        <snowflake.password>fake</snowflake.password>
+        <snowflake.warehouse>ontop</snowflake.warehouse>
 <!--        <junit.version></junit.version>-->
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>
@@ -266,6 +270,12 @@
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
             <version>11.5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.17</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
