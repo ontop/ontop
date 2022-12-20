@@ -34,12 +34,13 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.apache.commons.rdf.api.IRI;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.TARGET_ATOM_FACTORY;
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -105,9 +106,11 @@ public class TurtleSyntaxParserTest {
 		return TERM_FACTORY.getRDFLiteralFunctionalTerm(t, lang);
 	}
 
-	@Test(expected = TargetQueryParserException.class)
-	public void test_1_1_empty_placeholder() throws TargetQueryParserException {
-		parser.parse(":Person-{} a :Person .");
+	@Test
+	public void test_1_1_empty_placeholder()  {
+		assertThrows(TargetQueryParserException.class,
+				() -> parser.parse(":Person-{} a :Person ."),
+				"mismatched input '{' expecting {'a', IRIREF, PNAME_LN}");
 	}
 
 	@Test
@@ -170,9 +173,11 @@ public class TurtleSyntaxParserTest {
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}
 
-	@Test(expected = TargetQueryParserException.class)
-	public void test_1_2_empty_placeholder() throws TargetQueryParserException {
-		parser.parse("<http://example.org/testcase#Person-{}> a :Person .");
+	@Test
+	public void test_1_2_empty_placeholder() {
+		assertThrows(TargetQueryParserException.class,
+				() -> parser.parse("<http://example.org/testcase#Person-{}> a :Person ."),
+				"token recognition error at: '<http://example.org/testcase#Person-{}'");
 	}
 
 	@Test
@@ -733,7 +738,7 @@ public class TurtleSyntaxParserTest {
 								getVariable("text")), "en-us"))), result);
 	}
 
-	@Ignore("TODO: should we forbid non-recognized datatypes using the XSD prefix?")
+	@Disabled("TODO: should we forbid non-recognized datatypes using the XSD prefix?")
 	@Test
 	public void test_6_1() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^xsd:String .");
@@ -853,14 +858,19 @@ public class TurtleSyntaxParserTest {
 		assertEquals(4, result.size());
 	}
 
-	@Test(expected = TargetQueryParserException.class)
-	public void test_for_fully_qualified_column() throws TargetQueryParserException {
-		parser.parse(":Person-{person.id} a  :Person ;  :age 25 .");
+	@Test
+	public void test_for_fully_qualified_column() {
+		assertThrows(TargetQueryParserException.class,
+				() -> parser.parse(":Person-{person.id} a  :Person ;  :age 25 ."),
+				"Fully qualified columns as person.id are not accepted.\n" +
+						"Please, use an alias instead.\n");
 	}
 
-	@Test(expected = TargetQueryParserException.class)
-	public void test_for_language_tag_from_a_variable() throws TargetQueryParserException {
-		parser.parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
+	@Test
+	public void test_for_language_tag_from_a_variable() {
+		assertThrows(TargetQueryParserException.class,
+				() -> parser.parse(":Person-{id} a :Person ; :firstName {name}@{lang} . "),
+				"token recognition error at: '@{'");
 	}
 
 	@Test
@@ -1052,7 +1062,7 @@ public class TurtleSyntaxParserTest {
 	}
 
 
-	@Ignore("Anonymous blank nodes are not supported in general")
+	@Disabled("Anonymous blank nodes are not supported in general")
 	@Test
 	public void test_qootec() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(

@@ -21,14 +21,12 @@ package it.unibz.inf.ontop.spec.mapping;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.SPECIFICATION_FACTORY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class PrefixManagerTest {
@@ -41,7 +39,7 @@ public class PrefixManagerTest {
 	 * Checking that the atoms that use the default namespace are rendered in
 	 * short form and those who don't have it are rendered with the full uri
 	 */
-	@Ignore
+	@Disabled
 	@Test
 	public void testNamespace1() {
 		//PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
@@ -69,11 +67,10 @@ public class PrefixManagerTest {
 				PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#",
 				"obdap:", "http://obda.org/predicates#"));
 
-		assertEquals("obdap:q", pm.getShortForm(Q_IRI_STR));
-
-		assertEquals(":Person", pm.getShortForm(PERSON_IRI_STR));
-
-		assertEquals(":person-individual", pm.getShortForm(INDIVIDUAL_IRI_STR));
+		assertAll(
+				() -> assertEquals("obdap:q", pm.getShortForm(Q_IRI_STR)),
+				() -> assertEquals(":Person", pm.getShortForm(PERSON_IRI_STR)),
+				() -> assertEquals(":person-individual", pm.getShortForm(INDIVIDUAL_IRI_STR)));
 	}
 
 	@Test
@@ -82,11 +79,10 @@ public class PrefixManagerTest {
 				PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#",
 				"onto:", "http://obda.org/onto.owl#"));
 
-		assertEquals(":q", pm.getShortForm(Q_IRI_STR));
-
-		assertEquals("onto:Person", pm.getShortForm(PERSON_IRI_STR));
-
-		assertEquals("onto:person-individual", pm.getShortForm(INDIVIDUAL_IRI_STR));
+		assertAll(
+				() -> assertEquals(":q", pm.getShortForm(Q_IRI_STR)),
+				() -> assertEquals("onto:Person", pm.getShortForm(PERSON_IRI_STR)),
+				() -> assertEquals("onto:person-individual", pm.getShortForm(INDIVIDUAL_IRI_STR)));
 	}
 
 	/**

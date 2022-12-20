@@ -27,16 +27,16 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import junit.framework.TestCase;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SQLPPMappingConverterTest {
 
@@ -73,7 +73,7 @@ public class SQLPPMappingConverterTest {
 	private ImmutableList<IQ> getIQs(String source, String targetString) throws Exception {
 
 		TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(MAPPING_FACTORY.createPrefixManager(
-				ImmutableMap.of(":", "http://www.example.org/university#")));
+				ImmutableMap.of(PrefixManager.DEFAULT_PREFIX, "http://www.example.org/university#")));
 
 		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
@@ -81,7 +81,7 @@ public class SQLPPMappingConverterTest {
 		ImmutableList<IQ> dp = SQLPP_MAPPING_CONVERTER.convert(ImmutableList.of(mapping), getMetadataLookup()).stream()
 				.map(MappingAssertion::getQuery)
 				.collect(ImmutableCollectors.toList());
-		
+
 		assertFalse(dp.isEmpty());
 		return dp;
 	}
@@ -275,20 +275,20 @@ public class SQLPPMappingConverterTest {
 				":S_{t1_1} a :Student .");
 	}
 
-	// Black-box view extraction is not supported for ImmutableMetadataLookup
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAnalysis_26() throws Exception {
-		getIQs(
+		assertThrows(UnsupportedOperationException.class, // Black-box view extraction is not supported for ImmutableMetadataLookup
+				() -> getIQs(
 				"SELECT * FROM Student  WHERE (id,  year) IN (SELECT i_id, MAX(year) FROM Student GROUP BY id)",
-				":S_{id} a :Student ; :year \"{year}\" .");
+				":S_{id} a :Student ; :year \"{year}\" ."));
 	}
 
-	// Black-box view extraction is not supported for ImmutableMetadataLookup
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAnalysis_27() throws Exception {
-		getIQs(
+		assertThrows(UnsupportedOperationException.class, // Black-box view extraction is not supported for ImmutableMetadataLookup
+				() -> getIQs(
 				"SELECT id FROM Student  WHERE (id,  year) IN (SELECT i_id, MAX(year) FROM Student GROUP BY id) INTERSECT SELECT student_id FROM Enrollment",
-				":S_{id} a :Student .");
+				":S_{id} a :Student ."));
 	}
 
 	@Test

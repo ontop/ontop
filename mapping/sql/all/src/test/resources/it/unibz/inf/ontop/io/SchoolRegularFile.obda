@@ -6,5 +6,28 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 obda:		https://w3id.org/obda/vocabulary#
 
 [MappingDeclaration] @collection [[
+mappingId	M1
+target		<http://obda.org/onto.owl#P{id}> a <http://obda.org/onto.owl#Student> ; <http://obda.org/onto.owl#firstName> {fname} ; <http://obda.org/onto.owl#lastName> {lname} ; <http://obda.org/onto.owl#age> {age}^^xsd:int . 
+source		select id, fname, lname, age from student
+
+mappingId	M2
+target		<http://obda.org/onto.owl#C{id}> a <http://obda.org/onto.owl#Course> ; <http://obda.org/onto.owl#title> {title} ; <http://obda.org/onto.owl#hasLecturer> <http://obda.org/onto.owl#L{id}> ; <http://obda.org/onto.owl#description> {description}@en-us . 
+source		select id, title, lecturer, description from course
+
+mappingId	M3
+target		<http://obda.org/onto.owl#P{sid}> <http://obda.org/onto.owl#hasEnrollment> <http://obda.org/onto.owl#C{cid}> . 
+source		select sid, cid from enrollment
+
+mappingId	M4
+target		<http://obda.org/onto.owl#P{id}> a <http://obda.org/onto.owl#Student> ; <http://obda.org/onto.owl#firstName> {nome} ; <http://obda.org/onto.owl#lastName> {cognome} ; <http://obda.org/onto.owl#age> {eta}^^xsd:int . 
+source		select id, nome, cognome, eta from studenti
+
+mappingId	M5
+target		<http://obda.org/onto.owl#C{id}> a <http://obda.org/onto.owl#Course> ; <http://obda.org/onto.owl#title> {titolo} ; <http://obda.org/onto.owl#hasLecturer> <http://obda.org/onto.owl#L{id}> ; <http://obda.org/onto.owl#description> {decrizione}@it . 
+source		select id, titolo, professore, descrizione from corso
+
+mappingId	M6
+target		<http://obda.org/onto.owl#P{sid}> <http://obda.org/onto.owl#hasEnrollment> <http://obda.org/onto.owl#C{cid}> . 
+source		select sid, cid from registrare
 ]]
 
