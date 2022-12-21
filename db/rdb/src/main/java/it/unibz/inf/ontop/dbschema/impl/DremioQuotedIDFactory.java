@@ -34,11 +34,12 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
                     .collect(ImmutableCollectors.toList())
                     .reverse());
 
-        String schemaId = Arrays.stream(components)
+        Stream<String> stream = Stream.of(Arrays.stream(components)
                         .limit(components.length - 1) //First (N-1) components are schema, last is table name
                         .map(name -> name.replace("\"", "")) //Remove quotes in-between
-                       .collect(Collectors.joining("."));
+                       .collect(Collectors.joining(".")),
+                components[components.length - 1]);
 
-        return new RelationIDImpl(Stream.of(components[components.length - 1], schemaId).map(this::createFromString).collect(ImmutableCollectors.toList()));
+        return new RelationIDImpl(stream.map(this::createFromString).collect(ImmutableCollectors.toList()).reverse());
     }
 }
