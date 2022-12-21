@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot;
 
+import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -23,23 +25,24 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
+@PostgreSQLLightweightTest
 public class BootLabelsAndAliasesTest {
     // Reference
-    private static final String referenceOBDAPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/reference-labels.obda";
-    private static final String referenceOWLPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/reference-labels.owl";
+    private static final String referenceOBDAPath = "src/test/resources/mpboot.labels/reference-labels.obda";
+    private static final String referenceOWLPath = "src/test/resources/mpboot.labels/reference-labels.owl";
 
     // DB-connection
-    private static final String owlPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/labels.owl";
-    private static final String obdaPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/labels.obda";
-    private static final String propertyPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/labels.properties";
+    private static final String owlPath = "src/test/resources/mpboot.labels/labels.owl";
+    private static final String obdaPath = "src/test/resources/mpboot.labels/labels.obda";
+    private static final String propertyPath = "/mpboot.labels/labels.properties";
 
     // Bootstrapping-info
     private static final String BASE_IRI = "http://semanticweb.org/labels/";
-    private static final String bootOwlPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/boot-labels.owl";
-    private static final String bootOBDAPath = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/boot-labels.obda";
+    private static final String bootOwlPath = "src/test/resources/mpboot.labels/boot-labels.owl";
+    private static final String bootOBDAPath = "src/test/resources/mpboot.labels/boot-labels.obda";
 
     // Bootstrapper Configuration File
-    private static final String CONF_FILE = "src/test/resources/prof/postgresql/mpboot/bootstrapper.labels/boot-conf.json";
+    private static final String CONF_FILE = "src/test/resources/mpboot.labels/boot-conf.json";
 
     @Test
     public void testLabelsAndAliasesGeneration() {
@@ -93,10 +96,13 @@ public class BootLabelsAndAliasesTest {
     }
 
     private static OntopSQLOWLAPIConfiguration configure() {
+
+        String propertyFilePath = BootLabelsAndAliasesTest.class.getResource(propertyPath).getPath();
+
         OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlPath)
                 .nativeOntopMappingFile(obdaPath)
-                .propertyFile(propertyPath)
+                .propertyFile(propertyFilePath)
                 .enableTestMode()
                 .build();
 

@@ -1,0 +1,85 @@
+CREATE DATABASE "bootstrapper-tests";
+
+\connect "bootstrapper-tests"
+
+CREATE TABLE a (
+    id integer NOT NULL
+);
+
+CREATE TABLE b (
+    id integer NOT NULL
+);
+
+CREATE TABLE c (
+    id integer NOT NULL
+);
+
+CREATE TABLE d (
+    id integer NOT NULL
+);
+
+CREATE TABLE e (
+    id integer NOT NULL
+);
+
+CREATE TABLE f (
+    id integer NOT NULL
+);
+
+CREATE TABLE g (
+    id1 integer NOT NULL,
+    id2 character varying(10) NOT NULL
+);
+
+CREATE TABLE h (
+    id2 character varying(10) NOT NULL,
+    id1 integer NOT NULL
+);
+
+ALTER TABLE ONLY a
+    ADD CONSTRAINT a_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY b
+    ADD CONSTRAINT b_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY c
+    ADD CONSTRAINT c_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY d
+    ADD CONSTRAINT d_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY e
+    ADD CONSTRAINT e_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY f
+    ADD CONSTRAINT f_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY g
+    ADD CONSTRAINT g_pkey PRIMARY KEY (id1, id2);
+
+ALTER TABLE ONLY h
+    ADD CONSTRAINT h_pkey PRIMARY KEY (id2, id1);
+
+ALTER TABLE ONLY a
+    ADD CONSTRAINT a_1 FOREIGN KEY (id) REFERENCES b(id);
+
+ALTER TABLE ONLY a
+    ADD CONSTRAINT a_2 FOREIGN KEY (id) REFERENCES c(id);
+
+ALTER TABLE ONLY b
+    ADD CONSTRAINT b_1 FOREIGN KEY (id) REFERENCES e(id);
+
+ALTER TABLE ONLY c
+    ADD CONSTRAINT c_1 FOREIGN KEY (id) REFERENCES d(id);
+
+ALTER TABLE ONLY c
+    ADD CONSTRAINT c_2 FOREIGN KEY (id) REFERENCES e(id);
+
+ALTER TABLE ONLY e
+    ADD CONSTRAINT e FOREIGN KEY (id) REFERENCES f(id);
+
+ALTER TABLE ONLY f
+    ADD CONSTRAINT f_1 FOREIGN KEY (id) REFERENCES a(id);
+
+ALTER TABLE ONLY h
+    ADD CONSTRAINT h_id1_fkey FOREIGN KEY (id1, id2) REFERENCES g(id1, id2);
