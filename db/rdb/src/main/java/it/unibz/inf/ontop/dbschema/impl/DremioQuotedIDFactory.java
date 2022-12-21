@@ -27,8 +27,6 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     public RelationID createRelationID(String... components) {
         Objects.requireNonNull(components[components.length - 1]);
 
-        System.out.println("DEBUG: " + Arrays.toString(components));
-
         Stream<String> normalisedComponentsStream = components.length <= 2
                 ? Stream.of(components)
                 : Stream.of(
@@ -40,9 +38,7 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
         ImmutableList<QuotedID> r = normalisedComponentsStream
                 .map(this::createFromString)
-                .collect(ImmutableCollectors.toList());
-
-        System.out.println("DEBUG2: " + r);
+                .collect(ImmutableCollectors.toList()).reverse();
 
         return new RelationIDImpl(r);
     }
