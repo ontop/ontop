@@ -26,25 +26,23 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
     @Override
     public RelationID createRelationID(String... components) {
-        System.out.println("DEBUG: " + Arrays.toString(components));
-
         Objects.requireNonNull(components[components.length - 1]);
 
-        Stream<String> normalisedComponentsStream = components.length <= 2
-                ? Stream.of(components)
-                : Stream.of(
-                Stream.of(components)
-                        .limit(components.length - 1) // first (n-1) components are the schema name
-                        .map(name -> name.replace("\"", ""))
-                        .collect(Collectors.joining(".")),
-                components[0]); //  last is the table name
+        if (components.length == 1)
+            return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
 
-        ImmutableList<QuotedID> r = normalisedComponentsStream
-                .map(this::createFromString)
-                .collect(ImmutableCollectors.toList()).reverse();
+        QuotedID schemaId = components.length == 2
+                ? createFromString(components[0])
+                : createFromString(
+                String.join(".", Arrays.stream(components)
+                        .limit(components.length - 1) //First (N-1) components are schema, last is table name
+                        .map(name -> name.replace("\"", "")) //Remove quotes in-between
+                        .toArray(String[]::new))
+        );
 
-        System.out.println("DEBUG2: " + r);
-
-        return new RelationIDImpl(r);
+        return new RelationIDImpl(ImmutableList.of(
+                createFromString(components[components.length - 1]),
+                schemaId
+        ));
     }
 }
