@@ -3,10 +3,14 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
@@ -24,19 +28,17 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     public RelationID createRelationID(String... components) {
         Objects.requireNonNull(components[components.length - 1]);
 
-        if (components.length == 1)
-            return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
+        Stream<String> stream = components.length <= 2
+                ? Arrays.stream(components)
+                : Stream.of(Arrays.stream(components)
+                        .limit(components.length - 1) // first (N-1) components are the schema
+                        .map(name -> name.replace("\"", "")) // remove quotes in-between
+                        .collect(Collectors.joining(".")),
+                components[components.length - 1]); // last is the table name
 
-        QuotedID schemaId = createFromString(
-                String.join(".", Arrays.stream(components)
-                        .limit(components.length - 1) //First (N-1) components are schema, last is table name
-                        .map(name -> name.replace("\"", "")) //Remove quotes in-between
-                        .toArray(String[]::new))
-        );
-
-        return new RelationIDImpl(ImmutableList.of(
-                createFromString(components[components.length - 1]),
-                schemaId
-        ));
+        return new RelationIDImpl(stream
+                .map(this::createFromString)
+                .collect(ImmutableCollectors.toList())
+                .reverse());
     }
 }
