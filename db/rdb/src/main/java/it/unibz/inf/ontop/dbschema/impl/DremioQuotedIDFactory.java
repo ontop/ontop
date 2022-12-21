@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -25,6 +26,8 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
     @Override
     public RelationID createRelationID(String... components) {
+        System.out.println("DEBUG: " + Arrays.toString(components));
+
         Objects.requireNonNull(components[components.length - 1]);
 
         Stream<String> normalisedComponentsStream = components.length <= 2
@@ -39,6 +42,8 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
         ImmutableList<QuotedID> r = normalisedComponentsStream
                 .map(this::createFromString)
                 .collect(ImmutableCollectors.toList()).reverse();
+
+        System.out.println("DEBUG2: " + r);
 
         return new RelationIDImpl(r);
     }
