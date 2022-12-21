@@ -3,10 +3,13 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
@@ -24,21 +27,17 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     public RelationID createRelationID(String... components) {
         Objects.requireNonNull(components[components.length - 1]);
 
-        if (components.length == 1)
-            return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
+        Stream<String> normalisedComponentsStream = components.length <= 2
+                ? Stream.of(components)
+                : Stream.of(
+                Stream.of(components)
+                        .limit(components.length - 1) // first (n-1) components are the schema name
+                        .map(name -> name.replace("\"", ""))
+                        .collect(Collectors.joining(".")),
+                components[0]); //  last is the table name
 
-        QuotedID schemaId = components.length == 2
-                ? createFromString(components[0])
-                : createFromString(
-                String.join(".", Arrays.stream(components)
-                        .limit(components.length - 1) //First (N-1) components are schema, last is table name
-                        .map(name -> name.replace("\"", "")) //Remove quotes in-between
-                        .toArray(String[]::new))
-        );
-
-        return new RelationIDImpl(ImmutableList.of(
-                createFromString(components[components.length - 1]),
-                schemaId
-        ));
+        return new RelationIDImpl(normalisedComponentsStream
+                .map(this::createFromString)
+                .collect(ImmutableCollectors.toList()));
     }
 }
