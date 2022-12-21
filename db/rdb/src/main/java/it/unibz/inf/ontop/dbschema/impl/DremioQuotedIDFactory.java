@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
