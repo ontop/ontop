@@ -28,17 +28,17 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     public RelationID createRelationID(String... components) {
         Objects.requireNonNull(components[components.length - 1]);
 
-        if (components.length == 1)
-            return new RelationIDImpl(ImmutableList.of(createFromString(components[0])));
+        if (components.length <= 2)
+            return new RelationIDImpl(Arrays.stream(components)
+                    .map(this::createFromString)
+                    .collect(ImmutableCollectors.toList())
+                    .reverse());
 
-        QuotedID schemaId = components.length == 2
-                ? createFromString(components[0])
-                : createFromString(
+        QuotedID schemaId = createFromString(
                 String.join(".", Arrays.stream(components)
                         .limit(components.length - 1) //First (N-1) components are schema, last is table name
                         .map(name -> name.replace("\"", "")) //Remove quotes in-between
-                        .toArray(String[]::new))
-        );
+                        .toArray(String[]::new)));
 
         return new RelationIDImpl(ImmutableList.of(
                 createFromString(components[components.length - 1]),
