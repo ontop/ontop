@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +24,9 @@ import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
 public class ClusteringPatternTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusteringPatternTest.class);
+
     // Reference
     private static final String referenceOBDAPath = "src/test/resources/mpboot/clustering/reference-clustering.obda";
     private static final String referenceOWLPath = "src/test/resources/mpboot/clustering/reference-clustering.owl";
@@ -41,6 +46,8 @@ public class ClusteringPatternTest {
 
     @Test
     public void testClusteringClasses() { // It also tests the order of arguments
+
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {

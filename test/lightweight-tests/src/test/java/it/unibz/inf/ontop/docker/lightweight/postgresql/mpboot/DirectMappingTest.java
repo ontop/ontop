@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
 public class DirectMappingTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectMappingTest.class);
     // Reference
     private static final String referenceOBDAPath = "src/test/resources/mpboot/direct_mapping/reference-direct_mapping.obda";
     private static final String referenceOWLPath = "src/test/resources/mpboot/direct_mapping/reference-direct_mapping.owl";
@@ -38,8 +42,8 @@ public class DirectMappingTest {
     @Test
     public void testDirectMapping() { // It also tests the order of arguments
 
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
-
         BootConf bootConf = new BootConf.Builder().build();
 
         try {

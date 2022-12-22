@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,9 @@ import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
 public class BootLabelsAndAliasesTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BootLabelsAndAliasesTest.class);
+
     // Reference
     private static final String referenceOBDAPath = "src/test/resources/mpboot/labels/reference-labels.obda";
     private static final String referenceOWLPath = "src/test/resources/mpboot/labels/reference-labels.owl";
@@ -42,6 +47,8 @@ public class BootLabelsAndAliasesTest {
 
     @Test
     public void testLabelsAndAliasesGeneration() {
+
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {

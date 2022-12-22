@@ -5,18 +5,16 @@ import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.MPBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
 public class OrchestraCoalesceTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoPkeyTest.class);
 
     // Bootstrapper Configuration
     private static final String bootConfFile = "src/test/resources/mpboot/spider_orchestra/spider_orchestra_conf.json";
@@ -47,6 +47,8 @@ public class OrchestraCoalesceTest {
 
     @Test
     public void testOrchestraBootstrapping(){
+
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         try {
             BootConf.NullValue nullValue = BootConfParser.parseNullValue(bootConfFile);

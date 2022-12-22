@@ -1,45 +1,35 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot.utils.MPBootTestsHelper;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot.utils.WorkloadJsonEntry;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.MPBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.JoinPairs;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.sqlparser.WorkloadParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
 public class NoPkeyTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoPkeyTest.class);
 
     // Reference and to-be--compared files
     private static final String referenceOBDA = "src/test/resources/mpboot/spider_wta_1/reference-spider_wta_1.obda";
@@ -63,6 +53,9 @@ public class NoPkeyTest {
 
     @Test
     public void testWta_1Bootstrapping(){
+
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
+
         WorkloadParser parser = new WorkloadParser();
 
         try {
