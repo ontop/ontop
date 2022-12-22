@@ -6,12 +6,15 @@ import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.MPBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
@@ -22,34 +25,31 @@ import java.io.IOException;
 import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
-public class BootLabelsAndAliasesTest {
+public class SHPatternTest {
     // Reference
-    private static final String referenceOBDAPath = "src/test/resources/mpboot/labels/reference-labels.obda";
-    private static final String referenceOWLPath = "src/test/resources/mpboot/labels/reference-labels.owl";
+    private static final String referenceOBDAPath = "src/test/resources/mpboot/multipleinheritance/reference-multiple-inheritance.obda";
+    private static final String referenceOWLPath = "src/test/resources/mpboot/multipleinheritance/reference-multiple-inheritance.owl";
 
     // DB-connection
-    private static final String owlPath = "src/test/resources/mpboot/labels/labels.owl";
-    private static final String obdaPath = "src/test/resources/mpboot/labels/labels.obda";
-    private static final String propertyPath = "/mpboot/labels/labels.properties";
+    private static final String owlPath = "src/test/resources/mpboot/multipleinheritance/multiple-inheritance.owl";
+    private static final String obdaPath = "src/test/resources/mpboot/multipleinheritance/multiple-inheritance.obda";
+    private static final String propertyPath = "/mpboot/multipleinheritance/multiple-inheritance.properties";
 
     // Bootstrapping-info
-    protected String BASE_IRI = "http://semanticweb.org/labels/";
-    private static final String bootOwlPath = "src/test/resources/mpboot/labels/boot-labels.owl";
-    private static final String bootOBDAPath = "src/test/resources/mpboot/labels/boot-labels.obda";
+    private static final String BASE_IRI = "http://semanticweb.org/skyserver/";
+    private static final String bootOwlPath = "src/test/resources/mpboot/multipleinheritance/boot-multiple-inheritance.owl";
+    private static final String bootOBDAPath = "src/test/resources/mpboot/multipleinheritance/boot-multiple-inheritance.obda";
 
-    // Bootstrapper Configuration File
-    private static final String CONF_FILE = "src/test/resources/mpboot/labels/boot-conf.json";
+    // Bootstrapper conf file
+    private static final String CONF_FILE = "src/test/resources/mpboot/multipleinheritance/boot-conf.json";
 
     @Test
-    public void testLabelsAndAliasesGeneration() {
+    public void testMultipleInheritance() { // It also tests the order of arguments
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {
-            Dictionary dict = BootConfParser.parseDictionary(CONF_FILE);
             boolean enableSH = BootConfParser.parseEnableSH(CONF_FILE);
-
             BootConf bootConf = new BootConf.Builder()
-                    .dictionary(dict)
                     .enableSH(enableSH)
                     .build();
 
@@ -78,5 +78,4 @@ public class BootLabelsAndAliasesTest {
             e.printStackTrace();
         }
     }
-
 }

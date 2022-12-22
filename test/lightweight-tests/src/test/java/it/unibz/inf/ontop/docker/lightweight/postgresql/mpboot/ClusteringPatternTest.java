@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -22,35 +21,31 @@ import java.io.IOException;
 import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
-public class BootLabelsAndAliasesTest {
+public class ClusteringPatternTest {
     // Reference
-    private static final String referenceOBDAPath = "src/test/resources/mpboot/labels/reference-labels.obda";
-    private static final String referenceOWLPath = "src/test/resources/mpboot/labels/reference-labels.owl";
+    private static final String referenceOBDAPath = "src/test/resources/mpboot/clustering/reference-clustering.obda";
+    private static final String referenceOWLPath = "src/test/resources/mpboot/clustering/reference-clustering.owl";
 
     // DB-connection
-    private static final String owlPath = "src/test/resources/mpboot/labels/labels.owl";
-    private static final String obdaPath = "src/test/resources/mpboot/labels/labels.obda";
-    private static final String propertyPath = "/mpboot/labels/labels.properties";
+    private static final String owlPath = "src/test/resources/mpboot/clustering/clustering.owl";
+    private static final String obdaPath = "src/test/resources/mpboot/clustering/clustering.obda";
+    private static final String propertyPath = "/mpboot/clustering/clustering.properties";
 
     // Bootstrapping-info
-    protected String BASE_IRI = "http://semanticweb.org/labels/";
-    private static final String bootOwlPath = "src/test/resources/mpboot/labels/boot-labels.owl";
-    private static final String bootOBDAPath = "src/test/resources/mpboot/labels/boot-labels.obda";
+    private static final String BASE_IRI = "http://semanticweb.org/clustering/";
+    private static final String bootOwlPath = "src/test/resources/mpboot/clustering/boot-clustering.owl";
+    private static final String bootOBDAPath = "src/test/resources/mpboot/clustering/boot-clustering.obda";
 
-    // Bootstrapper Configuration File
-    private static final String CONF_FILE = "src/test/resources/mpboot/labels/boot-conf.json";
+    // Bootstrapper conf file
+    private static final String CONF_FILE = "src/test/resources/mpboot/clustering/boot-conf.json";
 
     @Test
-    public void testLabelsAndAliasesGeneration() {
+    public void testClusteringClasses() { // It also tests the order of arguments
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {
-            Dictionary dict = BootConfParser.parseDictionary(CONF_FILE);
-            boolean enableSH = BootConfParser.parseEnableSH(CONF_FILE);
-
             BootConf bootConf = new BootConf.Builder()
-                    .dictionary(dict)
-                    .enableSH(enableSH)
+                    .clusters(BootConfParser.parseClustering(CONF_FILE))
                     .build();
 
             Bootstrapper.BootstrappingResults results = MPBootTestsHelper.bootstrapMapping(initialConfiguration, bootConf, BASE_IRI, MPBootTestsHelper.Method.MPBOOT);
@@ -78,5 +73,4 @@ public class BootLabelsAndAliasesTest {
             e.printStackTrace();
         }
     }
-
 }

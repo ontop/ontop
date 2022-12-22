@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.repository.mpboot.testutils;
+package it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot.utils;
 
 public class WorkloadJsonEntry {
     private String query;

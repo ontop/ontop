@@ -1,14 +1,14 @@
-package it.unibz.inf.ontop.rdf4j.repository.mpboot;
+package it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.mpboot.testutils.WorkloadJsonEntry;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.MPBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
@@ -33,27 +33,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.docker.lightweight.postgresql.mpboot.utils.MPBootTestsHelper.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@PostgreSQLLightweightTest
 public class WorkloadTest {
 
     // Reference and to-be--compared files
-    private static final String referenceOBDA = "src/test/resources/bootstrapper.spider_flights/reference-spider_flights.obda";
-    private static final String referenceOWL = "src/test/resources/bootstrapper.spider_flights/reference-spider_flights.owl";
+    private static final String referenceOBDA = "src/test/resources/mpboot/spider_flights/reference-spider_flights.obda";
+    private static final String referenceOWL = "src/test/resources/mpboot/spider_flights/reference-spider_flights.owl";
 
     // Local Queries
-    private static final String testLocal = "src/test/resources/bootstrapper.spider_flights/spider_flights_queries_clean.json";
+    private static final String testLocal = "src/test/resources/mpboot/spider_flights/spider_flights_queries_clean.json";
 
     // DB-connection
-    private static final String owlPath = "src/test/resources/bootstrapper.spider_flights/spider_flight_2.owl";
-    private static final String obdaPath = "src/test/resources/bootstrapper.spider_flights/spider_flight_2.obda";
-    private static final String propertyPath = "src/test/resources/bootstrapper.spider_flights/spider_flight_2.properties";
+    private static final String owlPath = "src/test/resources/mpboot/spider_flights/spider_flight_2.owl";
+    private static final String obdaPath = "src/test/resources/mpboot/spider_flights/spider_flight_2.obda";
+    private static final String propertyPath = "/mpboot/spider_flights/spider_flight_2.properties";
 
     // Bootstrapping-info
     private static final String BASE_IRI = "http://semanticweb.org/flights/";
-    private static final String bootOwlPath = "src/test/resources/bootstrapper.spider_flights/boot-spider_flights.owl";
-    private static final String bootOBDAPath = "src/test/resources/bootstrapper.spider_flights/boot-spider_flights.obda";
+    private static final String bootOwlPath = "src/test/resources/mpboot/spider_flights/boot-spider_flights.owl";
+    private static final String bootOBDAPath = "src/test/resources/mpboot/spider_flights/boot-spider_flights.obda";
 
     private final static String sql1 = "SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRPORTS AS T3 ON T1.SourceAirport  =  T3.AirportCode WHERE T2.City  = \"Teramo\"";
     private final static String sql2 = "SELECT count(*) FROM \"FLIGHTS\" AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRPORTS AS T3 ON T1.SourceAirport  =  T3.AirportCode WHERE T2.City  = \"Teramo\""; // Quoted
@@ -72,18 +74,19 @@ public class WorkloadTest {
                 pairs.unite(parser.parseQuery(query)); // Side effect on empty
             }
 
-            OntopSQLOWLAPIConfiguration initialConfiguration = configureOntop();
+            OntopSQLOWLAPIConfiguration initialConfiguration = configure(propertyPath, owlPath, obdaPath);
             BootConf bootConf = new BootConf.Builder()
                     .joinPairs(pairs)
                     .enableSH(false)
                     .build();
-            Bootstrapper.BootstrappingResults results = bootstrapMPMapping(initialConfiguration, bootConf);
+
+            Bootstrapper.BootstrappingResults results = bootstrapMapping(initialConfiguration, bootConf, BASE_IRI, Method.MPBOOT);
 
             SQLPPMapping bootstrappedMappings = results.getPPMapping();
             OWLOntology boootstrappedOnto = results.getOntology();
 
             // Serialize
-            serializeMappingsAndOnto(bootstrappedMappings, boootstrappedOnto);
+            serializeMappingsAndOnto(bootstrappedMappings, boootstrappedOnto, bootOwlPath, bootOBDAPath);
         } catch (IOException | JSQLParserException | OWLOntologyStorageException | OWLOntologyCreationException |
                  MappingException | MappingBootstrappingException | InvalidQueryException e) {
             e.printStackTrace();
@@ -147,64 +150,5 @@ public class WorkloadTest {
         } catch (InvalidQueryException e) {
             e.printStackTrace();
         }
-    }
-
-    private static OntopSQLOWLAPIConfiguration configureOntop() {
-        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlPath)
-                .nativeOntopMappingFile(obdaPath)
-                .propertyFile(propertyPath)
-                .enableTestMode()
-                .build();
-
-        return configuration;
-    }
-
-    private static void serializeMappingsAndOnto(SQLPPMapping mapping, OWLOntology onto) throws IOException, OWLOntologyStorageException {
-
-        File bootOwlFile = new File(bootOwlPath);
-        File bootOBDAFile = new File(bootOBDAPath);
-
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
-        writer.write(bootOBDAFile, mapping);
-
-        onto.getOWLOntologyManager().saveOntology(onto, new OWLXMLDocumentFormat(), new FileDocumentTarget(bootOwlFile));
-    }
-
-    private static Bootstrapper.BootstrappingResults bootstrapMPMapping(OntopSQLOWLAPIConfiguration initialConfiguration,
-                                                                 BootConf bootConf)
-
-            throws OWLOntologyCreationException, MappingException, MappingBootstrappingException {
-
-        MPBootstrapper bootstrapper = (MPBootstrapper) Bootstrapper.mpBootstrapper();
-
-        // Create configuration here
-
-        // Davide> The bootstrappped mappings are appended to those already in "initialConfiguration"
-        Bootstrapper.BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI, bootConf);
-
-        return results;
-    }
-
-    private static List<String> getWorkloadQueries(String workloadFile) throws IOException {
-        String json = Files.lines(Paths.get(workloadFile)).collect(Collectors.joining(" "));
-
-        List<String> result = new ArrayList<>();
-
-        JsonElement jsonElement = JsonParser.parseString(json);
-
-        Gson g = new Gson();
-
-        if (jsonElement.isJsonArray()) {
-
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-
-            for (JsonElement element : jsonArray) {
-                String jsonStringElement = element.toString();
-                WorkloadJsonEntry workloadJsonEntry = g.fromJson(jsonStringElement, WorkloadJsonEntry.class);
-                result.add(workloadJsonEntry.getQuery());
-            }
-        }
-        return result;
     }
 }

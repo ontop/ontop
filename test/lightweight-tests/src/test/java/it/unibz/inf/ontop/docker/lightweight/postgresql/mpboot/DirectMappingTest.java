@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.Bootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.BootConf;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.bootconfparser.BootConfParser;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.util.mpbootstrapper.dictionary.Dictionary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -22,45 +20,37 @@ import java.io.IOException;
 import static org.junit.Assert.assertTrue;
 
 @PostgreSQLLightweightTest
-public class BootLabelsAndAliasesTest {
+public class DirectMappingTest {
     // Reference
-    private static final String referenceOBDAPath = "src/test/resources/mpboot/labels/reference-labels.obda";
-    private static final String referenceOWLPath = "src/test/resources/mpboot/labels/reference-labels.owl";
+    private static final String referenceOBDAPath = "src/test/resources/mpboot/direct_mapping/reference-direct_mapping.obda";
+    private static final String referenceOWLPath = "src/test/resources/mpboot/direct_mapping/reference-direct_mapping.owl";
 
     // DB-connection
-    private static final String owlPath = "src/test/resources/mpboot/labels/labels.owl";
-    private static final String obdaPath = "src/test/resources/mpboot/labels/labels.obda";
-    private static final String propertyPath = "/mpboot/labels/labels.properties";
+    private static final String owlPath = "src/test/resources/mpboot/direct_mapping/direct_mapping.owl";
+    private static final String obdaPath = "src/test/resources/mpboot/direct_mapping/direct_mapping.obda";
+    private static final String propertyPath = "/mpboot/direct_mapping/direct_mapping.properties";
 
     // Bootstrapping-info
-    protected String BASE_IRI = "http://semanticweb.org/labels/";
-    private static final String bootOwlPath = "src/test/resources/mpboot/labels/boot-labels.owl";
-    private static final String bootOBDAPath = "src/test/resources/mpboot/labels/boot-labels.obda";
-
-    // Bootstrapper Configuration File
-    private static final String CONF_FILE = "src/test/resources/mpboot/labels/boot-conf.json";
+    private static final String BASE_IRI = "http://semanticweb.org/skyserver/";
+    private static final String bootOwlPath = "src/test/resources/mpboot/direct_mapping/boot-direct_mapping.owl";
+    private static final String bootOBDAPath = "src/test/resources/mpboot/direct_mapping/boot-direct_mapping.obda";
 
     @Test
-    public void testLabelsAndAliasesGeneration() {
+    public void testDirectMapping() { // It also tests the order of arguments
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
+
+        BootConf bootConf = new BootConf.Builder().build();
+
         try {
-            Dictionary dict = BootConfParser.parseDictionary(CONF_FILE);
-            boolean enableSH = BootConfParser.parseEnableSH(CONF_FILE);
-
-            BootConf bootConf = new BootConf.Builder()
-                    .dictionary(dict)
-                    .enableSH(enableSH)
-                    .build();
-
-            Bootstrapper.BootstrappingResults results = MPBootTestsHelper.bootstrapMapping(initialConfiguration, bootConf, BASE_IRI, MPBootTestsHelper.Method.MPBOOT);
+            Bootstrapper.BootstrappingResults results = MPBootTestsHelper.bootstrapMapping(initialConfiguration, bootConf, BASE_IRI, MPBootTestsHelper.Method.DIRECT);
 
             SQLPPMapping bootstrappedMappings = results.getPPMapping();
             OWLOntology boootstrappedOnto = results.getOntology();
 
             MPBootTestsHelper.serializeMappingsAndOnto(bootstrappedMappings, boootstrappedOnto, bootOwlPath, bootOBDAPath);
-
-        } catch (IOException | OWLOntologyCreationException | MappingException | MappingBootstrappingException | OWLOntologyStorageException e) {
+        } catch (OWLOntologyCreationException | MappingException | MappingBootstrappingException | IOException |
+                 OWLOntologyStorageException e) {
             e.printStackTrace();
         }
 
@@ -78,5 +68,4 @@ public class BootLabelsAndAliasesTest {
             e.printStackTrace();
         }
     }
-
 }
