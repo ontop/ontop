@@ -42,7 +42,7 @@ public class DirectMappingTest {
     @Test
     public void testDirectMapping() { // It also tests the order of arguments
 
-        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         BootConf bootConf = new BootConf.Builder().build();
 

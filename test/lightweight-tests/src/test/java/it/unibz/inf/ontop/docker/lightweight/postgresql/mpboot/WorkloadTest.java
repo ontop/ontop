@@ -57,7 +57,7 @@ public class WorkloadTest {
     @Test
     public void testFlightsBootstrapping(){
 
-        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
 
         WorkloadParser parser = new WorkloadParser();
 

@@ -48,7 +48,7 @@ public class OrchestraCoalesceTest {
     @Test
     public void testOrchestraBootstrapping(){
 
-        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
 
         try {
             BootConf.NullValue nullValue = BootConfParser.parseNullValue(bootConfFile);
