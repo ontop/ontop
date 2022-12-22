@@ -48,7 +48,7 @@ public class BootLabelsAndAliasesTest {
     @Test
     public void testLabelsAndAliasesGeneration() {
 
-        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {

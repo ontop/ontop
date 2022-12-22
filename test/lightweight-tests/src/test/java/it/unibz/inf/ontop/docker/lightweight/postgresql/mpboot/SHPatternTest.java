@@ -47,7 +47,7 @@ public class SHPatternTest {
     @Test
     public void testMultipleInheritance() { // It also tests the order of arguments
 
-        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         OntopSQLOWLAPIConfiguration initialConfiguration = MPBootTestsHelper.configure(propertyPath, owlPath, obdaPath);
         try {

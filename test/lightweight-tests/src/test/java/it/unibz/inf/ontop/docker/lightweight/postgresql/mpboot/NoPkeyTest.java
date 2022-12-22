@@ -54,7 +54,7 @@ public class NoPkeyTest {
     @Test
     public void testWta_1Bootstrapping(){
 
-        LOGGER.error(new Object(){}.getClass().getEnclosingMethod().getName());
+        LOGGER.debug(new Object(){}.getClass().getEnclosingMethod().getName());
 
         WorkloadParser parser = new WorkloadParser();
 
