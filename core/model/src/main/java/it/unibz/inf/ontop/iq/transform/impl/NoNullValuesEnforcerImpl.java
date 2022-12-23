@@ -107,15 +107,15 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                             e -> e.getValue().simplifyAsGuaranteedToBeNonNull()
                     ));
 
-            ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = initialSubstitution.getImmutableMap().entrySet().stream()
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(initialSubstitution.getImmutableMap().entrySet().stream()
                     .map(e -> Optional.ofNullable(updatedEntryMap.get(e.getKey()))
                             .map(s -> Maps.immutableEntry(e.getKey(), s.getSimplifiedTerm()))
                             .orElse(e))
-                    .collect(ImmutableCollectors.toMap());
+                    .collect(ImmutableCollectors.toMap()));
 
-            ConstructionNode newConstructionNode = initialSubstitution.getImmutableMap().equals(newSubstitutionMap)
+            ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
                     ? rootNode
-                    : iqFactory.createConstructionNode(rootNode.getVariables(), substitutionFactory.getSubstitution(newSubstitutionMap));
+                    : iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution);
 
             ImmutableSet<Variable> simplifiableChildVariables = Sets.union(
                     Sets.difference(rootNode.getVariables(), initialSubstitution.getDomain()),

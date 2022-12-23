@@ -62,7 +62,7 @@ public class JoinLikeChildBindingLifter {
                 .collect(ImmutableCollectors.toSet());
 
         InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                nonDownPropagableFragment.getImmutableMap().keySet().stream()
+                nonDownPropagableFragment.getDomain().stream()
                         .filter(otherChildrenVariables::contains),
                 variableGenerator::generateNewVariableFromVar);
 

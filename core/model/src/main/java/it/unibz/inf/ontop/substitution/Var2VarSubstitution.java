@@ -8,8 +8,11 @@ import it.unibz.inf.ontop.model.term.Variable;
  */
 public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
 
-    @Override
-    Variable applyToVariable(Variable variable);
+    @Override // more specific return type
+    default Variable applyToVariable(Variable variable) {
+        Variable r = get(variable);
+        return r == null ? variable : r;
+    }
 
     /**
      * Guarantees that the term type is preserved

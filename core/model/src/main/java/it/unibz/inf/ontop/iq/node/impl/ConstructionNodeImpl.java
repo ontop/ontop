@@ -106,7 +106,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         // Substitution to non-projected variables is incorrect
-        if (substitution.getImmutableMap().values().stream()
+        if (substitution.getRange().stream()
                 .filter(v -> v instanceof Variable)
                 .map(v -> (Variable) v)
                 .anyMatch(v -> !projectedVariables.contains(v))) {
@@ -121,7 +121,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                                           ImmutableSubstitution<ImmutableTerm> substitution) {
         ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
 
-        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
+        Stream<Variable> variablesRequiredByBindings = substitution.getRange().stream()
                 .flatMap(ImmutableTerm::getVariableStream);
 
         //return only the variables that are also used in the bindings for the child of the construction node
@@ -157,10 +157,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         collectedVariableBuilder.addAll(projectedVariables);
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
-
-        collectedVariableBuilder.addAll(substitutionMap.keySet());
-        for (ImmutableTerm term : substitutionMap.values()) {
+        collectedVariableBuilder.addAll(substitution.getDomain());
+        for (ImmutableTerm term : substitution.getRange()) {
             if (term instanceof Variable) {
                 collectedVariableBuilder.add((Variable)term);
             }
@@ -351,7 +349,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(comb -> fullRenaming.filter(comb::contains))
                 // Remove non-injective substitutions
                 .filter(s -> {
-                    ImmutableCollection<Variable> values = s.getImmutableMap().values();
+                    ImmutableCollection<Variable> values = s.getRange();
                     return values.size() == ImmutableSet.copyOf(values).size();
                 })
                 // Inverse

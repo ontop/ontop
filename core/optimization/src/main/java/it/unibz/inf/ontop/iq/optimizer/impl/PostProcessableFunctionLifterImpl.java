@@ -312,7 +312,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
             ImmutableTerm liftedDefinition = renamingSubstitution.apply(originalDefinition);
-            ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(renamingSubstitution.getImmutableMap().values());
+            ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(renamingSubstitution.getRange());
 
             return new ChildDefinitionLift(partiallyPaddedChild, freshVariables, liftedDefinition);
         }

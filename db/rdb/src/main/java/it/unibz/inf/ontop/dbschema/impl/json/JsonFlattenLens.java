@@ -145,7 +145,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
                 dbParameters.getDBTypeFactory()
         );
 
-        ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, extractionSubstitution.getImmutableMap().keySet()));
+        ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(union(retainedVariables, extractionSubstitution.getDomain()));
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), cs);
 

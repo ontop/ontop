@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.substitution;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * TODO: find a better name
@@ -20,28 +19,47 @@ public interface ProtoSubstitution<T extends ImmutableTerm> {
 
     ImmutableMap<Variable, T> getImmutableMap();
 
-    boolean isDefining(Variable variable);
+    default boolean isDefining(Variable variable) { return getImmutableMap().containsKey(variable); }
 
-    ImmutableSet<Variable> getDomain();
+    default ImmutableSet<Variable> getDomain() { return getImmutableMap().keySet(); }
 
-    T get(Variable variable);
+    default ImmutableCollection<T> getRange() { return getImmutableMap().values(); }
 
-    boolean isEmpty();
+    default T get(Variable variable) { return getImmutableMap().get(variable); }
+
+    default boolean isEmpty() { return getImmutableMap().isEmpty(); }
 
     /**
      * Applies the substitution to an immutable term.
      */
-    ImmutableTerm apply(ImmutableTerm term);
+    default ImmutableTerm apply(ImmutableTerm term) {
+        if (term instanceof Constant) {
+            return term;
+        }
+        if (term instanceof Variable) {
+            return applyToVariable((Variable) term);
+        }
+        if (term instanceof ImmutableFunctionalTerm) {
+            return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
+        }
+        throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
+    }
 
     /**
      * This method can be applied to simple variables
      */
-    ImmutableTerm applyToVariable(Variable variable);
+    default ImmutableTerm applyToVariable(Variable variable) {
+        T r = get(variable);
+        return r == null ? variable : r;
+    }
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
-    ImmutableList<ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
-
+    default ImmutableList<ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
+        return terms.stream()
+                .map(this::apply)
+                .collect(ImmutableCollectors.toList());
+    }
 }

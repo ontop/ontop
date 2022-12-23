@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -51,16 +52,16 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
-            ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
+                    constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
                     .map(e -> Optional.ofNullable(typedNullMap.get(e.getKey()))
                             .filter(n -> e.getValue().isNull())
                             .map(n -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) n))
                             .orElse(e))
-                    .collect(ImmutableCollectors.toMap());
+                    .collect(ImmutableCollectors.toMap()));
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                    constructionNode.getVariables(),
-                    substitutionFactory.getSubstitution(newSubstitutionMap));
+                    constructionNode.getVariables(), newSubstitution);
 
             return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree) child).getChild());
         }

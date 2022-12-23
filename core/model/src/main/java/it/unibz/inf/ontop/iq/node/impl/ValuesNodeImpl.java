@@ -238,8 +238,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.getFragment(GroundFunctionalTerm.class);
         ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.getFragment(Constant.class);
         ImmutableSubstitution<Variable> variableSubstitutionFragment = descendingSubstitution.getFragment(Variable.class);
-        Var2VarSubstitution var2varSubstitutionFragment = substitutionFactory.getVar2VarSubstitution(
-                variableSubstitutionFragment.getImmutableMap());
 
         if (!functionalSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = addProjectedVariablesToConstruction(descendingSubstitution, constructionAndFilterAndValues);
@@ -249,6 +247,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
         if (!variableSubstitutionFragment.isEmpty()) {
+            Var2VarSubstitution var2varSubstitutionFragment = substitutionFactory.getVar2VarSubstitution(
+                    variableSubstitutionFragment.getImmutableMap());
             constructionAndFilterAndValues = substituteVariables(var2varSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }
         return buildTreeFromCFV(constructionAndFilterAndValues);
@@ -291,7 +291,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         int formerArity = formerOrderedVariables.size();
 
         ImmutableSet<Integer> substitutionVariableIndices = IntStream.range(0, formerArity)
-                .filter(i -> substitution.getImmutableMap().containsKey(formerOrderedVariables.get(i)))
+                .filter(i -> substitution.isDefining(formerOrderedVariables.get(i)))
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 

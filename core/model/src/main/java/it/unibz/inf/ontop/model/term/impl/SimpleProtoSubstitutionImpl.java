@@ -22,33 +22,7 @@ public class SimpleProtoSubstitutionImpl<T extends ImmutableTerm> extends Abstra
     }
 
     @Override
-    public T get(Variable var) {
-        return map.get(var);
-    }
-
-    @Override
     public ImmutableMap<Variable, T> getImmutableMap() {
         return map;
-    }
-
-    @Override
-    public boolean isDefining(Variable variable) {
-        return map.containsKey(variable);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getDomain() {
-        return map.keySet();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public ImmutableTerm applyToVariable(Variable variable) {
-        T v = map.get(variable);
-        return v == null ? variable : v;
     }
 }

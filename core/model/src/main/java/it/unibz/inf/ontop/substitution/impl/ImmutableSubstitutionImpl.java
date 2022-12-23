@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -27,34 +26,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public T get(Variable var) {
-        return map.get(var);
-    }
-
-    @Override
     public ImmutableMap<Variable, T> getImmutableMap() {
         return map;
-    }
-
-    @Override
-    public boolean isDefining(Variable variable) {
-        return map.containsKey(variable);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getDomain() {
-        return map.keySet();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public ImmutableTerm applyToVariable(Variable variable) {
-        T v = map.get(variable);
-        return v == null ? variable : v;
     }
 
     @Override

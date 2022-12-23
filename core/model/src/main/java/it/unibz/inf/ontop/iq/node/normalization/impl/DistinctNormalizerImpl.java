@@ -179,7 +179,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
     private boolean isConstructionNodeWithoutChildVariablesAndDeterministic(ConstructionNode constructionNode) {
         return constructionNode.getChildVariables().isEmpty()
-                && (constructionNode.getSubstitution().getImmutableMap().values()
+                && (constructionNode.getSubstitution().getRange()
                 .stream().allMatch(this::isConstantOrDeterministic));
     }
 

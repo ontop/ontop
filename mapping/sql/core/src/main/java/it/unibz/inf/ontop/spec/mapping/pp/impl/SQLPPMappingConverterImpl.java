@@ -121,7 +121,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                         .collect(ImmutableCollectors.toMap()));
 
         IQTree selectTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(spoSubstitution.getImmutableMap().values().stream()
+                iqFactory.createConstructionNode(spoSubstitution.getRange().stream()
                         .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet()), selectSubstitution),
                 tree);
 

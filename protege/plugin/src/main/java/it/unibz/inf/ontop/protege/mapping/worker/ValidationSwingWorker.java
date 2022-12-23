@@ -142,7 +142,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
 
         // a very lax version of column matching - quotation and case are ignored
         return  targetAtoms.stream()
-                .flatMap(a -> a.getSubstitution().getImmutableMap().values().stream())
+                .flatMap(a -> a.getSubstitution().getRange().stream())
                 .flatMap(ImmutableTerm::getVariableStream)
                 .map(Variable::getName)
                 .distinct()

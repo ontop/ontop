@@ -533,7 +533,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<Variable> leftVariables = leftChild.getVariables();
         ImmutableSet<Variable> rightVariables = rightChild.getVariables();
         ImmutableSet<Variable> domain = descendingSubstitution.getDomain();
-        ImmutableCollection<? extends VariableOrGroundTerm> range = descendingSubstitution.getImmutableMap().values();
+        ImmutableCollection<? extends VariableOrGroundTerm> range = descendingSubstitution.getRange();
 
         return rightVariables.stream()
                 .filter(v -> !leftVariables.contains(v))

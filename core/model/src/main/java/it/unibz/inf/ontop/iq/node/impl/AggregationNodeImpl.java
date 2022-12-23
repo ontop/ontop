@@ -62,7 +62,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
                                                                ImmutableSubstitution<ImmutableFunctionalTerm> substitution) {
         return Sets.union(groupingVariables,
-                substitution.getImmutableMap().values().stream()
+                substitution.getRange().stream()
                         .flatMap(ImmutableTerm::getVariableStream)
                         .collect(ImmutableCollectors.toSet())).immutableCopy();
     }
@@ -349,7 +349,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
      */
     @Override
     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return substitution.getImmutableMap().keySet();
+        return substitution.getDomain();
     }
 
     @Override

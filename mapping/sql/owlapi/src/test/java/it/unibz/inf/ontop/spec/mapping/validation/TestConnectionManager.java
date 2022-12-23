@@ -126,7 +126,7 @@ public class TestConnectionManager implements Closeable {
                 .flatMap(query -> Optional.of(query.getTree().getRootNode())
                         .filter(r -> r instanceof ConstructionNode)
                         .map(r -> (ConstructionNode)r)
-                        .map(r -> r.getSubstitution().getImmutableMap().values().stream())
+                        .map(r -> r.getSubstitution().getRange().stream())
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)

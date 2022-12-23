@@ -144,8 +144,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         }
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = replaceRDFByDBTermsInSubstitution(
-                    constructionNode.getSubstitution(), rdfTypes);
+            ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform((v, t) -> replaceRDFByDBTerm(t, rdfTypes.get(v)));
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution),
                     ((UnaryIQTree)tree).getChild()
@@ -160,10 +160,10 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         QueryNode rootNode = rdfTree.getRootNode();
         if (rootNode instanceof ConstructionNode) {
             // NB: should not include any non-projected variable (illegal IQ)
-            ImmutableMap<Variable, ImmutableTerm> substitutionMap = ((ConstructionNode) rootNode).getSubstitution().getImmutableMap();
-            Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitutionMap.keySet());
+            ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+            Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
             if (missingVariables.isEmpty())
-                return substitutionMap;
+                return substitution.getImmutableMap();
             throw new NotFullyTranslatableToNativeQueryException(String.format(
                     "its variables %s are missing an independent definition",
                     missingVariables));
@@ -178,16 +178,6 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         else {
             throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
         }
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> replaceRDFByDBTermsInSubstitution(
-            ImmutableSubstitution<ImmutableTerm> substitution, ImmutableMap<Variable, RDFTermType> rdfTypes) {
-        ImmutableMap<Variable, ImmutableTerm> newMap = substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> replaceRDFByDBTerm(e.getValue(), rdfTypes.get(e.getKey()))));
-
-        return substitutionFactory.getSubstitution(newMap);
     }
 
     private ImmutableTerm replaceRDFByDBTerm(ImmutableTerm definition,

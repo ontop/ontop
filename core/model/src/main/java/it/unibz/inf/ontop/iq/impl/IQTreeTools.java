@@ -49,7 +49,7 @@ public class IQTreeTools {
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
 
-        if (reducedSubstitution.getImmutableMap().values().stream().anyMatch(value ->
+        if (reducedSubstitution.getRange().stream().anyMatch(value ->
                 value.equals(termFactory.getNullConstant()))) {
             throw new UnsatisfiableDescendingSubstitutionException();
         }

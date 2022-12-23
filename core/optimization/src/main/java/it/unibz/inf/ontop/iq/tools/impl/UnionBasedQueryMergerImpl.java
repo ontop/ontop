@@ -65,8 +65,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     InjectiveVar2VarSubstitution disjointVariableSetRenaming = substitutionFactory.generateNotConflictingRenaming(
                             variableGenerator, def.getTree().getKnownVariables());
 
-                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(
-                            disjointVariableSetRenaming.getImmutableMap().values());
+                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(disjointVariableSetRenaming.getRange());
 
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
                             atomFactory.getDistinctVariableOnlyDataAtom(def.getProjectionAtom().getPredicate(),

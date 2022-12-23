@@ -802,7 +802,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ConstructionNode constructionNode = (ConstructionNode) rootNode;
 
         //NB: RDF constants are already expected to be decomposed
-        return constructionNode.getSubstitution().getImmutableMap().values().stream()
+        return constructionNode.getSubstitution().getRange().stream()
                 .allMatch(v -> (v instanceof DBConstant) || v.isNull());
     }
 

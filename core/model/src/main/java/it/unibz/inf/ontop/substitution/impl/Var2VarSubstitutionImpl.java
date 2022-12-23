@@ -29,22 +29,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public Variable applyToVariable(Variable variable) {
-        Variable r = map.get(variable);
-        return r == null ? variable : r;
-    }
-
-    @Override
-    public Variable get(Variable var) {
-        return map.get(var);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
@@ -52,16 +36,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public ImmutableMap<Variable, Variable> getImmutableMap() {
         return map;
-    }
-
-    @Override
-    public boolean isDefining(Variable variable) {
-        return map.containsKey(variable);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getDomain() {
-        return map.keySet();
     }
 
     @Override

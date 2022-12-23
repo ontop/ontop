@@ -427,7 +427,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
 
     private ImmutableExpression getFilterConditionForDifference(InjectiveVar2VarSubstitution sub) {
-        return termFactory.getConjunction(sub.getImmutableMap().values().stream()
+        return termFactory.getConjunction(sub.getRange().stream()
                 .map(termFactory::getDBIsNull)
                 .collect(ImmutableCollectors.toList()));
     }
@@ -824,7 +824,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         leftQuery.getVariables().stream(),
                         rightQuery.getVariables().stream()
                 ).filter(v -> !toCoalesce.contains(v)),
-                topSubstitution.getImmutableMap().keySet().stream())
+                topSubstitution.getDomain().stream())
                 .collect(ImmutableCollectors.toSet());
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
@@ -1174,7 +1174,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         if (it.hasNext()) {
             ImmutableSubstitution<ImmutableTerm> sub = it.next();
             TranslationResult child = translateExtensionElems(it, subquery, externalBindings);
-            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub.getImmutableMap(), child.nullableVariables);
+            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub, child.nullableVariables);
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(
                     Sets.union(
@@ -1234,12 +1234,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return new NonProjVarRenamings(leftSubstitution, rightSubstitution);
     }
 
-    private ImmutableSet<Variable> getNewNullableVars(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
-        return sub.entrySet().stream()
-                .filter(e -> e.getValue().getVariableStream()
+    private ImmutableSet<Variable> getNewNullableVars(ImmutableSubstitution<ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
+        return sub.filter((v, t) -> t.getVariableStream()
                         .anyMatch(nullableVariables::contains))
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
+                .getDomain();
     }
 
     private List<Map<Variable, ImmutableTerm>> mergeVarDefs(UnmodifiableIterator<VarDef> it) {
