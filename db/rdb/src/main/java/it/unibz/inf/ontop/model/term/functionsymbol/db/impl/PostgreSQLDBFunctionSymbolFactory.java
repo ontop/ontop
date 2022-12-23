@@ -509,4 +509,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("decode(%s, 'hex')", termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace3() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_REGEXP_REPLACE_3",
+                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootDBType), dbStringType, false,
+                ((terms, termConverter, termFactory) -> String.format("regexp_replace(%s,%s,%s,'g')",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(2)))));
+    }
 }
