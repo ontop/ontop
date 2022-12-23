@@ -3,14 +3,12 @@ package it.unibz.inf.ontop.substitution.impl;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -131,64 +129,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
-
-    @Override
-    public ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables) {
-        if (priorityVariables.isEmpty() || isEmpty()) {
-            return this;
-        }
-
-        ImmutableMap<Variable, T> localMap = getImmutableMap();
-        ImmutableSet<Variable> domain = getDomain();
-
-        if (localMap.values().stream()
-                .flatMap(ImmutableTerm::getVariableStream)
-                .anyMatch(domain::contains)) {
-            throw new UnsupportedOperationException("The orientate() method requires the domain and the range to be disjoint");
-        }
-
-        ImmutableMap<Variable, Variable> renamingMap = localMap.entrySet().stream()
-                // Will produce some results only if T is compatible with Variable
-                .filter(e -> e.getValue() instanceof Variable)
-                .filter(e -> {
-                    int replacedVariableIndex = priorityVariables.indexOf(e.getKey());
-                    int targetVariableIndex = priorityVariables.indexOf(e.getValue());
-                    return replacedVariableIndex >= 0 && ((targetVariableIndex < 0)
-                            || (replacedVariableIndex < targetVariableIndex));
-                })
-                .collect(ImmutableCollectors.toMap(
-                        e -> (Variable) e.getValue(),
-                        Map.Entry::getKey,
-                        (v1, v2) -> priorityVariables.indexOf(v1) <= priorityVariables.indexOf(v2) ? v1 : v2
-                ));
-
-        /*
-         * Applies the renaming
-         */
-        if (renamingMap.isEmpty()) {
-            return this;
-        }
-        else {
-            Var2VarSubstitution renamingSubstitution = substitutionFactory.getVar2VarSubstitution(renamingMap);
-
-            ImmutableMap<Variable, T> orientedMap = Stream.concat(
-                    localMap.entrySet().stream()
-                            /*
-                             * Removes entries that will be reversed
-                             */
-                            .filter(e -> !Optional.ofNullable(renamingMap.get(e.getValue()))
-                                    .filter(newValue -> newValue.equals(e.getKey()))
-                                    .isPresent()),
-                    renamingMap.entrySet().stream()
-                            .map(e -> (Map.Entry<Variable, T>) e))
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> renamingSubstitution.applyToTerm(e.getValue())
-                    ));
-
-            return constructNewSubstitution(orientedMap);
-        }
-    }
 
     @Override
     public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {

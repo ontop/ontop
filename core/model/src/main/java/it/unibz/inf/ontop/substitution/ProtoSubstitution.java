@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.Variable;
  *
  * Minimal interface for a substitution
  *
- * May not depend on the AtomFactory and SubstitutionFactory
+ * May not depend on SubstitutionFactory
  *
  */
 public interface ProtoSubstitution<T extends ImmutableTerm> {

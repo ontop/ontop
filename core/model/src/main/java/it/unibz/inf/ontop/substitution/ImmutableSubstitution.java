@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
  *
  * See SubstitutionFactory for creating new instances
  *
- * NB: implementations depend of the AtomFactory
  */
 public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSubstitution<T> {
 
@@ -50,17 +49,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      * Because of the optional cannot be overloaded.
      */
     Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
-
-    /**
-     * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
-     * <p>
-     * Acts on equality between variables.
-     * <p>
-     * The first variable in the list has the highest priority.
-     * <p>
-     * This method requires the domain and the range to be disjoint.
-     */
-    ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
