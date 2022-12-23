@@ -21,10 +21,10 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
     }
 
     @Override
-    public void saturateForeignKeys(ImmutableList<OntopViewDefinition> viewDefinitions,
+    public void saturateForeignKeys(ImmutableList<Lens> viewDefinitions,
                                     ImmutableMultimap<RelationID, RelationID> childrenMultimap,
                                     ImmutableMap<RelationID, JsonView> jsonViewMap) {
-        ImmutableMap<RelationID, OntopViewDefinition> viewDefinitionMap = viewDefinitions.stream()
+        ImmutableMap<RelationID, Lens> viewDefinitionMap = viewDefinitions.stream()
                 .collect(ImmutableCollectors.toMap(
                         NamedRelationDefinition::getID,
                         d -> d));
@@ -33,18 +33,18 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
                 .forEach(v -> saturate(v, childrenMultimap, jsonViewMap, viewDefinitionMap));
     }
 
-    private void saturate(OntopViewDefinition view, ImmutableMultimap<RelationID, RelationID> childrenMultimap,
+    private void saturate(Lens view, ImmutableMultimap<RelationID, RelationID> childrenMultimap,
                           ImmutableMap<RelationID, JsonView> jsonViewMap,
-                          ImmutableMap<RelationID, OntopViewDefinition> viewDefinitionMap) {
+                          ImmutableMap<RelationID, Lens> viewDefinitionMap) {
         view.getForeignKeys()
                 .forEach(fk -> deriveFK(view, fk, childrenMultimap, jsonViewMap, viewDefinitionMap));
 
     }
 
-    private void deriveFK(OntopViewDefinition view, ForeignKeyConstraint foreignKey,
+    private void deriveFK(Lens view, ForeignKeyConstraint foreignKey,
                           ImmutableMultimap<RelationID, RelationID> childrenMultimap,
                           ImmutableMap<RelationID, JsonView> jsonViewMap,
-                          ImmutableMap<RelationID, OntopViewDefinition> viewDefinitionMap) {
+                          ImmutableMap<RelationID, Lens> viewDefinitionMap) {
         NamedRelationDefinition targetRelation = foreignKey.getReferencedRelation();
         RelationID targetRelationId = targetRelation.getID();
         if (childrenMultimap.containsKey(targetRelationId)) {
@@ -61,16 +61,16 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
     /**
      * TODO: make it recursive so as to look for the higher level views
      */
-    private void deriveFKTarget(OntopViewDefinition sourceView, ForeignKeyConstraint foreignKey, RelationID childIdOfTarget,
+    private void deriveFKTarget(Lens sourceView, ForeignKeyConstraint foreignKey, RelationID childIdOfTarget,
                                 ImmutableList<Attribute> targetAttributes,
                                 ImmutableMultimap<RelationID, RelationID> childrenMultimap,
                                 ImmutableMap<RelationID, JsonView> jsonViewMap,
-                                ImmutableMap<RelationID, OntopViewDefinition> viewDefinitionMap) {
+                                ImmutableMap<RelationID, Lens> viewDefinitionMap) {
         if ((!jsonViewMap.containsKey(childIdOfTarget)) || !viewDefinitionMap.containsKey(childIdOfTarget))
             // TODO: log a warning, because children are expected to be views
             return;
 
-        OntopViewDefinition childRelation = viewDefinitionMap.get(childIdOfTarget);
+        Lens childRelation = viewDefinitionMap.get(childIdOfTarget);
 
         jsonViewMap.get(childIdOfTarget).getAttributesIncludingParentOnes(
                 childRelation,
@@ -78,8 +78,8 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
                 .forEach(as -> addForeignKey(sourceView, foreignKey, childRelation, as));
     }
 
-    private void addForeignKey(OntopViewDefinition sourceView, ForeignKeyConstraint initialFK,
-                               OntopViewDefinition targetRelation, ImmutableList<Attribute> targetAttributes) {
+    private void addForeignKey(Lens sourceView, ForeignKeyConstraint initialFK,
+                               Lens targetRelation, ImmutableList<Attribute> targetAttributes) {
         // Check if already existing
         if (sourceView.getForeignKeys().stream()
                 .filter(fk -> fk.getReferencedRelation().equals(targetRelation))

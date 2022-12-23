@@ -15,13 +15,13 @@ public class LensParsingTest {
     @Test
     public void testValidPersonBasicLenses() throws Exception {
 
-        ImmutableSet<OntopViewDefinition> lenses = loadLensesH2("src/test/resources/person/basic_views.json",
+        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/person/basic_views.json",
                 "src/test/resources/person/person.db-extract.json");
     }
 
     @Test
     public void testValidProfBasicLenses() throws Exception {
-        ImmutableSet<OntopViewDefinition> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views.json",
+        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views.json",
                 "src/test/resources/prof/prof.db-extract.json");
     }
 
@@ -30,7 +30,7 @@ public class LensParsingTest {
      */
     @Test(expected = MetadataExtractionException.class)
     public void testValidProfBasicLenses_MissingFDAttributes() throws Exception {
-        ImmutableSet<OntopViewDefinition> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
+        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
@@ -39,12 +39,12 @@ public class LensParsingTest {
      */
     @Test(expected = MetadataExtractionException.class)
     public void testValidProfBasicLenses_MissingUCAttributes() throws Exception {
-        ImmutableSet<OntopViewDefinition> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
+        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
-    public static ImmutableSet<OntopViewDefinition> loadLensesH2(String viewFilePath,
-                                                                 String dbMetadataFilePath)
+    public static ImmutableSet<Lens> loadLensesH2(String viewFilePath,
+                                                  String dbMetadataFilePath)
             throws Exception {
 
         return loadViewDefinitions(
@@ -58,7 +58,7 @@ public class LensParsingTest {
     }
 
 
-    public static ImmutableSet<OntopViewDefinition> loadViewDefinitionsPostgres(String viewFilePath, String dbMetadataFilePath)
+    public static ImmutableSet<Lens> loadViewDefinitionsPostgres(String viewFilePath, String dbMetadataFilePath)
             throws Exception {
         return loadViewDefinitions(
                 viewFilePath,
@@ -70,7 +70,7 @@ public class LensParsingTest {
         );
     }
 
-    private static ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath, String dbMetadataFilePath, OntopSQLCoreConfiguration configuration) throws Exception {
+    private static ImmutableSet<Lens> loadViewDefinitions(String viewFilePath, String dbMetadataFilePath, OntopSQLCoreConfiguration configuration) throws Exception {
         Injector injector = configuration.getInjector();
         SerializedMetadataProvider.Factory serializedMetadataProviderFactory = injector.getInstance(SerializedMetadataProvider.Factory.class);
         LensMetadataProvider.Factory viewMetadataProviderFactory = injector.getInstance(LensMetadataProvider.Factory.class);
@@ -88,8 +88,8 @@ public class LensParsingTest {
         ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(viewMetadataProvider);
 
         return metadata.getAllRelations().stream()
-                .filter(r -> r instanceof OntopViewDefinition)
-                .map(r -> (OntopViewDefinition) r)
+                .filter(r -> r instanceof Lens)
+                .map(r -> (Lens) r)
                 .collect(ImmutableCollectors.toSet());
 
     }

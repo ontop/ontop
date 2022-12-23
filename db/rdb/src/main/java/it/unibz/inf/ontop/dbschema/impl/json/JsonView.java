@@ -57,10 +57,10 @@ public abstract class JsonView extends JsonOpenObject {
         this.nonNullConstraints = nonNullConstraints;
     }
 
-    public abstract OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+    public abstract Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    public abstract void insertIntegrityConstraints(OntopViewDefinition relation,
+    public abstract void insertIntegrityConstraints(Lens relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
                                                     MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
 
@@ -73,7 +73,7 @@ public abstract class JsonView extends JsonOpenObject {
      * Parent attributes are expected to all come from the same parent.
      */
     public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
-            OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes);
+            Lens lens, ImmutableList<Attribute> parentAttributes);
 
     protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();

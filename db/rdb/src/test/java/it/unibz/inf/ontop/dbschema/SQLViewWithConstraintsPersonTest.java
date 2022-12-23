@@ -13,7 +13,7 @@ public class SQLViewWithConstraintsPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/sql_views_with_constraints.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public SQLViewWithConstraintsPersonTest() throws Exception {
     }

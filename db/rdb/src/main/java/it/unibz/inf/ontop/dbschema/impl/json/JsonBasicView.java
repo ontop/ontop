@@ -43,12 +43,12 @@ public class JsonBasicView extends JsonBasicOrJoinView {
      * TODO: support duplication of the column (not just renamings)
      */
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
                                                                                     ImmutableList<Attribute> parentAttributes) {
         if (filterExpression != null && (!filterExpression.isEmpty()))
             // TODO: log a warning
             return ImmutableList.of();
 
-        return getDerivedFromParentAttributes(ontopViewDefinition, parentAttributes);
+        return getDerivedFromParentAttributes(lens, parentAttributes);
     }
 }

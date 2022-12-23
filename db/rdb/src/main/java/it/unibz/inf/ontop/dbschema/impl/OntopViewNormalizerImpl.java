@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.OntopViewDefinition;
+import it.unibz.inf.ontop.dbschema.Lens;
 import it.unibz.inf.ontop.dbschema.OntopViewNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -20,7 +20,7 @@ public class OntopViewNormalizerImpl implements OntopViewNormalizer {
     }
 
     @Override
-    public void normalize(OntopViewDefinition viewDefinition) {
+    public void normalize(Lens viewDefinition) {
         IQ initialIQ = viewDefinition.getIQ();
         IQ newIQ = normalizeIQ(viewDefinition.getIQ());
 

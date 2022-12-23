@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.iq.view.impl;
+package it.unibz.inf.ontop.iq.lens.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
-import it.unibz.inf.ontop.dbschema.OntopViewDefinition;
+import it.unibz.inf.ontop.iq.lens.LensUnfolder;
+import it.unibz.inf.ontop.dbschema.Lens;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -25,13 +24,13 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 
-public class OntopViewUnfolderImpl implements OntopViewUnfolder {
+public class LensUnfolderImpl implements LensUnfolder {
 
     protected final CoreSingletons coreSingletons;
     protected final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected OntopViewUnfolderImpl(CoreSingletons coreSingletons) {
+    protected LensUnfolderImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
     }
@@ -50,7 +49,7 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
     }
 
     protected IQTree transformTree(IQTree tree, VariableGenerator variableGenerator, int maxLevel) {
-        return new MaxLevelViewUnfoldingTransformer(maxLevel, variableGenerator, coreSingletons)
+        return new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator, coreSingletons)
                 .transform(tree);
     }
 
@@ -60,8 +59,8 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
     private int extractMaxLevel(IQTree tree) {
         if (tree.getRootNode() instanceof ExtensionalDataNode) {
             RelationDefinition relationDefinition = ((ExtensionalDataNode) tree.getRootNode()).getRelationDefinition();
-            return (relationDefinition instanceof OntopViewDefinition)
-                    ? ((OntopViewDefinition) relationDefinition).getLevel()
+            return (relationDefinition instanceof Lens)
+                    ? ((Lens) relationDefinition).getLevel()
                     : 0;
         }
         else {
@@ -73,14 +72,14 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
     }
 
 
-    protected static class MaxLevelViewUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected static class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         protected final int maxLevel;
         protected final VariableGenerator variableGenerator;
         protected final SubstitutionFactory substitutionFactory;
         protected final QueryTransformerFactory transformerFactory;
 
-        protected MaxLevelViewUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator,
+        protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator,
                                                    CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.maxLevel = maxLevel;
@@ -92,11 +91,11 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
             RelationDefinition relationDefinition = dataNode.getRelationDefinition();
-            if (relationDefinition instanceof OntopViewDefinition) {
-                OntopViewDefinition viewDefinition = (OntopViewDefinition) relationDefinition;
-                return viewDefinition.getLevel() < maxLevel
+            if (relationDefinition instanceof Lens) {
+                Lens lens = (Lens) relationDefinition;
+                return lens.getLevel() < maxLevel
                         ? dataNode
-                        : merge(dataNode, viewDefinition.getIQ());
+                        : merge(dataNode, lens.getIQ());
             }
             else
                 return dataNode;

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
+import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final JoinLikeOptimizer joinLikeOptimizer;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
-    private final OntopViewUnfolder viewUnfolder;
+    private final LensUnfolder lensUnfolder;
     private final AggregationSplitter aggregationSplitter;
     private final FlattenLifter flattenLifter;
 
@@ -27,14 +27,14 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
-                                                        OntopViewUnfolder viewUnfolder,
+                                                        LensUnfolder lensUnfolder,
                                                         AggregationSplitter aggregationSplitter,
                                                         FlattenLifter flattenLifter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
-        this.viewUnfolder = viewUnfolder;
+        this.lensUnfolder = lensUnfolder;
         this.aggregationSplitter = aggregationSplitter;
         this.flattenLifter = flattenLifter;
     }
@@ -58,7 +58,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
             IQ queryBeforeUnfolding = current;
             // Unfolds Ontop views one level at a time (hence the loop)
-            current = viewUnfolder.optimize(queryBeforeUnfolding);
+            current = lensUnfolder.optimize(queryBeforeUnfolding);
             LOGGER.debug("New query after view unfolding:\n{}\n",
                     current
             );

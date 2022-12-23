@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -55,7 +54,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
                         .mapToObj(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
-    protected void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,
+    protected void insertUniqueConstraints(Lens relation, QuotedIDFactory idFactory,
                                            List<AddUniqueConstraints> addUniqueConstraints,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            CoreSingletons coreSingletons)
@@ -75,7 +74,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
         }
     }
 
-    private List<AddUniqueConstraints> extractUniqueConstraints(OntopViewDefinition relation, List<AddUniqueConstraints> addUniqueConstraints,
+    private List<AddUniqueConstraints> extractUniqueConstraints(Lens relation, List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
                                                                 QuotedIDFactory idFactory, CoreSingletons coreSingletons) {
 
@@ -108,7 +107,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     /**
      * Inferred from the tree
      */
-    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
+    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(Lens relation,
                                                                                   ImmutableList<NamedRelationDefinition> baseRelations,
                                                                                   ImmutableList<QuotedID> addedConstraintsColumns,
                                                                                   QuotedIDFactory idFactory,
@@ -248,7 +247,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
         builder.build();
     }
 
-    protected void insertForeignKeys(OntopViewDefinition relation, MetadataLookup lookup,
+    protected void insertForeignKeys(Lens relation, MetadataLookup lookup,
                                      List<AddForeignKey> addForeignKeys,
                                      ImmutableList<NamedRelationDefinition> baseRelations)
             throws MetadataExtractionException {
@@ -260,7 +259,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
         }
     }
 
-    private ImmutableList<AddForeignKey> extractForeignKeys(OntopViewDefinition relation, List<AddForeignKey> addForeignKeys,
+    private ImmutableList<AddForeignKey> extractForeignKeys(Lens relation, List<AddForeignKey> addForeignKeys,
                                                             ImmutableList<NamedRelationDefinition> baseRelations) {
         return Stream.concat(
                         addForeignKeys.stream(),
@@ -272,13 +271,13 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     /**
      * TODO: add FKs towards the base relations
      */
-    protected Stream<AddForeignKey> inferForeignKeys(OntopViewDefinition relation,
+    protected Stream<AddForeignKey> inferForeignKeys(Lens relation,
                                                      ImmutableList<NamedRelationDefinition> baseRelations) {
         return baseRelations.stream()
                 .flatMap(p -> inferForeignKeysFromParent(relation, p));
     }
 
-    protected Stream<AddForeignKey> inferForeignKeysFromParent(OntopViewDefinition relation,
+    protected Stream<AddForeignKey> inferForeignKeysFromParent(Lens relation,
                                                                NamedRelationDefinition baseRelation) {
         return baseRelation.getForeignKeys().stream()
                 .flatMap(fk -> getDerivedFromParentAttributes(
@@ -335,8 +334,8 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
      * Parent attributes are expected to all come from the same parent
      */
     protected ImmutableList<ImmutableList<Attribute>> getDerivedFromParentAttributes(
-            OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
-        IQ viewIQ = ontopViewDefinition.getIQ();
+            Lens lens, ImmutableList<Attribute> parentAttributes) {
+        IQ viewIQ = lens.getIQ();
 
         ImmutableList<RelationDefinition> parentRelations = parentAttributes.stream()
                 .map(Attribute::getRelation)
@@ -387,7 +386,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
 
         return ImmutableList.of(
                 parentVariableIndexes.stream()
-                        .map(i -> ontopViewDefinition.getAttribute(i + 1))
+                        .map(i -> lens.getAttribute(i + 1))
                         .collect(ImmutableCollectors.toList()));
     }
 }

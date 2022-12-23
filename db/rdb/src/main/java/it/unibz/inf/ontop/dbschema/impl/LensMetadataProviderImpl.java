@@ -133,7 +133,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 for (NamedRelationDefinition baseRelation : baseRelations)
                     insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
-                jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK,
+                jsonView.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
             }
         }
@@ -165,10 +165,10 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     @Override
     public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
-        ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
-                .filter(OntopViewDefinition.class::isInstance)
-                .map(OntopViewDefinition.class::cast)
-                .sorted(Comparator.comparingInt(OntopViewDefinition::getLevel))
+        ImmutableList<Lens> viewDefinitions = relationDefinitions.stream()
+                .filter(Lens.class::isInstance)
+                .map(Lens.class::cast)
+                .sorted(Comparator.comparingInt(Lens::getLevel))
                 .collect(ImmutableCollectors.toList());
 
         // Apply normalization
@@ -176,10 +176,10 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
         optimizeViews(viewDefinitions);
 
-        viewDefinitions.forEach(OntopViewDefinition::freeze);
+        viewDefinitions.forEach(Lens::freeze);
     }
 
-    private void optimizeViews(ImmutableList<OntopViewDefinition> viewDefinitions) {
+    private void optimizeViews(ImmutableList<Lens> viewDefinitions) {
         fkSaturator.saturateForeignKeys(viewDefinitions, dependencyCacheMetadataLookup.getChildrenMultimap(), jsonMap);
     }
 

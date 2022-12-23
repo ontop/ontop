@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.*;
-import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
+import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
@@ -50,7 +50,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(SelfJoinUCIQOptimizer.class);
         bindFromSettings(RedundantJoinFKOptimizer.class);
         bindFromSettings(BelowDistinctJoinWithClassUnionOptimizer.class);
-        bindFromSettings(OntopViewUnfolder.class);
+        bindFromSettings(LensUnfolder.class);
         bindFromSettings(AggregationSplitter.class);
         bindFromSettings(FlattenLifter.class);
         bindFromSettings(FilterLifter.class);

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
+import it.unibz.inf.ontop.dbschema.impl.LensImpl;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -58,16 +58,16 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+    public Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {
 
         ImmutableList<ParentDefinition> parentDefinitions = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
 
         Integer maxParentLevel = parentDefinitions.stream()
                 .map(p -> p.relation)
-                .filter(r -> r instanceof OntopViewDefinition)
-                .map(r -> (OntopViewDefinition)r)
-                .map(OntopViewDefinition::getLevel)
+                .filter(r -> r instanceof Lens)
+                .map(r -> (Lens)r)
+                .map(Lens::getLevel)
                 .reduce(0, Math::max, Math::max);
 
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
@@ -78,7 +78,7 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
-        return new OntopViewDefinitionImpl(
+        return new LensImpl(
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
@@ -87,7 +87,7 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    public void insertIntegrityConstraints(OntopViewDefinition relation,
+    public void insertIntegrityConstraints(Lens relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
 
