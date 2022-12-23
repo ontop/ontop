@@ -183,7 +183,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, InvalidMappingSourceQueriesException {
         try {
             return convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataReader(),
-                    specInput.getOntopViewReader());
+                    specInput.getLensesReader());
         } catch (FileNotFoundException e) {
             throw new MetadataExtractionException(e);
         }
@@ -192,7 +192,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
                                            Optional<Reader> optionalDbMetadataReader, 
-                                           Optional<Reader> ontopViewReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+                                           Optional<Reader> lensesReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try {
             if (optionalDbMetadataReader.isPresent()) {
@@ -201,19 +201,19 @@ public class SQLMappingExtractor implements MappingExtractor {
                     if (settings.allowRetrievingBlackBoxViewMetadataFromDB()) {
                         try (Connection connection = LocalJDBCConnectionUtils.createLazyConnection(settings)) {
 
-                            return convert(mapping, constraintFile, ontopViewReader,
+                            return convert(mapping, constraintFile, lensesReader,
                                     serializedMetadataProviderFactory.getMetadataProvider(
                                             dbMetadataReader, () -> metadataProviderFactory.getMetadataProvider(connection)));
                         }
                     }
                     else
-                        return convert(mapping, constraintFile, ontopViewReader,
+                        return convert(mapping, constraintFile, lensesReader,
                                 serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {
                 try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                    return convert(mapping, constraintFile, ontopViewReader,
+                    return convert(mapping, constraintFile, lensesReader,
                             metadataProviderFactory.getMetadataProvider(connection));
                 }
             }

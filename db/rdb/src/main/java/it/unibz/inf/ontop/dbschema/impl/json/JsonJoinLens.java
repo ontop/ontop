@@ -10,13 +10,13 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@JsonDeserialize(as = JsonJoinView.class)
-public class JsonJoinView extends JsonBasicOrJoinView {
+@JsonDeserialize(as = JsonJoinLens.class)
+public class JsonJoinLens extends JsonBasicOrJoinLens {
 
     @Nonnull
     public final JoinPart joinPart;
 
-    protected JsonJoinView(@JsonProperty("columns") JsonBasicOrJoinView.Columns columns, @JsonProperty("name") List<String> name,
+    protected JsonJoinLens(@JsonProperty("columns") JsonBasicOrJoinLens.Columns columns, @JsonProperty("name") List<String> name,
                            @JsonProperty("join") JoinPart joinPart,
                            @JsonProperty("filterExpression") String filterExpression,
                            @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,

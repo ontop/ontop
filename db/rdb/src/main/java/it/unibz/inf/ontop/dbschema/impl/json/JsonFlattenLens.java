@@ -39,7 +39,7 @@ import java.util.stream.IntStream;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
 @JsonDeserialize(as = JsonFlattenLens.class)
-public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
+public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
     @Nonnull
     public final Columns columns;

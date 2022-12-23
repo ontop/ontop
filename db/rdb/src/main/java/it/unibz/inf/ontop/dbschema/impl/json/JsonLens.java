@@ -30,8 +30,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(using = JsonView.JSONViewDeSerializer.class)
-public abstract class JsonView extends JsonOpenObject {
+@JsonDeserialize(using = JsonLens.JSONLensDeserializer.class)
+public abstract class JsonLens extends JsonOpenObject {
     @Nonnull
     public final List<String> name;
 
@@ -47,7 +47,7 @@ public abstract class JsonView extends JsonOpenObject {
     @Nullable
     public final NonNullConstraints nonNullConstraints;
 
-    public JsonView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+    public JsonLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                     @Nullable OtherFunctionalDependencies otherFunctionalDependencies, @Nullable ForeignKeys foreignKeys,
                     @Nullable NonNullConstraints nonNullConstraints) {
         this.name = name;
@@ -268,38 +268,38 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    protected static class TemporaryViewPredicate extends AtomPredicateImpl {
+    protected static class TemporaryLensPredicate extends AtomPredicateImpl {
 
-        protected TemporaryViewPredicate(String name, ImmutableList<TermType> baseTypesForValidation) {
+        protected TemporaryLensPredicate(String name, ImmutableList<TermType> baseTypesForValidation) {
             super(name, baseTypesForValidation);
         }
     }
 
-    public static class JSONViewDeSerializer extends JsonDeserializer<JsonView> {
+    public static class JSONLensDeserializer extends JsonDeserializer<JsonLens> {
 
         @Override
-        public JsonView deserialize(JsonParser jp, DeserializationContext ctxt)
+        public JsonLens deserialize(JsonParser jp, DeserializationContext ctxt)
                 throws IOException {
             ObjectMapper mapper = (ObjectMapper) jp.getCodec();
             JsonNode node = mapper.readTree(jp);
             String type = node.get("type").asText();
 
-            Class<? extends JsonView> instanceClass;
+            Class<? extends JsonLens> instanceClass;
             switch (type) {
                 case "BasicLens":
                 // Deprecated
                 case "BasicViewDefinition":
-                    instanceClass = JsonBasicView.class;
+                    instanceClass = JsonBasicLens.class;
                     break;
                 case "SQLLens":
                 // Deprecated
                 case "SQLViewDefinition":
-                    instanceClass = JsonSQLView.class;
+                    instanceClass = JsonSQLLens.class;
                     break;
                 case "JoinLens":
                 // Deprecated
                 case "JoinViewDefinition":
-                    instanceClass = JsonJoinView.class;
+                    instanceClass = JsonJoinLens.class;
                     break;
                 case "FlattenLens":
                 // Deprecated

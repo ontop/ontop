@@ -38,9 +38,9 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
+public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicOrJoinView.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicOrJoinLens.class);
 
     @Nonnull
     public final Columns columns;
@@ -48,7 +48,7 @@ public abstract class JsonBasicOrJoinView extends JsonBasicOrJoinOrNestedView {
     @Nonnull
     public final String filterExpression;
 
-    protected JsonBasicOrJoinView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+    protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                   @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
                                   @Nonnull Columns columns, @Nonnull String filterExpression) {

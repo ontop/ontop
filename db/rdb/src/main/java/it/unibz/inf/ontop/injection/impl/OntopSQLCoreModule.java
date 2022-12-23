@@ -28,8 +28,8 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
         bindFromSettings(IQTree2SelectFromWhereConverter.class);
         bindFromSettings(DialectExtraNormalizer.class);
         bindFromSettings(IQTree2NativeNodeGenerator.class);
-        bindFromSettings(OntopViewNormalizer.class);
-        bindFromSettings(OntopViewFKSaturator.class);
+        bindFromSettings(LensNormalizer.class);
+        bindFromSettings(LensFKSaturator.class);
 
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(

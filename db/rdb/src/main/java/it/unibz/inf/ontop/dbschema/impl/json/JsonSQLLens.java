@@ -36,15 +36,15 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.IntStream;
 
-@JsonDeserialize(as = JsonSQLView.class)
-public class JsonSQLView extends JsonView {
+@JsonDeserialize(as = JsonSQLLens.class)
+public class JsonSQLLens extends JsonLens {
     @Nonnull
     public final String query;
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSQLView.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSQLLens.class);
 
     @JsonCreator
-    public JsonSQLView(@JsonProperty("name") List<String> name,
+    public JsonSQLLens(@JsonProperty("name") List<String> name,
                        @JsonProperty("query") String query,
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
@@ -162,7 +162,7 @@ public class JsonSQLView extends JsonView {
     private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {
         DBTermType dbRootType = coreSingletons.getTypeFactory().getDBTypeFactory().getAbstractRootDBType();
 
-        return new TemporaryViewPredicate(
+        return new TemporaryLensPredicate(
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
@@ -172,10 +172,10 @@ public class JsonSQLView extends JsonView {
 
     private void insertUniqueConstraints(NamedRelationDefinition relation,
                                          QuotedIDFactory idFactory,
-                                         List<JsonSQLView.AddUniqueConstraints> addUniqueConstraints)
+                                         List<JsonSQLLens.AddUniqueConstraints> addUniqueConstraints)
             throws MetadataExtractionException {
 
-        for (JsonSQLView.AddUniqueConstraints addUC : addUniqueConstraints) {
+        for (JsonSQLLens.AddUniqueConstraints addUC : addUniqueConstraints) {
             if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
             FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
             JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
@@ -185,10 +185,10 @@ public class JsonSQLView extends JsonView {
 
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
                                               QuotedIDFactory idFactory,
-                                              List<JsonSQLView.AddFunctionalDependency> addFunctionalDependencies)
+                                              List<JsonSQLLens.AddFunctionalDependency> addFunctionalDependencies)
             throws MetadataExtractionException {
 
-        for (JsonSQLView.AddFunctionalDependency addFD : addFunctionalDependencies) {
+        for (JsonSQLLens.AddFunctionalDependency addFD : addFunctionalDependencies) {
             FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
 
             try {

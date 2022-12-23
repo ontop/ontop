@@ -27,10 +27,10 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
     private final CachingMetadataLookupWithDependencies dependencyCacheMetadataLookup;
-    private final OntopViewNormalizer ontopViewNormalizer;
-    private final OntopViewFKSaturator fkSaturator;
+    private final LensNormalizer lensNormalizer;
+    private final LensFKSaturator fkSaturator;
 
-    private final ImmutableMap<RelationID, JsonView> jsonMap;
+    private final ImmutableMap<RelationID, JsonLens> jsonMap;
     private final CachingMetadataLookup parentCachingMetadataLookup;
 
     // "Processed": constraints already inserted
@@ -42,9 +42,9 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     @AssistedInject
     protected LensMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
-                                       @Assisted Reader ontopViewReader,
-                                       OntopViewNormalizer ontopViewNormalizer,
-                                       OntopViewFKSaturator fkSaturator) throws MetadataExtractionException {
+                                       @Assisted Reader lensesReader,
+                                       LensNormalizer lensNormalizer,
+                                       LensFKSaturator fkSaturator) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -62,10 +62,10 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
         this.parentCachingMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
         this.fkSaturator = fkSaturator;
 
-        try (Reader viewReader = ontopViewReader) {
-            JsonViews jsonViews = loadAndDeserialize(viewReader);
+        try (Reader lensReader = lensesReader) {
+            JsonLenses jsonLenses = loadAndDeserialize(lensReader);
             QuotedIDFactory quotedIdFactory = parentMetadataProvider.getQuotedIDFactory();
-            this.jsonMap = jsonViews.relations.stream()
+            this.jsonMap = jsonLenses.relations.stream()
                     .collect(ImmutableCollectors.toMap(
                             t -> JsonMetadata.deserializeRelationID(quotedIdFactory, t.name),
                             t -> t));
@@ -77,7 +77,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
             throw new MetadataExtractionException(e);
         }
 
-        this.ontopViewNormalizer = ontopViewNormalizer;
+        this.lensNormalizer = lensNormalizer;
         // Depends on this provider for supporting views of level >1
         this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
     }
@@ -85,14 +85,14 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     /**
      * Deserializes a JSON file into a POJO.
      */
-    protected static JsonViews loadAndDeserialize(Reader viewReader) throws IOException {
+    protected static JsonLenses loadAndDeserialize(Reader viewReader) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new GuavaModule())
                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
         // Create POJO object from JSON
-        return objectMapper.readValue(viewReader, JsonViews.class);
+        return objectMapper.readValue(viewReader, JsonLenses.class);
     }
 
     @Override
@@ -105,9 +105,9 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        JsonView jsonView = jsonMap.get(id);
-        if (jsonView != null)
-            return jsonView.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
+        JsonLens jsonLens = jsonMap.get(id);
+        if (jsonLens != null)
+            return jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
         return parentCachingMetadataLookup.getRelation(id);
     }
@@ -124,8 +124,8 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
         MetadataLookup metadataLookupForFK = getMergedMetadataLookupForFK(initialMetadataLookupForFK);
 
         RelationID relationId = relation.getID();
-        JsonView jsonView = jsonMap.get(relationId);
-        if (jsonView != null) {
+        JsonLens jsonLens = jsonMap.get(relationId);
+        if (jsonLens != null) {
             // Useful for views having multiple children
             boolean notInserted = alreadyProcessedViews.add(relationId);
             if (notInserted) {
@@ -133,7 +133,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 for (NamedRelationDefinition baseRelation : baseRelations)
                     insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
-                jsonView.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
+                jsonLens.insertIntegrityConstraints((Lens) relation, baseRelations, metadataLookupForFK,
                         getDBParameters());
             }
         }
@@ -172,7 +172,7 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
                 .collect(ImmutableCollectors.toList());
 
         // Apply normalization
-        viewDefinitions.forEach(ontopViewNormalizer::normalize);
+        viewDefinitions.forEach(lensNormalizer::normalize);
 
         optimizeViews(viewDefinitions);
 

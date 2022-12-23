@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.json.JsonView;
+import it.unibz.inf.ontop.dbschema.impl.json.JsonLens;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.UUID;
@@ -14,37 +14,37 @@ import java.util.stream.IntStream;
 /**
  * Only looks at the target relations of existing FKs, does not consider transitive closure of FKs.
  */
-public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
+public class BasicLensFKSaturator implements LensFKSaturator {
 
     @Inject
-    protected BasicOntopViewFKSaturator() {
+    protected BasicLensFKSaturator() {
     }
 
     @Override
-    public void saturateForeignKeys(ImmutableList<Lens> viewDefinitions,
+    public void saturateForeignKeys(ImmutableList<Lens> lenses,
                                     ImmutableMultimap<RelationID, RelationID> childrenMultimap,
-                                    ImmutableMap<RelationID, JsonView> jsonViewMap) {
-        ImmutableMap<RelationID, Lens> viewDefinitionMap = viewDefinitions.stream()
+                                    ImmutableMap<RelationID, JsonLens> jsonLensMap) {
+        ImmutableMap<RelationID, Lens> lensMap = lenses.stream()
                 .collect(ImmutableCollectors.toMap(
                         NamedRelationDefinition::getID,
                         d -> d));
 
-        viewDefinitions
-                .forEach(v -> saturate(v, childrenMultimap, jsonViewMap, viewDefinitionMap));
+        lenses
+                .forEach(v -> saturate(v, childrenMultimap, jsonLensMap, lensMap));
     }
 
     private void saturate(Lens view, ImmutableMultimap<RelationID, RelationID> childrenMultimap,
-                          ImmutableMap<RelationID, JsonView> jsonViewMap,
-                          ImmutableMap<RelationID, Lens> viewDefinitionMap) {
+                          ImmutableMap<RelationID, JsonLens> jsonLensMap,
+                          ImmutableMap<RelationID, Lens> lensMap) {
         view.getForeignKeys()
-                .forEach(fk -> deriveFK(view, fk, childrenMultimap, jsonViewMap, viewDefinitionMap));
+                .forEach(fk -> deriveFK(view, fk, childrenMultimap, jsonLensMap, lensMap));
 
     }
 
     private void deriveFK(Lens view, ForeignKeyConstraint foreignKey,
                           ImmutableMultimap<RelationID, RelationID> childrenMultimap,
-                          ImmutableMap<RelationID, JsonView> jsonViewMap,
-                          ImmutableMap<RelationID, Lens> viewDefinitionMap) {
+                          ImmutableMap<RelationID, JsonLens> jsonLensMap,
+                          ImmutableMap<RelationID, Lens> lensMap) {
         NamedRelationDefinition targetRelation = foreignKey.getReferencedRelation();
         RelationID targetRelationId = targetRelation.getID();
         if (childrenMultimap.containsKey(targetRelationId)) {
@@ -53,8 +53,8 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
                     .collect(ImmutableCollectors.toList());
 
             childrenMultimap.get(targetRelationId)
-                    .forEach(c -> deriveFKTarget(view, foreignKey, c, targetAttributes, childrenMultimap, jsonViewMap,
-                            viewDefinitionMap));
+                    .forEach(c -> deriveFKTarget(view, foreignKey, c, targetAttributes, childrenMultimap, jsonLensMap,
+                            lensMap));
         }
     }
 
@@ -64,7 +64,7 @@ public class BasicOntopViewFKSaturator implements OntopViewFKSaturator {
     private void deriveFKTarget(Lens sourceView, ForeignKeyConstraint foreignKey, RelationID childIdOfTarget,
                                 ImmutableList<Attribute> targetAttributes,
                                 ImmutableMultimap<RelationID, RelationID> childrenMultimap,
-                                ImmutableMap<RelationID, JsonView> jsonViewMap,
+                                ImmutableMap<RelationID, JsonLens> jsonViewMap,
                                 ImmutableMap<RelationID, Lens> viewDefinitionMap) {
         if ((!jsonViewMap.containsKey(childIdOfTarget)) || !viewDefinitionMap.containsKey(childIdOfTarget))
             // TODO: log a warning, because children are expected to be views

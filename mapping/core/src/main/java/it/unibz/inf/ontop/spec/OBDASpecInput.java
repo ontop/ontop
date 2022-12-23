@@ -53,7 +53,7 @@ public interface OBDASpecInput {
 
     default Optional<Reader> getDBMetadataReader() throws FileNotFoundException { return getReader(DBMETADATA_KEY); }
 
-    default Optional<Reader> getOntopViewReader() throws FileNotFoundException { return getReader(LENSES_KEY); }
+    default Optional<Reader> getLensesReader() throws FileNotFoundException { return getReader(LENSES_KEY); }
 
     default Optional<Reader> getSparqlRulesReader() throws FileNotFoundException {
         return getReader(SPARQL_RULES_KEY);

@@ -29,12 +29,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
+public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicOrJoinOrNestedView.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicOrJoinOrNestedLens.class);
 
 
-    protected JsonBasicOrJoinOrNestedView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+    protected JsonBasicOrJoinOrNestedLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                           @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                           @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
@@ -47,7 +47,7 @@ public abstract class JsonBasicOrJoinOrNestedView extends JsonView {
     protected AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {
         DBTermType dbRootType = coreSingletons.getTypeFactory().getDBTypeFactory().getAbstractRootDBType();
 
-        return new TemporaryViewPredicate(
+        return new TemporaryLensPredicate(
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
