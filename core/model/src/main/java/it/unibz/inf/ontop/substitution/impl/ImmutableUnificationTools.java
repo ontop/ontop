@@ -6,6 +6,7 @@ import com.google.common.collect.*;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -47,7 +48,7 @@ public class ImmutableUnificationTools {
         return Optional.of(substitutionFactory.getSubstitution((ImmutableMap<Variable, T>)sub));
     }
 
-    public Optional<ArgumentMapUnification> computeArgumentMapMGU(
+    private Optional<ArgumentMapUnification> computeArgumentMapMGU(
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap1,
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap2) {
         ImmutableSet<Integer> firstIndexes = argumentMap1.keySet();
@@ -124,15 +125,48 @@ public class ImmutableUnificationTools {
 
 
 
-    public static class ArgumentMapUnification {
+    public final class ArgumentMapUnification {
         public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
         public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
 
-        public ArgumentMapUnification(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+        private ArgumentMapUnification(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                       ImmutableSubstitution<VariableOrGroundTerm> substitution) {
             this.argumentMap = argumentMap;
             this.substitution = substitution;
         }
+
+        private Optional<ImmutableUnificationTools.ArgumentMapUnification> unify(
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap) {
+
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
+                    substitution.applyToArgumentMap(newArgumentMap);
+
+            return computeArgumentMapMGU(argumentMap, updatedArgumentMap)
+                    .flatMap(u -> substitution.isEmpty()
+                            ? Optional.of(u)
+                            : computeAtomMGUS(substitution, u.substitution)
+                            .map(s -> new ArgumentMapUnification(u.argumentMap, s)));
+        }
+    }
+
+    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutionUnifier(
+            Stream<ImmutableSubstitution<VariableOrGroundTerm>> substitutions) {
+        return substitutions
+                .reduce(Optional.of(substitutionFactory.getSubstitution()),
+                        (o, s) -> o.flatMap(s1 -> computeAtomMGUS(s1, s)),
+                        (s1, s2) -> {
+                            throw new MinorOntopInternalBugException("Not expected to be run in parallel");
+                        });
+    }
+
+    public Optional<ImmutableUnificationTools.ArgumentMapUnification> getArgumentMapUnifier(
+            Stream<ImmutableMap<Integer, ? extends VariableOrGroundTerm>> arguments) {
+        return arguments
+                .reduce(Optional.of(new ArgumentMapUnification(ImmutableMap.of(), substitutionFactory.getSubstitution())),
+                        (o, n) -> o.flatMap(u -> u.unify(n)),
+                        (m1, m2) -> {
+                            throw new MinorOntopInternalBugException("Not expected to be run in parallel");
+                        });
     }
 
 

@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
@@ -80,7 +79,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         }
 
         // NB: may return an unifier with no entry
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unificationTools.getSubstitutionUnifier(
                 optimizationStates.stream()
                         .map(s -> s.substitution));
 
@@ -218,7 +217,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (simplifications.stream().anyMatch(s -> !s.isPresent()))
             return noSolutionState;
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unificationTools.getSubstitutionUnifier(
                 Stream.concat(
                         simplifications.stream()
                                 .map(Optional::get)
@@ -261,45 +260,6 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                                                                      Collection<ExtensionalDataNode> dataNodes,
                                                                                      C constraint);
 
-    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(
-            Stream<ExtensionalDataNode> dataNodes,
-            Function<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> argumentMapSelector) {
-         return dataNodes
-                .reduce(null,
-                        (o, n) -> o == null
-                                ? Optional.of(new ImmutableUnificationTools.ArgumentMapUnification(
-                                argumentMapSelector.apply(n),
-                                substitutionFactory.getSubstitution()))
-                                : o.flatMap(u -> unify(u, argumentMapSelector.apply(n))),
-                        (m1, m2) -> {
-                            throw new MinorOntopInternalBugException("Was not expected to be runned in //");
-                        });
-    }
-
-    private Optional<ImmutableUnificationTools.ArgumentMapUnification> unify(
-            ImmutableUnificationTools.ArgumentMapUnification previousUnification,
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
-
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
-                previousUnification.substitution.applyToArgumentMap(argumentMap);
-
-        return unificationTools.computeArgumentMapMGU(previousUnification.argumentMap, updatedArgumentMap)
-                .flatMap(u -> previousUnification.substitution.isEmpty()
-                        ? Optional.of(u)
-                        : unificationTools.computeAtomMGUS(previousUnification.substitution, u.substitution)
-                        .map(s -> new ImmutableUnificationTools.ArgumentMapUnification(u.argumentMap, s)));
-    }
-
-
-    private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifySubstitutions(
-            Stream<ImmutableSubstitution<VariableOrGroundTerm>> substitutions) {
-        return substitutions
-                .reduce(Optional.of(substitutionFactory.getSubstitution()),
-                        (o, s) -> o.flatMap(s1 -> unificationTools.computeAtomMGUS(s1, s)),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("No //");
-                        });
-    }
 
     /**
      * TODO: we don't need to remove the functional terms for the determinants

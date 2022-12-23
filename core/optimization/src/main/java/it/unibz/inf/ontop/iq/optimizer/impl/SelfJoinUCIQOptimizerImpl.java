@@ -127,7 +127,7 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                             normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
 
-            return unifyDataNodes(normalization.dataNodes.stream(), ExtensionalDataNode::getArgumentMap)
+            return unificationTools.getArgumentMapUnifier(normalization.dataNodes.stream().map(ExtensionalDataNode::getArgumentMap))
                     .map(u -> new DeterminantGroupEvaluation(
                             expressions,
                             ImmutableList.of(

@@ -111,7 +111,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             ImmutableSet<ImmutableExpression> expressions = extractExpressions(dataNodes, normalization.equalities, dependentIndexes);
 
-            return unifyDataNodes(normalization.dataNodes.stream(), n -> extractDependentArgumentMap(n, dependentIndexes))
+            return unificationTools.getArgumentMapUnifier(normalization.dataNodes.stream().map(n -> extractDependentArgumentMap(n, dependentIndexes)))
                     .map(u -> convertIntoDeterminantGroupEvaluation(u, targetDataNode,
                             ImmutableList.copyOf(normalization.dataNodes),
                             expressions, dependentIndexes));
