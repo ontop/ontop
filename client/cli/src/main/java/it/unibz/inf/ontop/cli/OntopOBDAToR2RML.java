@@ -176,7 +176,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
         final MetadataProvider metadataProvider;
         if (!Strings.isNullOrEmpty(ontopLensesFile)) {
             try(Reader lensReader = new FileReader(ontopLensesFile)) {
-                metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
+                metadataProvider = injector.getInstance(LensMetadataProvider.Factory.class)
                         .getMetadataProvider(dbMetadataProvider, lensReader);
             }
         }

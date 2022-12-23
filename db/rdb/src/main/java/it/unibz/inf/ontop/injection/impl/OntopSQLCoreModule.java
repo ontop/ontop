@@ -57,9 +57,9 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
 
         Module ontopViewMetadataProviderFactory = buildFactory(
                 ImmutableList.of(
-                        OntopViewMetadataProvider.class
+                        LensMetadataProvider.class
                 ),
-                OntopViewMetadataProvider.Factory.class);
+                LensMetadataProvider.Factory.class);
         install(ontopViewMetadataProviderFactory);
 
         Module mdProvider = buildFactory(ImmutableList.of(DBMetadataProvider.class), JDBCMetadataProviderFactory.class);

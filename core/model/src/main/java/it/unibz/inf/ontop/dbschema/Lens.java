@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQ;
 
 import javax.annotation.Nonnull;
 
 /**
- * Ontop view definitions are temporarily mutable, until their IQs are stabilized.
+ * Lenses are temporarily mutable, until their IQs are stabilized.
  */
 public interface OntopViewDefinition extends NamedRelationDefinition {
 

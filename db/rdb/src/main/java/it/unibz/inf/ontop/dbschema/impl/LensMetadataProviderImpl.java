@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider {
+public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
     private final CachingMetadataLookupWithDependencies dependencyCacheMetadataLookup;
@@ -41,10 +41,10 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     private MetadataLookup mergedMetadataLookupForFK;
 
     @AssistedInject
-    protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
-                                            @Assisted Reader ontopViewReader,
-                                            OntopViewNormalizer ontopViewNormalizer,
-                                            OntopViewFKSaturator fkSaturator) throws MetadataExtractionException {
+    protected LensMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
+                                       @Assisted Reader ontopViewReader,
+                                       OntopViewNormalizer ontopViewNormalizer,
+                                       OntopViewFKSaturator fkSaturator) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
