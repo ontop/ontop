@@ -76,10 +76,10 @@ public class OntopOBDAToR2RML implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String dbMetadataFile;
 
-    @Option(type = OptionType.COMMAND, name = {"-v", "--ontop-views"}, title = "Ontop view file",
-            description = "User-supplied view file")
+    @Option(type = OptionType.COMMAND, name = {"-l", "--lenses", "-v", "--ontop-views"}, title = "Lenses file",
+            description = "User-supplied lenses file. Lenses were formerly named Ontop views.")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    String ontopViewFile;
+    String ontopLensesFile;
 
     @Option(type = OptionType.COMMAND, name = {"--force"}, title = "Force the conversion",
             description = "Force the conversion in the absence of DB metadata", arity = 0)
@@ -174,10 +174,10 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         // DB metadata + view metadata
         final MetadataProvider metadataProvider;
-        if (!Strings.isNullOrEmpty(ontopViewFile)) {
-            try(Reader viewReader = new FileReader(ontopViewFile)) {
+        if (!Strings.isNullOrEmpty(ontopLensesFile)) {
+            try(Reader lensReader = new FileReader(ontopLensesFile)) {
                 metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
-                        .getMetadataProvider(dbMetadataProvider, viewReader);
+                        .getMetadataProvider(dbMetadataProvider, lensReader);
             }
         }
         else

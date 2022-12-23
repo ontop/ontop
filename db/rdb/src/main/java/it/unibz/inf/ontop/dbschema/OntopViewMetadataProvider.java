@@ -9,6 +9,6 @@ public interface OntopViewMetadataProvider extends MetadataProvider {
     interface Factory {
         OntopViewMetadataProvider getMetadataProvider(
                 MetadataProvider parentMetadataProvider,
-                Reader ontopViewReader) throws MetadataExtractionException;
+                Reader lensReader) throws MetadataExtractionException;
     }
 }
