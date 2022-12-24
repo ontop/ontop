@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -34,7 +36,7 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
     private String queryFile;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
-            title = "output", description = "output file (default)")
+            title = "output", description = "output file in the CSV format. If not specified, will print the results in the standard output.")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
@@ -119,8 +121,8 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
             for (String columnName : signature) {
                 valueListBuilder.add(
                         Optional.ofNullable(bindingSet.getValue(columnName))
-                                // TODO: check the serialization
-                                .map(Object::toString)
+                                .map(Value::stringValue)
+                                .map(StringEscapeUtils::escapeCsv)
                                 .orElse(""));
             }
             wr.append(String.join(",", valueListBuilder.build()));
