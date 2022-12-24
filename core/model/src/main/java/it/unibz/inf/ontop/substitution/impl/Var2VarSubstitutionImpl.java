@@ -2,13 +2,16 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
@@ -46,6 +49,13 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public <T extends ImmutableTerm> T applyToTerm(T term) {
         return (T) super.apply(term);
+    }
+
+    @Override
+    public ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        return arguments.stream()
+                .map(this::applyToTerm)
+                .collect(ImmutableCollectors.toList());
     }
 
 }

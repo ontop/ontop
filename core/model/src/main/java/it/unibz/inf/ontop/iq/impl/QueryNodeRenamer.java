@@ -12,14 +12,12 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Renames query nodes according to one renaming substitution.
@@ -39,7 +37,8 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public FilterNode transform(FilterNode filterNode) {
-        return iqFactory.createFilterNode(renameBooleanExpression(filterNode.getFilterCondition()));
+        ImmutableExpression booleanExpression = filterNode.getFilterCondition();
+        return iqFactory.createFilterNode(renamingSubstitution.applyToBooleanExpression(booleanExpression));
     }
 
     @Override
@@ -51,8 +50,8 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
-        return iqFactory.createLeftJoinNode(renameOptionalBooleanExpression(
-                leftJoinNode.getOptionalFilterCondition()));
+        Optional<ImmutableExpression> optionalExpression = leftJoinNode.getOptionalFilterCondition();
+        return iqFactory.createLeftJoinNode(optionalExpression.map(renamingSubstitution::applyToBooleanExpression));
     }
 
     @Override
@@ -62,24 +61,28 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return iqFactory.createIntensionalDataNode(renameDataAtom(intensionalDataNode.getProjectionAtom()));
+        DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
+        return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(atom.getPredicate(), renamingSubstitution.applyToArguments(atom.getArguments())));
     }
 
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
-        return iqFactory.createInnerJoinNode(renameOptionalBooleanExpression(innerJoinNode.getOptionalFilterCondition()));
+        Optional<ImmutableExpression> optionalExpression = innerJoinNode.getOptionalFilterCondition();
+        return iqFactory.createInnerJoinNode(optionalExpression.map(renamingSubstitution::applyToBooleanExpression));
     }
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
+        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
-                renameSubstitution(constructionNode.getSubstitution()));
+                renamingSubstitution.applyRenaming(substitution));
     }
 
     @Override
     public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
+        ImmutableSubstitution<it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
         return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
-                renameSubstitution(aggregationNode.getSubstitution()));
+                renamingSubstitution.applyRenaming(substitution));
     }
 
     @Override
@@ -88,7 +91,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
                 renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
                 renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
-                        .map(v -> renamingSubstitution.applyToVariable(v)),
+                        .map(renamingSubstitution::applyToVariable),
                 flattenNode.getFlattenedType()
         );
     }
@@ -140,29 +143,4 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return iqFactory.createOrderByNode(newComparators);
     }
 
-    private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {
-        return renamingSubstitution.applyToBooleanExpression(booleanExpression);
-    }
-
-
-    private DataAtom<AtomPredicate> renameDataAtom(DataAtom<AtomPredicate> atom) {
-        ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
-        for (VariableOrGroundTerm term : atom.getArguments()) {
-            argListBuilder.add(renamingSubstitution.applyToTerm(term));
-        }
-        return atomFactory.getDataAtom(atom.getPredicate(), argListBuilder.build());
-    }
-
-    private Optional<ImmutableExpression> renameOptionalBooleanExpression(
-            Optional<ImmutableExpression> optionalExpression) {
-        if (!optionalExpression.isPresent())
-            return Optional.empty();
-
-        ImmutableExpression expression = optionalExpression.get();
-        return Optional.of(renameBooleanExpression(expression));
-    }
-
-    private <T extends ImmutableTerm> ImmutableSubstitution<T> renameSubstitution(ImmutableSubstitution<T> substitution) {
-        return renamingSubstitution.applyRenaming(substitution);
-    }
 }
