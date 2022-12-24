@@ -258,9 +258,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return expressionAndSubstitution.getSubstitution().isEmpty()
                     ? filterLevelTree
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newlyProjectedVariables,
-                                    (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
-                                            expressionAndSubstitution.getSubstitution()),
+                            iqFactory.createConstructionNode(newlyProjectedVariables, expressionAndSubstitution.getSubstitution()),
                             filterLevelTree);
         } catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);

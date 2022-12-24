@@ -52,7 +52,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                 @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
@@ -61,10 +61,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
         this.projectedVariables = projectedVariables;
-        this.substitution = substitution;
+        this.substitution = (ImmutableSubstitution<ImmutableTerm>) substitution;
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
-        this.childVariables = extractChildVariables(projectedVariables, substitution);
+        this.childVariables = extractChildVariables(projectedVariables, this.substitution);
 
         if (settings.isTestModeEnabled())
             validateNode();
