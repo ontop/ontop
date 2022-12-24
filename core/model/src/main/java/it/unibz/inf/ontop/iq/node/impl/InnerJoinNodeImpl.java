@@ -188,8 +188,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     iqFactory.createConstructionNode(
                             constructionNodeTools.computeNewProjectedVariables(descendingSubstitution,
                                     getProjectedVariables(children)),
-                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
-                                    expressionAndSubstitution.getSubstitution()),
+                            expressionAndSubstitution.getSubstitution()),
                     joinTree);
         } catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
