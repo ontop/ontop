@@ -101,6 +101,20 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getInjectiveVar2VarSubstitution(newMap);
     }
 
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> replace(ImmutableSubstitution<T> substitution, Variable variable, T newValue) {
+        if (!substitution.isDefining(variable))
+            throw new IllegalArgumentException("SubstitutionFactory.replace: variable " + variable + " is not defined by " + substitution);
+
+        return new ImmutableSubstitutionImpl<>(Stream.concat(
+                        Stream.of(Maps.immutableEntry(variable, newValue)),
+                        substitution.getImmutableMap().entrySet().stream()
+                                .filter(e -> !e.getKey().equals(variable)))
+                .collect(ImmutableCollectors.toMap()),
+                termFactory,
+                this);
+    }
+
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
                                                            ImmutableSet<Variable> variables) {
 

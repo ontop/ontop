@@ -34,4 +34,6 @@ public interface SubstitutionFactory {
 
     InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
                                                                 ImmutableSet<Variable> variables);
+
+    <T extends ImmutableTerm> ImmutableSubstitution<T> replace(ImmutableSubstitution<T> substitution, Variable variable, T newValue);
 }
