@@ -16,10 +16,10 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MappingSaturationTest {
     private static final RelationDefinition P1;
@@ -126,14 +126,13 @@ public class MappingSaturationTest {
         ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, classifiedTBox).stream()
                 .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
 
-        assertEquals(maGivesLab, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB)));
-        assertEquals(maGivesLecture, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE)));
+        assertAll(
+                () -> assertEquals(maGivesLab, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB))),
+                () -> assertEquals(maGivesLecture, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE))),
 
-        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)));
+                () -> assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode),
 
-        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)) + "\nvs\n" + maTeaches);
+                () -> assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode));
     }
 
     private ImmutableTerm getConstantIRI(IRI iri) {

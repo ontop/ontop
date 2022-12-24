@@ -51,8 +51,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                 () -> options.constraintFile,
                 () -> options.dbMetadataFile,
                 () -> options.dbMetadataReader,
-                () -> options.ontopViewFile,
-                () -> options.ontopViewReader);
+                () -> options.lensesFile,
+                () -> options.lensesReader);
     }
 
     @Override
@@ -82,15 +82,15 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final Optional<File> constraintFile;
         private final Optional<File> dbMetadataFile;
         private final Optional<Reader> dbMetadataReader;
-        private final Optional<File> ontopViewFile;
-        private final Optional<Reader> ontopViewReader;
+        private final Optional<File> lensesFile;
+        private final Optional<Reader> lensesReader;
         final OntopMappingSQLOptions mappingSQLOptions;
 
 
         OntopMappingSQLAllOptions(Optional<File> mappingFile, Optional<Reader> mappingReader,
                                   Optional<Graph> mappingGraph, Optional<File> constraintFile,
                                   Optional<File> dbMetadataFile, Optional<Reader> dbMetadataReader,
-                                  Optional<File> ontopViewFile, Optional<Reader> ontopViewReader,
+                                  Optional<File> lensesFile, Optional<Reader> lensesReader,
                                   OntopMappingSQLOptions mappingSQLOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
@@ -98,8 +98,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             this.constraintFile = constraintFile;
             this.dbMetadataFile = dbMetadataFile;
             this.dbMetadataReader = dbMetadataReader;
-            this.ontopViewFile = ontopViewFile;
-            this.ontopViewReader = ontopViewReader;
+            this.lensesFile = lensesFile;
+            this.lensesReader = lensesReader;
             this.mappingSQLOptions = mappingSQLOptions;
         }
     }
@@ -111,7 +111,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final Runnable declareMappingDefinedCB;
         private final Runnable declareImplicitConstraintSetDefinedCB;
         private final Runnable declareDBMetadataSetDefinedCB;
-        private final Runnable declareOntopViewSetDefinedCB;
+        private final Runnable declareLensesDefinedCB;
 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
@@ -119,8 +119,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private Optional<File> constraintFile = Optional.empty();
         private Optional<File> dbMetadataFile = Optional.empty();
         private Optional<Reader> dbMetadataReader = Optional.empty();
-        private Optional<File> ontopViewFile = Optional.empty();
-        private Optional<Reader> ontopViewReader = Optional.empty();
+        private Optional<File> lensesFile = Optional.empty();
+        private Optional<Reader> lensesReader = Optional.empty();
         private boolean useR2rml = false;
 
 
@@ -130,12 +130,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         protected StandardMappingSQLAllBuilderFragment(B builder, Runnable declareMappingDefinedCB,
                                                        Runnable declareImplicitConstraintSetDefinedCB,
                                                        Runnable declareDBMetadataSetDefinedCB,
-                                                       Runnable declareOntopViewSetDefinedCB) {
+                                                       Runnable declareLensesDefinedCB) {
             this.builder = builder;
             this.declareMappingDefinedCB = declareMappingDefinedCB;
             this.declareImplicitConstraintSetDefinedCB = declareImplicitConstraintSetDefinedCB;
             this.declareDBMetadataSetDefinedCB = declareDBMetadataSetDefinedCB;
-            this.declareOntopViewSetDefinedCB = declareOntopViewSetDefinedCB;
+            this.declareLensesDefinedCB = declareLensesDefinedCB;
         }
 
 
@@ -273,38 +273,38 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         @Override
-        public B ontopViewFile(@Nonnull File ontopViewFile) {
-            declareOntopViewSetDefinedCB.run();
-            this.ontopViewFile = Optional.of(ontopViewFile);
+        public B lensesFile(@Nonnull File lensesFile) {
+            declareLensesDefinedCB.run();
+            this.lensesFile = Optional.of(lensesFile);
             return builder;
         }
 
         @Override
-        public B ontopViewFile(@Nonnull String ontopViewFilename) {
-            declareOntopViewSetDefinedCB.run();
+        public B lensesFile(@Nonnull String lensesFilename) {
+            declareLensesDefinedCB.run();
             try {
-                URI fileURI = new URI(ontopViewFilename);
+                URI fileURI = new URI(lensesFilename);
                 String scheme = fileURI.getScheme();
                 if (scheme == null) {
-                    this.ontopViewFile = Optional.of(new File(fileURI.getPath()));
+                    this.lensesFile = Optional.of(new File(fileURI.getPath()));
                 }
                 else if (scheme.equals("file")) {
-                    this.ontopViewFile = Optional.of(new File(fileURI));
+                    this.lensesFile = Optional.of(new File(fileURI));
                 }
                 else {
                     throw new InvalidOntopConfigurationException("Currently only local files are supported" +
-                            "as Ontop view files");
+                            "as lerses files");
                 }
                 return builder;
             } catch (URISyntaxException e) {
-                throw new InvalidOntopConfigurationException("Invalid Ontop view file path: " + e.getMessage());
+                throw new InvalidOntopConfigurationException("Invalid lenses file path: " + e.getMessage());
             }
         }
 
         @Override
-        public B ontopViewReader(@Nonnull Reader ontopViewReader) {
-            declareOntopViewSetDefinedCB.run();
-            this.ontopViewReader = Optional.of(ontopViewReader);
+        public B lensesReader(@Nonnull Reader lensesReader) {
+            declareLensesDefinedCB.run();
+            this.lensesReader = Optional.of(lensesReader);
             return builder;
         }
 
@@ -343,7 +343,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions(OntopMappingSQLOptions mappingOptions) {
                 return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile,
-                        dbMetadataFile, dbMetadataReader, ontopViewFile, ontopViewReader, mappingOptions);
+                        dbMetadataFile, dbMetadataReader, lensesFile, lensesReader, mappingOptions);
         }
 
     }
@@ -359,7 +359,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             B builder = (B) this;
             this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>(builder,
                     this::declareMappingDefined, this::declareImplicitConstraintSetDefined,
-                    this::declareDBMetadataDefined, this::declareOntopViewDefined);
+                    this::declareDBMetadataDefined, this::declareLensesDefined);
         }
 
         @Override
@@ -423,18 +423,18 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         @Override
-        public B ontopViewFile(@Nonnull File ontopViewFile) {
-            return localFragmentBuilder.ontopViewFile(ontopViewFile);
+        public B lensesFile(@Nonnull File ontopViewFile) {
+            return localFragmentBuilder.lensesFile(ontopViewFile);
         }
 
         @Override
-        public B ontopViewFile(@Nonnull String ontopViewFilename) {
-            return localFragmentBuilder.ontopViewFile(ontopViewFilename);
+        public B lensesFile(@Nonnull String lensesFilename) {
+            return localFragmentBuilder.lensesFile(lensesFilename);
         }
 
         @Override
-        public B ontopViewReader(@Nonnull Reader ontopViewReader) {
-            return localFragmentBuilder.ontopViewReader(ontopViewReader);
+        public B lensesReader(@Nonnull Reader lensesReader) {
+            return localFragmentBuilder.lensesReader(lensesReader);
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {

@@ -604,8 +604,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"0\"^^xsd:decimal",
-                "\"0\"^^xsd:decimal", "\"10.3\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"10.3\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
     }
 
     @Test

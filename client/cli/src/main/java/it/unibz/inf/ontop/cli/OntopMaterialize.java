@@ -23,13 +23,9 @@ import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.rio.trig.TriGWriter;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nullable;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
@@ -256,8 +252,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         if (dbMetadataFile != null)
             configBuilder.dbMetadataFile(dbMetadataFile);
 
-        if (ontopViewFile != null)
-            configBuilder.ontopViewFile(ontopViewFile);
+        if (ontopLensesFile != null)
+            configBuilder.lensesFile(ontopLensesFile);
 
         if (sparqlRulesFile != null)
             configBuilder.sparqlRulesFile(sparqlRulesFile);

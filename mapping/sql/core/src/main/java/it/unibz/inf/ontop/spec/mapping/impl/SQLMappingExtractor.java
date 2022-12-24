@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
-import it.unibz.inf.ontop.dbschema.OntopViewMetadataProvider;
+import it.unibz.inf.ontop.dbschema.LensMetadataProvider;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -48,7 +48,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final JDBCMetadataProviderFactory metadataProviderFactory;
-    private final OntopViewMetadataProvider.Factory viewMetadataProviderFactory;
+    private final LensMetadataProvider.Factory lensMetadataProviderFactory;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
@@ -79,7 +79,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 JDBCMetadataProviderFactory metadataProviderFactory,
                                 SerializedMetadataProvider.Factory serializedMetadataProviderFactory,
-                                OntopViewMetadataProvider.Factory viewMetadataProviderFactory) {
+                                LensMetadataProvider.Factory lensMetadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
@@ -91,7 +91,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = iqFactory;
-        this.viewMetadataProviderFactory = viewMetadataProviderFactory;
+        this.lensMetadataProviderFactory = lensMetadataProviderFactory;
         this.metamappingExpander = metamappingExpander;
         this.metadataProviderFactory = metadataProviderFactory;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
@@ -183,7 +183,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, InvalidMappingSourceQueriesException {
         try {
             return convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataReader(),
-                    specInput.getOntopViewReader());
+                    specInput.getLensesReader());
         } catch (FileNotFoundException e) {
             throw new MetadataExtractionException(e);
         }
@@ -192,7 +192,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
                                            Optional<Reader> optionalDbMetadataReader, 
-                                           Optional<Reader> ontopViewReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+                                           Optional<Reader> lensesReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try {
             if (optionalDbMetadataReader.isPresent()) {
@@ -201,19 +201,19 @@ public class SQLMappingExtractor implements MappingExtractor {
                     if (settings.allowRetrievingBlackBoxViewMetadataFromDB()) {
                         try (Connection connection = LocalJDBCConnectionUtils.createLazyConnection(settings)) {
 
-                            return convert(mapping, constraintFile, ontopViewReader,
+                            return convert(mapping, constraintFile, lensesReader,
                                     serializedMetadataProviderFactory.getMetadataProvider(
                                             dbMetadataReader, () -> metadataProviderFactory.getMetadataProvider(connection)));
                         }
                     }
                     else
-                        return convert(mapping, constraintFile, ontopViewReader,
+                        return convert(mapping, constraintFile, lensesReader,
                                 serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {
                 try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                    return convert(mapping, constraintFile, ontopViewReader,
+                    return convert(mapping, constraintFile, lensesReader,
                             metadataProviderFactory.getMetadataProvider(connection));
                 }
             }
@@ -224,12 +224,12 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping, Optional<File> constraintFile, 
-                                           Optional<Reader> ontopViewReader, MetadataProvider dbMetadataProvider) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
+                                           Optional<Reader> lensesReader, MetadataProvider dbMetadataProvider) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
         
         MetadataProvider metadataProvider;
-        if (ontopViewReader.isPresent()) {
-            try(Reader viewReader = ontopViewReader.get()) {
-                metadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, viewReader);
+        if (lensesReader.isPresent()) {
+            try(Reader lensReader = lensesReader.get()) {
+                metadataProvider = lensMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, lensReader);
             }
             catch (IOException e) {
                 throw new MetadataExtractionException(e);

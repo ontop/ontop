@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -15,14 +14,14 @@ public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
     final static String owlFile = "/pgsql/nested/hr/hr.owl";
     final static String obdaFile = "/pgsql/nested/hr/hr-denormalized.obda";
     final static String propertyFile = "/pgsql/nested/hr/hr.properties";
-    final static String viewFile = "/pgsql/nested/hr/hr_lenses_jsonb.json";
+    final static String lensesFile = "/pgsql/nested/hr/hr_lenses_jsonb.json";
 
     private static OntopOWLEngine ENGINE;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {
-        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
+        ENGINE = createReasonerWithLenses(owlFile, obdaFile, propertyFile, lensesFile);
         CONNECTION = ENGINE.getConnection();
     }
 

@@ -12,6 +12,7 @@
     <artifactId>ontop-semantic-index</artifactId>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <!-- filtering currently not used -->
         <filter.main.resources>true</filter.main.resources>
     </properties>

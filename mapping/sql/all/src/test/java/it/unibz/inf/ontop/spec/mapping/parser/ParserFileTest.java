@@ -22,158 +22,119 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ParserFileTest extends TestCase {
-	private static final String ROOT = "src/test/resources/scenario/";
-
-	final static Logger log = LoggerFactory
-			.getLogger(ParserFileTest.class);
+public class ParserFileTest {
+	private static final String ROOT = "src/test/resources/scenario/virtual/";
 
 	private final SQLMappingParser mappingParser;
 
 	public ParserFileTest() {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-				.jdbcUrl("jdbc:h2:mem:fake")
-				.jdbcUser("fake_user")
-				.jdbcPassword("fake_password")
+				.jdbcUrl("dummy")
+				.jdbcDriver("dummy")
 				.build();
 		Injector injector = configuration.getInjector();
 		mappingParser = injector.getInstance(SQLMappingParser.class);
     }
 
-	// @Test
-	public void testStockExchange_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/stockexchange-pgsql.owl");
-		execute(ppMapping, new URI("RandBStockExchange"));
+	@Test
+	public void testStockExchange_Pgsql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "stockexchange-pgsql.obda"));
+		execute(ppMapping, "RandBStockExchange");
 	}
 
-	// @Test
-	public void testImdbGroup4_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/imdb-group4-pgsql.owl");
-		execute(ppMapping, new URI("kbdb_imdb"));
+	@Test
+	public void testImdbGroup4_Pgsql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "imdb-group4-pgsql.obda"));
+		execute(ppMapping, "kbdb_imdb");
 	}
 
-	// @Test
-	public void testImdbGroup4_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/imdb-group4-oracle.owl");
-		execute(ppMapping, new URI("kbdb_imdb"));
+	@Test
+	public void testImdbGroup4_Oracle() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "imdb-group4-oracle.obda"));
+		execute(ppMapping, "kbdb_imdb");
 	}
 
-	// @Test
-	public void testAdolenaSlim_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/adolena-slim-pgsql.owl");
-		execute(ppMapping, new URI("nap"));
+	@Test
+	public void testAdolenaSlim_Pgsql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "adolena-slim-pgsql.obda"));
+		execute(ppMapping, "nap");
 	}
 
-	// @Test
-	public void testBooksApril20_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/books-april20-pgsql.owl");
-		execute(ppMapping, new URI("datasource"));
+	@Test
+	public void testBooksApril20_Pgsql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "books-april20-pgsql.obda"));
+		execute(ppMapping, "datasource");
 	}
 
-	// @Test
-	public void testHgt090303_Mysql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-090303-mysql.owl");
-		execute(ppMapping, new URI("HGT"));
+	@Test
+	public void testHgt090303_Mysql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "hgt-090303-mysql.obda"));
+		execute(ppMapping,"HGT");
 	}
 
-	// @Test
-	public void testHgt090324_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-090324-pgsql.owl");
-		execute(ppMapping, new URI("HGT"));
+	@Test
+	public void testHgt090324_Pgsql() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "hgt-090324-pgsql.obda"));
+		execute(ppMapping, "HGT");
 	}
 
-	// @Test
-	public void testHgt091007_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-091007-oracle.owl");
-		execute(ppMapping, new URI("HGT"));
+	@Test
+	public void testHgt091007_Oracle() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "hgt-091007-oracle.obda"));
+		execute(ppMapping, "HGT");
 	}
 
-	// @Test
-	public void testMpsOntologiaGcc_DB2() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/mps-ontologiagcc-db2.owl");
-		execute(ppMapping, new URI("sourceGCC"));
+	@Test
+	public void testMpsOntologiaGcc_DB2() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "mps-ontologiagcc-db2.obda"));
+		execute(ppMapping, "sourceGCC");
 	}
 
-	// @Test
-	public void testOperationNoyauV5_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/operation-noyau-v5-oracle.owl");
-		execute(ppMapping, new URI("PgmOpe"));
+	@Test
+	public void testOperationNoyauV5_Oracle() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "operation-noyau-v5-oracle.obda"));
+		execute(ppMapping, "PgmOpe");
 	}
 
-	// @Test
-	public void testOperationNoyauV6_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		SQLPPMapping ppMapping = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
-		execute(ppMapping, new URI("CORIOLIS-CRAQ"));
-		execute(ppMapping, new URI("PROGOS-CRAQ"));
+	@Test
+	public void testOperationNoyauV6_Oracle() throws InvalidMappingException, MappingIOException {
+		SQLPPMapping ppMapping = mappingParser.parse(new File(ROOT + "operation-noyau-v6-oracle.obda"));
+		execute(ppMapping, "CORIOLIS-CRAQ");
+		execute(ppMapping, "PROGOS-CRAQ");
 	}
 
-	// ------- Utility methods
 
-	private void execute(SQLPPMapping ppMapping, URI identifier) {
+	private void execute(SQLPPMapping ppMapping, String identifier) {
 		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 
-        /**
-         * Problems found in the mapping file.
-         * --> Do nothing.
-         *
-         * Before, tests were analyzing the incomplete ppMapping.
-         * TODO: discuss this difference due to the new interface.
-         *
-         */
-        if (ppMapping == null) {
-            return;
-        }
+		ImmutableList<SQLPPTriplesMap> mappings = ppMapping.getTripleMaps();
 
-		SQLPPMapping controller = ppMapping;
-		ImmutableList<SQLPPTriplesMap> mappings = controller.getTripleMaps();
-
-		log.debug("=========== " + identifier + " ===========");
 		for (SQLPPTriplesMap axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
 			boolean result = parse(query, builder.getQuotedIDFactory());
 
-			if (!result) {
-				log.error("Cannot parse query: " + query);
-				assertFalse(result);
-			} else {
-				assertTrue(result);
-			}
+			assertTrue(result);
 		}
-	}
-
-	private SQLPPMapping load(String file)  {
-		final String obdafile = file.substring(0, file.length() - 3) + "obda";
-        try {
-            return mappingParser.parse(new File(obdafile));
-        }
-        catch (Exception e) {
-            log.debug(e.toString());
-        }
-        return null;
 	}
 
 	private static boolean parse(String input, QuotedIDFactory idfac) {
 
-		
 		return true;
 	}
 }

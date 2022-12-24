@@ -111,8 +111,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0.0, 43.0\"^^xsd:string", "\"0.0, 23.0\"^^xsd:string", "\"0.0, 34.0\"^^xsd:string",
-        "\"0.0, 10.0\"^^xsd:string");
+        return ImmutableList.of("\"0, 43\"^^xsd:string", "\"0, 23\"^^xsd:string", "\"0, 34\"^^xsd:string",
+                "\"0, 10\"^^xsd:string");
     }
 
     @Test

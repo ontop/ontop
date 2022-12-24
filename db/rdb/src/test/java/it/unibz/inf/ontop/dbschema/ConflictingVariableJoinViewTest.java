@@ -17,7 +17,7 @@ public class ConflictingVariableJoinViewTest {
     @Test
     public void testPersonUniqueConstraint() throws Exception {
         try {
-            ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+            LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
         } catch (ConflictingVariableInJoinViewException e) {
             assertEquals(
                     e.getConflictingAttributeIds().stream().map(

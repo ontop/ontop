@@ -70,7 +70,7 @@ public class H2RDF4JTestTools {
 
     public static OntopRepositoryConnection initOBDA(String jdbcUrl, String obdaRelativePath,
                                                      @Nullable String ontologyRelativePath, @Nullable String propertyFile,
-                                                     @Nullable String viewFile, @Nullable String dbMetadataFile,
+                                                     @Nullable String lensesFile, @Nullable String dbMetadataFile,
                                                      @Nullable String sparqlRulesRelativePath) {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractRDF4JTest.class.getResource(obdaRelativePath).getPath())
@@ -85,8 +85,8 @@ public class H2RDF4JTestTools {
         if (propertyFile != null)
             builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
 
-        if (viewFile != null)
-            builder.ontopViewFile(AbstractRDF4JTest.class.getResource(viewFile).getPath());
+        if (lensesFile != null)
+            builder.lensesFile(AbstractRDF4JTest.class.getResource(lensesFile).getPath());
 
         if (dbMetadataFile != null)
             builder.dbMetadataFile(AbstractRDF4JTest.class.getResource(dbMetadataFile).getPath());
