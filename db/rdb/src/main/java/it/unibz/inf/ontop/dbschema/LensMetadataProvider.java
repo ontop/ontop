@@ -4,11 +4,11 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.io.Reader;
 
-public interface OntopViewMetadataProvider extends MetadataProvider {
+public interface LensMetadataProvider extends MetadataProvider {
 
     interface Factory {
-        OntopViewMetadataProvider getMetadataProvider(
+        LensMetadataProvider getMetadataProvider(
                 MetadataProvider parentMetadataProvider,
-                Reader ontopViewReader) throws MetadataExtractionException;
+                Reader lensReader) throws MetadataExtractionException;
     }
 }

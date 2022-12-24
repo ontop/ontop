@@ -14,7 +14,7 @@ public class NestedViewsPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/nested_lenses.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/hr_person-xt.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
 
     public NestedViewsPersonTest() throws Exception {
     }

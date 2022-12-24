@@ -63,8 +63,8 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         if (dbMetadataFile != null)
             configurationBuilder.dbMetadataFile(dbMetadataFile);
 
-        if (ontopViewFile != null)
-            configurationBuilder.ontopViewFile(ontopViewFile);
+        if (ontopLensesFile != null)
+            configurationBuilder.lensesFile(ontopLensesFile);
 
         if (sparqlRulesFile != null)
             configurationBuilder.sparqlRulesFile(sparqlRulesFile);

@@ -12,7 +12,7 @@ public class BasicViewWithConstraintsProfFalsePKTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints-falsePK.json";
     private static final String DBMETADATA_FILE = "src/test/resources/prof/prof_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithConstraintsProfFalsePKTest() throws Exception {
     }

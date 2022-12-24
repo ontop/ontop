@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class JsonViews extends JsonOpenObject {
+public class JsonLenses extends JsonOpenObject {
     @Nonnull
-    public final List<? extends JsonView> relations;
+    public final List<? extends JsonLens> relations;
 
     @JsonCreator
-    public JsonViews(@JsonProperty("relations") List<JsonView> relations) {
+    public JsonLenses(@JsonProperty("relations") List<JsonLens> relations) {
         this.relations = relations;
     }
 }

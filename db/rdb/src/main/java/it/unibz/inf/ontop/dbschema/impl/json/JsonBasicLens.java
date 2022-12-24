@@ -10,14 +10,14 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-@JsonDeserialize(as = JsonBasicView.class)
-public class JsonBasicView extends JsonBasicOrJoinView {
+@JsonDeserialize(as = JsonBasicLens.class)
+public class JsonBasicLens extends JsonBasicOrJoinLens {
 
     @Nonnull
     public final List<String> baseRelation;
 
     @JsonCreator
-    public JsonBasicView(@JsonProperty("columns") JsonBasicOrJoinView.Columns columns, @JsonProperty("name") List<String> name,
+    public JsonBasicLens(@JsonProperty("columns") JsonBasicOrJoinLens.Columns columns, @JsonProperty("name") List<String> name,
                          @JsonProperty("baseRelation") List<String> baseRelation,
                          @JsonProperty("filterExpression") String filterExpression,
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
@@ -43,12 +43,12 @@ public class JsonBasicView extends JsonBasicOrJoinView {
      * TODO: support duplication of the column (not just renamings)
      */
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
                                                                                     ImmutableList<Attribute> parentAttributes) {
         if (filterExpression != null && (!filterExpression.isEmpty()))
             // TODO: log a warning
             return ImmutableList.of();
 
-        return getDerivedFromParentAttributes(ontopViewDefinition, parentAttributes);
+        return getDerivedFromParentAttributes(lens, parentAttributes);
     }
 }

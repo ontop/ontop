@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQ;
 
 import javax.annotation.Nonnull;
 
 /**
- * Ontop view definitions are temporarily mutable, until their IQs are stabilized.
+ * Lenses are temporarily mutable, until their IQs are stabilized.
  */
-public interface OntopViewDefinition extends NamedRelationDefinition {
+public interface Lens extends NamedRelationDefinition {
 
     /**
      * IQ defining views from lower-level relations
@@ -16,11 +15,11 @@ public interface OntopViewDefinition extends NamedRelationDefinition {
     IQ getIQ();
 
     /**
-     * Level must be at least 1 for an Ontop view (0 refers to database relations)
+     * Level must be at least 1 for a lens (0 refers to database relations)
      *
-     * A level 1 view is defined from database relations only
+     * A level 1 lens is defined from database relations only
      *
-     * A Level 2 view is from at least an Ontop view of level 1 and none of higher level.
+     * A Level 2 lens is from at least a lens of level 1 and none of higher level.
      *
      */
     int getLevel();

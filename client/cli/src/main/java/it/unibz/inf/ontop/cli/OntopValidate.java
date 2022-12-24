@@ -59,8 +59,8 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         if (dbMetadataFile != null)
             builder.dbMetadataFile(dbMetadataFile);
 
-        if (ontopViewFile != null)
-            builder.ontopViewFile(ontopViewFile);
+        if (ontopLensesFile != null)
+            builder.lensesFile(ontopLensesFile);
 
         if (xmlCatalogFile != null)
             builder.xmlCatalogFile(xmlCatalogFile);

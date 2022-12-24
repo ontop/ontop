@@ -35,12 +35,12 @@ public class AbstractDockerRDF4JTest {
     }
 
     protected static void initOBDA(String obdaRelativePath, @Nullable String ontologyRelativePath,
-                                   String propertyFile, @Nullable String viewFile) throws SQLException, IOException {
-        initOBDA(obdaRelativePath, ontologyRelativePath, propertyFile, viewFile, null);
+                                   String propertyFile, @Nullable String lensesFile) throws SQLException, IOException {
+        initOBDA(obdaRelativePath, ontologyRelativePath, propertyFile, lensesFile, null);
     }
 
     protected static void initOBDA(String obdaRelativePath, @Nullable String ontologyRelativePath,
-                                   String propertyFile, @Nullable String viewFile,
+                                   String propertyFile, @Nullable String lensesFile,
                                    @Nullable String dbMetadataFile) throws SQLException, IOException {
 
         String propertyFilePath = AbstractDockerRDF4JTest.class.getResource(propertyFile).getPath();
@@ -80,8 +80,8 @@ public class AbstractDockerRDF4JTest {
 
         builder.propertyFile(AbstractDockerRDF4JTest.class.getResource(propertyFile).getPath());
 
-        if (viewFile != null)
-            builder.ontopViewFile(AbstractDockerRDF4JTest.class.getResource(viewFile).getPath());
+        if (lensesFile != null)
+            builder.lensesFile(AbstractDockerRDF4JTest.class.getResource(lensesFile).getPath());
 
         if (dbMetadataFile != null)
             builder.dbMetadataFile(AbstractDockerRDF4JTest.class.getResource(dbMetadataFile).getPath());
