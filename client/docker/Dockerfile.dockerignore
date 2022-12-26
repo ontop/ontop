@@ -14,10 +14,10 @@
 # Exclude test data (we are not testing when compiling, this can be done outside the Docker build)
 test/*/src
 
-# Exclude Maven generated files, except for directory /build/distribution/target/ontop from where
-# pre-built binaries are imported when using Docker build option '--target image-from-binaries'
+# Exclude Maven generated files, except for directory /build/distribution/target/ontop-docker from
+# where pre-built binaries are imported when using Docker build option '--target image-from-binaries'
 **/target
-!/build/distribution/target/ontop
+!/build/distribution/target/ontop-docker
 
 # Exclude the Dockerfile, this file, and the build-image.sh script, for convenience when working on
 # them (as changing them will not invalidate Docker cache and trigger a Maven build)

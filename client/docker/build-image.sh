@@ -36,7 +36,7 @@ CROSS_BUILD="false"
 PUSH="false"
 
 # Build variables non-customizable (edit in this script, and ensure BINDIR is relative to Ontop root)
-BINDIR="build/distribution/target/ontop"
+BINDIR="build/distribution/target/ontop-docker"
 PLATFORMS="linux/amd64,linux/arm64"
 
 # Initialize BUILDARGS and LABELARGS (revision-specific labels added to the latter, if info is available)

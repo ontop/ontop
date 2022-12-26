@@ -65,21 +65,21 @@ WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn clean package -Pcli -Dassembly.cli.format=dir && \
-    mv build/distribution/target/ontop-cli-* ontop && \
-    cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop && \
-    cd ontop && \
+    mv build/distribution/target/ontop-cli-* ontop-docker && \
+    cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop-docker && \
+    cd ontop-docker && \
     rm -rf ontop.bat ontop ontop-completion.sh jdbc logback.xml log/logback-debug.xml
 
-# ALTERNATIVE FINAL STAGE that uses pre-built binaries from ${ONTOP_CLI_BINDIR}, which defaults to
+# ALTERNATIVE FINAL STAGE that uses pre-built binaries from ${ONTOP_CLI_BINDIR}
 # - stage used by build-image.sh and more convenient for developers, as it integrates with regular
 #   Maven builds by reusing the Maven cache as well as previously generated binary artifacts.
-# - ${ONTOP_CLI_BINDIR} defaults to build/distribution/target/ontop (path used in build-image.sh)
+# - ${ONTOP_CLI_BINDIR} defaults to build/distribution/target/ontop-docker (as in build-image.sh)
 #   and can be set by calling 'docker buildx build' with --build-arg ONTOP_CLI_BINDIR=<path>
-#   (in that case, be sure to use a path that is not ignored by Dockerfile.dockerignore!)
+#   (in that case, be sure to use a path that is not ignored by Dockerfile.dockerignore)
 FROM ontop-base-image AS ontop-image-from-binaries
-ARG ONTOP_CLI_BINDIR="build/distribution/target/ontop"
+ARG ONTOP_CLI_BINDIR="build/distribution/target/ontop-docker"
 COPY ${ONTOP_CLI_BINDIR} /opt/ontop/
 
 # DEFAULT FINAL STAGE based on compiling Ontop within Docker (so only sw requirement is Docker)
 FROM ontop-base-image AS ontop-image-from-sources
-COPY --from=ontop-builder /build/ontop /opt/ontop/
+COPY --from=ontop-builder /build/ontop-docker /opt/ontop/
