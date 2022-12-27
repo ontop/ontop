@@ -71,46 +71,6 @@ public class TermsProducer {
      *
      */
     ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
-                               Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
-
-        Optional<UniqueConstraint> pko = td.getPrimaryKey();
-        if (pko.isPresent()) {
-            ImmutableList<Template.Component> template = generateTemplate(pko.get(), td, new Dictionary()); // use empty dict
-            ImmutableList<Variable> arguments = generateArguments(pko.get(), varNamePrefix);
-
-            return termFactory.getIRIFunctionalTerm(template, arguments);
-        }
-        else {
-            ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()
-                    .map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
-                    .collect(ImmutableCollectors.toList());
-
-            /*
-             * Re-use the blank node template if already existing
-             */
-            BnodeStringTemplateFunctionSymbol functionSymbol = bnodeTemplateMap
-                    .computeIfAbsent(td,
-                            d -> dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(vars.size()));
-
-            ImmutableFunctionalTerm lexicalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, vars);
-            return termFactory.getRDFFunctionalTerm(lexicalTerm,
-                    termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType()));
-        }
-    }
-
-    /**
-     * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
-     *   - the percent-encoded form of the table name,
-     *   - the SOLIDUS character '/',
-     *   - for each column in the primary key, in order:
-     *     - the percent-encoded form of the column name,
-     *     - a EQUALS SIGN character '=',
-     *     - the percent-encoded lexical form of the canonical RDF literal representation of the column value as defined in R2RML section 10.2 Natural Mapping of SQL Values [R2RML],
-     *     - if it is not the last column in the primary key, a SEMICOLON character ';'
-     * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
-     *
-     */
-    ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
                                Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap, BootConf bootConf) {
 
         Optional<UniqueConstraint> pko = td.getPrimaryKey();
