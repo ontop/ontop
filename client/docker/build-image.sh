@@ -124,12 +124,13 @@ function log {
 if [ "${TARGET}" = "ontop-image-from-binaries" ] || [ "${JDEPS}" ]; then
     # Compile via Maven ('clean' triggered by -c option; ontop-cli assembly not zipped)
     log "Compiling Ontop ${VERSION}"
+    rm -rf build/distribution/target/ontop-cli-*/
     ./mvnw ${QUIETARG} ${CLEANARG} package -Pcli -Dassembly.cli.format=dir
 
     # Rearrange generated ontop-cli files, dropping unused files and adding entrypoint.sh script
     log "Assembling content of image ${NAMETAG}"
     rm -rf ${BINDIR}
-    mv build/distribution/target/ontop-cli-* ${BINDIR}
+    mv build/distribution/target/ontop-cli-*/ ${BINDIR}
     rm -rf ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
     cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
 fi
