@@ -54,7 +54,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -125,6 +125,33 @@
                     <artifactId>ontop-cli</artifactId>
                 </dependency>
             </dependencies>
+        </profile>
+
+        <!-- Enforce a specific ontop-cli assembly format by setting -Dassembly.cli.format (used by Docker build-image.sh) -->
+        <profile>
+            <activation>
+                <property>
+                    <name>assembly.cli.format</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-cli-assembly</id>
+                                <configuration>
+                                    <formats>
+                                        <format>${assembly.cli.format}</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
