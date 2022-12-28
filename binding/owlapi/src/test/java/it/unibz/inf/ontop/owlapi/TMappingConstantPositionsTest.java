@@ -43,8 +43,8 @@ public class TMappingConstantPositionsTest extends AbstractOWLAPITest {
 				"SELECT * WHERE { ?x a :A. }";
 
 		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://example.org/1>",
 				"<http://example.org/2>",
-				"<http://example.org/3>",
-				"<http://example.org/1>"));
+				"<http://example.org/3>"));
 	}
 }

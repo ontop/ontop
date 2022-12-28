@@ -12,7 +12,7 @@ CREATE TABLE "DateTimes" (
   "type_timestamp" timestamp NULL DEFAULT NULL,
   "type_smalldatetime" smalldatetime NULL DEFAULT NULL,
   "type_time" time DEFAULT NULL,
-  "type_year" year DEFAULT NULL,
+  "type_year" int DEFAULT NULL,
   PRIMARY KEY ("id")
 );
 

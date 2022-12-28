@@ -15,7 +15,7 @@ VALUES
 
 CREATE TABLE t_name ( 
 	id INT NOT NULL PRIMARY KEY, -- a numeric id for the patient
-	name VARCHAR(40),  -- name of the patient
+	name VARCHAR(40)  -- name of the patient
 );
 
 CREATE TABLE t_nsclc ( 

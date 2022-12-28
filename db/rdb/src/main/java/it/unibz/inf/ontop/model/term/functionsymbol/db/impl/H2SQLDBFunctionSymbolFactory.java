@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.BINARY_VAR_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -51,6 +52,8 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
         DBTermType varBinary = dbTypeFactory.getDBTermType(VARBINARY_STR);
         builder.put(varBinary, createHexBinaryNormFunctionSymbol(varBinary));
+        DBTermType varBinary2 = dbTypeFactory.getDBTermType(BINARY_VAR_STR);
+        builder.put(varBinary2, createHexBinaryNormFunctionSymbol(varBinary2));
 
         return builder.build();
     }
@@ -123,7 +126,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("HASH('SHA256', STRINGTOUTF8(%s), 1)", termConverter.apply(terms.get(0)));
+        return String.format("RAWTOHEX(HASH('SHA256', STRINGTOUTF8(%s), 1))", termConverter.apply(terms.get(0)));
     }
 
     @Override
@@ -203,9 +206,19 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (databaseInfoSupplier.getDatabaseVersion()
+                .filter(s -> s.startsWith("1"))
+                .isPresent())
+            return super.serializeHexBinaryNorm(terms, termConverter, termFactory);
+
+        return String.format("UPPER(RAWTOHEX(%s))", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
     protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
         // To make sure the AVG does not return an integer but a decimal
-        if (inputType.equals(dbIntegerType))
+        if (inputType.equals(dbIntegerType) && databaseInfoSupplier.getDatabaseVersion().get().startsWith("1"))
             return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
 
         return super.createDBAvg(inputType, isDistinct);
@@ -216,5 +229,56 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return UUID_STR;
     }
 
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/604800)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/86400)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/3600)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/60)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s)))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEIL((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))*1000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
 
 }

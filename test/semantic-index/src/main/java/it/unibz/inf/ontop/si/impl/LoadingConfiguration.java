@@ -28,7 +28,7 @@ public class LoadingConfiguration {
     private final SQLPPSourceQueryFactory sourceQueryFactory;
 
     public LoadingConfiguration() {
-        this.jdbcUrl = "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+        this.jdbcUrl = "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";CACHE_SIZE=65536;LOCK_MODE=0";
 
         OntopSQLCoreConfiguration defaultConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .jdbcDriver(H2_DRIVER)

@@ -20,7 +20,6 @@ public abstract class AbstractGeofStringFunctionSymbolImpl extends ReduciblePosi
     protected AbstractGeofStringFunctionSymbolImpl(
             @Nonnull String functionSymbolName,
             @Nonnull IRI functionIRI,
-            //RDFDatatype wktLiteralType,
             ImmutableList<TermType> inputTypes,
             RDFDatatype xsdStringType) {
         super(functionSymbolName, functionIRI, inputTypes);
@@ -37,7 +36,7 @@ public abstract class AbstractGeofStringFunctionSymbolImpl extends ReduciblePosi
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         return termFactory.getConversion2RDFLexical(
-                dbTypeFactory.getDBBooleanType(),
+                dbTypeFactory.getDBStringType(),
                 computeDBTerm(subLexicalTerms, typeTerms, termFactory),
                 xsdStringType);
     }

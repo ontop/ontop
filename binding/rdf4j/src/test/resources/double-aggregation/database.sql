@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS mytable;
 CREATE TABLE mytable (
                            "id" integer primary key,
-                           "length" decimal,
+                           "length" decimal(20,2),
                            "type" text);
 
 insert into mytable ("id", "length", "type")

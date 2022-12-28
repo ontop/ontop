@@ -16,8 +16,9 @@ public class H2ExternalResourceForBookExample extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
-        Server.createTcpServer("-tcpPort", H2_PORT, "-tcpAllowOthers").start();
-        Connection conn = DriverManager.getConnection("jdbc:h2:tcp://localhost:" + H2_PORT + "/./src/test/resources/h2/books;ACCESS_MODE_DATA=r", "sa", "test");
+        Server.createTcpServer("-tcpPort", H2_PORT, "-tcpPassword", "test", "-tcpAllowOthers").start();
+        Connection conn = DriverManager.getConnection("jdbc:h2:tcp://localhost:" + H2_PORT
+                + "/./src/test/resources/h2/books.h2;ACCESS_MODE_DATA=r", "sa", "test");
         h2ConnectionName = conn.getMetaData().getDatabaseProductName() + "/" + conn.getCatalog();
         System.out.println("H2ExternalResourceForBookExample: Connection Established: " + h2ConnectionName);
     }
@@ -25,7 +26,7 @@ public class H2ExternalResourceForBookExample extends ExternalResource {
     @Override
     protected void after() {
         try {
-            Server.shutdownTcpServer("tcp://localhost:" + H2_PORT, "", true, true);
+            Server.shutdownTcpServer("tcp://localhost:" + H2_PORT, "test", true, true);
         } catch (SQLException e) {
             e.printStackTrace();
         }

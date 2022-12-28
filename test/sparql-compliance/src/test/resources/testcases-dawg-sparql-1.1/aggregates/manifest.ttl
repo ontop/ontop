@@ -357,5 +357,5 @@
                 mf:action
                      [ qt:query  <agg-sum-order-01.rq> ;
                        qt:data   <agg-sum-order-01.ttl> ] ;
-                mf:result  <agg-sum-order-01.srx>
+                mf:result  <agg-sum-order-01-modified.srx>
                 .

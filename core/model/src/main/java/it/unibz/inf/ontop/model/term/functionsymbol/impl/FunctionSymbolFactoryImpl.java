@@ -9,41 +9,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofIntersectionFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBoundaryFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofConvexHullFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDifferenceFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEnvelopeFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSymDifferenceFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofUnionFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRelateFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofGetSRIDFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfDisjointFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfEqualsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfOverlapsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfIntersectsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfTouchesFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhContainsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoveredByFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoversFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhDisjointFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhEqualsFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhInsideFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhMeetFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhOverlapFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8DcFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EqFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EcFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppiFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8PoFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppiFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnMultitypedInputBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
@@ -327,7 +293,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
-                new GeofRelateFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
+                new GeofRelateMFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
 
                 /*
                  * Time extension - duration arithmetic

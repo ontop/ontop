@@ -13,6 +13,14 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
+		<!--Create empty jdbc folder-->
+		<fileSet>
+			<directory>${maven.multiModuleProjectDirectory}/build/distribution/src/main/resources/</directory>
+			<outputDirectory>/jdbc</outputDirectory>
+			<includes>
+				<include>DROP_YOUR_JDBC_DRIVERS_IN_THIS_DIR.txt</include>
+			</includes>
+		</fileSet>
 		<fileSet>
 			<directory>${maven.multiModuleProjectDirectory}/build/distribution/src/main/resources/log
 			</directory>
@@ -48,12 +56,6 @@
 				<exclude>*:ontop-protege:*</exclude>
 				<exclude>*:ontop-distribution:*</exclude>
 			</excludes>
-		</dependencySet>
-		<dependencySet>
-			<outputDirectory>/jdbc</outputDirectory>
-			<includes>
-				<include>com.h2database:h2*</include>
-			</includes>
 		</dependencySet>
 	</dependencySets>
 </assembly>
