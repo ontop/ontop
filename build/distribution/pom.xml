@@ -73,20 +73,6 @@
                             <finalName>ontop-cli-${project.version}</finalName>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>attach-webapps-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <skipAssembly>${assembly.webapps.skip}</skipAssembly>
-                            <descriptors>
-                                <descriptor>src/assembly/ontop-webapps.xml</descriptor>
-                            </descriptors>
-                            <finalName>ontop-webapps-${project.version}</finalName>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>
@@ -99,21 +85,6 @@
                 <dependency>
                     <groupId>${project.groupId}</groupId>
                     <artifactId>ontop-cli</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>webapps</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-rdf4j-server</artifactId>
-                    <type>war</type>
-                </dependency>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-rdf4j-workbench</artifactId>
-                    <type>war</type>
                 </dependency>
             </dependencies>
         </profile>

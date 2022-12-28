@@ -91,7 +91,6 @@
         <filter.test.resources>false</filter.test.resources>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <assembly.cli.skip>true</assembly.cli.skip>
-        <assembly.webapps.skip>true</assembly.webapps.skip>
         <assembly.protege.skip>true</assembly.protege.skip>
         <bundle.protege.phase>none</bundle.protege.phase>
         <maven.war.skip>true</maven.war.skip>
@@ -361,28 +360,6 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>ontop-cli</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdf4j-webapps</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdf4j-config-sql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdf4j-server</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdf4j-workbench</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -1519,7 +1496,6 @@
         <!-- Manually activated profiles to control generated artifacts (call via mvn -Pname)
              - cli      generates build/distribution/target/ontop-cli-VERSION.zip
              - protege  generates build/distribution/target/ontop-protege-bundle-PLATFORM-VERSION.zip files
-             - webapps  generates build/distribution/target/ontop-webapps-VERSION.zip
              - release  generates all artifacts above, with testing, javadoc and jar metadata -->
         <profile>
             <id>cli</id>
@@ -1546,20 +1522,6 @@
                 <maven.test.skip>true</maven.test.skip>
                 <assembly.protege.skip>false</assembly.protege.skip>
                 <bundle.protege.phase>package</bundle.protege.phase>
-            </properties>
-        </profile>
-        <profile>
-            <id>webapps</id>
-            <build>
-                <defaultGoal>package</defaultGoal>
-            </build>
-            <properties>
-                <metadata.git.skip>true</metadata.git.skip>
-                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.test.skip>true</maven.test.skip>
-                <assembly.webapps.skip>false</assembly.webapps.skip>
-                <maven.war.skip>false</maven.war.skip>
             </properties>
         </profile>
         <profile>
