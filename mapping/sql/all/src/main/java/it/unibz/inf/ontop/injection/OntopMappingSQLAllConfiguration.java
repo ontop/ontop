@@ -45,11 +45,21 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
 
         B dbMetadataReader(@Nonnull Reader dbMetadataReader);
 
-        B ontopViewFile(@Nonnull File ontopViewFile);
+        B lensesFile(@Nonnull File ontopViewFile);
 
-        B ontopViewFile(@Nonnull String ontopViewFilename);
+        @Deprecated
+        default B ontopViewFile(@Nonnull String lensesFilename) {
+            return lensesFile(lensesFilename);
+        }
 
-        B ontopViewReader(@Nonnull Reader ontopViewReader);
+        B lensesFile(@Nonnull String lensesFilename);
+
+        @Deprecated
+        default B ontopViewReader(@Nonnull Reader lensesReader) {
+            return lensesReader(lensesReader);
+        }
+
+        B lensesReader(@Nonnull Reader lensesReader);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLConfiguration.Builder<B>,

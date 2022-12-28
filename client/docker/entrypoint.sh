@@ -83,7 +83,12 @@ if [ "${ONTOP_DB_METADATA_FILE+x}" ]; then
 fi
 
 if [ "${ONTOP_VIEW_FILE+x}" ]; then
-  args_array+=("--ontop-views=${ONTOP_VIEW_FILE}")
+  echo "WARNING: environment variable ONTOP_VIEW_FILE is deprecated. Please use ONTOP_LENSES_FILE instead"
+  ONTOP_LENSES_FILE=${ONTOP_VIEW_FILE}
+fi
+
+if [ "${ONTOP_LENSES_FILE+x}" ]; then
+  args_array+=("--lenses=${ONTOP_LENSES_FILE}")
 fi
 
 if [ "${ONTOP_SPARQL_RULES_FILE+x}" ]; then

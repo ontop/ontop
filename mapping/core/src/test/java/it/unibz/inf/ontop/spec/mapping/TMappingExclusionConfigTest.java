@@ -2,14 +2,14 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.RDF_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TMappingExclusionConfigTest {
 
@@ -23,29 +23,23 @@ public class TMappingExclusionConfigTest {
         ObjectPropertyExpression P = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/P"));
         ObjectPropertyExpression Q = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/Q"));
         ObjectPropertyExpression Ac = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/A"));
-        // in the config
-        assertTrue(conf.contains(A));
-        // not in the config
-        assertFalse(conf.contains(B));
-        // wrong type
-        assertFalse(conf.contains(Pc));
-        // in the config
-        assertTrue(conf.contains(P));
-        // not in the config
-        assertFalse(conf.contains(Q));
-        // wrong type
-        assertFalse(conf.contains(Ac));
+
+        assertAll(
+                () -> assertTrue(conf.contains(A)),         // in the config
+                () -> assertFalse(conf.contains(B)), // not in the config
+                () -> assertFalse(conf.contains(Pc)), // wrong type
+                () -> assertTrue(conf.contains(P)), // in the config
+                () -> assertFalse(conf.contains(Q)), // not in the config
+                () -> assertFalse(conf.contains(Ac))); // wrong type
     }
 
-    // File not found
-    @Test(expected = FileNotFoundException.class)
-    public void testNotExistingFile() throws Exception {
-        TMappingExclusionConfig.parseFile("not_existing.conf");
+    @Test
+    public void testNotExistingFile() {
+        assertThrows(FileNotFoundException.class, () -> TMappingExclusionConfig.parseFile("not_existing.conf"));
     }
 
-
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBadFile() throws Exception {
-        TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/bad.conf");
+        assertThrows(IllegalArgumentException.class, () -> TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/bad.conf"));
     }
 }

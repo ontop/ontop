@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
@@ -42,21 +41,21 @@ public abstract class AbstractVirtualModeTest {
         return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile), Optional.empty());
     }
 
-    protected static OntopOWLEngine createReasonerWithViews(String owlFile, String obdaFile, String propertiesFile, String viewFile) throws OWLOntologyCreationException {
-        return createReasoner(owlFile,obdaFile,propertiesFile, Optional.empty(), Optional.of(viewFile));
+    protected static OntopOWLEngine createReasonerWithLenses(String owlFile, String obdaFile, String propertiesFile, String lensesFile) throws OWLOntologyCreationException {
+        return createReasoner(owlFile,obdaFile,propertiesFile, Optional.empty(), Optional.of(lensesFile));
     }
 
-    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> viewFile) throws OWLOntologyCreationException {
+    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> lensesFile) throws OWLOntologyCreationException {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
-        OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile, viewFile);
+        OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile, lensesFile);
         return new SimpleOntopOWLEngine(config);
     }
 
     private static OntopSQLOWLAPIConfiguration createConfig(String owlFile, String obdaFile, String propertiesFile,
-                                                            Optional<String> implicitConstraintsFile, Optional<String> viewFile) {
+                                                            Optional<String> implicitConstraintsFile, Optional<String> lensesFile) {
 
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
@@ -66,7 +65,7 @@ public abstract class AbstractVirtualModeTest {
 
         implicitConstraintsFile.ifPresent(f -> builder.basicImplicitConstraintFile( AbstractVirtualModeTest.class.getResource(f).toString()));
 
-        viewFile.ifPresent(f -> builder.ontopViewFile(AbstractVirtualModeTest.class.getResource(f).getPath()));
+        lensesFile.ifPresent(f -> builder.lensesFile(AbstractVirtualModeTest.class.getResource(f).getPath()));
         return builder.build();
     }
 

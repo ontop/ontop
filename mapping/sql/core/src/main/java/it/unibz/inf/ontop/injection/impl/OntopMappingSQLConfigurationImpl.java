@@ -80,8 +80,8 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                                         Supplier<Optional<File>> constraintFileSupplier,
                                         Supplier<Optional<File>> dbMetadataFileSupplier,
                                         Supplier<Optional<Reader>> dbMetadataReaderSupplier,
-                                        Supplier<Optional<File>> ontopViewFileSupplier,
-                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
+                                        Supplier<Optional<File>> lensesFileSupplier,
+                                        Supplier<Optional<Reader>> lensesReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -92,8 +92,8 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 constraintFileSupplier,
                 dbMetadataFileSupplier,
                 dbMetadataReaderSupplier,
-                ontopViewFileSupplier,
-                ontopViewReaderSupplier
+                lensesFileSupplier,
+                lensesReaderSupplier
         );
     }
 

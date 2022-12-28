@@ -12,13 +12,6 @@ dctype:		http://purl.org/dc/dcmitype/Image#
 dcterms:		http://purl.org/dc/terms/
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
-[SourceDeclaration]
-sourceUri	kbdb_imdb
-connectionUrl	jbdc:postgresql://obdalin.inf.unibz.it/
-username	imdbobda
-password	imdb-09
-driverClass	org.postgresql.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	Actor
 target		:Person-{id} a :Actor . 
@@ -101,11 +94,11 @@ target		:Person-{person_id} :hasDateOfBirth {dob} .
 source		select person_id, info as dob from person_info where info_type_id = 21
 
 mappingId	ProductionCompany
-target		:company($id) a :ProductionCompany ; :hasCompanyName {name} . 
+target		:company-{id} a :ProductionCompany ; :hasCompanyName {name} .
 source		select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2
 
 mappingId	DistributionCompany
-target		:company($id) a :DistributionCompany ; :hasCompanyName {name} . 
+target		:company-{id} a :DistributionCompany ; :hasCompanyName {name} .
 source		select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1
 
 mappingId	hasProductionCompany
@@ -117,7 +110,7 @@ target		:Title-{title_id} :hasDistributionCompany :cCompany-{company_id} .
 source		select company_name.id as company_id, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1
 
 mappingId	hasCountryCode
-target		:company($id) :hasCountryCode {country} . 
+target		:company-{id} :hasCountryCode {country} .
 source		select company_name.id as id, company_name.country_code as country from company_name
 
 mappingId	hasName

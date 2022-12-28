@@ -93,8 +93,8 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
         if (this.dbMetadataFile != null)
             argList.add("--db-metadata=" + this.dbMetadataFile);
 
-        if (this.ontopViewFile != null)
-            argList.add("--ontop-views=" + this.ontopViewFile);
+        if (this.ontopLensesFile != null)
+            argList.add("--lenses=" + this.ontopLensesFile);
 
         if (this.sparqlRulesFile != null)
             argList.add("--sparql-rules=" + this.sparqlRulesFile);

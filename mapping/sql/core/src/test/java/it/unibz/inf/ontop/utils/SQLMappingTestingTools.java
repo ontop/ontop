@@ -15,7 +15,6 @@ import org.apache.commons.rdf.api.RDF;
 public class SQLMappingTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
-
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final DBFunctionSymbolFactory DB_FS_FACTORY;
@@ -30,10 +29,8 @@ public class SQLMappingTestingTools {
 
     static {
         OntopMappingSQLConfiguration defaultConfiguration = OntopMappingSQLConfiguration.defaultBuilder()
-                .jdbcUrl("jdbc:h2:mem:something")
-                .jdbcDriver("org.h2.Driver")
-                .jdbcUser("user")
-                .jdbcPassword("password")
+                .jdbcUrl("dummy")
+                .jdbcDriver("dummy")
                 .enableTestMode()
                 .build();
 

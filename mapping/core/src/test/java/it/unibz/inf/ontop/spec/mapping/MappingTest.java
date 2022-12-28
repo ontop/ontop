@@ -18,26 +18,22 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
+
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MappingTest {
 
     private static final RelationDefinition P1;
     private static final RelationDefinition P3;
-    private static final RelationDefinition P4;
-    private static final RelationDefinition P5;
     private static final RelationDefinition BROKER;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
     private static final Variable A = TERM_FACTORY.getVariable("a");
     private static final Variable B = TERM_FACTORY.getVariable("b");
@@ -62,12 +58,6 @@ public class MappingTest {
 
         P3 = builder.createDatabaseRelation("p3",
             "col31", integerDBType, false);
-
-        P4 = builder.createDatabaseRelation("p4",
-            "col41", integerDBType, false);
-
-        P5 = builder.createDatabaseRelation("p5",
-            "col51", integerDBType, false);
 
         BROKER = builder.createDatabaseRelation("brokerworksfor",
             "broker", integerDBType, false,
@@ -100,7 +90,6 @@ public class MappingTest {
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
             IQ mappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
             propertyMapBuilder.put(propertyIri, mappingAssertion);
-            LOGGER.info("Mapping assertion:\n" + mappingAssertion);
         }
 
         // Class
@@ -113,7 +102,6 @@ public class MappingTest {
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
         IQ classMappingAssertion = IQ_FACTORY.createIQ(mappingProjectionAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
-        LOGGER.info("Mapping assertion:\n" + classMappingAssertion);
 
 
         /*
@@ -136,36 +124,21 @@ public class MappingTest {
         /*
          * Test whether two mapping assertions share a variable
          */
-        LOGGER.info("After renaming:");
         Set<Variable> variableUnion = new HashSet<>();
 
         // Properties
         for (IRI propertyIri : propertyIris) {
-
             IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
-
-            LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-            if (Stream.of(mappingAssertionVariables)
-                    .anyMatch(variableUnion::contains)){
-                fail();
-                break;
-            }
+            assertTrue(Sets.intersection(mappingAssertionVariables, variableUnion).isEmpty());
             variableUnion.addAll(mappingAssertionVariables);
-            LOGGER.info("All variables thus far: "+variableUnion+"\n");
         }
 
         // Class
         IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1));
-
-        System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-        if(Stream.of(mappingAssertionVariables)
-                .anyMatch(variableUnion::contains)) {
-            fail();
-        }
+        assertTrue(Sets.intersection(mappingAssertionVariables, variableUnion).isEmpty());
         variableUnion.addAll(mappingAssertionVariables);
-        LOGGER.info("All variables thus far: "+variableUnion+"\n");
     }
 
     @Test
@@ -181,11 +154,18 @@ public class MappingTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IQ mappingAssertion = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, table1DataNode));
-        LOGGER.info(mappingAssertion.toString());
+        IQ iq = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, table1DataNode));
 
-//        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
-//        ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion);
+        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
+        ImmutableList<MappingAssertion> nonNormalizedMapping = ImmutableList.of(new MappingAssertion(MappingAssertionIndex.ofClass(tp, CLASS_1), iq, null));
+
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
+                .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
+
+        IQ result = normalizedMapping.get(MappingAssertionIndex.ofClass(tp, CLASS_1));
+        ExtensionalDataNode node = (ExtensionalDataNode) result.getTree().getChildren().get(0);
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> args = node.getArgumentMap();
+        assertEquals(args.get(0), args.get(2));
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
