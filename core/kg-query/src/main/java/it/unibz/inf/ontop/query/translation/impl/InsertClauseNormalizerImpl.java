@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -69,11 +70,15 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                         b -> b,
                         b -> variableGenerator.generateNewVariable()));
 
-        ImmutableSet<ImmutableSet<Variable>> uniqueConstraints = whereTree.inferUniqueConstraints();
+        VariableNullability variableNullability = whereTree.getVariableNullability();
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = uniqueConstraints.isEmpty()
-                ? createBNodeDefinitionsWithoutUniqueConstraint(bNodeMap, whereTree.getVariables())
-                : createBNodeDefinitionsFromUniqueConstraint(bNodeMap, uniqueConstraints.iterator().next());
+        ImmutableSet<ImmutableSet<Variable>> nonNullableUniqueConstraints = whereTree.inferUniqueConstraints().stream()
+                .filter(vs -> vs.stream().noneMatch(variableNullability::isPossiblyNullable))
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = nonNullableUniqueConstraints.isEmpty()
+                ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(bNodeMap, whereTree.getVariables())
+                : createBNodeDefinitionsFromNonNullableUniqueConstraint(bNodeMap, nonNullableUniqueConstraints.iterator().next());
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))
                 .immutableCopy();
@@ -84,8 +89,8 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                         substitutionFactory.getSubstitution(substitutionMap)));
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsFromUniqueConstraint(ImmutableMap<BNode, Variable> bNodeMap,
-                                                                                             ImmutableSet<Variable> uniqueConstraint) {
+    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableMap<BNode, Variable> bNodeMap,
+                                                                                                        ImmutableSet<Variable> uniqueConstraint) {
         return bNodeMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getValue,
@@ -96,7 +101,7 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
      * This implementation does not preserve duplicated rows, as foreseen by R2RML for the virtual setting
      * (see https://www.w3.org/TR/r2rml/#default-mappings)
      */
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsWithoutUniqueConstraint(
+    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsWithoutNonNullableUniqueConstraint(
             ImmutableMap<BNode, Variable> bNodeMap, ImmutableSet<Variable> whereVariables) {
         if (whereVariables.isEmpty())
             return bNodeMap.entrySet().stream()
@@ -123,9 +128,12 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 .forEach(v -> templateBuilder.addSeparator("/").addColumn());
 
         ImmutableList<ImmutableFunctionalTerm> arguments = variables.stream()
-                .map(v -> termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getExtractLexicalTermFromRDFTerm(),
-                        v))
+                .map(v -> termFactory.getDBCoalesce(
+                        termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getExtractLexicalTermFromRDFTerm(),
+                                v),
+                        termFactory.getDBStringConstant("null-value")
+                        ))
                 .collect(ImmutableCollectors.toList());
 
         return termFactory.getBnodeFunctionalTerm(templateBuilder.build(), arguments);

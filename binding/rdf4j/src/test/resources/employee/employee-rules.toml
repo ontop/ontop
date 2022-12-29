@@ -134,5 +134,22 @@ rules = [
     WHERE {
        ?e a :Employee .
     }
+    """,
+    """
+    PREFIX : <http://employee.example.org/voc#>
+    INSERT {
+      GRAPH <http://employee.example.org/nullability-robustness-test> {
+         [] a :EmployeeCountryEntry .
+      }
+    }
+    WHERE {
+       {
+         ?e a :Employee
+       }
+       UNION
+       {
+         ?e a :Employee ; :country ?country .
+       }
+    }
     """
 ]
