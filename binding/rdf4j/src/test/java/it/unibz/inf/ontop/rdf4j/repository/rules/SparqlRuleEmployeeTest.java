@@ -194,4 +194,18 @@ public class SparqlRuleEmployeeTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, ImmutableList.of("Doe", "Taylor"));
     }
 
+    /**
+     * Excepts the number of employees times 2
+     */
+    @Test
+    public void testCountGeneratedBnodeFromNullableVariables() {
+        String query = "PREFIX : <http://employee.example.org/voc#>\n" +
+                "SELECT (COUNT(?x) AS ?v) \n" +
+                "FROM <http://employee.example.org/nullability-robustness-test>\n" +
+                "WHERE {\n" +
+                "   ?x a :EmployeeCountryEntry .\n" +
+                "}\n" ;
+        runQueryAndCompare(query, ImmutableList.of("4"));
+    }
+
 }
