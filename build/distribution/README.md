@@ -3,8 +3,8 @@
 The [Ontop](http://ontop-vkg.org) framework is an open source project available under the terms of the
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-* Current version: 4.2.1
-* Release date: 19/04/2022
+* Current version: 5.0.0
+* Release date: 30/12/2022
 * [Changelog](https://ontop-vkg.org/guide/releases.html)
 
 ## Downloads
@@ -13,14 +13,14 @@ The [Ontop](http://ontop-vkg.org) framework is an open source project available 
 
 - `ontop-cli-[version].zip`
 
-### Platform-specific Ontop Protégé bundles with JRE 8 embedded
+### Platform-specific Ontop Protégé bundles with JRE 11 embedded
 
 - `ontop-protege-bundle-linux-[version].tar.gz`:  Linux bundle (start with `run.sh`)
 - `ontop-protege-bundle-macos-[version].zip`: macOS bundle (first run: right click `Protégé.app` and select `Open` in
   the warning dialog)
 - `ontop-protege-bundle-windows-[version].zip`: Windows bundle (start with `run.bat` or `Protege.exe`)
 
-### Platform-independent Ontop Protégé plugin and bundle (JRE 8 needs to be installed manually)
+### Platform-independent Ontop Protégé plugin and bundle (JRE 11 needs to be installed manually)
 
 - `it.unibz.inf.ontop.protege-[version].jar`: platform-independent plugin (drop it into Protege’s `plugins` folder).
 - `ontop-protege-bundle-platform-independent-[version].zip`: platform-independent plugin (start with `run.sh`, `run.command`
