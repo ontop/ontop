@@ -8,7 +8,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop-protege-parent</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Ontop OBDA plugin for protégé</description>
