@@ -32,7 +32,7 @@ public interface OntopModelConfiguration {
     /**
      * Default builder
      */
-    static Builder defaultBuilder() {
+    static <B extends Builder<B>> Builder<B> defaultBuilder() {
         return new OntopModelConfigurationImpl.BuilderImpl<>();
     }
 
