@@ -111,7 +111,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
 		return dag.incomingEdgesOf(v).stream()
-				.map(e -> dag.getEdgeSource(e))
+				.map(dag::getEdgeSource)
 				.collect(ImmutableCollectors.toSet());
 	}
 
@@ -145,7 +145,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 		return dag.outgoingEdgesOf(v).stream()
-				.map(e -> dag.getEdgeTarget(e))
+				.map(dag::getEdgeTarget)
 				.collect(ImmutableCollectors.toSet());
 	}
 	
@@ -242,12 +242,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			Equivalences<TT> v2 = vertexIndex.get(graph.getEdgeTarget(edge));
 			if (v1 == v2)
 				continue; // do not add loops
-			
-			Set<Equivalences<TT>> out = outgoingEdges.get(v1);
-			if (out == null) {
-				out = new HashSet<>();
-				outgoingEdges.put(v1, out);
-			}
+
+			Set<Equivalences<TT>> out = outgoingEdges.computeIfAbsent(v1, k -> new HashSet<>());
 			out.add(v2);
 		}
 

@@ -617,7 +617,8 @@ public class OntologyBuilderImpl implements OntologyBuilder {
          * @throws InconsistentOntologyException
          */
 
-        void addDisjointness(T... es) throws InconsistentOntologyException {
+        @SafeVarargs
+        final void addDisjointness(T... es) throws InconsistentOntologyException {
             ImmutableList.Builder<T> sb = new ImmutableList.Builder<>();
             int numberOfTop = 0;
             for (T e : es) {
