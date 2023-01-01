@@ -52,8 +52,8 @@ public class BinaryAxiomImpl<T> implements BinaryAxiom<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BinaryAxiomImpl<?>) {
-			BinaryAxiomImpl<T> inc2 = (BinaryAxiomImpl<T>) obj;
+		if (obj instanceof BinaryAxiomImpl) {
+			BinaryAxiomImpl<?> inc2 = (BinaryAxiomImpl<?>) obj;
 			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
 		return false;

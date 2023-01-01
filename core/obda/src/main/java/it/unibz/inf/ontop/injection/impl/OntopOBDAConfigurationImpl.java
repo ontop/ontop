@@ -123,9 +123,10 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopOBDAConfigurationBuilderMixin() {
+            B builder = (B) this;
             localBuilderFragment = new DefaultOntopOBDABuilderFragment<>(
-                    (B) this, this::declareOBDASpecificationAssigned);
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
+                    builder, this::declareOBDASpecificationAssigned);
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
         }
 
         @Override

@@ -82,8 +82,9 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected AbstractOntopOptimizationBuilderMixin() {
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>((B)this);
-            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>((B) this);
+            B builder = (B) this;
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
+            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>(builder);
         }
 
         protected Properties generateProperties() {

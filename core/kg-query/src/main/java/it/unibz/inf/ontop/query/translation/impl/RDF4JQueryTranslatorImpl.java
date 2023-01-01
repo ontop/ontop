@@ -470,7 +470,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         new HashSet<>(childVariables),
                         externalBindings, treatBNodeAsVariable));
 
-        ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
                 .map(ImmutableMap::copyOf)
                 .map(substitutionFactory::getSubstitution)
                 .collect(ImmutableCollectors.toList());
@@ -482,7 +482,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.iterator().next()
+                (ImmutableSubstitution<ImmutableFunctionalTerm>)(ImmutableSubstitution<?>)mergedVarDefs.iterator().next()
         );
     }
 

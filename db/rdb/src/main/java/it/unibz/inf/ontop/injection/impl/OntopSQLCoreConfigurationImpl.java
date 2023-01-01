@@ -95,8 +95,9 @@ public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected OntopSQLCoreBuilderMixin() {
-            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>((B)this);
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
+            B builder = (B) this;
+            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
         }
 
         @Override
