@@ -35,7 +35,7 @@ import java.security.SecureRandom;
  *
  */
 public class DefaultOntopOWLStatement implements OntopOWLStatement {
-	private OntopStatement st;
+	private final OntopStatement st;
 	private final KGQueryFactory kgQueryFactory;
 
 	public DefaultOntopOWLStatement(OntopStatement st, KGQueryFactory kgQueryFactory) {

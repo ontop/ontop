@@ -6,7 +6,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregateMysqlTest extends AbstractDistinctInAggregateTest {
 
-    private static String propertiesFile = "/mysql/university.properties";
+    private static final String propertiesFile = "/mysql/university.properties";
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {

@@ -10,7 +10,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTest {
 
-    private static String propertiesFile = "/mssql/university.properties";
+    private static final String propertiesFile = "/mssql/university.properties";
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {

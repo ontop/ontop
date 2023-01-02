@@ -33,6 +33,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.stream.Stream;
@@ -138,14 +139,15 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 	
 	public static final class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
-		private SimpleDirectedGraph <T,DefaultEdge> dag;
-		private EquivalencesDAG<T> reasonerDAG;
+		private final SimpleDirectedGraph <T,DefaultEdge> dag;
+		private final EquivalencesDAG<T> reasonerDAG;
 		
 		public EquivalencesDAGImpl(SimpleDirectedGraph<T, DefaultEdge> dag, EquivalencesDAG<T> reasonerDAG) {
 			this.dag = dag;
 			this.reasonerDAG = reasonerDAG;
 		}
 
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();

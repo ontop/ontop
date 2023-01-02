@@ -43,15 +43,15 @@ import java.util.*;
 public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection {
 
     private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
-    private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
-    private OntopRepository repository;
-    private OntopConnection ontopConnection;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
+    private final OntopRepository repository;
+    private final OntopConnection ontopConnection;
     private final RDF4JQueryFactory inputQueryFactory;
     private final OntopSystemSettings settings;
     private boolean isOpen;
     private boolean isActive;
-    private RDFParser rdfParser;
-    private Map<String, String> namespaces;
+    private final RDFParser rdfParser;
+    private final Map<String, String> namespaces;
 
 
     OntopRepositoryConnectionImpl(OntopRepository rep, OntopConnection connection,

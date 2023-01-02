@@ -107,7 +107,7 @@ public class RDB2RDFTest {
 			"tc0019a"
 	);
 
-	private static List<String> FAILURES = Lists.newArrayList();
+	private static final List<String> FAILURES = Lists.newArrayList();
 
 	private static final String BASE_IRI = "http://example.com/base/";
 
@@ -115,7 +115,7 @@ public class RDB2RDFTest {
 
 	private static Connection SQL_CONN;
 
-	private static ValueFactory FACTORY = SimpleValueFactory.getInstance();
+	private static final ValueFactory FACTORY = SimpleValueFactory.getInstance();
 
 	private static Properties PROPERTIES;
 

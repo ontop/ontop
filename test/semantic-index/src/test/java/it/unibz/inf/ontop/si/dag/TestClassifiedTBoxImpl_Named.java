@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -127,6 +128,7 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 			this.reasonerDAG = reasonerDAG;
 		}
 		
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();

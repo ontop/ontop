@@ -30,7 +30,6 @@ public class SimpleMaterializerTest {
 
     private Connection conn;
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
     private OWLOntology ontology;
 
     final String owlfile = "src/test/resources/test/simplemapping.owl";

@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class H2ExternalResourceForBookExample extends ExternalResource {
 
     // a random port to avoid conflicts
-    private static String H2_PORT = "19123";
+    private static final String H2_PORT = "19123";
     private String h2ConnectionName;
 
     @Override

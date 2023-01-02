@@ -125,10 +125,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol rowNumberFct;
     private DBFunctionSymbol rowNumberWithOrderByFct;
 
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)

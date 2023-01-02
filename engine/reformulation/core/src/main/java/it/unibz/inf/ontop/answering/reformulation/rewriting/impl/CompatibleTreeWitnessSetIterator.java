@@ -30,7 +30,7 @@ public class CompatibleTreeWitnessSetIterator implements Iterator<ImmutableColle
 
     private final ImmutableList<TreeWitness> tws;
 
-    private final boolean in[];  // subset number - binary representation
+    private final boolean[] in;  // subset number - binary representation
     private ImmutableList<TreeWitness> nextSet = null; // the first subset is empty - still need to find a compatible non-empty subset
 
     CompatibleTreeWitnessSetIterator(ImmutableList<TreeWitness> tws) {

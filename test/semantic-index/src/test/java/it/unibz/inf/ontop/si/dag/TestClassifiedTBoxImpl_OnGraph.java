@@ -35,6 +35,8 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import com.google.common.collect.ImmutableSet;
 
+import javax.annotation.Nonnull;
+
 /**
  * Reasoning over the TBox using the ontology graph
  * 
@@ -128,6 +130,7 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 			this.graph = graph;
 		}
 
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
 			Set<Equivalences<T>> result = new LinkedHashSet<>();

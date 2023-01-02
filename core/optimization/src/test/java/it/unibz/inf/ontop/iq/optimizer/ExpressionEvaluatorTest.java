@@ -37,13 +37,13 @@ public class ExpressionEvaluatorTest {
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/stock/", 0);
-    private ImmutableList<Template.Component> URI_TEMPLATE_STR_2 = Template.of("http://example.org/something/", 0, "/", 1);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/stock/", 0);
+    private final ImmutableList<Template.Component> URI_TEMPLATE_STR_2 = Template.of("http://example.org/something/", 0, "/", 1);
 
 
-    private ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D));
+    private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
+    private final ExtensionalDataNode EXPECTED_DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D));
 
 
     private final String languageTag =  "en-us";

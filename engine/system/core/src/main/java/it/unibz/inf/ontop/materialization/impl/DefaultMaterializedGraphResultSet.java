@@ -47,7 +47,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     @Nullable
     private TupleResultSet tmpContextResultSet;
 
-    private Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
     private final List<IRI> possiblyIncompleteClassesAndProperties;
     private VocabularyEntry lastSeenPredicate;
     private IRIConstant lastSeenPredicateIRI;

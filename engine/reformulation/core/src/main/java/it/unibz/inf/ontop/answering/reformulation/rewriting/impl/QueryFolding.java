@@ -47,7 +47,7 @@ public class QueryFolding {
 	private final CachedClassifiedTBoxWrapper cache;
 	
 	private DownwardSaturatedImmutableSet<ObjectPropertyExpression> properties;
-	private Set<QueryConnectedComponent.Loop> roots;
+	private final Set<QueryConnectedComponent.Loop> roots;
 	private DownwardSaturatedImmutableSet<ClassExpression> internalRootConcepts;
 	private Set<VariableOrGroundTerm> internalRoots;
 	private Set<VariableOrGroundTerm> internalDomain;

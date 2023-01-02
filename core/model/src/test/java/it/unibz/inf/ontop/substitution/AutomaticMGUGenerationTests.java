@@ -49,7 +49,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	private ImmutableUnificationTools unifier;
 	private AutomaticMGUTestDataGenerator	generator;
-	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
+	private final Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
 	public void setUp() throws Exception {
 		/*

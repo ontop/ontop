@@ -62,10 +62,10 @@ public class EmptyEntitiesTest {
 	final String propertyFile =
 			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 	
-	private List<String> emptyConcepts = new ArrayList<>();
-	private List<String> emptyRoles = new ArrayList<>();
-	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
-	private Set<Description> emptyProperties = new HashSet<>();
+	private final List<String> emptyConcepts = new ArrayList<>();
+	private final List<String> emptyRoles = new ArrayList<>();
+	private final Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
+	private final Set<Description> emptyProperties = new HashSet<>();
 
 	private OntopOWLEngine reasoner;
 	private ClassifiedTBox onto;
