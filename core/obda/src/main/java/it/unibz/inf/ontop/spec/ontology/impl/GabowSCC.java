@@ -145,7 +145,7 @@ public class GabowSCC<V, E>
         vertexToVertexNumber = new HashMap<>(c);
 
         for (V vertex : graph.vertexSet()) {
-            vertexToVertexNumber.put(vertex, new VertexNumber<V>(vertex, 0));            
+            vertexToVertexNumber.put(vertex, new VertexNumber<>(vertex));
         }
         
         stack = new ArrayDeque<>(c);
@@ -186,7 +186,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new Equivalences<V>(L.build())); 
+             stronglyConnectedSets.add(new Equivalences<>(L.build()));
          } 
     }
 
@@ -198,9 +198,9 @@ public class GabowSCC<V, E>
     	final V vertex;
     	int number;
     	
-    	private VertexNumber(V vertex, int number) {
+    	private VertexNumber(V vertex) {
     		this.vertex = vertex;
-    		this.number = number;
+    		this.number = 0;
     	}
 
     	int getNumber() {

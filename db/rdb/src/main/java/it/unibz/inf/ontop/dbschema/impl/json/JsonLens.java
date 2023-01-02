@@ -75,7 +75,7 @@ public abstract class JsonLens extends JsonOpenObject {
     public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
             Lens lens, ImmutableList<Attribute> parentAttributes);
 
-    protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
+    protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters)  {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
 

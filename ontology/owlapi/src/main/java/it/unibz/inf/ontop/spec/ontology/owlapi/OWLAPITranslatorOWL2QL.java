@@ -629,9 +629,6 @@ public class OWLAPITranslatorOWL2QL {
                 log.warn(INCONSISTENT_ONTOLOGY, ax);
                 throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
             }
-            catch (TranslationException e) {
-                log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
-            }
         }
 
         /**
@@ -1077,7 +1074,7 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
-    private ObjectConstant getIndividual(OWLIndividual ind) throws TranslationException {
+    private ObjectConstant getIndividual(OWLIndividual ind) {
         if (ind.isAnonymous())
             return termFactory.getConstantBNode(((OWLAnonymousIndividual)ind).getID().getID());
 

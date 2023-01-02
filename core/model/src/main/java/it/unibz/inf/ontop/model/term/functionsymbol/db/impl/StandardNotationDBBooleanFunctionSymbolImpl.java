@@ -25,7 +25,7 @@ public abstract class StandardNotationDBBooleanFunctionSymbolImpl extends DBBool
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect,
                 terms.stream()
-                        .map(termConverter::apply)
+                        .map(termConverter)
                         .collect(Collectors.joining(",")));
     }
 }

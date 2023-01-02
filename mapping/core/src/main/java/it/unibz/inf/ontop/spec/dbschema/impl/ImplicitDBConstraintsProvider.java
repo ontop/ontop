@@ -34,7 +34,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     ImplicitDBConstraintsProvider(MetadataProvider provider,
                                   ImmutableList<DatabaseRelationDescriptor> uniqueConstraints,
-                                  ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) throws MetadataExtractionException {
+                                  ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) {
         super(provider);
 
         this.uniqueConstraints = uniqueConstraints.stream()

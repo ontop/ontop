@@ -18,10 +18,9 @@ public class DefaultSQLIfThenElseFunctionSymbol extends AbstractDBIfThenElseFunc
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format(
-                TEMPLATE,
+        return String.format(TEMPLATE,
                 terms.stream()
-                        .map(termConverter::apply)
+                        .map(termConverter)
                         .toArray());
     }
 }

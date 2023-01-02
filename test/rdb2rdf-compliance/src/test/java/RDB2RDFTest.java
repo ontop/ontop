@@ -156,10 +156,10 @@ public class RDB2RDFTest {
 			// simpler handler for manifest files that takes advantage of the fact that triples in
 			// manifest files are ordered in a certain way (otherwise we'll get an explicit error)
             RDFHandler manifestHandler = new AbstractRDFHandler() {
-				protected String name;
-				protected String sqlFile;
-				protected String mappingFile;
-				protected String outputFile;
+				String name;
+				String sqlFile;
+				String mappingFile;
+				String outputFile;
 
 				@Override
 				public void handleStatement(final Statement st) throws RDFHandlerException {

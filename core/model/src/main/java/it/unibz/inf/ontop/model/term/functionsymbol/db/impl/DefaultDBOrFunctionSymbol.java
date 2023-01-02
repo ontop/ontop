@@ -98,7 +98,7 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return inBrackets(terms.stream()
-                        .map(termConverter::apply)
+                        .map(termConverter)
                         .collect(Collectors.joining(argumentSeparator)));
     }
 

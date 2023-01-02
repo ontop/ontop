@@ -114,7 +114,7 @@ public class LocalJDBCConnectionUtils {
         }
 
         @Override
-        public boolean isClosed() throws SQLException {
+        public boolean isClosed()  {
             return isClosed;
         }
 
