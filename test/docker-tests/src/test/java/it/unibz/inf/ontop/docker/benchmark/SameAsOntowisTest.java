@@ -265,7 +265,7 @@ public class SameAsOntowisTest {
         this.reasoner.close();
     }
 
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
+    private OntopOWLConnection createStuff() {
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -610,22 +610,22 @@ public class SameAsOntowisTest {
 
 
 
-    class QueryFactory {
+    static class QueryFactory {
 
         private final  int sizeQueriesArray = Settings.NUM_TABLES * (Settings.NUM_TABLES * Settings.NUM_OBJECTS * Settings.NUM_DATA);
 
 //        private final static int sizeQueries = 15;
 
 //        List<String> filterSPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
-        List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
+        final List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
 
 
 
-        List<String> warmUpQueries = new ArrayList<>();
+        final List<String> warmUpQueries = new ArrayList<>();
 
-        int[] filters = new int[3];
+        final int[] filters = new int[3];
 
         QueryFactory(){
 //            fillFilters();

@@ -46,17 +46,16 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void tearDown() {
 		REPOSITORY.shutDown();
 	}
 	
 	@Test
-	public void testInsertData() throws Exception {
+	public void testInsertData() {
 		int result = 0;
 		String queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -69,12 +68,11 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 	@Test
-	public void testDescribeUri0() throws Exception {
+	public void testDescribeUri0() {
 		boolean result = false;
 		String queryString = "DESCRIBE <http://www.semanticweb.org/ontologies/test#p1>";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -88,12 +86,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testDescribeUri1() throws Exception {
+	public void testDescribeUri1() {
 		int result = 0;
 		String queryString = "DESCRIBE <http://example.org/D>";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -107,12 +104,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testDescribeUri2() throws Exception {
+	public void testDescribeUri2() {
 		int result = 0;
 		String queryString = "DESCRIBE <http://example.org/C>";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -126,13 +122,12 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testDescribeVar0() throws Exception {
+	public void testDescribeVar0() {
 		boolean result = false;
 		String queryString = "DESCRIBE ?x WHERE {<http://example.org/C> ?x ?y }";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -146,12 +141,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testDescribeVar1() throws Exception {
+	public void testDescribeVar1() {
 		int result = 0;
 		String queryString = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -165,13 +159,12 @@ public class RDF4JConstructDescribeTest {
 	}
 
 	@Test
-	public void testDescribeVar2() throws Exception {
+	public void testDescribeVar2() {
 		int result = 0;
 		String queryString = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -190,8 +183,7 @@ public class RDF4JConstructDescribeTest {
 		String queryString = "DESCRIBE ?x <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -209,8 +201,7 @@ public class RDF4JConstructDescribeTest {
 		String queryString = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y} LIMIT 1";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -228,8 +219,7 @@ public class RDF4JConstructDescribeTest {
 		String queryString = "DESCRIBE ?x ?y <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -247,8 +237,7 @@ public class RDF4JConstructDescribeTest {
 		String queryString = "DESCRIBE ?x ?y <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> ?y}";
 
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -262,12 +251,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testConstruct0() throws Exception {
+	public void testConstruct0() {
 		boolean result = false;
 		String queryString = "CONSTRUCT {?s ?p <http://www.semanticweb.org/ontologies/test/p1>} WHERE {?s ?p <http://www.semanticweb.org/ontologies/test/p1>}";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -282,12 +270,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testConstruct1() throws Exception {
+	public void testConstruct1() {
 		int result = 0;
 		String queryString = "CONSTRUCT { ?s ?p <http://example.org/D> } WHERE { ?s ?p <http://example.org/D>}";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -301,12 +288,11 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testConstruct2() throws Exception {
+	public void testConstruct2() {
 		int result = 0;
 		String queryString = "CONSTRUCT {<http://example.org/C> ?p ?o} WHERE {<http://example.org/C> ?p ?o}";
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
-			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 
 			try (GraphQueryResult gresult = graphQuery.evaluate()) {
 				while (gresult.hasNext()) {
@@ -320,7 +306,7 @@ public class RDF4JConstructDescribeTest {
 	}
 
 	@Test
-	public void testGetStatements0() throws Exception {
+	public void testGetStatements0() {
 		boolean result = false;
 		Resource subj = REPOSITORY.getValueFactory().createIRI("http://www.semanticweb.org/ontologies/test/p1");
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
@@ -334,7 +320,7 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testGetStatements1() throws Exception {
+	public void testGetStatements1() {
 		int result = 0;
 		Value obj = REPOSITORY.getValueFactory().createIRI("http://example.org/D");
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {
@@ -348,7 +334,7 @@ public class RDF4JConstructDescribeTest {
 	}
 	
 	@Test
-	public void testGetStatements2() throws Exception {
+	public void testGetStatements2() {
 		int result = 0;
 		Resource subj = REPOSITORY.getValueFactory().createIRI("http://example.org/C");
 		try (RepositoryConnection con = REPOSITORY.getConnection()) {

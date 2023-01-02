@@ -21,7 +21,7 @@ public class BasicViewWithRenamingTest {
      * Constraint inherited from parent besides renaming
      */
     @Test
-    public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
+    public void testProfUniqueConstraintOnHiddenColumns() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)

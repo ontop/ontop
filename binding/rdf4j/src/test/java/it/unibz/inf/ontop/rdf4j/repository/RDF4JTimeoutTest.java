@@ -98,16 +98,16 @@ public class RDF4JTimeoutTest {
 
 
 	@Test
-	public void testTimeout1() throws Exception {
+	public void testTimeout1() {
 		testTimeout(false);
 	}
 
 	@Test
-	public void testTimeout2() throws Exception {
+	public void testTimeout2() {
 		testTimeout(true);
 	}
 
-	private void testTimeout(boolean useDefault) throws Exception {
+	private void testTimeout(boolean useDefault) {
 		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal2 ?v1; :hasVal2 ?v2.}";
 
 		// execute query
@@ -131,7 +131,7 @@ public class RDF4JTimeoutTest {
 	}
 	
 	@Test
-	public void testNoTimeout() throws Exception {
+	public void testNoTimeout() {
 		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
         
         // execute query

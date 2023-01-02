@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsProfNoPKTest {
      * Constraint involving a hidden column is not inherited from parent
      */
     @Test
-    public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
+    public void testProfUniqueConstraintOnHiddenColumns() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)

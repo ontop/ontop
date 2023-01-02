@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 public class VersionInfoTest {
 
     @Test
-    public void testGetVersion() throws Exception {
+    public void testGetVersion() {
         String version = VersionInfo.getVersionInfo().getVersion();
         System.out.println(version);
         assertNotNull(version);

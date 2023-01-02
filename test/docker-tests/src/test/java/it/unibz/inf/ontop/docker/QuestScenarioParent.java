@@ -86,7 +86,7 @@ public abstract class QuestScenarioParent extends TestCase {
 	protected abstract Repository createRepository() throws Exception;
 	
 	@Override
-	protected void tearDown() throws Exception {
+	protected void tearDown() {
 		if (dataRep != null) {
 			dataRep.shutDown();
 			dataRep = null;

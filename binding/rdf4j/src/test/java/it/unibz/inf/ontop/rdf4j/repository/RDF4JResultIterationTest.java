@@ -118,7 +118,7 @@ public class RDF4JResultIterationTest {
      * @throws Exception
      */
     @Test
-    public void testIteration() throws Exception {
+    public void testIteration() {
         String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1. ?y :hasVal1 ?v2.}";
 
         // execute query

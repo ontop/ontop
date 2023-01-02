@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate functional dependencies appear only once - check determinant
      */
     @Test
-    public void testProfDuplicateFDDeterminants() throws Exception {
+    public void testProfDuplicateFDDeterminants() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -37,7 +37,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate functional dependencies appear only once - check dependent
      */
     @Test
-    public void testProfDuplicateFDDependents() throws Exception {
+    public void testProfDuplicateFDDependents()  {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -53,7 +53,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate unique constraints appear only once - check determinant
      */
     @Test
-    public void testProfDuplicateUCColumn() throws Exception {
+    public void testProfDuplicateUCColumn() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)

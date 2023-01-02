@@ -213,7 +213,7 @@ public class QuestOWLExample_OntowisTests {
 		this.reasoner.close();
 	}
 	
-	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidMappingException{
+	private OWLConnection createStuff(boolean manualKeys) {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -258,10 +258,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OWLConnection conn = reasoner.getConnection();
-
-		return conn;
-
+		return reasoner.getConnection();
 	}
 
 
@@ -501,17 +498,17 @@ public class QuestOWLExample_OntowisTests {
 		}
 	}
 	
-	class QueryFactory {
+	static class QueryFactory {
 		
 		private final static int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
-		
-		String[] queriesOneSPARQL = new String[sizeQueriesArray];
-		String[] queriesTwoSPARQL = new String[sizeQueriesArray];
-		String[] queriesThreeSPARQL = new String[sizeQueriesArray];
 
-        String[] warmUpQueries = new String[Constants.NUM_WARM_UPS];
+		final String[] queriesOneSPARQL = new String[sizeQueriesArray];
+		final String[] queriesTwoSPARQL = new String[sizeQueriesArray];
+		final String[] queriesThreeSPARQL = new String[sizeQueriesArray];
 
-		int[] filters = new int[Constants.NUM_FILTERS];
+		final String[] warmUpQueries = new String[Constants.NUM_WARM_UPS];
+
+		final int[] filters = new int[Constants.NUM_FILTERS];
 		
 		QueryFactory(DBType type){
 			fillFilters(type);

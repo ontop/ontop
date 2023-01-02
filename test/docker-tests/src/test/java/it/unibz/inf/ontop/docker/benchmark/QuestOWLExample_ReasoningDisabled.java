@@ -358,7 +358,7 @@ public class QuestOWLExample_ReasoningDisabled {
         this.reasoner.close();
     }
 
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws IOException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for

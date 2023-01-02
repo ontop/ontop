@@ -266,7 +266,7 @@ public class CanonicalURIOntowisTest {
         this.reasoner.close();
     }
 
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
+    private OntopOWLConnection createStuff() {
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
@@ -546,10 +546,7 @@ public class CanonicalURIOntowisTest {
 //
 
         static private String oneClassSparqlTemplate(int n) {
-            String templ ="?x a :A" + n + " . ";
-
-
-            return templ;
+            return "?x a :A" + n + " . ";
         }
         static private String classSparqlTemplate(int n) {
             String templ ="";
@@ -608,22 +605,21 @@ public class CanonicalURIOntowisTest {
 
 
 
-    class QueryFactory {
+    static class QueryFactory {
 
         private final  int sizeQueriesArray = Settings.NUM_TABLES * (Settings.NUM_TABLES * Settings.NUM_OBJECTS * Settings.NUM_DATA);
 
 //        private final static int sizeQueries = 15;
 
 //        List<String> filterSPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
-        List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
+        final List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
 
 
+        final List<String> warmUpQueries = new ArrayList<>();
 
-        List<String> warmUpQueries = new ArrayList<>();
-
-        int[] filters = new int[3];
+        final  int[] filters = new int[3];
 
         QueryFactory(){
 //            fillFilters();

@@ -63,22 +63,22 @@ public class RDF4JComplexConstructDescribeTest {
 	}
 
 	@AfterClass
-	public static void terminate() throws Exception {
+	public static void terminate() {
 		REPOSITORY.shutDown();
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		con = REPOSITORY.getConnection();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown()  {
 		con.close();
 	}
 
 	@Test
-	public void testInsertData() throws Exception {
+	public void testInsertData() {
 		int result = 0;
 		String queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
@@ -96,7 +96,7 @@ public class RDF4JComplexConstructDescribeTest {
 
 	// Test case for: https://github.com/ontop/ontop/issues/161
     @Test
-    public void testConstructOptional() throws Exception {
+    public void testConstructOptional() {
         int result = 0;
         String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/test#> \n" +
                 "CONSTRUCT { ?s :p ?o1. ?s :p ?o2. }\n" +

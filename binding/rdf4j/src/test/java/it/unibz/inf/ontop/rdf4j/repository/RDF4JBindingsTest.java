@@ -96,7 +96,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testSelectBindings() throws Exception {
+    public void testSelectBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "SELECT * WHERE {?x :hasVal1 ?v1.}";
@@ -116,7 +116,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testSelectNoBindings() throws Exception {
+    public void testSelectNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "SELECT * WHERE {?x :hasVal1 ?v1.}";
@@ -135,7 +135,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testConstructBindings() throws Exception {
+    public void testConstructBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "CONSTRUCT {?x :hasVal1 ?v1 .} WHERE {?x :hasVal1 ?v1 .}";
@@ -155,7 +155,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testConstructNoBindings() throws Exception {
+    public void testConstructNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "CONSTRUCT {?x :hasVal1 ?v1 .} WHERE {?x :hasVal1 ?v1 .}";
@@ -173,7 +173,7 @@ public class RDF4JBindingsTest {
     }
     
     @Test
-    public void testAskBindings() throws Exception {
+    public void testAskBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "ASK WHERE {?x :hasVal1 ?v1 .}";
@@ -186,7 +186,7 @@ public class RDF4JBindingsTest {
     }
 
     @Test
-    public void testAskNoBindings() throws Exception {
+    public void testAskNoBindings() {
         String queryString
                 = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> "
                 + "ASK WHERE {?x :hasVal1 ?v1 .}";

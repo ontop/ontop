@@ -789,7 +789,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
     }
 
     //    @Test see results of datetime with locale
-    public void testDatetime() throws Exception {
+    public void testDatetime() {
         TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
         String value = "Jan 31 2013 9:32AM";

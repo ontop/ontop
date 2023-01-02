@@ -154,9 +154,8 @@ public class RepositoryTableManager {
 
 	/**
 	 * Stores the emptiness index in the database
-	 * @throws SQLException 
 	 */
-	public void store(Connection conn) throws SQLException {
+	public void store(Connection conn) {
 
 	}
 

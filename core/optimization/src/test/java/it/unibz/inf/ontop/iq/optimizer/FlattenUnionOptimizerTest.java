@@ -133,8 +133,7 @@ public class FlattenUnionOptimizerTest {
         IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IQ query2 = query1;
-        assertEquals(query2, optimizedQuery);
+        assertEquals(query1, optimizedQuery);
     }
 
     @Test

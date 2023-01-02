@@ -228,7 +228,7 @@ public class RDB2RDFTest {
 	protected final String name;
 	static final Logger logger = LoggerFactory.getLogger(RDB2RDFTest.class);
 	
-	public RDB2RDFTest(String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException {
+	public RDB2RDFTest(String name, String sqlFile, String mappingFile, String outputFile) {
 		this.name = name;
 		this.sqlFile = sqlFile;
 		this.mappingFile = mappingFile;

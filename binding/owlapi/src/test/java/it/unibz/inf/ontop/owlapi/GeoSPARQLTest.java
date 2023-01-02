@@ -1418,8 +1418,7 @@ public class GeoSPARQLTest {
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
-            boolean retval = rs.getValue();
-            return retval;
+            return rs.getValue();
         }
     }
 

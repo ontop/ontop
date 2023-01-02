@@ -80,28 +80,27 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
 
     @Override
     public void add(File file, String baseIRI, RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
-    public void add(URL url, String baseIRI, RDFFormat dataFormat,
-                    Resource... contexts) throws IOException,
-            RDFParseException, RepositoryException {
+    public void add(URL url, String baseIRI, RDFFormat dataFormat, Resource... contexts) 
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
     public void add(InputStream in, String baseIRI,
                     RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 
     @Override
     public void add(Reader reader, String baseIRI,
                     RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
+            throws RepositoryException {
         throw new RepositoryException(READ_ONLY_MESSAGE);
     }
 

@@ -176,7 +176,7 @@ public class SemanticIndexRepository {
         private final Connection conn;
         private final Map<ImmutableList<RDFTermType>, PreparedStatement> stmMap;
 
-        BatchProcessor(Connection conn) throws SQLException {
+        BatchProcessor(Connection conn) {
             this.conn = conn;
             stmMap = new HashMap<>();
         }

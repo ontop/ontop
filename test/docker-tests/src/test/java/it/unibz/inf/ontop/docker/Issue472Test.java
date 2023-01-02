@@ -23,7 +23,7 @@ public class Issue472Test {
     private static final String databaseFile = "src/test/resources/issue472/database.sql";
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException, SQLException {
+    public static void before() throws SQLException {
 
         Connection sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa", "");
         try (java.sql.Statement s = sqlConnection.createStatement()) {
@@ -36,7 +36,7 @@ public class Issue472Test {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() {
     }
 
     @Test
