@@ -40,23 +40,16 @@ public class ADPOntopTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
 
-		String sparqlQuery = Joiner.on("\n").join(
-				CharStreams.readLines(new FileReader(queryFile)));
-		
-		//System.out.println(sparqlQuery);
-		
-		try {
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
+			String sparqlQuery = Joiner.on("\n").join(
+					CharStreams.readLines(new FileReader(queryFile)));
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
+				final OWLBindingSet bindingSet = rs.next();
 				System.out.print(bindingSet + "\n");
 			}
 			rs.close();
@@ -71,23 +64,10 @@ public class ADPOntopTest {
 			System.out.println("=======================");
 			System.out.println(sparqlQuery);
 			System.out.println();
-			
+
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
 			System.out.println(qst.getExecutableQuery(sparqlQuery));
-			
-		} finally {
-			
-			/*
-			 * Close connection and resources
-			 */
-			if (st != null && !st.isClosed()) {
-				st.close();
-			}
-			if (conn != null && !conn.isClosed()) {
-				conn.close();
-			}
-			reasoner.close();
 		}
 	}
 

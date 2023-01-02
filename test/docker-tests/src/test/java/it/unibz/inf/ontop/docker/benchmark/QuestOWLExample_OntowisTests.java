@@ -82,7 +82,7 @@ public class QuestOWLExample_OntowisTests {
 	// private static final String QuestOWLExample_OntowisTests = null;
 	final String obdaFile;
 	final DBType dbType;
-	boolean mKeys = false;
+	boolean mKeys;
 
 	final String owlfile = "src/test/resources/benchmark/example/ontowis-5joins-int.owl";
 	final String usrConstrinFile = "src/test/resources/benchmark/example/funcCons.txt";

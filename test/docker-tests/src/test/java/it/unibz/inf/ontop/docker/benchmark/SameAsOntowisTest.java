@@ -308,13 +308,10 @@ public class SameAsOntowisTest {
             String sparqlQuery = queries.get(j);
             OntopOWLStatement st = conn.createStatement();
             try {
-
-                int count = 0;
-
-                //for (int i=0; i<nRuns; ++i){
+               //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                count = 0;
+                int count = 0;
                 while (rs.hasNext()) {
                     count ++;
                 }

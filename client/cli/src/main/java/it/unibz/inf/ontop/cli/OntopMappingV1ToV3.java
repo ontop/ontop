@@ -235,7 +235,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         InputStream in = new FileInputStream(mappingFile);
         URL documentUrl = new URL("file://" + mappingFile);
         parser.setRDFHandler(new RDFHandler() {
-            Map<BNode, List<Statement>> bmap = new HashMap<>();
+            Map<Resource, List<Statement>> bmap = new HashMap<>();
 
             Map<Resource, Resource> logicalTable = new HashMap<>();
             Map<Resource, String> sqlQuery = new HashMap<>();

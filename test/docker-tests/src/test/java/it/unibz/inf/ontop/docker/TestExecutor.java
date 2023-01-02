@@ -204,28 +204,24 @@ public class TestExecutor {
 
     private Set<Statement> readGraphResultSetInfo() throws Exception {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-        if (rdfFormat != null) {
-            RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
-            ParserConfig config = parser.getParserConfig();
-            // To emulate DatatypeHandling.IGNORE
-            config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-            config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-            config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-            config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+        RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
+        ParserConfig config = parser.getParserConfig();
+        // To emulate DatatypeHandling.IGNORE
+        config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+        config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+        config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+        config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
 
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-            Set<Statement> result = new LinkedHashSet<>();
-            parser.setRDFHandler(new StatementCollector(result));
+        Set<Statement> result = new LinkedHashSet<>();
+        parser.setRDFHandler(new StatementCollector(result));
 
-            try (InputStream in = new URL(resultFileURL).openStream()) {
-                parser.parse(in, resultFileURL);
-            }
-            return result;
-        } else {
-            throw new RuntimeException("Unable to determine file type of results file");
+        try (InputStream in = new URL(resultFileURL).openStream()) {
+            parser.parse(in, resultFileURL);
         }
+        return result;
     }
 
     public static boolean isAskQuery(String query) {

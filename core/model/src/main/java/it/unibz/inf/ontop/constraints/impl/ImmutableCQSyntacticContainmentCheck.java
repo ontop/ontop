@@ -13,7 +13,7 @@ public class ImmutableCQSyntacticContainmentCheck<P extends AtomPredicate> imple
     @Override
     public boolean isContainedIn(ImmutableCQ<P> cq1, ImmutableCQ<P> cq2) {
         return cq2.getAnswerVariables().equals(cq1.getAnswerVariables())
-                && !cq2.getAtoms().stream().anyMatch(a -> !cq1.getAtoms().contains(a));
+                && cq2.getAtoms().stream().allMatch(a -> cq1.getAtoms().contains(a));
     }
 
 }
