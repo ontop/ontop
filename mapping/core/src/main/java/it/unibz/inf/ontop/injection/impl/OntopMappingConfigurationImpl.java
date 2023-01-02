@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
@@ -74,7 +75,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
-                                                  Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
+                                                  Supplier<Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Graph>> mappingGraphSupplier,
@@ -91,7 +92,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         /*
          * Pre-processed mapping
          */
-        Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
+        Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>> optionalPPMapping = ppMappingSupplier.get();
 
         OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
@@ -110,7 +111,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 .ifPresent(specInputBuilder::addSparqlRuleReader);
 
         if (optionalPPMapping.isPresent()) {
-            PreProcessedMapping ppMapping = optionalPPMapping.get();
+            PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping = optionalPPMapping.get();
 
             return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
         }

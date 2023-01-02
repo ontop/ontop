@@ -85,7 +85,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
-                () -> options.ppMapping.map(m -> (PreProcessedMapping) m),
+                () -> options.ppMapping,
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
