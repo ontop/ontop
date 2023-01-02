@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import org.junit.Test;
-import org.locationtech.proj4j.units.Units;
 
 import static org.junit.Assert.*;
 

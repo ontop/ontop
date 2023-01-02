@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
 
 
 public class QuestOWLExampleNotLatinTest {

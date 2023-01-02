@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.h2gis.functions.factory.H2GISFunctions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;

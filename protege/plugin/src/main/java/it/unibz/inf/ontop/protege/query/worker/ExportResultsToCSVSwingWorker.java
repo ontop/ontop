@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.query.worker;
 
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import org.slf4j.Logger;

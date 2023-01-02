@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Run tests on whether the SQL translation of the Slice Optimization for Values Node

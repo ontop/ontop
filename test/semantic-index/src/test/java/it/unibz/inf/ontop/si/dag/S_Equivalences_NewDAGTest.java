@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;

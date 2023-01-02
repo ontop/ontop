@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
-import java.sql.ResultSet;
 
 /**
  * SQL-specific implementation of OBDAStatement.

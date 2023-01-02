@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.query.impl;
 
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 

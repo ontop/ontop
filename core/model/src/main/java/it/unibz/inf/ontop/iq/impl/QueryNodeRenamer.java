@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Renames query nodes according to one renaming substitution.

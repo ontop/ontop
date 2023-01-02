@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -15,8 +13,6 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.FileReader;
 
 /**
  * Class to test if annotation property can be treated as data property and object property

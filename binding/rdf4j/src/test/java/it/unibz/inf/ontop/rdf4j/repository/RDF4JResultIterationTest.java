@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;

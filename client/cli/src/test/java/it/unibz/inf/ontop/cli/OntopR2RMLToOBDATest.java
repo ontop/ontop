@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.cli;
 
-import com.github.rvesse.airline.Cli;
 import org.junit.Test;
-
-import static it.unibz.inf.ontop.cli.Ontop.getOntopCommandCLI;
 
 public class OntopR2RMLToOBDATest {
 

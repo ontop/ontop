@@ -34,8 +34,6 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.*;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 

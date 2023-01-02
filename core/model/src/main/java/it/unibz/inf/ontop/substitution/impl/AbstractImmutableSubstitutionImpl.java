@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;

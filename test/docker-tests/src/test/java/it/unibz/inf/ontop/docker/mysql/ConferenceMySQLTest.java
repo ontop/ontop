@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.Test;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 /**
  * Test mysql jdbc driver.

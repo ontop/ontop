@@ -1,18 +1,11 @@
 package it.unibz.inf.ontop.test.sparql;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import it.unibz.inf.ontop.si.SemanticIndexException;
-import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
-import org.eclipse.rdf4j.repository.Repository;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
-import java.util.Properties;
-import java.util.Set;
 
 /*Test of SPARQL 1.0 compliance
 Some test have been modified  or are missing, respect to the original test case
