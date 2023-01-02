@@ -75,6 +75,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     @Override
     public boolean equals(Object o) {
         return (o instanceof ImmutableSubstitution)
-                && map.equals(((ImmutableSubstitution) o).getImmutableMap());
+                && map.equals(((ImmutableSubstitution<?>) o).getImmutableMap());
     }
 }

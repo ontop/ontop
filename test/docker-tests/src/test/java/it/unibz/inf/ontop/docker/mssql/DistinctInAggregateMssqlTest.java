@@ -21,7 +21,7 @@ public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTes
     @Test
     @Ignore("STRING_AGG(DISTINCT) is not supported by MSSQL")
     @Override
-    public void testGroupConcatDistinct() throws Exception {
+    public void testGroupConcatDistinct() {
     }
 
     @Override

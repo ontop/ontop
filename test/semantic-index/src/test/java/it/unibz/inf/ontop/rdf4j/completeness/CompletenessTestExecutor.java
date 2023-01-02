@@ -6,7 +6,6 @@ import org.eclipse.rdf4j.common.text.StringUtil;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
@@ -81,7 +80,6 @@ public class CompletenessTestExecutor {
 	}
 
 	private void compareTupleQueryResults(TupleQueryResult queryResult, TupleQueryResult expectedResult)
-			throws Exception
 		{
 			// Create MutableTupleQueryResult to be able to re-iterate over the
 			// results
@@ -254,7 +252,7 @@ public class CompletenessTestExecutor {
 				// Enter recursion
 				result = matchBindingSets(queryResult1, queryResult2, newBNodeMapping, idx + 1);
 
-				if (result == true) {
+				if (result) {
 					// models match, look no further
 					break;
 				}
@@ -322,7 +320,7 @@ public class CompletenessTestExecutor {
 					IRI dt1 = leftLit.getDatatype();
 					IRI dt2 = rightLit.getDatatype();
 
-					if (dt1 != null && dt2 != null && dt1.equals(dt2)
+					if (dt1 != null && dt1.equals(dt2)
 							&& XMLDatatypeUtil.isValidValue(leftLit.getLabel(), dt1)
 							&& XMLDatatypeUtil.isValidValue(rightLit.getLabel(), dt2))
 					{
@@ -373,7 +371,7 @@ public class CompletenessTestExecutor {
 		return true;
 	}
 
-	private void compareGraphs(Set<Statement> queryResult, Set<Statement> expectedResult) throws Exception {
+	private void compareGraphs(Set<Statement> queryResult, Set<Statement> expectedResult) {
 		if (!Models.isomorphic(expectedResult, queryResult)) {
 			StringBuilder message = new StringBuilder(128);
 			message.append("\n============ ");
@@ -403,7 +401,7 @@ public class CompletenessTestExecutor {
 	}
 
 	private String readQueryString() throws IOException {
-		try (InputStream stream = new URL(queryFile).openStream();) {
+		try (InputStream stream = new URL(queryFile).openStream()) {
 			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}

@@ -204,7 +204,7 @@ public class SimpleMaterializerTest {
     }
 
     @Test
-    public void runMaterializationWithReasoningTrig_multi_files() throws Exception {
+    public void runMaterializationWithReasoningTrig_multi_files() {
         String outFile = "src/test/resources/output/";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping_named.obda";

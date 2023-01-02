@@ -396,7 +396,7 @@ public class MemoryTestExecutor {
 					IRI dt1 = leftLit.getDatatype();
 					IRI dt2 = rightLit.getDatatype();
 
-					if (dt1 != null && dt2 != null && dt1.equals(dt2)
+					if (dt1 != null && dt1.equals(dt2)
 							&& XMLDatatypeUtil.isValidValue(leftLit.getLabel(), dt1)
 							&& XMLDatatypeUtil.isValidValue(rightLit.getLabel(), dt2))
 					{

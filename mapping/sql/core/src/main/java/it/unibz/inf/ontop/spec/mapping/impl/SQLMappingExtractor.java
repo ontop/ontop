@@ -190,7 +190,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
                                            Optional<Reader> optionalDbMetadataReader, 
-                                           Optional<Reader> lensesReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+                                           Optional<Reader> lensesReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
 
         try {
             if (optionalDbMetadataReader.isPresent()) {

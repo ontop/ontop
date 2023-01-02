@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 
@@ -126,9 +127,8 @@ public class DownwardSaturatedImmutableSet<T> {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof DownwardSaturatedImmutableSet) {
-			DownwardSaturatedImmutableSet other = (DownwardSaturatedImmutableSet)o;
-			return this.elements == null && other.elements == null ||
-					this.elements != null && this.elements.equals(other.elements);
+			DownwardSaturatedImmutableSet<?> other = (DownwardSaturatedImmutableSet<?>)o;
+			return Objects.equals(this.elements, other.elements);
 		}
 		return false;
 	}

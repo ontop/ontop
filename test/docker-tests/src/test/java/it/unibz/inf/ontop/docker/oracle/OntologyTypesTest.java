@@ -60,10 +60,10 @@ public class OntologyTypesTest {
 	final String obdaErroredFileName =  this.getClass().getResource(obdaErroredFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
-	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
+	private void runTests(boolean isR2rml, String query, int numberResults) {
 
 		// Creating a new instance of the reasoner
-		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration.Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.ontologyFile(owlFileName);
@@ -224,7 +224,7 @@ public class OntologyTypesTest {
 	@Test
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
-	public void failedMapping()  throws Exception  {
+	public void failedMapping()  {
 		try {
 			// Creating a new instance of the reasoner
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -237,12 +237,8 @@ public class OntologyTypesTest {
 
 
 		} catch (Exception e) {
-
-
 			assertTrue(e instanceof SimpleOntopOWLEngine.InvalidOBDASpecificationException);
 			log.debug(e.getMessage());
-
-
 		}
 	}
 

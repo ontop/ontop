@@ -212,7 +212,7 @@ public class SQLQuestStatement extends QuestStatement {
     @Override
     protected GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
                                                    boolean shouldAlsoCloseStatement)
-            throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+            throws OntopQueryEvaluationException {
         TupleResultSet tuples;
         try {
             String sqlQuery = extractSQLQuery(executableQuery);

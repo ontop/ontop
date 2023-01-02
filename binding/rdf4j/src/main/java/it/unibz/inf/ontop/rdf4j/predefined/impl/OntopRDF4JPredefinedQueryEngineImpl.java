@@ -276,7 +276,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         }
     }
 
-    private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
+    private IQ createExecutableQuery(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
                                      QueryLogger queryLogger) throws OntopReformulationException, InvalidBindingSetException {
 
         // May throw an InvalidBindingSetException
@@ -299,11 +299,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return newIQ;
     }
 
-    private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
+    private IQ generateReferenceQuery(PredefinedQuery<?> predefinedQuery,
                                       ImmutableMap<String, String> bindingWithReferences)
             throws OntopReformulationException {
         BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
-        RDF4JQuery newQuery = predefinedQuery.getInputQuery()
+        RDF4JQuery<?> newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?
@@ -316,7 +316,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return queryReformulator.reformulateIntoNativeQuery(newQuery, tmpQueryLogger);
     }
 
-    private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
+    private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
                                           ImmutableMultimap<String, String> httpHeaders) {
         QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
         queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);

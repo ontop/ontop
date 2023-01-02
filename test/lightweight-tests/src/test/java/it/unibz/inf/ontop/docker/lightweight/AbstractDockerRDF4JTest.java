@@ -41,7 +41,7 @@ public class AbstractDockerRDF4JTest {
 
     protected static void initOBDA(String obdaRelativePath, @Nullable String ontologyRelativePath,
                                    String propertyFile, @Nullable String lensesFile,
-                                   @Nullable String dbMetadataFile) throws SQLException, IOException {
+                                   @Nullable String dbMetadataFile) {
 
         String propertyFilePath = AbstractDockerRDF4JTest.class.getResource(propertyFile).getPath();
 
@@ -67,7 +67,7 @@ public class AbstractDockerRDF4JTest {
             System.out.println("- ERROR loading '" + propertyFile + "'");
         }
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractDockerRDF4JTest.class.getResource(obdaRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(username)
@@ -96,7 +96,7 @@ public class AbstractDockerRDF4JTest {
         REPO_CONNECTION = repo.getConnection();
     }
 
-    protected static void release() throws SQLException {
+    protected static void release() {
         REPO_CONNECTION.close();
     }
 

@@ -39,7 +39,7 @@ public class ConferenceMySQLTest  {
 	private static final String obdaFile = "/mysql/conference/ontology5.obda";
 	private static final String propertyFile = "/mysql/conference/ontology5.properties";
 
-	private void runTests(String query) throws Exception {
+	private void runTests(String query) {
 		String owlFileName =  this.getClass().getResource(owlFile).toString();
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();

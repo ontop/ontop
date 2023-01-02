@@ -113,7 +113,7 @@ public class FramedJSONLDWriter implements RDFWriter {
             Object parsedJsonLd = JsonLdProcessor.fromRDF(nQuadsOutputStream.toString(StandardCharsets.UTF_8), options);
 
             // Empty result: was causing a NullPointerException while framing
-            if ((parsedJsonLd instanceof List) && ((List) parsedJsonLd).isEmpty()) {
+            if ((parsedJsonLd instanceof List) && ((List<?>) parsedJsonLd).isEmpty()) {
                 if (throwExceptionIfEmpty)
                     throw new EmptyResultException();
 

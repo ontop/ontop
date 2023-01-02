@@ -123,7 +123,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     @Override
     public boolean equals(Object other) {
         if (other instanceof ImmutableSubstitution) {
-            return getImmutableMap().equals(((ImmutableSubstitution) other).getImmutableMap());
+            return getImmutableMap().equals(((ImmutableSubstitution<?>) other).getImmutableMap());
         }
         return false;
     }
