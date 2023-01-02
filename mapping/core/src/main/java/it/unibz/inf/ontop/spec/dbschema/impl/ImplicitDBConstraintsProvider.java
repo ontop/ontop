@@ -73,7 +73,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                     referencedRelation = metadataLookup.getRelation(fkc.getValue().tableId);
                 }
                 catch (MetadataExtractionException e) {
-                    LOGGER.warn("Cannot find table {} for user-supplied FK {} -> {}", fkc.getValue().tableId, fkc.getKey().toString(), fkc.getKey().toString());
+                    LOGGER.warn("Cannot find table {} for user-supplied FK {} -> {}", fkc.getValue().tableId, fkc.getKey(), fkc.getKey());
                     continue;
                 }
                 String name = getTableName(relation) + "_USER_FK_" + getTableName(referencedRelation) + "_" + counter++;

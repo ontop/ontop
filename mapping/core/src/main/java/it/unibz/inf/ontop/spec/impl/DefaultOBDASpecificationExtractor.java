@@ -24,7 +24,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtractor {
 
     private final MappingExtractor mappingExtractor;

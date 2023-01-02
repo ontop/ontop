@@ -57,28 +57,25 @@ public class QuestOWLExample_NoReplace {
                 .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
-		/*
+        /*
          * Get the book information that is stored in the database
 		 */
-        String sparqlQuery = "PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
-                " SELECT DISTINCT ?x ?title ?author ?genre ?edition \n" +
-                " WHERE { ?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z. \n" +
-                "         ?y a :Author; :name ?author. \n" +
-                "         ?z a :Edition; :editionNumber ?edition }";
 
-        try (/*
-              * Prepare the data connection for querying.
-		 	 */
+        try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement()) {
+            String sparqlQuery = "PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
+                    " SELECT DISTINCT ?x ?title ?author ?genre ?edition \n" +
+                    " WHERE { ?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z. \n" +
+                    "         ?y a :Author; :name ?author. \n" +
+                    "         ?z a :Edition; :editionNumber ?edition }";
 
             long t1 = System.currentTimeMillis();
             TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                for (String name: rs.getSignature()) {
+                for (String name : rs.getSignature()) {
                     OWLObject binding = bindingSet.getOWLObject(name);
                     System.out.print(ToStringRenderer.getInstance().render(binding) + ", ");
                 }
@@ -87,9 +84,9 @@ public class QuestOWLExample_NoReplace {
             rs.close();
             long t2 = System.currentTimeMillis();
 
-			/*
+            /*
              * Print the query summary
-			 */
+             */
             IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
             System.out.println();
@@ -106,8 +103,6 @@ public class QuestOWLExample_NoReplace {
             System.out.println("=====================");
             System.out.println((t2 - t1) + "ms");
 
-        } finally {
-            reasoner.close();
         }
     }
 

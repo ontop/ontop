@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
 import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -119,10 +121,10 @@ public class CompletenessTestExecutor {
 
 				List<BindingSet> expectedBindings = Iterations.asList(expectedResultTable);
 
-				List<BindingSet> missingBindings = new ArrayList<BindingSet>(expectedBindings);
+				List<BindingSet> missingBindings = new ArrayList<>(expectedBindings);
 				missingBindings.removeAll(queryBindings);
 
-				List<BindingSet> unexpectedBindings = new ArrayList<BindingSet>(queryBindings);
+				List<BindingSet> unexpectedBindings = new ArrayList<>(queryBindings);
 				unexpectedBindings.removeAll(expectedBindings);
 
 				StringBuilder message = new StringBuilder(128);
@@ -215,7 +217,7 @@ public class CompletenessTestExecutor {
 	private static boolean matchBindingSets(List<? extends BindingSet> queryResult1,
 			Iterable<? extends BindingSet> queryResult2)
 	{
-		return matchBindingSets(queryResult1, queryResult2, new HashMap<BNode, BNode>(), 0);
+		return matchBindingSets(queryResult1, queryResult2, new HashMap<>(), 0);
 	}
 
 	/**
@@ -238,7 +240,7 @@ public class CompletenessTestExecutor {
 
 			for (BindingSet bs2 : matchingBindingSets) {
 				// Map bNodes in bs1 to bNodes in bs2
-				Map<BNode, BNode> newBNodeMapping = new HashMap<BNode, BNode>(bNodeMapping);
+				Map<BNode, BNode> newBNodeMapping = new HashMap<>(bNodeMapping);
 
 				for (Binding binding : bs1) {
 					if (binding.getValue() instanceof BNode) {
@@ -269,7 +271,7 @@ public class CompletenessTestExecutor {
 	private static List<BindingSet> findMatchingBindingSets(BindingSet st,
 			Iterable<? extends BindingSet> model, Map<BNode, BNode> bNodeMapping)
 	{
-		List<BindingSet> result = new ArrayList<BindingSet>();
+		List<BindingSet> result = new ArrayList<>();
 
 		for (BindingSet modelSt : model) {
 			if (bindingSetsMatch(st, modelSt, bNodeMapping)) {
@@ -325,21 +327,21 @@ public class CompletenessTestExecutor {
 							&& XMLDatatypeUtil.isValidValue(rightLit.getLabel(), dt2))
 					{
 						Integer compareResult = null;
-						if (dt1.equals(XMLSchema.DOUBLE)) {
+						if (dt1.equals(XSD.DOUBLE)) {
 							compareResult = Double.compare(leftLit.doubleValue(), rightLit.doubleValue());
 						}
-						else if (dt1.equals(XMLSchema.FLOAT)) {
+						else if (dt1.equals(XSD.FLOAT)) {
 							compareResult = Float.compare(leftLit.floatValue(), rightLit.floatValue());
 						}
-						else if (dt1.equals(XMLSchema.DECIMAL)) {
+						else if (dt1.equals(XSD.DECIMAL)) {
 							compareResult = leftLit.decimalValue().compareTo(rightLit.decimalValue());
 						}
 						else if (XMLDatatypeUtil.isIntegerDatatype(dt1)) {
 							compareResult = leftLit.integerValue().compareTo(rightLit.integerValue());
 						}
-						else if (dt1.equals(XMLSchema.BOOLEAN)) {
-							Boolean leftBool = Boolean.valueOf(leftLit.booleanValue());
-							Boolean rightBool = Boolean.valueOf(rightLit.booleanValue());
+						else if (dt1.equals(XSD.BOOLEAN)) {
+							Boolean leftBool = leftLit.booleanValue();
+							Boolean rightBool = rightLit.booleanValue();
 							compareResult = leftBool.compareTo(rightBool);
 						}
 						else if (XMLDatatypeUtil.isCalendarDatatype(dt1)) {
@@ -350,7 +352,7 @@ public class CompletenessTestExecutor {
 						}
 
 						if (compareResult != null) {
-							if (compareResult.intValue() != 0) {
+							if (compareResult != 0) {
 								return false;
 							}
 						}
@@ -401,19 +403,15 @@ public class CompletenessTestExecutor {
 	}
 
 	private String readQueryString() throws IOException {
-		InputStream stream = new URL(queryFile).openStream();
-		try {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		} finally {
-			stream.close();
+		try (InputStream stream = new URL(queryFile).openStream();) {
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}
 
 	private TupleQueryResult readExpectedTupleQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
 		if (tqrFormat.isPresent()) {
-			InputStream in = new URL(resultFile).openStream();
-			try {
+			try (InputStream in = new URL(resultFile).openStream()) {
 				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat.get());
 				parser.setValueFactory(repository.getValueFactory());
 
@@ -422,8 +420,6 @@ public class CompletenessTestExecutor {
 
 				parser.parse(in);
 				return qrBuilder.getQueryResult();
-			} finally {
-				in.close();
 			}
 		} else {
 			Set<Statement> resultGraph = readExpectedGraphQueryResult(repository);
@@ -445,14 +441,11 @@ public class CompletenessTestExecutor {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-			Set<Statement> result = new LinkedHashSet<Statement>();
+			Set<Statement> result = new LinkedHashSet<>();
 			parser.setRDFHandler(new StatementCollector(result));
 
-			InputStream in = new URL(resultFile).openStream();
-			try {
+			try (InputStream in = new URL(resultFile).openStream()) {
 				parser.parse(in, resultFile);
-			} finally {
-				in.close();
 			}
 			return result;
 		} else {

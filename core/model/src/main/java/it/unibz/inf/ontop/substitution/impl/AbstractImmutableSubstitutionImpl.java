@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
@@ -92,7 +91,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableSubstitution<T>) composeWith(g);
     }
 
-    private static class NotASubstitutionException extends RuntimeException {};
+    private static class NotASubstitutionException extends RuntimeException {}
 
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {

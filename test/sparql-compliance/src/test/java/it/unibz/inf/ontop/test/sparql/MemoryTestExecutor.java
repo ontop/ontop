@@ -10,7 +10,7 @@ import org.eclipse.rdf4j.common.text.StringUtil;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
 import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -178,10 +179,10 @@ public class MemoryTestExecutor {
 
 			List<BindingSet> expectedBindings = Iterations.asList(expectedResultTable);
 
-			List<BindingSet> missingBindings = new ArrayList<BindingSet>(expectedBindings);
+			List<BindingSet> missingBindings = new ArrayList<>(expectedBindings);
 			missingBindings.removeAll(queryBindings);
 
-			List<BindingSet> unexpectedBindings = new ArrayList<BindingSet>(queryBindings);
+			List<BindingSet> unexpectedBindings = new ArrayList<>(queryBindings);
 			unexpectedBindings.removeAll(expectedBindings);
 
 			StringBuilder message = new StringBuilder(128);
@@ -290,7 +291,7 @@ public class MemoryTestExecutor {
 	private static boolean matchBindingSets(List<? extends BindingSet> queryResult1,
 			Iterable<? extends BindingSet> queryResult2)
 	{
-		return matchBindingSets(queryResult1, queryResult2, new HashMap<BNode, BNode>(), 0);
+		return matchBindingSets(queryResult1, queryResult2, new HashMap<>(), 0);
 	}
 
 	/**
@@ -313,7 +314,7 @@ public class MemoryTestExecutor {
 
 			for (BindingSet bs2 : matchingBindingSets) {
 				// Map bNodes in bs1 to bNodes in bs2
-				Map<BNode, BNode> newBNodeMapping = new HashMap<BNode, BNode>(bNodeMapping);
+				Map<BNode, BNode> newBNodeMapping = new HashMap<>(bNodeMapping);
 
 				for (Binding binding : bs1) {
 					if (binding.getValue() instanceof BNode) {
@@ -344,7 +345,7 @@ public class MemoryTestExecutor {
 	private static List<BindingSet> findMatchingBindingSets(BindingSet st,
 			Iterable<? extends BindingSet> model, Map<BNode, BNode> bNodeMapping)
 	{
-		List<BindingSet> result = new ArrayList<BindingSet>();
+		List<BindingSet> result = new ArrayList<>();
 
 		for (BindingSet modelSt : model) {
 			if (bindingSetsMatch(st, modelSt, bNodeMapping)) {
@@ -400,19 +401,19 @@ public class MemoryTestExecutor {
 							&& XMLDatatypeUtil.isValidValue(rightLit.getLabel(), dt2))
 					{
 						Integer compareResult = null;
-						if (dt1.equals(XMLSchema.DOUBLE)) {
+						if (dt1.equals(XSD.DOUBLE)) {
 							compareResult = Double.compare(leftLit.doubleValue(), rightLit.doubleValue());
 						}
-						else if (dt1.equals(XMLSchema.FLOAT)) {
+						else if (dt1.equals(XSD.FLOAT)) {
 							compareResult = Float.compare(leftLit.floatValue(), rightLit.floatValue());
 						}
-						else if (dt1.equals(XMLSchema.DECIMAL)) {
+						else if (dt1.equals(XSD.DECIMAL)) {
 							compareResult = leftLit.decimalValue().compareTo(rightLit.decimalValue());
 						}
 						else if (XMLDatatypeUtil.isIntegerDatatype(dt1)) {
 							compareResult = leftLit.integerValue().compareTo(rightLit.integerValue());
 						}
-						else if (dt1.equals(XMLSchema.BOOLEAN)) {
+						else if (dt1.equals(XSD.BOOLEAN)) {
 							Boolean leftBool = leftLit.booleanValue();
 							Boolean rightBool = rightLit.booleanValue();
 							compareResult = leftBool.compareTo(rightBool);
@@ -502,7 +503,7 @@ public class MemoryTestExecutor {
 	private String readQueryString() throws IOException
 	{
 		try (InputStream stream = new URL(queryFileURL).openStream()) {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}
 

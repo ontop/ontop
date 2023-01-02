@@ -209,7 +209,7 @@ public abstract class AbstractVirtualModeTest {
                 log.debug(ind1.getIRI().toString());
                 i++;
             }
-            assertEquals(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()), returnedUris, expectedUris);
+            assertEquals(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()), expectedUris, returnedUris);
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedUris.size()), expectedUris.size(), i);
         }
     }

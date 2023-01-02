@@ -139,7 +139,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     protected synchronized VariableNullability getInheritedVariableNullability() {
         if (variableNullability == null)
-        variableNullability = variableNullabilitySupplier.get();
+            variableNullability = variableNullabilitySupplier.get();
 
         return variableNullability;
     }

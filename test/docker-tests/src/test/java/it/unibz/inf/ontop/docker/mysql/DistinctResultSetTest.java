@@ -53,20 +53,13 @@ public class DistinctResultSetTest {
                 .propertyFile(propertyFileName)
 //                .enableTestMode()
                 .build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
-        // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
 
-        int results = 0;
+        try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+             OWLConnection conn = reasoner.getConnection();
+             OWLStatement st = conn.createStatement()) {
 
-        try (OWLStatement st = conn.createStatement()) {
-            results= executeQueryAssertResults(query, st);
+            return executeQueryAssertResults(query, st);
         }
-        finally {
-            conn.close();
-            reasoner.close();
-        }
-        return results;
 
     }
 

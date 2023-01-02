@@ -132,12 +132,10 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             evaluate(queryId, bindings, acceptMediaTypes, httpHeaders, httpStatusSetter, httpHeaderSetter, outputStream);
-            return outputStream.toString(StandardCharsets.UTF_8.name());
+            return outputStream.toString(StandardCharsets.UTF_8);
         } catch (LateEvaluationOrConversionException e) {
             httpStatusSetter.accept(500);
             return e.getMessage();
-        } catch (UnsupportedEncodingException e) {
-            throw new MinorOntopInternalBugException("UTF-8 was expected to be supported");
         }
     }
 

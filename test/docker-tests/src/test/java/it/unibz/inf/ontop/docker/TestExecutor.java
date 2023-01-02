@@ -138,7 +138,7 @@ public class TestExecutor {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-            Set<Statement> result = new LinkedHashSet<Statement>();
+            Set<Statement> result = new LinkedHashSet<>();
             parser.setRDFHandler(new StatementCollector(result));
 
             try (InputStream in = new URL(resultFileURL).openStream()) {
@@ -156,20 +156,19 @@ public class TestExecutor {
         String thrownException = ex.getClass().getName();
         String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
         if (!thrownException.equals(expectedThrownException)) {
-            StringBuilder message = new StringBuilder(128);
-            message.append("\n============ ");
-            message.append(name);
-            message.append(" =======================\n");
-            message.append("Expected thrown exception: ");
-            message.append(expectedThrownException);
-            message.append("\n");
-            message.append("Thrown exception: ");
-            message.append(thrownException);
-            message.append("\n");
-            message.append("Message:" + ex.getMessage());
-            message.append("=====================================\n");
+            String message = "\n============ " +
+                    name +
+                    " =======================\n" +
+                    "Expected thrown exception: " +
+                    expectedThrownException +
+                    "\n" +
+                    "Thrown exception: " +
+                    thrownException +
+                    "\n" +
+                    "Message:" + ex.getMessage() +
+                    "=====================================\n";
             //logger.error(message.toString());
-            throw new Exception(message.toString());
+            throw new Exception(message);
         }
     }
 

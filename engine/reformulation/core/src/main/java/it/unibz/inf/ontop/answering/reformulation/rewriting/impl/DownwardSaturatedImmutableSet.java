@@ -66,7 +66,7 @@ public class DownwardSaturatedImmutableSet<T> {
 			result = e; // we have top, the intersection is sub
 
 		return result.isEmpty()
-				? BOTTOM
+				? bottom()
 				: new DownwardSaturatedImmutableSet<>(result);
 	}
 	
@@ -87,7 +87,7 @@ public class DownwardSaturatedImmutableSet<T> {
 	}
 
 	public static <T> DownwardSaturatedImmutableSet<T> create(ImmutableSet<T> e) {
-		return e.isEmpty() ? BOTTOM : new DownwardSaturatedImmutableSet<>(e);
+		return e.isEmpty() ? bottom() : new DownwardSaturatedImmutableSet<>(e);
 	}
 
 	private static final DownwardSaturatedImmutableSet TOP = new DownwardSaturatedImmutableSet<>(null);

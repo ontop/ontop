@@ -102,7 +102,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 			e.printStackTrace();
 			assertFalse(false);
 		}
-		return resultCount++;
+		return resultCount;
 	}
 
 	@Test

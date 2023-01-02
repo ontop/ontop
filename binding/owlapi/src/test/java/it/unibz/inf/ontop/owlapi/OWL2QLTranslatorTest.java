@@ -341,7 +341,7 @@ public class OWL2QLTranslatorTest {
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(3, axs.size());
-		Set<String> classNames = new HashSet<String>();
+		Set<String> classNames = new HashSet<>();
 		
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			OClass subC = (OClass)a.getSub();
@@ -378,7 +378,7 @@ public class OWL2QLTranslatorTest {
 
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(2, axs.size());
-		Set<String> classNames = new HashSet<String>();
+		Set<String> classNames = new HashSet<>();
 		
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			OClass subC = (OClass)a.getSub();

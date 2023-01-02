@@ -279,7 +279,7 @@ public class LocalJDBCConnectionUtils {
                 getConnection().setClientInfo(name, value);
             } catch (SQLClientInfoException e) {
                 throw e;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         }
 
@@ -289,7 +289,7 @@ public class LocalJDBCConnectionUtils {
                 getConnection().setClientInfo(properties);
             } catch (SQLClientInfoException e) {
                 throw e;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         }
 

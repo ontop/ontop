@@ -149,7 +149,7 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T vertex : dag.vertexSet()) 
 				result.add(getVertex(vertex));
@@ -192,10 +192,10 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 			
 			T node = v.getRepresentative();
 			
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			// reverse the dag
-			DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<T, DefaultEdge>(dag);
-			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<T, DefaultEdge>(reversed, node);
+			DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(dag);
+			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<>(reversed, node);
 
 			while (iterator.hasNext()) {
 				T child = iterator.next();

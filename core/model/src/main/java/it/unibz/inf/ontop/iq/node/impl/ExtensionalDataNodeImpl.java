@@ -132,7 +132,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public synchronized boolean isDistinct() {
         if (isDistinct == null)
-        isDistinct = relationDefinition.getUniqueConstraints().stream()
+            isDistinct = relationDefinition.getUniqueConstraints().stream()
                 .map(UniqueConstraint::getDeterminants)
                 .anyMatch(this::areDeterminantsPresentAndNotNull);
         return isDistinct;

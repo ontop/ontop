@@ -277,7 +277,7 @@ public abstract class AbstractBindTestWithFunctions {
                 hexString.append(hex);
             }
 
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }

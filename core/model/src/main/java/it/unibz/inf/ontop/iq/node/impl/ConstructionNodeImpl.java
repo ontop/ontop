@@ -95,14 +95,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         // The substitution domain must be a subset of the projectedVariables
         if (!projectedVariables.containsAll(substitutionDomain)) {
             throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
-                    "of the substitution must be projected.\n" + toString());
+                    "of the substitution must be projected.\n" + this);
         }
 
         // The variables contained in the domain and in the range of the substitution must be disjoint
         if (substitutionDomain.stream()
                 .anyMatch(childVariables::contains)) {
             throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
-                    "be used for defining other variables.\n" + toString());
+                    "be used for defining other variables.\n" + this);
         }
 
         // Substitution to non-projected variables is incorrect
@@ -112,8 +112,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .anyMatch(v -> !projectedVariables.contains(v))) {
             throw new InvalidQueryNodeException(
                     "ConstructionNode: substituting a variable " +
-                            "by a non-projected variable is incorrect.\n"
-                + toString());
+                            "by a non-projected variable is incorrect.\n" + this);
         }
     }
 

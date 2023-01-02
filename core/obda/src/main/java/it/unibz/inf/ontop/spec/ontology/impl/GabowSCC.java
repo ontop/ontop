@@ -48,7 +48,7 @@ public class GabowSCC<V, E>
     private final DirectedGraph<V, E> graph;
 
     // stores the vertices
-    private Deque<VertexNumber<V>> stack = new ArrayDeque<VertexNumber<V>>();
+    private Deque<VertexNumber<V>> stack = new ArrayDeque<>();
     
     // the result of the computation, cached for future calls
     private List<Equivalences<V>> stronglyConnectedSets;
@@ -57,7 +57,7 @@ public class GabowSCC<V, E>
     private Map<V, VertexNumber<V>> vertexToVertexNumber;
     
     //store the numbers
-    private Deque<Integer> B = new ArrayDeque<Integer>();
+    private Deque<Integer> B = new ArrayDeque<>();
     
     //number of vertexes
     private int c; 

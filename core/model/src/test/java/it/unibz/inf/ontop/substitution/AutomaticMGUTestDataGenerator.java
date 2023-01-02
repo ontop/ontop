@@ -58,10 +58,10 @@ public class AutomaticMGUTestDataGenerator {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
-		for (int i = 0; i < unifier1.size(); i++) {
+		for (Map.Entry<Variable, ImmutableTerm> e1 : unifier1) {
 			boolean result = false;
-			for (int j = 0; j < unifier2.size(); j++) {
-				result = result || compareSubstitutions(unifier1.get(i), unifier2.get(j));
+			for (Map.Entry<Variable, ImmutableTerm> e2 : unifier2) {
+				result = result || compareSubstitutions(e1, e2);
 			}
 			if (!result) {
 				/*
@@ -105,8 +105,7 @@ public class AutomaticMGUTestDataGenerator {
 		String[] mguStrings = mgustr.split(" ");
 
 		List<Map.Entry<Variable, ImmutableTerm>> mgu = new ArrayList<>();
-		for (int i = 0; i < mguStrings.length; i++) {
-			String string = mguStrings[i];
+		for (String string : mguStrings) {
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
@@ -142,13 +141,12 @@ public class AutomaticMGUTestDataGenerator {
 		List<ImmutableTerm> terms = new ArrayList<>();
 
 		String[] termstra = termstr.split(" ");
-		for (int i = 0; i < termstra.length; i++) {
-			terms.add(getTerm(termstra[i].trim()));
+		for (String s : termstra) {
+			terms.add(getTerm(s.trim()));
 		}
-		ImmutableTerm atom = TERM_FACTORY.getImmutableFunctionalTerm(
+		return TERM_FACTORY.getImmutableFunctionalTerm(
 				new OntopModelTestFunctionSymbol(atomstr.substring(0, 1), terms.size()),
 				ImmutableList.copyOf(terms));
-		return atom;
 	}
 
 	public ImmutableTerm getTerm(String termstrs) {
@@ -161,8 +159,8 @@ public class AutomaticMGUTestDataGenerator {
 		if (termstr.indexOf('(') != -1) {
 			String[] subtermstr = termstr.substring(2, termstrs.length() - 1).split(",");
 			List<ImmutableTerm> fuctTerms = new ArrayList<>();
-			for (int i = 0; i < subtermstr.length; i++) {
-				fuctTerms.add(getTerm(subtermstr[i]));
+			for (String s : subtermstr) {
+				fuctTerms.add(getTerm(s));
 			}
 			FunctionSymbol fs = new OntopModelTestFunctionSymbol(termstr.substring(0, 1), fuctTerms.size());
 			return TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.copyOf(fuctTerms));

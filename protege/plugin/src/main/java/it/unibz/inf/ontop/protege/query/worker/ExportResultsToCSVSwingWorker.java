@@ -37,7 +37,7 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
     protected Void doInBackground() throws Exception {
         start("initializing...");
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({"rawtypes" })
         Vector<Vector> data = tableModel.getDataVector();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {

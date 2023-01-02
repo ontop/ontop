@@ -72,7 +72,7 @@ public class H2RDF4JTestTools {
                                                      @Nullable String ontologyRelativePath, @Nullable String propertyFile,
                                                      @Nullable String lensesFile, @Nullable String dbMetadataFile,
                                                      @Nullable String sparqlRulesRelativePath) {
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractRDF4JTest.class.getResource(obdaRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)

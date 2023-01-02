@@ -8,6 +8,7 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -449,6 +450,8 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 10";
 
-        evaluateGraph(query);
+        try (GraphQueryResult r = evaluateGraph(query)) {
+
+        }
     }
 }

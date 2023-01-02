@@ -946,12 +946,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getExtractFunctionSymbol(String component) {
-        return extractFunctionSymbolsMap.computeIfAbsent(component, c -> createExtractFunctionSymbol(c));
+        return extractFunctionSymbolsMap.computeIfAbsent(component, this::createExtractFunctionSymbol);
     }
 
     @Override
     public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
-        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, this::createCurrentDateTimeFunctionSymbol);
     }
 
     /**
@@ -1055,14 +1055,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBMin(DBTermType dbType) {
-        return minMap
-                .computeIfAbsent(dbType, t -> createDBMin(t));
+        return minMap.computeIfAbsent(dbType, this::createDBMin);
     }
 
     @Override
     public DBFunctionSymbol getDBMax(DBTermType dbType) {
-        return maxMap
-                .computeIfAbsent(dbType, t -> createDBMax(t));
+        return maxMap.computeIfAbsent(dbType, this::createDBMax);
     }
 
     @Override
@@ -1303,7 +1301,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDBRowNumberWithOrderBy() {
         return new UnaryDBFunctionSymbolWithSerializerImpl("ROW_NUMBER_WITH_ORDERBY", rootDBType, dbIntegerType, true,
-                (t, c, f) -> serializeDBRowNumberWithOrderBy(t, c, f));
+                this::serializeDBRowNumberWithOrderBy);
     }
 
 

@@ -85,13 +85,11 @@ public class RDF4JBindingsTest {
     @After
     public void tearDown() throws Exception {
         if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
+            try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
             } catch (SQLException sqle) {
                 System.out.println("Table not found, not dropping");
             } finally {
-                s.close();
                 sqlConnection.close();
             }
         }

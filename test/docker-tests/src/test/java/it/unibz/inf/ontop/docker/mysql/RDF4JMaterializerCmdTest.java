@@ -42,6 +42,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 public class RDF4JMaterializerCmdTest extends TestCase {
@@ -126,7 +127,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 							  OntopSystemConfiguration configuration) throws IOException, OBDASpecificationException {
 		// output
 		File out = new File(filePath);
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8"))) {
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8))) {
 			String outfile = out.getAbsolutePath();
 			System.out.println(outfile);
 

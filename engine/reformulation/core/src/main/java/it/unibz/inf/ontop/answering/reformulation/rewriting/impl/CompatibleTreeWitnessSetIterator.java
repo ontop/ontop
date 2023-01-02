@@ -91,8 +91,8 @@ public class CompatibleTreeWitnessSetIterator implements Iterator<ImmutableColle
     }
 
     private boolean isLast() {
-        for (int i = 0; i < in.length; i++)
-            if (!in[i])
+        for (boolean b : in)
+            if (!b)
                 return false;
         return true;
     }

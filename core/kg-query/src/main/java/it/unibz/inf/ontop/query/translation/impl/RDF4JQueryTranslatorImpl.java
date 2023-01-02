@@ -1313,7 +1313,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new OntopUnsupportedKGQueryException(
-                        String.format("Invalid lexical forms are not accepted. Found for %s: %s", type.toString(), value));
+                        String.format("Invalid lexical forms are not accepted. Found for %s: %s", type, value));
 
             return termFactory.getRDFLiteralConstant(value, type);
         }

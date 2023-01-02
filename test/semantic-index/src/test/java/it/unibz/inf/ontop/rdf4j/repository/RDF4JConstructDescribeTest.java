@@ -58,13 +58,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				Statement s = gresult.next();
-				result++;
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					Statement s = gresult.next();
+					result++;
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(4, result);
 			}
-			Assert.assertEquals(4, result);
 		}
 	}
 	@Test
@@ -75,13 +76,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result = false;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result = false;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertFalse(result);
 			}
-			Assert.assertFalse(result);
 		}
 	}
 	
@@ -93,13 +95,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+				}
+				// None because INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE is false
+				Assert.assertEquals(0, result);
 			}
-			// None because INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE is false
-			Assert.assertEquals(0, result);
 		}
 	}
 	
@@ -111,13 +114,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(2, result);
 			}
-			Assert.assertEquals(2, result);
 		}
 	}
 	
@@ -130,13 +134,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result = false;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result = false;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertFalse(result);
 			}
-			Assert.assertFalse(result);
 		}
 	}
 	
@@ -148,14 +153,15 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(1, result);
 			}
 		}
-		Assert.assertEquals(1, result);
 	}
 
 	@Test
@@ -167,13 +173,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(2, result);
 			}
-			Assert.assertEquals(2, result);
 		}
 	}
 
@@ -186,12 +193,13 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+				}
+				Assert.assertEquals(3, result);
 			}
-			Assert.assertEquals(3, result);
 		}
 	}
 
@@ -204,12 +212,13 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				gresult.next();
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					gresult.next();
+				}
+				Assert.assertEquals(2, result);
 			}
-			Assert.assertEquals(2, result);
 		}
 	}
 
@@ -222,12 +231,13 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				gresult.next();
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					gresult.next();
+				}
+				// TODO: check the number of results
 			}
-			// TODO: check the number of results
 		}
 	}
 
@@ -240,13 +250,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement triple = gresult.next();
-				//System.out.println(triple);
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement triple = gresult.next();
+					//System.out.println(triple);
+				}
+				Assert.assertEquals(2, result);
 			}
-			Assert.assertEquals(2, result);
 		}
 	}
 	
@@ -258,14 +269,15 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result = false;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
-			}
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result = false;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
 
-			Assert.assertFalse(result);
+				Assert.assertFalse(result);
+			}
 		}
 	}
 	
@@ -277,13 +289,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(1, result);
 			}
-			Assert.assertEquals(1, result);
 		}
 	}
 	
@@ -295,13 +308,14 @@ public class RDF4JConstructDescribeTest {
 			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 					queryString);
 
-			GraphQueryResult gresult = graphQuery.evaluate();
-			while (gresult.hasNext()) {
-				result++;
-				Statement s = gresult.next();
-				//System.out.println(s.toString());
+			try (GraphQueryResult gresult = graphQuery.evaluate()) {
+				while (gresult.hasNext()) {
+					result++;
+					Statement s = gresult.next();
+					//System.out.println(s.toString());
+				}
+				Assert.assertEquals(2, result);
 			}
-			Assert.assertEquals(2, result);
 		}
 	}
 

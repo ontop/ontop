@@ -39,7 +39,7 @@ public class ArrayDBTermType extends DBTermTypeImpl implements DBTermType {
     }
 
 
-    public class IllegalArrayComparisonException extends OntopInternalBugException {
+    public static class IllegalArrayComparisonException extends OntopInternalBugException {
         public IllegalArrayComparisonException (String message) {
             super(message);
         }

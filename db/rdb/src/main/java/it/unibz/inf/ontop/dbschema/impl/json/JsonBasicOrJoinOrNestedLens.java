@@ -298,7 +298,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
 
     protected void insertForeignKey(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
 
-        QuotedIDFactory idFactory = lookup.getQuotedIDFactory();;
+        QuotedIDFactory idFactory = lookup.getQuotedIDFactory();
 
         RelationID targetRelationId = JsonMetadata.deserializeRelationID(idFactory, addForeignKey.to.relation);
         NamedRelationDefinition targetRelation;

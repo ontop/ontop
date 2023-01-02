@@ -106,23 +106,20 @@ public class ComplexWhereMappingTest {
 	}
 
 	private void runTests(OntopSQLOWLAPIConfiguration config) throws Exception {
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
 
-		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		try (OWLConnection conn = reasoner.getConnection();
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+			 OWLConnection conn = reasoner.getConnection();
 			 OWLStatement st = conn.createStatement()) {
+			String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-            OWLBindingSet bindingSet = rs.next();
-            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
+			OWLBindingSet bindingSet = rs.next();
+			OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			OWLIndividual ind2 = bindingSet.getOWLIndividual("y");
 			OWLLiteral val = bindingSet.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().render(val));
-		}
-		finally {
-			reasoner.close();
 		}
 	}
 

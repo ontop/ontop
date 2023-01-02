@@ -61,7 +61,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         + children.stream()
                             .filter(c -> c.getKnownVariables().stream()
                                     .anyMatch(conflictingVariables::contains))
-                            .map(c -> "\n" + c.toString())
+                            .map(c -> "\n" + c)
                             .collect(ImmutableCollectors.toList()));
             }
             allVariables.addAll(childNonProjectedVariables);

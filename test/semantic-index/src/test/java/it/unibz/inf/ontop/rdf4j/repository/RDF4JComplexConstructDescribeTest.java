@@ -66,17 +66,17 @@ public class RDF4JComplexConstructDescribeTest {
 	public static void terminate() throws Exception {
 		REPOSITORY.shutDown();
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		con = REPOSITORY.getConnection();
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		con.close();
 	}
-	
+
 	@Test
 	public void testInsertData() throws Exception {
 		int result = 0;
@@ -84,13 +84,14 @@ public class RDF4JComplexConstructDescribeTest {
 		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 				queryString);
 
-		GraphQueryResult gresult = graphQuery.evaluate();
-		while (gresult.hasNext()) {
-			Statement s = gresult.next();
-			result++;
-			System.out.println(s.toString());
+		try (GraphQueryResult gresult = graphQuery.evaluate()) {
+			while (gresult.hasNext()) {
+				Statement s = gresult.next();
+				result++;
+				System.out.println(s.toString());
+			}
+			Assert.assertEquals(5, result);
 		}
-		Assert.assertEquals(5, result);
 	}
 
 	// Test case for: https://github.com/ontop/ontop/issues/161
@@ -106,13 +107,14 @@ public class RDF4JComplexConstructDescribeTest {
         GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
                 queryString);
 
-        GraphQueryResult gresult = graphQuery.evaluate();
-        while (gresult.hasNext()) {
-            result++;
-            Statement s = gresult.next();
-            System.out.println(s.toString());
-        }
-        Assert.assertEquals(4, result);
+        try (GraphQueryResult gresult = graphQuery.evaluate()) {
+			while (gresult.hasNext()) {
+				result++;
+				Statement s = gresult.next();
+				System.out.println(s.toString());
+			}
+			Assert.assertEquals(4, result);
+		}
     }
 
 }

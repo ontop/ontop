@@ -24,7 +24,7 @@ import junit.framework.TestCase;
  * 
  * @author Davide
  * 
- * It tests the options for disabling the t-mappings. Currently it does not work with 
+ * It tests the options for disabling the t-mappings. Currently, it does not work with
  * concepts that are equivalent (e.g., the tests will fail when using the ontology
  * src/test/resources/test/tmapping/exampleTMapping.owl
  *
@@ -33,10 +33,10 @@ public class TMappingDisablingTest extends TestCase {
 	
 	private Connection connection;
 
-	private final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
-	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
-	private final String propertyFile = "src/test/resources/test/tmapping/exampleTMapping.properties";
-	private final String tMappingsConfFile = "src/test/resources/test/tmapping/tMappingsConf.conf";
+	private static final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
+	private static final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
+	private static final String propertyFile = "src/test/resources/test/tmapping/exampleTMapping.properties";
+	private static final String tMappingsConfFile = "src/test/resources/test/tmapping/tMappingsConf.conf";
 
 	@Before
 	public void setUp() throws Exception {
@@ -67,26 +67,20 @@ public class TMappingDisablingTest extends TestCase {
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
-		OWLConnection conn = reasoner.getConnection();
 		
-		String sparqlQuery = 
-				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
-				+ "SELECT ?y WHERE { ?y a :Boy }";
-		
-		String sparqlQuery1 = 
-				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
-				+ "SELECT ?y WHERE { ?y a :Man }";
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-			assertTrue(!rs.hasNext());
-			rs.close();
-			rs = st.executeSelectQuery(sparqlQuery1);
-			assertTrue(rs.hasNext());
-			rs.close();
-		}
-		finally {
-			reasoner.close();
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
+			String sparqlQuery = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+							+ "SELECT ?y WHERE { ?y a :Boy }";
+			try (TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery)) {
+				assertFalse(rs.hasNext());
+			}
+			String sparqlQuery1 = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+							+ "SELECT ?y WHERE { ?y a :Man }";
+			try (TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery1)) {
+				assertTrue(rs.hasNext());
+			}
 		}
 	}
 	
@@ -99,27 +93,20 @@ public class TMappingDisablingTest extends TestCase {
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
 				.enableTestMode()
 				.build();
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
-		OWLConnection conn = reasoner.getConnection();
-
-		String sparqlQuery =
-				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
-				+ "SELECT ?y WHERE { ?y a :Boy }";
-
-		String sparqlQuery1 =
-				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
-				+ "SELECT ?y WHERE { ?y a :Man }";
-
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
-			assertFalse(rs.hasNext());
-			rs.close();
-			rs = st.executeSelectQuery(sparqlQuery1);
-			assertTrue(rs.hasNext());
-			rs.close();
-		}
-		finally {
-			reasoner.close();
+		
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
+			String sparqlQuery = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+							+ "SELECT ?y WHERE { ?y a :Boy }";
+			try (TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery)) {
+				assertFalse(rs.hasNext());
+			}
+			String sparqlQuery1 = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+					+ "SELECT ?y WHERE { ?y a :Man }";
+			try (TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery1)) {
+				assertTrue(rs.hasNext());
+			}
 		}
 	}
 }

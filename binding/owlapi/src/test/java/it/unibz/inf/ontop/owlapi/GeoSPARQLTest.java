@@ -427,8 +427,7 @@ public class GeoSPARQLTest {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-            String retval = ind1.toString();
-            return retval;
+            return ind1.toString();
         }
     }
 

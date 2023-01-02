@@ -824,11 +824,7 @@ public class OWLAPITranslatorOWL2QL {
                     }
                 }
                 else {
-                    Map<OWLClassExpression, ObjectSomeValuesFrom> entry = auxiliaryClassProperties.get(owlOPE);
-                    if (entry == null) {
-                        entry = new HashMap<>();
-                        auxiliaryClassProperties.put(owlOPE, entry);
-                    }
+                    Map<OWLClassExpression, ObjectSomeValuesFrom> entry = auxiliaryClassProperties.computeIfAbsent(owlOPE, k -> new HashMap<>());
                     ObjectSomeValuesFrom existsSA = entry.get(owlCE);
                     if (existsSA == null) {
                         // no replacement found for this exists R.A, creating a new one

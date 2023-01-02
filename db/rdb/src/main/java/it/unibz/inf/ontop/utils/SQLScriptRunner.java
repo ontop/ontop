@@ -96,9 +96,7 @@ public class SQLScriptRunner {
             } finally {
                 connection.setAutoCommit(originalAutoCommit);
             }
-        } catch (IOException e) {
-            throw e;
-        } catch (SQLException e) {
+        } catch (IOException | SQLException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Error running script.  Cause: " + e, e);
@@ -123,7 +121,7 @@ public class SQLScriptRunner {
         StringBuffer command = null;
         try {
             LineNumberReader lineReader = new LineNumberReader(reader);
-            String line = null;
+            String line;
             while ((line = lineReader.readLine()) != null) {
                 if (command == null) {
                     command = new StringBuffer();
@@ -198,12 +196,7 @@ public class SQLScriptRunner {
             if (!autoCommit) {
                 conn.commit();
             }
-        } catch (SQLException e) {
-            e.fillInStackTrace();
-            printlnError("Error executing: " + command);
-            printlnError(e);
-            throw e;
-        } catch (IOException e) {
+        } catch (SQLException | IOException e) {
             e.fillInStackTrace();
             printlnError("Error executing: " + command);
             printlnError(e);
