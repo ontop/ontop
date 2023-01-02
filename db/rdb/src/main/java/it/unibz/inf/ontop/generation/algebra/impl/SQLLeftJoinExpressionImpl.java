@@ -41,9 +41,4 @@ public class SQLLeftJoinExpressionImpl implements SQLLeftJoinExpression {
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
     }
-
-    @Override
-    public ImmutableList<? extends SQLExpression> getSubExpressions() {
-        return ImmutableList.of(this.leftExpression, this.rightExpression);
-    }
 }

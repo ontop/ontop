@@ -15,7 +15,4 @@ public interface BinaryJoinExpression extends SQLExpression {
 
     Optional<ImmutableExpression> getFilterCondition();
 
-    ImmutableList<? extends SQLExpression> getSubExpressions();
-
-
 }

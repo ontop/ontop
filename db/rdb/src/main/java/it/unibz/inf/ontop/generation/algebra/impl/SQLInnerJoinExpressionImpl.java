@@ -45,9 +45,4 @@ public class SQLInnerJoinExpressionImpl implements SQLInnerJoinExpression {
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
     }
-
-    @Override
-    public ImmutableList<? extends SQLExpression> getSubExpressions() {
-        return ImmutableList.of(this.leftExpression, this.rightExpression);
-    }
 }
