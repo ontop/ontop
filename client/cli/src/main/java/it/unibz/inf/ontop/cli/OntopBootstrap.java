@@ -48,7 +48,7 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
             Objects.requireNonNull(owlFile, "ontology file must not be null");
 
-            OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+            OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 
             if (propertiesFile != null)
                 builder.propertyFile(propertiesFile);

@@ -30,14 +30,10 @@ public class BinaryAxiomImpl<T> implements BinaryAxiom<T> {
 	private final T included;
 	private final String string;
 	
-	BinaryAxiomImpl(T subDesc, T superDesc) {
-		included = subDesc;
-		including = superDesc;
-		StringBuilder bf = new StringBuilder();
-		bf.append(included.toString());
-		bf.append(" ISA ");
-		bf.append(including.toString());
-		string = bf.toString();
+	BinaryAxiomImpl(T included, T including) {
+		this.included = included;
+		this.including = including;
+		string = included + " ISA " + including;
 	}
 
 	@Override
@@ -52,8 +48,8 @@ public class BinaryAxiomImpl<T> implements BinaryAxiom<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BinaryAxiomImpl<?>) {
-			BinaryAxiomImpl<T> inc2 = (BinaryAxiomImpl<T>) obj;
+		if (obj instanceof BinaryAxiomImpl) {
+			BinaryAxiomImpl<?> inc2 = (BinaryAxiomImpl<?>) obj;
 			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
 		return false;

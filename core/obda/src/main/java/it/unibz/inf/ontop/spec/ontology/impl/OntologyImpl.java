@@ -218,14 +218,12 @@ public class OntologyImpl implements Ontology {
 
     @Override
 	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("[Ontology info.")
-		 	.append(String.format(" Axioms: %d", classInclusions.size() +
-		 			objectPropertyInclusions.size() + dataPropertyInclusions.size()))
-			.append(String.format(" Classes: %d", classes.map.size()))
-			.append(String.format(" Object Properties: %d", objectProperties.map.size()))
-			.append(String.format(" Data Properties: %d", dataProperties.map.size()))
-		    .append(String.format(" Annotation Properties: %d]", annotationProperties.map.size()));
-		return str.toString();
+		return "[Ontology info." +
+				String.format(" Axioms: %d", classInclusions.size() +
+						objectPropertyInclusions.size() + dataPropertyInclusions.size()) +
+				String.format(" Classes: %d", classes.map.size()) +
+				String.format(" Object Properties: %d", objectProperties.map.size()) +
+				String.format(" Data Properties: %d", dataProperties.map.size()) +
+				String.format(" Annotation Properties: %d]", annotationProperties.map.size());
 	}
 }

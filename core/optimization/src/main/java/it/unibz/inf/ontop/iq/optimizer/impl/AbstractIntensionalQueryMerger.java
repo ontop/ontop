@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -95,7 +96,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                 renamedIQ = queryRenamer.transform(definition);
             }
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
                     atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),
                     renamingSubstitution.applyToVariableArguments(renamedIQ.getProjectionAtom().getArguments())),
                     dataNode.getProjectionAtom());
@@ -105,8 +106,8 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                     .normalizeForOptimization(variableGenerator);
         }
 
-        private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
-                                                                                DataAtom targetAtom) {
+        private ImmutableSubstitution<? extends VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
+                                                                                DataAtom<AtomPredicate> targetAtom) {
             if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
                 throw new IllegalStateException("Incompatible predicates");
             }

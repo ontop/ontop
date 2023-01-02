@@ -10,10 +10,7 @@ public class DataPropertyRangeExpressionImpl implements DataPropertyRangeExpress
 
 	DataPropertyRangeExpressionImpl(DataPropertyExpression property) {
 		this.property = property;
-		StringBuilder bf = new StringBuilder();
-		bf.append("E");
-		bf.append(property.toString());
-		this.string =  bf.toString();
+		this.string = "E" + property;
 	}
 
 	@Override

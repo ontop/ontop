@@ -92,7 +92,8 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         private final DefaultOntopSQLCredentialBuilderFragment<B> sqlBuilderFragment;
 
         protected OntopSQLCredentialBuilderMixin() {
-            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>((B)this);
+            B builder = (B) this;
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
         }
 
         @Override
