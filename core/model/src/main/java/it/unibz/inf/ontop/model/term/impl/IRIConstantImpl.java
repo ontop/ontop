@@ -81,7 +81,7 @@ public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConst
 	@Override
 	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof Constant) {
-			if (((Constant) otherTerm).isNull())
+			if (otherTerm.isNull())
 				return IncrementalEvaluation.declareIsNull();
 			return equals(otherTerm)
 					? IncrementalEvaluation.declareIsTrue()

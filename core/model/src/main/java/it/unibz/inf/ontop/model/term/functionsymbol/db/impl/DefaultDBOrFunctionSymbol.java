@@ -64,7 +64,7 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
             return trueValue;
 
         Optional<ImmutableTerm> optionalNull = evaluatedTerms.stream()
-                .filter(t -> (t instanceof Constant) && ((Constant) t).isNull())
+                .filter(t -> (t instanceof Constant) && t.isNull())
                 .findFirst();
 
         ImmutableList<ImmutableExpression> others = evaluatedTerms.stream()

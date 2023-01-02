@@ -12,14 +12,13 @@ public class QueryParameterTypeImpl implements PredefinedQueryConfigEntry.QueryP
     @Nullable
     private final IRI datatypeIRI;
 
-    protected QueryParameterTypeImpl(PredefinedQueryConfigEntry.QueryParameterCategory category,IRI datatypeIRI) {
+    protected QueryParameterTypeImpl(PredefinedQueryConfigEntry.QueryParameterCategory category, IRI datatypeIRI) {
         this.category = category;
         this.datatypeIRI = datatypeIRI;
     }
 
     protected QueryParameterTypeImpl(PredefinedQueryConfigEntry.QueryParameterCategory category) {
-        this.category = category;
-        this.datatypeIRI = null;
+        this(category, null);
     }
 
     @Override

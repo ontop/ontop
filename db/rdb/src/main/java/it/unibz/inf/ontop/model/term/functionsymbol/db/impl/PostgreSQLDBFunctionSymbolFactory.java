@@ -160,10 +160,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     private String serializePath(ImmutableList<String> path) {
-        return "\'{"+
+        return "'{" +
                 path.stream()
                         .collect(Collectors.joining(","))
-                +"}\'";
+                + "}'";
     }
 
     private String printPath(ImmutableList<String> path) {
@@ -284,7 +284,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                                 typeOfFunctionString,
                                 termConverter.apply(terms.get(0)),
                                 types.stream()
-                                        .map(t -> "\'"+ t+ "\'")
+                                        .map(t -> "'" + t+ "'")
                                         .collect(Collectors.joining(","))
                         ));
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Creates QuotedIdentifiers following the rules of SparkSQL:
@@ -15,19 +16,18 @@ public class SparkSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
     private static final String SQL_QUOTATION_STRING = "`";
 
     @Override
-    public QuotedID createAttributeID(String s) {
+    public QuotedID createAttributeID(@Nonnull String s) {
         return createFromString(s);
     }
 
     @Override
-    public RelationID createRelationID(String tableId) {
+    public RelationID createRelationID(@Nonnull String tableId) {
         return new RelationIDImpl(ImmutableList.of(createFromString(tableId)));
     }
 
     @Override
     protected QuotedID createFromString(@Nonnull String s) {
-        if (s == null)
-            return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
+        Objects.requireNonNull(s);
 
         if (s.startsWith(SQL_QUOTATION_STRING) && s.endsWith(SQL_QUOTATION_STRING))
             return new QuotedIDImpl(s.substring(1, s.length() - 1), SQL_QUOTATION_STRING, false);

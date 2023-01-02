@@ -92,7 +92,7 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 					: IncrementalEvaluation.declareIsFalse();
 		}
 		else if (otherTerm instanceof Constant)
-			return ((Constant) otherTerm).isNull()
+			return otherTerm.isNull()
 				? IncrementalEvaluation.declareIsNull()
 				: IncrementalEvaluation.declareIsFalse();
 		else
