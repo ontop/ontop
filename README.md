@@ -33,13 +33,13 @@ Links
 
 - [Official Website and Documentation](https://ontop-vkg.org)
 - [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
-- [Docker Hub](https://hub.docker.com/r/ontop/ontop-endpoint)
+- [Docker Hub](https://hub.docker.com/r/ontop/ontop)
 - [GitHub](https://github.com/ontop/ontop/)
 - [GitHub Issues](https://github.com/ontop/ontop/issues)
 - [Google Group](https://groups.google.com/forum/#!forum/ontop4obda)
 - [Facebook](https://www.facebook.com/obdaontop/)
 - [Twitter](https://twitter.com/ontop4obda)
-- [Travis CI](https://travis-ci.org/ontop/ontop)
+- [Mastodon](https://fosstodon.org/@ontop)
 
 License
 -------
@@ -47,7 +47,7 @@ License
 The Ontop framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2022 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2023 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
