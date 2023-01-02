@@ -91,19 +91,18 @@ public class TestExecutor {
         int queryResultSize = countTuple(queryResult);
         int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
         if (queryResultSize != expectedResultSize) {
-            StringBuilder message = new StringBuilder(128);
-            message.append("\n============ ");
-            message.append(name);
-            message.append(" =======================\n");
-            message.append("Expected result: ");
-            message.append(expectedResultSize);
-            message.append("\n");
-            message.append("Query result: ");
-            message.append(queryResultSize);
-            message.append("\n");
-            message.append("=====================================\n");
+            String message = "\n============ " +
+                    name +
+                    " =======================\n" +
+                    "Expected result: " +
+                    expectedResultSize +
+                    "\n" +
+                    "Query result: " +
+                    queryResultSize +
+                    "\n" +
+                    "=====================================\n";
             //logger.error(message.toString());
-            Assert.fail(message.toString());
+            Assert.fail(message);
         }
     }
 

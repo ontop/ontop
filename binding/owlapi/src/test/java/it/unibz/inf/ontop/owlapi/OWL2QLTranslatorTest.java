@@ -135,12 +135,12 @@ public class OWL2QLTranslatorTest {
 			ObjectPropertyExpression superC = a.getSuper();
 			if (subC.getIRI().getIRIString().equals("http://example/P")) {
 				assertEquals("http://example/Q", superC.getIRI().getIRIString());
-				assertEquals(true, superC.isInverse() != subC.isInverse());
+				assertTrue(superC.isInverse() != subC.isInverse());
 			}
 			else { 
 				assertEquals("http://example/Q", subC.getIRI().getIRIString());
 				assertEquals("http://example/P", superC.getIRI().getIRIString());
-				assertEquals(true, superC.isInverse() != subC.isInverse());
+				assertTrue(superC.isInverse() != subC.isInverse());
 			}
 		}
 	}	
@@ -203,7 +203,7 @@ public class OWL2QLTranslatorTest {
 			ObjectSomeValuesFrom subC = (ObjectSomeValuesFrom) a.getSub();
 			OClass superC = (OClass) a.getSuper();
 			assertEquals("http://example/P", subC.getProperty().getIRI().getIRIString());
-			assertEquals(false, subC.getProperty().isInverse());				
+			assertFalse(subC.getProperty().isInverse());
 			assertEquals("http://example/A", superC.getIRI().getIRIString());
 		}
 	}	
@@ -231,7 +231,7 @@ public class OWL2QLTranslatorTest {
 			ObjectSomeValuesFrom subC = (ObjectSomeValuesFrom) a.getSub();
 			OClass superC = (OClass) a.getSuper();
 			assertEquals("http://example/P", subC.getProperty().getIRI().getIRIString());
-			assertEquals(true, subC.getProperty().isInverse());				
+			assertTrue(subC.getProperty().isInverse());
 			assertEquals("http://example/A", superC.getIRI().getIRIString());
 		}
 	}	
@@ -285,7 +285,7 @@ public class OWL2QLTranslatorTest {
 			ObjectPropertyExpression superC = a.getSuper();
 			assertEquals("http://example/P", subC.getIRI().getIRIString());
 			assertEquals("http://example/P", superC.getIRI().getIRIString());
-			assertEquals(true, subC.isInverse() != superC.isInverse());				
+			assertTrue(subC.isInverse() != superC.isInverse());
 		}
 	}	
 
@@ -313,7 +313,7 @@ public class OWL2QLTranslatorTest {
 			ObjectPropertyExpression superC = it.next();
 			assertEquals("http://example/P", subC.getIRI().getIRIString());
 			assertEquals("http://example/P", superC.getIRI().getIRIString());
-			assertEquals(true, subC.isInverse() != superC.isInverse());				
+			assertTrue(subC.isInverse() != superC.isInverse());
 		}
 	}	
 
@@ -413,7 +413,7 @@ public class OWL2QLTranslatorTest {
 		ObjectPropertyExpression top = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#topObjectProperty"));
 		ObjectPropertyExpression topInv = top.getInverse();
 		ObjectPropertyExpression topInvInv = topInv.getInverse();
-		assertTrue(topInv == topInvInv);
+		assertSame(topInv, topInvInv);
 
 		ObjectPropertyExpression top2 = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#topObjectProperty"));
 		assertEquals(top2, topInv);
@@ -421,12 +421,12 @@ public class OWL2QLTranslatorTest {
 		ObjectPropertyExpression bot = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
 		ObjectPropertyExpression botInv = bot.getInverse();
 		ObjectPropertyExpression botInvInv = botInv.getInverse();
-		assertTrue(botInv == botInvInv);
+		assertSame(botInv, botInvInv);
 		
 		ObjectPropertyExpression bot2 = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-		assertEquals(bot2, botInv);		
-		
-		assertFalse(bot.equals(top));
+		assertEquals(bot2, botInv);
+
+		assertNotEquals(bot, top);
 	}	
 	
 	@Test
@@ -885,7 +885,7 @@ public class OWL2QLTranslatorTest {
 		// first pass - find ope
 		for (BinaryAxiom<ClassExpression> ax : axs) {
 			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
-				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				ope = e.getProperty();
 			}
@@ -894,10 +894,10 @@ public class OWL2QLTranslatorTest {
 		// second pass - verify the axioms
 		for (BinaryAxiom<ClassExpression> ax : axs) {
 			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
-				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				assertEquals(e.getProperty(), ope);
-				assertEquals(ope.isInverse(), false);
+				assertFalse(ope.isInverse());
 			}
 			else if (ax.getSub().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/C")))) {
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
@@ -952,7 +952,7 @@ public class OWL2QLTranslatorTest {
         it.forEachRemaining(ax -> {
             if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))){
                 // E AUX.ROLE1^- ISA http://example/B
-                assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
                 ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty();
                 assertTrue(opep.isInverse());
             } else if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/D")))){
@@ -965,7 +965,7 @@ public class OWL2QLTranslatorTest {
                 assertTrue(ope.isInverse());
             } else {
                 // E AUX.ROLE0 ISA E AUX.ROLE1
-                assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty();
                 assertFalse(ope.isInverse());
                 ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSuper()).getProperty();
@@ -1042,7 +1042,7 @@ public class OWL2QLTranslatorTest {
 		// first pass - find ope
 		for (BinaryAxiom<ClassExpression> ax : axs) {
 			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
-				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				ope = e.getProperty();
 			}
@@ -1051,10 +1051,10 @@ public class OWL2QLTranslatorTest {
 		// second pass - verify the axioms
 		for (BinaryAxiom<ClassExpression> ax : axs) {
 			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
-				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+				assertTrue(ax.getSub() instanceof ObjectSomeValuesFrom);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				assertEquals(e.getProperty(), ope);
-				assertEquals(ope.isInverse(), false);
+				assertFalse(ope.isInverse());
 			}
 			else if (ax.getSub().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/C")))) {
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
@@ -1097,7 +1097,7 @@ public class OWL2QLTranslatorTest {
 
         BinaryAxiom<ClassExpression> a = assit.next();
         ObjectSomeValuesFrom ex = (ObjectSomeValuesFrom) a.getSub();
-        assertEquals(true, ex.getProperty().isInverse());
+		assertTrue(ex.getProperty().isInverse());
     }
 
     @Test
@@ -1123,7 +1123,7 @@ public class OWL2QLTranslatorTest {
 
         BinaryAxiom<ClassExpression> a = assit.next();
         ObjectSomeValuesFrom ex = (ObjectSomeValuesFrom) a.getSub();
-        assertEquals(false, ex.getProperty().isInverse());
+		assertFalse(ex.getProperty().isInverse());
     }
 
     @Test
@@ -1148,19 +1148,19 @@ public class OWL2QLTranslatorTest {
         BinaryAxiom<ObjectPropertyExpression> a = assit.next();
         BinaryAxiom<ObjectPropertyExpression> b = assit.next();
         ObjectPropertyExpression included =a.getSub();
-        assertEquals(false, included.isInverse());
+		assertFalse(included.isInverse());
         assertEquals("http://example/R", included.getIRI().getIRIString());
 
         ObjectPropertyExpression indlucing = a.getSuper();
-        assertEquals(true, indlucing.isInverse());
+		assertTrue(indlucing.isInverse());
         assertEquals("http://example/S", indlucing.getIRI().getIRIString());
 
         included = b.getSub();
-        assertEquals(false, included.isInverse());
+		assertFalse(included.isInverse());
         assertEquals("http://example/S", included.getIRI().getIRIString());
 
         indlucing = b.getSuper();
-        assertEquals(true, indlucing.isInverse());
+		assertTrue(indlucing.isInverse());
         assertEquals("http://example/R", indlucing.getIRI().getIRIString());
     }
 

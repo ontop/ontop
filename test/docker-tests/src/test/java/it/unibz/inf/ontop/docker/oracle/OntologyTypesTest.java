@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -76,26 +75,16 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
 
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
 
-
-		try {
 			executeQueryAssertResults(query, st, numberResults);
-
-		} catch (Exception e) {
-			st.close();
+		}
+		catch (Exception e) {
 			e.printStackTrace();
-			assertTrue(false);
-
-
-		} finally {
-
-			conn.close();
-			reasoner.close();
+			fail();
 		}
 	}
 

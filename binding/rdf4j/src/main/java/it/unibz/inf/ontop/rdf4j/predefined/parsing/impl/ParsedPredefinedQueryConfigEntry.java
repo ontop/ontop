@@ -124,7 +124,7 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         @Override
         public QueryParameterType getType() {
             if (parameterType == null) {
-                if (type.toUpperCase().equals("IRI"))
+                if (type.equalsIgnoreCase("IRI"))
                     return new QueryParameterTypeImpl(IRI);
 
                 String typeString = type.startsWith("xsd:")

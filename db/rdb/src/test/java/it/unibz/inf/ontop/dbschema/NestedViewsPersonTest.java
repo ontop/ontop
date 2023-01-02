@@ -36,9 +36,9 @@ public class NestedViewsPersonTest {
     public void testInferredFD() {
         ImmutableSet<FunctionalDependency> fds = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
-                .flatMap(l -> l.stream())
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
-        assertTrue(fds.size() == 1);
+        assertEquals(1, fds.size());
 
         FunctionalDependency fd = fds.stream().findFirst().get();
         ImmutableSet<String> determinants = fd.getDeterminants().stream()
@@ -51,6 +51,6 @@ public class NestedViewsPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(dependents, ImmutableSet.of("ssn", "fullName"));
+        assertEquals(ImmutableSet.of("ssn", "fullName"), dependents);
     }
 }

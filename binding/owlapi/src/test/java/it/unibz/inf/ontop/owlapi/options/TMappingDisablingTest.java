@@ -102,17 +102,17 @@ public class TMappingDisablingTest extends TestCase {
 		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configuration);
 		OWLConnection conn = reasoner.getConnection();
 
-		String sparqlQuery = 
+		String sparqlQuery =
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Boy }";
-		
-		String sparqlQuery1 = 
+
+		String sparqlQuery1 =
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
 
 		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
-			assertTrue(!rs.hasNext());
+			assertFalse(rs.hasNext());
 			rs.close();
 			rs = st.executeSelectQuery(sparqlQuery1);
 			assertTrue(rs.hasNext());

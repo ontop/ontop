@@ -71,7 +71,7 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (DataSource)null);
+            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, null);
         }
     }
 }

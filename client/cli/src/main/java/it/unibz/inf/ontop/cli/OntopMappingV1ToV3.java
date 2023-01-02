@@ -222,7 +222,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         }
 
         String propertyFilePath = f.substring(0, f.lastIndexOf(".")) + ".properties";
-        try (FileOutputStream outputStream = new FileOutputStream(new File(propertyFilePath))) {
+        try (FileOutputStream outputStream = new FileOutputStream(propertyFilePath)) {
             dataSourceProperties.store(outputStream, null);
         }
     }

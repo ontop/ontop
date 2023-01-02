@@ -124,14 +124,13 @@ public class QuestSPARQLRewriterTest extends TestCase {
 
 	private void expandAndDisplayOutput(String title, String sparqlInput) {
 		String sparqlOutput = getSPARQLRewriting(sparqlInput);
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n\n" + title);
-		sb.append("\n====================================================================================\n");
-		sb.append(sparqlInput);
-		sb.append("\n------------------------------------------------------------------------------------\n");
-		sb.append(sparqlOutput);
-		sb.append("\n====================================================================================\n");
-		System.out.println(sb.toString());
+		String sb = "\n\n" + title +
+				"\n====================================================================================\n" +
+				sparqlInput +
+				"\n------------------------------------------------------------------------------------\n" +
+				sparqlOutput +
+				"\n====================================================================================\n";
+		System.out.println(sb);
 	}
 
 	private String getSPARQLRewriting(String sparqlInput) {

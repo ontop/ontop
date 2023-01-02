@@ -338,8 +338,7 @@ public class MarriageTest {
         } finally {
             conn.close();
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
+		assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
     }
 
     private int runConstructQuery(String constructQuery) throws Exception {
