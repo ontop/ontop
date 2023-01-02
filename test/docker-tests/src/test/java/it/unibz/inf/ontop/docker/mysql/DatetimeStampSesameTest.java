@@ -27,9 +27,9 @@ public class DatetimeStampSesameTest  {
 	private static final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
 	private static final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
-	Repository repository;
+	final Repository repository;
 
 	public DatetimeStampSesameTest() {
 

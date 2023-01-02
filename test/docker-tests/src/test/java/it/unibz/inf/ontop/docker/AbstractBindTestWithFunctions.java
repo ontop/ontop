@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractBindTestWithFunctions {
 
-    protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
     private final OntopOWLEngine reasoner;
     private final OWLConnection conn;
 

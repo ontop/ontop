@@ -446,11 +446,11 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt, drp));
 
 		OWLDatatype dt3 = factory.getOWLDatatype(IRI.create("http://example/datatype3"));
-		OWLDataRange dr3 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.OWL_REAL.getDatatype(factory));
+		OWLDataRange dr3 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_INTEGER.getDatatype(factory), OWL2Datatype.OWL_REAL.getDatatype(factory));
 		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt3, dr3));
 
 		OWLDatatype dt4 = factory.getOWLDatatype(IRI.create("http://example/datatype3"));
-		OWLDataRange dr4 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.XSD_BOOLEAN.getDatatype(factory));
+		OWLDataRange dr4 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_INTEGER.getDatatype(factory), OWL2Datatype.XSD_BOOLEAN.getDatatype(factory));
 		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt4, dr4));
 	
 		Ontology dlliteonto = OWLAPI_TRANSLATOR.translateAndClassify(onto);

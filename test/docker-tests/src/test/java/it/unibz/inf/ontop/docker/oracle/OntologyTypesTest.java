@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
 
 public class OntologyTypesTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	final String owlFile = "/oracle/ontologyType/dataPropertiesOntologyType.owl";
 	final String obdaFile = "/oracle/ontologyType/dataPropertiesOntologyType.obda";

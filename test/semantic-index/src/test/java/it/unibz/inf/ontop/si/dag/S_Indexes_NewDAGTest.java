@@ -41,7 +41,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 public class S_Indexes_NewDAGTest extends TestCase {
 	
 
-	Logger log = LoggerFactory.getLogger(S_Indexes_NewDAGTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_Indexes_NewDAGTest.class);
 
 	public S_Indexes_NewDAGTest (String name){
 		super(name);

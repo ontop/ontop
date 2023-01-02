@@ -195,7 +195,7 @@ public class GabowSCC<V, E>
     
     private static final class VertexNumber<V>
     {
-    	V vertex;
+    	final V vertex;
     	int number;
     	
     	private VertexNumber(V vertex, int number) {

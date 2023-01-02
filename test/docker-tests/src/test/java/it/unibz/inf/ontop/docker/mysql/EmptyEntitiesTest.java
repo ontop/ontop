@@ -53,7 +53,7 @@ public class EmptyEntitiesTest {
 
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 
     final String owlFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";

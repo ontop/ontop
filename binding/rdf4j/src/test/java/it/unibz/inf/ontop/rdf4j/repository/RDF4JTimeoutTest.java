@@ -30,12 +30,12 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class RDF4JTimeoutTest {
-	static String owlfile = "src/test/resources/userconstraints/uc.owl";
-	static String obdafile = "src/test/resources/userconstraints/uc.obda";
-	static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
+	private static final String owlfile = "src/test/resources/userconstraints/uc.owl";
+	private static final String obdafile = "src/test/resources/userconstraints/uc.obda";
+	private static final String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
-	static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-	static String uc_create = "src/test/resources/userconstraints/create.sql";
+	private static final String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
+	private static final String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
 	private RepositoryConnection conn;

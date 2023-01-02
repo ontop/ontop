@@ -32,7 +32,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 
 public class S_NewGraphTest  extends TestCase{
 	
-	Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
 
 	public void testCreation() throws Exception {
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";

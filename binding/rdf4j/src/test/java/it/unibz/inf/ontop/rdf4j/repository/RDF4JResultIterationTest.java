@@ -47,11 +47,11 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
     */
 @Ignore
 public class RDF4JResultIterationTest {
-    static String owlfile = "src/test/resources/userconstraints/uc.owl";
-    static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
+    private static final String owlfile = "src/test/resources/userconstraints/uc.owl";
+    private static final String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
-    static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-    static String uc_create = "src/test/resources/userconstraints/create.sql";
+    private static final String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
+    private static final String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private static final String URL = "jdbc:h2:mem:countries_iteration_test";
     private static final String USER = "sa";

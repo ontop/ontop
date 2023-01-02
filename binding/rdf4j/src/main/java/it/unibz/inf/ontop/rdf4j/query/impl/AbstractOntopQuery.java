@@ -43,7 +43,7 @@ public abstract class AbstractOntopQuery implements Query {
     protected final OntopConnection conn;
     private final ImmutableMultimap<String, String> httpHeaders;
     protected int queryTimeout;
-    protected MapBindingSet bindings = new MapBindingSet();
+    protected final MapBindingSet bindings = new MapBindingSet();
 
     protected AbstractOntopQuery(String queryString, String baseIRI,
                                  ParsedQuery initialParsedQuery, OntopConnection conn,

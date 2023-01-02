@@ -26,7 +26,7 @@ import java.io.FileReader;
 @Ignore("Too slow (20 min)!")
 public class AnnotationTest extends AbstractVirtualModeTest {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    final Logger log = LoggerFactory.getLogger(this.getClass());
 
     final static String owlFile = "/pgsql/annotation/doid.owl";
     final static String obdaFile = "/pgsql/annotation/doid.obda";

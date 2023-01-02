@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHrJsonTest extends AbstractVirtualModeTest {
 
-    Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Test
     public void testFullNames() throws Exception {

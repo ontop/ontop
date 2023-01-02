@@ -40,7 +40,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 
 public class S_Indexes_CompareTest extends TestCase {
 	
-	Logger log = LoggerFactory.getLogger(S_Indexes_CompareTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_Indexes_CompareTest.class);
 
 	public S_Indexes_CompareTest (String name){
 		super(name);
