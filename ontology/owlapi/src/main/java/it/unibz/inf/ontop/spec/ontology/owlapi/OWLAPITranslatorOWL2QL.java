@@ -463,9 +463,6 @@ public class OWLAPITranslatorOWL2QL {
 
                 builder.addObjectPropertyAssertion(ope, c1, c2);
             }
-            catch (TranslationException e) {
-                log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
-            }
             catch (InconsistentOntologyException e) {
                 log.warn(INCONSISTENT_ONTOLOGY, ax);
                 throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
