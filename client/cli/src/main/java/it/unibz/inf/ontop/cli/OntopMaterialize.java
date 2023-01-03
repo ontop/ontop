@@ -64,7 +64,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static final String DEFAULT_FETCH_SIZE = "50000";
 
-    private enum OutputFormat {
+    public enum OutputFormat {
         rdfxml(".rdf") {
             RDFHandler createRDFHandler(BufferedWriter writer) {
                 return new RDFXMLWriter(writer);
