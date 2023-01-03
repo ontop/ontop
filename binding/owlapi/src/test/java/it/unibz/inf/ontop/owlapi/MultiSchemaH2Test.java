@@ -22,17 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static junit.framework.TestCase.assertTrue;
 
 /***
  * A simple test that check if the system is able to handle Mappings for

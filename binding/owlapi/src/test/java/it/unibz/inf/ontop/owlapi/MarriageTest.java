@@ -41,7 +41,6 @@ import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
 public class MarriageTest {
@@ -338,8 +337,7 @@ public class MarriageTest {
         } finally {
             conn.close();
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
+		assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues), expectedValues, returnedValues);
     }
 
     private int runConstructQuery(String constructQuery) throws Exception {

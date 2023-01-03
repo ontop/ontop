@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsPersonIncrTest {
      * The dependents of the FDs with identical determinants are merged
      */
     @Test
-    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+    public void testPersonAddFunctionalDependencyDependent() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -37,7 +37,7 @@ public class BasicViewWithConstraintsPersonIncrTest {
      * The determinant of the FD is correctly added by a viewfile and used to merge FDs
      */
     @Test
-    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+    public void testPersonAddFunctionalDependencyDeterminant() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)

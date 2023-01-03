@@ -51,7 +51,7 @@ public abstract class AbstractSimpleMultitypedDBFunctionSymbol extends AbstractT
                                     TermFactory termFactory) {
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect,
                 terms.stream()
-                        .map(termConverter::apply)
+                        .map(termConverter)
                         .collect(Collectors.joining(",")));
     }
 }

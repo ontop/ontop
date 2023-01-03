@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -81,13 +79,6 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
         return arguments.stream()
                 .flatMap(ImmutableTerm::getVariableStream)
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    protected static boolean hasDuplicates(DataAtom atom) {
-        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getArguments();
-        Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
-
-        return termSet.size() < termList.size();
     }
 
     /**

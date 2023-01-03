@@ -12,10 +12,8 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLValuesExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Collectors;
 

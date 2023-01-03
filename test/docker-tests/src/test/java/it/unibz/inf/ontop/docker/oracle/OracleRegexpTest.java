@@ -71,7 +71,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegex() throws Exception {
-		try {
 
 			String[] queries = {
 					"'E[a-z]*t'", 
@@ -96,9 +95,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 				String countryName = runTest(query, false);
 				assertEquals(countryName, "");
 			}
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 }

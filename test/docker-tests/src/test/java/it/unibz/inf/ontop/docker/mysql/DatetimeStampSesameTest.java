@@ -9,7 +9,6 @@ import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -27,9 +26,9 @@ public class DatetimeStampSesameTest  {
 	private static final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
 	private static final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
-	Repository repository;
+	final Repository repository;
 
 	public DatetimeStampSesameTest() {
 

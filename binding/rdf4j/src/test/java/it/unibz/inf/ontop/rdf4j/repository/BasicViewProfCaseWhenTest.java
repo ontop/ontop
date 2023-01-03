@@ -28,7 +28,7 @@ public class BasicViewProfCaseWhenTest extends AbstractRDF4JTest {
      * Test case 1 CASE WHEN with CAST
      */
     @Test
-    public void testProfLastName() throws Exception {
+    public void testProfLastName()  {
         String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -43,7 +43,7 @@ public class BasicViewProfCaseWhenTest extends AbstractRDF4JTest {
      * Test case 2 CASE WHEN with SUBSTRING
      */
     @Test
-    public void testProfNickName() throws Exception {
+    public void testProfNickName() {
         String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

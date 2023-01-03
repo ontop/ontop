@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;

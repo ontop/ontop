@@ -25,9 +25,7 @@ public class OWLAPITestingTools {
     }
 
     public static void executeFromFile(Connection conn, String filename) throws SQLException, IOException {
-        String s = Files
-                .lines(Paths.get(filename))
-                .collect(joining("\n"));
+        String s = Files.lines(Paths.get(filename)).collect(joining("\n"));
         try (Statement st = conn.createStatement()) {
             st.executeUpdate(s);
         }

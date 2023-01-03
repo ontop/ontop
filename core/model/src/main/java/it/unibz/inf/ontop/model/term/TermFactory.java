@@ -190,11 +190,11 @@ public interface TermFactory {
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public IRIConstant getConstantIRI(IRI iri);
+	IRIConstant getConstantIRI(IRI iri);
 
-	public IRIConstant getConstantIRI(String iri);
+	IRIConstant getConstantIRI(String iri);
 
-	public BNode getConstantBNode(String name);
+	BNode getConstantBNode(String name);
 
 	/**
 	 * Returns a DB boolean constant

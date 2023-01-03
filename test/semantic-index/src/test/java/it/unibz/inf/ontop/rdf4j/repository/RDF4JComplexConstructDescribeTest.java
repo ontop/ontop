@@ -63,39 +63,40 @@ public class RDF4JComplexConstructDescribeTest {
 	}
 
 	@AfterClass
-	public static void terminate() throws Exception {
+	public static void terminate() {
 		REPOSITORY.shutDown();
 	}
-	
+
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		con = REPOSITORY.getConnection();
 	}
-	
+
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown()  {
 		con.close();
 	}
-	
+
 	@Test
-	public void testInsertData() throws Exception {
+	public void testInsertData() {
 		int result = 0;
 		String queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
 				queryString);
 
-		GraphQueryResult gresult = graphQuery.evaluate();
-		while (gresult.hasNext()) {
-			Statement s = gresult.next();
-			result++;
-			System.out.println(s.toString());
+		try (GraphQueryResult gresult = graphQuery.evaluate()) {
+			while (gresult.hasNext()) {
+				Statement s = gresult.next();
+				result++;
+				System.out.println(s.toString());
+			}
+			Assert.assertEquals(5, result);
 		}
-		Assert.assertEquals(5, result);
 	}
 
 	// Test case for: https://github.com/ontop/ontop/issues/161
     @Test
-    public void testConstructOptional() throws Exception {
+    public void testConstructOptional() {
         int result = 0;
         String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/test#> \n" +
                 "CONSTRUCT { ?s :p ?o1. ?s :p ?o2. }\n" +
@@ -106,13 +107,14 @@ public class RDF4JComplexConstructDescribeTest {
         GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
                 queryString);
 
-        GraphQueryResult gresult = graphQuery.evaluate();
-        while (gresult.hasNext()) {
-            result++;
-            Statement s = gresult.next();
-            System.out.println(s.toString());
-        }
-        Assert.assertEquals(4, result);
+        try (GraphQueryResult gresult = graphQuery.evaluate()) {
+			while (gresult.hasNext()) {
+				result++;
+				Statement s = gresult.next();
+				System.out.println(s.toString());
+			}
+			Assert.assertEquals(4, result);
+		}
     }
 
 }

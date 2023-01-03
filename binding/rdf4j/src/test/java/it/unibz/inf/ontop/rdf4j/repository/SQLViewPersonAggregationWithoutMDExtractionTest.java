@@ -31,7 +31,7 @@ public class SQLViewPersonAggregationWithoutMDExtractionTest extends AbstractRDF
      * Test correct columns are projected for query with aggregation
      */
     @Test
-    public void testPersonSelect() throws Exception {
+    public void testPersonSelect() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -44,7 +44,7 @@ public class SQLViewPersonAggregationWithoutMDExtractionTest extends AbstractRDF
     }
 
     @Test
-    public void testPersonSums() throws Exception {
+    public void testPersonSums() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

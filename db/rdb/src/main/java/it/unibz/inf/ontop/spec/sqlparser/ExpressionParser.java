@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeExce
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -31,7 +30,6 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 

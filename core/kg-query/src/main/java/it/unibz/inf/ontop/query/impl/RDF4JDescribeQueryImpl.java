@@ -59,7 +59,7 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
     }
 
     @Override
-    public IQ translate(KGQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+    public IQ translate(KGQueryTranslator translator) throws OntopUnsupportedKGQueryException {
         throw new UnsupportedOperationException("DESCRIBE queries cannot be translated in one step.");
     }
 

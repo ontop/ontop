@@ -2,15 +2,12 @@ package it.unibz.inf.ontop.cli;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +27,6 @@ public class SimpleMaterializerTest {
 
     private Connection conn;
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
     private OWLOntology ontology;
 
     final String owlfile = "src/test/resources/test/simplemapping.owl";
@@ -208,7 +204,7 @@ public class SimpleMaterializerTest {
     }
 
     @Test
-    public void runMaterializationWithReasoningTrig_multi_files() throws Exception {
+    public void runMaterializationWithReasoningTrig_multi_files() {
         String outFile = "src/test/resources/output/";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping_named.obda";

@@ -20,7 +20,7 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
-    @Nullable // the defaul schema is optional
+    @Nullable // the default schema is optional
     private final QuotedID defaultSchema;
 
     private static final int SCHEMA_INDEX = 1;

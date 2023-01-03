@@ -8,7 +8,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregateDB2Test extends AbstractDistinctInAggregateTest {
 
-    private static String propertiesFile = "/db2/university.properties";
+    private static final String propertiesFile = "/db2/university.properties";
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {

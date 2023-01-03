@@ -92,7 +92,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
-		ClassifiedTBoxImpl r = new ClassifiedTBoxImpl(
+		return new ClassifiedTBoxImpl(
                 onto.classes(),
                 onto.objectProperties(),
                 onto.dataProperties(),
@@ -108,7 +108,6 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
                 onto.getIrreflexiveObjectPropertyAxioms(),
                 onto.getFunctionalObjectProperties(),
                 onto.getFunctionalDataProperties());
-		return r;
 	}
 
 	/**

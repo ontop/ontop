@@ -14,8 +14,7 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test
@@ -61,7 +60,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		} catch (Exception e) {
             st.close();
             e.printStackTrace();
-            assertTrue(false);
+			fail();
 
 
 		} finally {

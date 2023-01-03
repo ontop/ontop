@@ -26,7 +26,7 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
 
     // Temporary (dropped after initialization)
     @Nullable
-    private OntopSystemConfiguration configuration;
+    private final OntopSystemConfiguration configuration;
 
     @Nullable
     private OntopQueryEngine queryEngine;

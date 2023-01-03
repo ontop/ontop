@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.docker.dremio;
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;

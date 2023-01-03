@@ -27,7 +27,7 @@ public class BasicViewPersonNumericFilterTest extends AbstractRDF4JTest {
      * Filter works on numeric values
      */
     @Test
-    public void testPersonConcat() throws Exception {
+    public void testPersonConcat() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

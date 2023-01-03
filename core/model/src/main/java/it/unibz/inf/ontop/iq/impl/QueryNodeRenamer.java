@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Renames query nodes according to one renaming substitution.
@@ -88,7 +87,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
                 renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
                 renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
-                        .map(v -> renamingSubstitution.applyToVariable(v)),
+                        .map(renamingSubstitution::applyToVariable),
                 flattenNode.getFlattenedType()
         );
     }

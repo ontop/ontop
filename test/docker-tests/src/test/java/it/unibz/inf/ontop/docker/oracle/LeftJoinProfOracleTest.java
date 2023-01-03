@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {

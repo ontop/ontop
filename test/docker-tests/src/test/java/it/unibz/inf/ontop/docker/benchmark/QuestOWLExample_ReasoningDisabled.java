@@ -10,22 +10,21 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Ignore("used only for benchmark tests")
 public class QuestOWLExample_ReasoningDisabled {
 
-    class Constants {
+    static class Constants {
         static final int NUM_FILTERS = 3;
         static final int NUM_SQL_JOINS = 4;
 
@@ -34,26 +33,26 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     interface ParamConst{
-        public static final String MYSQL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.obda";
-        public static final String MYSQL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.properties";
+        String MYSQL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.obda";
+        String MYSQL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.properties";
 
-        public static final String POSTGRES_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
-        public static final String POSTGRES_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
+        String POSTGRES_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
+        String POSTGRES_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
 
-        public static final String DB2_OBDA_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.obda";
-        public static final String DB2_PROPERTY_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.properties";
+        String DB2_OBDA_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.obda";
+        String DB2_PROPERTY_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.properties";
 
-        public static final String MYSQL_SMALL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.obda";
-        public static final String MYSQL_SMALL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.properties";
+        String MYSQL_SMALL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.obda";
+        String MYSQL_SMALL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.properties";
 
-        public static final String POSTGRES_SMALL_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
-        public static final String POSTGRES_SMALL_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
+        String POSTGRES_SMALL_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
+        String POSTGRES_SMALL_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
 
-        //public static final String DB2_SMALL_OBDA_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.obda";
-        //public static final String DB2_SMALL_PROPERTY_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.properties";
+        //String DB2_SMALL_OBDA_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.obda";
+        //String DB2_SMALL_PROPERTY_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.properties";
 
 
-        static final String[] tMappingConfFiles = {
+        String[] tMappingConfFiles = {
                 "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_1.conf",
                 "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_2.conf",
                 "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_3.conf",
@@ -308,13 +307,13 @@ public class QuestOWLExample_ReasoningDisabled {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree, String tableFileName) throws FileNotFoundException, UnsupportedEncodingException {
+    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree, String tableFileName) throws IOException {
         /*
 		 * Generate File !
 		 */
         //String tableFileName = "table.txt";
-        PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/" + tableFileName, "UTF-8");
-        PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/" + tableFileName, StandardCharsets.UTF_8);
+        PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/graph.txt", StandardCharsets.UTF_8);
 
         //writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
@@ -359,7 +358,7 @@ public class QuestOWLExample_ReasoningDisabled {
         this.reasoner.close();
     }
 
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws IOException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -486,9 +485,6 @@ public class QuestOWLExample_ReasoningDisabled {
 //				}
 //
 
-                long time = 0;
-                int count = 0;
-
                 conn = createStuff();
 
                 st = conn.createStatement();
@@ -496,13 +492,13 @@ public class QuestOWLExample_ReasoningDisabled {
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                count = 0;
+                int count = 0;
                 while (rs.hasNext()) {
                     count ++;
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);
-                time =  (t2-t1);
+                long time =  (t2-t1);
                 System.out.println("partial time:" + time);
                 rs.close();
                 //}

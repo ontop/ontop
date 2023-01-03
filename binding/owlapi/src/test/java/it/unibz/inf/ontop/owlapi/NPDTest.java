@@ -158,7 +158,7 @@ public class NPDTest {
 		StringBuilder bf = new StringBuilder();
 		try (BufferedReader in = new BufferedReader(reader)) {
 			for (String line = in.readLine(); line != null; line = in.readLine()) {
-				bf.append(line + "\n");
+				bf.append(line).append("\n");
 				if (line.startsWith("--")) {
 					//System.out.println("EXECUTING " + i++ + ":\n" + bf.toString());
 					st.executeUpdate(bf.toString());
@@ -179,7 +179,7 @@ public class NPDTest {
 			assertEquals(tbl, 70);
 		}
 		
-		List<String> pk = new LinkedList<String>();	
+		List<String> pk = new LinkedList<>();
 		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(null, null, "FIELD_DESCRIPTION")) {
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");

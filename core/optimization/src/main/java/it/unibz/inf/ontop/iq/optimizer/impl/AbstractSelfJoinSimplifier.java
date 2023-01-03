@@ -317,7 +317,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             ImmutableMap<GroundFunctionalTerm, Variable> groundFunctionalTermMap = groundFunctionalTerms.stream()
                     .collect(ImmutableCollectors.toMap(
                             t -> t,
-                            t -> termFactory.getVariable("v" + UUID.randomUUID().toString())
+                            t -> termFactory.getVariable("v" + UUID.randomUUID())
                     ));
 
             ImmutableList<ExtensionalDataNode> newDataNodes = dataNodes.stream()

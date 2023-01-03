@@ -27,7 +27,7 @@ public class BasicViewPersonNullFilterTest extends AbstractRDF4JTest {
      * Filter works on nullability of hidden columns
      */
     @Test
-    public void testPersonFullName() throws Exception {
+    public void testPersonFullName()  {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

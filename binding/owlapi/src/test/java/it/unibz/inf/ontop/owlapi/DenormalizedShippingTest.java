@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class DenormalizedShippingTest extends AbstractOWLAPITest {
 

@@ -29,14 +29,13 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -44,7 +43,7 @@ import java.util.Properties;
 @Ignore("used only for benchmark tests")
 public class QuestOWLExample_OntowisTests {
 
-    class Constants {
+    static class Constants {
         static final int NUM_FILTERS = 3;
         static final int NUM_SQL_JOINS = 4;
 
@@ -54,21 +53,20 @@ public class QuestOWLExample_OntowisTests {
 
 	interface ParamConst{
 		// Postgres
-		public static final String POSTGRESInt = "src/test/resources/benchmark/example/postgres-NoViews-joins-int.obda";
-		public static final String POSTGRESStr = "src/test/resources/benchmark/example/postgres-NoViews-joins-str.obda";
-		public static final String POSTGRESIntView = "src/test/resources/benchmark/example/postgres-Views-joins-int.obda";
-		public static final String POSTGRESStrView = "src/test/resources/benchmark/example/postgres-Views-joins-str.obda";
+		String POSTGRESInt = "src/test/resources/benchmark/example/postgres-NoViews-joins-int.obda";
+		String POSTGRESStr = "src/test/resources/benchmark/example/postgres-NoViews-joins-str.obda";
+		String POSTGRESIntView = "src/test/resources/benchmark/example/postgres-Views-joins-int.obda";
+		String POSTGRESStrView = "src/test/resources/benchmark/example/postgres-Views-joins-str.obda";
 		
 		// MySQL
-		public static final String MYSQLInt = "src/test/resources/benchmark/example/mysql-NoViews-joins-int.obda";
-		public static final String MYSQLStr = "src/test/resources/benchmark/example/mysql-NoViews-joins-str.obda";
-		public static final String MYSQLIntView = "src/test/resources/benchmark/example/mysql-Views-joins-int.obda";
-		public static final String MYSQLStrView = "src/test/resources/benchmark/example/mysql-Views-joins-str.obda";
+		String MYSQLInt = "src/test/resources/benchmark/example/mysql-NoViews-joins-int.obda";
+		String MYSQLStr = "src/test/resources/benchmark/example/mysql-NoViews-joins-str.obda";
+		String MYSQLIntView = "src/test/resources/benchmark/example/mysql-Views-joins-int.obda";
+		String MYSQLStrView = "src/test/resources/benchmark/example/mysql-Views-joins-str.obda";
 		
 		// DB2
-		public static final String DB2Int = "src/test/resources/benchmark/example/db2-NoViews-joins-int.obda";
-		public static final String DB2IntView = "src/test/resources/benchmark/example/db2-Views-joins-int.obda";
-		
+		String DB2Int = "src/test/resources/benchmark/example/db2-NoViews-joins-int.obda";
+		String DB2IntView = "src/test/resources/benchmark/example/db2-Views-joins-int.obda";
 	}
 	
 	enum DBType {
@@ -84,7 +82,7 @@ public class QuestOWLExample_OntowisTests {
 	// private static final String QuestOWLExample_OntowisTests = null;
 	final String obdaFile;
 	final DBType dbType;
-	boolean mKeys = false;
+	boolean mKeys;
 
 	final String owlfile = "src/test/resources/benchmark/example/ontowis-5joins-int.owl";
 	final String usrConstrinFile = "src/test/resources/benchmark/example/funcCons.txt";
@@ -170,12 +168,12 @@ public class QuestOWLExample_OntowisTests {
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
-	private void generateFile( List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
+	private void generateFile( List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree) throws IOException {
 		/*
 		 * Generate File !
 		 */
-		PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/table.txt", "UTF-8");
-		PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/graph.txt", "UTF-8");
+		PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/table.txt", StandardCharsets.UTF_8);
+		PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/graph.txt", StandardCharsets.UTF_8);
 
 		int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
 		int nF = Constants.NUM_FILTERS;
@@ -215,7 +213,7 @@ public class QuestOWLExample_OntowisTests {
 		this.reasoner.close();
 	}
 	
-	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidMappingException{
+	private OWLConnection createStuff(boolean manualKeys) {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -260,10 +258,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OWLConnection conn = reasoner.getConnection();
-
-		return conn;
-
+		return reasoner.getConnection();
 	}
 
 
@@ -280,21 +275,18 @@ public class QuestOWLExample_OntowisTests {
 			OWLStatement st = conn.createStatement();
 			try {
 
-				long time = 0;
-				int count = 0;
-				
 				//for (int i=0; i<nRuns; ++i){
 					long t1 = System.currentTimeMillis();
 					TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 					int columnSize = rs.getColumnCount();
-					count = 0;
+					int count = 0;
 					while (rs.hasNext()) {
 						count ++;
 						//System.out.print("\n");
 					}
 					long t2 = System.currentTimeMillis();
 					//time = time + (t2-t1);
-                    time =  (t2-t1);
+					long time =  (t2-t1);
 					System.out.println("partial time:" + time);
 					rs.close();
 				//}
@@ -474,18 +466,15 @@ public class QuestOWLExample_OntowisTests {
 		private final static String SPARQL_END = "}";
 		
 		static String oneSparqlJoinQuery(int nSqlJoins, int filter){
-			String result = oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-			return result;
+			return oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		}
 		
 		static String twoSparqlJoinQuery(int nSqlJoins, int filter){
-			String result = twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-			return result;
+			return twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		}
 		
 		static String threeSparqlJoinQuery(int nSqlJoins, int filter){
-			String result = threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-			return result;
+			return threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		}
 		
 		static private String filter(int filter){
@@ -493,38 +482,33 @@ public class QuestOWLExample_OntowisTests {
 		}
 		
 		static private String oneSparqlJoinTemplate(int nSqlJoins) {
-			String templ = 
-					"PREFIX :	<http://www.example.org/> "
-							+ "SELECT ?x ?y  "
-							+ "WHERE {"
-							+ "?x a  :"+nSqlJoins+"Tab1 . "
-							+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
-			return templ;
+			return "PREFIX :	<http://www.example.org/> "
+					+ "SELECT ?x ?y  "
+					+ "WHERE {"
+					+ "?x a  :"+nSqlJoins+"Tab1 . "
+					+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
 		}
 		static private String twoSparqlJoinTemplate(int nSqlJoins){
-			String templ =
-					oneSparqlJoinTemplate(nSqlJoins) +
-					"?x :hasString"+(nSqlJoins+1)+"j ?y1 . "; // Additional Sparql join 1
-			return templ;
+			return oneSparqlJoinTemplate(nSqlJoins) +
+			"?x :hasString"+(nSqlJoins+1)+"j ?y1 . ";
 		}
 		static private String threeSparqlJoinTemplate(int nSqlJoins){
-			String templ = twoSparqlJoinTemplate(nSqlJoins) +
-					"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . "; // Additional Sparql Join 2
-			return templ;
+			return twoSparqlJoinTemplate(nSqlJoins) +
+					"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . ";
 		}
-	};
+	}
 	
-	class QueryFactory {
+	static class QueryFactory {
 		
 		private final static int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
-		
-		String[] queriesOneSPARQL = new String[sizeQueriesArray];
-		String[] queriesTwoSPARQL = new String[sizeQueriesArray];
-		String[] queriesThreeSPARQL = new String[sizeQueriesArray];
 
-        String[] warmUpQueries = new String[Constants.NUM_WARM_UPS];
+		final String[] queriesOneSPARQL = new String[sizeQueriesArray];
+		final String[] queriesTwoSPARQL = new String[sizeQueriesArray];
+		final String[] queriesThreeSPARQL = new String[sizeQueriesArray];
 
-		int[] filters = new int[Constants.NUM_FILTERS];
+		final String[] warmUpQueries = new String[Constants.NUM_WARM_UPS];
+
+		final int[] filters = new int[Constants.NUM_FILTERS];
 		
 		QueryFactory(DBType type){
 			fillFilters(type);
@@ -605,5 +589,5 @@ public class QuestOWLExample_OntowisTests {
 				else if ( i < Constants.NUM_FILTERS * 4 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % Constants.NUM_FILTERS]); // 4 SQL Joins
 			}
 		}	
-	};
+	}
 }

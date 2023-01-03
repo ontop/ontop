@@ -147,14 +147,14 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 		private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
 				throws OntopResultConversionException {
-			Constant constant = null;
-			String nodeName = node.getSourceName();
+			String nodeName = node.getName();
 			ValueExpr ve = null;
 
 			if (extMap != null) {
 				ve = extMap.get(nodeName);
 			}
 
+			Constant constant;
 			if (ve instanceof ValueConstant) {
 				ValueConstant vc = (ValueConstant) ve;
 				if (vc.getValue() instanceof IRI) {

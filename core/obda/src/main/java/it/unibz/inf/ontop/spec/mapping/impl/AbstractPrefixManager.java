@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

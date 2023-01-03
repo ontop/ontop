@@ -10,7 +10,6 @@ import org.junit.Test;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -30,12 +29,12 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class RDF4JTimeoutTest {
-	static String owlfile = "src/test/resources/userconstraints/uc.owl";
-	static String obdafile = "src/test/resources/userconstraints/uc.obda";
-	static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
+	private static final String owlfile = "src/test/resources/userconstraints/uc.owl";
+	private static final String obdafile = "src/test/resources/userconstraints/uc.obda";
+	private static final String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
-	static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-	static String uc_create = "src/test/resources/userconstraints/create.sql";
+	private static final String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
+	private static final String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
 	private RepositoryConnection conn;
@@ -99,16 +98,16 @@ public class RDF4JTimeoutTest {
 
 
 	@Test
-	public void testTimeout1() throws Exception {
+	public void testTimeout1() {
 		testTimeout(false);
 	}
 
 	@Test
-	public void testTimeout2() throws Exception {
+	public void testTimeout2() {
 		testTimeout(true);
 	}
 
-	private void testTimeout(boolean useDefault) throws Exception {
+	private void testTimeout(boolean useDefault) {
 		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal2 ?v1; :hasVal2 ?v2.}";
 
 		// execute query
@@ -132,7 +131,7 @@ public class RDF4JTimeoutTest {
 	}
 	
 	@Test
-	public void testNoTimeout() throws Exception {
+	public void testNoTimeout() {
 		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
         
         // execute query

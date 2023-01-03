@@ -350,7 +350,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 );
     }
 
-    private class FlattenedVariableTypeException extends OntopInternalBugException {
+    private static class FlattenedVariableTypeException extends OntopInternalBugException {
         protected FlattenedVariableTypeException (String message) {
             super(message);
         }

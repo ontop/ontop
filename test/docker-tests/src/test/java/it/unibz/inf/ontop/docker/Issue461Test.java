@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.docker;
 
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.exception.R2RMLSerializationException;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
@@ -26,7 +25,7 @@ public class Issue461Test {
     private static final String obdaFilewithDuplicates = "src/test/resources/issue461/mappingwithduplicates.obda";
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException, SQLException {
+    public static void before() throws SQLException {
 
         Connection sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa", "");
         try (java.sql.Statement s = sqlConnection.createStatement()) {
@@ -39,7 +38,7 @@ public class Issue461Test {
     }
 
     @AfterClass
-    public static void after() throws OWLException {
+    public static void after() {
     }
 
     @Test

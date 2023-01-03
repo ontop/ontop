@@ -46,7 +46,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	private OntopOWLEngine reasoner = null;
 	
 	private Connection jdbcconn = null;
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
 	private static final String username = "sa";

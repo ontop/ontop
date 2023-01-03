@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 

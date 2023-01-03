@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
@@ -93,7 +91,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableSubstitution<T>) composeWith(g);
     }
 
-    private static class NotASubstitutionException extends RuntimeException {};
+    private static class NotASubstitutionException extends RuntimeException {}
 
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
@@ -125,7 +123,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     @Override
     public boolean equals(Object other) {
         if (other instanceof ImmutableSubstitution) {
-            return getImmutableMap().equals(((ImmutableSubstitution) other).getImmutableMap());
+            return getImmutableMap().equals(((ImmutableSubstitution<?>) other).getImmutableMap());
         }
         return false;
     }

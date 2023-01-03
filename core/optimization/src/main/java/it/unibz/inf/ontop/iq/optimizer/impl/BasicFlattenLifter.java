@@ -306,8 +306,8 @@ public class BasicFlattenLifter implements FlattenLifter {
     }
 
     private static class SplitFlattenSequence {
-        private List<FlattenNode> liftableFlatten;
-        private List<FlattenNode> nonLiftableFlatten;
+        private final List<FlattenNode> liftableFlatten;
+        private final List<FlattenNode> nonLiftableFlatten;
 
         public SplitFlattenSequence() {
             this.liftableFlatten = new LinkedList<>();

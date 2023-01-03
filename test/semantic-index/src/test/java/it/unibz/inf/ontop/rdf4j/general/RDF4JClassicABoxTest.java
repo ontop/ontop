@@ -46,7 +46,7 @@ public class RDF4JClassicABoxTest {
 
 
 	static Repository repo;
-	String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
+	final String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
 	static SimpleDataset dataset;
 	static ValueFactory valueFactory;
 

@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -160,10 +158,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     private String serializePath(ImmutableList<String> path) {
-        return "\'{"+
+        return "'{" +
                 path.stream()
                         .collect(Collectors.joining(","))
-                +"}\'";
+                + "}'";
     }
 
     private String printPath(ImmutableList<String> path) {
@@ -284,7 +282,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                                 typeOfFunctionString,
                                 termConverter.apply(terms.get(0)),
                                 types.stream()
-                                        .map(t -> "\'"+ t+ "\'")
+                                        .map(t -> "'" + t+ "'")
                                         .collect(Collectors.joining(","))
                         ));
     }

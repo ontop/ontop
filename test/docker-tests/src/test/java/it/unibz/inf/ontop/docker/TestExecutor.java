@@ -91,19 +91,18 @@ public class TestExecutor {
         int queryResultSize = countTuple(queryResult);
         int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
         if (queryResultSize != expectedResultSize) {
-            StringBuilder message = new StringBuilder(128);
-            message.append("\n============ ");
-            message.append(name);
-            message.append(" =======================\n");
-            message.append("Expected result: ");
-            message.append(expectedResultSize);
-            message.append("\n");
-            message.append("Query result: ");
-            message.append(queryResultSize);
-            message.append("\n");
-            message.append("=====================================\n");
+            String message = "\n============ " +
+                    name +
+                    " =======================\n" +
+                    "Expected result: " +
+                    expectedResultSize +
+                    "\n" +
+                    "Query result: " +
+                    queryResultSize +
+                    "\n" +
+                    "=====================================\n";
             //logger.error(message.toString());
-            Assert.fail(message.toString());
+            Assert.fail(message);
         }
     }
 
@@ -139,7 +138,7 @@ public class TestExecutor {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-            Set<Statement> result = new LinkedHashSet<Statement>();
+            Set<Statement> result = new LinkedHashSet<>();
             parser.setRDFHandler(new StatementCollector(result));
 
             try (InputStream in = new URL(resultFileURL).openStream()) {
@@ -157,20 +156,19 @@ public class TestExecutor {
         String thrownException = ex.getClass().getName();
         String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
         if (!thrownException.equals(expectedThrownException)) {
-            StringBuilder message = new StringBuilder(128);
-            message.append("\n============ ");
-            message.append(name);
-            message.append(" =======================\n");
-            message.append("Expected thrown exception: ");
-            message.append(expectedThrownException);
-            message.append("\n");
-            message.append("Thrown exception: ");
-            message.append(thrownException);
-            message.append("\n");
-            message.append("Message:" + ex.getMessage());
-            message.append("=====================================\n");
+            String message = "\n============ " +
+                    name +
+                    " =======================\n" +
+                    "Expected thrown exception: " +
+                    expectedThrownException +
+                    "\n" +
+                    "Thrown exception: " +
+                    thrownException +
+                    "\n" +
+                    "Message:" + ex.getMessage() +
+                    "=====================================\n";
             //logger.error(message.toString());
-            throw new Exception(message.toString());
+            throw new Exception(message);
         }
     }
 
@@ -206,28 +204,24 @@ public class TestExecutor {
 
     private Set<Statement> readGraphResultSetInfo() throws Exception {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-        if (rdfFormat != null) {
-            RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
-            ParserConfig config = parser.getParserConfig();
-            // To emulate DatatypeHandling.IGNORE
-            config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-            config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-            config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-            config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+        RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
+        ParserConfig config = parser.getParserConfig();
+        // To emulate DatatypeHandling.IGNORE
+        config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+        config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+        config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+        config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
 
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-            Set<Statement> result = new LinkedHashSet<>();
-            parser.setRDFHandler(new StatementCollector(result));
+        Set<Statement> result = new LinkedHashSet<>();
+        parser.setRDFHandler(new StatementCollector(result));
 
-            try (InputStream in = new URL(resultFileURL).openStream()) {
-                parser.parse(in, resultFileURL);
-            }
-            return result;
-        } else {
-            throw new RuntimeException("Unable to determine file type of results file");
+        try (InputStream in = new URL(resultFileURL).openStream()) {
+            parser.parse(in, resultFileURL);
         }
+        return result;
     }
 
     public static boolean isAskQuery(String query) {

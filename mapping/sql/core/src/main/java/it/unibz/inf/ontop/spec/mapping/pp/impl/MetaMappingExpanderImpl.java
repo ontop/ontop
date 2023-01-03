@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.iq.IQTree;

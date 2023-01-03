@@ -37,15 +37,15 @@ public abstract class AbstractVirtualModeTest {
         return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty(), Optional.empty());
     }
 
-    protected static OntopOWLEngine createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile)  {
         return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile), Optional.empty());
     }
 
-    protected static OntopOWLEngine createReasonerWithLenses(String owlFile, String obdaFile, String propertiesFile, String lensesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasonerWithLenses(String owlFile, String obdaFile, String propertiesFile, String lensesFile)  {
         return createReasoner(owlFile,obdaFile,propertiesFile, Optional.empty(), Optional.of(lensesFile));
     }
 
-    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> lensesFile) throws OWLOntologyCreationException {
+    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> lensesFile) {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
@@ -69,7 +69,7 @@ public abstract class AbstractVirtualModeTest {
         return builder.build();
     }
 
-    protected static OntopOWLEngine createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         r2rmlFile =  AbstractVirtualModeTest.class.getResource(r2rmlFile).toString();
         propertiesFile = AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
@@ -209,7 +209,7 @@ public abstract class AbstractVirtualModeTest {
                 log.debug(ind1.getIRI().toString());
                 i++;
             }
-            assertEquals(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()), returnedUris, expectedUris);
+            assertEquals(String.format("%s instead of \n %s", returnedUris, expectedUris), expectedUris, returnedUris);
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedUris.size()), expectedUris.size(), i);
         }
     }
@@ -270,7 +270,7 @@ public abstract class AbstractVirtualModeTest {
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }
-            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
+            assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues), expectedValues, returnedValues);
 //        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
 //                returnedValues.equals(expectedValues));
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);

@@ -143,7 +143,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
                 return lexicalTerm.isGround()
                         ? Stream.empty()
-                        : Stream.of(computeDBTerm((NonGroundTerm) lexicalTerm,
+                        : Stream.of(computeDBTerm(lexicalTerm,
                                 possibleType, childTree))
                             .map(t -> iqFactory.createOrderComparator(t, isAscending))
                             .map(ComparatorSimplification::new);

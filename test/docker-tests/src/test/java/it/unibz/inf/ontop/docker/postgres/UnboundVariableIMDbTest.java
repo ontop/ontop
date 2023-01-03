@@ -10,8 +10,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import static org.junit.Assert.assertEquals;
-
 
 /**
  * Test class to solve the bug that generates unbound variables in the mapping.

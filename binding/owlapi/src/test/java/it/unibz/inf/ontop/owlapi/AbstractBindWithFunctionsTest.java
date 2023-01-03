@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.*;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -124,7 +125,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+        byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
         StringBuilder hexString = new StringBuilder();
 
         for (byte b : hash) {
@@ -135,7 +136,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
         }
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                String.format("\"%s\"^^xsd:string",hexString.toString())));
+                String.format("\"%s\"^^xsd:string",hexString)));
     }
 
 	
@@ -788,7 +789,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
     }
 
     //    @Test see results of datetime with locale
-    public void testDatetime() throws Exception {
+    public void testDatetime() {
         TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
         String value = "Jan 31 2013 9:32AM";

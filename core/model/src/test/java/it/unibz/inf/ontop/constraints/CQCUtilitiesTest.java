@@ -38,22 +38,22 @@ import static org.junit.Assert.*;
 
 public class CQCUtilitiesTest {
 
-	IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
-	IRI propertyR = RDF_FACTORY.createIRI("http://example.com/R");
-	IRI propertyS = RDF_FACTORY.createIRI("http://example.com/S");
-	IRI propertyT = RDF_FACTORY.createIRI("http://example.com/T");
-	IRI classA = RDF_FACTORY.createIRI("http://example.com/A");
-    IRI classB = RDF_FACTORY.createIRI("http://example.com/B");
-	IRI classC = RDF_FACTORY.createIRI("http://example.com/C");
+	final IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
+	final IRI propertyR = RDF_FACTORY.createIRI("http://example.com/R");
+	final IRI propertyS = RDF_FACTORY.createIRI("http://example.com/S");
+	final IRI propertyT = RDF_FACTORY.createIRI("http://example.com/T");
+	final IRI classA = RDF_FACTORY.createIRI("http://example.com/A");
+    final IRI classB = RDF_FACTORY.createIRI("http://example.com/B");
+	final IRI classC = RDF_FACTORY.createIRI("http://example.com/C");
 
-    Variable x = TERM_FACTORY.getVariable("x");
-    Variable y = TERM_FACTORY.getVariable("y");
-    Variable z = TERM_FACTORY.getVariable("z");
-    Variable s = TERM_FACTORY.getVariable("s");
-    Variable t = TERM_FACTORY.getVariable("t");
-    Variable n = TERM_FACTORY.getVariable("n");
-    Variable m = TERM_FACTORY.getVariable("m");
-    Variable o = TERM_FACTORY.getVariable("o");
+    final Variable x = TERM_FACTORY.getVariable("x");
+    final Variable y = TERM_FACTORY.getVariable("y");
+    final Variable z = TERM_FACTORY.getVariable("z");
+    final Variable s = TERM_FACTORY.getVariable("s");
+    final Variable t = TERM_FACTORY.getVariable("t");
+    final Variable n = TERM_FACTORY.getVariable("n");
+    final Variable m = TERM_FACTORY.getVariable("m");
+    final Variable o = TERM_FACTORY.getVariable("o");
 
 
     @Test

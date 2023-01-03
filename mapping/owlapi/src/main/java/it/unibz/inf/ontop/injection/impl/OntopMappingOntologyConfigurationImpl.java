@@ -17,7 +17,6 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Properties;
 
 public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigurationImpl
         implements OntopMappingOntologyConfiguration, OntopOntologyOWLAPIConfiguration {

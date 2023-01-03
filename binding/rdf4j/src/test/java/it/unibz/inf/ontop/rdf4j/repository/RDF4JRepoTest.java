@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 
 public class RDF4JRepoTest {
-Logger log = LoggerFactory.getLogger("newlogger");
+	final Logger log = LoggerFactory.getLogger("newlogger");
 	@Test
 	public void test() {
 		RemoteRepositoryManager m = new RemoteRepositoryManager("http://localhost:8080/openrdf-sesame");

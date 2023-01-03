@@ -23,7 +23,7 @@ public class OntopEndpointNoPortalTest {
 
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
-    private static String PORT = "29839";
+    private static final String PORT = "29839";
 
 
     @BeforeClass

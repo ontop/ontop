@@ -86,7 +86,7 @@ public abstract class QuestScenarioParent extends TestCase {
 	protected abstract Repository createRepository() throws Exception;
 	
 	@Override
-	protected void tearDown() throws Exception {
+	protected void tearDown() {
 		if (dataRep != null) {
 			dataRep.shutDown();
 			dataRep = null;
@@ -176,14 +176,10 @@ public abstract class QuestScenarioParent extends TestCase {
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
 				"SELECT ?ManifestName WHERE { ?ManifestURL rdfs:label ?ManifestName . }");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
-		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
-		try {
+		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {
 			if (manifestNames.hasNext()) {
 				return manifestNames.next().getValue("ManifestName").stringValue();
 			}
-		}
-		finally {
-			manifestNames.close();
 		}
 		// Derive name from manifest URL
 		int lastSlashIdx = manifestFileURL.lastIndexOf('/');

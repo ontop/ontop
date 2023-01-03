@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.generation.algebra.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.generation.algebra.SQLExpression;
@@ -44,10 +43,5 @@ public class SQLInnerJoinExpressionImpl implements SQLInnerJoinExpression {
     @Override
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    @Override
-    public ImmutableList<? extends SQLExpression> getSubExpressions() {
-        return ImmutableList.of(this.leftExpression, this.rightExpression);
     }
 }

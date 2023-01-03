@@ -22,7 +22,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EA
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
-    FunctionSymbolFactory functionSymbolFactory;
+    protected final FunctionSymbolFactory functionSymbolFactory;
 
     public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType, FunctionSymbolFactoryImpl functionSymbolFactory) {
         super("GEOF_DISTANCE", functionIRI,

@@ -34,8 +34,6 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.*;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
@@ -88,12 +86,12 @@ public class OntopRDF4JInMemoryTest {
 	}
 
 	@AfterClass
-	public static void terminate() throws Exception {
+	public static void terminate() {
 		repository.shutDown();
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		/*
 		 * Get the repository connection
 		 */
@@ -101,12 +99,12 @@ public class OntopRDF4JInMemoryTest {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		con.close();
 	}
 
 	@Test
-	public void runQuery() throws Exception {
+	public void runQuery() {
 
 		/*
 		 * Sample query: show all books with their title.

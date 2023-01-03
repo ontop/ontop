@@ -27,7 +27,7 @@ public class SQLViewPersonTestSimpleQuery extends AbstractRDF4JTest {
      * Test correct columns are projected
      */
     @Test
-    public void testPersonSelect() throws Exception {
+    public void testPersonSelect() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

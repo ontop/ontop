@@ -35,7 +35,7 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
         // The SI unfortunately does not provide unique constraints... and is not robust to DISTINCTs in a sub-query
         newProperties.putIfAbsent(OntopModelSettings.CARDINALITY_MODE, "LOOSE");
 
-        OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ppMapping(repo.createMappings())
                 .properties(newProperties)
                 .jdbcUrl(repo.getJdbcUrl())

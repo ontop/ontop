@@ -87,7 +87,7 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
             repo.init();
             OntopRepositoryConnection connection = repo.getConnection();
 
-            String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
+            String query = Files.lines(Paths.get(queryFile)).collect(joining("\n"));
 
             try (TupleQueryResult result = connection.prepareTupleQuery(QueryLanguage.SPARQL, query)
                     .evaluate()) {

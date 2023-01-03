@@ -46,28 +46,24 @@ public class HasIdTest extends AbstractVirtualModeTest {
     }
 
 
-    private TupleOWLResultSet runLocalQuery(String query) throws OWLException {
-
-        OWLStatement st = createStatement();
-        return st.executeSelectQuery(query);
-    }
-
     @Test
     public void test() throws OWLException {
-        TupleOWLResultSet  results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
-                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-                "SELECT ?p ?firstName ?lastName " +
-                "WHERE { " +
-                "    ?p :hasId \"3\"^^xsd:int . " +
-                "    OPTIONAL { ?p :firstName ?firstName }" +
-                "    OPTIONAL { ?p :lastName ?lastName }" +
-                "}");
-        // At least one result
-        assertTrue(results.hasNext());
-        final OWLBindingSet bindingSet = results.next();
-        assertEquals(bindingSet.getOWLIndividual("p").toString(), "<http://example.com/persons/3>");
-        assertNull(bindingSet.getOWLLiteral("firstName"));
-        assertNull(bindingSet.getOWLLiteral("lastName"));
-        assertFalse(results.hasNext());
+        try (OWLStatement st = createStatement()) {
+            TupleOWLResultSet results = st.executeSelectQuery("PREFIX : <http://example.com/vocab#>" +
+                    "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+                    "SELECT ?p ?firstName ?lastName " +
+                    "WHERE { " +
+                    "    ?p :hasId \"3\"^^xsd:int . " +
+                    "    OPTIONAL { ?p :firstName ?firstName }" +
+                    "    OPTIONAL { ?p :lastName ?lastName }" +
+                    "}");
+            // At least one result
+            assertTrue(results.hasNext());
+            final OWLBindingSet bindingSet = results.next();
+            assertEquals(bindingSet.getOWLIndividual("p").toString(), "<http://example.com/persons/3>");
+            assertNull(bindingSet.getOWLLiteral("firstName"));
+            assertNull(bindingSet.getOWLLiteral("lastName"));
+            assertFalse(results.hasNext());
+        }
     }
 }

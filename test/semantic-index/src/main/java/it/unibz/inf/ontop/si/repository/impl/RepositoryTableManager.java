@@ -5,12 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,7 +15,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.si.repository.impl.RepositoryTable.*;
-import static it.unibz.inf.ontop.si.repository.impl.RepositoryTable.getNotNull;
 
 public class RepositoryTableManager {
 
@@ -160,9 +154,8 @@ public class RepositoryTableManager {
 
 	/**
 	 * Stores the emptiness index in the database
-	 * @throws SQLException 
 	 */
-	public void store(Connection conn) throws SQLException {
+	public void store(Connection conn) {
 
 	}
 

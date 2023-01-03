@@ -113,7 +113,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         }
 
         OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<T> getImmutableCopy() {
-            return new OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<T>(ImmutableMap.copyOf(map), NOT_FOUND);
+            return new OntologyImpl.ImmutableOntologyVocabularyCategoryImpl<>(ImmutableMap.copyOf(map), NOT_FOUND);
         }
     }
 
@@ -647,5 +647,5 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             else // many tops
                 throw new InconsistentOntologyException();
         }
-    };
+    }
 }

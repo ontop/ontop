@@ -62,7 +62,7 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
 
         OntopSystemSQLBuilderMixin() {
             B builder = (B) this;
-            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<B>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
         }
 
         @Override

@@ -2,16 +2,13 @@ package it.unibz.inf.ontop.rdf4j.predefined.parsing.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.Query;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.IRI;
 import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.TYPED_LITERAL;
@@ -124,7 +121,7 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         @Override
         public QueryParameterType getType() {
             if (parameterType == null) {
-                if (type.toUpperCase().equals("IRI"))
+                if (type.equalsIgnoreCase("IRI"))
                     return new QueryParameterTypeImpl(IRI);
 
                 String typeString = type.startsWith("xsd:")

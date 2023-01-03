@@ -10,15 +10,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
-
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.SERIAL_STR;
 
 
 public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {

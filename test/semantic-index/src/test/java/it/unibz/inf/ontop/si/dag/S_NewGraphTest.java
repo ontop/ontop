@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
@@ -32,7 +31,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 
 public class S_NewGraphTest  extends TestCase{
 	
-	Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
 
 	public void testCreation() throws Exception {
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";

@@ -39,7 +39,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 
 public class S_TransitiveReductionTest extends TestCase {
 
-	Logger log = LoggerFactory.getLogger(S_TransitiveReductionTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_TransitiveReductionTest.class);
 
 	public S_TransitiveReductionTest (String name){
 		super(name);

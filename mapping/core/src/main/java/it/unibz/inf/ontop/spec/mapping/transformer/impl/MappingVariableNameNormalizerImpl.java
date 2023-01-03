@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -15,7 +14,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 
 @Singleton
