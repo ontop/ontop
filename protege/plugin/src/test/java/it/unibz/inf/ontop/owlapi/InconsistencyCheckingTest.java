@@ -35,7 +35,7 @@ public class InconsistencyCheckingTest {
 	private final OWLNamedIndividual c = NamedIndividual(IRI.create(prefix + "c"));
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp()  {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = Ontology(manager, //
 				Declaration(c1),

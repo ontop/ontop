@@ -50,13 +50,13 @@ public class AbstractOWLAPITest {
 
     protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile,
                                    @Nullable String propertiesFile)
-            throws SQLException, IOException, OWLOntologyCreationException {
-        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+            throws SQLException, IOException {
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
         executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractOWLAPITest.class.getResource(obdaFile).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
@@ -188,8 +188,7 @@ public class AbstractOWLAPITest {
     protected boolean executeAskQuery(String query) throws Exception {
         try (OWLStatement st = CONNECTION.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
-            boolean retval = rs.getValue();
-            return retval;
+            return rs.getValue();
         }
     }
 

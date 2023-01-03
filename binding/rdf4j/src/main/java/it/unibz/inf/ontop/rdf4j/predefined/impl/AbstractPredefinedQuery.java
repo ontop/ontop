@@ -178,7 +178,7 @@ public class AbstractPredefinedQuery<Q extends RDF4JQuery> implements Predefined
         switch (paramType.getCategory()) {
             case IRI:
                 // TODO: support templates
-                return String.format("http://%s.example.org/fake", UUID.randomUUID().toString());
+                return String.format("http://%s.example.org/fake", UUID.randomUUID());
             case TYPED_LITERAL:
                 return generateReferenceLiteralValue(paramType.getDatatypeIRI()
                         .orElseThrow(() -> new MinorOntopInternalBugException("Invalid typed literal")));

@@ -12,7 +12,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints-duplicateUCFD.json";
     private static final String DBMETADATA_FILE = "src/test/resources/prof/prof_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithConstraintsProfWithDuplicatesTest() throws Exception {
     }
@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate functional dependencies appear only once - check determinant
      */
     @Test
-    public void testProfDuplicateFDDeterminants() throws Exception {
+    public void testProfDuplicateFDDeterminants() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -37,7 +37,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate functional dependencies appear only once - check dependent
      */
     @Test
-    public void testProfDuplicateFDDependents() throws Exception {
+    public void testProfDuplicateFDDependents()  {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -53,7 +53,7 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      * Duplicate unique constraints appear only once - check determinant
      */
     @Test
-    public void testProfDuplicateUCColumn() throws Exception {
+    public void testProfDuplicateUCColumn() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)

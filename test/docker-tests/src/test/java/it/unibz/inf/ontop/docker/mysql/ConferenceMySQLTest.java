@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.Test;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 /**
  * Test mysql jdbc driver.
@@ -40,7 +39,7 @@ public class ConferenceMySQLTest  {
 	private static final String obdaFile = "/mysql/conference/ontology5.obda";
 	private static final String propertyFile = "/mysql/conference/ontology5.properties";
 
-	private void runTests(String query) throws Exception {
+	private void runTests(String query) {
 		String owlFileName =  this.getClass().getResource(owlFile).toString();
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
@@ -57,7 +56,7 @@ public class ConferenceMySQLTest  {
 
 
 	@Test(expected = SimpleOntopOWLEngine.InvalidOBDASpecificationException.class)
-	public void testWrongMappings() throws Exception {
+	public void testWrongMappings() {
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
                 "   ?x :LcontainsT ?y\n" +

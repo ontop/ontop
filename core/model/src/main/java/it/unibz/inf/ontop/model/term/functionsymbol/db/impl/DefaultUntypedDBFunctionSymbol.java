@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**

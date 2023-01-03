@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.si.repository.impl.SemanticIndex;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -33,6 +32,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.stream.Stream;
@@ -138,17 +138,18 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 	
 	public static final class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
-		private SimpleDirectedGraph <T,DefaultEdge> dag;
-		private EquivalencesDAG<T> reasonerDAG;
+		private final SimpleDirectedGraph <T,DefaultEdge> dag;
+		private final EquivalencesDAG<T> reasonerDAG;
 		
 		public EquivalencesDAGImpl(SimpleDirectedGraph<T, DefaultEdge> dag, EquivalencesDAG<T> reasonerDAG) {
 			this.dag = dag;
 			this.reasonerDAG = reasonerDAG;
 		}
 
+		@Nonnull
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T vertex : dag.vertexSet()) 
 				result.add(getVertex(vertex));
@@ -191,10 +192,10 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 			
 			T node = v.getRepresentative();
 			
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			// reverse the dag
-			DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<T, DefaultEdge>(dag);
-			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<T, DefaultEdge>(reversed, node);
+			DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(dag);
+			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<>(reversed, node);
 
 			while (iterator.hasNext()) {
 				T child = iterator.next();

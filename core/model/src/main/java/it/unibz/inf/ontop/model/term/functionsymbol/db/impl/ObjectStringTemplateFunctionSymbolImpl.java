@@ -96,7 +96,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         if(terms.stream()
                 .filter(t -> t instanceof Constant)
-                .anyMatch(t -> ((Constant)t).isNull())) {
+                .anyMatch(ImmutableTerm::isNull)) {
             return Optional.empty();
         }
         return Optional.of(TermTypeInference.declareTermType(lexicalType));

@@ -12,6 +12,7 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests to check if PostGIS supports GeoSPARQL properly.
@@ -63,7 +64,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfIntersects(?xWkt, ?bWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -115,7 +116,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfWithin(?xWkt, ?bWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -134,7 +135,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfContains(?bWkt, ?xWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -203,7 +204,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER(?x < 350000) .\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
 

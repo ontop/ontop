@@ -89,7 +89,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private static final String ST_RELATE = "ST_RELATE";
     private static final String ST_SRID = "ST_SRID";
 
-    protected DBTypeFactory dbTypeFactory;
+    protected final DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
     protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;

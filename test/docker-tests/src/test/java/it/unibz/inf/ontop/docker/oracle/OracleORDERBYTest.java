@@ -49,12 +49,13 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
 
     private void runQueryAndCheckSQL(String query) throws OWLException{
 
-        OntopOWLStatement st = createStatement();
-        String sql = st.getExecutableQuery(query).toString();
-        //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
-        boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");
-        log.debug(sql);
-        assertTrue(m);
+        try (OntopOWLStatement st = createStatement()) {
+            String sql = st.getExecutableQuery(query).toString();
+            //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
+            boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");
+            log.debug(sql);
+            assertTrue(m);
+        }
     }
 
 

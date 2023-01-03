@@ -48,7 +48,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(Parameterized.class)
 public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 
-	private static final ImmutableSet IGNORE = ImmutableSet.of();
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
 	private static final CompletenessRepositoryRegistry REGISTRY = new CompletenessRepositoryRegistry();
 	private final String testIRI;
 	private final String resultFile;

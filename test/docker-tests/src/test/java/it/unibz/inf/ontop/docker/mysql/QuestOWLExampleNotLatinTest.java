@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
 
 
 public class QuestOWLExampleNotLatinTest {
@@ -63,13 +62,6 @@ public class QuestOWLExampleNotLatinTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database
@@ -81,7 +73,9 @@ public class QuestOWLExampleNotLatinTest {
 				"		 ?y a :作者; :name ?author. \n" +
 				"		 ?z a :Édition; :editionNumber ?edition }";
 
-		try {
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+			 OntopOWLConnection conn = reasoner.getConnection();
+			 OntopOWLStatement st = conn.createStatement()) {
             long t1 = System.currentTimeMillis();
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			while (rs.hasNext()) {
@@ -94,8 +88,6 @@ public class QuestOWLExampleNotLatinTest {
 			/*
 			 * Print the query summary
 			 */
-			OntopOWLStatement qst = st;
-
 			System.out.println();
 			System.out.println("The input SPARQL query:");
 			System.out.println("=======================");
@@ -104,24 +96,12 @@ public class QuestOWLExampleNotLatinTest {
 			
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
-			System.out.println(qst.getExecutableQuery(sparqlQuery));
+			System.out.println(st.getExecutableQuery(sparqlQuery));
 
             System.out.println("Query Execution Time:");
             System.out.println("=====================");
             System.out.println((t2-t1) + "ms");
 			
-		} finally {
-			
-			/*
-			 * Close connection and resources
-			 */
-			if (st != null && !st.isClosed()) {
-				st.close();
-			}
-			if (conn != null && !conn.isClosed()) {
-				conn.close();
-			}
-			reasoner.close();
 		}
 	}
 

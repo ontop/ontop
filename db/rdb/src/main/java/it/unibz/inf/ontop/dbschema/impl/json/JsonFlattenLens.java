@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
+import it.unibz.inf.ontop.dbschema.impl.LensImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -39,7 +39,7 @@ import java.util.stream.IntStream;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
 @JsonDeserialize(as = JsonFlattenLens.class)
-public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
+public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
     @Nonnull
     public final Columns columns;
@@ -77,13 +77,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    public OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
+    public Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {
 
         NamedRelationDefinition parentDefinition = extractParentDefinition(dbParameters, parentCacheMetadataLookup);
 
-        int parentLevel = (parentDefinition instanceof OntopViewDefinition)?
-                ((OntopViewDefinition) parentDefinition).getLevel():
+        int parentLevel = (parentDefinition instanceof Lens)?
+                ((Lens) parentDefinition).getLevel():
                 0;
 
         RelationID relationId = dbParameters.getQuotedIDFactory().createRelationID(name.toArray(new String[0]));
@@ -92,7 +92,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
 
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
-        return new OntopViewDefinitionImpl(
+        return new LensImpl(
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
@@ -371,7 +371,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    public void insertIntegrityConstraints(OntopViewDefinition relation,
+    public void insertIntegrityConstraints(Lens relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
 
@@ -474,7 +474,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedView {
     }
 
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
                                                                                     ImmutableList<Attribute> parentAttributes) {
         return ImmutableList.of();
     }

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
@@ -82,8 +81,9 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected AbstractOntopOptimizationBuilderMixin() {
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>((B)this);
-            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>((B) this);
+            B builder = (B) this;
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
+            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>(builder);
         }
 
         protected Properties generateProperties() {

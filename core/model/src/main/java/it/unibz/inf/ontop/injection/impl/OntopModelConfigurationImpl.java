@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -66,7 +65,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
                 injector = injectorSupplier.get();
             }
             else {
-                Set<Class> moduleClasses = new HashSet<>();
+                Set<Class<? extends Module>> moduleClasses = new HashSet<>();
 
                 // Only keeps the first instance of a module class
                 ImmutableList<Module> modules = buildGuiceModules()
@@ -210,7 +209,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
             implements Builder<B> {
 
         @Override
-        public final OntopModelConfiguration build() {
+        public OntopModelConfiguration build() {
             Properties p = generateProperties();
 
             return new OntopModelConfigurationImpl(

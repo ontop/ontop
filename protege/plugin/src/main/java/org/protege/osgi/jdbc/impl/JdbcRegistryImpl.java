@@ -3,6 +3,8 @@ package org.protege.osgi.jdbc.impl;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.JdbcRegistryException;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
@@ -16,13 +18,12 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 
 	@Override
 	public void addJdbcDriver(String className, URL location) throws JdbcRegistryException {
-		try {
-			URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader());
-			Class<?> driverClass = classLoader.loadClass(className);
-			Driver driver = (Driver) driverClass.newInstance();
+		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader())) {
+			Class<? extends Driver> driverClass = classLoader.loadClass(className).asSubclass(Driver.class);
+			Driver driver = driverClass.getConstructor().newInstance();
 			drivers.add(driver);
 		}
-		catch (InstantiationException | ClassNotFoundException | IllegalAccessException ie) {
+		catch (Exception ie) {
 			throw new JdbcRegistryException(ie);
 		}
     }

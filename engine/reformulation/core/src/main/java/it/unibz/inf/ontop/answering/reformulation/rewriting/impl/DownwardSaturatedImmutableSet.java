@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 
@@ -67,7 +67,7 @@ public class DownwardSaturatedImmutableSet<T> {
 			result = e; // we have top, the intersection is sub
 
 		return result.isEmpty()
-				? BOTTOM
+				? bottom()
 				: new DownwardSaturatedImmutableSet<>(result);
 	}
 	
@@ -88,7 +88,7 @@ public class DownwardSaturatedImmutableSet<T> {
 	}
 
 	public static <T> DownwardSaturatedImmutableSet<T> create(ImmutableSet<T> e) {
-		return e.isEmpty() ? BOTTOM : new DownwardSaturatedImmutableSet<>(e);
+		return e.isEmpty() ? bottom() : new DownwardSaturatedImmutableSet<>(e);
 	}
 
 	private static final DownwardSaturatedImmutableSet TOP = new DownwardSaturatedImmutableSet<>(null);
@@ -127,9 +127,8 @@ public class DownwardSaturatedImmutableSet<T> {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof DownwardSaturatedImmutableSet) {
-			DownwardSaturatedImmutableSet other = (DownwardSaturatedImmutableSet)o;
-			return this.elements == null && other.elements == null ||
-					this.elements != null && this.elements.equals(other.elements);
+			DownwardSaturatedImmutableSet<?> other = (DownwardSaturatedImmutableSet<?>)o;
+			return Objects.equals(this.elements, other.elements);
 		}
 		return false;
 	}

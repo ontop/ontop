@@ -10,17 +10,16 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -28,7 +27,7 @@ import java.util.regex.Pattern;
 @Ignore("used only for benchmark tests")
 public class SameAsOntowisTest {
 
-    class Constants {
+    static class Constants {
         static final int NUM_FILTERS = 3;
 
 //        static final int NUM_RUNS = 1;
@@ -37,14 +36,12 @@ public class SameAsOntowisTest {
 
     interface ParamConst{
         // Postgres
-        public static final String POSTGRES2DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA2-ten.obda";
-        public static final String POSTGRES2DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-thirty.obda";
-        public static final String POSTGRES2DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-sixty.obda";
-        public static final String POSTGRES3DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA3-ten.obda";
-        public static final String POSTGRES3DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-thirty.obda";
-        public static final String POSTGRES3DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-sixty.obda";
-
-
+        String POSTGRES2DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA2-ten.obda";
+        String POSTGRES2DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-thirty.obda";
+        String POSTGRES2DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-sixty.obda";
+        String POSTGRES3DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA3-ten.obda";
+        String POSTGRES3DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-thirty.obda";
+        String POSTGRES3DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-sixty.obda";
     }
 
     public static class Settings{
@@ -180,13 +177,13 @@ public class SameAsOntowisTest {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    private void generateFile( List<Long> resultsLow, List<Long> resultsMiddle, List<Long> resultsHigh, List<String> queries, long time) throws FileNotFoundException, UnsupportedEncodingException {
+    private void generateFile( List<Long> resultsLow, List<Long> resultsMiddle, List<Long> resultsHigh, List<String> queries, long time) throws IOException {
 		/*
 		 * Generate File !
 		 */
-        PrintWriter writer = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"table.txt", "UTF-8");
-        PrintWriter writerQ = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"queries.txt", "UTF-8");
-        PrintWriter writerG = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"table.txt", StandardCharsets.UTF_8);
+        PrintWriter writerQ = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"queries.txt", StandardCharsets.UTF_8);
+        PrintWriter writerG = new PrintWriter("src/test/resources/results/"+ Settings.resultFileName+"graph.txt", StandardCharsets.UTF_8);
 
         writer.println("offline time: " + time);
 
@@ -268,7 +265,7 @@ public class SameAsOntowisTest {
         this.reasoner.close();
     }
 
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
+    private OntopOWLConnection createStuff() {
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -311,20 +308,16 @@ public class SameAsOntowisTest {
             String sparqlQuery = queries.get(j);
             OntopOWLStatement st = conn.createStatement();
             try {
-
-                long time = 0;
-                int count = 0;
-
-                //for (int i=0; i<nRuns; ++i){
+               //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                count = 0;
+                int count = 0;
                 while (rs.hasNext()) {
                     count ++;
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);
-                time =  (t2-t1);
+                long time =  (t2-t1);
                 System.out.println("partial time:" + time);
                 rs.close();
                 //}
@@ -498,18 +491,15 @@ public class SameAsOntowisTest {
         private final static String SPARQL_END = "}";
 
         static String classSparqlQuery(int n, int filter){
-            String result = SPARQL_BEGIN + oneClassSparqlTemplate(n)  + SPARQL_END + limit(filter);
-            return result;
+            return SPARQL_BEGIN + oneClassSparqlTemplate(n)  + SPARQL_END + limit(filter);
         }
 
         static String dataSparqlQuery(int n, int filter){
-            String result = SPARQL_BEGIN + dataSparqlTemplate(n) + filter(filter) + SPARQL_END;
-            return result;
+            return SPARQL_BEGIN + dataSparqlTemplate(n) + filter(filter) + SPARQL_END;
         }
 
         static String objectSparqlQuery(int n, int filter) {
-            String result = SPARQL_BEGIN + objectSparqlTemplate(n) + filter(filter) + SPARQL_END;
-            return result;
+            return SPARQL_BEGIN + objectSparqlTemplate(n) + filter(filter) + SPARQL_END;
         }
 
         static String classAndObjectSparqlQuery(int nclass, int ndata, int nobject,  int filter) {
@@ -531,8 +521,7 @@ public class SameAsOntowisTest {
         }
 
         static String classAndObjectSparqlQuery(int nclass, int ndata, int nobject) {
-            String result = SPARQL_BEGIN + oneClassSparqlTemplate(nclass)  +dataSparqlTemplate(ndata)  + objectSparqlTemplate(nobject) + SPARQL_END;
-            return result;
+            return SPARQL_BEGIN + oneClassSparqlTemplate(nclass)  +dataSparqlTemplate(ndata)  + objectSparqlTemplate(nobject) + SPARQL_END;
         }
 
 
@@ -559,10 +548,7 @@ public class SameAsOntowisTest {
 //
 
         static private String oneClassSparqlTemplate(int n) {
-            String templ ="?x a :A" + n + " . ";
-
-
-            return templ;
+            return "?x a :A" + n + " . ";
         }
         static private String classSparqlTemplate(int n) {
             String templ ="";
@@ -600,47 +586,43 @@ public class SameAsOntowisTest {
         }
 
         static private String oneSparqlTwoDataProperty(int n) {
-            String templ =
-                    "PREFIX :	<http://www.example.org/> "
-                            + "SELECT *  "
-                            + "WHERE {"
-                            + "?x a :A"+n+" . "
-                            + "?x :S"+n+" ?y . "
-                            + "?x :S"+n +1 +" ?w . ";
-            return templ;
+            return "PREFIX :	<http://www.example.org/> "
+                    + "SELECT *  "
+                    + "WHERE {"
+                    + "?x a :A"+n+" . "
+                    + "?x :S"+n+" ?y . "
+                    + "?x :S"+n +1 +" ?w . ";
         }
 
         static private String oneSparqlObjectAndTwoDataProperty(int n) {
-            String templ =
-                    "PREFIX :	<http://www.example.org/> "
-                            + "SELECT * "
-                            + "WHERE {"
-                            + "?x a :A"+n+" . "
-                            + "?x :S"+n+" ?y . "
-                            + "?x :S"+n +1 +" ?w . "
-                            + "?x :R ?z . ";
-            return templ;
+            return "PREFIX :	<http://www.example.org/> "
+                    + "SELECT * "
+                    + "WHERE {"
+                    + "?x a :A"+n+" . "
+                    + "?x :S"+n+" ?y . "
+                    + "?x :S"+n +1 +" ?w . "
+                    + "?x :R ?z . ";
         }
-    };
+    }
 
 
 
-    class QueryFactory {
+    static class QueryFactory {
 
         private final  int sizeQueriesArray = Settings.NUM_TABLES * (Settings.NUM_TABLES * Settings.NUM_OBJECTS * Settings.NUM_DATA);
 
 //        private final static int sizeQueries = 15;
 
 //        List<String> filterSPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
-        List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
-        List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter0SPARQL =new ArrayList<>(sizeQueriesArray);
+        final List<String> filter1SPARQL = new ArrayList<>(sizeQueriesArray);
+        final List<String> filter2SPARQL = new ArrayList<>(sizeQueriesArray);
 
 
 
-        List<String> warmUpQueries = new ArrayList<>();
+        final List<String> warmUpQueries = new ArrayList<>();
 
-        int[] filters = new int[3];
+        final int[] filters = new int[3];
 
         QueryFactory(){
 //            fillFilters();
@@ -888,5 +870,5 @@ public class SameAsOntowisTest {
 //
 //
 //        }
-    };
+    }
 }

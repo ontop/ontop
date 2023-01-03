@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
@@ -74,15 +75,15 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
-                                                  Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
+                                                  Supplier<Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Graph>> mappingGraphSupplier,
                                                   Supplier<Optional<File>> constraintFileSupplier,
                                                   Supplier<Optional<File>> dbMetadataFileSupplier,
                                                   Supplier<Optional<Reader>> dbMetadataReaderSupplier,
-                                                  Supplier<Optional<File>> ontopViewFileSupplier,
-                                                  Supplier<Optional<Reader>> ontopViewReaderSupplier
+                                                  Supplier<Optional<File>> lensesSupplier,
+                                                  Supplier<Optional<Reader>> lensesReaderSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -91,7 +92,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         /*
          * Pre-processed mapping
          */
-        Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
+        Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>> optionalPPMapping = ppMappingSupplier.get();
 
         OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
@@ -100,17 +101,17 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 .ifPresent(specInputBuilder::addDBMetadataFile);
         dbMetadataReaderSupplier.get()
                 .ifPresent(specInputBuilder::addDBMetadataReader);
-        ontopViewFileSupplier.get()
-                .ifPresent(specInputBuilder::addOntopViewFile);
-        ontopViewReaderSupplier.get()
-                .ifPresent(specInputBuilder::addOntopViewReader);
+        lensesSupplier.get()
+                .ifPresent(specInputBuilder::addLensesFile);
+        lensesReaderSupplier.get()
+                .ifPresent(specInputBuilder::addLensesReader);
         options.sparqlRulesFile
                 .ifPresent(specInputBuilder::addSparqlRuleFile);
         options.sparqlRulesReader
                 .ifPresent(specInputBuilder::addSparqlRuleReader);
 
         if (optionalPPMapping.isPresent()) {
-            PreProcessedMapping ppMapping = optionalPPMapping.get();
+            PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping = optionalPPMapping.get();
 
             return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
         }
@@ -244,7 +245,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
-        private boolean isOntopViewDefined;
+        private boolean areLensesDefined;
 
         OntopMappingBuilderMixin() {
             B builder = (B) this;
@@ -312,11 +313,11 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             isDBMetadataDefined = true;
         }
 
-        final void declareOntopViewDefined() {
+        final void declareLensesDefined() {
             if (isOBDASpecificationAssigned()) {
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             }
-            isOntopViewDefined = true;
+            areLensesDefined = true;
         }
 
         @Override
@@ -331,8 +332,8 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 throw new InvalidOntopConfigurationException("The mapping is already defined, " +
                         "cannot assign the OBDA specification");
             }
-            if (isOntopViewDefined) {
-                throw new InvalidOntopConfigurationException("Ontop views are already defined, " +
+            if (areLensesDefined) {
+                throw new InvalidOntopConfigurationException("Lenses are already defined, " +
                         "cannot assign the OBDA specification");
             }
         }

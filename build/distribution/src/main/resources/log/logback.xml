@@ -6,6 +6,7 @@
 		</encoder>
 	</appender>
 
+	<!--
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>log/ontop.log</file>
 		<append>false</append>
@@ -14,11 +15,12 @@
 			</pattern>
 		</encoder>
 	</appender>
+	-->
 
 	<!-- Configure the logging level below. For more information use WARN,
 		INFO or DEBUG instead of ERROR -->
 
-	<root level="INFO">
+	<root level="${ONTOP_LOG_LEVEL:-INFO}">
 		<appender-ref ref="STDOUT" />
         <!--
 		<appender-ref ref="FILE" />

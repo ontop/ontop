@@ -249,13 +249,13 @@ public class SQLPPMappingConverterTest {
 	}
 
 	@Test
-    public void testAnalysis_22() throws Exception{
+    public void testAnalysis_22() throws Exception {
         getIQs("select id, first_name, last_name from Student where year in (2000, 2014)",
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
     }
 
 	@Test
-    public void testAnalysis_23() throws Exception{
+    public void testAnalysis_23() throws Exception {
         getIQs("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
     }
@@ -276,7 +276,7 @@ public class SQLPPMappingConverterTest {
 	}
 
 	@Test
-	public void testAnalysis_26() throws Exception {
+	public void testAnalysis_26() {
 		assertThrows(UnsupportedOperationException.class, // Black-box view extraction is not supported for ImmutableMetadataLookup
 				() -> getIQs(
 				"SELECT * FROM Student  WHERE (id,  year) IN (SELECT i_id, MAX(year) FROM Student GROUP BY id)",
@@ -284,7 +284,7 @@ public class SQLPPMappingConverterTest {
 	}
 
 	@Test
-	public void testAnalysis_27() throws Exception {
+	public void testAnalysis_27() {
 		assertThrows(UnsupportedOperationException.class, // Black-box view extraction is not supported for ImmutableMetadataLookup
 				() -> getIQs(
 				"SELECT id FROM Student  WHERE (id,  year) IN (SELECT i_id, MAX(year) FROM Student GROUP BY id) INTERSECT SELECT student_id FROM Enrollment",

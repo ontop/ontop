@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static it.unibz.inf.ontop.utils.MappingTestingTools.TARGET_ATOM_FACTORY;
 
 import static org.junit.jupiter.api.Assertions.*;
 

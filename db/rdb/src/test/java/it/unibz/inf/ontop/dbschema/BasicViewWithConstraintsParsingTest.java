@@ -14,7 +14,7 @@ public class BasicViewWithConstraintsParsingTest {
     private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithConstraintsParsingTest() throws Exception {
     }
@@ -23,7 +23,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Both the parent "id" and added "status" constraints are present in the views
      */
     @Test
-    public void testPersonAddUniqueConstraint() throws Exception {
+    public void testPersonAddUniqueConstraint()  {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -39,7 +39,7 @@ public class BasicViewWithConstraintsParsingTest {
      * The dependent of the FD is correctly added by a viewfile
      */
     @Test
-    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+    public void testPersonAddFunctionalDependencyDependent() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -55,7 +55,7 @@ public class BasicViewWithConstraintsParsingTest {
      * The determinant of the FD is correctly added by a viewfile
      */
     @Test
-    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+    public void testPersonAddFunctionalDependencyDeterminant()  {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -71,7 +71,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Add FK destination relation name via viewfile
      */
     @Test
-    public void testPersonAddForeignKey_DestinationRelation() throws Exception {
+    public void testPersonAddForeignKey_DestinationRelation() {
         ImmutableSet<String> destination_relation = viewDefinitions.stream()
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
@@ -86,7 +86,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Add destination relation foreign key column name via viewfile
      */
     @Test
-    public void testPersonAddForeignKey_DestinationColumn() throws Exception {
+    public void testPersonAddForeignKey_DestinationColumn() {
         ImmutableSet<String> destination_column = viewDefinitions.stream()
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
@@ -101,7 +101,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Add source relation key column name via viewfile
      */
     @Test
-    public void testPersonAddForeignKey_SourceColumn() throws Exception {
+    public void testPersonAddForeignKey_SourceColumn()  {
         ImmutableSet<String> source_column = viewDefinitions.stream()
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
@@ -116,7 +116,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Add new foreign key name
      */
     @Test
-    public void testPersonAddForeignKey_FKName() throws Exception {
+    public void testPersonAddForeignKey_FKName() {
         ImmutableSet<String> fk_name = viewDefinitions.stream()
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
@@ -130,7 +130,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Composite foreign key
      */
     @Test
-    public void testCompositeForeignKey() throws Exception {
+    public void testCompositeForeignKey() {
         ImmutableList<String> destination_column = viewDefinitions.stream()
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
@@ -148,7 +148,7 @@ public class BasicViewWithConstraintsParsingTest {
      * Non-null constraint taken into account
      */
     @Test
-    public void testPersonAddNonNullConstraint() throws Exception {
+    public void testPersonAddNonNullConstraint() {
         ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
                 .map(RelationDefinition::getAttributes)
                 .flatMap(Collection::stream)

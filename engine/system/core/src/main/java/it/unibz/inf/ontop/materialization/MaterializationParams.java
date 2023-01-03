@@ -17,7 +17,7 @@ public interface MaterializationParams {
     boolean canMaterializationBeIncomplete();
 
 
-    static Builder defaultBuilder() {
+    static <B extends Builder<B>> Builder<B> defaultBuilder() {
         return new MaterializationParamsImpl.DefaultBuilder<>();
     }
 

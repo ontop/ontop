@@ -17,7 +17,6 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {

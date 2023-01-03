@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -32,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractBindTestWithFunctions {
 
-    protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
     private final OntopOWLEngine reasoner;
     private final OWLConnection conn;
 
@@ -42,7 +41,7 @@ public abstract class AbstractBindTestWithFunctions {
         this.conn = reasoner.getConnection();
     }
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
@@ -278,7 +277,7 @@ public abstract class AbstractBindTestWithFunctions {
                 hexString.append(hex);
             }
 
-            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString));
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
@@ -1830,7 +1829,7 @@ public abstract class AbstractBindTestWithFunctions {
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }
-            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
+            assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues), expectedValues, returnedValues);
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
         }
     }

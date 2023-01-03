@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -34,7 +33,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     protected static final String groupConcatDistinctQueryFile = "/distinctInAggregates/groupConcatDistinct.rq";
 
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();

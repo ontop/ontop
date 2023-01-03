@@ -126,7 +126,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AbstractCompositeIQTree<N> other = (AbstractCompositeIQTree<N>) o;
+        AbstractCompositeIQTree<?> other = (AbstractCompositeIQTree<?>) o;
         return rootNode.equals(other.rootNode) && children.equals(other.children);
     }
 

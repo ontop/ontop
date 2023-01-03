@@ -1,7 +1,7 @@
 CREATE TABLE "v_accomm" (
-  "Id" int(11) primary key
+  "Id" int primary key
 );
 
 CREATE TABLE "vaaccomm" (
-  "Ident" int(11) primary key
+  "Ident" int primary key
 );

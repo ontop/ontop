@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import it.unibz.inf.ontop.model.type.lexical.DefaultLexicalSpaces;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

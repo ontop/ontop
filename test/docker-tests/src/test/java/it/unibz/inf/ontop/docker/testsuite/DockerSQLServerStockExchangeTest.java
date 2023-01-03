@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.docker.utils.OntopTestCase;
 import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
 import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

@@ -64,7 +64,7 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
             return trueValue;
 
         Optional<ImmutableTerm> optionalNull = evaluatedTerms.stream()
-                .filter(t -> (t instanceof Constant) && ((Constant) t).isNull())
+                .filter(t -> (t instanceof Constant) && t.isNull())
                 .findFirst();
 
         ImmutableList<ImmutableExpression> others = evaluatedTerms.stream()
@@ -98,7 +98,7 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return inBrackets(terms.stream()
-                        .map(termConverter::apply)
+                        .map(termConverter)
                         .collect(Collectors.joining(argumentSeparator)));
     }
 

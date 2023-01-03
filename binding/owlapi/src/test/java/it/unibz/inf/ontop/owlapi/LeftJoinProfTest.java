@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.junit.*;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -581,8 +579,8 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
 
         String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
                 "\"10.5\"^^xsd:decimal",
-                "\"12\"^^xsd:decimal",
-                "\"13\"^^xsd:decimal"));
+                "\"12.0\"^^xsd:decimal",
+                "\"13.0\"^^xsd:decimal"));
     }
 
     @Test
@@ -606,8 +604,8 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "\"0\"^^xsd:integer",
                 "\"0\"^^xsd:integer",
                 "\"10.5\"^^xsd:decimal",
-                "\"12\"^^xsd:decimal",
-                "\"13\"^^xsd:decimal"));
+                "\"12.0\"^^xsd:decimal",
+                "\"13.0\"^^xsd:decimal"));
     }
 
     @Test
@@ -690,8 +688,8 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "\"0\"^^xsd:integer",
                 "\"0\"^^xsd:integer",
                 "\"0\"^^xsd:integer",
-                "\"18\"^^xsd:decimal",
-                "\"20\"^^xsd:decimal",
+                "\"18.0\"^^xsd:decimal",
+                "\"20.0\"^^xsd:decimal",
                 "\"54.5\"^^xsd:decimal"));
     }
 
@@ -709,8 +707,8 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?v";
 
         String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "\"31\"^^xsd:decimal",
-                "\"32\"^^xsd:decimal",
+                "\"31.0\"^^xsd:decimal",
+                "\"32.0\"^^xsd:decimal",
                 "\"75.5\"^^xsd:decimal"));
     }
 
@@ -728,9 +726,9 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?v";
 
         String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "\"15.5\"^^xsd:decimal",
-                "\"16\"^^xsd:decimal",
-                "\"18.875\"^^xsd:decimal"));
+                "\"15.5000000000000000\"^^xsd:decimal",
+                "\"16.0000000000000000\"^^xsd:decimal",
+                "\"18.8750000000000000\"^^xsd:decimal"));
     }
 
     /**
@@ -1026,7 +1024,6 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "\"A\"@en"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat1() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1041,17 +1038,16 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "Rog",
-                "Frankie",
-                "Johnny",
-                "King of Pop",
-                "",
-                "",
-                "",
-                ""));
+                "\"Rog\"^^xsd:string",
+                "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string",
+                "\"King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat2() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1068,17 +1064,16 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "Rog Rog",
-                "Frankie Frankie",
-                "Johnny Johnny",
-                "King of Pop King of Pop",
-                "",
-                "",
-                "",
-                ""));
+                "\"Rog Rog\"^^xsd:string",
+                "\"Frankie Frankie\"^^xsd:string",
+                "\"Johnny Johnny\"^^xsd:string",
+                "\"King of Pop King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat3() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1095,17 +1090,16 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "Rog",
-                "Frankie",
-                "Johnny",
-                "King of Pop",
-                "",
-                "",
-                "",
-                ""));
+                "\"Rog\"^^xsd:string",
+                "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string",
+                "\"King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat4() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1122,17 +1116,16 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "Rog|Rog",
-                "Frankie|Frankie",
-                "Johnny|Johnny",
-                "King of Pop|King of Pop",
-                "",
-                "",
-                "",
-                ""));
+                "\"Rog|Rog\"^^xsd:string",
+                "\"Frankie|Frankie\"^^xsd:string",
+                "\"Johnny|Johnny\"^^xsd:string",
+                "\"King of Pop|King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat5() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1149,17 +1142,16 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "Rog",
-                "Frankie",
-                "Johnny",
-                "King of Pop",
-                "",
-                "",
-                "",
-                ""));
+                "\"Rog\"^^xsd:string",
+                "\"Frankie\"^^xsd:string",
+                "\"Johnny\"^^xsd:string",
+                "\"King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string"));
     }
 
-    @Ignore("ignored due to a bug in H2: org.h2.jdbc.JdbcSQLException: Function \"LISTAGG\" not found ")
     @Test
     public void testGroupConcat6() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -1177,14 +1169,14 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "ORDER BY ?p\n";
 
         checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
-                "nothing",
-                "Frankie",
-                "nothing",
-                "King of Pop",
-                "",
-                "",
-                "",
-                "nothing"));
+                "\"nothing\"^^xsd:string",
+                "\"Frankie\"^^xsd:string",
+                "\"nothing\"^^xsd:string",
+                "\"King of Pop\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"\"^^xsd:string",
+                "\"nothing\"^^xsd:string"));
     }
 
     @Test

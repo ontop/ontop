@@ -1,6 +1,6 @@
 
 CREATE TABLE title (
-  id int(11) NOT NULL,
+  id int NOT NULL,
   title varchar(100) DEFAULT NULL,
   PRIMARY KEY (id)
 );

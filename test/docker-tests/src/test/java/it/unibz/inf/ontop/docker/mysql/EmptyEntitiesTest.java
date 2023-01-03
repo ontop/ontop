@@ -28,8 +28,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
@@ -53,7 +51,7 @@ public class EmptyEntitiesTest {
 
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 
     final String owlFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
@@ -62,10 +60,10 @@ public class EmptyEntitiesTest {
 	final String propertyFile =
 			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 	
-	private List<String> emptyConcepts = new ArrayList<>();
-	private List<String> emptyRoles = new ArrayList<>();
-	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
-	private Set<Description> emptyProperties = new HashSet<>();
+	private final List<String> emptyConcepts = new ArrayList<>();
+	private final List<String> emptyRoles = new ArrayList<>();
+	private final Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
+	private final Set<Description> emptyProperties = new HashSet<>();
 
 	private OntopOWLEngine reasoner;
 	private ClassifiedTBox onto;

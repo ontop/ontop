@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.*;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -41,10 +42,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal",
-                "\"1.0\"^^xsd:decimal"));
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal",
+                "\"1.000000\"^^xsd:decimal"));
     }
 	
 	
@@ -61,10 +62,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal",
-                "\"0.0\"^^xsd:decimal"));
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal"));
     }
 	
 	
@@ -81,10 +82,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.0, 43\"^^xsd:string",
-                "\"0.0, 23\"^^xsd:string",
-                "\"0.0, 34\"^^xsd:string",
-                "\"0.0, 10\"^^xsd:string"));
+                "\"0.000000, 43\"^^xsd:string",
+                "\"0.000000, 23\"^^xsd:string",
+                "\"0.000000, 34\"^^xsd:string",
+                "\"0.000000, 10\"^^xsd:string"));
     }
 	
 	@Test
@@ -100,10 +101,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"8.6\"^^xsd:decimal",
-                "\"5.75\"^^xsd:decimal",
-                "\"6.8\"^^xsd:decimal",
-                "\"1.50\"^^xsd:decimal"));
+                "\"8.60000000\"^^xsd:decimal",
+                "\"5.75000000\"^^xsd:decimal",
+                "\"6.80000000\"^^xsd:decimal",
+                "\"1.50000000\"^^xsd:decimal"));
 	}
 	
 	/*
@@ -124,7 +125,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+        byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
         StringBuilder hexString = new StringBuilder();
 
         for (byte b : hash) {
@@ -135,7 +136,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
         }
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                String.format("\"%s\"^^xsd:string",hexString.toString())));
+                String.format("\"%s\"^^xsd:string",hexString)));
     }
 
 	
@@ -762,10 +763,10 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"21.5\"^^xsd:decimal",
-                "\"11.5\"^^xsd:decimal",
-                "\"17\"^^xsd:decimal",
-                "\"5\"^^xsd:decimal"));
+                "\"21.5000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"11.5000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"17.0000000000000000000000000000000000000000\"^^xsd:decimal",
+                "\"5.0000000000000000000000000000000000000000\"^^xsd:decimal"));
     }
 
 //    @Test timezone is not supported in h2
@@ -788,7 +789,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
     }
 
     //    @Test see results of datetime with locale
-    public void testDatetime() throws Exception {
+    public void testDatetime() {
         TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
         String value = "Jan 31 2013 9:32AM";
@@ -849,7 +850,7 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
         String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"0.5\"^^xsd:decimal"));
+                "\"0.5000000000000000000000000000000000000000\"^^xsd:decimal"));
     }
 
     @Test

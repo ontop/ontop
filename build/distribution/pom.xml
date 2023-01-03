@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-build</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-distribution</artifactId>
@@ -54,7 +54,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -73,20 +73,6 @@
                             <finalName>ontop-cli-${project.version}</finalName>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>attach-webapps-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <skipAssembly>${assembly.webapps.skip}</skipAssembly>
-                            <descriptors>
-                                <descriptor>src/assembly/ontop-webapps.xml</descriptor>
-                            </descriptors>
-                            <finalName>ontop-webapps-${project.version}</finalName>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>
@@ -103,21 +89,6 @@
             </dependencies>
         </profile>
         <profile>
-            <id>webapps</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-rdf4j-server</artifactId>
-                    <type>war</type>
-                </dependency>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-rdf4j-workbench</artifactId>
-                    <type>war</type>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
             <id>release</id>
             <dependencies>
                 <dependency>
@@ -125,6 +96,33 @@
                     <artifactId>ontop-cli</artifactId>
                 </dependency>
             </dependencies>
+        </profile>
+
+        <!-- Enforce a specific ontop-cli assembly format by setting -Dassembly.cli.format (used by Docker build-image.sh) -->
+        <profile>
+            <activation>
+                <property>
+                    <name>assembly.cli.format</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-cli-assembly</id>
+                                <configuration>
+                                    <formats>
+                                        <format>${assembly.cli.format}</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

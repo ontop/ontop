@@ -3,7 +3,7 @@ CREATE TABLE books (
     id int NOT NULL,
     title character varying(100),
     price int,
-    discount decimal,
+    discount decimal(20,2),
     description character varying(100),
     lang character varying(100)
 );

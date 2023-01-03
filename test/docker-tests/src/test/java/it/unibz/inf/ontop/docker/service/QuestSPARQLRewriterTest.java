@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Test class using StockExchange scenario in MySQL
@@ -124,14 +125,13 @@ public class QuestSPARQLRewriterTest extends TestCase {
 
 	private void expandAndDisplayOutput(String title, String sparqlInput) {
 		String sparqlOutput = getSPARQLRewriting(sparqlInput);
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n\n" + title);
-		sb.append("\n====================================================================================\n");
-		sb.append(sparqlInput);
-		sb.append("\n------------------------------------------------------------------------------------\n");
-		sb.append(sparqlOutput);
-		sb.append("\n====================================================================================\n");
-		System.out.println(sb.toString());
+		String sb = "\n\n" + title +
+				"\n====================================================================================\n" +
+				sparqlInput +
+				"\n------------------------------------------------------------------------------------\n" +
+				sparqlOutput +
+				"\n====================================================================================\n";
+		System.out.println(sb);
 	}
 
 	private String getSPARQLRewriting(String sparqlInput) {
@@ -150,7 +150,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 		String queryFileLocation = ROOT_LOCATION + queryFile;
 		URL queryFileUrl = QuestSPARQLRewriterTest.class.getResource(queryFileLocation);
 		try (InputStream stream = queryFileUrl.openStream()) {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		} catch (IOException e) { 
 			throw new RuntimeException("Cannot read input file");
 		}

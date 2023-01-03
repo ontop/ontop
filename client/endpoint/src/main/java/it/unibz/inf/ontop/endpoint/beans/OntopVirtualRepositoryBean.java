@@ -19,13 +19,13 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${properties:#{null}}") String properties,
                                                              @Value("${constraint:#{null}}") String constraint,
                                                              @Value("${db-metadata:#{null}}") String dbMetadata,
-                                                             @Value("${ontop-views:#{null}}") String ontopViews,
+                                                             @Value("${lenses:#{null}}") String lenses,
                                                              @Value("${sparql-rules:#{null}}") String sparqlRules,
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
                                                              @Value("${db-url:#{null}}") String dbUrl,
                                                              @Value("${db-driver:#{null}}") String dbDriver) throws RepositoryException {
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 
         if (properties != null && !properties.isEmpty())
             builder.propertyFile(properties);
@@ -47,8 +47,8 @@ public class OntopVirtualRepositoryBean {
         if (dbMetadata !=null && !dbMetadata.isEmpty())
             builder.dbMetadataFile(dbMetadata);
 
-        if (ontopViews !=null && !ontopViews.isEmpty())
-            builder.ontopViewFile(ontopViews);
+        if (lenses !=null && !lenses.isEmpty())
+            builder.lensesFile(lenses);
 
         if (sparqlRules !=null && !sparqlRules.isEmpty())
             builder.sparqlRulesFile(sparqlRules);

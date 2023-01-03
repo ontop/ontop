@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
@@ -37,7 +36,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 
 
-	Logger log = LoggerFactory.getLogger(S_EquivalenceOverNamed_NewDAG_Test.class);
+	private final Logger log = LoggerFactory.getLogger(S_EquivalenceOverNamed_NewDAG_Test.class);
 
 	public S_EquivalenceOverNamed_NewDAG_Test (String name){
 		super(name);

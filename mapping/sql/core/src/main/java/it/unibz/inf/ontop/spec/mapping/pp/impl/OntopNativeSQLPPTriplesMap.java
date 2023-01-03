@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPTriplesMapProvenance;
 

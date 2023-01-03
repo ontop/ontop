@@ -8,7 +8,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregatePostgresTest extends AbstractDistinctInAggregateTest {
 
-    private static String propertiesFile = "/pgsql/university.properties";
+    private static final String propertiesFile = "/pgsql/university.properties";
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {

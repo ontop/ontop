@@ -91,7 +91,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 		statisticsPanel.add(new JScrollPane(triplesCountTable), BorderLayout.CENTER);
 
 		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
-		SwingWorker<Integer, TriplesMapInfo> worker = new SwingWorker<Integer, TriplesMapInfo>() {
+		SwingWorker<Integer, TriplesMapInfo> worker = new SwingWorker<>() {
 
 			@Override
 			protected Integer doInBackground() throws Exception {
@@ -125,16 +125,13 @@ public class MappingStatisticsAction extends ProtegeAction {
 				try {
 					int count = get();
 					summaryLabel.setText(count != ERROR_ENTRY
-						? "<html><b>" + count + "</b></html>"
-						: "An error occurred in the counting process.");
-				}
-				catch (CancellationException e) {
+							? "<html><b>" + count + "</b></html>"
+							: "An error occurred in the counting process.");
+				} catch (CancellationException e) {
 					/* NO-OP */
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					summaryLabel.setText("An error occurred: " + e.getMessage());
-				}
-				catch (ExecutionException e) {
+				} catch (ExecutionException e) {
 					dialog.dispose();
 					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModel.getDataSource());
 				}

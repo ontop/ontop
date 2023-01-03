@@ -21,14 +21,14 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     final static String owlFile = "/pgsql/nested/pub/pub.owl";
     final static String obdaFile = "/pgsql/nested/pub/pub.obda";
     final static String propertyFile = "/pgsql/nested/pub/pub.properties";
-    final static String viewFile = "/pgsql/nested/pub/pub_lenses.json";
+    final static String lensesFile = "/pgsql/nested/pub/pub_lenses.json";
 
     private static OntopOWLEngine ENGINE;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {
-        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
+        ENGINE = createReasonerWithLenses(owlFile, obdaFile, propertyFile, lensesFile);
         CONNECTION = ENGINE.getConnection();
     }
 

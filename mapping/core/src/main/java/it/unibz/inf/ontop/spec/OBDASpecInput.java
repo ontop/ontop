@@ -53,7 +53,7 @@ public interface OBDASpecInput {
 
     default Optional<Reader> getDBMetadataReader() throws FileNotFoundException { return getReader(DBMETADATA_KEY); }
 
-    default Optional<Reader> getOntopViewReader() throws FileNotFoundException { return getReader(ONTOPVIEW_KEY); }
+    default Optional<Reader> getLensesReader() throws FileNotFoundException { return getReader(LENSES_KEY); }
 
     default Optional<Reader> getSparqlRulesReader() throws FileNotFoundException {
         return getReader(SPARQL_RULES_KEY);
@@ -92,12 +92,12 @@ public interface OBDASpecInput {
             return addReader(DBMETADATA_KEY, dbMetadataReader);
         }
 
-        default Builder addOntopViewFile(File ontopViewFile) {
-            return addFile(ONTOPVIEW_KEY, ontopViewFile);
+        default Builder addLensesFile(File lensesFile) {
+            return addFile(LENSES_KEY, lensesFile);
         }
 
-        default Builder addOntopViewReader(Reader ontopViewReader) {
-            return addReader(ONTOPVIEW_KEY, ontopViewReader);
+        default Builder addLensesReader(Reader lensesReader) {
+            return addReader(LENSES_KEY, lensesReader);
         }
 
         default Builder addSparqlRuleFile(File sparqlRuleFile) {
@@ -117,7 +117,7 @@ public interface OBDASpecInput {
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
     String DBMETADATA_KEY = "db-metadata";
-    String ONTOPVIEW_KEY = "ontop-view";
+    String LENSES_KEY = "lenses";
 
     String SPARQL_RULES_KEY = "sparql-rules";
 

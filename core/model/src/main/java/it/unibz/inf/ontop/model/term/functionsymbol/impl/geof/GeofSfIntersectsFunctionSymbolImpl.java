@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class GeofSfIntersectsFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolDirectImpl {

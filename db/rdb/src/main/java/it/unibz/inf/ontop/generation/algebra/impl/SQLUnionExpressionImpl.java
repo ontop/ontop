@@ -26,7 +26,7 @@ public class SQLUnionExpressionImpl implements SQLUnionExpression {
     }
 
     @Override
-    public ImmutableList<? extends SQLExpression> getSubExpressions() {
+    public ImmutableList<SQLExpression> getSubExpressions() {
         return this.subExpressions;
     }
 

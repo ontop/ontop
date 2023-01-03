@@ -38,8 +38,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
@@ -65,12 +63,12 @@ public class RegexpTest extends TestCase {
 
 	private static final String ROOT_LOCATION = "/testcases-docker/virtual-mode/stockexchange/simplecq/";
 	private static final String owlfile = ROOT_LOCATION + "stockexchange.owl";
-	private String obdafile;
-	private String propertyfile;
+	private final String obdafile;
+	private final String propertyfile;
 	
 	private OntopOWLEngine reasoner;
 	private Connection sqlConnection;
-	private boolean isH2;
+	private final boolean isH2;
 	private final boolean acceptFlags;
 
 	/**

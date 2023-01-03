@@ -23,16 +23,12 @@ import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.rio.trig.TriGWriter;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nullable;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -243,9 +239,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     /**
      * Mapping file + connection info
      */
-    private Builder<? extends Builder> createAndInitConfigurationBuilder() {
+    private Builder<? extends Builder<?>> createAndInitConfigurationBuilder() {
 
-        final Builder<? extends Builder> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+        final Builder<? extends Builder<?>> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
@@ -256,8 +252,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         if (dbMetadataFile != null)
             configBuilder.dbMetadataFile(dbMetadataFile);
 
-        if (ontopViewFile != null)
-            configBuilder.ontopViewFile(ontopViewFile);
+        if (ontopLensesFile != null)
+            configBuilder.lensesFile(ontopLensesFile);
 
         if (sparqlRulesFile != null)
             configBuilder.sparqlRulesFile(sparqlRulesFile);
@@ -307,7 +303,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         return configBuilder;
     }
 
-    private class OutputSpec {
+    private static class OutputSpec {
         private final Optional<String> prefix;
         private final String format;
 
@@ -329,10 +325,10 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
                         prefixExtension.isPresent() ?
                                 Paths.get(prefix.get(), prefixExtension.get() + suffix) :
                                 Paths.get(prefix.get() + suffix),
-                        Charset.forName("UTF-8")
+                        StandardCharsets.UTF_8
                 );
             }
-            return new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
+            return new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
         }
 
         private String getSuffix() {

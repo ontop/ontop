@@ -46,8 +46,7 @@ public class DataSomeValuesFromImpl implements DataSomeValuesFrom {
 	DataSomeValuesFromImpl(DataPropertyExpression property, Datatype filler) {
 		this.property = property;
 		this.filler = filler;
-		this.string =  new StringBuilder().append("E").append(property.toString()).append(".")
-						.append(filler.toString()).toString();
+		this.string = "E" + property + "." + filler;
 	}
 
 	@Override

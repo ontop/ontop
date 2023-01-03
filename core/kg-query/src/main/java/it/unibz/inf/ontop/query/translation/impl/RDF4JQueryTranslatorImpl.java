@@ -470,7 +470,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         new HashSet<>(childVariables),
                         externalBindings, treatBNodeAsVariable));
 
-        ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
                 .map(ImmutableMap::copyOf)
                 .map(substitutionFactory::getSubstitution)
                 .collect(ImmutableCollectors.toList());
@@ -482,7 +482,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.iterator().next()
+                (ImmutableSubstitution<ImmutableFunctionalTerm>)(ImmutableSubstitution<?>)mergedVarDefs.iterator().next()
         );
     }
 
@@ -1311,7 +1311,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new OntopUnsupportedKGQueryException(
-                        String.format("Invalid lexical forms are not accepted. Found for %s: %s", type.toString(), value));
+                        String.format("Invalid lexical forms are not accepted. Found for %s: %s", type, value));
 
             return termFactory.getRDFLiteralConstant(value, type);
         }
