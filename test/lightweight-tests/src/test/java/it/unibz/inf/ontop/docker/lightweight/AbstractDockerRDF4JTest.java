@@ -19,7 +19,6 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -30,12 +29,12 @@ public class AbstractDockerRDF4JTest {
     private static OntopRepositoryConnection REPO_CONNECTION;
 
     protected static void initOBDA(String obdaRelativePath, @Nullable String ontologyRelativePath,
-                                   String propertyFile) throws SQLException, IOException {
+                                   String propertyFile) {
         initOBDA(obdaRelativePath, ontologyRelativePath, propertyFile, null);
     }
 
     protected static void initOBDA(String obdaRelativePath, @Nullable String ontologyRelativePath,
-                                   String propertyFile, @Nullable String lensesFile) throws SQLException, IOException {
+                                   String propertyFile, @Nullable String lensesFile) {
         initOBDA(obdaRelativePath, ontologyRelativePath, propertyFile, lensesFile, null);
     }
 

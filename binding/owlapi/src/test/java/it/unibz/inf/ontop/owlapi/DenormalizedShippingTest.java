@@ -16,7 +16,7 @@ import static org.junit.Assert.assertFalse;
 public class DenormalizedShippingTest extends AbstractOWLAPITest {
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException, SQLException, IOException {
+    public static void before() throws SQLException, IOException {
         initOBDA("/shipping/create-db.sql", "/shipping/shipping.obda");
     }
 

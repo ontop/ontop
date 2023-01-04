@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
 
@@ -20,7 +19,7 @@ public class HrJsonDenormalizedTest extends AbstractHrJsonTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         ENGINE = createReasonerWithLenses(owlFile, obdaFile, propertyFile, lensesFile);
         CONNECTION = ENGINE.getConnection();
     }

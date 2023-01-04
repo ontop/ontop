@@ -6,14 +6,13 @@ import it.unibz.inf.ontop.docker.AbstractDistinctInAggregateTest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTest {
 
     private static final String propertiesFile = "/mssql/university.properties";
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
         CONNECTION = REASONER.getConnection();
     }

@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
-    public BindWithFunctionsDenodoTest() throws OWLOntologyCreationException {
+    public BindWithFunctionsDenodoTest() {
         super(createReasoner(owlfile, obdafile, propertyfile));
         REASONER = getReasoner();
         CONNECTION = getConnection();

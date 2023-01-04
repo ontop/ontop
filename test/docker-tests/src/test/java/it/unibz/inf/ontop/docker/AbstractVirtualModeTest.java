@@ -33,7 +33,7 @@ public abstract class AbstractVirtualModeTest {
 
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
         return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty(), Optional.empty());
     }
 

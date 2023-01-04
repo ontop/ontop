@@ -6,8 +6,6 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.File;
 import java.io.FileNotFoundException;

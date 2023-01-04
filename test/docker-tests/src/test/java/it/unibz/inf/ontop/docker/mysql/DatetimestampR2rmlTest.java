@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DatetimestampR2rmlTest extends AbstractVirtualModeTest {
     private static final String owlFile = "/mysql/northwind/northwind-dmo.owl";
@@ -20,7 +19,7 @@ public class DatetimestampR2rmlTest extends AbstractVirtualModeTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createR2RMLReasoner(owlFile, r2rmlFile, propertyFile);
         CONNECTION = REASONER.getConnection();
     }
