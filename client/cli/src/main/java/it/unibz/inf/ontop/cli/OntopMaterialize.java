@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.JDBC_URL;
 import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_PASSWORD;
@@ -65,48 +66,28 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     private static final String DEFAULT_FETCH_SIZE = "50000";
 
     public enum OutputFormat {
-        rdfxml(".rdf") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new RDFXMLWriter(writer);
-            }
-        },
-        turtle(".ttl") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new TurtleWriter(writer).set(BasicWriterSettings.PRETTY_PRINT, false);
-            }
-        },
-        ntriples(".nt") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new NTriplesWriter(writer).set(BasicWriterSettings.PRETTY_PRINT, false);
-            }
-        },
-        nquads(".nq") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new NQuadsWriter(writer).set(BasicWriterSettings.PRETTY_PRINT, false);
-            }
-        },
-        trig(".trig") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new TriGWriter(writer);
-            }
-        },
-        jsonld(".jsonld") {
-            RDFHandler createRDFHandler(BufferedWriter writer) {
-                return new JSONLDWriter(writer);
-            }
-        };
+        rdfxml(".rdf", RDFXMLWriter::new),
+        turtle(".ttl", w ->  new TurtleWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        ntriples(".nt", w ->  new NTriplesWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        nquads(".nq", w ->  new NQuadsWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        trig(".trig", TriGWriter::new),
+        jsonld(".jsonld", JSONLDWriter::new);
 
         private final String extension;
+        private final Function<BufferedWriter, RDFHandler> rdfHandlerProvider;
 
-        OutputFormat(String extension) {
+        OutputFormat(String extension, Function<BufferedWriter, RDFHandler> rdfHandlerProvider) {
             this.extension = extension;
+            this.rdfHandlerProvider = rdfHandlerProvider;
         }
 
         String getExtension() {
             return extension;
         }
 
-        abstract RDFHandler createRDFHandler(BufferedWriter writer);
+        RDFHandler createRDFHandler(BufferedWriter writer) {
+            return rdfHandlerProvider.apply(writer);
+        }
     }
     
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
