@@ -329,11 +329,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     decompositionMap.entrySet().stream()
                             .flatMap(e -> e.getValue()
                                     // Sub-term substitution entries from decompositions
-                                    .map(d -> d.getSubTermSubstitutionMap()
-                                            // (PARTIAL LIFT CASE)
-                                            .map(s -> s.entrySet().stream())
-                                            // FULL LIFT
-                                            .orElseGet(Stream::empty))
+                                    .map(d -> d.getSubTermSubstitutionMap().stream()
+                                            .flatMap(s -> s.entrySet().stream()))
                                     // Non-decomposable entries
                                     .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                             e.getKey(),
@@ -402,9 +399,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
                     .flatMap(e -> e.getValue()
                             // Decomposition case
-                            .map(d -> d.getSubTermSubstitutionMap()
-                                    .map(s -> s.entrySet().stream())
-                                    .orElseGet(Stream::empty))
+                            .map(d -> d.getSubTermSubstitutionMap().stream()
+                                    .flatMap(s -> s.entrySet().stream()))
                             // Not decomposed: new entry (new variable -> functional term)
                             .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                     (Variable) newArguments.get(e.getKey()),

@@ -78,8 +78,8 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
             ImmutableList<UniqueConstraint> uniqueConstraints = rightRelation.getUniqueConstraints();
             if (!uniqueConstraints.isEmpty()) {
                 ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
-                        .map(Collection::stream)
-                        .orElseGet(Stream::empty)
+                        .stream()
+                        .flatMap(Collection::stream)
                         .collect(ImmutableCollectors.toSet());
 
                 Optional<ImmutableList<Integer>> matchingIndexes = uniqueConstraints.stream()

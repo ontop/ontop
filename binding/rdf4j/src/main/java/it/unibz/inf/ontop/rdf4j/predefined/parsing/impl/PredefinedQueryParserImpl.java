@@ -61,8 +61,7 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                     .filter(e -> e.getValue() instanceof Toml)
                     .flatMap(e -> Optional.ofNullable(((Toml) e.getValue()).getString("query"))
                             .map(v -> Maps.immutableEntry(e.getKey(), v))
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
+                            .stream())
                     .collect(ImmutableCollectors.toMap());
 
             ObjectMapper mapper = new ObjectMapper();

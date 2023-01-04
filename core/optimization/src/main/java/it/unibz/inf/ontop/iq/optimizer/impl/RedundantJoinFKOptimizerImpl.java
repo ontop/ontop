@@ -127,9 +127,8 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
 
             for (Map.Entry<RelationDefinition, Collection<ExtensionalDataNode>> entry: dataNodeMap.entrySet()) {
                 redundantNodes.addAll(entry.getKey().getForeignKeys().stream()
-                        .flatMap(fk -> Optional.ofNullable(dataNodeMap.get(fk.getReferencedRelation()))
-                                .map(Collection::stream)
-                                .orElseGet(Stream::empty)
+                        .flatMap(fk -> Optional.ofNullable(dataNodeMap.get(fk.getReferencedRelation())).stream()
+                                .flatMap(Collection::stream)
                                 .filter(targetNode -> isJustHavingFKArguments(fk, targetNode))
                                 .filter(targetNode -> entry.getValue().stream()
                                                 .anyMatch(s -> (!redundantNodes.contains(s))

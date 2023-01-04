@@ -91,8 +91,8 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap = rightDataNode.getArgumentMap();
 
             ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
-                    .map(Collection::stream)
-                    .orElseGet(Stream::empty)
+                    .stream()
+                    .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
             if (sameRelationLeftNodes.isEmpty())

@@ -106,10 +106,9 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                         subTermLexicalTerm, subTermTypeTerm, variableNullability, termFactory));
 
         return Stream.concat(numericPushDownRequestStream,
-                optionalIncompatibleVariable
-                        .map(v -> createNonNumericRequest(subTermTypeTerm, v, nonNumericTypes, termFactory))
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                        optionalIncompatibleVariable
+                                .map(v -> createNonNumericRequest(subTermTypeTerm, v, nonNumericTypes, termFactory))
+                                .stream())
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -145,8 +144,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
          */
         Stream<Map.Entry<Variable, ImmutableFunctionalTerm>> incompatibleEntryStream = optionalIncompatibleCountVariable
                 .map(v -> Maps.immutableEntry(v, termFactory.getDBCount(optionalIncompatibleSubVariable.get(), false)))
-                .map(Stream::of)
-                .orElseGet(Stream::empty);
+                .stream();
 
         return Stream.concat(numericAggregationStream, incompatibleEntryStream)
                 .collect(ImmutableCollectors.toMap());
@@ -179,9 +177,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         ImmutableFunctionalTerm lexicalTerm = termFactory.getDBCase(
                 Stream.concat(
                         // Checks the incompatibility first
-                        incompatibleWhenPair
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
+                        incompatibleWhenPair.stream(),
                         // Then the numeric values
                         numericLexicalWhenPairs),
                 termFactory.getDBStringConstant("0"), true);
@@ -192,9 +188,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         ImmutableFunctionalTerm typeTerm = termFactory.getDBCase(
                 Stream.concat(
                         // Checks the incompatibility first
-                        incompatibleWhenPair
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
+                        incompatibleWhenPair.stream(),
                         // Then the numeric values
                         numericTypeWhenPairs),
                 termFactory.getRDFTermTypeConstant(termFactory.getTypeFactory().getXsdIntegerDatatype()),
