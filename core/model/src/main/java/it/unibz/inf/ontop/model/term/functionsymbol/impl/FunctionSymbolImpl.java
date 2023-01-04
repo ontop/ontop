@@ -100,12 +100,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     private Optional<ImmutableTerm> simplifyIfElseNullOrCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
                                                        VariableNullability variableNullability) {
         return simplifyIfElseNull(terms, termFactory, variableNullability)
-                .map(Optional::of)
-                .orElseGet(() -> simplifyCoalesce(terms, termFactory, variableNullability));
+                .or(() -> simplifyCoalesce(terms, termFactory, variableNullability));
     }
 
     /**
-     * If one arguments is a IF_ELSE_NULL(...) functional term, tries to lift the IF_ELSE_NULL above.
+     * If one argument is a IF_ELSE_NULL(...) functional term, tries to lift the IF_ELSE_NULL above.
      *
      * Lifting is only possible for function symbols that do not tolerate nulls.
      *

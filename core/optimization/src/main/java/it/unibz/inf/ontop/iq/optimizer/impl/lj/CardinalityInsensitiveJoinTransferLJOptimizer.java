@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Singleton
 public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {

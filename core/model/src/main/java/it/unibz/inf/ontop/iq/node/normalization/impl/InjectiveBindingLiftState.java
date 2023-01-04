@@ -152,8 +152,7 @@ public class InjectiveBindingLiftState {
                 .filter(m -> !m.isEmpty())
                 .map(substitutionFactory::getSubstitution)
                 .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
-                .map(Optional::of)
-                .orElseGet(() -> newChildVariables.equals(grandChildTree.getVariables())
+                .or(() -> newChildVariables.equals(grandChildTree.getVariables())
                         ? Optional.empty()
                         : Optional.of(iqFactory.createConstructionNode(newChildVariables)));
 

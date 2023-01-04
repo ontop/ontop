@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
