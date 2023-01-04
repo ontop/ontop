@@ -291,9 +291,7 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         // TODO: find a better name
         ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.getImmutableMap().entrySet().stream()
-                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey())
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey()).stream())
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableSet<Variable> newScope = Sets.union(childNullability.scope, nonNestedSubstitution.getDomain()).immutableCopy();
@@ -340,8 +338,14 @@ public class VariableNullabilityImpl implements VariableNullability {
 
     @Override
     public boolean canPossiblyBeNullSeparately(ImmutableList<? extends ImmutableTerm> terms) {
+
+        ImmutableSet<Variable> variables = terms.stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .collect(ImmutableCollectors.toSet());
+
         if (terms.stream().allMatch(t -> t instanceof Variable)) {
-            return canPossiblyBeNullSeparately(ImmutableSet.copyOf((ImmutableList<Variable>) terms));
+            return canPossiblyBeNullSeparately(variables);
         }
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
@@ -359,13 +363,8 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         VariableNullability newVariableNullability = update(substitution, substitution.getDomain(), variableGenerator);
 
-        ImmutableSet<Variable> variables = Sets.union(
-                terms.stream()
-                        .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable) t)
-                        .collect(Collectors.toSet()),
-                substitution.getDomain()).immutableCopy();
+        ImmutableSet<Variable> newVariables = Sets.union(variables, substitution.getDomain()).immutableCopy();
 
-        return newVariableNullability.canPossiblyBeNullSeparately(variables);
+        return newVariableNullability.canPossiblyBeNullSeparately(newVariables);
     }
 }

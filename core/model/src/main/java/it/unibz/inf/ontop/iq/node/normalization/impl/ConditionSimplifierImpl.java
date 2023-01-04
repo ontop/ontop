@@ -152,13 +152,11 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 Stream.concat(
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> !nonLiftableVariables.contains(e.getKey()))
-                                .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
-                                .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e),
+                                .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey())),
                         groundFunctionalSubstitution
-                                .map(s -> s.getImmutableMap().entrySet().stream()
-                                        .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e))
+                                .map(s -> s.getImmutableMap().entrySet().stream())
                                 .orElseGet(Stream::empty))
-                        .collect(ImmutableCollectors.toMap()));
+                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }

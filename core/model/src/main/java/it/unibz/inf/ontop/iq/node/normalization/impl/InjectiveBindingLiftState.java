@@ -139,10 +139,9 @@ public class InjectiveBindingLiftState {
                 injectivityDecompositionMap.entrySet().stream()
                         .flatMap(e -> e.getValue()
                                 // Sub-term substitution entries from injectivity decompositions
-                            .map(d -> d.getSubTermSubstitutionMap()
-                                    .map(s -> s.entrySet().stream()
-                                            .map(subE -> (Map.Entry<Variable, ImmutableTerm>)(Map.Entry<Variable, ?>) subE))
-                                    .orElseGet(Stream::empty))
+                            .map(d -> d.getSubTermSubstitutionMap().stream()
+                                    .flatMap(s -> s.entrySet().stream())
+                                    .map(subE -> (Map.Entry<Variable, ImmutableTerm>)(Map.Entry<Variable, ?>) subE))
                                 // Non-decomposable entries
                             .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                     e.getKey(),
