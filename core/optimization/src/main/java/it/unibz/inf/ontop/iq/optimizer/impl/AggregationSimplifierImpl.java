@@ -103,10 +103,8 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                     substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
                             .flatMap(e -> e.getValue()
                                     // Takes the entries in the SubTermSubstitutionMap
-                                    .map(s -> s.getDecomposition().getSubTermSubstitutionMap()
-                                            .map(sub -> sub.entrySet().stream())
-                                            // If none, no entry
-                                            .orElseGet(Stream::of))
+                                    .map(s -> s.getDecomposition().getSubTermSubstitutionMap().stream().
+                                            flatMap(sub -> sub.entrySet().stream()))
                                     // Otherwise (if no simplification), keeps the former definition
                                     .orElseGet(() -> Stream.of(Maps.immutableEntry(e.getKey(), initialSubstitution.get(e.getKey())))))
                             .collect(ImmutableCollectors.toMap()));

@@ -5,21 +5,18 @@ import it.unibz.inf.ontop.docker.lightweight.MariaDBLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 @MariaDBLightweightTest
 public class DistinctInAggregateMariaDBTest extends AbstractDistinctInAggregateTest {
 
     private static final String PROPERTIES_FILE = "/university/university-mariadb.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 }

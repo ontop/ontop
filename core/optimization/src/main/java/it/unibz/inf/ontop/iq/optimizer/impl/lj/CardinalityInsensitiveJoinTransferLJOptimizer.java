@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Singleton
 public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
@@ -91,8 +90,8 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap = rightDataNode.getArgumentMap();
 
             ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
-                    .map(Collection::stream)
-                    .orElseGet(Stream::empty)
+                    .stream()
+                    .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
             if (sameRelationLeftNodes.isEmpty())

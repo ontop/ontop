@@ -98,9 +98,8 @@ public class SelectItemParser {
                 // see https://www.w3.org/TR/r2rml/#r2rml-views
                 alias = Optional.empty();
             }
-            stream = alias.map(a -> Stream.of(Maps.immutableEntry(
-                        idfac.createAttributeID(a), expressionParser.apply(expr, attributes))))
-                    .orElse(Stream.of());
+            stream = alias.stream()
+                    .map(a -> Maps.immutableEntry(idfac.createAttributeID(a), expressionParser.apply(expr, attributes)));
         }
     }
 }

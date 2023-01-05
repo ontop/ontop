@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
@@ -96,9 +95,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
 
         private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
             return queryMerger.mergeDefinitions(mapping.getRDFClasses(predicate).stream()
-                    .flatMap(i -> mapping.getRDFClassDefinition(predicate, i)
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
+                    .flatMap(i -> mapping.getRDFClassDefinition(predicate, i).stream())
                     .collect(ImmutableCollectors.toList()));
         }
 

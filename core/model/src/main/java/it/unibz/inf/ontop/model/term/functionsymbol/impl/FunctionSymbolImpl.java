@@ -100,12 +100,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     private Optional<ImmutableTerm> simplifyIfElseNullOrCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
                                                        VariableNullability variableNullability) {
         return simplifyIfElseNull(terms, termFactory, variableNullability)
-                .map(Optional::of)
-                .orElseGet(() -> simplifyCoalesce(terms, termFactory, variableNullability));
+                .or(() -> simplifyCoalesce(terms, termFactory, variableNullability));
     }
 
     /**
-     * If one arguments is a IF_ELSE_NULL(...) functional term, tries to lift the IF_ELSE_NULL above.
+     * If one argument is a IF_ELSE_NULL(...) functional term, tries to lift the IF_ELSE_NULL above.
      *
      * Lifting is only possible for function symbols that do not tolerate nulls.
      *
@@ -486,9 +485,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
                 .flatMap(e -> e.getValue()
                         // Decomposition case
-                        .map(d -> d.getSubTermSubstitutionMap()
-                                .map(s -> s.entrySet().stream())
-                                .orElseGet(Stream::empty))
+                        .map(d -> d.getSubTermSubstitutionMap().stream()
+                                .flatMap(s -> s.entrySet().stream()))
                         // Not decomposed: new entry (new variable -> functional term)
                         .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                 (Variable) newArguments.get(e.getKey()),

@@ -158,15 +158,11 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     private String serializePath(ImmutableList<String> path) {
-        return "'{" +
-                path.stream()
-                        .collect(Collectors.joining(","))
-                + "}'";
+        return "'{" + String.join(",", path) + "}'";
     }
 
     private String printPath(ImmutableList<String> path) {
-        return path.stream()
-                        .collect(Collectors.joining("."));
+        return String.join(".", path);
     }
 
     @Override

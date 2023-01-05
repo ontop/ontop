@@ -3,8 +3,6 @@ package org.protege.osgi.jdbc.impl;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.JdbcRegistryException;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;

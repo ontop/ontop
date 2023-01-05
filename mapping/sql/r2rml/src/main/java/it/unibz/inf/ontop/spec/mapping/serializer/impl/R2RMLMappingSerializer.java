@@ -19,7 +19,6 @@ import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import java.io.*;
-import java.util.HashSet;
 
 
 public class R2RMLMappingSerializer implements MappingSerializer {

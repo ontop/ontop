@@ -24,7 +24,7 @@ public class ReplaceTest extends AbstractDockerRDF4JTest {
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 
