@@ -62,7 +62,11 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
         DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
-        return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(atom.getPredicate(), renamingSubstitution.applyToArguments(atom.getArguments())));
+        return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(
+                atom.getPredicate(),
+                atom.getArguments().stream()
+                        .map(renamingSubstitution::applyToTerm)
+                        .collect(ImmutableCollectors.toList())));
     }
 
     @Override
@@ -92,8 +96,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
                 renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
                         .map(renamingSubstitution::applyToVariable),
-                flattenNode.getFlattenedType()
-        );
+                flattenNode.getFlattenedType());
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
@@ -142,5 +145,4 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
         return iqFactory.createOrderByNode(newComparators);
     }
-
 }

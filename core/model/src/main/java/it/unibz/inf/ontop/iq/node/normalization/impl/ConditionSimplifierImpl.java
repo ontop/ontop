@@ -156,8 +156,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         groundFunctionalSubstitution
                                 .map(s -> s.getImmutableMap().entrySet().stream())
                                 .orElseGet(Stream::empty))
-                        .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>) e)
-                        .collect(ImmutableCollectors.toMap()));
+                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }

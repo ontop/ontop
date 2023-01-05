@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
+import com.github.rvesse.airline.annotations.restrictions.AllowedEnumValues;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.JDBC_URL;
 import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_PASSWORD;
@@ -55,7 +56,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             this.code = code;
         }
 
-        public String getCode() {
+        String getCode() {
             return code;
         }
     }
@@ -63,14 +64,32 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static final String DEFAULT_FETCH_SIZE = "50000";
-    private static final String RDF_XML = "rdfxml";
-    private static final String TURTLE = "turtle";
-    private static final String NTRIPLES = "ntriples";
-    private static final String NQUADS = "nquads";
-    private static final String TRIG = "trig";
 
-    private static final String JSONLD = "jsonld";
+    public enum OutputFormat {
+        rdfxml(".rdf", RDFXMLWriter::new),
+        turtle(".ttl", w ->  new TurtleWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        ntriples(".nt", w ->  new NTriplesWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        nquads(".nq", w ->  new NQuadsWriter(w).set(BasicWriterSettings.PRETTY_PRINT, false)),
+        trig(".trig", TriGWriter::new),
+        jsonld(".jsonld", JSONLDWriter::new);
 
+        private final String extension;
+        private final Function<BufferedWriter, RDFHandler> rdfHandlerProvider;
+
+        OutputFormat(String extension, Function<BufferedWriter, RDFHandler> rdfHandlerProvider) {
+            this.extension = extension;
+            this.rdfHandlerProvider = rdfHandlerProvider;
+        }
+
+        String getExtension() {
+            return extension;
+        }
+
+        RDFHandler createRDFHandler(BufferedWriter writer) {
+            return rdfHandlerProvider.apply(writer);
+        }
+    }
+    
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
             title = "output", description = "output file (default) or prefix (only for --separate-files)")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
@@ -80,8 +99,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS, TRIG, JSONLD})
-    public String format = RDF_XML;
+    @AllowedEnumValues(OutputFormat.class)
+    public OutputFormat format = OutputFormat.rdfxml;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
             description = "generating separate files for different classes/properties. This is useful for" +
@@ -99,25 +118,19 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     public void run() {
 
         RDF4JMaterializer materializer = createMaterializer();
-        OutputSpec outputSpec = (outputFile == null) ?
-                new OutputSpec(format) :
-                new OutputSpec(outputFile, format);
+
         if (separate) {
-            runWithSeparateFiles(materializer, outputSpec);
+            runWithSeparateFiles(materializer);
         } else {
-            runWithSingleFile(materializer, outputSpec);
+            runWithSingleFile(materializer);
         }
     }
 
     private RDF4JMaterializer createMaterializer() {
-
-        RDF4JMaterializer materializer;
         try {
             Builder<? extends Builder<?>> configurationBuilder = createAndInitConfigurationBuilder();
-            if (owlFile != null)
-                configurationBuilder.ontologyFile(owlFile);
 
-            materializer = RDF4JMaterializer.defaultMaterializer(
+            return RDF4JMaterializer.defaultMaterializer(
                     configurationBuilder.build(),
                     MaterializationParams.defaultBuilder()
                             .build()
@@ -125,10 +138,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         } catch (OBDASpecificationException e) {
             throw new RuntimeException(e);
         }
-        return materializer;
     }
 
-    private void runWithSingleFile(RDF4JMaterializer materializer, OutputSpec outputSpec) {
+    private void runWithSingleFile(RDF4JMaterializer materializer) {
         int tripleCount = 0;
 
         final long startTime = System.currentTimeMillis();
@@ -136,12 +148,12 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         GraphQueryResult result = materializer.materialize().evaluate();
 
         try {
-            BufferedWriter writer = outputSpec.createWriter(Optional.empty());
+            BufferedWriter writer = createWriter(Optional.empty());
             tripleCount += serializeTripleBatch(
                     result,
                     Optional.empty(),
                     writer,
-                    outputSpec.createRDFHandler(writer)
+                    format.createRDFHandler(writer)
             );
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -154,31 +166,31 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         System.out.println("Elapsed time to materialize: " + time + " {ms}");
     }
 
-    private void runWithSeparateFiles(RDF4JMaterializer materializer, OutputSpec outputSpec) {
+    private void runWithSeparateFiles(RDF4JMaterializer materializer) {
         try {
-            materializeClassesByFile(materializer, outputSpec);
-            materializePropertiesByFile(materializer, outputSpec);
+            materializeClassesByFile(materializer);
+            materializePropertiesByFile(materializer);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void materializeClassesByFile(RDF4JMaterializer materializer, OutputSpec outputSpec) throws Exception {
+    private void materializeClassesByFile(RDF4JMaterializer materializer) throws Exception {
         ImmutableSet<IRI> classes = materializer.getClasses();
         int total = classes.size();
         AtomicInteger i = new AtomicInteger();
         for (IRI c : classes) {
-            serializePredicate(materializer, c, PredicateType.CLASS, i.incrementAndGet(), total, outputSpec);
+            serializePredicate(materializer, c, PredicateType.CLASS, i.incrementAndGet(), total);
         }
     }
 
-    private void materializePropertiesByFile(RDF4JMaterializer materializer, OutputSpec outputSpec) throws Exception {
+    private void materializePropertiesByFile(RDF4JMaterializer materializer) throws Exception {
         ImmutableSet<IRI> properties = materializer.getProperties();
 
         int total = properties.size();
         AtomicInteger i = new AtomicInteger();
         for (IRI p : properties) {
-            serializePredicate(materializer, p, PredicateType.PROPERTY, i.incrementAndGet(), total, outputSpec);
+            serializePredicate(materializer, p, PredicateType.PROPERTY, i.incrementAndGet(), total);
         }
     }
 
@@ -186,8 +198,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
     private void serializePredicate(RDF4JMaterializer materializer, IRI predicateIRI,
-                                    PredicateType predicateType, int index, int total,
-                                    OutputSpec outputSpec) throws Exception {
+                                    PredicateType predicateType, int index, int total) throws Exception {
         final long startTime = System.currentTimeMillis();
 
 
@@ -203,12 +214,12 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         GraphQueryResult result = materializer.materialize(ImmutableSet.of(predicateIRI)).evaluate();
 
         while (result.hasNext()) {
-            BufferedWriter writer = outputSpec.createWriter(Optional.of(fileSubstring + fileCount));
+            BufferedWriter writer = createWriter(Optional.of(fileSubstring + fileCount));
             tripleCount += serializeTripleBatch(
                     result,
                     Optional.of(TRIPLE_LIMIT_PER_FILE),
                     writer,
-                    outputSpec.createRDFHandler(writer)
+                    format.createRDFHandler(writer)
             );
             fileCount++;
         }
@@ -218,6 +229,21 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         final long endTime = System.currentTimeMillis();
         final long time = endTime - startTime;
         System.out.println("Elapsed time to materialize: " + time + " {ms}");
+    }
+
+    // We need direct access to the writer to close it (cannot be done via the RDFHandler)
+    private BufferedWriter createWriter(Optional<String> prefixExtension) throws IOException {
+        if (outputFile != null) {
+            String prefix = removeExtension(outputFile);
+            String suffix = format.getExtension();
+            return Files.newBufferedWriter(
+                    prefixExtension
+                            .map(s -> Paths.get(prefix, s + suffix))
+                            .orElseGet(() -> Paths.get(prefix + suffix)),
+                    StandardCharsets.UTF_8
+            );
+        }
+        return new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
     }
 
     /**
@@ -242,6 +268,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     private Builder<? extends Builder<?>> createAndInitConfigurationBuilder() {
 
         final Builder<? extends Builder<?>> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+
+        if (owlFile != null)
+            configBuilder.ontologyFile(owlFile);
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
@@ -303,77 +332,4 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         return configBuilder;
     }
 
-    private static class OutputSpec {
-        private final Optional<String> prefix;
-        private final String format;
-
-        private OutputSpec(String prefix, String format) {
-            this.prefix = Optional.of(removeExtension(prefix));
-            this.format = format;
-        }
-
-        private OutputSpec(String format) {
-            this.prefix = Optional.empty();
-            this.format = format;
-        }
-
-        // We need a direct access to the writer to close it (cannot be done via the RDFHandler)
-        private BufferedWriter createWriter(Optional<String> prefixExtension) throws IOException {
-            if (prefix.isPresent()) {
-                String suffix = getSuffix();
-                return Files.newBufferedWriter(
-                        prefixExtension.isPresent() ?
-                                Paths.get(prefix.get(), prefixExtension.get() + suffix) :
-                                Paths.get(prefix.get() + suffix),
-                        StandardCharsets.UTF_8
-                );
-            }
-            return new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
-        }
-
-        private String getSuffix() {
-            switch (format) {
-                case RDF_XML:
-                    return ".rdf";
-                case TURTLE:
-                    return ".ttl";
-                case NTRIPLES:
-                    return ".nt";
-                case NQUADS:
-                    return  ".nq";
-                case TRIG:
-                    return ".trig";
-                case JSONLD:
-                    return ".jsonld";
-                default:
-                    throw new RuntimeException("Unknown output format: " + format);
-            }
-        }
-
-        private RDFHandler createRDFHandler(BufferedWriter writer) {
-            switch (format) {
-                case RDF_XML:
-                    return new RDFXMLWriter(writer);
-                case TURTLE:
-                    TurtleWriter tw  = new TurtleWriter(writer);
-                    tw.set(BasicWriterSettings.PRETTY_PRINT, false);
-                    return tw;
-                case NTRIPLES:
-                    NTriplesWriter btw  = new NTriplesWriter(writer);
-                    btw.set(BasicWriterSettings.PRETTY_PRINT, false);
-                    return btw;
-                case NQUADS:
-                    NQuadsWriter nqw = new NQuadsWriter(writer);
-                    nqw.set(BasicWriterSettings.PRETTY_PRINT, false);
-                    return nqw;
-                case TRIG:
-                    TriGWriter ntw = new TriGWriter(writer);
-                    return ntw;
-                case JSONLD:
-                    return new JSONLDWriter(writer);
-                default:
-                    throw new RuntimeException("Unknown output format: " + format);
-            }
-        }
-    }
 }

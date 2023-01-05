@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +38,12 @@ public class AbstractOWLAPITest {
     private static OntopOWLConnection CONNECTION;
 
     protected static void initOBDA(String createDbFile, String obdaFile)
-            throws SQLException, IOException, OWLOntologyCreationException {
+            throws SQLException, IOException {
         initOBDA(createDbFile, obdaFile, null, null);
     }
 
     protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile)
-            throws SQLException, IOException, OWLOntologyCreationException {
+            throws SQLException, IOException {
         initOBDA(createDbFile, obdaFile, ontologyFile, null);
     }
 

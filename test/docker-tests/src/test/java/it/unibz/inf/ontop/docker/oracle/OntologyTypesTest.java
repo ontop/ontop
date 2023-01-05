@@ -107,7 +107,7 @@ public class OntologyTypesTest {
 
 
 	@Test
-	public void testOntologyType() throws Exception {
+	public void testOntologyType() {
 		Properties p = new Properties();
 
 		//no value in the mapping
@@ -166,7 +166,7 @@ public class OntologyTypesTest {
 	}
 
 	@Test
-	public void testOntologyTypeR2rml() throws Exception {
+	public void testOntologyTypeR2rml() {
 
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result

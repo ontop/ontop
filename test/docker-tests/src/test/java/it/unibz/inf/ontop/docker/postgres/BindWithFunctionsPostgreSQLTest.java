@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,7 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     private static OntopOWLEngine REASONER;
     private static OWLConnection CONNECTION;
 
-    public BindWithFunctionsPostgreSQLTest() throws OWLOntologyCreationException {
+    public BindWithFunctionsPostgreSQLTest()  {
         super(createReasoner(owlfile, obdafile, propertiesfile));
         REASONER = getReasoner();
         CONNECTION = getConnection();

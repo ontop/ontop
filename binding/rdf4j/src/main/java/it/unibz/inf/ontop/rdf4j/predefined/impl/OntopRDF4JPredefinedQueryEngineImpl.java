@@ -243,9 +243,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return acceptMediaTypes
                 .map(m -> m.startsWith("*/*")
                         ? Optional.of(defaultFormat)
-                        : registry.getFileFormatForMIMEType(m)
-                        .map(Optional::of)
-                        .orElseGet(() -> otherFormatFct.apply(m)))
+                        : registry.getFileFormatForMIMEType(m).or(() -> otherFormatFct.apply(m)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(f -> registry.get(f).isPresent())

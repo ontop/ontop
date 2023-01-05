@@ -487,8 +487,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             // TODO: only create a right provenance when really needed
             Optional<RightProvenance> rightProvenance = provenanceVariable
                     .map(v -> createProvenanceElements(v, rightGrandChild, rightChildRequiredVariables))
-                    .map(Optional::of)
-                    .orElseGet(() -> createProvenanceElements(rightGrandChild, selectedSubstitution,
+                    .or(() -> createProvenanceElements(rightGrandChild, selectedSubstitution,
                             leftVariables, rightChildRequiredVariables, variableGenerator));
 
             // Tree where a fresh non-nullable variable may have been introduced for the provenance
@@ -684,8 +683,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .flatMap(f -> f.proposeProvenanceVariables()
                             .filter(v -> !leftVariables.contains(v))
                             .findAny())
-                    .map(Optional::of)
-                    .orElse(defaultRightProvenanceVariable)
+                    .or(() -> defaultRightProvenanceVariable)
                     .orElseThrow(() -> new MinorOntopInternalBugException("A default provenance variable was needed"));
 
             return termFactory.getIfElseNull(termFactory.getDBIsNotNull(provenanceVariable), value);

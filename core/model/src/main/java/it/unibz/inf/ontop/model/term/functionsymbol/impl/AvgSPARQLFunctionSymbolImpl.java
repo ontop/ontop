@@ -283,16 +283,12 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs = Stream.concat(
                 Stream.concat(
                         // First: presence of non-numeric values
-                        incompatibleWhenPair
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
+                        incompatibleWhenPair.stream(),
                         // Second: presence of double
                         // and Third: presence of float
                         floatDoubleWhenPairs),
                 // Fourth: presence of decimal or integer
-                decimalEntry
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty));
+                decimalEntry.stream());
 
         return termFactory.getDBCase(
                 whenPairs,

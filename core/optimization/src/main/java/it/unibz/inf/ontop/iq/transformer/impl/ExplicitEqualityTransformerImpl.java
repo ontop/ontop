@@ -140,7 +140,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .map(Multiset.Entry::getElement)
                     .collect(ImmutableCollectors.toSet());
 
-            return children.stream().sequential()
+            return children.stream()
                     .map(t -> substitutionFactory.getInjectiveVar2VarSubstitution(
                                         t.getVariables().stream()
                                                 .filter(repeatedVariables::contains)
@@ -151,13 +151,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
             Iterator<IQTree> it = children.iterator();
-            return substitutions.stream().sequential()
+            return substitutions.stream()
                     .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
                     .collect(ImmutableCollectors.toList());
         }
 
         private boolean isFirstOcc(Variable variable, ImmutableList<IQTree> children, IQTree tree) {
-            return children.stream().sequential()
+            return children.stream()
                     .filter(t -> t.getVariables().contains(variable))
                     .findFirst()
                     .orElseThrow(() -> new MinorOntopInternalBugException("Should be present"))

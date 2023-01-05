@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     private static final String owlFileName = "/redundant_join/redundant_join_fk_test.owl";
@@ -22,7 +21,7 @@ public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasonerWithConstraints(owlFileName, obdaFileName, propertyFileName, constraintFileName);
         CONNECTION = REASONER.getConnection();
     }

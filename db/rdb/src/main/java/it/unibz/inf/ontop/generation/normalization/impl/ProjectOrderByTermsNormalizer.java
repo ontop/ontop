@@ -171,24 +171,25 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
 
-        ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode
-                .map(c -> Stream.concat(
+        ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode.isPresent()
+                ? Stream.concat(
                         projectedVariables.stream(),
-                        c.getSubstitution().getRange().stream())
-                        .collect(ImmutableCollectors.toSet()))
-                .orElseGet(() -> (ImmutableSet<ImmutableTerm>)(ImmutableSet<?>) tree.getVariables());
+                        analysis.constructionNode.get().getSubstitution().getImmutableMap().values().stream())
+                        .collect(ImmutableCollectors.toSet())
+                : projectedVariables;
 
         ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings = analysis.sortConditions.stream()
                 .map(OrderByNode.OrderComparator::getTerm)
                 .filter(t -> !alreadyDefinedTerms.contains(t))
-                .map(t -> (t instanceof Variable)
-                        ? Maps.immutableEntry((Variable) t, t)
-                        : Maps.immutableEntry(variableGenerator.generateNewVariable(), t))
+                .map(t -> Maps.immutableEntry(
+                        (t instanceof Variable)
+                                ? (Variable) t
+                                : variableGenerator.generateNewVariable(),
+                        t))
                 .collect(ImmutableCollectors.toSet());
 
         if (newBindings.isEmpty())
             return tree;
-
 
         if (!isSupported(projectedVariables, analysis, newBindings)) {
             throw new DistinctOrderByDialectLimitationException();
@@ -203,12 +204,11 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
                 Stream.concat(
                         newBindings.stream()
-                        .filter(e -> !e.getKey().equals(e.getValue()))
-                        .map(e -> (Map.Entry<Variable,ImmutableTerm>)(Map.Entry<Variable,?>)e),
-                analysis.constructionNode
-                        .map(c -> c.getSubstitution().getImmutableMap().entrySet().stream())
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap()));
+                                .filter(e -> !e.getKey().equals(e.getValue())),
+                        analysis.constructionNode
+                                .map(c -> c.getSubstitution().getImmutableMap().entrySet().stream())
+                                .orElseGet(Stream::empty))
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
 
