@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
@@ -96,12 +97,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                         getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
                                         allColumnIDs.get(flattenedVar).getSQLRendering()
                         ));
-                        indexVar.ifPresent(
-                                v -> builder.append(String.format(
-                                        " WITH ORDINALITY ",
-                                        allColumnIDs.get(v).getSQLRendering()
-                                )
-                        ));
+                        indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
                         builder.append(
                                 String.format(
                                         "AS %s ON TRUE",
@@ -133,7 +129,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                         ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
-                                        e -> e.getKey(),
+                                        Map.Entry::getKey,
                                         e -> new QualifiedAttributeID(null, e.getValue())
                                 ));
 
