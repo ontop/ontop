@@ -209,7 +209,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	/**
 	 * In contexts where we don't know the precise type
 	 */
-	private KGQuery parseQueryString(String queryString) throws OntopOWLException {
+	private KGQuery<?> parseQueryString(String queryString) throws OntopOWLException {
 		try {
 			return kgQueryFactory.createSPARQLQuery(queryString);
 		} catch (OntopInvalidKGQueryException | OntopUnsupportedKGQueryException e) {
