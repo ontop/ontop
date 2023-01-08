@@ -123,7 +123,7 @@ public abstract class AbstractOntopQuery<Q extends ParsedQuery> implements Query
         return getMaxQueryTime();
     }
 
-    //all code below is copy-pasted from org.eclipse.rdf4j.repository.sparql.query.SPARQLOperation
+
     protected String getQueryString() {
         return queryString;
     }
@@ -132,7 +132,7 @@ public abstract class AbstractOntopQuery<Q extends ParsedQuery> implements Query
         return initialParsedQuery;
     }
 
-    protected byte[] getSalt() {
+    protected byte[] generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[20];
         random.nextBytes(salt);

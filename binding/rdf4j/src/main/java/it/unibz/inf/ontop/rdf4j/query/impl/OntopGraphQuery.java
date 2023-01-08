@@ -45,7 +45,7 @@ public class OntopGraphQuery extends AbstractOntopQuery<ParsedGraphQuery> implem
 			if (queryTimeout > 0)
 				stm.setQueryTimeout(queryTimeout);
 			GraphResultSet res = stm.execute(query, getHttpHeaders());
-			return new IteratingGraphQueryResult(Collections.emptyMap(), new OntopCloseableStatementIteration(res.iterator(), getSalt()));
+			return new IteratingGraphQueryResult(Collections.emptyMap(), new OntopCloseableStatementIteration(res.iterator(), generateSalt()));
 		}
 		catch (Exception e) {
 			throw new QueryEvaluationException(e);

@@ -53,7 +53,7 @@ public class OntopTupleQuery extends AbstractOntopQuery<ParsedTupleQuery> implem
 			}
 
 			List<String> signature = res.getSignature();
-			return new OntopTupleQueryResult(res, signature, getSalt());
+			return new OntopTupleQueryResult(res, signature, generateSalt());
 		}
 		catch (QueryEvaluationException e) {
 			throw e;
