@@ -35,7 +35,7 @@ public class OptiqueIntegrationTest extends AbstractRDF4JVirtualModeTest {
 	public void test1() {
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ;
 
-		int obtainedResult = extecuteQueryAndGetCount(con, sparqlQuery);
+		int obtainedResult = executeQueryAndGetCount(con, sparqlQuery);
 		assertEquals(98, obtainedResult);
 	}
 }

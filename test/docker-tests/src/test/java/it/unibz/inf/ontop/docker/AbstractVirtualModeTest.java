@@ -38,8 +38,8 @@ public abstract class AbstractVirtualModeTest {
         private final OntopOWLEngine engine;
         private final OntopOWLConnection connection;
 
-        EngineConnection(OntopOWLEngine engine) {
-            this.engine = engine;
+        EngineConnection(OntopSQLOWLAPIConfiguration config) {
+            this.engine = new SimpleOntopOWLEngine(config);
             this.connection = engine.getConnection();
         }
 
@@ -72,8 +72,7 @@ public abstract class AbstractVirtualModeTest {
         propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
         OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile, lensesFile);
-        OntopOWLEngine engine = new SimpleOntopOWLEngine(config);
-        return new EngineConnection(engine);
+        return new EngineConnection(config);
     }
 
     private static OntopSQLOWLAPIConfiguration createConfig(String owlFile, String obdaFile, String propertiesFile,
@@ -103,8 +102,7 @@ public abstract class AbstractVirtualModeTest {
                 .enableTestMode()
                 .build();
 
-        OntopOWLEngine engine = new SimpleOntopOWLEngine(config);
-        return new EngineConnection(engine);
+        return new EngineConnection(config);
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws OWLException {

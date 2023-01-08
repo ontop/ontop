@@ -45,7 +45,7 @@ public class AbstractRDF4JVirtualModeTest {
         return repo;
     }
 
-    protected int extecuteQueryAndGetCount(RepositoryConnection con, String query) {
+    protected int executeQueryAndGetCount(RepositoryConnection con, String query) {
         int resultCount = 0;
         TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
         try (TupleQueryResult result = tupleQuery.evaluate()) {

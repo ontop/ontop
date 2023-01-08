@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;

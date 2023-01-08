@@ -1,17 +1,17 @@
 package it.unibz.inf.ontop.docker.dremio;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Executed with Dremio over Postgresql
  */
-//@Ignore
+
 public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/dremio/bind/sparqlBind.owl";
@@ -25,93 +25,80 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     @Override
     protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0, 43\"^^xsd:string");
-        expectedValues.add("\"0, 23\"^^xsd:string");
-        expectedValues.add("\"0, 34\"^^xsd:string");
-        expectedValues.add("\"0, 10\"^^xsd:string");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0, 43\"^^xsd:string",
+                "\"0, 23\"^^xsd:string",
+                "\"0, 34\"^^xsd:string",
+                "\"0, 10\"^^xsd:string");
     }
 
     @Override
     protected List<String> getDatatypeExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.200000\"^^xsd:decimal");
-        expectedValues.add("\"0.250000\"^^xsd:decimal");
-        expectedValues.add("\"0.200000\"^^xsd:decimal");
-        expectedValues.add("\"0.150000\"^^xsd:decimal");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0.200000\"^^xsd:decimal",
+                "\"0.250000\"^^xsd:decimal",
+                "\"0.200000\"^^xsd:decimal",
+                "\"0.150000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getMonthExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"7\"^^xsd:integer");
-        expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"9\"^^xsd:integer");
-        expectedValues.add("\"11\"^^xsd:integer");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"7\"^^xsd:integer",
+                "\"12\"^^xsd:integer",
+                "\"9\"^^xsd:integer",
+                "\"11\"^^xsd:integer");
     }
 
     @Override
     protected List<String> getDayExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"14\"^^xsd:integer");
-        expectedValues.add("\"8\"^^xsd:integer");
-        expectedValues.add("\"21\"^^xsd:integer");
-        expectedValues.add("\"5\"^^xsd:integer");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"14\"^^xsd:integer",
+                "\"8\"^^xsd:integer",
+                "\"21\"^^xsd:integer",
+                "\"5\"^^xsd:integer");
     }
 
     @Override
     protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.500000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0.500000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getStrExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1967-11-05T06:50:00+00:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T11:30:00+00:00\"^^xsd:string");
-        expectedValues.add("\"2014-07-14T10:47:52+00:00\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06+00:00\"^^xsd:string");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"1967-11-05T06:50:00+00:00\"^^xsd:string",
+                "\"2011-12-08T11:30:00+00:00\"^^xsd:string",
+                "\"2014-07-14T10:47:52+00:00\"^^xsd:string",
+                "\"2015-09-21T09:23:06+00:00\"^^xsd:string");
     }
 
     @Override
     protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.600000\"^^xsd:decimal");
-        expectedValues.add("\"5.750000\"^^xsd:decimal");
-        expectedValues.add("\"6.800000\"^^xsd:decimal");
-        expectedValues.add("\"1.500000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"8.600000\"^^xsd:decimal",
+                "\"5.750000\"^^xsd:decimal",
+                "\"6.800000\"^^xsd:decimal",
+                "\"1.500000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getHoursExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"6\"^^xsd:integer");
-        expectedValues.add("\"10\"^^xsd:integer");
-        expectedValues.add("\"9\"^^xsd:integer");
-        expectedValues.add("\"11\"^^xsd:integer");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"6\"^^xsd:integer",
+                "\"10\"^^xsd:integer",
+                "\"9\"^^xsd:integer",
+                "\"11\"^^xsd:integer");
     }
 
     @Override
     protected List<String> getDivideExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.500000\"^^xsd:decimal");
-        expectedValues.add("\"11.500000\"^^xsd:decimal");
-        expectedValues.add("\"17.000000\"^^xsd:decimal");
-        expectedValues.add("\"5.000000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"21.500000\"^^xsd:decimal",
+                "\"11.500000\"^^xsd:decimal",
+                "\"17.000000\"^^xsd:decimal",
+                "\"5.000000\"^^xsd:decimal");
     }
 
     @Ignore("Not supported yet ")
