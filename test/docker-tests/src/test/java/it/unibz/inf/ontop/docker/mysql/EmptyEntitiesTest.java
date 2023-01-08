@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +226,8 @@ public class EmptyEntitiesTest {
 	 * Cannot work until inverses and existentials are considered  in the Abox
 	 * @throws Exception
 	 */
-	// @Test
+	@Test
+	@Ignore
 	public void testEmptiesWithInverses() throws Exception {
 		System.out.println();
 		System.out.println(onto.objectPropertiesDAG());

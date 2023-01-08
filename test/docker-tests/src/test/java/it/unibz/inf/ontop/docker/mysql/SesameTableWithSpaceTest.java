@@ -32,25 +32,6 @@ public class SesameTableWithSpaceTest extends AbstractRDF4JVirtualModeTest {
 
 	private static RepositoryConnection con;
 
-	public SesameTableWithSpaceTest() throws Exception {
-		// create owlontology from file
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		URL owlFileName =  this.getClass().getResource(owlFile);
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(owlFileName.getPath()).getParentFile(), false);
-		man.addIRIMapper(iriMapper);
-
-		OWLOntology owlontology = man.loadOntologyFromOntologyDocument(new File(owlFileName.getPath()));
-
-		// create RDF Graph from ttl file
-		RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-		InputStream in =  this.getClass().getResourceAsStream(ttlFile);
-		URL documentUrl = new URL("file://" + ttlFile);
-		Model mappings = new LinkedHashModel();
-		StatementCollector collector = new StatementCollector(mappings);
-		parser.setRDFHandler(collector);
-		parser.parse(in, documentUrl.toString());
-	}
-
 	@BeforeClass
 	public static void setUp() {
 		Repository repo = createR2RMLReasoner(owlFile, ttlFile, propertyFile);
