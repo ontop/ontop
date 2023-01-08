@@ -1,19 +1,15 @@
 package it.unibz.inf.ontop.docker;
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -28,42 +24,23 @@ import static org.junit.Assert.assertTrue;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  */
 
-public abstract class AbstractBindTestWithFunctions {
+public abstract class AbstractBindTestWithFunctions extends AbstractVirtualModeTest {
 
-    protected static final Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
-    private final OntopOWLEngine reasoner;
-    private final OWLConnection conn;
+    protected static EngineConnection CONNECTION;
 
-
-    protected AbstractBindTestWithFunctions(OntopOWLEngine reasoner) {
-        this.reasoner = reasoner;
-        this.conn = reasoner.getConnection();
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
     }
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
-
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertiesFile)
-                .enableTestMode()
-                .build();
-        return new SimpleOntopOWLEngine(config);
+    @AfterClass
+    public static void after() throws Exception {
+        CONNECTION.close();
     }
 
-    public OntopOWLEngine getReasoner() {
-        return reasoner;
-    }
-
-    public OWLConnection getConnection() {
-        return conn;
-    }
 
     private void runTests(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
+        try (OWLStatement st = createStatement()) {
             int i = 0;
             try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
                 while (rs.hasNext()) {
@@ -1805,7 +1782,7 @@ public abstract class AbstractBindTestWithFunctions {
 
     private void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {
 
-        try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
+        try (OWLStatement st = createStatement()) {
             int i = 0;
             List<String> returnedValues = new ArrayList<>();
             try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {

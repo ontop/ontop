@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
@@ -109,7 +108,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     }
 
     private String readQueryFile(String queryFile) throws IOException {
-        Path path = Paths.get(QuestSPARQLRewriterTest.class.getResource(queryFile).getPath());
+        Path path = Paths.get(AbstractDistinctInAggregateTest.class.getResource(queryFile).getPath());
         return new String(Files.readAllBytes(path));
     }
 

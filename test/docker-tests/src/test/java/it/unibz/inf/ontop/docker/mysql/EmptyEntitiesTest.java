@@ -52,13 +52,13 @@ public class EmptyEntitiesTest {
 
 	private OWLConnection conn;
 
-	final Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile =
+    private static final String owlFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-    final String obdaFile =
+	private static final  String obdaFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
-	final String propertyFile =
+	private static final  String propertyFile =
 			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 	
 	private final List<String> emptyConcepts = new ArrayList<>();
@@ -95,28 +95,9 @@ public class EmptyEntitiesTest {
 
 	@After
 	public void tearDown() throws Exception {
-//			dropTables();
 			reasoner.close();
-//			connection.close();
 	}
 
-//	private void dropTables() throws SQLException, IOException {
-//
-//		Statement st = connection.createStatement();
-//
-//		FileReader reader = new FileReader("src/test/resources/emptiesDatabase-drop-h2.sql");
-//		BufferedReader in = new BufferedReader(reader);
-//		StringBuilder bf = new StringBuilder();
-//		String line = in.readLine();
-//		while (line != null) {
-//			bf.append(line);
-//			line = in.readLine();
-//		}
-//
-//		st.executeUpdate(bf.toString());
-//		st.close();
-//		connection.commit();
-//	}
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";

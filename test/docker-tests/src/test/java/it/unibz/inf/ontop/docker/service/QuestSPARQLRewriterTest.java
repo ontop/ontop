@@ -135,15 +135,14 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	}
 
 	private String getSPARQLRewriting(String sparqlInput) {
-		String sparqlOutput;
 		try (OntopOWLConnection connection = reasoner.getConnection();
 			 OntopOWLStatement statement = connection.createStatement()) {
 
-			sparqlOutput = statement.getRewritingRendering(sparqlInput);
-		} catch (OWLException e) {
-			sparqlOutput = "NULL";
+			return statement.getRewritingRendering(sparqlInput);
 		}
-		return sparqlOutput;
+		catch (OWLException e) {
+			return "NULL";
+		}
 	}
 
 	private String readQueryFile(String queryFile) {

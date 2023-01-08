@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.docker.mssql;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,50 +17,36 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     private static final String obdafile = "/mssql/sparqlBindSqlServer.obda";
     private static final String propertiesfile = "/mssql/sparqlBindSqlServer.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
-
-    public BindWithFunctionsSqlServerTest()  {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
-    }
-
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
     @Override
     protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.500000\"^^xsd:decimal");
-        expectedValues.add("\"5.750000\"^^xsd:decimal");
-        expectedValues.add("\"6.700000\"^^xsd:decimal");
-        expectedValues.add("\"1.500000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"8.500000\"^^xsd:decimal",
+                "\"5.750000\"^^xsd:decimal",
+                "\"6.700000\"^^xsd:decimal",
+                "\"1.500000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0E-19, 43.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 23.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 34.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0E-19, 10.0000000000000000000\"^^xsd:string");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0E-19, 43.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 23.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 34.0000000000000000000\"^^xsd:string",
+                "\"0E-19, 10.0000000000000000000\"^^xsd:string");
     }
 
     @Override
     protected List<String> getStrExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1967-11-05T07:50:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T12:30:00\"^^xsd:string");
-        expectedValues.add("\"2014-06-05T18:47:52\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T09:23:06\"^^xsd:string");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"1967-11-05T07:50:00\"^^xsd:string",
+                "\"2011-12-08T12:30:00\"^^xsd:string",
+                "\"2014-06-05T18:47:52\"^^xsd:string",
+                "\"2015-09-21T09:23:06\"^^xsd:string");
     }
 
     @Ignore("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
@@ -85,9 +69,8 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
 
     @Override
     protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.500000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0.500000\"^^xsd:decimal");
     }
 
     @Test
@@ -102,13 +85,11 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
      */
     @Override
     protected List<String> getDaysDTExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17742\"^^xsd:long");
-        expectedValues.add("\"255\"^^xsd:long");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"16360\"^^xsd:long",
+                "\"17270\"^^xsd:long",
+                "\"17742\"^^xsd:long",
+                "\"255\"^^xsd:long");
     }
 
     /**
@@ -116,13 +97,11 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
      */
     @Override
     protected List<String> getSecondsExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1413514800\"^^xsd:long");
-        expectedValues.add("\"1492161472\"^^xsd:long");
-        expectedValues.add("\"1532994786\"^^xsd:long");
-        expectedValues.add("\"22112400\"^^xsd:long");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"1413514800\"^^xsd:long",
+                "\"1492161472\"^^xsd:long",
+                "\"1532994786\"^^xsd:long",
+                "\"22112400\"^^xsd:long");
     }
 
     @Ignore("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")

@@ -2,9 +2,8 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -21,20 +20,10 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     private static final String owlfile = "/oracle/bindTest/sparqlBind.owl";
     private static final String obdafile = "/oracle/bindTest/sparqlBindOracle.obda";
     private static final String propertiesfile = "/oracle/oracle.properties";
-    
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
 
-    public BindWithFunctionsOracleTest() {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
-    }
-
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
     @Override

@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.docker.dremio;
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,19 +18,9 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/dremio/bind/sparqlBindDremio.obda";
     private static final String propertyfile = "/dremio/bind/sparqlBindDremio.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
-
-    public BindWithFunctionsDremioTest() {
-        super(createReasoner(owlfile, obdafile, propertyfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
-    }
-
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
     }
 
     @Override

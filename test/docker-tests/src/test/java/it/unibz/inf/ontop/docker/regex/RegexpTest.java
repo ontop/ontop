@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.regex;
  */
 
 import com.google.common.collect.Lists;
-import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
@@ -37,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.net.URL;
@@ -129,9 +127,9 @@ public class RegexpTest extends TestCase {
 		if(this.isH2)
 			this.createH2Database();
 
-		final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(owlfile);
-		final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(obdafile);
-		final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(propertyfile);
+		final URL owlFileUrl = RegexpTest.class.getResource(owlfile);
+		final URL obdaFileUrl = RegexpTest.class.getResource(obdafile);
+		final URL propertyFileUrl = RegexpTest.class.getResource(propertyfile);
 		// Creating a new instance of the reasoner
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileUrl.toString())

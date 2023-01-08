@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  */
 public abstract class AbstractVirtualModeTest {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
