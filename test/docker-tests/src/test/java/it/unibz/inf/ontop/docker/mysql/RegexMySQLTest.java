@@ -16,9 +16,9 @@ import org.semanticweb.owlapi.model.OWLException;
  */
 public class RegexMySQLTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/mysql/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "/mysql/regex/stockexchangeRegexMySQL.obda";
-	static final String propertiesfile = "/mysql/regex/stockexchangeRegexMySQL.properties";
+	private static final String owlfile = "/mysql/regex/stockBolzanoAddress.owl";
+	private static final String obdafile = "/mysql/regex/stockexchangeRegexMySQL.obda";
+	private static final String propertiesfile = "/mysql/regex/stockexchangeRegexMySQL.properties";
 
 	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
@@ -61,11 +61,4 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		countResults(1, query);
 	}
-	
-
-	
-	
-	
-
-		
 }
