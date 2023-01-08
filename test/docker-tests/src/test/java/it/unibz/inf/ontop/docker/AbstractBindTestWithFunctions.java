@@ -1802,6 +1802,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractVirtualModeT
                 }
             }
             if(!sameOrder){
+                expectedValues = new ArrayList<>(expectedValues);
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }
