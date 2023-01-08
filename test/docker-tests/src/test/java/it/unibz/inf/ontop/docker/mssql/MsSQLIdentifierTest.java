@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.docker.mssql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,13 +20,11 @@ public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 	private static final String obdafile = "/mssql/identifiers-mssql.obda";
 	private static final String propertyfile = "/mssql/identifiers-mssql.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -39,7 +35,6 @@ public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	/**

@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.docker.oracle;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -26,13 +24,11 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	static final String obdafile = "/oracle/regex/oracle-regexp.obda";
 	static final String propertyfile = "/oracle/regex/oracle-regexp.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -43,7 +39,6 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 

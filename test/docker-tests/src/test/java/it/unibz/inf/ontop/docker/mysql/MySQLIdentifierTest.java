@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -23,13 +20,11 @@ public class MySQLIdentifierTest extends AbstractVirtualModeTest {
 	private static final String obdafile = "/mysql/identifiers/identifiers-mysql.obda";
 	private static final String propertiesfile = "/mysql/identifiers/identifiers-mysql.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
 	}
 
 	@Override
@@ -40,7 +35,6 @@ public class MySQLIdentifierTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	/**

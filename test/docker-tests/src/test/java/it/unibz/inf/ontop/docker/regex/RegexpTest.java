@@ -59,8 +59,6 @@ public class RegexpTest extends TestCase {
 
 	private OWLConnection conn;
 
-	private OWLOntology ontology;
-
 	private static final String ROOT_LOCATION = "/testcases-docker/virtual-mode/stockexchange/simplecq/";
 	private static final String owlfile = ROOT_LOCATION + "stockexchange.owl";
 	private final String obdafile;

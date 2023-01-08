@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -18,8 +16,7 @@ import java.nio.file.Paths;
 
 public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualModeTest {
 
-    protected static OntopOWLEngine REASONER;
-    protected static OntopOWLConnection CONNECTION;
+    protected static EngineConnection CONNECTION;
 
     protected static final String owlFile = "/distinctInAggregates/university.ttl";
     protected static final String obdaFile = "/distinctInAggregates/university.obda";
@@ -38,7 +35,6 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Test

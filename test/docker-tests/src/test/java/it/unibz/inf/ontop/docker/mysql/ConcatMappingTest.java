@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,13 +20,11 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
     private static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
     private static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
     public static void before() {
-        REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
-        CONNECTION = REASONER.getConnection();
+        CONNECTION = createReasoner(owlFile, obdaFile, propertiesFile);
     }
 
     @Override
@@ -39,7 +35,6 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Test

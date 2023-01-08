@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,13 +18,11 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 	private static final String obdaFile = "/mssql/adventureWorks.obda";
 	private static final String propertiesFile = "/mssql/adventureWorks.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlFile, obdaFile, propertiesFile);
 	}
 
 	@Override
@@ -37,7 +33,6 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
     /**

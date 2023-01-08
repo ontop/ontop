@@ -2,15 +2,11 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,19 +16,16 @@ import static org.junit.Assert.assertEquals;
  *
  */
 public class LowerMovieTest extends AbstractVirtualModeTest{
-    Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final static String owlFile = "/pgsql/movieontology.owl";
-    final static String obdaFile = "/pgsql/lowerMovie.obda";
-    final static String propertyFile = "/pgsql/lowerMovie.properties";
+    private final static String owlFile = "/pgsql/movieontology.owl";
+    private final static String obdaFile = "/pgsql/lowerMovie.obda";
+    private final static String propertyFile = "/pgsql/lowerMovie.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
     public static void before() {
-        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
-        CONNECTION = REASONER.getConnection();
+        CONNECTION = createReasoner(owlFile, obdaFile, propertyFile);
     }
 
     @Override
@@ -43,7 +36,6 @@ public class LowerMovieTest extends AbstractVirtualModeTest{
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
 
@@ -58,11 +50,8 @@ public class LowerMovieTest extends AbstractVirtualModeTest{
 
                 "}";
 
-
-
         String name = runQueryAndReturnStringOfLiteralX(queryBind);
         assertEquals("\"a.j.\"^^xsd:string", name);
-
     }
 
     @Test
@@ -76,15 +65,8 @@ public class LowerMovieTest extends AbstractVirtualModeTest{
 
                 "}";
 
-
-
         String name = runQueryAndReturnStringOfLiteralX(queryBind);
         assertEquals("\"Colleen\"^^xsd:string" , name );
-
     }
-
-
-
-
 }
 

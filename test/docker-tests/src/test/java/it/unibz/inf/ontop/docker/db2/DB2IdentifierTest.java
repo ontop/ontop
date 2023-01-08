@@ -23,13 +23,11 @@ public class DB2IdentifierTest extends AbstractVirtualModeTest {
 	private static final String propertyfile = "/db2/db2-stock.properties";
 
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -40,7 +38,6 @@ public class DB2IdentifierTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	/**

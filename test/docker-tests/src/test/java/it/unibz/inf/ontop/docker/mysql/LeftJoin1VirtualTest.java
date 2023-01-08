@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -15,19 +13,16 @@ import org.semanticweb.owlapi.model.OWLException;
  * @author Minda, Guohui, mrezk
  */
 public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
-	//private static Logger log = LoggerFactory.getLogger(LeftJoinTest1Virtual.class);
 
 	private static final String owlfile = "/mysql/person/person.owl";
 	private static final String obdafile = "/mysql/person/person1.obda";
 	private static final String propertyfile = "/mysql/person/person1.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before()  {
-		REASONER = createReasoner(owlfile, obdafile, propertyfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
 	}
 
 	@Override
@@ -38,7 +33,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
     @Test
@@ -206,7 +200,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	
 	@Test
 	public void testLeftJoin14() throws Exception {
-		
 
 		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
 
@@ -215,7 +208,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	
 	@Test
 	public void testLeftJoin15() throws Exception {
-		
 
 		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
 
@@ -224,7 +216,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	
 	@Test
 	public void testLeftJoin16() throws Exception {
-		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 
@@ -234,7 +225,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	@Test
 	public void testLeftJoin17() throws Exception {
 		
-
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
 
 		countResults(4, query_multi7);
@@ -242,7 +232,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 	@Test
 	public void testUnion1() throws Exception {
-		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
 
@@ -251,7 +240,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 	@Test
 	public void testUnion2() throws Exception {
-		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
 
@@ -260,7 +248,6 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 	@Test
 	public void testLeftJoin19() throws Exception {
-		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 

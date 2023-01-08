@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.dremio;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -17,13 +15,11 @@ public class DremioTest extends AbstractVirtualModeTest {
     private static final String obdafile = "/dremio/incidents/incidents.obda";
     private static final String propertyfile = "/dremio/dremio.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
     public static void before() {
-        REASONER = createReasoner(owlfile, obdafile, propertyfile);
-        CONNECTION = REASONER.getConnection();
+        CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
     }
 
     @Override
@@ -34,13 +30,12 @@ public class DremioTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Test
     public void testDremio() throws Exception {
-            /* 
-            * Get the  information that is stored in the database 
+            /*
+            * Get the  information that is stored in the database
             */
         String sparqlQuery =
                 "PREFIX : <http://www.semanticweb.org/incidents#>\n" +

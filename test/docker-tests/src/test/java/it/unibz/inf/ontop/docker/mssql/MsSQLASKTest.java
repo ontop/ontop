@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.docker.mssql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,13 +20,11 @@ public class MsSQLASKTest extends AbstractVirtualModeTest {
     private static final String propertyfile =
             "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
     public static void before() {
-        REASONER = createReasoner(owlfile, obdafile, propertyfile);
-        CONNECTION = REASONER.getConnection();
+        CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
     }
 
     @Override
@@ -39,7 +35,6 @@ public class MsSQLASKTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Test
@@ -47,6 +42,5 @@ public class MsSQLASKTest extends AbstractVirtualModeTest {
         String query = "ASK { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker> .}";
         boolean val =  runQueryAndReturnBooleanX(query);
         assertTrue(val);
-
     }
 }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -33,25 +34,46 @@ public abstract class AbstractVirtualModeTest {
 
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
+    protected static final class EngineConnection implements AutoCloseable {
+        private final OntopOWLEngine engine;
+        private final OntopOWLConnection connection;
+
+        EngineConnection(OntopOWLEngine engine) {
+            this.engine = engine;
+            this.connection = engine.getConnection();
+        }
+
+        @Override
+        public void close() throws Exception {
+            connection.close();
+            engine.close();
+        }
+
+        public OntopOWLStatement createStatement() throws OWLException {
+            return connection.createStatement();
+        }
+    }
+
+    protected static EngineConnection createReasoner(String owlFile, String obdaFile, String propertiesFile) {
         return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty(), Optional.empty());
     }
 
-    protected static OntopOWLEngine createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile)  {
+    protected static EngineConnection createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile)  {
         return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile), Optional.empty());
     }
 
-    protected static OntopOWLEngine createReasonerWithLenses(String owlFile, String obdaFile, String propertiesFile, String lensesFile)  {
+    protected static EngineConnection createReasonerWithLenses(String owlFile, String obdaFile, String propertiesFile, String lensesFile)  {
         return createReasoner(owlFile,obdaFile,propertiesFile, Optional.empty(), Optional.of(lensesFile));
     }
 
-    private static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> lensesFile) {
+    private static EngineConnection createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile, Optional<String> lensesFile) {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
         OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile, lensesFile);
-        return new SimpleOntopOWLEngine(config);
+        OntopOWLEngine engine = new SimpleOntopOWLEngine(config);
+        return new EngineConnection(engine);
     }
 
     private static OntopSQLOWLAPIConfiguration createConfig(String owlFile, String obdaFile, String propertiesFile,
@@ -69,7 +91,7 @@ public abstract class AbstractVirtualModeTest {
         return builder.build();
     }
 
-    protected static OntopOWLEngine createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) {
+    protected static EngineConnection createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) {
         owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
         r2rmlFile =  AbstractVirtualModeTest.class.getResource(r2rmlFile).toString();
         propertiesFile = AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
@@ -80,7 +102,9 @@ public abstract class AbstractVirtualModeTest {
                 .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        return new SimpleOntopOWLEngine(config);
+
+        OntopOWLEngine engine = new SimpleOntopOWLEngine(config);
+        return new EngineConnection(engine);
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws OWLException {

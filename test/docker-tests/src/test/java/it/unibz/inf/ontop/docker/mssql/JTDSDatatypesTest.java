@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,13 +18,11 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 	private static final String obdafile = "/mssql/datatype/datatypejtds.obda";
 	private static final String propertiesfile = "/mssql/datatype/datatypejtds.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before()  {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
 	}
 
 	@Override
@@ -37,7 +33,6 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 

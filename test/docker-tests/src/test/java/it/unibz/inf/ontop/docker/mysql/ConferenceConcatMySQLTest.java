@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -28,13 +26,11 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
     private static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
 	private static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
 
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() {
-		REASONER = createReasoner(owlFile, obdaFile, propertyFile);
-		CONNECTION = REASONER.getConnection();
+		CONNECTION = createReasoner(owlFile, obdaFile, propertyFile);
 	}
 
 	@Override
@@ -45,25 +41,12 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
 	private void runTests(String query1) throws Exception {
 
-		OWLStatement st = createStatement();
-
-
-		try {
+		try (OWLStatement st = createStatement()) {
 			executeQueryAssertResults(query1, st);
-			
-		} catch (Exception e) {
-            st.close();
-            e.printStackTrace();
-			fail();
-
-
-		} finally {
-			st.close();
 		}
 	}
 

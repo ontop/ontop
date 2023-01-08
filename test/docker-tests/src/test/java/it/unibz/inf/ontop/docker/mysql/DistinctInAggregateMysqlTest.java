@@ -9,7 +9,6 @@ public class DistinctInAggregateMysqlTest extends AbstractDistinctInAggregateTes
 
     @BeforeClass
     public static void before() {
-        REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
-        CONNECTION = REASONER.getConnection();
+        CONNECTION = createReasoner(owlFile, obdaFile, propertiesFile);
     }
 }
