@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 
 public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
@@ -23,7 +22,7 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before()  {
         REASONER = createReasoner(OWL_FILE, OBDA_FILE, PROPERTY_FILE);
         CONNECTION = REASONER.getConnection();
     }

@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 @Ignore("Stopped database test")
 public class SAPHANATest extends AbstractVirtualModeTest {
@@ -21,7 +20,7 @@ public class SAPHANATest extends AbstractVirtualModeTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlfile, obdafile, propertyfile);
         CONNECTION = REASONER.getConnection();
     }

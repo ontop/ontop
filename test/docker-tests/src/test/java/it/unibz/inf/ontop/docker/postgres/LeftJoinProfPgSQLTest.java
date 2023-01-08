@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class LeftJoinProfPgSQLTest extends AbstractLeftJoinProfTest {
 
@@ -20,7 +19,7 @@ public class LeftJoinProfPgSQLTest extends AbstractLeftJoinProfTest {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlFileName, obdaFileName, propertyFileName);
         CONNECTION = REASONER.getConnection();
     }

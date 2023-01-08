@@ -12,7 +12,7 @@ public class BasicViewWithRenamingTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-renaming.json";
     private static final String DBMETADATA_FILE = "src/test/resources/prof/prof_with_constraints.db-extract.json";
 
-    ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithRenamingTest() throws Exception {
     }

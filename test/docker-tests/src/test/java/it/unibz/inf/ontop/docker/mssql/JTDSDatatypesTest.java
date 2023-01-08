@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,15 +16,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/mssql/datatype/datatypesjtds.owl";
-	static final String obdafile = "/mssql/datatype/datatypejtds.obda";
-	static final String propertiesfile = "/mssql/datatype/datatypejtds.properties";
+	private static final String owlfile = "/mssql/datatype/datatypesjtds.owl";
+	private static final String obdafile = "/mssql/datatype/datatypejtds.obda";
+	private static final String propertiesfile = "/mssql/datatype/datatypejtds.properties";
 
 	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before()  {
 		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
 		CONNECTION = REASONER.getConnection();
 	}

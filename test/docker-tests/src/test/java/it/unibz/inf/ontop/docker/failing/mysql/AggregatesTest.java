@@ -9,7 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 @Ignore("Not supported yet")
 public class AggregatesTest extends AbstractVirtualModeTest {
@@ -22,7 +21,7 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before() {
 		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
 		CONNECTION = REASONER.getConnection();
 	}

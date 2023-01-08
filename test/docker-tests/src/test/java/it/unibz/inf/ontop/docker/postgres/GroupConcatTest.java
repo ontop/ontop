@@ -9,7 +9,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,15 +20,15 @@ import java.util.stream.Collectors;
  */
 public class GroupConcatTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "/pgsql/gconcat/vkg.ttl";
-    static final String obdafile = "/pgsql/gconcat/vkg.obda";
-    static final String propertiesfile = "/pgsql/gconcat/vkg.properties";
+    private static final String owlfile = "/pgsql/gconcat/vkg.ttl";
+    private static final String obdafile = "/pgsql/gconcat/vkg.obda";
+    private static final String propertiesfile = "/pgsql/gconcat/vkg.properties";
 
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlfile, obdafile, propertiesfile);
         CONNECTION = REASONER.getConnection();
     }

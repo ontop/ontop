@@ -9,7 +9,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DatetimestampObdaTest extends AbstractVirtualModeTest  {
 
@@ -21,7 +20,7 @@ public class DatetimestampObdaTest extends AbstractVirtualModeTest  {
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlFile, obdaFile, propertyFile);
         CONNECTION = REASONER.getConnection();
     }

@@ -29,7 +29,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 
@@ -41,7 +40,7 @@ public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before() {
 		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
 		CONNECTION = REASONER.getConnection();
 	}

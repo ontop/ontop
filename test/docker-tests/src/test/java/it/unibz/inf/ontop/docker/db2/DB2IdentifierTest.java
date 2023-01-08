@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,16 +18,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class DB2IdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/db2/identifiers/identifiers.owl";
-	static final String obdafile = "/db2/identifiers/identifiers-db2.obda";
-	static final String propertyfile = "/db2/db2-stock.properties";
+	private static final String owlfile = "/db2/identifiers/identifiers.owl";
+	private static final String obdafile = "/db2/identifiers/identifiers-db2.obda";
+	private static final String propertyfile = "/db2/db2-stock.properties";
 
 
 	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before() {
 		REASONER = createReasoner(owlfile, obdafile, propertyfile);
 		CONNECTION = REASONER.getConnection();
 	}

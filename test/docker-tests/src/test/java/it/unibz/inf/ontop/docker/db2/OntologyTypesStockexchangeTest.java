@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -21,15 +20,15 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     
-	static final String owlFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	static final String obdaFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
-    static final String propertyFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
+	private static final String owlFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	private static final String obdaFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
+    private static final String propertyFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
 
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before()  {
         REASONER = createReasoner(owlFile, obdaFile, propertyFile);
         CONNECTION = REASONER.getConnection();
     }

@@ -9,7 +9,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with mysql syntax. 
@@ -25,7 +24,7 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before() {
 		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
 		CONNECTION = REASONER.getConnection();
 	}

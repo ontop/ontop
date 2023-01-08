@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /***
  * Oracle long name.
@@ -16,15 +15,15 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 public class OracleLongNameTest extends AbstractVirtualModeTest {
 
 	
-	final static String owlFile = "/oracle/oraclesql/o.owl";
-	final static String obdaFile1 = "/oracle/oraclesql/o1.obda";
-	final static String propertyFile = "/oracle/oracle.properties";
+	private final static String owlFile = "/oracle/oraclesql/o.owl";
+	private final static String obdaFile1 = "/oracle/oraclesql/o1.obda";
+	private final static String propertyFile = "/oracle/oracle.properties";
 
 	private static OntopOWLEngine REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
+	public static void before() {
 		REASONER = createReasoner(owlFile, obdaFile1, propertyFile);
 		CONNECTION = REASONER.getConnection();
 	}

@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 @PostgreSQLLightweightTest
 public class ReplaceTest extends AbstractDockerRDF4JTest {
 
@@ -19,7 +16,7 @@ public class ReplaceTest extends AbstractDockerRDF4JTest {
     private static final String PROPERTIES_FILE = "/prof/postgresql/prof-postgresql.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before()  {
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 

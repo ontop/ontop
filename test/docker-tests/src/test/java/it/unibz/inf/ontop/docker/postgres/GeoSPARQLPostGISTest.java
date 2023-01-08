@@ -9,7 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,15 +19,15 @@ import static org.junit.Assert.assertTrue;
 @Ignore
 public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "/pgsql/geosparql/geosparql.owl";
-    static final String obdafile = "/pgsql/geosparql/geosparql-postgres.obda";
-    static final String propertiesfile = "/pgsql/geosparql/geosparql-postgres.properties";
+    private static final String owlfile = "/pgsql/geosparql/geosparql.owl";
+    private static final String obdafile = "/pgsql/geosparql/geosparql-postgres.obda";
+    private static final String propertiesfile = "/pgsql/geosparql/geosparql-postgres.properties";
 
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlfile, obdafile, propertiesfile);
         CONNECTION = REASONER.getConnection();
     }

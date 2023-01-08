@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,15 +20,15 @@ import static org.junit.Assert.assertEquals;
 
 public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "/testcases-docker/datetime/datatypes.owl";
-    static final String obdafile = "/testcases-docker/datetime/datatypes-mysql.obda";
-    static final String propertiesfile = "/testcases-docker/datetime/datatypes-mysql.properties";
+    private static final String owlfile = "/testcases-docker/datetime/datatypes.owl";
+    private static final String obdafile = "/testcases-docker/datetime/datatypes-mysql.obda";
+    private static final String propertiesfile = "/testcases-docker/datetime/datatypes-mysql.properties";
 
     private static OntopOWLEngine REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
+    public static void before() {
         REASONER = createReasoner(owlfile, obdafile, propertiesfile);
         CONNECTION = REASONER.getConnection();
     }
