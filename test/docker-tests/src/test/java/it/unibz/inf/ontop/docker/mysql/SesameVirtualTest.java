@@ -64,7 +64,6 @@ public class SesameVirtualTest extends AbstractRDF4JVirtualModeTest {
 				BindingSet bindingSet = result.next();
 				for (String b : bindings) {
 					logger.debug("Binding: {}", bindingSet.getBinding(b));
-					System.out.println(bindingSet.getBinding(b));
 				}
 			}
 		}
@@ -77,7 +76,6 @@ public class SesameVirtualTest extends AbstractRDF4JVirtualModeTest {
 			while (gresult.hasNext()) {
 				Statement s = gresult.next();
 				logger.debug("Statement: {}", s.toString());
-				System.out.println(s);
 			}
 		}
 	}
