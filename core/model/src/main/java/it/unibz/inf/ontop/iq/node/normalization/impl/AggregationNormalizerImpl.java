@@ -182,7 +182,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                            nonGroupingSubstitution.composeWith(aggregationSubstitution)
+                            substitutionFactory.compose(nonGroupingSubstitution, aggregationSubstitution)
                                     .filter(aggregationSubstitution.getDomain()::contains);
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
@@ -257,8 +257,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // Needed when some grouping variables are also used in the aggregates
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
-                            (s, a) -> (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                                    a.getSubstitution().composeWith(s).filter(aggregateVariables::contains),
+                            (s, a) -> substitutionFactory.compose(a.getSubstitution(), s)
+                                            .filter(aggregateVariables::contains)
+                                            .castTo(ImmutableFunctionalTerm.class),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });

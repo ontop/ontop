@@ -46,5 +46,16 @@ public interface SubstitutionFactory {
      * @param <T>
      * @throws IllegalArgumentException if the substitutions do not agree on one of the variables
      */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<T> substitution1, ImmutableSubstitution<T> substitution2);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2);
+
+    /**
+     *  Viewing a substitution as a function (takes a term, returns a term).
+     *  this method yield the substitution "(g o f)", where (g o f)(x) = g(f(x))
+     *  Note that we assume f(x) = x if x is not explicitly in the domain of substitution f
+     * @param g
+     * @param f
+     * @return
+     * @param <T>
+     */
+    <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
 }

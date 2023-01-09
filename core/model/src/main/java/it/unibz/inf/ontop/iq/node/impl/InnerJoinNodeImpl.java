@@ -99,21 +99,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> combineVarDefs(
             ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s1,
             ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s2) {
+
+         // substitutionFactory.compose takes the first definition of a common variable.
+         // It behaves like a union except that is robust to "non-identical" definitions.
+         // If normalized, two definitions for the same variables are expected to be compatible.
+         //
+         // If not normalized, the definitions may be incompatible, but that's fine
+         // since they will not produce any result.
+
         return s1.isEmpty()
                 ? s2
                 : s1.stream()
                     .flatMap(d1 -> s2.stream()
-                        /*
-                         * Takes the first definition of a common variable.
-                         *
-                         * Behaves like an union except that is robust to "non-identical" definitions.
-                         * If normalized, two definitions for the same variables are expected to be compatible.
-                         *
-                         * If not normalized, the definitions may be incompatible, but that's fine
-                         * since they will not produce any result.
-                         *
-                         */
-                        .map(d2 -> d2.composeWith2(d1)))
+                        .map(d2 -> substitutionFactory.compose(d2, d1)))
                     .collect(ImmutableCollectors.toSet());
     }
 
@@ -171,8 +169,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
-                            .composeWith2(expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             ImmutableList<IQTree> newChildren = children.stream()
                     .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))

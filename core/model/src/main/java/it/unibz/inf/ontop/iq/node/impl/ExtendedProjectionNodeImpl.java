@@ -186,7 +186,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction);
 
-        return new ConstructionNodeImpl.PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
+        return new ConstructionNodeImpl.PropagationResults<>(substitutionFactory.compose(thetaFBar, thetaCBar), newDeltaC, f);
 
     }
 
@@ -195,10 +195,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
-        ImmutableSubstitution<VariableOrGroundTerm> delta = tauF
-                .filter((k, v) -> !thetaBar.isDefining(k)  && !tauCPropagationResults.delta.isDefining(k))
-                .transform(v -> (VariableOrGroundTerm)v)
-                .composeWith2(tauCPropagationResults.delta);
+        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.compose(
+                tauF.filter(v -> !thetaBar.isDefining(v) && !tauCPropagationResults.delta.isDefining(v)),
+                tauCPropagationResults.delta);
 
         ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.filter(k -> !tauF.isDefining(k));
 

@@ -100,18 +100,18 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.getFragment(ImmutableFunctionalTerm.class).getImmutableMap().entrySet().stream()
-                    .filter(e -> nonNullVariables.contains(e.getKey()))
+            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution
+                    .filter(nonNullVariables::contains)
+                    .getFragment(ImmutableFunctionalTerm.class).getImmutableMap().entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             e -> e.getValue().simplifyAsGuaranteedToBeNonNull()
                     ));
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(initialSubstitution.getImmutableMap().entrySet().stream()
-                    .map(e -> Optional.ofNullable(updatedEntryMap.get(e.getKey()))
-                            .map(s -> Maps.immutableEntry(e.getKey(), s.getSimplifiedTerm()))
-                            .orElse(e))
-                    .collect(ImmutableCollectors.toMap()));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution
+                    .transform((k, v) -> Optional.ofNullable(updatedEntryMap.get(k))
+                            .map(FunctionalTermSimplification::getSimplifiedTerm)
+                            .orElse(v));
 
             ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
                     ? rootNode

@@ -73,11 +73,15 @@ public class JoinLikeChildBindingLifter {
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
-        ImmutableSubstitution<ImmutableTerm> naiveAscendingSubstitution = expressionResults.getSubstitution().composeWith(
-                selectedChildSubstitution);
+        ImmutableSubstitution<ImmutableTerm> naiveAscendingSubstitution =
+                substitutionFactory.compose(
+                        expressionResults.getSubstitution(),
+                        selectedChildSubstitution);
+
         ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
-                expressionResults.getSubstitution().composeWith2(freshRenaming)
-                        .composeWith2(downPropagableFragment);
+                substitutionFactory.compose(
+                        expressionResults.getSubstitution(),
+                        substitutionFactory.union(freshRenaming, downPropagableFragment));
 
         return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
                 naiveAscendingSubstitution, descendingSubstitution);

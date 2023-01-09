@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.tools.impl;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -42,17 +43,15 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                         e -> decomposeDefinition(e.getValue(), variableGenerator, Optional.of(e.getKey()))
                 ));
 
-        ImmutableMap<Variable, ImmutableTerm> topSubstitutionMap = decompositionMap.entrySet().stream()
-                // To avoid entries like t/t
-                .filter(e -> !e.getKey().equals(e.getValue().term))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().term));
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(topSubstitutionMap);
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(
+                decompositionMap.entrySet().stream()
+                        // To avoid entries like t/t
+                        .filter(e -> !e.getKey().equals(e.getValue().term))
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().term)));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(
-                decompositionMap.values().stream()
-                        .map(d -> d.substitution));
+        Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(decompositionMap.values());
 
         return subSubstitution
                 .map(s -> topSubstitution.isEmpty()
@@ -74,9 +73,7 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                         .map(t -> decomposeDefinition(t, variableGenerator, Optional.empty()))
                         .collect(ImmutableCollectors.toList());
 
-                Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(
-                        childDecompositions.stream()
-                                .map(d -> d.substitution));
+                Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(childDecompositions);
 
                 ImmutableFunctionalTerm newFunctionalTerm = subSubstitution
                         .map(s -> childDecompositions.stream()
@@ -122,12 +119,12 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
     }
 
     private Optional<ImmutableSubstitution<ImmutableTerm>> combineSubstitutions(
-            Stream<Optional<ImmutableSubstitution<ImmutableTerm>>> stream) {
-        return stream
+           ImmutableCollection<DefinitionDecomposition> decompositions) {
+        return decompositions.stream()
+                .map(d -> d.substitution)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                // The composition here behaves like an union (independent fresh variables)
-                .reduce(ImmutableSubstitution::composeWith);
+                .reduce(substitutionFactory::union);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

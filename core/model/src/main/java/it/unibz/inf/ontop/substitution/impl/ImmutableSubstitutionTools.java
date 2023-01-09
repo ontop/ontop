@@ -52,6 +52,6 @@ public class ImmutableSubstitutionTools {
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMap);
 
         // TODO: refactor
-        return (ImmutableSubstitution<T>) renamingSubstitution.composeWith(substitution);
+        return (ImmutableSubstitution<T>) substitutionFactory.compose(renamingSubstitution, substitution);
     }
 }

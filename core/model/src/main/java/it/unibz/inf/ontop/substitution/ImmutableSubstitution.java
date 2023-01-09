@@ -36,17 +36,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
             throws ConversionException;
 
-    /**
-     * Viewing a substitution as a function (takes a term, returns a term).
-     * This method yield the substitution "(g o f)" where g is this substitution.
-     * NB: (g o f)(x) = g(f(x))
-     */
-    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);
-
-    ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> f);
-
-
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
+
+    <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 
     /**
      * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.

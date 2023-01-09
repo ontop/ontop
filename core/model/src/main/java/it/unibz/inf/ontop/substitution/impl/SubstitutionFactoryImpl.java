@@ -119,13 +119,13 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<T> substitution1, ImmutableSubstitution<T> substitution2) {
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2) {
 
         if (substitution1.isEmpty())
-            return substitution2;
+            return (ImmutableSubstitution)substitution2;
 
         if (substitution2.isEmpty())
-            return substitution1;
+            return (ImmutableSubstitution)substitution1;
 
         ImmutableMap<Variable, T> map = Stream.of(substitution1, substitution2)
                 .map(ProtoSubstitution::getImmutableMap)
@@ -163,4 +163,24 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         variableGenerator.registerAdditionalVariables(ImmutableSet.of(newVariable));
         return newVariable;
     }
+
+
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
+        if (g.isEmpty())
+            return (ImmutableSubstitution) f;
+
+        if (f.isEmpty())
+            return (ImmutableSubstitution) g;
+
+        ImmutableMap<Variable, T> map = Stream.concat(
+                        f.getImmutableMap().entrySet().stream()
+                                .map(e -> Maps.immutableEntry(e.getKey(), (T)g.apply(e.getValue()))),
+                        g.getImmutableMap().entrySet().stream())
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
+
+        return getSubstitution(map);
+    }
+
 }

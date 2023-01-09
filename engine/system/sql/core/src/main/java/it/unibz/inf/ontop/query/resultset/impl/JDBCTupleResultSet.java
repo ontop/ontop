@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Optional;
 
 public class JDBCTupleResultSet extends AbstractTupleResultSet {
@@ -34,7 +33,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                               @Nullable OntopConnectionCloseable statementClosingCB,
                               TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, answerAtom.getArguments(),queryLogger, statementClosingCB);
+        super(rs, answerAtom.getArguments(), queryLogger, statementClosingCB);
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;
@@ -47,16 +46,16 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException {
         //builder (+loop) in order to throw checked exception
         final ImmutableMap.Builder<Variable, Constant> builder = ImmutableMap.builder();
-        Iterator<Variable> it = sqlSignature.iterator();
         try {
-            for (int i = 1; i <= sqlSignature.size(); i++) {
-                Variable var = it.next();
+            int index = 1;
+            for (Variable var : sqlSignature) {
                 builder.put(
                         var,
                         convertToConstant(
-                            rs.getString(i),
+                            rs.getString(index),
                             sqlTypeMap.get(var)
                         ));
+                index++;
             }
         } catch (SQLException e) {
             throw buildConnectionException(e);
@@ -75,23 +74,24 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     }
 
     private OntopBinding[] computeBindingMap(ImmutableSubstitution<Constant> sqlVar2Constant) {
-        ImmutableSubstitution<ImmutableTerm> composition = sqlVar2Constant.composeWith(sparqlVar2Term);
         //this can be improved and simplified
         return signature.stream()
-                       .map(v -> getBinding(v,composition))
+                       .map(v -> getBinding(v, sqlVar2Constant))
                        .filter(Optional::isPresent)
                        .map(Optional::get)
                        .toArray(OntopBinding[]::new);
     }
 
-    private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<ImmutableTerm> composition) {
-        Optional<RDFConstant> constant = evaluate(composition.applyToVariable(v));
+    private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<Constant> sqlVar2Constant) {
+        ImmutableTerm term = sparqlVar2Term.applyToVariable(v);
+        ImmutableTerm constantTerm = sqlVar2Constant.apply(term);
+        Optional<RDFConstant> constant = evaluate(constantTerm);
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
     }
 
     private Optional<RDFConstant> evaluate(ImmutableTerm term) {
         ImmutableTerm simplifiedTerm = term.simplify();
-        if (simplifiedTerm instanceof Constant){
+        if (simplifiedTerm instanceof Constant) {
             if (simplifiedTerm instanceof RDFConstant) {
                 return Optional.of((RDFConstant) simplifiedTerm);
             }
@@ -99,11 +99,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
             if (constant.isNull()) {
                 return Optional.empty();
             }
-            if(constant instanceof DBConstant){
+            if (constant instanceof DBConstant) {
                 throw new SQLOntopBindingSet.InvalidConstantTypeInResultException(
-                        constant +"is a DB constant. But a binding cannot have a DB constant as value");
+                        constant + " is a DB constant. But a binding cannot have a DB constant as value");
             }
-            throw new SQLOntopBindingSet.InvalidConstantTypeInResultException("Unexpected constant type for "+constant);
+            throw new SQLOntopBindingSet.InvalidConstantTypeInResultException("Unexpected constant type for " + constant);
         }
         throw new SQLOntopBindingSet.InvalidTermAsResultException(simplifiedTerm);
     }

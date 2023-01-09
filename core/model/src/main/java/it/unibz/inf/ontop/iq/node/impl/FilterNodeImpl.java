@@ -247,8 +247,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
-                            .composeWith2(expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
             IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()

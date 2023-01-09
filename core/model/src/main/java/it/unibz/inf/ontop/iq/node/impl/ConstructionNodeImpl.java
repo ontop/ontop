@@ -253,9 +253,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         return childDefs.stream()
-                .map(childDef -> childDef.composeWith(substitution))
-                .map(s -> s.filter(projectedVariables::contains))
+                .map(childDef -> substitutionFactory.compose(childDef, substitution))
                 .map(s -> s.getFragment(NonVariableTerm.class))
+                .map(s -> s.filter(projectedVariables::contains))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -334,7 +334,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
         ImmutableSubstitution<Variable> fullRenaming = getSubstitution()
                 .filter((k, v) -> childConstraint.contains(v))
-                .transform((k, v) -> (Variable) v);
+                .castTo(Variable.class);
 
         if (fullRenaming.isEmpty())
             return Stream.empty();
@@ -477,7 +477,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                childConstructionNode.getSubstitution().composeWith(substitution).transform(v -> v.simplify(grandChild.getVariableNullability())),
+                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution)
+                        .transform(v -> v.simplify(grandChild.getVariableNullability())),
                 projectedVariables
         );
 
@@ -502,22 +503,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         public final Optional<ImmutableExpression> filter;
         public final ImmutableSubstitution<ImmutableTerm> theta;
 
-        /**
-         * After tauC propagation
-         */
-        PropagationResults(ImmutableSubstitution<NonFunctionalTerm> thetaCBar,
-                           ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
-                           ImmutableSubstitution<T> newDeltaC,
-                           Optional<ImmutableExpression> f) {
-            this.theta = thetaFBar.composeWith(thetaCBar);
-            this.delta = newDeltaC;
-            this.filter = f;
-        }
-
-        /**
-         * After tauF propagation
-         */
-        PropagationResults(ImmutableSubstitution<ImmutableTerm> theta,
+       PropagationResults(ImmutableSubstitution<ImmutableTerm> theta,
                            ImmutableSubstitution<T> delta,
                            Optional<ImmutableExpression> newF) {
             this.theta = theta;

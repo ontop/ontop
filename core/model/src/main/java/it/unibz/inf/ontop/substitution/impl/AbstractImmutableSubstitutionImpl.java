@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -15,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -57,38 +54,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
 
-    /**
-     *" "this o f"
-     *
-     * Equivalent to the function x {@code ->} this.apply(f.apply(x))
-     *
-     * Follows the formal definition of a the composition of two substitutions.
-     *
-     */
-    @Override
-    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f) {
-        if (isEmpty()) {
-            return (ImmutableSubstitution<ImmutableTerm>)f;
-        }
-        if (f.isEmpty()) {
-            return (ImmutableSubstitution<ImmutableTerm>)this;
-        }
-
-        return substitutionFactory.getSubstitution(Stream.concat(
-                f.getImmutableMap().entrySet().stream()
-                        .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue()))),
-                getImmutableMap().entrySet().stream())
-                        .filter(e -> !e.getKey().equals(e.getValue()))
-                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                // keep the value from f
-                                (vf, v) -> vf)));
-    }
-
-    @Override
-    public ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> g) {
-        return (ImmutableSubstitution<T>) composeWith(g);
-    }
-
 
     @Override
     public boolean equals(Object other) {
@@ -128,6 +93,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 termFactory, substitutionFactory);
     }
 
+    @Override
+    public <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type) {
+        if (getImmutableMap().entrySet().stream()
+                .anyMatch(e -> !type.isInstance(e.getValue())))
+            throw new ClassCastException();
+
+        return (ImmutableSubstitution<S>) this;
+    }
+    
     @Override
     public <T2 extends ImmutableTerm> ImmutableSubstitution<T2> transform(Function<T, T2> function) {
         return new ImmutableSubstitutionImpl<>(getImmutableMap().entrySet().stream()

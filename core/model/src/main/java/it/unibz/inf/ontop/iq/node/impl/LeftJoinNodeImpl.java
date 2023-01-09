@@ -262,7 +262,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
                 // TODO: remove the casts
                 ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
-                        expressionAndCondition.getSubstitution().composeWith2(descendingSubstitution);
+                        substitutionFactory.compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
 
                 IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty(), variableGenerator);
 
