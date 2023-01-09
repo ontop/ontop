@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
 
 /**
  * Test mysql jdbc driver.
@@ -33,27 +33,18 @@ import org.junit.Test;
  *
  */
 
-public class ConferenceMySQLTest  {
+public class ConferenceMySQLTest extends AbstractVirtualModeTest {
 
     private static final String owlFile = "/mysql/conference/ontology5.owl";
 	private static final String obdaFile = "/mysql/conference/ontology5.obda";
 	private static final String propertyFile = "/mysql/conference/ontology5.properties";
 
-	private void runTests(String query) {
-		String owlFileName =  this.getClass().getResource(owlFile).toString();
-		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
-		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+	private EngineConnection connection;
 
-        // Creating a new instance of the reasoner
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFileName)
-				.nativeOntopMappingFile(obdaFileName)
-				.propertyFile(propertyFileName)
-				.enableTestMode()
-				.build();
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return connection.createStatement();
 	}
-
 
 	@Test(expected = SimpleOntopOWLEngine.InvalidOBDASpecificationException.class)
 	public void testWrongMappings() {
@@ -62,8 +53,6 @@ public class ConferenceMySQLTest  {
                 "   ?x :LcontainsT ?y\n" +
                 "}";
 
-		runTests(query1);
+		connection = createReasoner(owlFile, obdaFile, propertyFile);
 	}
-
-
 }

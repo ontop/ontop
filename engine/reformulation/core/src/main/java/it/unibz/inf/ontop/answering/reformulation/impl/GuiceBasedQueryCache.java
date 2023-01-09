@@ -14,7 +14,7 @@ public class GuiceBasedQueryCache implements QueryCache {
 
     // NB: still present in more recent versions of Guava
     @SuppressWarnings("UnstableApiUsage")
-    private final Cache<KGQuery, IQ> cache;
+    private final Cache<KGQuery<?>, IQ> cache;
 
     @Inject
     private GuiceBasedQueryCache(OntopReformulationSettings settings) {
@@ -25,12 +25,12 @@ public class GuiceBasedQueryCache implements QueryCache {
 
     @Nullable
     @Override
-    public IQ get(KGQuery inputQuery) {
+    public IQ get(KGQuery<?> inputQuery) {
         return cache.getIfPresent(inputQuery);
     }
 
     @Override
-    public void put(KGQuery inputQuery, IQ executableQuery) {
+    public void put(KGQuery<?> inputQuery, IQ executableQuery) {
         cache.put(inputQuery, executableQuery);
     }
 

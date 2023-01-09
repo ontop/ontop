@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.docker.db2;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,20 +17,11 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
 	private static final String obdafile = "/db2/bind/sparqlBindDb2.obda";
     private static final String propertiesfile = "/db2/bind/db2-smallbooks.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
-
-    public BindWithFunctionsDb2Test() {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
-    }
 
     @Ignore("Not yet supported")
     @Test
@@ -54,12 +43,11 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
 
     @Override
     protected List<String> getDivideExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.2500000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"11.5000000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"16.7500000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"5.0000000000000000000000000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"21.2500000000000000000000000\"^^xsd:decimal",
+                "\"11.5000000000000000000000000\"^^xsd:decimal",
+                "\"16.7500000000000000000000000\"^^xsd:decimal",
+                "\"5.0000000000000000000000000\"^^xsd:decimal");
     }
 
     @Ignore("Not yet supported")
@@ -70,84 +58,71 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
 
     @Override
     protected List<String> getConstantIntegerDivideExpectedResults() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.50000000000000000000000000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0.50000000000000000000000000\"^^xsd:decimal");
     }
 
 
     @Override
     protected List<String> getAbsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"^^xsd:decimal");
-        expectedValues.add("\"5.7500\"^^xsd:decimal");
-        expectedValues.add("\"6.7000\"^^xsd:decimal");
-        expectedValues.add("\"1.5000\"^^xsd:decimal");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"8.5000\"^^xsd:decimal",
+                "\"5.7500\"^^xsd:decimal",
+                "\"6.7000\"^^xsd:decimal",
+                "\"1.5000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getRoundExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.00, 43.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 23.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 34.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 10.00\"^^xsd:string");
-        return expectedValues;
+        return ImmutableList.of(
+                "\"0.00, 43.00\"^^xsd:string",
+                "\"0.00, 23.00\"^^xsd:string",
+                "\"0.00, 34.00\"^^xsd:string",
+                "\"0.00, 10.00\"^^xsd:string");
     }
 
     @Override
     protected List<String> getYearExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2014\"^^xsd:integer");
-        expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"2015\"^^xsd:integer");
-        expectedValues.add("\"1970\"^^xsd:integer");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"2014\"^^xsd:integer",
+                "\"2011\"^^xsd:integer",
+                "\"2015\"^^xsd:integer",
+                "\"1970\"^^xsd:integer");
     }
 
     @Override
     protected List<String> getSecondsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52.000000\"^^xsd:decimal");
-        expectedValues.add("\"0.000000\"^^xsd:decimal");
-        expectedValues.add("\"6.000000\"^^xsd:decimal");
-        expectedValues.add("\"0.000000\"^^xsd:decimal");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"52.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"6.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getDaysDTExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17742\"^^xsd:long");
-        expectedValues.add("\"1351\"^^xsd:long");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"16360\"^^xsd:long",
+                "\"17270\"^^xsd:long",
+                "\"17742\"^^xsd:long",
+                "\"1351\"^^xsd:long");
     }
 
     @Override
     protected List<String> getDaysExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17743\"^^xsd:long");
-        expectedValues.add("\"1352\"^^xsd:long");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"16360\"^^xsd:long",
+                "\"17270\"^^xsd:long",
+                "\"17743\"^^xsd:long",
+                "\"1352\"^^xsd:long");
     }
 
     @Override
     protected List<String> getSecondsExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1413514800\"^^xsd:long");
-        expectedValues.add("\"1492161472\"^^xsd:long");
-        expectedValues.add("\"1532994786\"^^xsd:long");
-        expectedValues.add("\"116806800\"^^xsd:long");
-
-        return expectedValues;
+        return ImmutableList.of(
+                "\"1413514800\"^^xsd:long",
+                "\"1492161472\"^^xsd:long",
+                "\"1532994786\"^^xsd:long",
+                "\"116806800\"^^xsd:long");
     }
 }

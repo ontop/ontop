@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
@@ -156,7 +157,8 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
+	@Ignore
 	public void testOBDAEmpties()  {
 
 		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
@@ -181,7 +183,8 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
+	@Ignore
 	public void testR2rmlEmpties() {
 
 		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
@@ -206,7 +209,8 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
+	@Ignore
 	public void testComparesNpdQuery() throws Exception {
 		int obdaResult = npdQuery(reasonerOBDA.getConnection());
 		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());

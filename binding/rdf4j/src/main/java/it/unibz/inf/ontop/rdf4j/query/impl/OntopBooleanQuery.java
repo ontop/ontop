@@ -12,14 +12,14 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 
-public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
+public class OntopBooleanQuery extends AbstractOntopQuery<ParsedBooleanQuery> implements BooleanQuery {
 
 
 	private final RDF4JQueryFactory factory;
 
-	public OntopBooleanQuery(String queryString, ParsedQuery q, String baseIRI, OntopConnection ontopConnection,
+	public OntopBooleanQuery(String queryString, ParsedBooleanQuery q, String baseIRI, OntopConnection ontopConnection,
                              ImmutableMultimap<String, String> httpHeaders,
                              RDF4JQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         super(queryString, baseIRI, q, ontopConnection, httpHeaders, settings);
@@ -31,8 +31,8 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery(), bindings);
 
 		try (OntopStatement stm = conn.createStatement()) {
-			if(this.queryTimeout > 0)
-				stm.setQueryTimeout(this.queryTimeout);
+			if (queryTimeout > 0)
+				stm.setQueryTimeout(queryTimeout);
 			try (BooleanResultSet rs = stm.execute(query, getHttpHeaders())) {
 				return rs.getValue();
 			}

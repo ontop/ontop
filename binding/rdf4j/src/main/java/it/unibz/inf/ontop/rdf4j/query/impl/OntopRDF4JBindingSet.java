@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 
 public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingSet {
 
-    private static final long serialVersionUID = -8455466574395305166L;
-
     private final OntopBindingSet ontopBindingSet;
     private final byte[] salt;
 

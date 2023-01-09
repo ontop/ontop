@@ -769,7 +769,8 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 "\"5.0000000000000000000000000000000000000000\"^^xsd:decimal"));
     }
 
-//    @Test timezone is not supported in h2
+    @Test
+    @Ignore("timezone is not supported in h2")
     public void testTZ() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -788,7 +789,8 @@ public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
                 "\"0.0\""));
     }
 
-    //    @Test see results of datetime with locale
+    @Test
+    @Ignore("see results of datetime with locale")
     public void testDatetime() {
         TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 

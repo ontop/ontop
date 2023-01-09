@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -21,21 +19,11 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
     private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
-
-    public BindWithFunctionsMySQLTest() {
-        super(createReasoner(owlfile, obdafile, propertyfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertyfile);
     }
 
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
-    }
-    
 
     @Ignore("Not yet supported")
     @Test

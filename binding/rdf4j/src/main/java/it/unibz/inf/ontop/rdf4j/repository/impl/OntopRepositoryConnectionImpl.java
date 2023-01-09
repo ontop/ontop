@@ -328,11 +328,8 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
-                ? null
-                : baseIRI.isEmpty() ? null : baseIRI;
-
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedBooleanQuery q = (ParsedBooleanQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
         return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
@@ -359,13 +356,9 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
-                ? null
-                : baseIRI.isEmpty() ? null : baseIRI;
-
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedGraphQuery q = (ParsedGraphQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
         return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
-
     }
 
     @Override
@@ -403,12 +396,13 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
         LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
+        // TODO: why no getSafeBaseIri?
         if (q instanceof ParsedTupleQuery)
-            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopTupleQuery(queryString, (ParsedTupleQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedBooleanQuery)
-            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopBooleanQuery(queryString, (ParsedBooleanQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedGraphQuery)
-            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+            return new OntopGraphQuery(queryString, (ParsedGraphQuery) q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else
             throw new MalformedQueryException("Unrecognized query type. " + queryString);
     }
@@ -437,12 +431,15 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
 
-        String safeBaseIRI = baseIRI == null
+        String safeBaseIRI = getSafeBaseIri(baseIRI);
+        ParsedTupleQuery q = (ParsedTupleQuery) QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
+    }
+
+    private static String getSafeBaseIri(String baseIRI) {
+        return baseIRI == null
                 ? null
                 : baseIRI.isEmpty() ? null : baseIRI;
-        ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-
-        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
     @Override
