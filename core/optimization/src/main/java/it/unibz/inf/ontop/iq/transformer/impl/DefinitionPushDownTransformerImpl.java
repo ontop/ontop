@@ -72,11 +72,11 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 });
 
         return optionalLocalDefinition
-                .flatMap(d -> initialSubstitution.union(
-                        substitutionFactory.getSubstitution(newRequest.getNewVariable(), d)))
-                .map(s -> iqFactory.createConstructionNode(newProjectedVariables, s))
                 // Stops the definition to the new construction node
-                .map(c -> iqFactory.createUnaryIQTree(c, child))
+                .map(d -> iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(newProjectedVariables,
+                                substitutionFactory.union(initialSubstitution, substitutionFactory.getSubstitution(newRequest.getNewVariable(), d))),
+                        child))
                 // Otherwise, continues
                 .orElseGet(() -> iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),

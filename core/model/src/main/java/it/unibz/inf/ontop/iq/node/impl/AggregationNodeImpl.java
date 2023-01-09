@@ -318,7 +318,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         // For Aggregation functional terms, we don't look further on for child definitions
         return groupingVariableDefs.stream()
-                .map(childDef -> childDef.union(def).get())
+                .map(childDef -> substitutionFactory.union(childDef, def))
                 .collect(ImmutableCollectors.toSet());
     }
 

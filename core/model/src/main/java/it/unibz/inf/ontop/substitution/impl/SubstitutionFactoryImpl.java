@@ -10,6 +10,9 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -113,6 +116,29 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(ImmutableCollectors.toMap()),
                 termFactory,
                 this);
+    }
+
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<T> substitution1, ImmutableSubstitution<T> substitution2) {
+
+        if (substitution1.isEmpty())
+            return substitution2;
+
+        if (substitution2.isEmpty())
+            return substitution1;
+
+        ImmutableMap<Variable, T> map = Stream.of(substitution1, substitution2)
+                .map(ProtoSubstitution::getImmutableMap)
+                .map(ImmutableMap::entrySet)
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (val1, val2) -> {
+                            if (!val1.equals(val2))
+                                throw new IllegalArgumentException("Substitutions " + substitution1 + " and " + substitution2 + " do not agree on one of the variables");
+                            return val1;
+                        }));
+
+        return getSubstitution(map);
     }
 
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,

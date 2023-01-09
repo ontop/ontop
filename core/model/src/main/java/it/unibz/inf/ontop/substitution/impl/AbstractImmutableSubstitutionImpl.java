@@ -89,34 +89,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableSubstitution<T>) composeWith(g);
     }
 
-    private static class NotASubstitutionException extends RuntimeException {}
-
-    @Override
-    public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
-        if (otherSubstitution.isEmpty())
-            return Optional.of(this);
-        if (isEmpty())
-            return Optional.of(otherSubstitution);
-
-        try {
-            ImmutableMap<Variable, T> map = Stream.of(this, otherSubstitution)
-                    .map(ProtoSubstitution::getImmutableMap)
-                    .map(ImmutableMap::entrySet)
-                    .flatMap(Collection::stream)
-                    .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                            (v1, v2) -> {
-                                if (!v1.equals(v2))
-                                    throw new NotASubstitutionException();
-                                return v1;
-                            }));
-
-            return Optional.of(substitutionFactory.getSubstitution(map));
-        }
-        catch (NotASubstitutionException e) {
-            return Optional.empty();
-        }
-    }
-
 
     @Override
     public boolean equals(Object other) {

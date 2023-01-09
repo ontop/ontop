@@ -296,10 +296,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
-                    .flatMap(s -> s.union(positionSubstitution))
+                    .map(s -> substitutionFactory.union(s, positionSubstitution))
                     .map(s -> s.filter(projectedVariablesBeforeRenaming::contains))
                     .orElse(positionSubstitution);
-
 
             IQTree childOfConstruction = Optional.of(childTree)
                     .filter(t -> t.getRootNode() instanceof ConstructionNode)

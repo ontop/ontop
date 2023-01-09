@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -36,4 +37,14 @@ public interface SubstitutionFactory {
                                                                 ImmutableSet<Variable> variables);
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> replace(ImmutableSubstitution<T> substitution, Variable variable, T newValue);
+
+    /**
+     *
+     * @param substitution1
+     * @param substitution2
+     * @return
+     * @param <T>
+     * @throws IllegalArgumentException if the substitutions do not agree on one of the variables
+     */
+    <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<T> substitution1, ImmutableSubstitution<T> substitution2);
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -182,8 +181,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         return leftDefs.stream()
                     .flatMap(l -> rightDefs.stream()
-                            .map(r -> l.union(r).orElseThrow(() -> new MinorOntopInternalBugException(
-                                                    "Unexpected conflict between " + l + " and " + r))))
+                            .map(r -> substitutionFactory.union(l, r)))
                     .collect(ImmutableCollectors.toSet());
     }
 

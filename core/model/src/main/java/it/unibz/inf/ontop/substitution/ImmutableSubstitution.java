@@ -45,10 +45,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> f);
 
-    /**
-     * Because of the optional cannot be overloaded.
-     */
-    Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
