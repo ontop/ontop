@@ -2,15 +2,12 @@ package it.unibz.inf.ontop.docker.failing.local;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.semanticweb.owlapi.model.OWLException;
 
 import java.io.FileReader;
 
@@ -18,41 +15,24 @@ import java.io.FileReader;
  *
  * @author 
  */
-public class ADPOntopTest {
+public class ADPOntopTest extends AbstractVirtualModeTest  {
 	
-	final String owlFile = "/local/adp/npd-ql.owl";
-	final String obdaFile = "/local/adp/mapping-fed.obda";
-	final String queryFile = "/local/adp/01.q";
-	final String propertyFile = "/local/adp/mapping-fed.properties";
-	final String r2rmlfile = "/local/adp/mapping-fed.ttl";
+	private static final String owlFile = "/local/adp/npd-ql.owl";
+	private static final String obdaFile = "/local/adp/mapping-fed.obda";
+	private static final String queryFile = "/local/adp/01.q";
+	private static final String propertyFile = "/local/adp/mapping-fed.properties";
 
 	public void runQuery() throws Exception {
-
-		String owlFileName =  this.getClass().getResource(owlFile).toString();
-		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
-		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdaFileName)
-				.ontologyFile(owlFileName)
-				.propertyFile(propertyFileName)
-				.enableTestMode()
-				.build();
-
-
-		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
-			 OWLConnection conn = reasoner.getConnection();
-			 OWLStatement st = conn.createStatement()) {
+		try (EngineConnection connection = createReasoner(owlFile, obdaFile, propertyFile);
+			 OWLStatement st = connection.createStatement()) {
 			String sparqlQuery = Joiner.on("\n").join(
 					CharStreams.readLines(new FileReader(queryFile)));
-			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-			while (rs.hasNext()) {
-				final OWLBindingSet bindingSet = rs.next();
-				System.out.print(bindingSet + "\n");
+			try (TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery)) {
+				while (rs.hasNext()) {
+					final OWLBindingSet bindingSet = rs.next();
+					System.out.print(bindingSet + "\n");
+				}
 			}
-			rs.close();
 
 			/*
 			 * Print the query summary
@@ -71,8 +51,12 @@ public class ADPOntopTest {
 		}
 	}
 
-  public static void main(String[] args) throws Exception {
-	  new ADPOntopTest().runQuery();
-	    
-  }
+	public static void main(String[] args) throws Exception {
+		new ADPOntopTest().runQuery();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement()  {
+		throw new IllegalStateException("should never be called");
+	}
 }

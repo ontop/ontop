@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class AbstractPredefinedQuery<Q extends RDF4JQuery> implements PredefinedQuery<Q> {
+public class AbstractPredefinedQuery<Q extends RDF4JQuery<?>> implements PredefinedQuery<Q> {
 
     private final String id;
     protected final PredefinedQueryConfigEntry queryConfig;

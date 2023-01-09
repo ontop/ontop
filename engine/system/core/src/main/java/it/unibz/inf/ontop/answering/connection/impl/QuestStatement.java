@@ -27,7 +27,7 @@ public abstract class QuestStatement implements OntopStatement {
 	private final QueryReformulator engine;
 	private final QueryLogger.Factory queryLoggerFactory;
 
-	private QueryExecutionThread executionThread;
+	private QueryExecutionThread<?,?> executionThread;
 	private boolean canceled = false;
 
 

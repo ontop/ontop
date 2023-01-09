@@ -18,13 +18,13 @@ public class ConflictingVariableJoinViewTest {
     public void testPersonUniqueConstraint() throws Exception {
         try {
             LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
-        } catch (ConflictingVariableInJoinViewException e) {
-            assertEquals(
-                    e.getConflictingAttributeIds().stream().map(
-                            QuotedID::getName).collect(ImmutableCollectors.toSet()),
-                    ImmutableSet.of("c_id"));
-            return;
+            fail();
         }
-        fail();
+        catch (ConflictingVariableInJoinViewException e) {
+            assertEquals(ImmutableSet.of("c_id"),
+                    e.getConflictingAttributeIds().stream()
+                            .map(QuotedID::getName)
+                            .collect(ImmutableCollectors.toSet()));
+        }
     }
 }

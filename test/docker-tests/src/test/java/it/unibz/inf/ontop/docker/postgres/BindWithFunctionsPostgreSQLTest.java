@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -22,20 +20,11 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     private static final String obdafile = "/pgsql/bind/sparqlBindPostgreSQL.obda";
     private static final String propertiesfile = "/pgsql/bind/sparqlBindPostgreSQL.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OWLConnection CONNECTION;
-
-    public BindWithFunctionsPostgreSQLTest()  {
-        super(createReasoner(owlfile, obdafile, propertiesfile));
-        REASONER = getReasoner();
-        CONNECTION = getConnection();
+    @BeforeClass
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
-    @AfterClass
-    public static void after() throws Exception {
-        CONNECTION.close();
-        REASONER.close();
-    }
 
     @Override
     protected List<String> getAbsExpectedValues() {

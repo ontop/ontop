@@ -2,13 +2,8 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
@@ -20,8 +15,7 @@ import java.nio.file.Paths;
 
 public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualModeTest {
 
-    protected static OntopOWLEngine REASONER;
-    protected static OntopOWLConnection CONNECTION;
+    protected static EngineConnection CONNECTION;
 
     protected static final String owlFile = "/distinctInAggregates/university.ttl";
     protected static final String obdaFile = "/distinctInAggregates/university.obda";
@@ -32,20 +26,6 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     protected static final String groupConcatDistinctQueryFile = "/distinctInAggregates/groupConcatDistinct.rq";
 
 
-    protected static OntopOWLEngine createReasoner(String owlFile, String obdaFile, String propertiesFile) {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
-
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertiesFile)
-                .enableTestMode()
-                .build();
-        return new SimpleOntopOWLEngine(config);
-    }
-
     @Override
     protected OntopOWLStatement createStatement() throws OWLException {
         return CONNECTION.createStatement();
@@ -54,7 +34,6 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Test
@@ -129,7 +108,7 @@ public abstract class AbstractDistinctInAggregateTest extends AbstractVirtualMod
     }
 
     private String readQueryFile(String queryFile) throws IOException {
-        Path path = Paths.get(QuestSPARQLRewriterTest.class.getResource(queryFile).getPath());
+        Path path = Paths.get(AbstractDistinctInAggregateTest.class.getResource(queryFile).getPath());
         return new String(Files.readAllBytes(path));
     }
 

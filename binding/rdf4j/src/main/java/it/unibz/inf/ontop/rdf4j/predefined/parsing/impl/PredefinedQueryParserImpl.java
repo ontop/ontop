@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
@@ -99,7 +100,7 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
     private PredefinedGraphQuery createPredefinedGraphQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,
                                                             String queryString) {
         ParsedQuery parsedTree = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, null);
-        RDF4JConstructQuery graphQuery = inputQueryFactory.createConstructQuery(queryString, parsedTree, new MapBindingSet());
+        RDF4JConstructQuery graphQuery = inputQueryFactory.createConstructQuery(queryString, (ParsedGraphQuery) parsedTree, new MapBindingSet());
 
         return new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry);
     }
