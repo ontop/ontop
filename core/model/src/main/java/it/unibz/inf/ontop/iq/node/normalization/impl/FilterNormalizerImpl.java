@@ -257,7 +257,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 Optional<ConstructionNode> parentConstructionNode = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> (ImmutableSubstitution<ImmutableTerm>) (ImmutableSubstitution<?>) s)
                         .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
                 return conditionSimplificationResults.getOptionalExpression()

@@ -233,45 +233,35 @@ public class VariableNullabilityImpl implements VariableNullability {
     private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
-        ImmutableMultimap<Variable, Integer> functionSubTermMultimap = substitution.getImmutableMap().entrySet().stream()
+        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                 .flatMap(e -> {
                     ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
                     return IntStream.range(0, subTerms.size())
                             .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
-                            .mapToObj(i -> Maps.immutableEntry(e.getKey(), i));
+                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable()));
                 })
-                .collect(ImmutableCollectors.toMultimap());
-
-        if (functionSubTermMultimap.isEmpty())
-            return Stream.of(substitution);
-
-        ImmutableTable<Variable, Integer, Variable> subTermNames = functionSubTermMultimap.entries().stream()
-                .map(e -> Tables.immutableCell(e.getKey(), e.getValue(), variableGenerator.generateNewVariable()))
                 .collect(ImmutableCollectors.toTable());
 
-        ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
-                .map(e ->
-                        Optional.of(functionSubTermMultimap.get(e.getKey()))
-                                .filter(indexes -> !indexes.isEmpty())
-                                .map(indexes -> {
-                                    Variable v = e.getKey();
-                                    ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
-                                    ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                            .mapToObj(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
-                                                    .orElseGet(() -> def.getTerm(i)))
-                                            .collect(ImmutableCollectors.toList());
+        if (subTermNames.isEmpty())
+            return Stream.of(substitution);
 
-                                    ImmutableTerm newDef = termFactory.getImmutableFunctionalTerm(
-                                            def.getFunctionSymbol(), newArgs);
-                                    return Maps.immutableEntry(v, newDef);
-                                })
-                                .orElse((Map.Entry<Variable, ImmutableTerm>)e))
-                .collect(ImmutableCollectors.toMap());
+        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution
+                .transform((var, value) -> Optional.of(subTermNames.row(var))
+                        .filter(indexes -> !indexes.isEmpty())
+                        .<ImmutableTerm>map(indexes -> {
+                            ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) value;
+                            ImmutableList<? extends ImmutableTerm> subTerms = def.getTerms();
+                            ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, subTerms.size())
+                                    .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(indexes.get(i))
+                                            .orElseGet(() -> subTerms.get(i)))
+                                    .collect(ImmutableCollectors.toList());
 
-        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitutionFactory.getSubstitution(parentSubstitutionMap);
+                            return termFactory.getImmutableFunctionalTerm(def.getFunctionSymbol(), newArgs);
+                        })
+                        .orElse(value));
 
-
+        //noinspection DataFlowIssue
         ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(
                 subTermNames.cellSet().stream()
                         .collect(ImmutableCollectors.toMap(

@@ -181,9 +181,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .filter(nonGroupingVariables::contains);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                    (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
                             substitutionFactory.compose(nonGroupingSubstitution, aggregationSubstitution)
-                                    .filter(aggregationSubstitution.getDomain()::contains);
+                                    .filter(aggregationSubstitution.getDomain()::contains)
+                                    .castTo(ImmutableFunctionalTerm.class);
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
                     groupingVariables,

@@ -401,8 +401,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 Optional<ConstructionNode> newParent = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> iqFactory.createConstructionNode(extractProjectedVariables(children),
-                                (ImmutableSubstitution<ImmutableTerm>) (ImmutableSubstitution<?>) s));
+                        .map(s -> iqFactory.createConstructionNode(extractProjectedVariables(children), s));
 
                 return newParent
                         .map(p -> updateParentConditionAndChildren(p, newJoiningCondition, newChildren))

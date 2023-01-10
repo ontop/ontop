@@ -129,7 +129,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
             return Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
-                    .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
                     .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, filterLevelTree))
                     .orElse(filterLevelTree);

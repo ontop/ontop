@@ -482,7 +482,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                (ImmutableSubstitution<ImmutableFunctionalTerm>)(ImmutableSubstitution<?>)mergedVarDefs.iterator().next()
+                mergedVarDefs.iterator().next().castTo(ImmutableFunctionalTerm.class)
         );
     }
 

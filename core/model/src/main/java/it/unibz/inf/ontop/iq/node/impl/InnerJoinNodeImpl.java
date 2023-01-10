@@ -423,9 +423,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(children.stream()
-                            .flatMap(c -> c.getVariables().stream())
-                            .collect(ImmutableCollectors.toSet()),
-                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s))
+                                    .flatMap(c -> c.getVariables().stream())
+                                    .collect(ImmutableCollectors.toSet()),
+                            s))
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, joinTree))
                     .orElse(joinTree);
 
