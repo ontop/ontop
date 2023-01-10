@@ -80,9 +80,9 @@ public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
                         .map(tuple -> substitutionFactory.getSubstitution(
                                 IntStream.range(0, orderedVariables.size())
                                     .boxed()
-                                    .collect(ImmutableCollectors.toMap(
-                                        orderedVariables::get,
-                                        i -> (ImmutableTerm) tuple.get(i)))))
+                                    .collect(ImmutableCollectors.<Integer, Variable, ImmutableTerm>toMap(
+                                            orderedVariables::get,
+                                            tuple::get))))
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createNaryIQTree(

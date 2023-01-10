@@ -56,7 +56,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
                     constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
                     .map(e -> Optional.ofNullable(typedNullMap.get(e.getKey()))
                             .filter(n -> e.getValue().isNull())
-                            .map(n -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) n))
+                            .map(n -> Maps.<Variable, ImmutableTerm>immutableEntry(e.getKey(), n))
                             .orElse(e))
                     .collect(ImmutableCollectors.toMap()));
 

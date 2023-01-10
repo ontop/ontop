@@ -401,7 +401,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
             possibleVariableDefinitions = distinctValuesStream
                     .map(row -> IntStream.range(0, getVariables().size())
-                            .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), (NonVariableTerm) row.get(i)))
+                            .mapToObj(i -> Maps.<Variable, NonVariableTerm>immutableEntry(orderedVariables.get(i), row.get(i)))
                             .collect(ImmutableCollectors.toMap()))
                     .map(substitutionFactory::getSubstitution)
                     .collect(ImmutableCollectors.toSet());

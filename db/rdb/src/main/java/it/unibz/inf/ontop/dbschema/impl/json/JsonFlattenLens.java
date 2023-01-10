@@ -294,12 +294,12 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                                                                              Variable flattenedIfArrayVar, CoreSingletons cs){
 
         TermFactory termFactory = cs.getTermFactory();
-        return cs.getSubstitutionFactory().getSubstitution(ImmutableMap.of(
+        return cs.getSubstitutionFactory().getSubstitution(
                         flattenedIfArrayVar,
                         termFactory.getIfElseNull(
                                 termFactory.getDBIsArray(dbType, flattenedVar),
                                 flattenedVar
-                        )));
+                        ));
     }
 
 

@@ -12,10 +12,12 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
@@ -58,7 +60,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              * where
              *   V' = (V minus {f}) union {o,i}
              */
-            ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
+            ImmutableMap<Boolean, ImmutableSubstitution<ImmutableTerm>> splitSub = splitSubstitution(
                     cn,
                     flattenNode.getFlattenedVariable()
             );
@@ -94,7 +96,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
         );
     }
 
-    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, VariableGenerator variableGenerator) {
+    private IQTree getChild(FlattenNode fn, ImmutableSubstitution<ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, VariableGenerator variableGenerator) {
             return flattenedVarDef.isEmpty() ?
                     grandChild:
                     iqFactory.createUnaryIQTree(
@@ -107,7 +109,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                     ).normalizeForOptimization(variableGenerator);
     }
 
-    private ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
+    private ImmutableMap<Boolean, ImmutableSubstitution<ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
         return cn.getSubstitution().getImmutableMap().entrySet().stream().collect(
                 ImmutableCollectors.partitioningBy(
                         e -> (e.getKey().equals(flattenedVar) ||
@@ -115,10 +117,11 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         ImmutableCollectors.toMap(
                                 ImmutableMap.Entry::getKey,
                                 ImmutableMap.Entry::getValue
-                        )));
+                        ))).entrySet().stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> substitutionFactory.getSubstitution(e.getValue())));
     }
 
-    private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
+    private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableSubstitution<ImmutableTerm> filteredSub) {
 
         return iqFactory.createConstructionNode(
                 Stream.concat(
@@ -126,11 +129,11 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         cn.getVariables().stream()
                                 .filter(v -> !v.equals(fn.getFlattenedVariable()))
                 ).collect(ImmutableCollectors.toSet()),
-                substitutionFactory.getSubstitution(filteredSub)
+                filteredSub
         );
     }
 
-    private ConstructionNode getChildCn(ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn,
+    private ConstructionNode getChildCn(ImmutableSubstitution<ImmutableTerm> flattenedVarDef, ConstructionNode parentCn,
                                         FlattenNode fn) {
         ImmutableSet<Variable> fnDefinedVars = fn.getLocallyDefinedVariables();
         return iqFactory.createConstructionNode(
@@ -139,7 +142,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                         parentCn.getLocallyRequiredVariables().stream()
                                 .filter(v -> !fnDefinedVars.contains(v))
                 ).collect(ImmutableCollectors.toSet()),
-                substitutionFactory.getSubstitution(flattenedVarDef)
+                flattenedVarDef
         );
     }
 

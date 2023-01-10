@@ -326,7 +326,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                     e.getValue().get().getLiftableTerm())))
                     .collect(ImmutableCollectors.toMap());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> newAggregationSubstitutionMap =
+            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
                     decompositionMap.entrySet().stream()
                             .flatMap(e -> e.getValue()
                                     // Sub-term substitution entries from decompositions
@@ -336,10 +336,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                     .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                             e.getKey(),
                                             (ImmutableFunctionalTerm) simplifiedSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap());
-
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
-                    newAggregationSubstitutionMap);
+                            .collect(ImmutableCollectors.toMap()));
 
             if (liftedSubstitutionMap.isEmpty())
                 return new AggregationNormalizationState(
