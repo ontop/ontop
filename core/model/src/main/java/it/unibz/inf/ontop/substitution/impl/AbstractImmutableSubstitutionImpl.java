@@ -20,12 +20,9 @@ import java.util.function.Predicate;
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
-    protected final SubstitutionFactory substitutionFactory;
 
-    protected AbstractImmutableSubstitutionImpl(TermFactory termFactory,
-                                                SubstitutionFactory substitutionFactory) {
+    protected AbstractImmutableSubstitutionImpl(TermFactory termFactory) {
         super(termFactory);
-        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -90,7 +87,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> type.cast(e.getValue()))),
-                termFactory, substitutionFactory);
+                termFactory);
     }
 
     @Override
@@ -108,7 +105,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> function.apply(e.getValue()))),
-                termFactory, substitutionFactory);
+                termFactory);
     }
 
     @Override
@@ -117,6 +114,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> function.apply(e.getKey(), e.getValue()))),
-                termFactory, substitutionFactory);
+                termFactory);
     }
 }

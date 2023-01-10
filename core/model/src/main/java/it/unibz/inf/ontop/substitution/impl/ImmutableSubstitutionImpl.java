@@ -15,9 +15,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     private final ImmutableMap<Variable, T> map;
 
     protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
-                                        TermFactory termFactory,
-                                        SubstitutionFactory substitutionFactory) {
-        super(termFactory, substitutionFactory);
+                                        TermFactory termFactory) {
+        super(termFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (substitutionMap.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
@@ -37,7 +36,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     @Override
     protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
-        return substitutionFactory.getSubstitution(map);
+        return new ImmutableSubstitutionImpl<T>(map, termFactory);
     }
 
     @Override

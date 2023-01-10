@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -246,9 +245,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
         if (!variableSubstitutionFragment.isEmpty()) {
-            Var2VarSubstitution var2varSubstitutionFragment = substitutionFactory.getVar2VarSubstitution(
-                    variableSubstitutionFragment.getImmutableMap());
-            constructionAndFilterAndValues = substituteVariables(var2varSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
+            constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }
         return buildTreeFromCFV(constructionAndFilterAndValues);
     }
@@ -299,11 +296,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .mapToObj(formerOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableList<Constant>> filteredValues = formerValues.stream()
-                .filter(tuple -> substitutionVariableIndices.stream()
-                        .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
-                .collect(ImmutableCollectors.toList());
-
         ImmutableList<ImmutableList<Constant>> newValues = formerValues.stream()
                 .filter(tuple -> substitutionVariableIndices.stream()
                         .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
@@ -318,7 +310,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 iqFactory.createValuesNode(newOrderedVariables, newValues));
     }
 
-    private static ConstructionAndFilterAndValues substituteVariables(Var2VarSubstitution variableSubstitutionFragment,
+    private static ConstructionAndFilterAndValues substituteVariables(ImmutableSubstitution<Variable> variableSubstitutionFragment,
                                                                       ConstructionAndFilterAndValues constructionAndFilterAndValues,
                                                                       IntermediateQueryFactory iqFactory) {
         ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
@@ -328,6 +320,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ImmutableList<Variable> substitutedOrderedVariables = formerOrderedVariables.stream()
                 .map(variableSubstitutionFragment::applyToVariable)
+                .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toList());
 
         if (substitutedOrderedVariables.equals(formerOrderedVariables))

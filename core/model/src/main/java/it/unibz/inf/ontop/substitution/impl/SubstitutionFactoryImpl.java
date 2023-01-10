@@ -29,7 +29,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
-        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, termFactory, this);
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, termFactory);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), termFactory, this);
+        return getSubstitution(ImmutableMap.of());
     }
 
     @Override
@@ -67,24 +67,19 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables) {
-        return new ImmutableSubstitutionImpl<>(
-                variables.collect(ImmutableCollectors.toMap(v -> v, v -> termFactory.getNullConstant())), termFactory, this);
-    }
-
-    @Override
-    public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new Var2VarSubstitutionImpl(substitutionMap, termFactory, this);
+        return getSubstitution(
+                variables.collect(ImmutableCollectors.toMap(v -> v, v -> termFactory.getNullConstant())));
     }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, termFactory, this);
+        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, termFactory);
     }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer) {
         ImmutableMap<Variable, Variable> map = stream.collect(ImmutableCollectors.toMap(v -> v, transformer));
-        return new InjectiveVar2VarSubstitutionImpl(map, termFactory, this);
+        return getInjectiveVar2VarSubstitution(map);
     }
 
     /**
@@ -108,13 +103,11 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         if (!substitution.isDefining(variable))
             throw new IllegalArgumentException("SubstitutionFactory.replace: variable " + variable + " is not defined by " + substitution);
 
-        return new ImmutableSubstitutionImpl<>(Stream.concat(
+        return getSubstitution(Stream.concat(
                         Stream.of(Maps.immutableEntry(variable, newValue)),
                         substitution.getImmutableMap().entrySet().stream()
                                 .filter(e -> !e.getKey().equals(variable)))
-                .collect(ImmutableCollectors.toMap()),
-                termFactory,
-                this);
+                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override

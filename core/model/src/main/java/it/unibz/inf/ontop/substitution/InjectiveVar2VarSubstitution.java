@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * Var2VarSubstitution that is injective
  *    (no value in the substitution map is shared by two keys)
  */
-public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
+public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Variable> {
 
     /**
      * Applies it (the Var2VarSubstitution) on the keys and values of the given substitution.
@@ -21,6 +21,14 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
     <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
     ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments) throws ConversionException;
+
+    <T extends ImmutableTerm> T applyToTerm(T term);
+
+    @Override // more specific return type
+    default Variable applyToVariable(Variable variable) {
+        Variable r = get(variable);
+        return r == null ? variable : r;
+    }
 
     /**
      * { (x,y) | (x,y) \in (this o otherSubstitution), x not excluded }

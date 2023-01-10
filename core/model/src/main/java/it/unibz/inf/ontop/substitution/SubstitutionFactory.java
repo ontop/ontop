@@ -26,8 +26,6 @@ public interface SubstitutionFactory {
 
    ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables);
 
-    Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
-
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer);
