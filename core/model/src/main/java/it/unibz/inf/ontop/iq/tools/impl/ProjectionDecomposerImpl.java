@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ProjectionDecomposerImpl implements ProjectionDecomposer {
 

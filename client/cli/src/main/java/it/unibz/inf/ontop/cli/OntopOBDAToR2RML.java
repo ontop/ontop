@@ -7,6 +7,7 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
@@ -31,7 +32,6 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
@@ -240,20 +240,26 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
 
         private TargetAtom normalize(TargetAtom target, Function<Variable, Optional<QuotedID>> lookup) {
+            ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
+
             ImmutableMap<Variable, Optional<QuotedID>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().applyToVariable(v))
+                    .map(targetSubstitution::applyToVariable)
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
-                    .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
+                    .collect(ImmutableCollectors.toMap(v -> v, lookup));
 
-            if (targetPreMap.values().stream().anyMatch(t -> !t.isPresent()))
-                throw new RuntimeException(targetPreMap.entrySet().stream()
-                        .filter(e -> !e.getValue().isPresent())
-                        .map(Map.Entry::getKey)
-                        .map(Variable::getName)
+            ImmutableList<String> missingPlaceholders = targetPreMap.entrySet().stream()
+                    .filter(e -> e.getValue().isEmpty())
+                    .map(Map.Entry::getKey)
+                    .map(Variable::getName)
+                    .collect(ImmutableCollectors.toList());
+
+            if (!missingPlaceholders.isEmpty())
+                throw new RuntimeException(missingPlaceholders.stream()
                         .collect(Collectors.joining(", ",
                                 "The placeholder(s) ",
-                                " in the target do(es) not occur in source query of the mapping assertion\n[" + target + "]")));
+                                " in the target do(es) not occur in source query of the mapping assertion\n["
+                                        + target + "]")));
 
             //noinspection OptionalGetWithoutIsPresent
             ImmutableMap<Variable, Variable> targetMap = targetPreMap.entrySet().stream()
@@ -262,8 +268,8 @@ public class OntopOBDAToR2RML implements OntopCommand {
                             Map.Entry::getKey,
                             e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
 
-            Var2VarSubstitution sub = substitutionFactory.getVar2VarSubstitution(targetMap);
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = target.getSubstitution().transform(sub::apply);
+            ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitution(targetMap);
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }
 

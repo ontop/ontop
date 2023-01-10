@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;

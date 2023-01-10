@@ -21,14 +21,15 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -195,7 +196,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		ImmutableTerm extractedSubject = getSubjectTerm(tm, regularTriplesMap);
 		ImmutableTerm extractedObject = getSubjectTerm(parent, regularTriplesMap);
 
-		ImmutableMap<Variable, Variable> childMap, parentMap;
+		InjectiveVar2VarSubstitution sub, ob;
 		String sourceQuery;
 
 		if (robm.getJoinConditions().isEmpty()) {
@@ -203,27 +204,30 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
 						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
-			childMap = parentMap = Stream.concat(
-					getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
-					extractedObject.getVariableStream())
-					.collect(toVariableRenamingMap(TMP_PREFIX));
+			sub = ob = substitutionFactory.getInjectiveVar2VarSubstitution(
+					Stream.concat(
+							getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
+							extractedObject.getVariableStream()),
+					toVariableRenamingMap(TMP_PREFIX));
 
-			sourceQuery = getSQL(childMap.entrySet().stream()
+			sourceQuery = getSQL(sub.getImmutableMap().entrySet().stream()
 							.map(e -> Maps.immutableEntry(TMP_PREFIX + "." + e.getKey(), e.getValue())),
 					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), TMP_PREFIX)),
 					Stream.of());
 		}
 		else {
-			childMap = getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs)
-					.collect(toVariableRenamingMap(CHILD_PREFIX));
+			sub = substitutionFactory.getInjectiveVar2VarSubstitution(
+					getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
+					toVariableRenamingMap(CHILD_PREFIX));
 
-			parentMap = extractedObject.getVariableStream()
-					.collect(toVariableRenamingMap(PARENT_PREFIX));
+			ob = substitutionFactory.getInjectiveVar2VarSubstitution(
+					extractedObject.getVariableStream(),
+					toVariableRenamingMap(PARENT_PREFIX));
 
 			sourceQuery = getSQL(Stream.concat(
-					childMap.entrySet().stream()
+					sub.getImmutableMap().entrySet().stream()
 							.map(e -> Maps.immutableEntry(CHILD_PREFIX + "." + e.getKey(), e.getValue())),
-					parentMap.entrySet().stream()
+					ob.getImmutableMap().entrySet().stream()
 							.map(e -> Maps.immutableEntry(PARENT_PREFIX + "." + e.getKey(), e.getValue()))),
 					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), CHILD_PREFIX),
 							Maps.immutableEntry(parent.getLogicalTable(), PARENT_PREFIX)),
@@ -231,12 +235,10 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							.map(j -> Maps.immutableEntry(CHILD_PREFIX + "." + j.getChild(), PARENT_PREFIX + "." + j.getParent())));
 		}
 
-		Var2VarSubstitution sub = substitutionFactory.getInjectiveVar2VarSubstitution(childMap);
 		ImmutableTerm subject = sub.apply(extractedSubject);
 		ImmutableList<ImmutableTerm>  graphs = extractedGraphs.stream()
 				.map(sub::apply)
 				.collect(ImmutableCollectors.toList());
-		Var2VarSubstitution ob = substitutionFactory.getInjectiveVar2VarSubstitution(parentMap);
 		ImmutableTerm object = ob.apply(extractedObject);
 
 		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(sub::apply)
@@ -277,8 +279,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				Stream.concat(l1.stream(), l2.stream()).flatMap(ImmutableTerm::getVariableStream));
 	}
 
-	private Collector<Variable, ?, ImmutableMap<Variable, Variable>> toVariableRenamingMap(String prefix) {
-		return ImmutableCollectors.toMap(v -> v, v -> prefixAttributeName(prefix + "_", v));
+	private Function<Variable, Variable> toVariableRenamingMap(String prefix) {
+		return v -> prefixAttributeName(prefix + "_", v);
 	}
 
 	private Variable prefixAttributeName(String prefix, Variable var) {

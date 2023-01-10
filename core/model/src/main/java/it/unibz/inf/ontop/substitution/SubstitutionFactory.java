@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 

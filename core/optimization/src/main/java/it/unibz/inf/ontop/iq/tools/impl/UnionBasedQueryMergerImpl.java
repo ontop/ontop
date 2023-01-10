@@ -110,10 +110,8 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
             DistinctVariableOnlyDataAtom sourceProjectionAtom,
             DistinctVariableOnlyDataAtom targetProjectionAtom) {
 
-        int arity = sourceProjectionAtom.getEffectiveArity();
-
         if (!sourceProjectionAtom.getPredicate().equals(targetProjectionAtom.getPredicate())
-                || (arity != targetProjectionAtom.getEffectiveArity())) {
+                || (sourceProjectionAtom.getEffectiveArity() != targetProjectionAtom.getEffectiveArity())) {
             return Optional.empty();
         }
         else {

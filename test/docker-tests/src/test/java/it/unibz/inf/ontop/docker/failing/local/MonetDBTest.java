@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
 
 @Ignore("Local test")
 public class MonetDBTest extends AbstractVirtualModeTest {

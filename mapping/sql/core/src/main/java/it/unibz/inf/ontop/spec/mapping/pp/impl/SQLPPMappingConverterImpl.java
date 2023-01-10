@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,37 +87,36 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
+        ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
+
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().applyToVariable(v))
+                    .map(targetSubstitution::applyToVariable)
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
-                    .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
+                    .collect(ImmutableCollectors.toMap(v -> v, lookup));
 
-        if (targetPreMap.values().stream().anyMatch(t -> !t.isPresent()))
-            throw new InvalidMappingSourceQueriesException(targetPreMap.entrySet().stream()
-                    .filter(e -> !e.getValue().isPresent())
-                    .map(Map.Entry::getKey)
-                    .map(Variable::getName)
+        ImmutableList<String> missingPlaceholders = targetPreMap.entrySet().stream()
+                .filter(e -> e.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .map(Variable::getName)
+                .collect(ImmutableCollectors.toList());
+
+        if (!missingPlaceholders.isEmpty())
+            throw new InvalidMappingSourceQueriesException(missingPlaceholders.stream()
                     .collect(Collectors.joining(", ",
                             "The placeholder(s) ",
                             " in the target do(es) not occur in source query of the mapping assertion\n["
                                     + provenance.getProvenanceInfo() + "]")));
 
-        ImmutableMap<Variable, ImmutableTerm> targetMap = targetPreMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
-
-        Var2VarSubstitution targetRenamingPart = substitutionFactory.getVar2VarSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable) // (NON-INJECTIVE)
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetPreMap.entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().get()))
                 .filter(e -> !e.getValue().equals(e.getKey()))
-                .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = target.getSubstitution().transform(targetRenamingPart::apply);
+        ImmutableSubstitution<Variable> targetRenamingPart = substitution.getFragment(Variable.class);
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
 
-        ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
-                targetMap.entrySet().stream() // getNonVariableFragment
-                        .filter(e -> !(e.getValue() instanceof Variable))
-                        .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.getFragment(NonVariableTerm.class);
 
         IQTree selectTree = iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(spoSubstitution.getRange().stream()

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.substitution;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;

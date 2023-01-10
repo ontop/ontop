@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -11,8 +10,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -46,7 +45,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.filter(projectedVariables::contains);
 
-        Var2VarSubstitution downRenamingSubstitution = substitutionFactory.getVar2VarSubstitution(
+        InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 reducedAscendingSubstitution.getFragment(Variable.class)
                         .filter((k, v) -> !projectedVariables.contains(v))
                         .getImmutableMap().entrySet().stream()
@@ -68,11 +67,11 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     public class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
         private final ImmutableSubstitution<ImmutableTerm> normalizedSubstitution;
-        private final Var2VarSubstitution downRenamingSubstitution;
+        private final InjectiveVar2VarSubstitution downRenamingSubstitution;
         private final ImmutableSet<Variable> projectedVariables;
 
         private ConstructionSubstitutionNormalizationImpl(ImmutableSubstitution<ImmutableTerm> normalizedSubstitution,
-                                                          Var2VarSubstitution downRenamingSubstitution,
+                                                          InjectiveVar2VarSubstitution downRenamingSubstitution,
                                                           ImmutableSet<Variable> projectedVariables) {
             this.normalizedSubstitution = normalizedSubstitution;
             this.downRenamingSubstitution = downRenamingSubstitution;
