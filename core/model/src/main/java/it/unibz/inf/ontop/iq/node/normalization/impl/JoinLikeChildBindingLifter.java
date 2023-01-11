@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -50,10 +51,9 @@ public class JoinLikeChildBindingLifter {
 
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
-        ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
-                .builder().restrictRangeTo(VariableOrGroundTerm.class).build();
+        ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution.restrictRangeTo(VariableOrGroundTerm.class);
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.builder().restrictRangeTo(ImmutableFunctionalTerm.class).build();
+        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
@@ -62,8 +62,7 @@ public class JoinLikeChildBindingLifter {
                 .collect(ImmutableCollectors.toSet());
 
         InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                nonDownPropagableFragment.getDomain().stream()
-                        .filter(otherChildrenVariables::contains),
+                Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream(),
                 variableGenerator::generateNewVariableFromVar);
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(

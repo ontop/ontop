@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -32,18 +34,12 @@ public class ConstructionNodeTools {
 
     public ImmutableSet<Variable> computeNewProjectedVariables(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
-        ImmutableSet<Variable> tauDomain = descendingSubstitution.getDomain();
 
-        Stream<Variable> remainingVariableStream = projectedVariables.stream()
-                .filter(v -> !tauDomain.contains(v));
+        Sets.SetView<Variable> remainingVariables = Sets.difference(projectedVariables, descendingSubstitution.getDomain());
 
-        Stream<Variable> newVariableStream = descendingSubstitution.entrySet().stream()
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .map(Map.Entry::getValue)
-                .flatMap(ImmutableTerm::getVariableStream);
+        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
 
-        return Stream.concat(newVariableStream, remainingVariableStream)
-                .collect(ImmutableCollectors.toSet());
+        return Sets.union(newVariables, remainingVariables).immutableCopy();
     }
 
     /**
@@ -70,10 +66,10 @@ public class ConstructionNodeTools {
          */
         ImmutableSubstitution<ImmutableTerm> normalizedEta = substitutionTools.prioritizeRenaming(eta, newV);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.restrictDomain(newV);
+        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.restrictDomainTo(newV);
 
         ImmutableSubstitution<ImmutableTerm> delta = normalizedEta.builder()
-                .restrictDomain(v -> !formerTheta.isDefining(v))
+                .removeFromDomain(formerTheta.getDomain())
                 .restrictDomain(v -> !newTheta.isDefining(v) || formerV.contains(v))
                 .build();
 

@@ -91,7 +91,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.restrictDomain(getVariables());
+                : renamingSubstitution.restrictDomainTo(getVariables());
 
         return selectedSubstitution.isEmpty()
                 ? this

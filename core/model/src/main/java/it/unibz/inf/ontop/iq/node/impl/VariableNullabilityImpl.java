@@ -233,8 +233,9 @@ public class VariableNullabilityImpl implements VariableNullability {
     private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
-        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution.entrySet().stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .entrySet().stream()
                 .flatMap(e -> {
                     ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
                     return IntStream.range(0, subTerms.size())
@@ -247,9 +248,10 @@ public class VariableNullabilityImpl implements VariableNullability {
             return Stream.of(substitution);
 
         ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution.builder()
-                .transform((v, t) -> Optional.of(subTermNames.row(v))
-                        .filter(indexes -> !indexes.isEmpty())
-                        .<ImmutableTerm>map(indexes -> {
+                .<ImmutableTerm>transform(t -> t)
+                .conditionalTransform(
+                        v -> Optional.of(subTermNames.row(v)).filter(indexes -> !indexes.isEmpty()),
+                        (t, indexes) -> {
                             ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) t;
                             ImmutableList<? extends ImmutableTerm> subTerms = def.getTerms();
                             ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, subTerms.size())
@@ -259,7 +261,6 @@ public class VariableNullabilityImpl implements VariableNullability {
 
                             return termFactory.getImmutableFunctionalTerm(def.getFunctionSymbol(), newArgs);
                         })
-                        .orElse(t))
                 .build();
 
         //noinspection DataFlowIssue

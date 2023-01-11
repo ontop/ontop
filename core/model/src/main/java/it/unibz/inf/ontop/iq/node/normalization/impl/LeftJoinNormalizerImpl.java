@@ -383,7 +383,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
                 ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                                simplificationResults.getSubstitution().restrictDomain(rightVariables);
+                                simplificationResults.getSubstitution().restrictDomainTo(rightVariables);
 
                 if (downSubstitution.isEmpty())
                     return updateConditionAndRightChild(simplificationResults.getOptionalExpression(), rightChild);
@@ -468,8 +468,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .findFirst();
 
             ImmutableSubstitution<ImmutableTerm> selectedSubstitution = provenanceVariable
-                    .map(pv -> rightSubstitution.builder()
-                            .restrictDomain(v -> !v.equals(pv)).build())
+                    .map(pv -> rightSubstitution.builder().removeFromDomain(ImmutableSet.of(pv)).build())
                     .orElse(rightSubstitution);
 
             /*
@@ -667,7 +666,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 Optional<Variable> rightProvenanceVariable, ImmutableSet<Variable> leftVariables) {
 
             return selectedSubstitution.builder()
-                    .restrictDomain(v -> !leftVariables.contains(v))
+                    .removeFromDomain(leftVariables)
                     .transform(t -> transformRightSubstitutionValue(t, leftVariables, rightProvenanceVariable))
                     .build();
         }
@@ -769,7 +768,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSet<Variable> leftVariables) {
 
             Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.builder()
-                    .restrictDomain(leftVariables)
+                    .restrictDomainTo(leftVariables)
                     .toStrictEqualities();
 
             return termFactory.getConjunction(

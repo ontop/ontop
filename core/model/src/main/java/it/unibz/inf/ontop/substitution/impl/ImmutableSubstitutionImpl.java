@@ -35,11 +35,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
-        return new ImmutableSubstitutionImpl<T>(map, termFactory);
-    }
-
-    @Override
     public int hashCode() {
         return map.hashCode();
     }

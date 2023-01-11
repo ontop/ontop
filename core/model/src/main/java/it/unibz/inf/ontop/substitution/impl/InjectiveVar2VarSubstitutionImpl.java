@@ -57,11 +57,6 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
                 .collect(ImmutableCollectors.toList());
     }
 
-    @Override
-    protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
-        throw new RuntimeException("NEW SUB");
-    }
-    
     private InjectiveVar2VarSubstitution create(ImmutableMap<Variable, Variable> map) {
         return new InjectiveVar2VarSubstitutionImpl(map, termFactory);
     }
@@ -94,7 +89,7 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
 
 
     @Override
-    public InjectiveVar2VarSubstitution restrictDomain(ImmutableSet<Variable> set) {
+    public InjectiveVar2VarSubstitution restrictDomainTo(ImmutableSet<Variable> set) {
         return create(entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));

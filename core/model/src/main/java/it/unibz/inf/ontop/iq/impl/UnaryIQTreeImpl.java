@@ -59,7 +59,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.restrictDomain(getVariables());
+                : renamingSubstitution.restrictDomainTo(getVariables());
 
         return selectedSubstitution.isEmpty()
                 ? this

@@ -170,7 +170,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .immutableCopy();
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
-                .map(s -> s.restrictDomain(rightSpecificVariables))
+                .map(s -> s.restrictDomainTo(rightSpecificVariables))
                 .collect(ImmutableCollectors.toSet());
 
         if (leftDefs.isEmpty())
@@ -452,7 +452,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return results.getExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.builder().restrictRangeTo(VariableOrGroundTerm.class).build()));
+                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.restrictRangeTo(VariableOrGroundTerm.class)));
     }
 
     /**

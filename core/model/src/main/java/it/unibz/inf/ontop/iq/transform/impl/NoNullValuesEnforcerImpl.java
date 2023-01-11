@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -100,7 +99,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
-                    .restrictDomain(nonNullVariables)
+                    .restrictDomainTo(nonNullVariables)
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .toMap(ImmutableFunctionalTerm::simplifyAsGuaranteedToBeNonNull);
 

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,7 +42,7 @@ public class IQTreeTools {
             IQTree tree, ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws UnsatisfiableDescendingSubstitutionException {
 
-        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomain(tree.getVariables());
+        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
@@ -68,7 +67,7 @@ public class IQTreeTools {
     public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
-        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.builder().restrictRangeTo(Variable.class).build();
+        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         ImmutableSet<Map.Entry<Variable, Variable>> var2VarMap = var2VarFragment.entrySet();
 
         int size = descendingSubstitution.entrySet().size();

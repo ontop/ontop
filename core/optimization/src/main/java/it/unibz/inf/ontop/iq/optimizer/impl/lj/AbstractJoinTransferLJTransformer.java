@@ -341,7 +341,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
         ImmutableSubstitution<ImmutableTerm> substitution = renamingSubstitution.builder()
-                .restrictDomain(projectedVariables)
+                .restrictDomainTo(projectedVariables)
                 .<ImmutableTerm>transform(t -> termFactory.getIfElseNull(condition, t))
                 .build();
 

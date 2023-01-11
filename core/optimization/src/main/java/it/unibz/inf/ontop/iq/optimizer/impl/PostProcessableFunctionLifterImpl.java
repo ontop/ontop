@@ -297,7 +297,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
                     .map(s -> substitutionFactory.union(s, positionSubstitution))
-                    .map(s -> s.restrictDomain(projectedVariablesBeforeRenaming))
+                    .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
 
             IQTree childOfConstruction = Optional.of(childTree)

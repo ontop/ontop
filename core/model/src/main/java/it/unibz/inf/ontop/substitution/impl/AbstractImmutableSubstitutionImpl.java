@@ -62,13 +62,18 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return false;
     }
 
-    protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
-
     @Override
-    public ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set) {
+    public ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set) {
         return new ImmutableSubstitutionImpl<>(entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
+    }
+
+    @Override
+    public <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<S> type) {
+        return new ImmutableSubstitutionImpl<>(entrySet().stream()
+                .filter(e -> type.isInstance(e.getValue()))
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> type.cast(e.getValue()))), termFactory);
     }
 
     @Override
@@ -118,8 +123,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public Builder<B> restrictDomain(ImmutableSet<Variable> set) {
+        public Builder<B> restrictDomainTo(ImmutableSet<Variable> set) {
             return restrictDomain(set::contains);
+        }
+
+        @Override
+        public Builder<B> removeFromDomain(ImmutableSet<Variable> set) {
+            return restrictDomain(v -> !set.contains(v));
         }
 
         @Override

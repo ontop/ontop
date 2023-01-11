@@ -89,8 +89,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, getVariables());
 
-        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.builder().restrictRangeTo(NonFunctionalTerm.class).build();
-        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.builder().restrictRangeTo(GroundFunctionalTerm.class).build();
+        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
+        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.restrictRangeTo(GroundFunctionalTerm.class);
 
         try {
             ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
@@ -131,7 +131,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * ---------------
          */
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.builder().restrictRangeTo(NonFunctionalTerm.class).build();
+        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
         // Projected variables after propagating tauC
         ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
@@ -140,10 +140,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomain(vC);
+        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(vC);
 
         ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
-                .restrictDomain(v -> !thetaC.isDefining(v))
+                .removeFromDomain(thetaC.getDomain())
                 .restrictDomain(v -> !thetaCBar.isDefining(v) || projectedVariables.contains(v))
                 .build();
 
@@ -151,7 +151,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * deltaC to thetaF
          * ---------------
          */
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.builder().restrictRangeTo(ImmutableFunctionalTerm.class).build();
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
@@ -168,12 +168,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         )));
 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
-                .restrictDomain(v -> !thetaF.isDefining(v))
+                .removeFromDomain(thetaF.getDomain())
                 .restrictDomain(v -> !thetaFBar.isDefining(v) || projectedVariables.contains(v))
                 .transform(thetaFBar::apply)
                 .build();
 
-        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.builder().restrictRangeTo(NonFunctionalTerm.class).build();
+        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
 
         ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.entrySet();
 
@@ -182,7 +182,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .map(e -> termFactory.getStrictEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()
-                .restrictDomain(v -> !newDeltaC.isDefining(v))
+                .removeFromDomain(newDeltaC.getDomain())
                 .toStrictEqualities();
 
         Optional<ImmutableExpression> f = Optional.of(Stream.concat(thetaFRelatedExpressions, blockedExpressions)
@@ -201,22 +201,20 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.compose(
                 tauF.builder()
-                        .restrictDomain(v -> !thetaBar.isDefining(v))
-                        .restrictDomain(v -> !tauCPropagationResults.delta.isDefining(v))
+                        .removeFromDomain(thetaBar.getDomain())
+                        .removeFromDomain(tauCPropagationResults.delta.getDomain())
                         .build(),
                 tauCPropagationResults.delta);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.builder().restrictDomain(v -> !tauF.isDefining(v)).build();
+        ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
         Stream<ImmutableExpression> newConditionStream =
                 Stream.concat(
                         // tauF vs thetaBar
-                        tauF.entrySet().stream()
-                                .filter(e -> thetaBar.isDefining(e.getKey()))
+                        tauF.restrictDomainTo(thetaBar.getDomain()).entrySet().stream()
                                 .map(e -> termFactory.getStrictEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
                         // tauF vs newDelta
-                        tauF.entrySet().stream()
-                                .filter(e -> tauCPropagationResults.delta.isDefining(e.getKey()))
+                        tauF.restrictDomainTo(tauCPropagationResults.delta.getDomain()).entrySet().stream()
                                 .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));
 

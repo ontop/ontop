@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
@@ -42,7 +43,14 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 
-    ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set);
+    ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set);
+
+    <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<S> type);
+
+    default ImmutableSet<Variable> getRangeVariables() {
+        return getRange().stream()
+                .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet());
+    }
 
     default boolean isInjective() {
         ImmutableCollection<T> values = getRange();
@@ -58,7 +66,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         Builder<T> restrictDomain(Predicate<Variable> predicate);
 
-        Builder<T> restrictDomain(ImmutableSet<Variable> set);
+        Builder<T> restrictDomainTo(ImmutableSet<Variable> set);
+
+        Builder<T> removeFromDomain(ImmutableSet<Variable> set);
 
         Builder<T> restrict(BiPredicate<Variable, T> predicate);
 

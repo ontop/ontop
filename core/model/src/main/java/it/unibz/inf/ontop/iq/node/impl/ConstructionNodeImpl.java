@@ -119,12 +119,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
                                                           ImmutableSubstitution<ImmutableTerm> substitution) {
         ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
-
-        Stream<Variable> variablesRequiredByBindings = substitution.getRange().stream()
-                .flatMap(ImmutableTerm::getVariableStream);
+        ImmutableSet<Variable> variablesRequiredByBindings = substitution.getRangeVariables();
 
         //return only the variables that are also used in the bindings for the child of the construction node
-        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
+        return Sets.union(projectedVariables, variablesRequiredByBindings).stream()
                 .filter(v -> !variableDefinedByBindings.contains(v))
                 .collect(ImmutableCollectors.toSet());
     }
@@ -246,7 +244,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
 
         if (childDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.builder().restrictRangeTo(NonVariableTerm.class).build();
+            ImmutableSubstitution<NonVariableTerm> def = substitution.restrictRangeTo(NonVariableTerm.class);
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -255,7 +253,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return childDefs.stream()
                 .map(childDef -> substitutionFactory.compose(childDef, substitution))
                 .map(ImmutableSubstitution::builder)
-                .map(b -> b.restrictDomain(projectedVariables))
+                .map(b -> b.restrictDomainTo(projectedVariables))
                 .map(b -> b.restrictRangeTo(NonVariableTerm.class))
                 .map(ImmutableSubstitution.Builder::build)
                 .collect(ImmutableCollectors.toSet());
@@ -347,7 +345,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return IntStream.range(1, fullRenamingDomain.size() + 1)
                 .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
                 .flatMap(Collection::stream)
-                .map(comb -> fullRenaming.restrictDomain(ImmutableSet.copyOf(comb)))
+                .map(comb -> fullRenaming.restrictDomainTo(ImmutableSet.copyOf(comb)))
                 .filter(ImmutableSubstitution::isInjective)
                 // Inverse
                 .map(s -> substitutionFactory.getInjectiveVar2VarSubstitution(

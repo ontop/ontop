@@ -95,7 +95,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
 
             ImmutableMap<Variable, Optional<AggregationSimplification>> simplificationMap =
                     initialSubstitution.builder()
-                            .toMap(term -> simplifyAggregationFunctionalTerm(term, normalizedChild, hasGroupBy));
+                            .toMap(t -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
@@ -118,17 +118,16 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
-            ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = simplificationMap.entrySet().stream()
+            ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
                     .filter(e -> e.getValue().isPresent())
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> e.getValue().get().getDecomposition().getLiftableTerm()));
+                            e -> e.getValue().get().getDecomposition().getLiftableTerm())));
 
-            return parentSubstitutionMap.isEmpty()
+            return parentSubstitution.isEmpty()
                     ? newAggregationTree
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(rootNode.getVariables(),
-                                    substitutionFactory.getSubstitution(parentSubstitutionMap)),
+                            iqFactory.createConstructionNode(rootNode.getVariables(), parentSubstitution),
                             newAggregationTree);
         }
 

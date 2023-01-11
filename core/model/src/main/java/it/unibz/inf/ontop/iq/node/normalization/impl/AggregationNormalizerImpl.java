@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -179,11 +178,11 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     groupingVariables).immutableCopy();
 
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
-                    .restrictDomain(nonGroupingVariables);
+                    .restrictDomainTo(nonGroupingVariables);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                             substitutionFactory.compose(nonGroupingSubstitution, aggregationSubstitution).builder()
-                                    .restrictDomain(aggregationSubstitution.getDomain())
+                                    .restrictDomainTo(aggregationSubstitution.getDomain())
                                     .build(ImmutableFunctionalTerm.class);
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
@@ -191,7 +190,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     newAggregationSubstitution);
 
             // Nullable
-            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().builder().restrictDomain(groupingVariables).build())
+            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().builder().restrictDomainTo(groupingVariables).build())
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s))
                     .orElse(null);
@@ -259,7 +258,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
                             (s, a) -> substitutionFactory.compose(a.getSubstitution(), s).builder()
-                                            .restrictDomain(aggregateVariables)
+                                            .restrictDomainTo(aggregateVariables)
                                             .build(ImmutableFunctionalTerm.class),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
