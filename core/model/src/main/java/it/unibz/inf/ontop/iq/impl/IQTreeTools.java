@@ -69,7 +69,7 @@ public class IQTreeTools {
     public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
-        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.getFragment(Variable.class);
+        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.builder().restrictRangeTo(Variable.class).build();
         ImmutableSet<Map.Entry<Variable, Variable>> var2VarMap = var2VarFragment.entrySet();
 
         int size = descendingSubstitution.entrySet().size();

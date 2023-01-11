@@ -46,7 +46,8 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.filter(projectedVariables::contains);
 
         InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
-                reducedAscendingSubstitution.getFragment(Variable.class)
+                reducedAscendingSubstitution.builder()
+                        .restrictRangeTo(Variable.class).build()
                         .filter((k, v) -> !projectedVariables.contains(v))
                         .entrySet().stream()
                         .collect(ImmutableCollectors.toMap(

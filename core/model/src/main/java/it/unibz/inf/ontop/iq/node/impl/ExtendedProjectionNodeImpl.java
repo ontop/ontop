@@ -89,8 +89,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, getVariables());
 
-        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getFragment(NonFunctionalTerm.class);
-        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getFragment(GroundFunctionalTerm.class);
+        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.builder().restrictRangeTo(NonFunctionalTerm.class).build();
+        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.builder().restrictRangeTo(GroundFunctionalTerm.class).build();
 
         try {
             ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
@@ -105,11 +105,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                     tauFPropagationResults.theta, newChild);
 
             IQTree filterTree = filterNode
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newChild))
                     .orElse(newChild);
 
             return projectionNode
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, filterTree))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, filterTree))
                     .orElse(filterTree);
 
         } catch (EmptyTreeException e) {
@@ -131,7 +131,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * ---------------
          */
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getFragment(NonFunctionalTerm.class);
+        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.builder().restrictRangeTo(NonFunctionalTerm.class).build();
 
         // Projected variables after propagating tauC
         ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
@@ -149,7 +149,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * deltaC to thetaF
          * ---------------
          */
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFragment(ImmutableFunctionalTerm.class);
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.builder().restrictRangeTo(ImmutableFunctionalTerm.class).build();
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
@@ -169,7 +169,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter((k, v) -> !thetaF.isDefining(k) && ((!thetaFBar.isDefining(k)) || projectedVariables.contains(k)))
                 .transform(thetaFBar::apply);
 
-        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
+        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.builder().restrictRangeTo(NonFunctionalTerm.class).build();
 
         ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.entrySet();
 

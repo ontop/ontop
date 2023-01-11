@@ -298,7 +298,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // Taken from the child sub-tree
             VariableNullability variableNullability = Optional.ofNullable(childConstructionNode)
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, grandChild,
                             iqFactory.createIQTreeCache(true)))
                     .orElse(grandChild)
                     .getVariableNullability();
@@ -309,11 +309,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .transform(v -> v.simplify(variableNullability));
 
             ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionMap =
-                    simplifiedSubstitution.entrySet().stream()
-                            .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> decomposeFunctionalTerm((ImmutableFunctionalTerm) e.getValue())));
+                    simplifiedSubstitution.builder()
+                            .restrictRangeTo(ImmutableFunctionalTerm.class)
+                            .toMap(this::decomposeFunctionalTerm);
 
             ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
                     // All variables and constants

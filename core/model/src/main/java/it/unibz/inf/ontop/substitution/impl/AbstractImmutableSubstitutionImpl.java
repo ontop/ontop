@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -81,16 +82,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {
-        return new ImmutableSubstitutionImpl<>(getImmutableMap().entrySet().stream()
-                .filter(e -> type.isInstance(e.getValue()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> type.cast(e.getValue()))),
-                termFactory);
-    }
-
-    @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type) {
         if (getImmutableMap().entrySet().stream()
                 .anyMatch(e -> !type.isInstance(e.getValue())))
@@ -136,6 +127,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         @Override
         public Builder<B> restrictDomain(Predicate<Variable> predicate) {
             return new BuilderImpl<>(stream.filter(e -> predicate.test(e.getKey())));
+        }
+
+        @Override
+        public <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<S> type) {
+            return new BuilderImpl<>(stream
+                    .filter(e -> type.isInstance(e.getValue()))
+                    .map(e -> Maps.immutableEntry(e.getKey(), type.cast(e.getValue()))));
         }
 
         @Override

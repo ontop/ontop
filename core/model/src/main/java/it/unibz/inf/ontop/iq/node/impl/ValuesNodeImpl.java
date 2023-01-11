@@ -232,18 +232,19 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return this;
         ConstructionAndFilterAndValues constructionAndFilterAndValues =
                 new ConstructionAndFilterAndValues(null, null, this);
-        // Split up the substitution in three groups
-        ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.getFragment(GroundFunctionalTerm.class);
-        ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.getFragment(Constant.class);
-        ImmutableSubstitution<Variable> variableSubstitutionFragment = descendingSubstitution.getFragment(Variable.class);
 
+        ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.builder().restrictRangeTo(GroundFunctionalTerm.class).build();
         if (!functionalSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = addProjectedVariablesToConstruction(descendingSubstitution, constructionAndFilterAndValues);
             constructionAndFilterAndValues = substituteGroundFunctionalTerms(functionalSubstitutionFragment, constructionAndFilterAndValues, variableGenerator);
         }
+
+        ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.builder().restrictRangeTo(Constant.class).build();
         if (!constantSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
+
+        ImmutableSubstitution<Variable> variableSubstitutionFragment = descendingSubstitution.builder().restrictRangeTo(Variable.class).build();
         if (!variableSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }

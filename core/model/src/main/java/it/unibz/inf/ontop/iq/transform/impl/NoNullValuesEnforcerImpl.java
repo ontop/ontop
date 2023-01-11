@@ -99,9 +99,9 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution
-                    .filter(nonNullVariables::contains)
-                    .getFragment(ImmutableFunctionalTerm.class).builder()
+            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
+                    .restrictDomain(nonNullVariables::contains)
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .toMap(ImmutableFunctionalTerm::simplifyAsGuaranteedToBeNonNull);
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution

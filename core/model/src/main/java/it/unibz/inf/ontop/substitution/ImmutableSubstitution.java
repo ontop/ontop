@@ -36,7 +36,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
             throws ConversionException;
 
-    <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 
@@ -84,6 +83,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
         ImmutableSubstitution<T> build();
 
         Builder<T> restrictDomain(Predicate<Variable> predicate);
+
+        <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<S> type);
 
         Stream<ImmutableExpression> toStrictEqualities();
 

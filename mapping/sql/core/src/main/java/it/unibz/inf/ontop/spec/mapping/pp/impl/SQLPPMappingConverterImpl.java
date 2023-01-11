@@ -113,10 +113,10 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .filter(e -> !e.getValue().equals(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<Variable> targetRenamingPart = substitution.getFragment(Variable.class);
+        ImmutableSubstitution<Variable> targetRenamingPart = substitution.builder().restrictRangeTo(Variable.class).build();
         ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
 
-        ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.getFragment(NonVariableTerm.class);
+        ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.builder().restrictRangeTo(NonVariableTerm.class).build();
 
         IQTree selectTree = iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(spoSubstitution.getRange().stream()

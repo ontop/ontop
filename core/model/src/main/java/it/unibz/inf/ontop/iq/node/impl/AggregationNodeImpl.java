@@ -88,12 +88,13 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
-        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution
-                .getFragment(GroundTerm.class)
-                .filter(aggregationVariables::contains);
+        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.builder()
+                .restrictRangeTo(GroundTerm.class)
+                .restrictDomain(aggregationVariables::contains)
+                .build();
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
-                descendingSubstitution.getFragment(Variable.class),
+                descendingSubstitution.builder().restrictRangeTo(Variable.class).build(),
                 aggregationVariables);
 
         ImmutableSet<Variable> domain = Sets.difference(descendingSubstitution.getDomain(),
@@ -307,7 +308,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .map(s -> s.filter(groupingVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
+        ImmutableSubstitution<NonVariableTerm> def = substitution.builder().restrictRangeTo(NonVariableTerm.class).build();
 
         if (groupingVariableDefs.isEmpty()) {
             return def.isEmpty()

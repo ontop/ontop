@@ -51,9 +51,9 @@ public class JoinLikeChildBindingLifter {
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
         ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
-                .getFragment(VariableOrGroundTerm.class);
+                .builder().restrictRangeTo(VariableOrGroundTerm.class).build();
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFragment(ImmutableFunctionalTerm.class);
+        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.builder().restrictRangeTo(ImmutableFunctionalTerm.class).build();
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
