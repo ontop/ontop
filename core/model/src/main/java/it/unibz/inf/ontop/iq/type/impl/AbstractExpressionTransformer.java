@@ -31,7 +31,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         IQTree newChild = transform(child);
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.transform(v -> transformTerm(v, child));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder().transform(t -> transformTerm(t, child)).build();
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree
@@ -45,7 +45,7 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         IQTree newChild = transform(child);
 
         ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.transform(v -> transformFunctionalTerm(v, child));
+        ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.builder().transform(t -> transformFunctionalTerm(t, child)).build();
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree

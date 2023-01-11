@@ -142,8 +142,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.filter(vC::contains);
 
-        ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta
-                .filter((k, v) -> !thetaC.isDefining(k) && ((!thetaCBar.isDefining(k)) || projectedVariables.contains(k)));
+        ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
+                .restrictDomain(v -> !thetaC.isDefining(v) && (!thetaCBar.isDefining(v) || projectedVariables.contains(v)))
+                .build();
 
         /* ---------------
          * deltaC to thetaF
@@ -165,9 +166,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                 e -> e.getValue().iterator().next()
                         )));
 
-        ImmutableSubstitution<ImmutableTerm> gamma = deltaC
-                .filter((k, v) -> !thetaF.isDefining(k) && ((!thetaFBar.isDefining(k)) || projectedVariables.contains(k)))
-                .transform(thetaFBar::apply);
+        ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
+                .restrictDomain(v -> !thetaF.isDefining(v) && (!thetaFBar.isDefining(v) || projectedVariables.contains(v)))
+                .transform(thetaFBar::apply)
+                .build();
 
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.builder().restrictRangeTo(NonFunctionalTerm.class).build();
 

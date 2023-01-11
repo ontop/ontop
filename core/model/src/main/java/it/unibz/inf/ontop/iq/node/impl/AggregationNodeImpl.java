@@ -90,7 +90,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.builder()
                 .restrictRangeTo(GroundTerm.class)
-                .restrictDomain(aggregationVariables::contains)
+                .restrictDomain(aggregationVariables)
                 .build();
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(

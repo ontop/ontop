@@ -100,14 +100,13 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
-                    .restrictDomain(nonNullVariables::contains)
+                    .restrictDomain(nonNullVariables)
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .toMap(ImmutableFunctionalTerm::simplifyAsGuaranteedToBeNonNull);
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution
-                    .transform((k, v) -> Optional.ofNullable(updatedEntryMap.get(k))
-                            .map(FunctionalTermSimplification::getSimplifiedTerm)
-                            .orElse(v));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
+                    .conditionalTransform(v -> Optional.ofNullable(updatedEntryMap.get(v)), (t, u) -> u.getSimplifiedTerm())
+                    .build();
 
             ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)
                     ? rootNode

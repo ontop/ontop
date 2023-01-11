@@ -145,7 +145,10 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
             ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform((v, t) -> replaceRDFByDBTerm(t, rdfTypes.get(v)));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.builder()
+                    .conditionalTransform(v -> Optional.of(rdfTypes.get(v)), this::replaceRDFByDBTerm)
+                    .build();
+
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution),
                     ((UnaryIQTree)tree).getChild()

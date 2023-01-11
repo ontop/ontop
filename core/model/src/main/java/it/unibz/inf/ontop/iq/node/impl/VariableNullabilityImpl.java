@@ -246,11 +246,11 @@ public class VariableNullabilityImpl implements VariableNullability {
         if (subTermNames.isEmpty())
             return Stream.of(substitution);
 
-        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution
-                .transform((var, value) -> Optional.of(subTermNames.row(var))
+        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution.builder()
+                .transform((v, t) -> Optional.of(subTermNames.row(v))
                         .filter(indexes -> !indexes.isEmpty())
                         .<ImmutableTerm>map(indexes -> {
-                            ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) value;
+                            ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) t;
                             ImmutableList<? extends ImmutableTerm> subTerms = def.getTerms();
                             ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, subTerms.size())
                                     .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(indexes.get(i))
@@ -259,7 +259,8 @@ public class VariableNullabilityImpl implements VariableNullability {
 
                             return termFactory.getImmutableFunctionalTerm(def.getFunctionSymbol(), newArgs);
                         })
-                        .orElse(value));
+                        .orElse(t))
+                .build();
 
         //noinspection DataFlowIssue
         ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(

@@ -351,10 +351,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private ImmutableSubstitution<ImmutableTerm> makeRightSpecificDefsProvenanceDependent(
                 ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, Optional<Variable> defaultProvenanceVariable,
                 ImmutableSet<Variable> leftVariables) {
-            return ascendingSubstitution.transform(
-                    (k, v) -> (leftVariables.contains(k) || isNullWhenRightIsRejected(v, leftVariables))
-                            ? v
-                            : transformRightSubstitutionValue(v, leftVariables, defaultProvenanceVariable));
+            return ascendingSubstitution.builder()
+                    .transform((v, t) -> leftVariables.contains(v) || isNullWhenRightIsRejected(t, leftVariables)
+                            ? t
+                            : transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
+                    .build();
         }
 
         @Override
@@ -511,7 +512,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
 
             ImmutableSubstitution<ImmutableTerm> liftableSubstitution = ljCondition
-                    .map(c -> rightSubstitution.<ImmutableTerm>transform(v -> termFactory.getIfElseNull(c, v)))
+                    .map(c -> rightSubstitution.builder().<ImmutableTerm>transform(t -> termFactory.getIfElseNull(c, t)).build())
                     .orElse(rightSubstitution);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(
@@ -666,9 +667,10 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<? extends ImmutableTerm> selectedSubstitution,
                 Optional<Variable> rightProvenanceVariable, ImmutableSet<Variable> leftVariables) {
 
-            return selectedSubstitution
-                    .filter(k -> !leftVariables.contains(k))
-                    .transform(v -> transformRightSubstitutionValue(v, leftVariables, rightProvenanceVariable));
+            return selectedSubstitution.builder()
+                    .restrictDomain(v -> !leftVariables.contains(v))
+                    .transform(t -> transformRightSubstitutionValue(t, leftVariables, rightProvenanceVariable))
+                    .build();
         }
 
         private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
@@ -768,7 +770,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSet<Variable> leftVariables) {
 
             Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.builder()
-                    .restrictDomain(leftVariables::contains)
+                    .restrictDomain(leftVariables)
                     .toStrictEqualities();
 
             return termFactory.getConjunction(

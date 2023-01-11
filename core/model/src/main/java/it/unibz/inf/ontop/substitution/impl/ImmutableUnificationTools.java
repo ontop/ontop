@@ -118,7 +118,7 @@ public class ImmutableUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
         return optionalMGUS
-                .map(substitution -> substitution.transform(GroundTermTools::convertIntoVariableOrGroundTerm));
+                .map(s -> s.builder().transform(GroundTermTools::convertIntoVariableOrGroundTerm).build());
     }
 
 

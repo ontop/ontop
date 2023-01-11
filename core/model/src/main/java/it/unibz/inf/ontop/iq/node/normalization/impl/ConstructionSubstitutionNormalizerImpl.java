@@ -47,8 +47,9 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 reducedAscendingSubstitution.builder()
-                        .restrictRangeTo(Variable.class).build()
-                        .filter((k, v) -> !projectedVariables.contains(v))
+                        .restrictRangeTo(Variable.class)
+                        .restrict((k, v) -> !projectedVariables.contains(v))
+                        .build()
                         .entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getValue,
@@ -56,9 +57,10 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                                 // In case of key conflict, choose anyone of them
                                 (v1, v2) -> v1)));
 
-        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.compose(downRenamingSubstitution, reducedAscendingSubstitution)
-                .filter(projectedVariables::contains)
-                .transform(v -> v.simplify());
+        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.compose(downRenamingSubstitution, reducedAscendingSubstitution).builder()
+                .restrictDomain(projectedVariables)
+                .transform(t -> t.simplify())
+                .build();
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);

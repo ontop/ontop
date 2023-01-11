@@ -46,10 +46,11 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
         IQTree newChild = transform(child);
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution().transform(
-                definition -> (definition instanceof ImmutableExpression)
-                        ? transformExpression((ImmutableExpression) definition)
-                        : definition);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution().builder()
+                .transform(t -> (t instanceof ImmutableExpression)
+                        ? transformExpression((ImmutableExpression) t)
+                        : t)
+                .build();
 
         ConstructionNode newRootNode = newSubstitution.equals(initialSubstitution)
                 ? rootNode

@@ -269,7 +269,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
                             e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
 
             ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitution(targetMap);
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.builder().transform(targetRenamingPart::apply).build();
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }
 

@@ -255,8 +255,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return childDefs.stream()
                 .map(childDef -> substitutionFactory.compose(childDef, substitution))
                 .map(ImmutableSubstitution::builder)
+                .map(b -> b.restrictDomain(projectedVariables))
                 .map(b -> b.restrictRangeTo(NonVariableTerm.class))
-                .map(b -> b.restrictDomain(projectedVariables::contains))
                 .map(ImmutableSubstitution.Builder::build)
                 .collect(ImmutableCollectors.toSet());
     }
@@ -334,9 +334,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
-        ImmutableSubstitution<Variable> fullRenaming = getSubstitution()
-                .filter((k, v) -> childConstraint.contains(v))
-                .castTo(Variable.class);
+        ImmutableSubstitution<Variable> fullRenaming = getSubstitution().builder()
+                .restrict((k, v) -> childConstraint.contains(v))
+                .build(Variable.class);
 
         if (fullRenaming.isEmpty())
             return Stream.empty();
@@ -429,7 +429,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return shrunkChild;
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    substitution.transform(v -> v.simplify(shrunkChild.getVariableNullability())), projectedVariables);
+                    substitution.builder().transform(t -> t.simplify(shrunkChild.getVariableNullability())).build(), projectedVariables);
 
             Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
 
@@ -479,8 +479,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution)
-                        .transform(v -> v.simplify(grandChild.getVariableNullability())),
+                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution).builder()
+                        .transform(t -> t.simplify(grandChild.getVariableNullability())).build(),
                 projectedVariables
         );
 

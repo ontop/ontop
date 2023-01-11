@@ -1235,8 +1235,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private ImmutableSet<Variable> getNewNullableVars(ImmutableSubstitution<ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
-        return sub.filter((v, t) -> t.getVariableStream()
-                        .anyMatch(nullableVariables::contains))
+        return sub.builder().restrict((v, t) -> t.getVariableStream()
+                        .anyMatch(nullableVariables::contains)).build()
                 .getDomain();
     }
 

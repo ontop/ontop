@@ -60,7 +60,7 @@ public class TermTypeMappingCaster implements MappingCaster {
         }
         IQTree childTree = assertion.getTopChild();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().transform(v -> transformDefinition(v, childTree));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().builder().transform(t -> transformDefinition(t, childTree)).build();
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);
 
