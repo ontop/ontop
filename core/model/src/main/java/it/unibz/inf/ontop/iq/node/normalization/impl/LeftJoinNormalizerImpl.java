@@ -767,9 +767,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<ImmutableTerm> selectedSubstitution,
                 ImmutableSet<Variable> leftVariables) {
 
-            Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.entrySet().stream()
-                    .filter(e -> leftVariables.contains(e.getKey()))
-                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
+            Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.builder()
+                    .restrictDomain(leftVariables::contains)
+                    .toStrictEqualities();
 
             return termFactory.getConjunction(
                             ljCondition.map(selectedSubstitution::applyToBooleanExpression),

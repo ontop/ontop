@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -75,4 +76,17 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      */
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> transform(BiFunction<Variable, T, S> function);
+
+
+    Builder<T> builder();
+
+    interface Builder<T extends ImmutableTerm> {
+        ImmutableSubstitution<T> build();
+
+        Builder<T> restrictDomain(Predicate<Variable> predicate);
+
+        Stream<ImmutableExpression> toStrictEqualities();
+
+        <S> ImmutableMap<Variable, S> toMap(Function<T, S> transformer);
+    }
 }

@@ -177,9 +177,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(e -> !thetaFBarEntries.contains(e))
                 .map(e -> termFactory.getStrictEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
-        Stream<ImmutableExpression> blockedExpressions = gamma.entrySet().stream()
-                .filter(e -> !newDeltaC.isDefining(e.getKey()))
-                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
+        Stream<ImmutableExpression> blockedExpressions = gamma.builder()
+                .restrictDomain(v -> !newDeltaC.isDefining(v))
+                .toStrictEqualities();
 
         Optional<ImmutableExpression> f = Optional.of(Stream.concat(thetaFRelatedExpressions, blockedExpressions)
                         .collect(ImmutableCollectors.toList()))

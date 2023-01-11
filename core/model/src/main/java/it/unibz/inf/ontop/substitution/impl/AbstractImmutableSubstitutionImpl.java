@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -13,6 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -115,5 +115,39 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         Map.Entry::getKey,
                         e -> function.apply(e.getKey(), e.getValue()))),
                 termFactory);
+    }
+
+    @Override
+    public Builder<T> builder() {
+        return new BuilderImpl<>(entrySet().stream());
+    }
+
+    private final class BuilderImpl<B extends ImmutableTerm> implements Builder<B> {
+        private final Stream<Map.Entry<Variable, B>> stream;
+
+        BuilderImpl(Stream<Map.Entry<Variable, B>> stream) {
+            this.stream = stream;
+        }
+        @Override
+        public ImmutableSubstitution<B> build() {
+            return new ImmutableSubstitutionImpl<>(stream.collect(ImmutableCollectors.toMap()), termFactory);
+        }
+
+        @Override
+        public Builder<B> restrictDomain(Predicate<Variable> predicate) {
+            return new BuilderImpl<>(stream.filter(e -> predicate.test(e.getKey())));
+        }
+
+        @Override
+        public Stream<ImmutableExpression> toStrictEqualities() {
+            return stream.map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
+        }
+
+        @Override
+        public <S> ImmutableMap<Variable, S> toMap(Function<B, S> transformer) {
+            return stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> transformer.apply(e.getValue())));
+        }
+
+
     }
 }
