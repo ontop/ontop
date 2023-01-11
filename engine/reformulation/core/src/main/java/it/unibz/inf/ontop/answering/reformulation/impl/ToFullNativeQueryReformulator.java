@@ -83,7 +83,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         DistinctVariableOnlyDataAtom initialProjectionAtom = iq.getProjectionAtom();
         IQTree initialTree = iq.getTree();
 
-        ImmutableMap<Variable, ImmutableTerm> definitions = extractDefinitions(initialTree);
+        ImmutableSubstitution<ImmutableTerm> definitions = extractDefinitions(initialTree);
         ImmutableMap<Variable, RDFTermType> rdfTypes = extractRDFTypes(definitions);
 
         IQTree dbTree = replaceRDFByDBTerms(initialTree, rdfTypes);
@@ -156,14 +156,14 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                     "(proper exception should have already been thrown)");
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
+    private ImmutableSubstitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
         QueryNode rootNode = rdfTree.getRootNode();
         if (rootNode instanceof ConstructionNode) {
             // NB: should not include any non-projected variable (illegal IQ)
             ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
             Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
             if (missingVariables.isEmpty())
-                return substitution.getImmutableMap();
+                return substitution;
             throw new NotFullyTranslatableToNativeQueryException(String.format(
                     "its variables %s are missing an independent definition",
                     missingVariables));
@@ -173,7 +173,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return extractDefinitions(((UnaryIQTree)rootNode).getChild());
         }
         else if (rdfTree.getVariables().isEmpty()) {
-            return ImmutableMap.of();
+            return substitutionFactory.getSubstitution();
         }
         else {
             throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
@@ -196,9 +196,9 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                 "(proper exception should have already been thrown)");
     }
 
-    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(ImmutableMap<Variable, ImmutableTerm> definitions)
+    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(ImmutableSubstitution<ImmutableTerm> definitions)
             throws NotFullyTranslatableToNativeQueryException {
-        ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder(); // in order to handle checked exceptions
 
         for (Map.Entry<Variable, ImmutableTerm> entry : definitions.entrySet()) {
             mapBuilder.put(entry.getKey(), extractRDFType(entry.getKey(), entry.getValue(), definitions));
@@ -207,7 +207,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     }
 
     private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition,
-                                         ImmutableMap<Variable, ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
+                                       ImmutableSubstitution<ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
         if (definition instanceof Variable) {
             Variable otherVariable = (Variable) definition;
             return extractRDFType(otherVariable, definitions.get(otherVariable), definitions);
