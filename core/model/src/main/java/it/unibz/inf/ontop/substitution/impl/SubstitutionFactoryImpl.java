@@ -107,7 +107,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         return getSubstitution(Stream.concat(
                         Stream.of(Maps.immutableEntry(variable, newValue)),
-                        substitution.getImmutableMap().entrySet().stream()
+                        substitution.entrySet().stream()
                                 .filter(e -> !e.getKey().equals(variable)))
                 .collect(ImmutableCollectors.toMap()));
     }
@@ -122,8 +122,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             return (ImmutableSubstitution)substitution1;
 
         ImmutableMap<Variable, T> map = Stream.of(substitution1, substitution2)
-                .map(ProtoSubstitution::getImmutableMap)
-                .map(ImmutableMap::entrySet)
+                .map(ProtoSubstitution::entrySet)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (val1, val2) -> {
@@ -168,9 +167,9 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             return (ImmutableSubstitution) g;
 
         ImmutableMap<Variable, T> map = Stream.concat(
-                        f.getImmutableMap().entrySet().stream()
+                        f.entrySet().stream()
                                 .map(e -> Maps.immutableEntry(e.getKey(), (T)g.apply(e.getValue()))),
-                        g.getImmutableMap().entrySet().stream())
+                        g.entrySet().stream())
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
@@ -181,10 +180,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f, Set<Variable> variablesToExcludeFromTheDomain) {
         ImmutableSet<Variable> fDomain = f.getDomain();
 
-        Stream<Map.Entry<Variable, Variable>> fEntryStream = f.getImmutableMap().entrySet().stream()
+        Stream<Map.Entry<Variable, Variable>> fEntryStream = f.entrySet().stream()
                 .map(e -> Maps.immutableEntry(e.getKey(), g.applyToVariable(e.getValue())));
 
-        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
+        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.entrySet().stream()
                 .filter(e -> !fDomain.contains(e.getKey()));
 
         ImmutableMap<Variable, Variable> newMap = Stream.concat(fEntryStream, gEntryStream)

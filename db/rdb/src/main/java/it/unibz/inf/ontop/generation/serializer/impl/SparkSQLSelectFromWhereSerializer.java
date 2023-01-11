@@ -148,7 +148,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
              */
             private Optional<String> checkSubstitutionMap(ImmutableTerm term,
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution){
-                for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+                for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.entrySet()) {
                     if (entry.getValue().equals(term)) {
                         return Optional.of("`" + entry.getKey().getName() + "`");   // Return the COLUMN ALIAS
                     }

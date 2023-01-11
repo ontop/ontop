@@ -86,7 +86,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (!mgu.isPresent()) {
 				computedmgu = null;
 			} else {
-				computedmgu.addAll(mgu.get().getImmutableMap().entrySet());
+				computedmgu.addAll(mgu.get().entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);

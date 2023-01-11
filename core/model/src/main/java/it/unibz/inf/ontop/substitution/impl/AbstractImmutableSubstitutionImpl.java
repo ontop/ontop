@@ -64,7 +64,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {
-        ImmutableMap<Variable, T> newMap = getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, T> newMap = entrySet().stream()
                 .filter(e -> filter.test(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
 
@@ -73,7 +73,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> filter(BiPredicate<Variable, T> filter) {
-        ImmutableMap<Variable, T> newMap = getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, T> newMap = entrySet().stream()
                 .filter(e -> filter.test(e.getKey(), e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 

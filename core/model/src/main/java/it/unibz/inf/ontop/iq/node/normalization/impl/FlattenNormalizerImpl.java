@@ -110,7 +110,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
     }
 
     private ImmutableMap<Boolean, ImmutableSubstitution<ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
-        return cn.getSubstitution().getImmutableMap().entrySet().stream().collect(
+        return cn.getSubstitution().entrySet().stream().collect(
                 ImmutableCollectors.partitioningBy(
                         e -> (e.getKey().equals(flattenedVar) ||
                                 e.getValue().getVariableStream().anyMatch(v -> v.equals(flattenedVar))),

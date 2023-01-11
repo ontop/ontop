@@ -91,7 +91,7 @@ public class JoinLikeChildBindingLifter {
                                                                        ImmutableSubstitution<ImmutableTerm> substitution,
                                                                        InjectiveVar2VarSubstitution freshRenaming) {
 
-        Stream<ImmutableExpression> expressions2 = freshRenaming.getImmutableMap().entrySet().stream()
+        Stream<ImmutableExpression> expressions2 = freshRenaming.entrySet().stream()
                         .map(r -> termFactory.getStrictEquality(substitution.applyToVariable(r.getKey()), r.getValue()));
 
         return termFactory.getConjunction(

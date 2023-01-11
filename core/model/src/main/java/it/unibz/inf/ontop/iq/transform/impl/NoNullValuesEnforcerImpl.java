@@ -101,7 +101,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution
                     .filter(nonNullVariables::contains)
-                    .getFragment(ImmutableFunctionalTerm.class).getImmutableMap().entrySet().stream()
+                    .getFragment(ImmutableFunctionalTerm.class).entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             e -> e.getValue().simplifyAsGuaranteedToBeNonNull()

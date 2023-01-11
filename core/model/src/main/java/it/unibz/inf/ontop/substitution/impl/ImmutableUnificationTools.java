@@ -97,12 +97,12 @@ public class ImmutableUnificationTools {
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
 
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution1.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution1.entrySet()) {
             firstArgListBuilder.add(entry.getKey());
             secondArgListBuilder.add(entry.getValue());
         }
 
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution2.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution2.entrySet()) {
             firstArgListBuilder.add(entry.getKey());
             secondArgListBuilder.add(entry.getValue());
         }

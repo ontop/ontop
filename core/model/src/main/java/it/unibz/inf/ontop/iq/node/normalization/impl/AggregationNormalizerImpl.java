@@ -309,22 +309,22 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .transform(v -> v.simplify(variableNullability));
 
             ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionMap =
-                    simplifiedSubstitution.getImmutableMap().entrySet().stream()
+                    simplifiedSubstitution.entrySet().stream()
                             .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
                                     e -> decomposeFunctionalTerm((ImmutableFunctionalTerm) e.getValue())));
 
-            ImmutableMap<Variable, ImmutableTerm> liftedSubstitutionMap = Stream.concat(
+            ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
                     // All variables and constants
-                    simplifiedSubstitution.getImmutableMap().entrySet().stream()
+                    simplifiedSubstitution.entrySet().stream()
                             .filter(e -> e.getValue() instanceof NonFunctionalTerm),
                     // (Possibly decomposed) functional terms
                     decompositionMap.entrySet().stream()
                             .filter(e -> e.getValue().isPresent())
                             .map(e -> Maps.immutableEntry(e.getKey(),
                                     e.getValue().get().getLiftableTerm())))
-                    .collect(ImmutableCollectors.toMap());
+                    .collect(ImmutableCollectors.toMap()));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
                     decompositionMap.entrySet().stream()
@@ -338,7 +338,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                             (ImmutableFunctionalTerm) simplifiedSubstitution.get(e.getKey())))))
                             .collect(ImmutableCollectors.toMap()));
 
-            if (liftedSubstitutionMap.isEmpty())
+            if (liftedSubstitution.isEmpty())
                 return new AggregationNormalizationState(
                         ancestors,
                         groupingVariables, newAggregationSubstitution,
@@ -346,7 +346,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
                     Sets.union(groupingVariables, aggregationSubstitution.getDomain()).immutableCopy(),
-                    substitutionFactory.getSubstitution(liftedSubstitutionMap));
+                   liftedSubstitution);
 
             ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
                     newAggregationSubstitution.getDomain()).immutableCopy();

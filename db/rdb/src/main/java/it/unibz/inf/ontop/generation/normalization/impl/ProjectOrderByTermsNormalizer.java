@@ -174,7 +174,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode.isPresent()
                 ? Stream.concat(
                         projectedVariables.stream(),
-                        analysis.constructionNode.get().getSubstitution().getImmutableMap().values().stream())
+                        analysis.constructionNode.get().getSubstitution().getRange().stream())
                         .collect(ImmutableCollectors.toSet())
                 : projectedVariables;
 
@@ -206,7 +206,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
                         newBindings.stream()
                                 .filter(e -> !e.getKey().equals(e.getValue())),
                         analysis.constructionNode
-                                .map(c -> c.getSubstitution().getImmutableMap().entrySet().stream())
+                                .map(c -> c.getSubstitution().entrySet().stream())
                                 .orElseGet(Stream::empty))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 

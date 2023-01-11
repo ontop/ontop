@@ -462,7 +462,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return Optional.of(updateParentConditionRightChild(newParent, ljCondition, rightGrandChild));
             }
 
-            Optional<Variable> provenanceVariable = rightSubstitution.getImmutableMap().entrySet().stream()
+            Optional<Variable> provenanceVariable = rightSubstitution.entrySet().stream()
                     .filter(e -> e.getValue().equals(specialProvenanceConstant))
                     .map(Map.Entry::getKey)
                     .findFirst();
@@ -718,7 +718,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                                                    ImmutableSet<Variable> rightRequiredVariables,
                                                                    VariableGenerator variableGenerator) {
 
-            if (selectedSubstitution.getImmutableMap().entrySet().stream()
+            if (selectedSubstitution.entrySet().stream()
                     .filter(e -> !leftVariables.contains(e.getKey()))
                     .map(Map.Entry::getValue)
                     .anyMatch(value -> needsAnExternalProvenanceVariable(value, leftVariables))) {
@@ -767,7 +767,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<ImmutableTerm> selectedSubstitution,
                 ImmutableSet<Variable> leftVariables) {
 
-            Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.getImmutableMap().entrySet().stream()
+            Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.entrySet().stream()
                     .filter(e -> leftVariables.contains(e.getKey()))
                     .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 

@@ -210,7 +210,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							extractedObject.getVariableStream()),
 					toVariableRenamingMap(TMP_PREFIX));
 
-			sourceQuery = getSQL(sub.getImmutableMap().entrySet().stream()
+			sourceQuery = getSQL(sub.entrySet().stream()
 							.map(e -> Maps.immutableEntry(TMP_PREFIX + "." + e.getKey(), e.getValue())),
 					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), TMP_PREFIX)),
 					Stream.of());
@@ -225,9 +225,9 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					toVariableRenamingMap(PARENT_PREFIX));
 
 			sourceQuery = getSQL(Stream.concat(
-					sub.getImmutableMap().entrySet().stream()
+					sub.entrySet().stream()
 							.map(e -> Maps.immutableEntry(CHILD_PREFIX + "." + e.getKey(), e.getValue())),
-					ob.getImmutableMap().entrySet().stream()
+					ob.entrySet().stream()
 							.map(e -> Maps.immutableEntry(PARENT_PREFIX + "." + e.getKey(), e.getValue()))),
 					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), CHILD_PREFIX),
 							Maps.immutableEntry(parent.getLogicalTable(), PARENT_PREFIX)),

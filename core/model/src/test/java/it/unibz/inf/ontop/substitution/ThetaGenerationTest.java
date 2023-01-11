@@ -42,7 +42,7 @@ public class ThetaGenerationTest extends TestCase {
 	private Vector<Map.Entry<Variable, ImmutableTerm>> getMGUAsVector(ImmutableFunctionalTerm t1, ImmutableFunctionalTerm t2) {
 		Optional<ImmutableSubstitution<ImmutableTerm>> mgu = UNIFICATION_TOOLS.computeMGU(
 				ImmutableList.of(t1), ImmutableList.of(t2));
-		return mgu.map(s -> new Vector<>(s.getImmutableMap().entrySet())).orElse(null);
+		return mgu.map(s -> new Vector<>(s.entrySet())).orElse(null);
 	}
 
 	private static FunctionSymbol createClassLikePredicate(String name) {

@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
+
 /**
  * TODO: find a better name
  *
@@ -18,6 +20,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public interface ProtoSubstitution<T extends ImmutableTerm> {
 
     ImmutableMap<Variable, T> getImmutableMap();
+
+    default ImmutableSet<Map.Entry<Variable, T>> entrySet() { return getImmutableMap().entrySet(); }
 
     default boolean isDefining(Variable variable) { return getImmutableMap().containsKey(variable); }
 

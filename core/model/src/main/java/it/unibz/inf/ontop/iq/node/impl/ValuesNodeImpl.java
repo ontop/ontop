@@ -259,7 +259,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         variableGenerator::generateNewVariableFromVar)
                 .filter(substitution.getDomain()::contains);
 
-        return termFactory.getConjunction(renaming.applyRenaming(substitution).getImmutableMap().entrySet().stream()
+        return termFactory.getConjunction(renaming.applyRenaming(substitution).entrySet().stream()
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
                 .map(filterCondition ->
                         new ConstructionAndFilterAndValues(

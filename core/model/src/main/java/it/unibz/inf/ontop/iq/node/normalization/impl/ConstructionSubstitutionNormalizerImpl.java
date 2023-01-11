@@ -48,7 +48,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 reducedAscendingSubstitution.getFragment(Variable.class)
                         .filter((k, v) -> !projectedVariables.contains(v))
-                        .getImmutableMap().entrySet().stream()
+                        .entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getValue,
                                 Map.Entry::getKey,

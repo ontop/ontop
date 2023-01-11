@@ -151,7 +151,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          */
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFragment(ImmutableFunctionalTerm.class);
 
-        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
+        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         e -> deltaC.applyToVariable(e.getKey()),
                         e -> deltaC.applyToFunctionalTerm(e.getValue())));
@@ -171,13 +171,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
 
-        ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.getImmutableMap().entrySet();
+        ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.entrySet();
 
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
                 .filter(e -> !thetaFBarEntries.contains(e))
                 .map(e -> termFactory.getStrictEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
-        Stream<ImmutableExpression> blockedExpressions = gamma.getImmutableMap().entrySet().stream()
+        Stream<ImmutableExpression> blockedExpressions = gamma.entrySet().stream()
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
@@ -204,11 +204,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Stream<ImmutableExpression> newConditionStream =
                 Stream.concat(
                         // tauF vs thetaBar
-                        tauF.getImmutableMap().entrySet().stream()
+                        tauF.entrySet().stream()
                                 .filter(e -> thetaBar.isDefining(e.getKey()))
                                 .map(e -> termFactory.getStrictEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
                         // tauF vs newDelta
-                        tauF.getImmutableMap().entrySet().stream()
+                        tauF.entrySet().stream()
                                 .filter(e -> tauCPropagationResults.delta.isDefining(e.getKey()))
                                 .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));

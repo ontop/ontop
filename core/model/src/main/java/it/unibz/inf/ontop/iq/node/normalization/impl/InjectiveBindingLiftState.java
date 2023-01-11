@@ -103,7 +103,7 @@ public class InjectiveBindingLiftState {
         ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
         ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> injectivityDecompositionMap =
-                childSubstitution.getImmutableMap().entrySet().stream()
+                childSubstitution.entrySet().stream()
                         .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
@@ -112,30 +112,30 @@ public class InjectiveBindingLiftState {
                                         .analyzeInjectivity(nonFreeVariables, grandChildVariableNullability,
                                                 variableGenerator)));
 
-        ImmutableMap<Variable, ImmutableTerm> liftedSubstitutionMap = Stream.concat(
+        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+
+        ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
                 // All variables and constants
-                childSubstitution.getImmutableMap().entrySet().stream()
+                childSubstitution.entrySet().stream()
                         .filter(e -> e.getValue() instanceof NonFunctionalTerm),
                 // (Possibly decomposed) injective functional terms
                 injectivityDecompositionMap.entrySet().stream()
                         .filter(e -> e.getValue().isPresent())
                         .map(e -> Maps.immutableEntry(e.getKey(),
                                 e.getValue().get().getLiftableTerm())))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toMap()));
 
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
-        Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitutionMap)
+        Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitution)
                 .filter(m -> !m.isEmpty())
-                .map(substitutionFactory::getSubstitution)
                 .map(s -> iqFactory.createConstructionNode(childConstructionNode.getVariables(), s));
 
         ImmutableSet<Variable> newChildVariables = liftedConstructionNode
                 .map(ConstructionNode::getChildVariables)
                 .orElseGet(childConstructionNode::getVariables);
 
-        ImmutableMap<Variable, ImmutableTerm> newChildSubstitutionMap =
+        ImmutableSubstitution<ImmutableTerm> newChildSubstitution = substitutionFactory.getSubstitution(
                 injectivityDecompositionMap.entrySet().stream()
                         .flatMap(e -> e.getValue()
                                 // Sub-term substitution entries from injectivity decompositions
@@ -146,11 +146,10 @@ public class InjectiveBindingLiftState {
                             .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                     e.getKey(),
                                     childSubstitution.get(e.getKey())))))
-                        .collect(ImmutableCollectors.toMap());
+                        .collect(ImmutableCollectors.toMap()));
 
-        Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitutionMap)
+        Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)
                 .filter(m -> !m.isEmpty())
-                .map(substitutionFactory::getSubstitution)
                 .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
                 .or(() -> newChildVariables.equals(grandChildTree.getVariables())
                         ? Optional.empty()

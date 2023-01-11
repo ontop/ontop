@@ -40,7 +40,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     }
 
     protected Stream<Variable> extractNullVariables(ConstructionNode constructionNode) {
-        return constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
+        return constructionNode.getSubstitution().entrySet().stream()
                 .filter(e -> e.getValue().isNull())
                 .map(Map.Entry::getKey);
     }
@@ -53,7 +53,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                    constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
+                    constructionNode.getSubstitution().entrySet().stream()
                     .map(e -> Optional.ofNullable(typedNullMap.get(e.getKey()))
                             .filter(n -> e.getValue().isNull())
                             .map(n -> Maps.<Variable, ImmutableTerm>immutableEntry(e.getKey(), n))

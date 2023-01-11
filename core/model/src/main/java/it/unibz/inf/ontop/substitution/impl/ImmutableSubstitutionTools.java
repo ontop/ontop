@@ -34,7 +34,7 @@ public class ImmutableSubstitutionTools {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> prioritizeRenaming(
             ImmutableSubstitution<T> substitution, ImmutableSet<Variable> priorityVariables) {
 
-        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.getImmutableMap().entrySet().stream()
+        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.entrySet().stream()
                 .filter(e -> priorityVariables.contains(e.getKey())
                         && (e.getValue() instanceof Variable)
                         && (!priorityVariables.contains(e.getValue())))

@@ -74,7 +74,7 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
         if (isEmpty())
             return substitutionToRename;
 
-        ImmutableMap<Variable, T> substitutionMap = substitutionToRename.getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, T> substitutionMap = substitutionToRename.entrySet().stream()
                 // Substitutes the keys and values of the substitution to rename.
                 .map(e -> Maps.immutableEntry(applyToVariable(e.getKey()), applyToTerm(e.getValue())))
                 // Safe because the local substitution is injective
@@ -99,7 +99,7 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
 
     @Override
     public InjectiveVar2VarSubstitution filter(Predicate<Variable> filter) {
-        return of(getImmutableMap().entrySet().stream()
+        return of(entrySet().stream()
                         .filter(e -> filter.test(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
     }

@@ -109,7 +109,7 @@ public class TriplesMap {
 
         return factory.getTargetAtom(
                 projectionAtom,
-                a.getSubstitution().getImmutableMap().entrySet().stream()
+                a.getSubstitution().entrySet().stream()
                         .map(e -> e.getKey().equals(predicateVariable) ? newEntry : e)
                         .collect(ImmutableCollectors.toMap()));
     }

@@ -110,8 +110,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                Stream.concat(blockedSubstitutionToGroundTerm.getImmutableMap().entrySet().stream(),
-                                blockedVar2VarSubstitution.getImmutableMap().entrySet().stream())
+                Stream.concat(blockedSubstitutionToGroundTerm.entrySet().stream(),
+                                blockedVar2VarSubstitution.entrySet().stream())
                         .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                         .collect(ImmutableCollectors.toList()));
 
@@ -136,7 +136,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(ImmutableSubstitution<Variable> descendingVar2Var,
                                                                                  ImmutableSet<Variable> aggregationVariables) {
         // Substitution value -> substitution keys
-        ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.getImmutableMap().entrySet().stream()
+        ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         Map.Entry::getValue,
                         Map.Entry::getKey));
@@ -291,7 +291,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                             groupingVariables, substitution.getDomain()));
         }
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> nonAggregateMap = substitution.getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, ImmutableFunctionalTerm> nonAggregateMap = substitution.entrySet().stream()
                 .filter(e -> !e.getValue().getFunctionSymbol().isAggregation())
                 .collect(ImmutableCollectors.toMap());
         if (!nonAggregateMap.isEmpty()) {

@@ -233,7 +233,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
-        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution.getImmutableMap().entrySet().stream()
+        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution.entrySet().stream()
                 .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                 .flatMap(e -> {
                     ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
@@ -279,7 +279,7 @@ public class VariableNullabilityImpl implements VariableNullability {
             ImmutableSubstitution<? extends ImmutableTerm> nonNestedSubstitution, VariableNullabilityImpl childNullability) {
 
         // TODO: find a better name
-        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.entrySet().stream()
                 .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey()).stream())
                 .collect(ImmutableCollectors.toMap());
 

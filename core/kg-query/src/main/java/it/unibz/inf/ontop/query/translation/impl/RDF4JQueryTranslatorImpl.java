@@ -453,7 +453,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return Stream.concat(
                 an.getGroupingVariables().stream()
                         .filter(childNullableVars::contains),
-                an.getSubstitution().getImmutableMap().entrySet().stream()
+                an.getSubstitution().entrySet().stream()
                         .filter(e -> e.getValue().getFunctionSymbol().isNullable(ImmutableSet.of(0)))
                         .map(Map.Entry::getKey)
         ).collect(ImmutableCollectors.toSet());

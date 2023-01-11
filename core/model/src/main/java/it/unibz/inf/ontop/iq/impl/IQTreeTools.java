@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -69,17 +70,17 @@ public class IQTreeTools {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
         ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.getFragment(Variable.class);
-        ImmutableMap<Variable, Variable> var2VarMap = var2VarFragment.getImmutableMap();
+        ImmutableSet<Map.Entry<Variable, Variable>> var2VarMap = var2VarFragment.entrySet();
 
-        int size = descendingSubstitution.getImmutableMap().size();
+        int size = descendingSubstitution.entrySet().size();
         if (var2VarMap.size() != size)
             return Optional.empty();
 
-        ImmutableSet<Variable> coDomain = var2VarMap.values().stream()
+        ImmutableSet<Variable> coDomain = var2VarFragment.getRange().stream()
                 .filter(v -> !projectedVariables.contains(v))
                 .collect(ImmutableCollectors.toSet());
         return (coDomain.size() == size)
-                ? Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarMap))
+                ? Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarFragment.getImmutableMap()))
                 : Optional.empty();
     }
 

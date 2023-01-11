@@ -128,7 +128,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .map(normalizedUnifier::applyToBooleanExpression),
 
                         // Equalities that must remain
-                        normalizedUnifier.getImmutableMap().entrySet().stream()
+                        normalizedUnifier.entrySet().stream()
                                 .filter(e -> nonLiftableVariables.contains(e.getKey())
                                         || rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
                                 .sorted(Map.Entry.comparingByKey())
@@ -150,11 +150,11 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
                 Stream.concat(
-                        normalizedUnifier.getImmutableMap().entrySet().stream()
+                        normalizedUnifier.entrySet().stream()
                                 .filter(e -> !nonLiftableVariables.contains(e.getKey()))
                                 .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey())),
                         groundFunctionalSubstitution
-                                .map(s -> s.getImmutableMap().entrySet().stream())
+                                .map(s -> s.entrySet().stream())
                                 .orElseGet(Stream::empty))
                         .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
