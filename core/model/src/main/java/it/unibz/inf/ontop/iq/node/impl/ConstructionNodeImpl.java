@@ -347,12 +347,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return IntStream.range(1, fullRenamingDomain.size() + 1)
                 .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
                 .flatMap(Collection::stream)
-                .map(comb -> fullRenaming.builder().restrictDomain(ImmutableSet.copyOf(comb)).build())
-                // Remove non-injective substitutions
-                .filter(s -> {
-                    ImmutableCollection<Variable> values = s.getRange();
-                    return values.size() == ImmutableSet.copyOf(values).size();
-                })
+                .map(comb -> fullRenaming.restrictDomain(ImmutableSet.copyOf(comb)))
+                .filter(ImmutableSubstitution::isInjective)
                 // Inverse
                 .map(s -> substitutionFactory.getInjectiveVar2VarSubstitution(
                         s.entrySet().stream()

@@ -30,8 +30,6 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
         Variable r = get(variable);
         return r == null ? variable : r;
     }
-    @Override
-    InjectiveVar2VarSubstitution restrictDomain(Predicate<Variable> predicate);
 
     @Override
     InjectiveVar2VarSubstitution restrictDomain(ImmutableSet<Variable> set);

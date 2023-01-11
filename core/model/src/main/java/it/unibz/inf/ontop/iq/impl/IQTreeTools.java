@@ -43,8 +43,7 @@ public class IQTreeTools {
             IQTree tree, ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws UnsatisfiableDescendingSubstitutionException {
 
-        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution
-                .builder().restrictDomain(tree.getVariables()).build();
+        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomain(tree.getVariables());
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();

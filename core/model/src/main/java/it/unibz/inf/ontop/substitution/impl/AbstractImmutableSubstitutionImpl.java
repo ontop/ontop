@@ -65,15 +65,10 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
 
     @Override
-    public ImmutableSubstitution<T> restrictDomain(Predicate<Variable> filter) {
-        return new ImmutableSubstitutionImpl<>(entrySet().stream()
-                .filter(e -> filter.test(e.getKey()))
-                .collect(ImmutableCollectors.toMap()), termFactory);
-    }
-
-    @Override
     public ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set) {
-        return restrictDomain(set::contains);
+        return new ImmutableSubstitutionImpl<>(entrySet().stream()
+                .filter(e -> set.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
     @Override

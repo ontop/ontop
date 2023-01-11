@@ -140,10 +140,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.builder().restrictDomain(vC).build();
+        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomain(vC);
 
         ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
-                .restrictDomain(v -> !thetaC.isDefining(v) && (!thetaCBar.isDefining(v) || projectedVariables.contains(v)))
+                .restrictDomain(v -> !thetaC.isDefining(v))
+                .restrictDomain(v -> !thetaCBar.isDefining(v) || projectedVariables.contains(v))
                 .build();
 
         /* ---------------
@@ -167,7 +168,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         )));
 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
-                .restrictDomain(v -> !thetaF.isDefining(v) && (!thetaFBar.isDefining(v) || projectedVariables.contains(v)))
+                .restrictDomain(v -> !thetaF.isDefining(v))
+                .restrictDomain(v -> !thetaFBar.isDefining(v) || projectedVariables.contains(v))
                 .transform(thetaFBar::apply)
                 .build();
 
@@ -198,7 +200,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
         ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.compose(
-                tauF.builder().restrictDomain(v -> !thetaBar.isDefining(v) && !tauCPropagationResults.delta.isDefining(v)).build(),
+                tauF.builder()
+                        .restrictDomain(v -> !thetaBar.isDefining(v))
+                        .restrictDomain(v -> !tauCPropagationResults.delta.isDefining(v))
+                        .build(),
                 tauCPropagationResults.delta);
 
         ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.builder().restrictDomain(v -> !tauF.isDefining(v)).build();

@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,10 +42,12 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 
-    ImmutableSubstitution<T> restrictDomain(Predicate<Variable> predicate);
-
     ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set);
 
+    default boolean isInjective() {
+        ImmutableCollection<T> values = getRange();
+        return values.size() == ImmutableSet.copyOf(values).size();
+    }
 
     Builder<T> builder();
 

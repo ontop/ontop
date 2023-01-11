@@ -179,7 +179,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     groupingVariables).immutableCopy();
 
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
-                    .builder().restrictDomain(nonGroupingVariables).build();
+                    .restrictDomain(nonGroupingVariables);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                             substitutionFactory.compose(nonGroupingSubstitution, aggregationSubstitution).builder()

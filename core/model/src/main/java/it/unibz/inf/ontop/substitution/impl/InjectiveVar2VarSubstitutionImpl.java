@@ -93,17 +93,11 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
     }
 
 
-
-    @Override
-    public InjectiveVar2VarSubstitution restrictDomain(Predicate<Variable> filter) {
-        return create(entrySet().stream()
-                        .filter(e -> filter.test(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
-    }
-
     @Override
     public InjectiveVar2VarSubstitution restrictDomain(ImmutableSet<Variable> set) {
-        return restrictDomain(set::contains);
+        return create(entrySet().stream()
+                .filter(e -> set.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     private static boolean isInjective(ImmutableMap<Variable, ? extends VariableOrGroundTerm> substitutionMap) {

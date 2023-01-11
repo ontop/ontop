@@ -70,10 +70,11 @@ public class ConstructionNodeTools {
          */
         ImmutableSubstitution<ImmutableTerm> normalizedEta = substitutionTools.prioritizeRenaming(eta, newV);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.builder().restrictDomain(newV).build();
+        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.restrictDomain(newV);
 
         ImmutableSubstitution<ImmutableTerm> delta = normalizedEta.builder()
-                .restrictDomain(v -> !formerTheta.isDefining(v) && (!newTheta.isDefining(v) || formerV.contains(v)))
+                .restrictDomain(v -> !formerTheta.isDefining(v))
+                .restrictDomain(v -> !newTheta.isDefining(v) || formerV.contains(v))
                 .build();
 
         return new NewSubstitutionPair(newTheta, delta);
