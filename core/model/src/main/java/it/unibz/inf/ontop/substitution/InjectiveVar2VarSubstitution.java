@@ -30,18 +30,6 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
         return r == null ? variable : r;
     }
 
-    /**
-     * { (x,y) | (x,y) \in (this o otherSubstitution), x not excluded }
-     *
-     *
-     * Returns Optional.empty() when the resulting substitution is not injective (anymore).
-     *
-     * Variables to exclude from the domain are typically fresh temporary variables that can be ignored.
-     * Ignoring them is sufficient in many cases to guarantee that the substitution is injective.
-     *
-     */
-    Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(InjectiveVar2VarSubstitution otherSubstitution,
-                                                                             Set<Variable> variablesToExcludeFromTheDomain);
 
     @Override
     InjectiveVar2VarSubstitution filter(Predicate<Variable> filter);

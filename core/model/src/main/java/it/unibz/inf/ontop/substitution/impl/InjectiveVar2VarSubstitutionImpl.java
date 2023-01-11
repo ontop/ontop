@@ -96,27 +96,6 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
     }
 
 
-    @Override
-    public Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(
-            InjectiveVar2VarSubstitution g, Set<Variable> variablesToExcludeFromTheDomain) {
-        ImmutableSet<Variable> gDomain = g.getDomain();
-
-        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
-                .map(e1 -> Maps.immutableEntry(e1.getKey(), applyToVariable(e1.getValue())));
-
-        Stream<Map.Entry<Variable, Variable>> localEntryStream = getImmutableMap().entrySet().stream()
-                .filter(e -> !gDomain.contains(e.getKey()));
-
-        ImmutableMap<Variable, Variable> newMap = Stream.concat(gEntryStream, localEntryStream)
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                // Removes some excluded entries
-                .filter(e -> !variablesToExcludeFromTheDomain.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap());
-
-        return Optional.of(newMap)
-                .filter(InjectiveVar2VarSubstitutionImpl::isInjective)
-                .map(this::of);
-    }
 
     @Override
     public InjectiveVar2VarSubstitution filter(Predicate<Variable> filter) {

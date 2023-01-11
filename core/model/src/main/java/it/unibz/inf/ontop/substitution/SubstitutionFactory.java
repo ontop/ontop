@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -55,4 +57,14 @@ public interface SubstitutionFactory {
      * @param <T>
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
+
+    /**
+     * { (x,y) | (x,y) \in (g o f), x not excluded }
+     * Returns Optional.empty() when the resulting substitution is not injective.
+     * Variables to exclude from the domain are typically fresh temporary variables that can be ignored.
+     * Ignoring them is sufficient in many cases to guarantee that the substitution is injective.
+     */
+    InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f,
+                                                                             Set<Variable> variablesToExcludeFromTheDomain);
+
 }

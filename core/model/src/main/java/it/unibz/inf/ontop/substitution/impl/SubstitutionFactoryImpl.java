@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -173,6 +175,24 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
         return getSubstitution(map);
+    }
+
+    @Override
+    public InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f, Set<Variable> variablesToExcludeFromTheDomain) {
+        ImmutableSet<Variable> fDomain = f.getDomain();
+
+        Stream<Map.Entry<Variable, Variable>> fEntryStream = f.getImmutableMap().entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), g.applyToVariable(e.getValue())));
+
+        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
+                .filter(e -> !fDomain.contains(e.getKey()));
+
+        ImmutableMap<Variable, Variable> newMap = Stream.concat(fEntryStream, gEntryStream)
+                .filter(e -> !variablesToExcludeFromTheDomain.contains(e.getKey()))
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
+
+        return getInjectiveVar2VarSubstitution(newMap);
     }
 
 }

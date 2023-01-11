@@ -65,14 +65,13 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     InjectiveVar2VarSubstitution disjointVariableSetRenaming = substitutionFactory.generateNotConflictingRenaming(
                             variableGenerator, def.getTree().getKnownVariables());
 
-                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(disjointVariableSetRenaming.getRange());
-
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
                             atomFactory.getDistinctVariableOnlyDataAtom(def.getProjectionAtom().getPredicate(),
                                     disjointVariableSetRenaming.applyToVariableArguments(def.getProjectionAtom().getArguments())),
                             projectionAtom)
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
+                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(disjointVariableSetRenaming.getRange());
                     InjectiveVar2VarSubstitution renamingSubstitution =
                             /*
                               fresh variables are excluded from the domain of the renaming substitution
@@ -80,8 +79,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
                                NB: this guarantees that the renaming substitution is injective
                              */
-                            headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming, freshVariables)
-                                    .orElseThrow(() -> new IllegalStateException("Bug: the renaming substitution is not injective"));
+                            substitutionFactory.compose(headSubstitution, disjointVariableSetRenaming, freshVariables);
 
                     QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
                     return queryRenamer.transform(def).getTree();
