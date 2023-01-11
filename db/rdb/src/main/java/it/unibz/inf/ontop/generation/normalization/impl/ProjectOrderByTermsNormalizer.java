@@ -171,12 +171,10 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
 
-        ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode.isPresent()
-                ? Stream.concat(
+        ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Stream.concat(
                         projectedVariables.stream(),
-                        analysis.constructionNode.get().getSubstitution().getRange().stream())
-                        .collect(ImmutableCollectors.toSet())
-                : projectedVariables;
+                        analysis.getSubstitution().getRange().stream())
+                .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings = analysis.sortConditions.stream()
                 .map(OrderByNode.OrderComparator::getTerm)
@@ -191,7 +189,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         if (newBindings.isEmpty())
             return tree;
 
-        if (!isSupported(projectedVariables, analysis, newBindings)) {
+        if (!isSupported(alreadyDefinedTerms, analysis, newBindings)) {
             throw new DistinctOrderByDialectLimitationException();
         }
 
@@ -201,14 +199,11 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
                         .map(Map.Entry::getKey))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                Stream.concat(
-                        newBindings.stream()
-                                .filter(e -> !e.getKey().equals(e.getValue())),
-                        analysis.constructionNode
-                                .map(c -> c.getSubstitution().entrySet().stream())
-                                .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
+                        substitutionFactory.getSubstitution(newBindings.stream()
+                                .filter(e -> !e.getKey().equals(e.getValue()))
+                                .collect(ImmutableCollectors.toMap())),
+                        analysis.getSubstitution());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
 
@@ -221,17 +216,10 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
      * Decides whether or not new bindings can be added
      *
      */
-    protected boolean isSupported(ImmutableSet<Variable> projectedVariables, Analysis analysis,
+    protected boolean isSupported(ImmutableSet<ImmutableTerm> alreadyProjectedTerms, Analysis analysis,
                                 ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings) {
         if (!analysis.hasDistinct)
             return true;
-
-        ImmutableSet<ImmutableTerm> alreadyProjectedTerms = Stream.concat(
-                projectedVariables.stream(),
-                analysis.constructionNode
-                        .map(c -> c.getSubstitution().getRange().stream())
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toSet());
 
         return newBindings.stream()
                 .map(Map.Entry::getValue)
@@ -295,7 +283,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class Analysis {
+    private final class Analysis {
         private final boolean hasDistinct;
         private final Optional<ConstructionNode> constructionNode;
         private final ImmutableList<OrderByNode.OrderComparator> sortConditions;
@@ -305,6 +293,10 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
             this.hasDistinct = hasDistinct;
             this.constructionNode = constructionNode;
             this.sortConditions = sortConditions;
+        }
+
+        ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+            return constructionNode.map(ConstructionNode::getSubstitution).orElseGet(substitutionFactory::getSubstitution);
         }
     }
 

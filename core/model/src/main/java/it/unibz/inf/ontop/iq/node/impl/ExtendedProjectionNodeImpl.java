@@ -161,7 +161,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(
                 m.asMap().entrySet().stream()
                         .filter(e -> e.getKey() instanceof Variable)
-                        .filter(e -> !child.getVariables().contains(e.getKey()))
+                        .filter(e -> !child.getVariables().contains((Variable)e.getKey()))
                         .collect(ImmutableCollectors.toMap(
                                 e -> (Variable) e.getKey(),
                                 e -> e.getValue().iterator().next()

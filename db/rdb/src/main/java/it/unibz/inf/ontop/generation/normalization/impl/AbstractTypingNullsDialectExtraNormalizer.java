@@ -52,13 +52,11 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                    constructionNode.getSubstitution().entrySet().stream()
-                    .map(e -> Optional.ofNullable(typedNullMap.get(e.getKey()))
-                            .filter(n -> e.getValue().isNull())
-                            .map(n -> Maps.<Variable, ImmutableTerm>immutableEntry(e.getKey(), n))
-                            .orElse(e))
-                    .collect(ImmutableCollectors.toMap()));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+                    .conditionalTransform(
+                            v -> Optional.ofNullable(typedNullMap.get(v)),
+                            (t, n) -> t.isNull() ? n : t)
+                    .build();
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                     constructionNode.getVariables(), newSubstitution);

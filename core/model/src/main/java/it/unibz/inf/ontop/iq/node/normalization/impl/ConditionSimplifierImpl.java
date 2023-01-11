@@ -139,24 +139,18 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
 
 
-        Optional<ImmutableExpression> newExpression;
-        if (groundFunctionalSubstitution.isPresent()) {
-            newExpression = evaluateCondition(
+        Optional<ImmutableExpression> newExpression = (groundFunctionalSubstitution.isPresent())
+            ? evaluateCondition(
                     groundFunctionalSubstitution.get().applyToBooleanExpression(partiallySimplifiedExpression.get()),
-                    variableNullability);
-        }
-        else
-            newExpression = partiallySimplifiedExpression;
+                    variableNullability)
+            : partiallySimplifiedExpression;
 
-        ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
-                Stream.concat(
-                        normalizedUnifier.entrySet().stream()
-                                .filter(e -> !nonLiftableVariables.contains(e.getKey()))
-                                .filter(e -> !rejectedByChildrenVariablesEqToConstant.contains(e.getKey())),
-                        groundFunctionalSubstitution
-                                .map(s -> s.entrySet().stream())
-                                .orElseGet(Stream::empty))
-                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
+                        normalizedUnifier.builder()
+                                .removeFromDomain(nonLiftableVariables)
+                                .removeFromDomain(rejectedByChildrenVariablesEqToConstant)
+                                .build(),
+                        groundFunctionalSubstitution.orElseGet(substitutionFactory::getSubstitution));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }

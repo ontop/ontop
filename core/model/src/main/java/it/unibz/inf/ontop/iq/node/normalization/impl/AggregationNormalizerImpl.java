@@ -316,8 +316,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
                     // All variables and constants
-                    simplifiedSubstitution.entrySet().stream()
-                            .filter(e -> e.getValue() instanceof NonFunctionalTerm),
+                    simplifiedSubstitution.builder().restrictRangeTo(NonFunctionalTerm.class).build(ImmutableTerm.class).entrySet().stream(),
                     // (Possibly decomposed) functional terms
                     decompositionMap.entrySet().stream()
                             .filter(e -> e.getValue().isPresent())

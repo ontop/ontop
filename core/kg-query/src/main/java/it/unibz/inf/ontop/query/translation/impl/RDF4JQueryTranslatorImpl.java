@@ -906,9 +906,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
 
         subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
-        projectedVars = projectionElems.stream()
-                .map(pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
-                .collect(ImmutableCollectors.toSet());
         ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
 
         // Substitution for possibly unbound variables

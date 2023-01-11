@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -76,9 +77,12 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 .filter(vs -> vs.stream().noneMatch(variableNullability::isPossiblyNullable))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = nonNullableUniqueConstraints.isEmpty()
-                ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(bNodeMap, whereTree.getVariables())
-                : createBNodeDefinitionsFromNonNullableUniqueConstraint(bNodeMap, nonNullableUniqueConstraints.iterator().next());
+        ImmutableTerm term = nonNullableUniqueConstraints.isEmpty()
+                ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(whereTree.getVariables())
+                : createBNodeDefinitionsFromNonNullableUniqueConstraint(nonNullableUniqueConstraints.iterator().next());
+
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bNodeMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getValue, e -> term)));
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))
                 .immutableCopy();
@@ -86,33 +90,22 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
         return new ResultImpl(bNodeMap,
                 iqFactory.createConstructionNode(
                         newProjectedVariables,
-                        substitutionFactory.getSubstitution(substitutionMap)));
+                        substitution));
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableMap<BNode, Variable> bNodeMap,
-                                                                                                        ImmutableSet<Variable> uniqueConstraint) {
-        return bNodeMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getValue,
-                        e -> generateBNodeTemplateFunctionalTerm(uniqueConstraint)));
+    private ImmutableTerm createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableSet<Variable> uniqueConstraint) {
+        return generateBNodeTemplateFunctionalTerm(uniqueConstraint);
     }
 
     /**
      * This implementation does not preserve duplicated rows, as foreseen by R2RML for the virtual setting
      * (see https://www.w3.org/TR/r2rml/#default-mappings)
      */
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsWithoutNonNullableUniqueConstraint(
-            ImmutableMap<BNode, Variable> bNodeMap, ImmutableSet<Variable> whereVariables) {
+    private ImmutableTerm createBNodeDefinitionsWithoutNonNullableUniqueConstraint(ImmutableSet<Variable> whereVariables) {
         if (whereVariables.isEmpty())
-            return bNodeMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getValue,
-                            e -> termFactory.getConstantBNode(UUID.randomUUID().toString())));
+            return termFactory.getConstantBNode(UUID.randomUUID().toString());
 
-        return bNodeMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getValue,
-                        e -> generateBNodeTemplateFunctionalTerm(whereVariables)));
+        return generateBNodeTemplateFunctionalTerm(whereVariables);
     }
 
     private ImmutableFunctionalTerm generateBNodeTemplateFunctionalTerm(ImmutableSet<Variable> variables) {

@@ -103,27 +103,21 @@ public class InjectiveBindingLiftState {
         ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
         ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> injectivityDecompositionMap =
-                childSubstitution.entrySet().stream()
-                        .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> ((ImmutableFunctionalTerm) e.getValue())
-                                        // Analyzes injectivity
-                                        .analyzeInjectivity(nonFreeVariables, grandChildVariableNullability,
-                                                variableGenerator)));
+                childSubstitution.builder()
+                        .restrictRangeTo(ImmutableFunctionalTerm.class)
+                        .toMap(t -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
 
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-        ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
+        ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                 // All variables and constants
-                childSubstitution.entrySet().stream()
-                        .filter(e -> e.getValue() instanceof NonFunctionalTerm),
+                childSubstitution.restrictRangeTo(NonFunctionalTerm.class),
                 // (Possibly decomposed) injective functional terms
-                injectivityDecompositionMap.entrySet().stream()
+                substitutionFactory.getSubstitution(injectivityDecompositionMap.entrySet().stream()
                         .filter(e -> e.getValue().isPresent())
                         .map(e -> Maps.immutableEntry(e.getKey(),
-                                e.getValue().get().getLiftableTerm())))
-                .collect(ImmutableCollectors.toMap()));
+                                e.getValue().get().getLiftableTerm()))
+                        .collect(ImmutableCollectors.toMap())));
 
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
