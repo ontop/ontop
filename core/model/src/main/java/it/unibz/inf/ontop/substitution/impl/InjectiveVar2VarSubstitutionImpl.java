@@ -13,12 +13,9 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -65,7 +62,7 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
         throw new RuntimeException("NEW SUB");
     }
     
-    private InjectiveVar2VarSubstitution of(ImmutableMap<Variable, Variable> map) {
+    private InjectiveVar2VarSubstitution create(ImmutableMap<Variable, Variable> map) {
         return new InjectiveVar2VarSubstitutionImpl(map, termFactory);
     }
 
@@ -98,14 +95,20 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
 
 
     @Override
-    public InjectiveVar2VarSubstitution filter(Predicate<Variable> filter) {
-        return of(entrySet().stream()
+    public InjectiveVar2VarSubstitution restrictDomain(Predicate<Variable> filter) {
+        return create(entrySet().stream()
                         .filter(e -> filter.test(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
+    }
+
+    @Override
+    public InjectiveVar2VarSubstitution restrictDomain(ImmutableSet<Variable> set) {
+        return restrictDomain(set::contains);
     }
 
     private static boolean isInjective(ImmutableMap<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
         ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
         return valueSet.size() == substitutionMap.keySet().size();
     }
+
 }

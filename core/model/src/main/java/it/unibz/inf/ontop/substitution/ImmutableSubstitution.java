@@ -41,14 +41,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 
-    /**
-     * Constructs the projection of the substitution: the domain is restricted to the variables satisfying the filter.
-     *
-     * @param filter condition on variables
-     * @return new restricted substitution
-     */
+    ImmutableSubstitution<T> restrictDomain(Predicate<Variable> predicate);
 
-    ImmutableSubstitution<T> filter(Predicate<Variable> filter);
+    ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set);
 
 
     Builder<T> builder();

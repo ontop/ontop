@@ -383,8 +383,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
                 ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                        ((ImmutableSubstitution<? extends VariableOrGroundTerm>)
-                                simplificationResults.getSubstitution()).filter(rightVariables::contains);
+                                simplificationResults.getSubstitution().builder().restrictDomain(rightVariables).build();
 
                 if (downSubstitution.isEmpty())
                     return updateConditionAndRightChild(simplificationResults.getOptionalExpression(), rightChild);
@@ -469,8 +468,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .findFirst();
 
             ImmutableSubstitution<ImmutableTerm> selectedSubstitution = provenanceVariable
-                    .map(v -> rightSubstitution
-                            .filter(k -> !k.equals(v)))
+                    .map(v -> rightSubstitution.builder()
+                            .restrictDomain(k -> !k.equals(v)).build())
                     .orElse(rightSubstitution);
 
             /*

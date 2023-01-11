@@ -44,7 +44,7 @@ public class IQTreeTools {
             throws UnsatisfiableDescendingSubstitutionException {
 
         ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution
-                .filter(tree.getVariables()::contains);
+                .builder().restrictDomain(tree.getVariables()).build();
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();

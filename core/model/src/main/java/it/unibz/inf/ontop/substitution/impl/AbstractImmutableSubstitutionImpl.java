@@ -65,12 +65,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
 
     @Override
-    public ImmutableSubstitution<T> filter(Predicate<Variable> filter) {
-        ImmutableMap<Variable, T> newMap = entrySet().stream()
+    public ImmutableSubstitution<T> restrictDomain(Predicate<Variable> filter) {
+        return new ImmutableSubstitutionImpl<>(entrySet().stream()
                 .filter(e -> filter.test(e.getKey()))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toMap()), termFactory);
+    }
 
-        return (newMap.size() == getImmutableMap().size()) ? this : constructNewSubstitution(newMap);
+    @Override
+    public ImmutableSubstitution<T> restrictDomain(ImmutableSet<Variable> set) {
+        return restrictDomain(set::contains);
     }
 
     @Override
@@ -84,14 +87,16 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public Builder<T> builder() {
-        return new BuilderImpl<>(entrySet().stream());
+        return new BuilderImpl<>(entrySet().stream(), termFactory);
     }
 
-    private final class BuilderImpl<B extends ImmutableTerm> implements Builder<B> {
-        private final Stream<Map.Entry<Variable, B>> stream;
+    protected static class BuilderImpl<B extends ImmutableTerm> implements Builder<B> {
+        protected final Stream<Map.Entry<Variable, B>> stream;
+        protected final TermFactory termFactory;
 
-        BuilderImpl(Stream<Map.Entry<Variable, B>> stream) {
+        BuilderImpl(Stream<Map.Entry<Variable, B>> stream, TermFactory termFactory) {
             this.stream = stream;
+            this.termFactory = termFactory;
         }
         @Override
         public ImmutableSubstitution<B> build() {
@@ -108,9 +113,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return (ImmutableSubstitution<S>) built;
         }
 
+        protected <S extends ImmutableTerm> Builder<S> create(Stream<Map.Entry<Variable, S>> stream) {
+            return new BuilderImpl<>(stream, termFactory);
+        }
+
         @Override
         public Builder<B> restrictDomain(Predicate<Variable> predicate) {
-            return new BuilderImpl<>(stream.filter(e -> predicate.test(e.getKey())));
+            return create(stream.filter(e -> predicate.test(e.getKey())));
         }
 
         @Override
@@ -120,29 +129,29 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         @Override
         public Builder<B> restrict(BiPredicate<Variable, B> predicate) {
-            return new BuilderImpl<>(stream.filter(e -> predicate.test(e.getKey(), e.getValue())));
+            return create(stream.filter(e -> predicate.test(e.getKey(), e.getValue())));
         }
 
         @Override
         public <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<S> type) {
-            return new BuilderImpl<>(stream
+            return create(stream
                     .filter(e -> type.isInstance(e.getValue()))
                     .map(e -> Maps.immutableEntry(e.getKey(), type.cast(e.getValue()))));
         }
 
         @Override
         public <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, B, S> function) {
-            return new BuilderImpl<>(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getKey(), e.getValue()))));
+            return create(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getKey(), e.getValue()))));
         }
 
         @Override
         public <S extends ImmutableTerm> Builder<S> transform(Function<B, S> function) {
-            return new BuilderImpl<>(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue()))));
+            return create(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue()))));
         }
 
         @Override
         public <U> Builder<B> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<B, U, B> function) {
-            return new BuilderImpl<>(stream.map(e -> Maps.immutableEntry(
+            return create(stream.map(e -> Maps.immutableEntry(
                     e.getKey(),
                     lookup.apply(e.getKey())
                             .<B>map(u -> function.apply(e.getValue(), u))

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -29,8 +30,9 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
         Variable r = get(variable);
         return r == null ? variable : r;
     }
-
+    @Override
+    InjectiveVar2VarSubstitution restrictDomain(Predicate<Variable> predicate);
 
     @Override
-    InjectiveVar2VarSubstitution filter(Predicate<Variable> filter);
+    InjectiveVar2VarSubstitution restrictDomain(ImmutableSet<Variable> set);
 }

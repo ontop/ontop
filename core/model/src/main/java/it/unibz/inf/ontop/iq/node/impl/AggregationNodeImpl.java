@@ -102,7 +102,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .immutableCopy();
 
         ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution
-                .filter(domain::contains);
+                .builder().restrictDomain(domain).build();
 
         IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
 
@@ -146,7 +146,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .flatMap(e -> extractBlockedDomainVars(e.getKey(), e.getValue(), aggregationVariables))
                 .collect(ImmutableCollectors.toSet());
 
-         return descendingVar2Var.filter(blockedVariables::contains);
+         return descendingVar2Var.builder().restrictDomain(blockedVariables).build();
     }
 
     private Stream<Variable> extractBlockedDomainVars(Variable rangeVariable, Collection<Variable> domainVariables,
@@ -305,7 +305,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> groupingVariableDefs = child.getPossibleVariableDefinitions().stream()
-                .map(s -> s.filter(groupingVariables::contains))
+                .map(s -> s.builder().restrictDomain(groupingVariables).build())
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSubstitution<NonVariableTerm> def = substitution.builder().restrictRangeTo(NonVariableTerm.class).build();

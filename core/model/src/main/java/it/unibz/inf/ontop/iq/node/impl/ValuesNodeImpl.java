@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -256,9 +257,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                                                            VariableGenerator variableGenerator) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
         InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                        valuesNode.getVariables().stream(),
-                        variableGenerator::generateNewVariableFromVar)
-                .filter(substitution.getDomain()::contains);
+                Sets.intersection(valuesNode.getVariables(), substitution.getDomain()).stream(),
+                variableGenerator::generateNewVariableFromVar);
 
         return termFactory.getConjunction(renaming.applyRenaming(substitution).builder().toStrictEqualities())
                 .map(filterCondition ->

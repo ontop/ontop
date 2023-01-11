@@ -140,7 +140,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.filter(vC::contains);
+        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.builder().restrictDomain(vC).build();
 
         ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
                 .restrictDomain(v -> !thetaC.isDefining(v) && (!thetaCBar.isDefining(v) || projectedVariables.contains(v)))
@@ -198,10 +198,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
         ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.compose(
-                tauF.filter(v -> !thetaBar.isDefining(v) && !tauCPropagationResults.delta.isDefining(v)),
+                tauF.builder().restrictDomain(v -> !thetaBar.isDefining(v) && !tauCPropagationResults.delta.isDefining(v)).build(),
                 tauCPropagationResults.delta);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.filter(k -> !tauF.isDefining(k));
+        ImmutableSubstitution<ImmutableTerm> newTheta = thetaBar.builder().restrictDomain(v -> !tauF.isDefining(v)).build();
 
         Stream<ImmutableExpression> newConditionStream =
                 Stream.concat(

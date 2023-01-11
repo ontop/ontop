@@ -343,11 +343,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         ImmutableSet<Variable> fullRenamingDomain = fullRenaming.getDomain();
 
-        //noinspection UnstableApiUsage
+        //noinspection UnstableApiUsages
         return IntStream.range(1, fullRenamingDomain.size() + 1)
                 .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
                 .flatMap(Collection::stream)
-                .map(comb -> fullRenaming.filter(comb::contains))
+                .map(comb -> fullRenaming.builder().restrictDomain(ImmutableSet.copyOf(comb)).build())
                 // Remove non-injective substitutions
                 .filter(s -> {
                     ImmutableCollection<Variable> values = s.getRange();

@@ -66,7 +66,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.getPossibleVariableDefinitions().stream())
-                .map(s -> s.filter(projectedVariables::contains))
+                .map(s -> s.builder().restrictDomain(projectedVariables).build())
                 .collect(ImmutableCollectors.toSet());
     }
 

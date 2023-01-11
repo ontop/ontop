@@ -108,7 +108,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.filter(getVariables()::contains);
+                : renamingSubstitution.restrictDomain(getVariables());
 
         return selectedSubstitution.isEmpty()
                 ? this
