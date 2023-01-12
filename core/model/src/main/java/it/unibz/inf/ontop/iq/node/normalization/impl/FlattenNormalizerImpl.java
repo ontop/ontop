@@ -72,8 +72,12 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                                     ))).entrySet().stream()
                     .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> substitutionFactory.getSubstitution(e.getValue())));
 
-            ImmutableSubstitution<ImmutableTerm> filteredSub = splitSub.get(false);
-            ImmutableSubstitution<ImmutableTerm> flattenedVarDef = splitSub.get(true);
+            ImmutableSubstitution<ImmutableTerm> flattenedVarDef = cn.getSubstitution().builder()
+                    .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
+                    .build();
+            ImmutableSubstitution<ImmutableTerm> filteredSub = cn.getSubstitution().builder()
+                    .removeFromDomain(flattenedVarDef.getDomain())
+                    .build();
 
             // Nothing can be lifted, declare the new tree normalized
             if (filteredSub.isEmpty()) {
