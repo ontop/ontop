@@ -72,14 +72,14 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                 NativeNode nativeNode = position.getDatabaseQuery(dbParameters);
                 try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                     while (rs.next()) {
-                        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
-                        for (Variable variable : nativeNode.getVariables()) { // exceptions, no streams
-                            String column = nativeNode.getColumnNames().get(variable).getName();
-                            builder.put(variable,
-                                    termFactory.getDBConstant(rs.getString(column),
-                                            nativeNode.getTypeMap().get(variable)));
-                        }
-                        resultBuilder.add(position.createExpansion(substitutionFactory.getSubstitution(builder.build())));
+                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionWithExceptions(
+                                nativeNode.getVariables(),
+                                v -> v,
+                                v -> termFactory.getDBConstant(
+                                        rs.getString(nativeNode.getColumnNames().get(v).getName()),
+                                        nativeNode.getTypeMap().get(v)));
+
+                        resultBuilder.add(position.createExpansion(sub));
                     }
                 }
             }

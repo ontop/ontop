@@ -138,13 +138,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder(); // exceptions - no stream
-        for (AddColumns a : columns.added) {
-            Variable v = getVariable(a.name, idFactory, termFactory);
-            ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
-            substitutionMapBuilder.put(v, value);
-        }
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMapBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionWithExceptions(
+                columns.added,
+                a -> getVariable(a.name, idFactory, termFactory),
+                a -> extractExpression(a, parentAttributeMap, idFactory, coreSingletons));
 
         ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
                 .getConstructionSubstitutionNormalizer();

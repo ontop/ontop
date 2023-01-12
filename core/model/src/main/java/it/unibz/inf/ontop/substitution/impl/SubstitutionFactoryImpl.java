@@ -49,6 +49,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
+    public     <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionWithExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionWithExceptions<U,T,E> termProvider) throws E {
+        ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder(); // exceptions - no stream
+        for (U u : entries) {
+            Variable v = variableProvider.apply(u);
+            T t = termProvider.apply(u);
+            substitutionMapBuilder.put(v, t);
+        }
+        return getSubstitution(substitutionMapBuilder.build());
+    }
+
+    @Override
     public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
         return new ImmutableSubstitutionImpl<>(stream
                 .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
