@@ -48,6 +48,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
     }
 
+    @Override
+    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
+        return new ImmutableSubstitutionImpl<>(stream
+                .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
+    }
+
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1) {
@@ -62,6 +68,11 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3) {
         return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3));
+    }
+
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3, Variable k4, T v4) {
+        return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
     }
 
     @Override

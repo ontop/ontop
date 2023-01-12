@@ -144,8 +144,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
             ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
             substitutionMapBuilder.put(v, value);
         }
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitutionMapBuilder.build();
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMap);
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMapBuilder.build());
 
         ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
                 .getConstructionSubstitutionNormalizer();

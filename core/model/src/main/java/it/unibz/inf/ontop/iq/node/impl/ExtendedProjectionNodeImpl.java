@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
@@ -144,7 +145,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
                 .removeFromDomain(thetaC.getDomain())
-                .restrictDomain(v -> !thetaCBar.isDefining(v) || projectedVariables.contains(v))
+                .removeFromDomain(Sets.difference(thetaCBar.getDomain(), projectedVariables).immutableCopy())
                 .build();
 
         /* ---------------
@@ -158,18 +159,16 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         e -> deltaC.applyToVariable(e.getKey()),
                         e -> deltaC.applyToFunctionalTerm(e.getValue())));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitutionFromStream(
                 m.asMap().entrySet().stream()
                         .filter(e -> e.getKey() instanceof Variable)
-                        .filter(e -> !child.getVariables().contains((Variable)e.getKey()))
-                        .collect(ImmutableCollectors.toMap(
-                                e -> (Variable) e.getKey(),
-                                e -> e.getValue().iterator().next()
-                        )));
+                        .filter(e -> !child.getVariables().contains((Variable)e.getKey())),
+                e -> (Variable) e.getKey(),
+                e -> e.getValue().iterator().next());
 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
-                .restrictDomain(v -> !thetaFBar.isDefining(v) || projectedVariables.contains(v))
+                .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables).immutableCopy())
                 .transform(thetaFBar::apply)
                 .build();
 

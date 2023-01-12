@@ -344,12 +344,11 @@ public class VariableNullabilityImpl implements VariableNullability {
                         getNullableVariables().stream())
                         .collect(ImmutableCollectors.toSet()));
 
-        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitutionFromStream(
                 terms.stream()
-                        .filter(t -> t instanceof NonVariableTerm)
-                        .collect(ImmutableCollectors.toMap(
-                                t -> variableGenerator.generateNewVariable(),
-                                t -> t)));
+                        .filter(t -> t instanceof NonVariableTerm),
+                t -> variableGenerator.generateNewVariable(),
+                t -> t);
 
         VariableNullability newVariableNullability = update(substitution, substitution.getDomain(), variableGenerator);
 

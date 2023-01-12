@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -314,15 +315,15 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             .restrictRangeTo(ImmutableFunctionalTerm.class)
                             .toMap(this::decomposeFunctionalTerm);
 
-            ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.getSubstitution(Stream.concat(
+            ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants
-                    simplifiedSubstitution.builder().restrictRangeTo(NonFunctionalTerm.class).build(ImmutableTerm.class).entrySet().stream(),
+                    simplifiedSubstitution.builder().restrictRangeTo(NonFunctionalTerm.class).build(ImmutableTerm.class),
                     // (Possibly decomposed) functional terms
-                    decompositionMap.entrySet().stream()
-                            .filter(e -> e.getValue().isPresent())
-                            .map(e -> Maps.immutableEntry(e.getKey(),
-                                    e.getValue().get().getLiftableTerm())))
-                    .collect(ImmutableCollectors.toMap()));
+                    substitutionFactory.getSubstitutionFromStream(
+                            decompositionMap.entrySet().stream()
+                                    .filter(e -> e.getValue().isPresent()),
+                            Map.Entry::getKey,
+                            e -> e.getValue().get().getLiftableTerm()));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
                     decompositionMap.entrySet().stream()

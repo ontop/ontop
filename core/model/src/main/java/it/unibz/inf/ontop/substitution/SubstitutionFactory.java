@@ -23,10 +23,12 @@ public interface SubstitutionFactory {
 
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
 
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1);
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2);
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
-                                                                       Variable k3, T v3);
+    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U,T> termProvider);
+
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2, Variable v3, T t3);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2, Variable v3, T t3, Variable v4, T t4);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values);

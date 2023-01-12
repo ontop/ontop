@@ -70,7 +70,7 @@ public class ConstructionNodeTools {
 
         ImmutableSubstitution<ImmutableTerm> delta = normalizedEta.builder()
                 .removeFromDomain(formerTheta.getDomain())
-                .restrictDomain(v -> !newTheta.isDefining(v) || formerV.contains(v))
+                .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV).immutableCopy())
                 .build();
 
         return new NewSubstitutionPair(newTheta, delta);

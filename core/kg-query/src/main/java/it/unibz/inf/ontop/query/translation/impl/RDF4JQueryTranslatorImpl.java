@@ -224,8 +224,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private IQ createInsertIQ(IntensionalDataNode dataNode, ImmutableMap<BNode, Variable> bnodeVariableMap, IQTree subTree) {
 
         DataAtom<AtomPredicate> dataNodeAtom = dataNode.getProjectionAtom();
-        List<Variable> mutableProjectedVariables = Lists.newArrayList();
-        Map<Variable, VariableOrGroundTerm> mutableSubstitutionMap = Maps.newHashMap();
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(subTree.getKnownVariables(), dataNode.getKnownVariables()));
@@ -238,22 +236,17 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         : a)
                 .collect(ImmutableCollectors.toList());
 
-        for (VariableOrGroundTerm term: normalizedArguments) {
-            if ((term instanceof Variable) && !mutableProjectedVariables.contains(term))
-                mutableProjectedVariables.add((Variable) term);
-            else {
-                Variable newVariable = variableGenerator.generateNewVariable();
-                mutableSubstitutionMap.put(newVariable, term);
-                mutableProjectedVariables.add(newVariable);
-            }
-        }
+        ImmutableMap<Variable, VariableOrGroundTerm> map = normalizedArguments.stream()
+                .map(t -> Maps.immutableEntry(t instanceof Variable ? (Variable)t : variableGenerator.generateNewVariable(), t))
+                .distinct()
+                .collect(ImmutableCollectors.toMap());
 
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(dataNodeAtom.getPredicate(),
-                ImmutableList.copyOf(mutableProjectedVariables));
+                ImmutableList.copyOf(map.keySet()));
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(mutableProjectedVariables),
-                substitutionFactory.getSubstitution(ImmutableMap.copyOf(mutableSubstitutionMap)));
+                map.keySet(),
+                substitutionFactory.getSubstitutionWithIdentityEntries(map.entrySet(), Map.Entry::getKey, Map.Entry::getValue));
 
         IQ newIQ = iqFactory.createIQ(
                 projectionAtom,
@@ -470,10 +463,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         new HashSet<>(childVariables),
                         externalBindings, treatBNodeAsVariable));
 
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
-                .map(ImmutableMap::copyOf)
-                .map(substitutionFactory::getSubstitution)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs);
+
         if (mergedVarDefs.size() > 1) {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
                     "within an RDF4J Group node: " + groupNode);
@@ -551,34 +542,23 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<ImmutableMap<Variable, ImmutableTerm>> maps = StreamSupport.stream(
-                node.getBindingSets().spliterator(),
-                false
-        ).map(bs -> getBsMap(bs, nullConstant))
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> maps =
+                StreamSupport.stream(node.getBindingSets().spliterator(), false)
+                        .map(bs -> getBsMap(bs, nullConstant))
+                        .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> nullableVars = maps.iterator().next().keySet().stream()
+        ImmutableSet<Variable> nullableVars = maps.get(0).getDomain().stream()
                 .filter(v -> maps.stream().anyMatch(m -> m.get(v).equals(nullConstant)))
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<IQTree> subtrees = maps.stream()
-                .map(substitutionFactory::getSubstitution)
-                .map(sub -> iqFactory.createConstructionNode(
-                        sub.getDomain(),
-                        sub
-                ))
-                .map(cn -> iqFactory.createUnaryIQTree(
-                        cn,
-                        iqFactory.createTrueNode()
-                ))
+                .map(sub -> iqFactory.createConstructionNode(sub.getDomain(), sub))
+                .map(cn -> iqFactory.createUnaryIQTree(cn, iqFactory.createTrueNode()))
                 .collect(ImmutableCollectors.toList());
 
         IQTree tree = subtrees.size() == 1 ?
-                subtrees.iterator().next() :
-                iqFactory.createNaryIQTree(
-                        iqFactory.createUnionNode(allVars),
-                        subtrees
-                );
+                subtrees.get(0) :
+                iqFactory.createNaryIQTree(iqFactory.createUnionNode(allVars), subtrees);
 
         // Most of the time
         if (externalBindings.isEmpty())
@@ -592,15 +572,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         );
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs, Constant nullConstant) {
-        return bs.getBindingNames().stream()
-                .collect(ImmutableCollectors.toMap(
+    private ImmutableSubstitution<ImmutableTerm> getBsMap(BindingSet bs, Constant nullConstant) {
+        return substitutionFactory.getSubstitution(bs.getBindingNames(),
                         termFactory::getVariable,
-                        x -> getTermForBinding(
-                                x,
-                                bs,
-                                nullConstant
-                        )));
+                        x -> getTermForBinding(x, bs, nullConstant));
     }
 
     private ImmutableTerm getTermForBinding(String x, BindingSet bindingSet, Constant nullConstant) {
@@ -1112,22 +1087,18 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         // So we may need to nest them
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ImmutableList<VarDef> varDefs = ImmutableList.copyOf(
-                getVarDefs(
+        ImmutableSet<Variable> childVars = childQuery.getVariables();
+        ImmutableList<VarDef> varDefs = getVarDefs(
                         node.getElements().iterator(),
                         new HashSet<>(childQuery.getVariables()),
-                        externalBindings, treatBNodeAsVariable));
-        ImmutableSet<Variable> childVars = childQuery.getVariables();
-        varDefs = varDefs.stream()
+                        externalBindings, treatBNodeAsVariable).stream()
                 .filter(vd -> !childVars.contains(vd.var))
                 .collect(ImmutableCollectors.toList());
+
         if (varDefs.isEmpty()) {
             return childTranslation;
         }
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
-                .map(ImmutableMap::copyOf)
-                .map(substitutionFactory::getSubstitution)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs);
 
         return translateExtensionElems(
                 mergedVarDefs.reverse().iterator(),
@@ -1232,6 +1203,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return sub.builder().restrict((v, t) -> t.getVariableStream()
                         .anyMatch(nullableVariables::contains)).build()
                 .getDomain();
+    }
+
+    private ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergeVarDefs(ImmutableList<VarDef> list) {
+        return mergeVarDefs(list.iterator()).stream()
+                .map(ImmutableMap::copyOf)
+                .map(substitutionFactory::getSubstitution)
+                .collect(ImmutableCollectors.toList());
     }
 
     private List<Map<Variable, ImmutableTerm>> mergeVarDefs(UnmodifiableIterator<VarDef> it) {
@@ -1768,7 +1746,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         // Filter variables according to bindings
         return conjunction
                 .map(iqFactory::createFilterNode)
-                .map(f -> (IQTree) iqFactory.createUnaryIQTree(f, iqTree))
+                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, iqTree))
                 .orElse(iqTree);
     }
 

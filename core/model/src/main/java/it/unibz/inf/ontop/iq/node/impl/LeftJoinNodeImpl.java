@@ -463,10 +463,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                                                            ImmutableSet<Variable> leftVariables,
                                                                            ImmutableSet<Variable> rightVariables) {
 
-        ImmutableSet<Variable> rightSpecificVariables = rightVariables.stream()
-                .filter(v -> !leftVariables.contains(v))
-                .collect(ImmutableCollectors.toSet());
-
+        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightVariables, leftVariables).immutableCopy();
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
@@ -480,17 +477,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution =
-                substitutionFactory.getSubstitution(
-                        downSubstitutionExpressions.stream()
-                            .map(ImmutableFunctionalTerm::getTerms)
-                            .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
-                            // Rename right-specific variables if possible
-                            .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
-                                    ? args.reverse() : args)
-                            .collect(ImmutableCollectors.toMap(
-                                    args -> (Variable) args.get(0),
-                                    args -> (VariableOrGroundTerm) args.get(1))));
+        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution = substitutionFactory.getSubstitutionFromStream(
+                downSubstitutionExpressions.stream()
+                        .map(ImmutableFunctionalTerm::getTerms)
+                        .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
+                        // Rename right-specific variables if possible
+                        .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
+                                ? args.reverse() : args),
+                args -> (Variable) args.get(0),
+                args -> (VariableOrGroundTerm) args.get(1));
 
         Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
                         .filter(e -> !downSubstitutionExpressions.contains(e)
