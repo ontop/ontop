@@ -138,7 +138,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionWithExceptions(
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionThrowsExceptions(
                 columns.added,
                 a -> getVariable(a.name, idFactory, termFactory),
                 a -> extractExpression(a, parentAttributeMap, idFactory, coreSingletons));

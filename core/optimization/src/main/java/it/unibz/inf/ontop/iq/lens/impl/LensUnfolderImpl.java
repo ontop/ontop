@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
@@ -109,9 +108,12 @@ public class LensUnfolderImpl implements LensUnfolder {
                     ? definition
                     : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
-                    renamingSubstitution.applyToVariableArguments(renamedDefinition.getProjectionAtom().getArguments()),
-                    dataNode.getArgumentMap());
+            ImmutableList<Variable> sourceAtomArguments = renamingSubstitution.applyToVariableArguments(renamedDefinition.getProjectionAtom().getArguments());
+
+            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
+                    dataNode.getArgumentMap().entrySet(),
+                    e -> sourceAtomArguments.get(e.getKey()),
+                    Map.Entry::getValue);
 
             IQTree substitutedDefinition = renamedDefinition.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
@@ -122,15 +124,6 @@ public class LensUnfolderImpl implements LensUnfolder {
                     .normalizeForOptimization(variableGenerator);
         }
 
-        protected ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(
-                ImmutableList<Variable> sourceAtomArguments,
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap) {
-
-            return substitutionFactory.getSubstitution(
-                    targetArgumentMap.entrySet(),
-                    e -> sourceAtomArguments.get(e.getKey()),
-                    Map.Entry::getValue);
-        }
     }
 
 

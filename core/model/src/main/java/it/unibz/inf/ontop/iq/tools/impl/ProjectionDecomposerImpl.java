@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.tools.impl;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
@@ -43,7 +42,7 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                         e -> decomposeDefinition(e.getValue(), variableGenerator, Optional.of(e.getKey()))
                 ));
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitutionWithIdentityEntries(
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
                 decompositionMap.entrySet(), Map.Entry::getKey, e-> e.getValue().term);
 
         Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(decompositionMap.values());

@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -109,7 +107,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     + provenance.getProvenanceInfo() + "]")));
 
         //noinspection OptionalGetWithoutIsPresent
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionWithIdentityEntries(
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
                 targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);

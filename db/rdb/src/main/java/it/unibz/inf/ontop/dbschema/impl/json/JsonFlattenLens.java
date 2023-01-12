@@ -135,7 +135,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
-        ImmutableSubstitution<ImmutableTerm> extractionSubstitution = cs.getSubstitutionFactory().getSubstitutionWithExceptions(
+        ImmutableSubstitution<ImmutableTerm> extractionSubstitution = cs.getSubstitutionFactory().getSubstitutionThrowsExceptions(
                 columns.extracted,
                 c -> variableGenerator.generateNewVariable(normalizeAttributeName(c.name, idFactory)),
                 c -> getCheckDatatypeExtractAndCastFromJson(

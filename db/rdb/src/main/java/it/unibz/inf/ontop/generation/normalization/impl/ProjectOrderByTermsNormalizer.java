@@ -200,7 +200,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
-                        substitutionFactory.getSubstitutionWithIdentityEntries(newBindings, Map.Entry::getKey, Map.Entry::getValue),
+                        substitutionFactory.getSubstitutionRemoveIdentityEntries(newBindings, Map.Entry::getKey, Map.Entry::getValue),
                         analysis.getSubstitution());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);

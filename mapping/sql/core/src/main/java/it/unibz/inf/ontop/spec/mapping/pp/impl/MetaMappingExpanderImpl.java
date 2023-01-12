@@ -72,7 +72,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                 NativeNode nativeNode = position.getDatabaseQuery(dbParameters);
                 try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                     while (rs.next()) {
-                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionWithExceptions(
+                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionThrowsExceptions(
                                 nativeNode.getVariables(),
                                 v -> v,
                                 v -> termFactory.getDBConstant(

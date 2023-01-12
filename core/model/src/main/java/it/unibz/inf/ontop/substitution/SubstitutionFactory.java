@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -19,16 +18,16 @@ import java.util.stream.Stream;
 public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap);
-    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionWithIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
+    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
 
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
 
     @FunctionalInterface
-    interface FunctionWithExceptions<U, T, E extends Throwable> {
+    interface FunctionThrowsExceptions<U, T, E extends Throwable> {
         T apply(U arg) throws E;
     }
 
-    <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionWithExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionWithExceptions<U,T,E> termProvider) throws E;
+    <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U,T,E> termProvider) throws E;
 
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U,T> termProvider);
 

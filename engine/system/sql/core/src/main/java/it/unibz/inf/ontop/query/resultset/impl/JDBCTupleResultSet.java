@@ -15,11 +15,12 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Optional;
 
 public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
-    private final ImmutableSortedSet<Variable> sqlSignature;
+    private final ImmutableMap<Integer, Variable> indexedSqlSignature;
     private final ImmutableMap<Variable, DBTermType> sqlTypeMap;
     private final ImmutableSubstitution<ImmutableTerm> sparqlVar2Term;
     private final SubstitutionFactory substitutionFactory;
@@ -34,7 +35,13 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                               TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
         super(rs, answerAtom.getArguments(), queryLogger, statementClosingCB);
-        this.sqlSignature = sqlSignature;
+        ImmutableMap.Builder<Integer, Variable> indexedSqlSignatureBuilder = ImmutableMap.builder();
+        int index = 1;
+        for (Variable v : sqlSignature) {
+            indexedSqlSignatureBuilder.put(index, v);
+            index++;
+        }
+        this.indexedSqlSignature = indexedSqlSignatureBuilder.build();
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
@@ -44,25 +51,20 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     @Override
     protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException {
-        //builder (+loop) in order to throw checked exception
-        final ImmutableMap.Builder<Variable, Constant> builder = ImmutableMap.builder();
+        ImmutableSubstitution<Constant> substitution;
         try {
-            int index = 1;
-            for (Variable var : sqlSignature) {
-                builder.put(
-                        var,
-                        convertToConstant(
-                            rs.getString(index),
-                            sqlTypeMap.get(var)
-                        ));
-                index++;
-            }
-        } catch (SQLException e) {
+            substitution = substitutionFactory.getSubstitutionThrowsExceptions(
+                    indexedSqlSignature.entrySet(),
+                    Map.Entry::getValue,
+                    e -> convertToConstant(rs.getString(e.getKey()), sqlTypeMap.get(e.getValue())));
+        }
+        catch (SQLException e) {
             throw buildConnectionException(e);
         }
         try {
-            return new SQLOntopBindingSet(computeBindingMap(substitutionFactory.getSubstitution(builder.build())));
-        } catch (Exception e) {
+            return new SQLOntopBindingSet(computeBindingMap(substitution));
+        }
+        catch (Exception e) {
             throw new OntopResultConversionException(e);
         }
     }

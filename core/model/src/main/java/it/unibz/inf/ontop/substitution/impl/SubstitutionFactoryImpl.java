@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -35,7 +34,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionWithIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
+    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
         return new ImmutableSubstitutionImpl<>(entries.stream()
                 .map(e -> Maps.immutableEntry(variableProvider.apply(e), termProvider.apply(e)))
                 .filter(e -> !e.getKey().equals(e.getValue()))
@@ -49,7 +48,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public     <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionWithExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionWithExceptions<U,T,E> termProvider) throws E {
+    public     <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U,T,E> termProvider) throws E {
         ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder(); // exceptions - no stream
         for (U u : entries) {
             Variable v = variableProvider.apply(u);

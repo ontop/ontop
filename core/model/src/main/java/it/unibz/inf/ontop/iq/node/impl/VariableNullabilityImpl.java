@@ -237,9 +237,9 @@ public class VariableNullabilityImpl implements VariableNullability {
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
                 .entrySet().stream()
                 .flatMap(e -> {
-                    ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
-                    return IntStream.range(0, subTerms.size())
-                            .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
+                    ImmutableFunctionalTerm def = e.getValue();
+                    return IntStream.range(0, def.getArity())
+                            .filter(i -> def.getTerm(i) instanceof ImmutableFunctionalTerm)
                             .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable()));
                 })
                 .collect(ImmutableCollectors.toTable());
@@ -253,10 +253,9 @@ public class VariableNullabilityImpl implements VariableNullability {
                         v -> Optional.of(subTermNames.row(v)).filter(indexes -> !indexes.isEmpty()),
                         (t, indexes) -> {
                             ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) t;
-                            ImmutableList<? extends ImmutableTerm> subTerms = def.getTerms();
-                            ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, subTerms.size())
+                            ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
                                     .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(indexes.get(i))
-                                            .orElseGet(() -> subTerms.get(i)))
+                                            .orElseGet(() -> def.getTerm(i)))
                                     .collect(ImmutableCollectors.toList());
 
                             return termFactory.getImmutableFunctionalTerm(def.getFunctionSymbol(), newArgs);

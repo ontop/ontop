@@ -100,7 +100,6 @@ public class IQ2CQ {
             ValuesNode freshValuesNode = originalValuesNode.applyFreshRenaming(freshRenaming);
             ImmutableList<Variable> freshVariables = freshValuesNode.getOrderedVariables();
 
-
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
                     dataNode.getArgumentMap().entrySet(),
                     e -> freshVariables.get(e.getKey()),
