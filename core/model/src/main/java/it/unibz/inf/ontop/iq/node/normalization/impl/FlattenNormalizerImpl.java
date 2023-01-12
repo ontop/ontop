@@ -62,29 +62,17 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              *   V' = (V minus {f}) union {o,i}
              */
             Variable flattenedVar = flattenNode.getFlattenedVariable();
-            ImmutableMap<Boolean, ImmutableSubstitution<ImmutableTerm>> splitSub = cn.getSubstitution().entrySet().stream().collect(
-                            ImmutableCollectors.partitioningBy(
-                                    e -> (e.getKey().equals(flattenedVar) ||
-                                            e.getValue().getVariableStream().anyMatch(v1 -> v1.equals(flattenedVar))),
-                                    ImmutableCollectors.toMap(
-                                            ImmutableMap.Entry::getKey,
-                                            ImmutableMap.Entry::getValue
-                                    ))).entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> substitutionFactory.getSubstitution(e.getValue())));
 
-            ImmutableSubstitution<ImmutableTerm> flattenedVarDef = cn.getSubstitution().builder()
+            ImmutableSubstitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
                     .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
                     .build();
-            ImmutableSubstitution<ImmutableTerm> filteredSub = cn.getSubstitution().builder()
-                    .removeFromDomain(flattenedVarDef.getDomain())
+            ImmutableSubstitution<ImmutableTerm> primeSubstitution = cn.getSubstitution().builder()
+                    .removeFromDomain(flattenedVarSubstitution.getDomain())
                     .build();
 
             // Nothing can be lifted, declare the new tree normalized
-            if (filteredSub.isEmpty()) {
-                return iqFactory.createUnaryIQTree(
-                        flattenNode,
-                        normalizedChild,
-                        outputTreeCache);
+            if (primeSubstitution.isEmpty()) {
+                return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, outputTreeCache);
             }
 
             ConstructionNode newParentCn = iqFactory.createConstructionNode(
@@ -92,39 +80,29 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
                             flattenNode.getLocallyDefinedVariables(),
                             Sets.difference(cn.getVariables(), ImmutableSet.of(flattenedVar))
                     ).immutableCopy(),
-                    filteredSub);
+                    primeSubstitution);
 
             IQTree grandChild = normalizedChild.getChildren().get(0);
-            IQTree updatedChild;
-            if (flattenedVarDef.isEmpty()) {
-                updatedChild = grandChild;
-            } else {
-                updatedChild = iqFactory.createUnaryIQTree(
+            IQTree updatedChild = flattenedVarSubstitution.isEmpty()
+                ? grandChild
+                : iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(
                                 Sets.union(
                                         ImmutableSet.of(flattenedVar),
                                         Sets.difference(newParentCn.getLocallyRequiredVariables(), flattenNode.getLocallyDefinedVariables())
                                 ).immutableCopy(),
-                                flattenedVarDef),
+                                flattenedVarSubstitution),
                         grandChild
                 ).normalizeForOptimization(variableGenerator);
-            }
 
             return iqFactory.createUnaryIQTree(
                     newParentCn,
-                    iqFactory.createUnaryIQTree(
-                            flattenNode,
-                            updatedChild
-                    ).normalizeForOptimization(variableGenerator),
+                    iqFactory.createUnaryIQTree(flattenNode, updatedChild).normalizeForOptimization(variableGenerator),
                     outputTreeCache);
         }
 
         // Nothing can be lifted, declare the new tree normalized
-        return iqFactory.createUnaryIQTree(
-                flattenNode,
-                normalizedChild,
-                outputTreeCache
-        );
+        return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, outputTreeCache);
     }
 
 }
