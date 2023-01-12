@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.substitution;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -79,6 +81,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
         <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
 
         <U> Builder<T> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<T, U, T> function);
+
+        <U> Builder<T> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
 
         Stream<ImmutableExpression> toStrictEqualities();
 

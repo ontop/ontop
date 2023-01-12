@@ -129,18 +129,12 @@ public class InjectiveBindingLiftState {
                 .map(ConstructionNode::getChildVariables)
                 .orElseGet(childConstructionNode::getVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newChildSubstitution = substitutionFactory.getSubstitution(
-                injectivityDecompositionMap.entrySet().stream()
-                        .flatMap(e -> e.getValue()
-                                // Sub-term substitution entries from injectivity decompositions
-                            .map(d -> d.getSubTermSubstitutionMap().stream()
-                                    .flatMap(s -> s.entrySet().stream())
-                                    .map(subE -> (Map.Entry<Variable, ImmutableTerm>)(Map.Entry<Variable, ?>) subE))
-                                // Non-decomposable entries
-                            .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                    e.getKey(),
-                                    childSubstitution.get(e.getKey())))))
-                        .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<ImmutableFunctionalTerm> newChildSubstitution =  childSubstitution.builder()
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .conditionalFlatTransform(
+                        injectivityDecompositionMap::get,
+                        ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                .build();
 
         Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)
                 .filter(m -> !m.isEmpty())

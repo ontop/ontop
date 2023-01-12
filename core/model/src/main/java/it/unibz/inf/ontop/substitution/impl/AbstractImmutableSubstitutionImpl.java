@@ -159,8 +159,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return create(stream.map(e -> Maps.immutableEntry(
                     e.getKey(),
                     lookup.apply(e.getKey())
-                            .<B>map(u -> function.apply(e.getValue(), u))
+                            .map(u -> function.apply(e.getValue(), u))
                             .orElse(e.getValue()))));
+        }
+
+        @Override
+        public <U> Builder<B> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
+            return create(stream
+                    .flatMap(e -> lookup.apply(e.getKey())
+                    .map(u -> function.apply(u).stream()
+                            .flatMap(s -> s.entrySet().stream()))
+                    .orElseGet(() -> Stream.of(e))));
         }
 
         @Override

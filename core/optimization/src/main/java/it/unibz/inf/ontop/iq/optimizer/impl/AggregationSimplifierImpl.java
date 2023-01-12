@@ -98,14 +98,11 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                             .toMap(t -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                    substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
-                            .flatMap(e -> e.getValue()
-                                    // Takes the entries in the SubTermSubstitutionMap
-                                    .map(s -> s.getDecomposition().getSubTermSubstitutionMap().stream().
-                                            flatMap(sub -> sub.entrySet().stream()))
-                                    // Otherwise (if no simplification), keeps the former definition
-                                    .orElseGet(() -> Stream.of(Maps.immutableEntry(e.getKey(), initialSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap()));
+                    initialSubstitution.builder()
+                            .conditionalFlatTransform(
+                                    simplificationMap::get,
+                                    u -> u.getDecomposition().getSubTermSubstitutionMap())
+                            .build();
 
             AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
 
