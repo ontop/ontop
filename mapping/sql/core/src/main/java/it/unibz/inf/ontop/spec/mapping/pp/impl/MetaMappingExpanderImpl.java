@@ -79,7 +79,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     termFactory.getDBConstant(rs.getString(column),
                                             nativeNode.getTypeMap().get(variable)));
                         }
-                        resultBuilder.add(position.createExpansion(builder.build()));
+                        resultBuilder.add(position.createExpansion(substitutionFactory.getSubstitution(builder.build())));
                     }
                 }
             }
@@ -122,9 +122,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             return nativeNodeGenerator.generate(transformedTree, dbParameters, true);
         }
 
-        MappingAssertion createExpansion(ImmutableMap<Variable, ImmutableTerm> values) {
-            ImmutableTerm instantiatedTemplate = substitutionFactory.getSubstitution(values)
-                    .apply(getTemplate());
+        MappingAssertion createExpansion(ImmutableSubstitution<ImmutableTerm> values) {
+            ImmutableTerm instantiatedTemplate = values.apply(getTemplate());
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = substitutionFactory.replace(assertion.getTopSubstitution(), topVariable, instantiatedTemplate);
 
             IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(

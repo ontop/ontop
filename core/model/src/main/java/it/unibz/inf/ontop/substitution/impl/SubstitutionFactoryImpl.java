@@ -35,6 +35,21 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
+    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionWithIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
+        return new ImmutableSubstitutionImpl<>(entries.stream()
+                .map(e -> Maps.immutableEntry(variableProvider.apply(e), termProvider.apply(e)))
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap()), termFactory);
+    }
+
+    @Override
+    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
+        return new ImmutableSubstitutionImpl<>(entries.stream()
+                .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
+    }
+
+
+    @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1) {
         return getSubstitution(ImmutableMap.of(k1, v1));
     }
@@ -55,7 +70,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<T> values) {
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values) {
         if (variables.size() != values.size())
             throw new IllegalArgumentException("lists of different lengths");
 

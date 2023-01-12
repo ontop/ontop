@@ -265,10 +265,9 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         //noinspection DataFlowIssue
         ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(
-                subTermNames.cellSet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Table.Cell::getValue,
-                                c -> ((ImmutableFunctionalTerm) substitution.get(c.getRowKey())).getTerm(c.getColumnKey()))));
+                subTermNames.cellSet(),
+                Table.Cell::getValue,
+                c -> ((ImmutableFunctionalTerm) substitution.get(c.getRowKey())).getTerm(c.getColumnKey()));
 
         return Stream.concat(
                 // Recursive

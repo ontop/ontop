@@ -716,14 +716,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         InjectiveVar2VarSubstitution rightRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(toCoalesce.stream(),
                 variableGenerator::generateNewVariableFromVar);
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(toCoalesce.stream()
-                .collect(ImmutableCollectors.toMap(
-                        x -> x,
-                        x -> termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
-                                leftRenamingSubstitution.get(x),
-                                rightRenamingSubstitution.get(x)
-                        ))));
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(
+                toCoalesce,
+                v -> v,
+                v -> termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
+                        leftRenamingSubstitution.get(v),
+                        rightRenamingSubstitution.get(v)));
 
         Optional<ImmutableExpression> filterExpression = join instanceof LeftJoin ?
                 getLeftJoinFilter(
@@ -883,12 +882,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         List<ProjectionElem> projectionElems = node.getProjectionElemList().getElements();
 
         ImmutableSubstitution<Variable> substitution =
-                substitutionFactory.getSubstitution(projectionElems.stream()
-                        .filter(pe -> !pe.getProjectionAlias().orElse(pe.getName()).equals(pe.getName()))
-                        .collect(ImmutableCollectors.toMap(
-                                pe -> termFactory.getVariable(pe.getName()),
-                                pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
-                        ));
+                substitutionFactory.getSubstitutionWithIdentityEntries(
+                        projectionElems,
+                        pe -> termFactory.getVariable(pe.getName()),
+                        pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())));
 
         ImmutableSet<Variable> projectedVars = projectionElems.stream()
                 .map(pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))

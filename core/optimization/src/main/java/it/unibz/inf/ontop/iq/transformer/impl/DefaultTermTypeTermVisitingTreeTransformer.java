@@ -277,14 +277,13 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                 ImmutableSet.copyOf(orderedVariables),
                 substitutionFactory.getSubstitution(
-                        metaTermTypeVariables.stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        variable -> variable,
-                                        variable -> termFactory.getRDFTermTypeFunctionalTerm(
-                                                        generatedVariableNamesMap.get(variable),
-                                                        dictionary,
-                                                        possibleConstants,
-                                                        false)))));
+                        metaTermTypeVariables,
+                        v -> v,
+                        v -> termFactory.getRDFTermTypeFunctionalTerm(
+                                generatedVariableNamesMap.get(v),
+                                dictionary,
+                                possibleConstants,
+                                false)));
 
         return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);
     }

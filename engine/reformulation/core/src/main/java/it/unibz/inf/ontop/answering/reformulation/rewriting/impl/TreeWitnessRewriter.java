@@ -337,12 +337,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<Variable, ImmutableTerm> map = IntStream.range(0, vars.size())
-                .mapToObj(i -> Maps.<Variable, ImmutableTerm>immutableEntry(vars.get(i), cq.getAnswerVariables().get(i)))
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(map);
+        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
         if (substitution.isEmpty())
             return body;
 

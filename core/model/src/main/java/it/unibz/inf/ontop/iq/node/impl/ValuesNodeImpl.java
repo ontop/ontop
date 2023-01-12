@@ -103,10 +103,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         if (!singleValueVariableIndices.isEmpty()) {
             // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
             ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
-                    singleValueVariableIndices.stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    orderedVariables::get,
-                                    i -> values.get(0).get(i))));
+                    singleValueVariableIndices,
+                    orderedVariables::get,
+                    i -> values.get(0).get(i));
+
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
             // Create the ValueNode
@@ -392,10 +392,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
 
             possibleVariableDefinitions = distinctValuesStream
-                    .map(row -> IntStream.range(0, getVariables().size())
-                            .mapToObj(i -> Maps.<Variable, NonVariableTerm>immutableEntry(orderedVariables.get(i), row.get(i)))
-                            .collect(ImmutableCollectors.toMap()))
-                    .map(substitutionFactory::getSubstitution)
+                    .map(row -> substitutionFactory.<NonVariableTerm>getSubstitution(orderedVariables, row))
                     .collect(ImmutableCollectors.toSet());
         }
         return possibleVariableDefinitions;

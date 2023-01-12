@@ -7,7 +7,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -18,13 +19,17 @@ import java.util.stream.Stream;
 public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap);
+    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionWithIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
+
+    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U,T> termProvider);
+
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
                                                                        Variable k3, T v3);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<T> values);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values);
 
    ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables);
 

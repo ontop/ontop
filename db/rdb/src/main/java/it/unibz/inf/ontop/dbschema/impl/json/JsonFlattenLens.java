@@ -268,7 +268,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                                                                            ImmutableMap<Variable, ExtractedColumn> extractColumnsMap,
                                                                            CoreSingletons cs, DBTypeFactory typeFactory)
             throws MetadataExtractionException {
-        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder(); // exception - no stream
         for (Map.Entry<Variable, JsonFlattenLens.ExtractedColumn> entry : extractColumnsMap.entrySet()) {
             builder.put(entry.getKey(), getCheckDatatypeExtractAndCastFromJson(
                     flattenOutputVariable,

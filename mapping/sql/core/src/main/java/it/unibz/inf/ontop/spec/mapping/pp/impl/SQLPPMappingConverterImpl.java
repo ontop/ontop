@@ -108,10 +108,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                             " in the target do(es) not occur in source query of the mapping assertion\n["
                                     + provenance.getProvenanceInfo() + "]")));
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(targetPreMap.entrySet().stream()
-                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().get()))
-                .filter(e -> !e.getValue().equals(e.getKey()))
-                .collect(ImmutableCollectors.toMap()));
+        //noinspection OptionalGetWithoutIsPresent
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionWithIdentityEntries(
+                targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
         ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.builder().transform(targetRenamingPart::apply).build();

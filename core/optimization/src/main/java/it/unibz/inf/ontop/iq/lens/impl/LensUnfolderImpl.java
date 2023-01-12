@@ -126,13 +126,10 @@ public class LensUnfolderImpl implements LensUnfolder {
                 ImmutableList<Variable> sourceAtomArguments,
                 ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap) {
 
-            ImmutableMap<Variable, VariableOrGroundTerm> newMap = targetArgumentMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            e -> sourceAtomArguments.get(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-
-            return substitutionFactory.getSubstitution(newMap);
+            return substitutionFactory.getSubstitution(
+                    targetArgumentMap.entrySet(),
+                    e -> sourceAtomArguments.get(e.getKey()),
+                    Map.Entry::getValue);
         }
     }
 

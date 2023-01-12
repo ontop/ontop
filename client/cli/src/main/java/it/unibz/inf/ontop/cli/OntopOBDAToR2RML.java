@@ -9,6 +9,7 @@ import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
@@ -262,13 +263,9 @@ public class OntopOBDAToR2RML implements OntopCommand {
                                         + target + "]")));
 
             //noinspection OptionalGetWithoutIsPresent
-            ImmutableMap<Variable, Variable> targetMap = targetPreMap.entrySet().stream()
-                    .filter(e -> !e.getKey().getName().equals(e.getValue().get().getSQLRendering()))
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
+            ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitutionWithIdentityEntries(
+                    targetPreMap.entrySet(), Map.Entry::getKey, e -> termFactory.getVariable(e.getValue().get().getSQLRendering()));
 
-            ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitution(targetMap);
             ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.builder().transform(targetRenamingPart::apply).build();
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }

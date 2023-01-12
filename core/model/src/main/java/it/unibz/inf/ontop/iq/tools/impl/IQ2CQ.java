@@ -102,10 +102,9 @@ public class IQ2CQ {
 
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
-                    dataNode.getArgumentMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    e -> freshVariables.get(e.getKey()),
-                                    Map.Entry::getValue)));
+                    dataNode.getArgumentMap().entrySet(),
+                    e -> freshVariables.get(e.getKey()),
+                    Map.Entry::getValue);
 
             IQTree newValuesNode = freshValuesNode.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 

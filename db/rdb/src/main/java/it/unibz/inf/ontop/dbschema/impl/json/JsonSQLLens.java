@@ -130,10 +130,9 @@ public class JsonSQLLens extends JsonLens {
         }
 
         ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
-                raExpression.getUnqualifiedAttributes().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> termFactory.getVariable(e.getKey().getName()),
-                                Map.Entry::getValue)));
+                raExpression.getUnqualifiedAttributes().entrySet(),
+                e -> termFactory.getVariable(e.getKey().getName()),
+                Map.Entry::getValue);
 
         ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 
