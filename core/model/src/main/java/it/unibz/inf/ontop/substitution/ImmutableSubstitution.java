@@ -47,7 +47,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set);
 
-    <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<S> type);
+    <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<? extends S> type);
 
     default ImmutableSet<Variable> getRangeVariables() {
         return getRange().stream()
@@ -74,13 +74,15 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         Builder<T> restrict(BiPredicate<Variable, T> predicate);
 
-        <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<S> type);
+        <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type);
 
         <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function);
 
         <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
 
         <U> Builder<T> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<T, U, T> function);
+
+        <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, Optional<U>> lookup, Function<U, S> function);
 
         <U> Builder<T> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
 

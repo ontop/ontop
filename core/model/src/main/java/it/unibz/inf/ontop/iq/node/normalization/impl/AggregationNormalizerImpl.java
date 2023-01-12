@@ -317,25 +317,19 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants
-                    simplifiedSubstitution.builder().restrictRangeTo(NonFunctionalTerm.class).build(ImmutableTerm.class),
+                    simplifiedSubstitution.<ImmutableTerm>restrictRangeTo(NonFunctionalTerm.class),
                     // (Possibly decomposed) functional terms
-                    substitutionFactory.getSubstitutionFromStream(
-                            decompositionMap.entrySet().stream()
-                                    .filter(e -> e.getValue().isPresent()),
-                            Map.Entry::getKey,
-                            e -> e.getValue().get().getLiftableTerm()));
+                    simplifiedSubstitution.builder()
+                            .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
+                            .conditionalTransformOrRemove(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                            .build());
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
-                    decompositionMap.entrySet().stream()
-                            .flatMap(e -> e.getValue()
-                                    // Sub-term substitution entries from decompositions
-                                    .map(d -> d.getSubTermSubstitutionMap().stream()
-                                            .flatMap(s -> s.entrySet().stream()))
-                                    // Non-decomposable entries
-                                    .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                            e.getKey(),
-                                            (ImmutableFunctionalTerm) simplifiedSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap()));
+            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = simplifiedSubstitution.builder()
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
+                    .conditionalFlatTransform(
+                            decompositionMap::get,
+                            ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                    .build();
 
             if (liftedSubstitution.isEmpty())
                 return new AggregationNormalizationState(

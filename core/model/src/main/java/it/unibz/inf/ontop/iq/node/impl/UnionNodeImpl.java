@@ -581,10 +581,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         return substitutionFactory.getSubstitutionFromStream(
                 projectedVariables.stream()
-                        .map(v -> Maps.immutableEntry(v, mergeDefinitions(v, childSubstitutions, variableGenerator)))
-                        .filter(e -> e.getValue().isPresent()),
+                        .map(v -> mergeDefinitions(v, childSubstitutions, variableGenerator)
+                                .map(d -> Maps.immutableEntry(v, d)))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get),
                 Map.Entry::getKey,
-                e -> e.getValue().get());
+                Map.Entry::getValue);
     }
 
     private Optional<ImmutableTerm> mergeDefinitions(

@@ -113,11 +113,10 @@ public class InjectiveBindingLiftState {
                 // All variables and constants
                 childSubstitution.restrictRangeTo(NonFunctionalTerm.class),
                 // (Possibly decomposed) injective functional terms
-                substitutionFactory.getSubstitutionFromStream(
-                        injectivityDecompositionMap.entrySet().stream()
-                                .filter(e -> e.getValue().isPresent()),
-                        Map.Entry::getKey,
-                        e -> e.getValue().get().getLiftableTerm()));
+                childSubstitution.builder()
+                        .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
+                        .conditionalTransformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                        .build());
 
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 

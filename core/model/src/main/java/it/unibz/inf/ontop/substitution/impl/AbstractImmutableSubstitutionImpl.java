@@ -70,7 +70,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<S> type) {
+    public <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<? extends S> type) {
         return new ImmutableSubstitutionImpl<>(entrySet().stream()
                 .filter(e -> type.isInstance(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> type.cast(e.getValue()))), termFactory);
@@ -138,7 +138,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<S> type) {
+        public <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type) {
             return create(stream
                     .filter(e -> type.isInstance(e.getValue()))
                     .map(e -> Maps.immutableEntry(e.getKey(), type.cast(e.getValue()))));
@@ -164,12 +164,22 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
+        public <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, Optional<U>> lookup, Function<U, S> function) {
+            return create(stream
+                    .map(e -> lookup.apply(e.getKey())
+                            .map(function)
+                            .map(r -> Maps.immutableEntry(e.getKey(), r)))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get));
+        }
+
+        @Override
         public <U> Builder<B> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
             return create(stream
                     .flatMap(e -> lookup.apply(e.getKey())
-                    .map(u -> function.apply(u).stream()
-                            .flatMap(s -> s.entrySet().stream()))
-                    .orElseGet(() -> Stream.of(e))));
+                            .map(u -> function.apply(u).stream()
+                                    .flatMap(s -> s.entrySet().stream()))
+                            .orElseGet(() -> Stream.of(e))));
         }
 
         @Override

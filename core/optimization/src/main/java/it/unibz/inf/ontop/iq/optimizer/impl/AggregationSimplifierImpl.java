@@ -115,11 +115,9 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
-            ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitutionFactory.getSubstitutionFromStream(
-                    simplificationMap.entrySet().stream()
-                            .filter(e -> e.getValue().isPresent()),
-                    Map.Entry::getKey,
-                    e -> e.getValue().get().getDecomposition().getLiftableTerm());
+            ImmutableSubstitution<ImmutableTerm> parentSubstitution = initialSubstitution.builder()
+                    .conditionalTransformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
+                    .build();
 
             return parentSubstitution.isEmpty()
                     ? newAggregationTree
