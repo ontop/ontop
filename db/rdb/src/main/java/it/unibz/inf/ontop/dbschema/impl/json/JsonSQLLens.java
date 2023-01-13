@@ -139,8 +139,7 @@ public class JsonSQLLens extends JsonLens {
         VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(
                 Sets.union(initialChild.getKnownVariables(), projectedVariables));
 
-                ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
-
+        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
 
         IQTree updatedChild = normalization.updateChild(initialChild, variableGenerator);
 

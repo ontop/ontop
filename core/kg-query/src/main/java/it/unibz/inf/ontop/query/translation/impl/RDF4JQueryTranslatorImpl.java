@@ -343,10 +343,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         }
 
         VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        leftTranslation.iqTree.getKnownVariables(),
-                        rightTranslation.iqTree.getKnownVariables()
-                ));
+                Sets.union(leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         InjectiveVar2VarSubstitution sub = substitutionFactory.getInjectiveVar2VarSubstitution(sharedVars.stream(),
                 vGen::generateNewVariableFromVar);
@@ -528,7 +525,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> maps =
                 StreamSupport.stream(node.getBindingSets().spliterator(), false)
-                        .map(bs -> getBsMap(bs, nullConstant))
+                        .map(bs -> substitutionFactory.getSubstitution(
+                                bs.getBindingNames(),
+                                termFactory::getVariable,
+                                x -> getTermForBinding(x, bs, nullConstant)))
                         .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> nullableVars = maps.get(0).getDomain().stream()
@@ -552,14 +552,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         return createTranslationResult(
                 applyExternalBindingFilter(tree, externalBindings, externallyBoundedVariables),
-                nullableVars
-        );
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> getBsMap(BindingSet bs, Constant nullConstant) {
-        return substitutionFactory.getSubstitution(bs.getBindingNames(),
-                        termFactory::getVariable,
-                        x -> getTermForBinding(x, bs, nullConstant));
+                nullableVars);
     }
 
     private ImmutableTerm getTermForBinding(String x, BindingSet bindingSet, Constant nullConstant) {
@@ -644,6 +637,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         if (!(join instanceof Join) && !(join instanceof LeftJoin)) {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
+
         TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
         TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
@@ -687,12 +681,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 ? iqFactory.createLeftJoinNode(joinCondition)
                 : iqFactory.createInnerJoinNode(joinCondition);
 
-        ImmutableSet<Variable> newNullableVars = join instanceof LeftJoin
-                ? Sets.difference(rightTranslation.iqTree.getVariables(), sharedVars).immutableCopy()
-                : ImmutableSet.of();
-
         ImmutableSet<Variable> newSetOfNullableVars = join instanceof LeftJoin
-                ? Sets.union(nullableVarsUnion, newNullableVars).immutableCopy()
+                ? Sets.union(nullableVarsUnion, Sets.difference(rightTranslation.iqTree.getVariables(), sharedVars)).immutableCopy()
                 : Sets.difference(nullableVarsUnion, sharedVars).immutableCopy();
 
         IQTree joinQuery = buildJoinQuery(
@@ -853,16 +843,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()));
 
-        ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
-        ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
-
         ImmutableSet<Variable> leftVariables = leftQuery.getVariables();
         ImmutableSet<Variable> rightVariables = rightQuery.getVariables();
 
         Sets.SetView<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables);
         Sets.SetView<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables);
 
-        ImmutableSet<Variable> allNullable = Sets.union(nullableFromLeft, Sets.union(nullableFromRight, Sets.union(nullOnLeft, nullOnRight))).immutableCopy();
+        ImmutableSet<Variable> allNullable = Sets.union(
+                Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables),
+                Sets.union(nullOnLeft, nullOnRight)).immutableCopy();
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
@@ -911,8 +900,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                 .collect(ImmutableCollectors.toSet()));
             // NB: INSERT blocks cannot have more than 1 default graph. Important for the rest
             else if (defaultGraphCount == 1) {
-                IRIConstant graph = termFactory.getConstantIRI(
-                        defaultGraphs.iterator().next().stringValue());
+                IRIConstant graph = termFactory.getConstantIRI(defaultGraphs.iterator().next().stringValue());
                 subTree = iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
             }

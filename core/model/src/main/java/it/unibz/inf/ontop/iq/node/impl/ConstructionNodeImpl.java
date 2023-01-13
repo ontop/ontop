@@ -99,8 +99,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         // The variables contained in the domain and in the range of the substitution must be disjoint
-        if (substitutionDomain.stream()
-                .anyMatch(childVariables::contains)) {
+        if (!Sets.intersection(substitutionDomain, childVariables).isEmpty()) {
             throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
                     "be used for defining other variables.\n" + this);
         }
@@ -122,9 +121,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ImmutableSet<Variable> variablesRequiredByBindings = substitution.getRangeVariables();
 
         //return only the variables that are also used in the bindings for the child of the construction node
-        return Sets.union(projectedVariables, variablesRequiredByBindings).stream()
-                .filter(v -> !variableDefinedByBindings.contains(v))
-                .collect(ImmutableCollectors.toSet());
+        return Sets.difference(
+                        Sets.union(projectedVariables, variablesRequiredByBindings),
+                        variableDefinedByBindings)
+                .immutableCopy();
     }
 
     @Override

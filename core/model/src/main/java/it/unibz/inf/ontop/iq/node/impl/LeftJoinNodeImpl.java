@@ -526,8 +526,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<Variable> domain = descendingSubstitution.getDomain();
         ImmutableCollection<? extends VariableOrGroundTerm> range = descendingSubstitution.getRange();
 
-        return rightVariables.stream()
-                .filter(v -> !leftVariables.contains(v))
+        return Sets.difference(rightVariables, leftVariables).stream()
                 .anyMatch(v -> (domain.contains(v)
                             && (!isFreshVariable(descendingSubstitution.get(v), leftVariables, rightVariables)))
                         // The domain of the substitution is assumed not to contain fresh variables
