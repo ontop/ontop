@@ -472,7 +472,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.iterator().next().castTo(ImmutableFunctionalTerm.class)
+                mergedVarDefs.reverse().iterator().next().castTo(ImmutableFunctionalTerm.class) // last substitution
         );
     }
 
@@ -1090,10 +1090,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         if (varDefs.isEmpty()) {
             return childTranslation;
         }
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs);
 
         return translateExtensionElems(
-                mergedVarDefs.reverse().iterator(),
+                mergeVarDefs(varDefs).iterator(),
                 childTranslation,
                 externalBindings
         );
@@ -1107,20 +1106,18 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             if (elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName())) {
                 return getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
             }
-            ImmutableTerm term = getTerm(
-                    elem.getExpr(),
-                    allowedVars,
-                    externalBindings, treatBNodeAsVariable);
-            Variable definedVar = termFactory.getVariable(elem.getName());
-            allowedVars.add(definedVar);
+            else {
+                ImmutableTerm term = getTerm(
+                        elem.getExpr(),
+                        allowedVars,
+                        externalBindings, treatBNodeAsVariable);
+                Variable definedVar = termFactory.getVariable(elem.getName());
+                allowedVars.add(definedVar);
 
-            List<VarDef> varDefs = getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
-            varDefs.add(
-                    new VarDef(
-                            definedVar,
-                            term
-                    ));
-            return varDefs;
+                List<VarDef> varDefs = getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
+                varDefs.add(new VarDef(definedVar, term));
+                return varDefs;
+            }
         }
         return new ArrayList<>();
     }
@@ -1198,34 +1195,24 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 .getDomain();
     }
 
-    private ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergeVarDefs(ImmutableList<VarDef> list) {
-        return mergeVarDefs(list.iterator()).stream()
-                .map(ImmutableMap::copyOf)
-                .map(substitutionFactory::getSubstitution)
-                .collect(ImmutableCollectors.toList());
-    }
+    private ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergeVarDefs(ImmutableList<VarDef> varDefs)  {
+        Deque<Map<Variable, ImmutableTerm>> substitutionMapList = new LinkedList<>();
+        substitutionMapList.add(new HashMap<>());
 
-    private List<Map<Variable, ImmutableTerm>> mergeVarDefs(UnmodifiableIterator<VarDef> it) {
-        if (it.hasNext()) {
-            VarDef varDef = it.next();
-            List<Map<Variable, ImmutableTerm>> subs = mergeVarDefs(it);
-            Map<Variable, ImmutableTerm> currentsub = subs.get(subs.size() - 1);
-            if (varDef.term.getVariableStream()
-                    .anyMatch(currentsub::containsKey)) {
-                Map<Variable, ImmutableTerm> map = new HashMap<>();
-                map.put(varDef.var, varDef.term);
-                subs.add(map);
-                return subs;
+        // in this loop, varDefs are iterated in the reverse order
+        // but the new elements are inserted in the list at index 0,
+        // which cancels out the reverse order
+        for (VarDef varDef : varDefs.reverse()) {
+            Map<Variable, ImmutableTerm> head = substitutionMapList.getFirst();
+            if (varDef.term.getVariableStream().anyMatch(head::containsKey)) { // start off a new substitution
+                substitutionMapList.addFirst(new HashMap<>());
             }
-            currentsub.put(
-                    varDef.var,
-                    varDef.term
-            );
-            return subs;
+            substitutionMapList.getFirst().put(varDef.var, varDef.term);
         }
-        List<Map<Variable, ImmutableTerm>> list = new ArrayList<>();
-        list.add(new HashMap<>());
-        return list;
+
+        return substitutionMapList.stream()
+                .map(m -> substitutionFactory.getSubstitutionFromStream(m.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue))
+                .collect(ImmutableCollectors.toList());
     }
 
     private GroundTerm getTermForLiteralOrIri(Value v) {

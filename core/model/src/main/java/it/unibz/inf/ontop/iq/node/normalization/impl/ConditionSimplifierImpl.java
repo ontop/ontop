@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -18,7 +15,6 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -111,7 +107,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         .map(ImmutableFunctionalTerm::getTerms)
                         .map(args -> Maps.immutableEntry(
                                 (NonFunctionalTerm) args.get(0),
-                                (NonFunctionalTerm)args.get(1))),
+                                (NonFunctionalTerm) args.get(1))),
                 nonLiftableVariables);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
@@ -137,7 +133,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
                 .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
-
 
         Optional<ImmutableExpression> newExpression = (groundFunctionalSubstitution.isPresent())
             ? evaluateCondition(
@@ -206,38 +201,31 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      */
     private Optional<ImmutableSubstitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
             ImmutableExpression expression, ImmutableList<IQTree> children) {
-        ImmutableMap<Variable, Collection<GroundFunctionalTerm>> map = expression.flattenAND()
-                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
-                // TODO: generalize it to non-binary equalities
-                .filter(e -> e.getArity() == 2)
-                .filter(e -> {
-                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
-                    return arguments.stream().anyMatch(t -> t instanceof Variable)
-                            && arguments.stream().anyMatch(t -> t instanceof GroundFunctionalTerm);
-                })
-                .collect(ImmutableCollectors.toMultimap(
-                        e -> e.getTerms().stream()
-                                .filter(t -> t instanceof Variable)
-                                .map(t -> (Variable) t)
-                                .findAny().get(),
-                        e -> e.getTerms().stream()
-                                .filter(t -> t instanceof GroundFunctionalTerm)
-                                .map(t -> (GroundFunctionalTerm) t)
-                                .findAny().get()))
-                .asMap();
 
-        return Optional.of(map)
-                .filter(m -> !m.isEmpty())
-                .map(m -> substitutionFactory.getSubstitution(
-                        m.entrySet().stream()
-                                // Picks one of the ground functional term
-                                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().iterator().next()))
+        ImmutableMultimap<Variable, GroundFunctionalTerm> binaryEqualitiesSubset = expression.flattenAND()
+                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                .map(ImmutableFunctionalTerm::getTerms)
+                .filter(args -> args.stream().anyMatch(t -> t instanceof Variable)
+                        && args.stream().anyMatch(t -> t instanceof GroundFunctionalTerm)
+                        && args.stream().allMatch(t -> t instanceof Variable || t instanceof GroundFunctionalTerm))
+                .flatMap(args -> args.stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable)t)
+                        .flatMap(v -> args.stream()
+                                .filter(t -> t instanceof GroundFunctionalTerm)
+                                .map(t -> (GroundFunctionalTerm)t)
+                                .map(g -> Maps.immutableEntry(v, g))))
+                .collect(ImmutableCollectors.toMultimap());
+
+        return Optional.of(binaryEqualitiesSubset)
+                .map(m -> substitutionFactory.getSubstitutionFromStream(
+                        m.asMap().entrySet().stream()
                                 // Filter out ground terms that would be "rejected" by all the children using the variable
                                 .filter(e -> children.stream()
-                                            .filter(c -> c.getVariables().contains(e.getKey()))
-                                            .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(
-                                                    e.getKey(), false)))
-                                .collect(ImmutableCollectors.toMap())))
+                                        .filter(c -> c.getVariables().contains(e.getKey()))
+                                        .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(e.getKey(), false))),
+                        // Picks one of the ground functional term
+                        Map.Entry::getKey, e -> e.getValue().iterator().next()))
                 .filter(s -> !s.isEmpty());
     }
 
