@@ -201,13 +201,9 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     /**
      * We can extract at most one equality ground-functional-term -> variable per variable.
-     *
      * Treated differently from non-functional terms because functional terms are not robust to unification.
-     *
      * Does not include in the substitution ground terms that are "rejected" by all the children using the variable
-     *
      */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Optional<ImmutableSubstitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
             ImmutableExpression expression, ImmutableList<IQTree> children) {
         ImmutableMap<Variable, Collection<GroundFunctionalTerm>> map = expression.flattenAND()

@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -23,7 +21,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> implements DialectExtraNormalizer {
 
@@ -171,36 +168,35 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
 
-        ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Stream.concat(
-                        projectedVariables.stream(),
-                        analysis.getSubstitution().getRange().stream())
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
+                        projectedVariables,
+                        analysis.getSubstitution().getRange().stream().collect(ImmutableCollectors.toSet()))
+                .immutableCopy();
 
-        ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings = analysis.sortConditions.stream()
+        ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()
                 .map(OrderByNode.OrderComparator::getTerm)
                 .filter(t -> !alreadyDefinedTerms.contains(t))
+                .distinct() // keep only the first occurrence of the sorting term
                 .map(t -> Maps.immutableEntry(
                         (t instanceof Variable)
                                 ? (Variable) t
                                 : variableGenerator.generateNewVariable(),
                         t))
-                .collect(ImmutableCollectors.toSet());
+                .collect(ImmutableCollectors.toMap());
 
         if (newBindings.isEmpty())
             return tree;
 
-        if (!isSupported(alreadyDefinedTerms, analysis, newBindings)) {
+        // decides whether the new bindings can be added
+        if (analysis.hasDistinct && newBindings.values().stream()
+                .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms))) {
             throw new DistinctOrderByDialectLimitationException();
         }
 
-        ImmutableSet<Variable> newProjectedVariables = Stream.concat(
-                projectedVariables.stream(),
-                newBindings.stream()
-                        .map(Map.Entry::getKey))
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newProjectedVariables = Sets.union(projectedVariables, newBindings.keySet()).immutableCopy();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
-                        substitutionFactory.getSubstitutionRemoveIdentityEntries(newBindings, Map.Entry::getKey, Map.Entry::getValue),
+                        substitutionFactory.getSubstitutionRemoveIdentityEntries(newBindings.entrySet(), Map.Entry::getKey, Map.Entry::getValue),
                         analysis.getSubstitution());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
@@ -208,20 +204,6 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         return analysis.constructionNode
                 .map(n -> updateTopConstructionNode(tree, newConstructionNode))
                 .orElseGet(() -> insertConstructionNode(tree, newConstructionNode));
-    }
-
-    /**
-     * Decides whether or not new bindings can be added
-     *
-     */
-    protected boolean isSupported(ImmutableSet<ImmutableTerm> alreadyProjectedTerms, Analysis analysis,
-                                ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings) {
-        if (!analysis.hasDistinct)
-            return true;
-
-        return newBindings.stream()
-                .map(Map.Entry::getValue)
-                .noneMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms));
     }
 
     /**
@@ -240,7 +222,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
                         .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms));
         }
         else if (term instanceof Variable) {
-            return !(alreadyProjectedTerms.contains(term));
+            return !alreadyProjectedTerms.contains(term);
         }
         // Constant
         else

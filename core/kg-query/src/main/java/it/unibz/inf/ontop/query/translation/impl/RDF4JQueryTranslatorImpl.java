@@ -855,33 +855,29 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         List<ProjectionElem> projectionElems = node.getProjectionElemList().getElements();
 
-        ImmutableSubstitution<Variable> substitution =
-                substitutionFactory.getSubstitutionRemoveIdentityEntries(
-                        projectionElems,
+        ImmutableMap<Variable, Variable> map = projectionElems.stream()
+                .collect(ImmutableCollectors.toMap(
                         pe -> termFactory.getVariable(pe.getName()),
-                        pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())));
+                        pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName()))));
 
-        ImmutableSet<Variable> projectedVars = projectionElems.stream()
-                .map(pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName())))
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSubstitution<Variable> substitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
+                        map.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+
+        ImmutableSet<Variable> projectedVars = ImmutableSet.copyOf(map.values());
 
         if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        child.iqTree.getKnownVariables(),
-                        projectedVars
-                )
-        );
+                Sets.union(child.iqTree.getKnownVariables(), projectedVars));
 
         subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution, variableGenerator);
         ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
 
         // Substitution for possibly unbound variables
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getNullSubstitution(projectedVars.stream()
-                .filter(v -> !subQueryVariables.contains(v)));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getNullSubstitution(
+                Sets.difference(projectedVars, subQueryVariables));
 
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
@@ -941,18 +937,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ImmutableSet<Variable> leftVariables = leftQuery.getVariables();
         ImmutableSet<Variable> rightVariables = rightQuery.getVariables();
 
-        ImmutableSet<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables).immutableCopy();
-        ImmutableSet<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables).immutableCopy();
+        Sets.SetView<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables);
+        Sets.SetView<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables);
 
         ImmutableSet<Variable> allNullable = Sets.union(nullableFromLeft, Sets.union(nullableFromRight, Sets.union(nullOnLeft, nullOnRight))).immutableCopy();
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ImmutableSubstitution<ImmutableTerm> leftSubstitution = substitutionFactory.getNullSubstitution(nullOnLeft.stream());
-        ImmutableSubstitution<ImmutableTerm> rightSubstitution = substitutionFactory.getNullSubstitution(nullOnRight.stream());
-
-        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, leftSubstitution);
-        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, rightSubstitution);
+        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, substitutionFactory.getNullSubstitution(nullOnLeft));
+        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, substitutionFactory.getNullSubstitution(nullOnRight));
 
         UnionNode unionNode = iqFactory.createUnionNode(rootVariables);
 

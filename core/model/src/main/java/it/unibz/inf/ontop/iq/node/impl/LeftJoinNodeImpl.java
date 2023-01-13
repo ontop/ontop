@@ -286,8 +286,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 Optional<ConstructionNode> constructionNode = Optional.of(projectedVariables)
                         .filter(vars -> !leftVariables.containsAll(vars))
                         .map(vars -> substitutionFactory.getNullSubstitution(
-                                projectedVariables.stream()
-                                        .filter(v -> !leftVariables.contains(v))))
+                                Sets.difference(projectedVariables, leftVariables)))
                         .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
                 return constructionNode
@@ -499,16 +498,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
-        ImmutableSet<Variable> constraintVariables = constraint.getVariables();
 
-        ImmutableSet<Variable> nullVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables()).stream()
-                .filter(constraintVariables::contains)
-                .collect(ImmutableCollectors.toSet());
+        Sets.SetView<Variable> nullVariables = Sets.intersection(
+                Sets.difference(rightChild.getVariables(), leftChild.getVariables()),
+                constraint.getVariables());
 
         if (nullVariables.isEmpty())
             return false;
 
-        ImmutableExpression nullifiedExpression = substitutionFactory.getNullSubstitution(nullVariables.stream())
+        ImmutableExpression nullifiedExpression = substitutionFactory.getNullSubstitution(nullVariables)
                 .applyToBooleanExpression(constraint);
 
         return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))

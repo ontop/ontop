@@ -622,14 +622,13 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             IQTree ljLevelTree;
             if (rightChild.isDeclaredAsEmpty()) {
-                ImmutableSet<Variable> leftVariables = leftChild.getVariables();
-                ImmutableSet<Variable> rightSpecificVariables = rightChild.getVariables().stream()
-                        .filter(v -> !leftVariables.contains(v))
-                        .collect(ImmutableCollectors.toSet());
+                Sets.SetView<Variable> rightSpecificVariables =
+                        Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(leftVariables, rightSpecificVariables).immutableCopy(),
-                        substitutionFactory.getNullSubstitution(rightSpecificVariables.stream()));
+                        Sets.union(leftChild.getVariables(), rightSpecificVariables).immutableCopy(),
+                        substitutionFactory.getNullSubstitution(rightSpecificVariables));
+
                 ljLevelTree = iqFactory.createUnaryIQTree(newParentConstructionNode, leftChild, normalizedProperties);
             }
             else if (rightChild.getRootNode() instanceof TrueNode) {
@@ -753,9 +752,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          */
         private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm, ImmutableSet<Variable> leftVariables) {
             ImmutableSubstitution<ImmutableTerm> nullSubstitution = substitutionFactory.getNullSubstitution(
-                    immutableTerm.getVariableStream()
-                            .filter(v -> !leftVariables.contains(v))
-                            .distinct());
+                    Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables));
 
             return nullSubstitution.apply(immutableTerm)
                     .simplify()

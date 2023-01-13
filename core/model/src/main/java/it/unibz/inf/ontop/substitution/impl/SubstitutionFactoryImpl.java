@@ -104,9 +104,9 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Stream<Variable> variables) {
+    public ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Set<Variable> variables) {
         return getSubstitution(
-                variables.collect(ImmutableCollectors.toMap(v -> v, v -> termFactory.getNullConstant())));
+                variables.stream().collect(ImmutableCollectors.toMap(v -> v, v -> termFactory.getNullConstant())));
     }
 
     @Override

@@ -656,16 +656,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     throw new IllegalStateException("Functions have different arities, they cannot be combined");
                 }
 
-                ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
-                for (int i = 0; i < arguments1.size(); i++) {
-                    // Recursive
-                    ImmutableTerm newArgument = combineDefinitions(arguments1.get(i), arguments2.get(i),
-                            variableGenerator, false)
-                            .orElseGet(variableGenerator::generateNewVariable);
-                    argumentBuilder.add(newArgument);
-                }
-                return Optional.of(termFactory.getImmutableFunctionalTerm(firstFunctionSymbol,
-                        argumentBuilder.build()));
+                ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, arguments1.size())
+                        // RECURSIVE
+                        .mapToObj(i -> combineDefinitions(arguments1.get(i), arguments2.get(i), variableGenerator, false)
+                                .orElseGet(variableGenerator::generateNewVariable))
+                        .collect(ImmutableCollectors.toList());
+
+                return Optional.of(termFactory.getImmutableFunctionalTerm(firstFunctionSymbol, newArguments));
             }
         }
         else {
