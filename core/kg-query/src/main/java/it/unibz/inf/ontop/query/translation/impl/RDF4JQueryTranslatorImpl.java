@@ -336,9 +336,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
         ImmutableSet<Variable> leftVars = leftTranslation.iqTree.getVariables();
-        ImmutableSet<Variable> sharedVars = rightTranslation.iqTree.getVariables().stream()
-                .filter(leftVars::contains)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> sharedVars = Sets.intersection(rightTranslation.iqTree.getVariables(), leftVars).immutableCopy();
 
         if (sharedVars.isEmpty()) {
             return leftTranslation;
@@ -405,10 +403,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                    ImmutableSet<Variable> rightNullableVars) {
 
         List<ImmutableExpression> disjuncts = new ArrayList<>();
-        disjuncts.add(termFactory.getStrictEquality(
-                leftVar,
-                renamedVar
-        ));
+        disjuncts.add(termFactory.getStrictEquality(leftVar, renamedVar));
+
         if (leftNullableVars.contains(leftVar)) {
             disjuncts.add(termFactory.getDBIsNull(leftVar));
         }
@@ -651,28 +647,16 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         TranslationResult leftTranslation = translate(join.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
         TranslationResult rightTranslation = translate(join.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
-        IQTree leftQuery = leftTranslation.iqTree;
-        IQTree rightQuery = rightTranslation.iqTree;
+        ImmutableSet<Variable> nullableVarsUnion = Sets.union(leftTranslation.nullableVariables, rightTranslation.nullableVariables).immutableCopy();
 
-        ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
-        ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
+        ImmutableSet<Variable> sharedVars = Sets.intersection(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables()).immutableCopy();
 
-        ImmutableSet<Variable> projectedFromRight = rightTranslation.iqTree.getVariables();
-        ImmutableSet<Variable> projectedFromLeft = leftTranslation.iqTree.getVariables();
-
-        ImmutableSet<Variable> toCoalesce = projectedFromLeft.stream()
-                .filter(projectedFromRight::contains)
-                .filter(v -> nullableFromLeft.contains(v) || nullableFromRight.contains(v))
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> toCoalesce = Sets.intersection(sharedVars, nullableVarsUnion).immutableCopy();
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        leftQuery.getKnownVariables(),
-                        rightQuery.getKnownVariables()
-                )
-        );
-        // May update the variable generator!!
+                Sets.union(leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
+        // May update the variable generator!!
         InjectiveVar2VarSubstitution leftRenamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(toCoalesce.stream(),
                 variableGenerator::generateNewVariableFromVar);
 
@@ -687,61 +671,38 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         leftRenamingSubstitution.get(v),
                         rightRenamingSubstitution.get(v)));
 
-        Optional<ImmutableExpression> filterExpression = join instanceof LeftJoin ?
-                getLeftJoinFilter(
+        Optional<ImmutableExpression> filterExpression = join instanceof LeftJoin
+                ? getLeftJoinFilter(
                         (LeftJoin) join,
                         topSubstitution,
-                        Sets.union(
-                                projectedFromLeft,
-                                projectedFromRight
-                        ).immutableCopy(),
+                        Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables()).immutableCopy(),
                         externalBindings,
-                        treatBNodeAsVariable) :
-                Optional.empty();
+                        treatBNodeAsVariable)
+                : Optional.empty();
 
         Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, toCoalesce.stream()
                 .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution)));
 
-        JoinLikeNode joinLikeNode = join instanceof LeftJoin ?
-                iqFactory.createLeftJoinNode(joinCondition) :
-                iqFactory.createInnerJoinNode(joinCondition);
+        JoinLikeNode joinLikeNode = join instanceof LeftJoin
+                ? iqFactory.createLeftJoinNode(joinCondition)
+                : iqFactory.createInnerJoinNode(joinCondition);
 
-        ImmutableSet<Variable> sharedVars = Sets.intersection(
-                leftQuery.getVariables(),
-                rightQuery.getVariables()
-        ).immutableCopy();
+        ImmutableSet<Variable> newNullableVars = join instanceof LeftJoin
+                ? Sets.difference(rightTranslation.iqTree.getVariables(), sharedVars).immutableCopy()
+                : ImmutableSet.of();
 
-        ImmutableSet<Variable> nullableVarsUnion = Sets.union(
-                nullableFromLeft,
-                nullableFromRight
-        ).immutableCopy();
-
-        ImmutableSet<Variable> newNullableVars = join instanceof LeftJoin ?
-                Sets.difference(
-                        rightQuery.getVariables(),
-                        sharedVars
-                ).immutableCopy() :
-                ImmutableSet.of();
-
-        ImmutableSet<Variable> newSetOfNullableVars = join instanceof LeftJoin ?
-                Sets.union(
-                        nullableVarsUnion,
-                        newNullableVars
-                ).immutableCopy() :
-                Sets.difference(
-                        nullableVarsUnion,
-                        sharedVars
-                ).immutableCopy();
+        ImmutableSet<Variable> newSetOfNullableVars = join instanceof LeftJoin
+                ? Sets.union(nullableVarsUnion, newNullableVars).immutableCopy()
+                : Sets.difference(nullableVarsUnion, sharedVars).immutableCopy();
 
         IQTree joinQuery = buildJoinQuery(
                 joinLikeNode,
-                leftQuery,
-                rightQuery,
+                leftTranslation.iqTree,
+                rightTranslation.iqTree,
                 topSubstitution,
                 leftRenamingSubstitution,
                 rightRenamingSubstitution,
-                toCoalesce
-        );
+                toCoalesce);
 
         return createTranslationResult(joinQuery, newSetOfNullableVars);
     }
@@ -752,10 +713,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return join.getCondition() != null ?
                 Optional.of(
                         topSubstitution.applyToBooleanExpression(
-                                getFilterExpression(
-                                        join.getCondition(),
-                                        variables,
-                                        externalBindings, treatBNodeAsVariable))) :
+                                getFilterExpression(join.getCondition(), variables, externalBindings, treatBNodeAsVariable))) :
                 Optional.empty();
     }
 
@@ -781,19 +739,14 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                   InjectiveVar2VarSubstitution rightRenamingSubstitution,
                                   ImmutableSet<Variable> toCoalesce) {
 
-        ImmutableSet<Variable> projectedVariables = Stream.concat(
-                Stream.concat(
-                        leftQuery.getVariables().stream(),
-                        rightQuery.getVariables().stream()
-                ).filter(v -> !toCoalesce.contains(v)),
-                topSubstitution.getDomain().stream())
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> projectedVariables = Sets.union(
+                Sets.difference(
+                        Sets.union(leftQuery.getVariables(), rightQuery.getVariables()),
+                        toCoalesce),
+                topSubstitution.getDomain()).immutableCopy();
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        leftQuery.getKnownVariables(),
-                        rightQuery.getKnownVariables()
-                ));
+                Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()));
 
         NonProjVarRenamings nonProjVarsRenaming = getNonProjVarsRenamings(leftQuery, rightQuery, variableGenerator);
 
@@ -804,35 +757,21 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         nonProjVarsRenaming.left),
                 applyInDepthRenaming(
                         rightQuery.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution, variableGenerator),
-                        nonProjVarsRenaming.right)
-        );
+                        nonProjVarsRenaming.right));
 
-        return topSubstitution.isEmpty() ?
-                joinTree :
-                iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(
-                                projectedVariables,
-                                topSubstitution
-                        ),
-                        joinTree
-                );
+        return topSubstitution.isEmpty()
+                ? joinTree
+                : iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(projectedVariables, topSubstitution),
+                        joinTree);
     }
 
     private IQTree getJoinTree(JoinLikeNode joinNode, IQTree leftTree, IQTree rightTree) {
         if (joinNode instanceof LeftJoinNode) {
-            return iqFactory.createBinaryNonCommutativeIQTree(
-                    (LeftJoinNode) joinNode,
-                    leftTree,
-                    rightTree
-            );
+            return iqFactory.createBinaryNonCommutativeIQTree((LeftJoinNode) joinNode, leftTree, rightTree);
         }
         if (joinNode instanceof InnerJoinNode) {
-            return iqFactory.createNaryIQTree(
-                    (InnerJoinNode) joinNode,
-                    ImmutableList.of(
-                            leftTree,
-                            rightTree
-                    ));
+            return iqFactory.createNaryIQTree((InnerJoinNode) joinNode, ImmutableList.of(leftTree, rightTree));
         }
         throw new Sparql2IqConversionException("Left or inner join expected");
     }
@@ -869,10 +808,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 Sets.difference(projectedVars, subQueryVariables));
 
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
-        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(
-                projectNode,
-                subQuery
-        );
+        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
+
         ImmutableSet<Variable> nullableVariables = child.nullableVariables.stream()
                 .map(substitution::applyToVariable)
                 .filter(t -> t instanceof Variable)
@@ -914,11 +851,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         IQTree rightQuery = rightTranslation.iqTree;
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        leftQuery.getKnownVariables(),
-                        rightQuery.getKnownVariables()
-                )
-        );
+                Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()));
 
         ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
         ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
@@ -948,15 +881,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         iqFactory.createNaryIQTree(
                                 unionNode,
                                 ImmutableList.of(
-                                        applyInDepthRenaming(
-                                                iqFactory.createUnaryIQTree(leftCn, leftQuery),
-                                                nonProjVarsRenamings.left),
-                                        applyInDepthRenaming(
-                                                iqFactory.createUnaryIQTree(rightCn, rightQuery),
-                                                nonProjVarsRenamings.right)
-                                ))),
-                allNullable
-        );
+                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(leftCn, leftQuery), nonProjVarsRenamings.left),
+                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(rightCn, rightQuery), nonProjVarsRenamings.right)))),
+                allNullable);
     }
 
     private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings,
@@ -1141,18 +1068,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
          *  - non-projected variables from the right operand that are also present in the left operand
          */
 
-        InjectiveVar2VarSubstitution leftSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(leftKnownVars.stream()
-                        .filter(v -> !leftProjVars.contains(v))
-                        .filter(rightKnownVars::contains)
-                        .distinct(),
+        InjectiveVar2VarSubstitution leftSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+                Sets.intersection(Sets.difference(leftKnownVars, leftProjVars), rightKnownVars).stream(),
                 variableGenerator::generateNewVariableFromVar);
 
-        InjectiveVar2VarSubstitution rightSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(rightKnownVars.stream()
-                        .filter(v -> !rightProjVars.contains(v))
-                        .filter(leftKnownVars::contains)
-                        .distinct(),
+        InjectiveVar2VarSubstitution rightSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+                Sets.intersection(Sets.difference(rightKnownVars, rightProjVars), leftKnownVars).stream(),
                 variableGenerator::generateNewVariableFromVar);
-
 
         return new NonProjVarRenamings(leftSubstitution, rightSubstitution);
     }
