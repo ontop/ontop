@@ -718,10 +718,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                                                    ImmutableSet<Variable> rightRequiredVariables,
                                                                    VariableGenerator variableGenerator) {
 
-            if (selectedSubstitution.entrySet().stream()
-                    .filter(e -> !leftVariables.contains(e.getKey()))
-                    .map(Map.Entry::getValue)
-                    .anyMatch(value -> needsAnExternalProvenanceVariable(value, leftVariables))) {
+            if (selectedSubstitution.builder()
+                    .removeFromDomain(leftVariables)
+                    .build()
+                    .getRange().stream()
+                    .anyMatch(t -> needsAnExternalProvenanceVariable(t, leftVariables))) {
                 return Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
                         rightTree, leftVariables, rightRequiredVariables, variableGenerator));
             }

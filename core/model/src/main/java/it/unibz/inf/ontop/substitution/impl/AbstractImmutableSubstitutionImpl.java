@@ -192,6 +192,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
+        public <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, B, S> transformer) {
+            return stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> transformer.apply(e.getKey(), e.getValue())));
+        }
+
+        @Override
         public <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<B, Optional<S>> transformer) {
             return stream
                     .map(e -> transformer.apply(e.getValue())

@@ -281,7 +281,8 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         // TODO: find a better name
         ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.entrySet().stream()
-                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey()).stream())
+                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey())
+                        .map(v -> Maps.immutableEntry(e.getKey(), v)).stream())
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableSet<Variable> newScope = Sets.union(childNullability.scope, nonNestedSubstitution.getDomain()).immutableCopy();
@@ -289,17 +290,16 @@ public class VariableNullabilityImpl implements VariableNullability {
         return childNullability.appendNewVariables(nullabilityBindings, newScope);
     }
 
-    private Optional<Map.Entry<Variable, Variable>> evaluateTermNullability(
-            ImmutableTerm term, VariableNullability childNullability, Variable key) {
+    private Optional<Variable> evaluateTermNullability(ImmutableTerm term, VariableNullability childNullability, Variable key) {
+
         if (term instanceof Constant) {
             return term.isNull()
-                    ? Optional.of(Maps.immutableEntry(key, key))
+                    ? Optional.of(key)
                     : Optional.empty();
         }
         else if (term instanceof Variable)
             return Optional.of((Variable) term)
-                    .filter(childNullability::isPossiblyNullable)
-                    .map(v -> Maps.immutableEntry(key, v));
+                    .filter(childNullability::isPossiblyNullable);
         else {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol.FunctionalTermNullability results = functionalTerm.getFunctionSymbol().evaluateNullability(
@@ -307,9 +307,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                     childNullability, termFactory);
 
             return results.isNullable()
-                    ? Optional.of(results.getBoundVariable()
-                    .map(v -> Maps.immutableEntry(key, v))
-                    .orElseGet(() -> Maps.immutableEntry(key, key)))
+                    ? Optional.of(results.getBoundVariable().orElse(key))
                     : Optional.empty();
         }
     }

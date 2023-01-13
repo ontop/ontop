@@ -287,12 +287,13 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                             groupingVariables, substitution.getDomain()));
         }
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> nonAggregateMap = substitution.entrySet().stream()
-                .filter(e -> !e.getValue().getFunctionSymbol().isAggregation())
-                .collect(ImmutableCollectors.toMap());
-        if (!nonAggregateMap.isEmpty()) {
+        ImmutableSubstitution<ImmutableFunctionalTerm> nonAggregateSubstitution = substitution.builder()
+                .restrict((v, t) -> !t.getFunctionSymbol().isAggregation())
+                .build();
+
+        if (!nonAggregateSubstitution.isEmpty()) {
             throw new InvalidIntermediateQueryException("The substitution of the aggregation node " +
-                    "should only define aggregates, not " + nonAggregateMap);
+                    "should only define aggregates, not " + nonAggregateSubstitution);
         }
     }
 

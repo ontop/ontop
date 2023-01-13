@@ -85,6 +85,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         <S> ImmutableMap<Variable, S> toMap(Function<T, S> transformer);
 
+        <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, T, S> transformer);
+
         <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<T, Optional<S>> transformer);
     }
 }
