@@ -117,8 +117,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return new BuilderImpl<>(stream, termFactory);
         }
 
-        @Override
-        public Builder<B> restrictDomain(Predicate<Variable> predicate) {
+        private Builder<B> restrictDomain(Predicate<Variable> predicate) {
             return create(stream.filter(e -> predicate.test(e.getKey())));
         }
 
@@ -155,16 +154,16 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public <U> Builder<B> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<B, U, B> function) {
+        public <U> Builder<B> transformOrRetain(Function<Variable, U> lookup, BiFunction<B, U, B> function) {
             return create(stream.map(e -> Maps.immutableEntry(
                     e.getKey(),
-                    lookup.apply(e.getKey())
+                    Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(u -> function.apply(e.getValue(), u))
                             .orElse(e.getValue()))));
         }
 
         @Override
-        public <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, U> lookup, Function<U, S> function) {
+        public <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function) {
             return create(stream
                     .map(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
@@ -174,7 +173,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public <U> Builder<B> conditionalFlatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
+        public <U> Builder<B> flatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
             return create(stream
                     .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(u -> function.apply(u).stream()

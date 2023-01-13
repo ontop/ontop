@@ -104,7 +104,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                     .toMap(ImmutableFunctionalTerm::simplifyAsGuaranteedToBeNonNull);
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
-                    .conditionalTransform(v -> Optional.ofNullable(updatedEntryMap.get(v)), (t, u) -> u.getSimplifiedTerm())
+                    .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
                     .build();
 
             ConstructionNode newConstructionNode = initialSubstitution.equals(newSubstitution)

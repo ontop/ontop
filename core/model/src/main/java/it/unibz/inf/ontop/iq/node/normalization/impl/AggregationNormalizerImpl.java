@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -321,14 +320,12 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     // (Possibly decomposed) functional terms
                     simplifiedSubstitution.builder()
                             .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
-                            .conditionalTransformOrRemove(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                            .transformOrRemove(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                             .build());
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = simplifiedSubstitution.builder()
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
-                    .conditionalFlatTransform(
-                            decompositionMap::get,
-                            ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                    .flatTransform(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
                     .build();
 
             if (liftedSubstitution.isEmpty())

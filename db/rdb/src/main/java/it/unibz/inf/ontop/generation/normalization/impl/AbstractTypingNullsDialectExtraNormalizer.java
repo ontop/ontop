@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -14,11 +13,9 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
@@ -53,9 +50,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
-                    .conditionalTransform(
-                            v -> Optional.ofNullable(typedNullMap.get(v)),
-                            (t, n) -> t.isNull() ? n : t)
+                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
                     .build();
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(

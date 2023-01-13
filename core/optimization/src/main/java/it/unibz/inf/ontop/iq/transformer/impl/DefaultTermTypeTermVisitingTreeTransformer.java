@@ -196,7 +196,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                         "Was expecting the child to start with a ConstructionNode"));
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().builder()
-                .conditionalTransform(v -> Optional.ofNullable(typeFunctionSymbolMap.get(v)), this::enforceUsageOfCommonTypeFunctionSymbol)
+                .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
                 .build();
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(tree.getVariables(),newSubstitution);

@@ -248,10 +248,11 @@ public class VariableNullabilityImpl implements VariableNullability {
             return Stream.of(substitution);
 
         ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution.builder()
-                .<ImmutableTerm>transform(t -> t)
-                .conditionalTransform(
-                        v -> Optional.of(subTermNames.row(v)).filter(indexes -> !indexes.isEmpty()),
-                        (t, indexes) -> {
+                .transform((v, t) -> {
+                            ImmutableMap<Integer, Variable> indexes = subTermNames.row(v);
+                            if (indexes.isEmpty())
+                                return t;
+
                             ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) t;
                             ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
                                     .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(indexes.get(i))

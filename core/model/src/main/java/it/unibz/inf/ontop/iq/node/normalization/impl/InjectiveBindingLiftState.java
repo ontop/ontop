@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -21,7 +20,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -115,7 +113,7 @@ public class InjectiveBindingLiftState {
                 // (Possibly decomposed) injective functional terms
                 childSubstitution.builder()
                         .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
-                        .conditionalTransformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                        .transformOrRemove(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                         .build());
 
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
@@ -130,9 +128,7 @@ public class InjectiveBindingLiftState {
 
         ImmutableSubstitution<ImmutableFunctionalTerm> newChildSubstitution =  childSubstitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .conditionalFlatTransform(
-                        injectivityDecompositionMap::get,
-                        ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
                 .build();
 
         Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)

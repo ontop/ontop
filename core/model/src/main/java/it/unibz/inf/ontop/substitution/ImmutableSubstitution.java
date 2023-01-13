@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.substitution;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableCollection;
@@ -66,8 +63,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         <S extends ImmutableTerm> ImmutableSubstitution<S> build(Class<S> type);
 
-        Builder<T> restrictDomain(Predicate<Variable> predicate);
-
         Builder<T> restrictDomainTo(ImmutableSet<Variable> set);
 
         Builder<T> removeFromDomain(ImmutableSet<Variable> set);
@@ -80,11 +75,11 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
 
-        <U> Builder<T> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<T, U, T> function);
+        <U> Builder<T> transformOrRetain(Function<Variable, U> lookup, BiFunction<T, U, T> function);
 
-        <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
+        <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
 
-        <U> Builder<T> conditionalFlatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
+        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
 
         Stream<ImmutableExpression> toStrictEqualities();
 

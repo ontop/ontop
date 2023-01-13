@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
-import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,9 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class AggregationSimplifierImpl implements AggregationSimplifier {
 
@@ -93,28 +89,24 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             // With the GROUP BY clause, groups are never empty
             boolean hasGroupBy = !rootNode.getGroupingVariables().isEmpty();
 
-            ImmutableMap<Variable, AggregationSimplification> simplificationMap =
-                    initialSubstitution.builder()
+            ImmutableMap<Variable, AggregationSimplification> simplificationMap = initialSubstitution.builder()
                             .toMapWithoutOptional(t -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                    initialSubstitution.builder()
-                            .conditionalFlatTransform(
-                                    simplificationMap::get,
-                                    u -> u.getDecomposition().getSubTermSubstitutionMap())
+            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = initialSubstitution.builder()
+                            .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubTermSubstitutionMap())
                             .build();
 
             AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
 
-            Stream<DefinitionPushDownRequest> definitionsToPushDown = simplificationMap.values().stream()
-                    .flatMap(s -> s.getPushDownRequests().stream());
-
-            IQTree pushDownChildTree = pushDownDefinitions(normalizedChild, definitionsToPushDown);
+            IQTree pushDownChildTree = pushDownDefinitions(
+                    normalizedChild,
+                    simplificationMap.values().stream()
+                            .flatMap(s -> s.getPushDownRequests().stream()));
             UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
             ImmutableSubstitution<ImmutableTerm> parentSubstitution = initialSubstitution.builder()
-                    .conditionalTransformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
+                    .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
                     .build();
 
             return parentSubstitution.isEmpty()

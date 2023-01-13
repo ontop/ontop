@@ -143,9 +143,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         }
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
-            ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.builder()
-                    .conditionalTransform(v -> Optional.of(rdfTypes.get(v)), this::replaceRDFByDBTerm)
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+                    .transform((v, t) -> replaceRDFByDBTerm(t, rdfTypes.get(v)))
                     .build();
 
             return iqFactory.createUnaryIQTree(
@@ -200,6 +199,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
 
     private ImmutableMap<Variable, RDFTermType> extractRDFTypes(ImmutableSubstitution<ImmutableTerm> definitions)
             throws NotFullyTranslatableToNativeQueryException {
+
         ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder(); // in order to handle checked exceptions
 
         for (Map.Entry<Variable, ImmutableTerm> entry : definitions.entrySet()) {
