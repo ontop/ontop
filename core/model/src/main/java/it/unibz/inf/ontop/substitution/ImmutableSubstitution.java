@@ -82,12 +82,14 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
         <U> Builder<T> conditionalTransform(Function<Variable, Optional<U>> lookup, BiFunction<T, U, T> function);
 
-        <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, Optional<U>> lookup, Function<U, S> function);
+        <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
 
-        <U> Builder<T> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
+        <U> Builder<T> conditionalFlatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
 
         Stream<ImmutableExpression> toStrictEqualities();
 
         <S> ImmutableMap<Variable, S> toMap(Function<T, S> transformer);
+
+        <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<T, Optional<S>> transformer);
     }
 }

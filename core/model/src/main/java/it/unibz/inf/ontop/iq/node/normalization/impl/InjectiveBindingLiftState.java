@@ -102,10 +102,10 @@ public class InjectiveBindingLiftState {
 
         ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
-        ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> injectivityDecompositionMap =
+        ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> injectivityDecompositionMap =
                 childSubstitution.builder()
                         .restrictRangeTo(ImmutableFunctionalTerm.class)
-                        .toMap(t -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
+                        .toMapWithoutOptional(t -> t.analyzeInjectivity(nonFreeVariables, grandChildVariableNullability, variableGenerator));
 
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 

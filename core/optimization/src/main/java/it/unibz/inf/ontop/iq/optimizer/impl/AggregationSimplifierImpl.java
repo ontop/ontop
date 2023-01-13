@@ -93,9 +93,9 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             // With the GROUP BY clause, groups are never empty
             boolean hasGroupBy = !rootNode.getGroupingVariables().isEmpty();
 
-            ImmutableMap<Variable, Optional<AggregationSimplification>> simplificationMap =
+            ImmutableMap<Variable, AggregationSimplification> simplificationMap =
                     initialSubstitution.builder()
-                            .toMap(t -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
+                            .toMapWithoutOptional(t -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     initialSubstitution.builder()
@@ -107,8 +107,6 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
 
             Stream<DefinitionPushDownRequest> definitionsToPushDown = simplificationMap.values().stream()
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
                     .flatMap(s -> s.getPushDownRequests().stream());
 
             IQTree pushDownChildTree = pushDownDefinitions(normalizedChild, definitionsToPushDown);

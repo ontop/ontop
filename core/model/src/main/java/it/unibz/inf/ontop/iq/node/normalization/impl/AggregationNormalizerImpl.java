@@ -310,10 +310,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .transform(t -> t.simplify(variableNullability))
                     .build();
 
-            ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionMap =
+            ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> decompositionMap =
                     simplifiedSubstitution.builder()
                             .restrictRangeTo(ImmutableFunctionalTerm.class)
-                            .toMap(this::decomposeFunctionalTerm);
+                            .toMapWithoutOptional(this::decomposeFunctionalTerm);
 
             ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants

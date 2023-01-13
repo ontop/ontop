@@ -164,9 +164,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, Optional<U>> lookup, Function<U, S> function) {
+        public <U, S extends ImmutableTerm> Builder<S> conditionalTransformOrRemove(Function<Variable, U> lookup, Function<U, S> function) {
             return create(stream
-                    .map(e -> lookup.apply(e.getKey())
+                    .map(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
                             .map(r -> Maps.immutableEntry(e.getKey(), r)))
                     .filter(Optional::isPresent)
@@ -174,9 +174,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         @Override
-        public <U> Builder<B> conditionalFlatTransform(Function<Variable, Optional<U>> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
+        public <U> Builder<B> conditionalFlatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
             return create(stream
-                    .flatMap(e -> lookup.apply(e.getKey())
+                    .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(u -> function.apply(u).stream()
                                     .flatMap(s -> s.entrySet().stream()))
                             .orElseGet(() -> Stream.of(e))));
@@ -192,6 +192,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> transformer.apply(e.getValue())));
         }
 
+        @Override
+        public <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<B, Optional<S>> transformer) {
+            return stream
+                    .map(e -> transformer.apply(e.getValue())
+                            .map(v -> Maps.immutableEntry(e.getKey(), v)))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(ImmutableCollectors.toMap());
+        }
 
     }
 }
