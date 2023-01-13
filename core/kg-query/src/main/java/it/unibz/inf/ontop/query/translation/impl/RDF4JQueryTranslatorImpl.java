@@ -456,13 +456,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) {
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ImmutableList<VarDef> varDefs = ImmutableList.copyOf(
-                getGroupVarDefs(
-                        groupNode.getGroupElements().iterator(),
-                        new HashSet<>(childVariables),
-                        externalBindings, treatBNodeAsVariable));
-
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs = mergeVarDefs(varDefs);
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs =
+                getGroupVarDefs(groupNode.getGroupElements(), childVariables, externalBindings, treatBNodeAsVariable);
 
         if (mergedVarDefs.size() > 1) {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
@@ -472,31 +467,25 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.reverse().iterator().next().castTo(ImmutableFunctionalTerm.class) // last substitution
+                mergedVarDefs.get(0).castTo(ImmutableFunctionalTerm.class) // the only substitution
         );
     }
 
-    private List<VarDef> getGroupVarDefs(Iterator<GroupElem> it, Set<Variable> allowedVars, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                         boolean treatBNodeAsVariable) {
-        if (it.hasNext()) {
-            GroupElem elem = it.next();
-            ImmutableTerm term = getTerm(
-                    elem.getOperator(),
-                    allowedVars,
-                    externalBindings,
-                    treatBNodeAsVariable);
+    private ImmutableList<ImmutableSubstitution<ImmutableTerm>> getGroupVarDefs(List<GroupElem> list,
+                                                                                ImmutableSet<Variable> childVariables,
+                                                                                ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                                                boolean treatBNodeAsVariable) {
+        List<VarDef> result = new ArrayList<>();
+        Set<Variable> allowedVars = new HashSet<>(childVariables); // mutable: accumulator
+
+        for (GroupElem elem : list) {
+            ImmutableTerm term = getTerm(elem.getOperator(), allowedVars, externalBindings, treatBNodeAsVariable);
             Variable definedVar = termFactory.getVariable(elem.getName());
             allowedVars.add(definedVar);
 
-            List<VarDef> varDefs = getGroupVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
-            varDefs.add(
-                    new VarDef(
-                            definedVar,
-                            term
-                    ));
-            return varDefs;
+            result.add(new VarDef(definedVar, term));
         }
-        return new ArrayList<>();
+        return mergeVarDefs(ImmutableList.copyOf(result));
     }
 
     private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings,
@@ -1072,90 +1061,70 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     private TranslationResult translateExtension(Extension node, ImmutableMap<Variable, GroundTerm> externalBindings,
                                                  @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
+
         TranslationResult childTranslation = translate(node.getArg(), externalBindings, dataset, treatBNodeAsVariable);
-        IQTree childQuery = childTranslation.iqTree;
 
         // Warning: an ExtensionElement might reference a variable appearing in a previous ExtensionElement
         // So we may need to nest them
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ImmutableSet<Variable> childVars = childQuery.getVariables();
-        ImmutableList<VarDef> varDefs = getVarDefs(
-                        node.getElements().iterator(),
-                        new HashSet<>(childQuery.getVariables()),
-                        externalBindings, treatBNodeAsVariable).stream()
-                .filter(vd -> !childVars.contains(vd.var))
-                .collect(ImmutableCollectors.toList());
+        ImmutableSet<Variable> childVars = childTranslation.iqTree.getVariables();
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs =
+                getVarDefs(node.getElements(), childVars, externalBindings, treatBNodeAsVariable);
 
-        if (varDefs.isEmpty()) {
+        if (mergedVarDefs.isEmpty()) {
             return childTranslation;
         }
 
-        return translateExtensionElems(
-                mergeVarDefs(varDefs).iterator(),
-                childTranslation,
-                externalBindings
-        );
+        return translateExtensionElems(mergedVarDefs, childTranslation, externalBindings);
     }
 
-    private List<VarDef> getVarDefs(Iterator<ExtensionElem> it, Set<Variable> allowedVars,
-                                    ImmutableMap<Variable, GroundTerm> externalBindings,
-                                    boolean treatBNodeAsVariable) {
-        if (it.hasNext()) {
-            ExtensionElem elem = it.next();
-            if (elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName())) {
-                return getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
-            }
-            else {
-                ImmutableTerm term = getTerm(
-                        elem.getExpr(),
-                        allowedVars,
-                        externalBindings, treatBNodeAsVariable);
+    private ImmutableList<ImmutableSubstitution<ImmutableTerm>> getVarDefs(List<ExtensionElem> list,
+                                                                           ImmutableSet<Variable> childVars,
+                                                                           ImmutableMap<Variable, GroundTerm> externalBindings,
+                                                                           boolean treatBNodeAsVariable) {
+        List<VarDef> result = new ArrayList<>();
+        Set<Variable> allowedVars = new HashSet<>(childVars); // mutable: accumulator
+
+        for (ExtensionElem elem : list) {
+            if (!(elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName()))) {
+                ImmutableTerm term = getTerm(elem.getExpr(), allowedVars, externalBindings, treatBNodeAsVariable);
                 Variable definedVar = termFactory.getVariable(elem.getName());
                 allowedVars.add(definedVar);
 
-                List<VarDef> varDefs = getVarDefs(it, allowedVars, externalBindings, treatBNodeAsVariable);
-                varDefs.add(new VarDef(definedVar, term));
-                return varDefs;
+                result.add(new VarDef(definedVar, term));
             }
         }
-        return new ArrayList<>();
+
+        ImmutableList<VarDef> varDefs = result.stream()
+                .filter(vd -> !childVars.contains(vd.var))
+                .collect(ImmutableCollectors.toList());
+
+        return mergeVarDefs(varDefs);
     }
 
-    private TranslationResult translateExtensionElems(UnmodifiableIterator<ImmutableSubstitution<ImmutableTerm>> it,
+    private TranslationResult translateExtensionElems(ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutions,
                                                       TranslationResult subquery,
                                                       ImmutableMap<Variable, GroundTerm> externalBindings) {
-        if (it.hasNext()) {
-            ImmutableSubstitution<ImmutableTerm> sub = it.next();
-            TranslationResult child = translateExtensionElems(it, subquery, externalBindings);
-            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub, child.nullableVariables);
+
+        TranslationResult result = createTranslationResult(subquery.iqTree, subquery.nullableVariables);
+
+        for (ImmutableSubstitution<ImmutableTerm> substitution : substitutions) {
+
+            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(substitution, result.nullableVariables);
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                    Sets.union(
-                            child.iqTree.getVariables(),
-                            sub.getDomain()
-                    ).immutableCopy(),
-                    sub
-            );
+                    Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),
+                    substitution);
 
-            return createTranslationResultFromExtendedProjection(
+            result = createTranslationResultFromExtendedProjection(
                     constructionNode,
-                    iqFactory.createUnaryIQTree(
-                            constructionNode,
-                            child.iqTree
-                    ),
-                    Sets.union(
-                            child.nullableVariables,
-                            newNullableVariables
-                    ).immutableCopy(),
-                    externalBindings
-            );
+                    iqFactory.createUnaryIQTree(constructionNode, result.iqTree),
+                    Sets.union(result.nullableVariables, newNullableVariables).immutableCopy(),
+                    externalBindings);
         }
 
-        return createTranslationResult(
-                subquery.iqTree,
-                subquery.nullableVariables
-        );
+        return result;
     }
 
     private NonProjVarRenamings getNonProjVarsRenamings(IQTree leftQuery, IQTree rightQuery,
@@ -1199,15 +1168,12 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         Deque<Map<Variable, ImmutableTerm>> substitutionMapList = new LinkedList<>();
         substitutionMapList.add(new HashMap<>());
 
-        // in this loop, varDefs are iterated in the reverse order
-        // but the new elements are inserted in the list at index 0,
-        // which cancels out the reverse order
-        for (VarDef varDef : varDefs.reverse()) {
-            Map<Variable, ImmutableTerm> head = substitutionMapList.getFirst();
-            if (varDef.term.getVariableStream().anyMatch(head::containsKey)) { // start off a new substitution
-                substitutionMapList.addFirst(new HashMap<>());
+        for (VarDef varDef : varDefs) {
+            Map<Variable, ImmutableTerm> last = substitutionMapList.getLast();
+            if (varDef.term.getVariableStream().anyMatch(last::containsKey)) { // start off a new substitution
+                substitutionMapList.addLast(new HashMap<>());
             }
-            substitutionMapList.getFirst().put(varDef.var, varDef.term);
+            substitutionMapList.getLast().put(varDef.var, varDef.term);
         }
 
         return substitutionMapList.stream()
