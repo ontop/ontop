@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.substitution.impl;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -16,11 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<Variable> implements InjectiveVar2VarSubstitution {
 
-    /**
-     * Regular constructor
-     */
-    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap,
-                                               TermFactory termFactory) {
+    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, TermFactory termFactory) {
         super(substitutionMap, termFactory);
 
         if (!isInjective(this.map))
@@ -77,9 +70,14 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
-    private static boolean isInjective(ImmutableMap<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
-        ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
-        return valueSet.size() == substitutionMap.keySet().size();
+    @Override
+    public ImmutableSet<Variable> getRangeSet() {
+        return ImmutableSet.copyOf(map.values());
+    }
+
+    static <T> boolean isInjective(ImmutableMap<Variable, T> map) {
+        ImmutableCollection<T> values = map.values();
+        return values.size() == ImmutableSet.copyOf(values).size();
     }
 
 }

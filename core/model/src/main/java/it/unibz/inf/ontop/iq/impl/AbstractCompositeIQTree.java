@@ -145,6 +145,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
+
+        ImmutableSet<Variable> variables = getVariables();
+
         try {
             Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
@@ -152,7 +155,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
-                    .flatMap(this::extractFreshRenaming)
+                    .flatMap(s -> iqTreeTools.extractFreshRenaming(s, variables))
                     // Fresh renaming
                     .map(s -> applyFreshRenaming(s, true))
                     .map(t -> newConstraint
@@ -164,9 +167,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                             .orElseGet(() -> newConstraint
                                     .map(c -> propagateDownConstraint(c, variableGenerator))
                                     .orElse(this)));
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, variables));
         }
     }
 
@@ -194,11 +197,6 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     protected abstract IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                  Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
-
-    private Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqTreeTools.extractFreshRenaming(descendingSubstitution, getVariables());
-    }
 
     @Override
     public final void validate() throws InvalidIntermediateQueryException {

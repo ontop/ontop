@@ -101,7 +101,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
                     .restrictDomainTo(nonNullVariables)
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
-                    .toMap(ImmutableFunctionalTerm::simplifyAsGuaranteedToBeNonNull);
+                    .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
                     .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())

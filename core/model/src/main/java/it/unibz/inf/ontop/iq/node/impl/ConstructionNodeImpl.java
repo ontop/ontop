@@ -350,10 +350,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .filter(ImmutableSubstitution::isInjective)
                 // Inverse
                 .map(s -> substitutionFactory.getInjectiveVar2VarSubstitution(
-                        s.entrySet().stream()
+                        s.inverseMap().entrySet().stream()
                                 .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getValue,
-                                        Map.Entry::getKey))))
+                                        Map.Entry::getKey,
+                                        e -> e.getValue().iterator().next()))))
                 .map(s -> childConstraint.stream()
                             .map(s::applyToVariable)
                             .collect(ImmutableCollectors.toSet()))

@@ -279,10 +279,8 @@ public class VariableNullabilityImpl implements VariableNullability {
             ImmutableSubstitution<? extends ImmutableTerm> nonNestedSubstitution, VariableNullabilityImpl childNullability) {
 
         // TODO: find a better name
-        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.entrySet().stream()
-                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey())
-                        .map(v -> Maps.immutableEntry(e.getKey(), v)).stream())
-                .collect(ImmutableCollectors.toMap());
+        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.builder()
+                .toMapWithoutOptional((v, t) -> evaluateTermNullability(t, childNullability, v));
 
         ImmutableSet<Variable> newScope = Sets.union(childNullability.scope, nonNestedSubstitution.getDomain()).immutableCopy();
 

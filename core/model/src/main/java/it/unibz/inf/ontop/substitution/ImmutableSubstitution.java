@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.substitution;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -99,13 +100,13 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     default ImmutableSet<Variable> getRangeVariables() {
         return getRange().stream()
-                .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet());
+                .flatMap(ImmutableTerm::getVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
-    default boolean isInjective() {
-        ImmutableCollection<T> values = getRange();
-        return values.size() == ImmutableSet.copyOf(values).size();
-    }
+    boolean isInjective();
+
+    ImmutableMap<T, Collection<Variable>> inverseMap();
 
     Builder<T> builder();
 
@@ -134,10 +135,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         Stream<ImmutableExpression> toStrictEqualities();
 
-        <S> ImmutableMap<Variable, S> toMap(Function<T, S> transformer);
-
         <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, T, S> transformer);
 
-        <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<T, Optional<S>> transformer);
+        <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, T, Optional<S>> transformer);
     }
 }

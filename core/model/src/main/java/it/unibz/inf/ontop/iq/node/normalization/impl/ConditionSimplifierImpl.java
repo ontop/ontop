@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -97,24 +98,29 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 // TODO: consider the fact that equalities might be n-ary
-                .filter(e -> {
-                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
-                    return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm);
-                })
+                .filter(e -> e.getTerms().stream().allMatch(t -> t instanceof NonFunctionalTerm))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = unify(functionFreeEqualities.stream()
-                        .map(ImmutableFunctionalTerm::getTerms)
-                        .map(args -> Maps.immutableEntry(
-                                (NonFunctionalTerm) args.get(0),
-                                (NonFunctionalTerm) args.get(1))),
-                nonLiftableVariables);
+        ImmutableList<NonFunctionalTerm> args1 = functionFreeEqualities.stream()
+                .map(eq -> (NonFunctionalTerm)eq.getTerm(0))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<NonFunctionalTerm> args2 = functionFreeEqualities.stream()
+                .map(eq -> (NonFunctionalTerm)eq.getTerm(1))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = unificationTools.computeMGU(args1, args2)
+                // TODO: merge priorityRenaming with the orientate() method
+                .map(u -> substitutionTools.prioritizeRenaming(u, nonLiftableVariables))
+                .orElseThrow(UnsatisfiableConditionException::new);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
                 .filter(v -> children.stream()
                         .filter(c -> c.getVariables().contains(v))
                         .allMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
                 .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> variablesToRemainInEqualities = Sets.union(nonLiftableVariables, rejectedByChildrenVariablesEqToConstant).immutableCopy();
 
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
@@ -124,49 +130,25 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .map(normalizedUnifier::applyToBooleanExpression),
 
                         // Equalities that must remain
-                        normalizedUnifier.entrySet().stream()
-                                .filter(e -> nonLiftableVariables.contains(e.getKey())
-                                        || rejectedByChildrenVariablesEqToConstant.contains(e.getKey()))
-                                .sorted(Map.Entry.comparingByKey())
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
-                ));
+                        normalizedUnifier.builder()
+                                .restrictDomainTo(variablesToRemainInEqualities)
+                                .toStrictEqualities()
+                                .sorted(Comparator.comparing(eq -> (Variable) eq.getTerm(0)))));
 
         Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
                 .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
 
-        Optional<ImmutableExpression> newExpression = (groundFunctionalSubstitution.isPresent())
+        Optional<ImmutableExpression> newExpression = groundFunctionalSubstitution.isPresent()
             ? evaluateCondition(
                     groundFunctionalSubstitution.get().applyToBooleanExpression(partiallySimplifiedExpression.get()),
                     variableNullability)
             : partiallySimplifiedExpression;
 
         ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
-                        normalizedUnifier.builder()
-                                .removeFromDomain(nonLiftableVariables)
-                                .removeFromDomain(rejectedByChildrenVariablesEqToConstant)
-                                .build(),
+                        normalizedUnifier.builder().removeFromDomain(variablesToRemainInEqualities).build(),
                         groundFunctionalSubstitution.orElseGet(substitutionFactory::getSubstitution));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
-    }
-
-    private ImmutableSubstitution<NonFunctionalTerm> unify(
-            Stream<Map.Entry<NonFunctionalTerm, NonFunctionalTerm>> equalityStream,
-            ImmutableSet<Variable> nonLiftableVariables) throws UnsatisfiableConditionException {
-        ImmutableList<Map.Entry<NonFunctionalTerm, NonFunctionalTerm>> equalities = equalityStream.collect(ImmutableCollectors.toList());
-
-        ImmutableList<NonFunctionalTerm> args1 = equalities.stream()
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<NonFunctionalTerm> args2 = equalities.stream()
-                .map(Map.Entry::getValue)
-                .collect(ImmutableCollectors.toList());
-
-        return unificationTools.computeMGU(args1, args2)
-                // TODO: merge priorityRenaming with the orientate() method
-                .map(u -> substitutionTools.prioritizeRenaming(u, nonLiftableVariables))
-                .orElseThrow(UnsatisfiableConditionException::new);
     }
 
     @Override

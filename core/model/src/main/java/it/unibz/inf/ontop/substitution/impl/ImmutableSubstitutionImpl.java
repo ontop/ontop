@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -117,7 +118,17 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
     }
 
+    @Override
+    public boolean isInjective() {
+        return InjectiveVar2VarSubstitutionImpl.isInjective(map);
+    }
 
+    @Override
+    public ImmutableMap<T, Collection<Variable>> inverseMap() {
+       return map.entrySet().stream()
+               .collect(ImmutableCollectors.toMultimap(Map.Entry::getValue, Map.Entry::getKey))
+               .asMap();
+    }
 
     @Override
     public ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set) {
@@ -244,19 +255,14 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         }
 
         @Override
-        public <S> ImmutableMap<Variable, S> toMap(Function<B, S> transformer) {
-            return stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> transformer.apply(e.getValue())));
-        }
-
-        @Override
         public <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, B, S> transformer) {
             return stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> transformer.apply(e.getKey(), e.getValue())));
         }
 
         @Override
-        public <S> ImmutableMap<Variable, S> toMapWithoutOptional(Function<B, Optional<S>> transformer) {
+        public <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, B, Optional<S>> transformer) {
             return stream
-                    .map(e -> transformer.apply(e.getValue())
+                    .map(e -> transformer.apply(e.getKey(), e.getValue())
                             .map(v -> Maps.immutableEntry(e.getKey(), v)))
                     .filter(Optional::isPresent)
                     .map(Optional::get)

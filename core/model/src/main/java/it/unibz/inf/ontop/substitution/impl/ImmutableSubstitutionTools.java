@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -34,20 +35,17 @@ public class ImmutableSubstitutionTools {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> prioritizeRenaming(
             ImmutableSubstitution<T> substitution, ImmutableSet<Variable> priorityVariables) {
 
-        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.builder()
+        ImmutableMap<Variable, Collection<Variable>> renamingMultimap = substitution.builder()
                 .restrictDomainTo(priorityVariables)
                 .restrictRangeTo(Variable.class)
+                .restrict((v, t) -> !priorityVariables.contains(t))
                 .build()
-                .entrySet().stream()
-                .filter(e -> !priorityVariables.contains(e.getValue()))
-                .collect(ImmutableCollectors.toMultimap(
-                        Map.Entry::getValue,
-                        Map.Entry::getKey));
+                .inverseMap();
 
         if (renamingMultimap.isEmpty())
             return substitution;
 
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMultimap.asMap().entrySet().stream()
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMultimap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().iterator().next())));

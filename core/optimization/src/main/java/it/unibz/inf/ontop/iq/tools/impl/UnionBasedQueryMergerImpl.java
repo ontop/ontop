@@ -71,7 +71,6 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                             projectionAtom)
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
-                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(disjointVariableSetRenaming.getRange());
                     InjectiveVar2VarSubstitution renamingSubstitution =
                             /*
                               fresh variables are excluded from the domain of the renaming substitution
@@ -79,7 +78,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
                                NB: this guarantees that the renaming substitution is injective
                              */
-                            substitutionFactory.compose(headSubstitution, disjointVariableSetRenaming, freshVariables);
+                            substitutionFactory.compose(headSubstitution, disjointVariableSetRenaming, disjointVariableSetRenaming.getRangeSet());
 
                     QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
                     return queryRenamer.transform(def).getTree();

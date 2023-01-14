@@ -43,8 +43,7 @@ public class RequiredExtensionalDataNodeExtractor {
 
         // Usually at the top of the right child of a LJ, with a substitution with ground terms (normally provenance constants)
         if ((!fromLeft) && (root instanceof ConstructionNode)
-                && ((ConstructionNode) root).getSubstitution().getRange().stream()
-                .allMatch(ImmutableTerm::isGround))
+                && ((ConstructionNode) root).getSubstitution().getRange().stream().allMatch(ImmutableTerm::isGround))
             return extractSomeRequiredNodes(((UnaryIQTree) tree).getChild(), false);
 
         return extractOtherType(tree);

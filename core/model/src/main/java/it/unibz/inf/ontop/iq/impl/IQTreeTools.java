@@ -5,10 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -47,8 +44,9 @@ public class IQTreeTools {
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
 
-        if (reducedSubstitution.getRange().stream().anyMatch(value ->
-                value.equals(termFactory.getNullConstant()))) {
+        Constant nullConstant = termFactory.getNullConstant();
+
+        if (reducedSubstitution.getRange().stream().anyMatch(v -> v.equals(nullConstant))) {
             throw new UnsatisfiableDescendingSubstitutionException();
         }
 

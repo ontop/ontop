@@ -132,13 +132,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(ImmutableSubstitution<Variable> descendingVar2Var,
                                                                                  ImmutableSet<Variable> aggregationVariables) {
         // Substitution value -> substitution keys
-        ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.entrySet().stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        Map.Entry::getValue,
-                        Map.Entry::getKey));
+        ImmutableMap<Variable, Collection<Variable>> inverse = descendingVar2Var.inverseMap();
 
         // Variables whose entries are blocked
-        ImmutableSet<Variable> blockedVariables = invertedMultimap.asMap().entrySet().stream()
+        ImmutableSet<Variable> blockedVariables = inverse.entrySet().stream()
                 .flatMap(e -> extractBlockedDomainVars(e.getKey(), e.getValue(), aggregationVariables))
                 .collect(ImmutableCollectors.toSet());
 

@@ -312,7 +312,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> decompositionMap =
                     simplifiedSubstitution.builder()
                             .restrictRangeTo(ImmutableFunctionalTerm.class)
-                            .toMapWithoutOptional(this::decomposeFunctionalTerm);
+                            .toMapWithoutOptional((v, t) -> decomposeFunctionalTerm(t));
 
             ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -50,12 +51,10 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                         .restrictRangeTo(Variable.class)
                         .restrict((v, t) -> !projectedVariables.contains(t))
                         .build()
-                        .entrySet().stream()
+                        .inverseMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getValue,
                                 Map.Entry::getKey,
-                                // In case of key conflict, choose anyone of them
-                                (v1, v2) -> v1)));
+                                e -> e.getValue().iterator().next())));
 
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.compose(downRenamingSubstitution, reducedAscendingSubstitution).builder()
                 .restrictDomainTo(projectedVariables)
