@@ -304,10 +304,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      */
     private Stream<ImmutableSet<Variable>> extractTransformedUniqueConstraint(ImmutableSet<Variable> childConstraint,
                                                                               VariableNullability variableNullability) {
-        Stream<ImmutableSet<Variable>> atomicConstraints = substitution.entrySet().stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                .filter(e -> isAtomicConstraint((ImmutableFunctionalTerm)e.getValue(), childConstraint, variableNullability))
-                .map(Map.Entry::getKey)
+        Stream<ImmutableSet<Variable>> atomicConstraints = substitution.builder()
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .restrict((v, t) -> isAtomicConstraint(t, childConstraint, variableNullability))
+                .build()
+                .getDomain().stream()
                 .map(ImmutableSet::of);
 
         Stream<ImmutableSet<Variable>> duplicatedConstraints = extractDuplicatedConstraints(childConstraint);

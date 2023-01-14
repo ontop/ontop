@@ -68,10 +68,9 @@ public class IQTreeTools {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
         ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
-        ImmutableSet<Map.Entry<Variable, Variable>> var2VarMap = var2VarFragment.entrySet();
 
-        int size = descendingSubstitution.entrySet().size();
-        if (var2VarMap.size() != size)
+        int size = descendingSubstitution.getDomain().size();
+        if (var2VarFragment.getDomain().size() != size)
             return Optional.empty();
 
         ImmutableSet<Variable> coDomain = var2VarFragment.getRange().stream()

@@ -152,8 +152,7 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = IntStream.range(0, groupCount.get())
                 .mapToObj(i -> i < groupList.size()
-                        ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i)))
-                            .immutableCopy()
+                        ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i))).immutableCopy()
                         : ImmutableSet.copyOf(newVariableMultimap.get(i)))
                 .collect(ImmutableCollectors.toSet());
 

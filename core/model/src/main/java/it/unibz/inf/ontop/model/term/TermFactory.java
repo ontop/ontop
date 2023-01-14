@@ -516,7 +516,7 @@ public interface TermFactory {
 	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
-	 * TODO: find a better name
+	 * TODO: find a better name
 	 *
 	 */
 	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,

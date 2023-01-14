@@ -322,13 +322,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 
     ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
-        ImmutableMap<Variable, VariableOrGroundTerm> equalities = cq.equalities.entrySet().stream()
-                .filter(e -> e.getKey() != e.getValue())
-                .collect(ImmutableCollectors.toMap(e -> (Variable)e.getKey(), Map.Entry::getValue));
 
-        ImmutableSubstitution s = substitutionFactory.getSubstitution(equalities);
+        ImmutableSubstitution<Variable> s = substitutionFactory.getSubstitutionFromStream(
+                cq.equalities.entrySet().stream()
+                        // the check needs to be done before cast: equalities can contain a = a
+                        .filter(e -> e.getKey() != e.getValue()),
+                e -> (Variable)e.getKey(),
+                e -> (Variable)e.getValue());
 
-	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
+	    return new ImmutableCQ<>(
+                vars.stream()
+                        .map(v -> (Variable)s.applyToVariable(v))
+                        .collect(ImmutableCollectors.toList()),
+                ImmutableList.copyOf(cq.atoms));
     }
 
     private ImmutableList<IQTree> convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {

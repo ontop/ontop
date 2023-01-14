@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 
 /**
- * TODO: find a better name
+ * TODO: find a better name
  *
  * Minimal interface for a substitution
  *
