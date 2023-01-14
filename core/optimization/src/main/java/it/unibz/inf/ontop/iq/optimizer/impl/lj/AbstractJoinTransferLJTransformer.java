@@ -505,6 +505,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 Stream<ImmutableMultimap<? extends VariableOrGroundTerm, Variable>> replacementStream,
                 ImmutableSet<Variable> leftVariables,
                 TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+
             ImmutableMap<? extends VariableOrGroundTerm, Collection<Variable>> replacement = replacementStream
                     .flatMap(m -> m.entries().stream())
                     .collect(ImmutableCollectors.toMultimap()).asMap();

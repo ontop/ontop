@@ -25,17 +25,17 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     ImmutableMap<Variable, T> getImmutableMap();
 
-    default ImmutableSet<Map.Entry<Variable, T>> entrySet() { return getImmutableMap().entrySet(); }
+    ImmutableSet<Map.Entry<Variable, T>> entrySet();
 
-    default boolean isDefining(Variable variable) { return getImmutableMap().containsKey(variable); }
+    boolean isDefining(Variable variable);
 
-    default ImmutableSet<Variable> getDomain() { return getImmutableMap().keySet(); }
+    ImmutableSet<Variable> getDomain();
 
-    default ImmutableCollection<T> getRange() { return getImmutableMap().values(); }
+    ImmutableCollection<T> getRange();
 
-    default T get(Variable variable) { return getImmutableMap().get(variable); }
+    T get(Variable variable);
 
-    default boolean isEmpty() { return getImmutableMap().isEmpty(); }
+    boolean isEmpty();
 
     /**
      * Applies the substitution to an immutable term.

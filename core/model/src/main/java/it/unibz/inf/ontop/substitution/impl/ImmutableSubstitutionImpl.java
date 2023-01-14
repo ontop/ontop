@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -29,15 +26,46 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     protected final TermFactory termFactory;
     protected final ImmutableMap<Variable, T> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
-                                     TermFactory termFactory) {
+    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
-        if (substitutionMap.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
+        if (map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
             throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
-                    "(for efficiency reasons)\n. Substitution: " + substitutionMap);
+                    "(for efficiency reasons)\n. Substitution: " + map);
     }
+
+
+    @Override
+    public ImmutableSet<Map.Entry<Variable, T>> entrySet() {
+        return map.entrySet();
+    }
+
+    @Override
+    public  boolean isDefining(Variable variable) {
+        return map.containsKey(variable);
+    }
+
+    @Override
+    public  ImmutableSet<Variable> getDomain() {
+        return map.keySet();
+    }
+
+    @Override
+    public  ImmutableCollection<T> getRange() {
+        return map.values();
+    }
+
+    @Override
+    public  T get(Variable variable) {
+        return map.get(variable);
+    }
+
+    @Override
+    public  boolean isEmpty() {
+        return map.isEmpty();
+    }
+
 
 
     @Override
@@ -107,7 +135,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type) {
-        if (getImmutableMap().entrySet().stream()
+        if (entrySet().stream()
                 .anyMatch(e -> !type.isInstance(e.getValue())))
             throw new ClassCastException();
 
@@ -250,8 +278,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof ImmutableSubstitution) {
-            return getImmutableMap().equals(((ImmutableSubstitution<?>) other).getImmutableMap());
+        if (other instanceof ImmutableSubstitutionImpl) {
+            return map.equals(((ImmutableSubstitutionImpl<?>) other).map);
         }
         return false;
     }

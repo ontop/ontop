@@ -34,22 +34,23 @@ public class ImmutableSubstitutionTools {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> prioritizeRenaming(
             ImmutableSubstitution<T> substitution, ImmutableSet<Variable> priorityVariables) {
 
-        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.entrySet().stream()
-                .filter(e -> priorityVariables.contains(e.getKey())
-                        && (e.getValue() instanceof Variable)
-                        && (!priorityVariables.contains(e.getValue())))
+        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.builder()
+                .restrictDomainTo(priorityVariables)
+                .restrictRangeTo(Variable.class)
+                .build()
+                .entrySet().stream()
+                .filter(e -> !priorityVariables.contains(e.getValue()))
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> (Variable) e.getValue(),
+                        Map.Entry::getValue,
                         Map.Entry::getKey));
 
         if (renamingMultimap.isEmpty())
             return substitution;
 
-        ImmutableMap<Variable, Variable> renamingMap = renamingMultimap.asMap().entrySet().stream()
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMultimap.asMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()));
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMap);
+                        e -> e.getValue().iterator().next())));
 
         // TODO: refactor
         return (ImmutableSubstitution<T>) substitutionFactory.compose(renamingSubstitution, substitution);

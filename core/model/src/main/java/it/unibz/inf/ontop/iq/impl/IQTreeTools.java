@@ -62,23 +62,22 @@ public class IQTreeTools {
     }
 
     /**
-     * If the substitution is an fresh renaming, returns it as an injective substitution
+     * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableSet<Variable> projectedVariables) {
-        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
+    public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+                                                                       ImmutableSet<Variable> projectedVariables) {
 
+        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         int size = descendingSubstitution.getDomain().size();
-        if (var2VarFragment.getDomain().size() != size)
+
+        if (var2VarFragment.getDomain().size() != size
+                || var2VarFragment.getRange().stream()
+                        .filter(v -> !projectedVariables.contains(v))
+                        .distinct()
+                        .count()  != size)
             return Optional.empty();
 
-        ImmutableSet<Variable> coDomain = var2VarFragment.getRange().stream()
-                .filter(v -> !projectedVariables.contains(v))
-                .collect(ImmutableCollectors.toSet());
-        return (coDomain.size() == size)
-                ? Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarFragment.getImmutableMap()))
-                : Optional.empty();
+        return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarFragment.getImmutableMap()));
     }
 
 

@@ -31,15 +31,24 @@ public interface SubstitutionFactory {
 
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U, T> termProvider);
 
+    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2, Variable v3, T t3);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1, Variable v2, T t2, Variable v3, T t3, Variable v4, T t4);
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
+
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values);
 
    ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Set<Variable> variables);
+
+
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution();
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1);
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2);
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2, Variable v3, Variable t3);
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2, Variable v3, Variable t3, Variable v4, Variable t4);
+
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 

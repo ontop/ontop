@@ -74,9 +74,8 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
         // swap subjects and objects
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
-                ImmutableMap.of(
-                        originalSubject, newObject,
-                        originalObject, newSubject));
+                originalSubject, newObject,
+                originalObject, newSubject);
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
 
