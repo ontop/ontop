@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.substitution.impl;
 
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,34 +14,22 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
-public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements InjectiveVar2VarSubstitution {
-
-    private final ImmutableMap<Variable, Variable> map;
+public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<Variable> implements InjectiveVar2VarSubstitution {
 
     /**
      * Regular constructor
      */
     protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap,
                                                TermFactory termFactory) {
-        super(termFactory);
-        this.map = substitutionMap;
+        super(substitutionMap, termFactory);
 
-        if (!isInjective(substitutionMap))
+        if (!isInjective(this.map))
             throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
     }
 
     @Override
     public String toString() {
-        return Joiner.on(", ").withKeyValueSeparator("/").join(map);
-    }
-
-    @Override
-    public ImmutableMap<Variable, Variable> getImmutableMap() {
-        return map;
+        return "injective " + super.toString();
     }
 
     @Override
@@ -55,10 +42,6 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
         return arguments.stream()
                 .map(this::applyToTerm)
                 .collect(ImmutableCollectors.toList());
-    }
-
-    private InjectiveVar2VarSubstitution create(ImmutableMap<Variable, Variable> map) {
-        return new InjectiveVar2VarSubstitutionImpl(map, termFactory);
     }
 
     @Override
@@ -77,8 +60,7 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
     }
 
     @Override
-    public ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments)
-            throws ConversionException {
+    public ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments) throws ConversionException {
         ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
 
         if (!newArguments.stream().allMatch(t -> t instanceof Variable))
@@ -90,9 +72,9 @@ public class InjectiveVar2VarSubstitutionImpl extends AbstractImmutableSubstitut
 
     @Override
     public InjectiveVar2VarSubstitution restrictDomainTo(ImmutableSet<Variable> set) {
-        return create(entrySet().stream()
+        return new InjectiveVar2VarSubstitutionImpl(entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap()));
+                .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
     private static boolean isInjective(ImmutableMap<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
