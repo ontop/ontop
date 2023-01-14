@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -19,13 +21,38 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
-        extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
+public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> implements ImmutableSubstitution<T> {
 
 
-    protected AbstractImmutableSubstitutionImpl(TermFactory termFactory) {
-        super(termFactory);
+    protected final TermFactory termFactory;
+
+    protected AbstractImmutableSubstitutionImpl(TermFactory termFactory)  {
+        this.termFactory = termFactory;
     }
+
+    @Override
+    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+        if (isEmpty())
+            return functionalTerm;
+
+        ImmutableList<ImmutableTerm> subTerms = apply(functionalTerm.getTerms());
+
+        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+        // Distinguishes the BooleanExpression from the other functional terms.
+        return (functionSymbol instanceof BooleanFunctionSymbol)
+                ? termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, subTerms)
+                : termFactory.getImmutableFunctionalTerm(functionSymbol, subTerms);
+    }
+
+    @Override
+    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
+        if (isEmpty())
+            return booleanExpression;
+
+        return termFactory.getImmutableExpression(booleanExpression.getFunctionSymbol(),
+                apply(booleanExpression.getTerms()));
+    }
+
 
 
     @Override

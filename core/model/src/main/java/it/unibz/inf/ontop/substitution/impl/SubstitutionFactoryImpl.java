@@ -158,7 +158,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             return (ImmutableSubstitution)substitution1;
 
         ImmutableMap<Variable, T> map = Stream.of(substitution1, substitution2)
-                .map(ProtoSubstitution::entrySet)
+                .map(ImmutableSubstitution::entrySet)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (val1, val2) -> {

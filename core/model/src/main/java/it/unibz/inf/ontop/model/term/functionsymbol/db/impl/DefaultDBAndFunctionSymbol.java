@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -105,7 +105,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
      */
     private ImmutableList<ImmutableTerm> simplifyStrictEqConstant(ImmutableList<ImmutableTerm> terms, int i,
                                                                   TermFactory termFactory, VariableNullability variableNullability) {
-        Optional<ProtoSubstitution<NonNullConstant>> substitution = Optional.of(terms.get(i))
+        Optional<ImmutableSubstitution<NonNullConstant>> substitution = Optional.of(terms.get(i))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .filter(t -> t.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)

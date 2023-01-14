@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -513,7 +513,7 @@ public interface TermFactory {
 	 *
 	 * See the SubstitutionFactory for richer substitutions
 	 */
-	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
 	 * TODO: find a better name

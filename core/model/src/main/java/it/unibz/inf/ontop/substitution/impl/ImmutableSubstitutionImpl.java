@@ -14,8 +14,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     private final ImmutableMap<Variable, T> map;
 
-    protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
-                                        TermFactory termFactory) {
+    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
+                                     TermFactory termFactory) {
         super(termFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
