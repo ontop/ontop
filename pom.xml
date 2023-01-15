@@ -156,7 +156,7 @@
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
-        <opencsv.version>4.6</opencsv.version>
+        <opencsv.version>5.7.1</opencsv.version>
         <owlapi.version>5.1.20</owlapi.version>
         <owlapi-osgi.version>5.1.20</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
@@ -729,6 +729,12 @@
                 <artifactId>rdf4j-model-api</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>${opencsv.version}</version>
+            </dependency>
+
 
             <!-- Spring Boot -->
             <dependency>
