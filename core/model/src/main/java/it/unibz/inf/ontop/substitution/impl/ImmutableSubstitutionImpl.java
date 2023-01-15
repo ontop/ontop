@@ -58,6 +58,18 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     }
 
     @Override
+    public ImmutableSet<T> getRangeSet() {
+        return ImmutableSet.copyOf(map.values());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getRangeVariables() {
+        return getRange().stream()
+                .flatMap(ImmutableTerm::getVariableStream)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public  T get(Variable variable) {
         return map.get(variable);
     }

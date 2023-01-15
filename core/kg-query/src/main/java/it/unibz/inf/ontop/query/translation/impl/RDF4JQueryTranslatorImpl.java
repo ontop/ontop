@@ -386,13 +386,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
                                                             ImmutableSet<Variable> leftNullableVars, ImmutableSet<Variable> rightNullableVars) {
+
+        InjectiveVar2VarSubstitution sharedVarsSub = sub.restrictDomainTo(sharedVars);
+
         return termFactory.getConjunction(Stream.concat(
-                        sharedVars.stream()
-                                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars)),
-                        Stream.of(
-                                termFactory.getDisjunction(sharedVars.stream()
-                                        .map(v1 -> termFactory.getStrictEquality(v1, sub.get(v1)))
-                                        .collect(ImmutableCollectors.toList()))))
+                        sharedVarsSub.builder().transform((v, t) -> getEqOrNullable(v, t, leftNullableVars, rightNullableVars)).build().getRange().stream(),
+                        Stream.of(termFactory.getDisjunction(sharedVarsSub.builder()
+                                        .toStrictEqualities().collect(ImmutableCollectors.toList()))))
                 .collect(ImmutableCollectors.toList()));
     }
 

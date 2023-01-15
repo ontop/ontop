@@ -70,11 +70,6 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
-    @Override
-    public ImmutableSet<Variable> getRangeSet() {
-        return ImmutableSet.copyOf(map.values());
-    }
-
     static <T> boolean isInjective(ImmutableMap<Variable, T> map) {
         ImmutableCollection<T> values = map.values();
         return values.size() == ImmutableSet.copyOf(values).size();

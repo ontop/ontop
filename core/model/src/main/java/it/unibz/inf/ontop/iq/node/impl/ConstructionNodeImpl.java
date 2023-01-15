@@ -334,8 +334,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
         ImmutableSubstitution<Variable> fullRenaming = getSubstitution().builder()
+                .restrictRangeTo(Variable.class)
                 .restrict((v, t) -> childConstraint.contains(t))
-                .build(Variable.class);
+                .build();
 
         if (fullRenaming.isEmpty())
             return Stream.empty();

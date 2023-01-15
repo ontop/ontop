@@ -34,6 +34,10 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     ImmutableCollection<T> getRange();
 
+    ImmutableSet<T> getRangeSet();
+
+    ImmutableSet<Variable> getRangeVariables();
+
     T get(Variable variable);
 
     boolean isEmpty();
@@ -98,11 +102,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<? extends S> type);
 
-    default ImmutableSet<Variable> getRangeVariables() {
-        return getRange().stream()
-                .flatMap(ImmutableTerm::getVariableStream)
-                .collect(ImmutableCollectors.toSet());
-    }
 
     boolean isInjective();
 
@@ -123,9 +122,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type);
 
-        <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function);
+        <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function); // one occur can be simplified
 
-        <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
+        <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function); // make a shortcut
 
         <U> Builder<T> transformOrRetain(Function<Variable, U> lookup, BiFunction<T, U, T> function);
 
