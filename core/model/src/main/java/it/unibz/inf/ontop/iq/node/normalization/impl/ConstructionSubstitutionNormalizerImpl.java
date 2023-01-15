@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -13,10 +12,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -46,7 +43,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
 
-        InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverse(
+        InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
                 reducedAscendingSubstitution.builder()
                         .restrictRangeTo(Variable.class)
                         .restrict((v, t) -> !projectedVariables.contains(t))

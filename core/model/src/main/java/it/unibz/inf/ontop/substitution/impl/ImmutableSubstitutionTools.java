@@ -1,17 +1,11 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Tools for the new generation of (immutable) substitutions
@@ -44,7 +38,7 @@ public class ImmutableSubstitutionTools {
         if (renaming.isEmpty())
             return substitution;
 
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverse(renaming);
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
 
         // TODO: refactor
         return (ImmutableSubstitution<T>) substitutionFactory.compose(renamingSubstitution, substitution);

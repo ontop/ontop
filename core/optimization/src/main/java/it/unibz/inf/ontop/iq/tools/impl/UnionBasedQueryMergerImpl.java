@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.tools.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -63,13 +61,17 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 .skip(1)
                 .map(def -> {
                     // Updates the variable generator
-                    InjectiveVar2VarSubstitution disjointVariableSetRenaming = substitutionFactory.generateNotConflictingRenaming(
-                            variableGenerator, def.getTree().getKnownVariables());
+                    InjectiveVar2VarSubstitution disjointVariableSetRenaming =
+                            substitutionFactory.generateNotConflictingRenaming(variableGenerator, def.getTree().getKnownVariables());
 
-                    InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
-                            atomFactory.getDistinctVariableOnlyDataAtom(def.getProjectionAtom().getPredicate(),
-                                    disjointVariableSetRenaming.applyToVariableArguments(def.getProjectionAtom().getArguments())),
-                            projectionAtom);
+                    if (!def.getProjectionAtom().getPredicate().equals(projectionAtom.getPredicate()))
+                        throw new IllegalStateException("Bug: unexpected incompatible atoms");
+
+                    ImmutableList<Variable> sourceProjectionAtomArguments =
+                            disjointVariableSetRenaming.applyToVariableArguments(def.getProjectionAtom().getArguments());
+
+                    InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveVar2VarSubstitutionOf(
+                            substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
                             /*
@@ -98,14 +100,4 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }
 
-    private InjectiveVar2VarSubstitution computeRenamingSubstitution(DistinctVariableOnlyDataAtom sourceProjectionAtom,
-                                                                     DistinctVariableOnlyDataAtom targetProjectionAtom) {
-
-        if (!sourceProjectionAtom.getPredicate().equals(targetProjectionAtom.getPredicate()))
-            throw new IllegalStateException("Bug: unexpected incompatible atoms");
-
-        ImmutableSubstitution<Variable> newMap = substitutionFactory.getSubstitution(sourceProjectionAtom.getArguments(), targetProjectionAtom.getArguments());
-
-        return substitutionFactory.getInjectiveVar2VarSubstitution(newMap);
-    }
 }

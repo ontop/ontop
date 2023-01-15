@@ -464,13 +464,12 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                                     .map(variableGenerator::generateNewVariable)
                                     .orElseGet(variableGenerator::generateNewVariable)));
 
-            ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement = initialArgumentMap.entrySet().stream()
+            ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>> replacement = initialArgumentMap.entrySet().stream()
                     .filter(e -> !determinantIndexes.contains(e.getKey()))
-                    .filter(e -> !newArgumentMap.get(e.getKey()).equals(e.getValue()))
-                    .collect(ImmutableCollectors.toMultimap(
-                            Map.Entry::getValue,
-                            e -> (Variable) newArgumentMap.get(e.getKey())
-                    ));
+                    // newArgumentMap contains freshly generated variable names for the filter above
+                    //  so, below we have a substitution, whose domain consists of fresh variables
+                    .map(e -> Maps.<Variable, VariableOrGroundTerm>immutableEntry((Variable) newArgumentMap.get(e.getKey()), e.getValue()))
+                    .collect(ImmutableCollectors.toList());
 
             return new DataNodeAndReplacement(
                     iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap),
@@ -482,10 +481,10 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     protected static class DataNodeAndReplacement {
         public final ExtensionalDataNode extensionalDataNode;
         // Key: replaced argument, value: the replacing variable
-        public final ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement;
+        public final ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>> replacement;
 
         public DataNodeAndReplacement(ExtensionalDataNode extensionalDataNode,
-                                      ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement) {
+                                      ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>> replacement) {
             this.extensionalDataNode = extensionalDataNode;
             this.replacement = replacement;
         }
@@ -502,20 +501,25 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         }
 
         public static RenamingAndEqualities extract(
-                Stream<ImmutableMultimap<? extends VariableOrGroundTerm, Variable>> replacementStream,
+                Stream<ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>>> replacementStream,
                 ImmutableSet<Variable> leftVariables,
                 TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
-            ImmutableMap<? extends VariableOrGroundTerm, Collection<Variable>> replacement = replacementStream
-                    .flatMap(m -> m.entries().stream())
-                    .collect(ImmutableCollectors.toMultimap()).asMap();
+            // replacementStream is effectively a substitution: the domain is fresh variables (unique)
+            ImmutableSubstitution<VariableOrGroundTerm> replacementSub = substitutionFactory.getSubstitutionFromStream(
+                    replacementStream
+                            .flatMap(Collection::stream),
+                    Map.Entry::getKey,
+                    Map.Entry::getValue);
 
-            ImmutableMap<Variable, Variable> renamingSubstitutionMap = replacement.entrySet().stream()
-                    .filter(e -> e.getKey() instanceof Variable)
-                    .filter(e -> !leftVariables.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap(
-                            e -> (Variable) e.getKey(),
-                            e -> e.getValue().iterator().next()));
+            InjectiveVar2VarSubstitution renamingSubstitution =
+                    substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
+                            replacementSub.builder()
+                                    .restrictRangeTo(Variable.class)
+                                    .restrict((v, t) -> !leftVariables.contains(t))
+                                    .build());
+
+            ImmutableMap<VariableOrGroundTerm, Collection<Variable>> replacement = replacementSub.inverseMap();
 
             Stream<ImmutableExpression> newVarEqualities = replacement.values().stream()
                     .filter(variables -> variables.size() > 1)
@@ -535,9 +539,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                             groundTermEqualities)
                     .collect(ImmutableCollectors.toSet());
 
-            return new RenamingAndEqualities(
-                    substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitutionMap),
-                    equalities);
+            return new RenamingAndEqualities(renamingSubstitution, equalities);
         }
     }
 

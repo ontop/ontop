@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -75,7 +73,7 @@ public class IQTreeTools {
                         .count()  != size)
             return Optional.empty();
 
-        return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(var2VarFragment));
+        return Optional.of(substitutionFactory.injectiveVar2VarSubstitutionOf(var2VarFragment));
     }
 
 

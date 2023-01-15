@@ -135,18 +135,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getInjectiveVar2VarSubstitution(ImmutableMap.of(v1, t1, v2, t2, v3, t3, v4, t4));
     }
 
-    @Override
-    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
+    private InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
         return new InjectiveVar2VarSubstitutionImpl(substitutionMap, termFactory);
     }
 
     @Override
-    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableSubstitution<Variable> substitution) {
+    public InjectiveVar2VarSubstitution injectiveVar2VarSubstitutionOf(ImmutableSubstitution<Variable> substitution) {
         return getInjectiveVar2VarSubstitution(((ImmutableSubstitutionImpl<Variable>)substitution).getImmutableMap());
     }
 
     @Override
-    public InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverse(ImmutableSubstitution<Variable> substitution) {
+    public InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverseOf(ImmutableSubstitution<Variable> substitution) {
         return getInjectiveVar2VarSubstitution(
                 substitution.inverseMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(

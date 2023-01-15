@@ -50,11 +50,9 @@ public interface SubstitutionFactory {
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2, Variable v3, Variable t3, Variable v4, Variable t4);
 
 
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
+    InjectiveVar2VarSubstitution injectiveVar2VarSubstitutionOf(ImmutableSubstitution<Variable> substitution);
 
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableSubstitution<Variable> substitution);
-
-    InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverse(ImmutableSubstitution<Variable> substitution);
+    InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverseOf(ImmutableSubstitution<Variable> substitution);
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer);
 

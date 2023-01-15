@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -349,7 +348,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .flatMap(Collection::stream)
                 .map(comb -> fullRenaming.restrictDomainTo(ImmutableSet.copyOf(comb)))
                 .filter(ImmutableSubstitution::isInjective)
-                .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverse)
+                .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
                 .map(s -> childConstraint.stream()
                             .map(s::applyToVariable)
                             .collect(ImmutableCollectors.toSet()))
