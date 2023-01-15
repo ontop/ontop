@@ -349,12 +349,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .flatMap(Collection::stream)
                 .map(comb -> fullRenaming.restrictDomainTo(ImmutableSet.copyOf(comb)))
                 .filter(ImmutableSubstitution::isInjective)
-                // Inverse
-                .map(s -> substitutionFactory.getInjectiveVar2VarSubstitution(
-                        s.inverseMap().entrySet().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> e.getValue().iterator().next()))))
+                .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverse)
                 .map(s -> childConstraint.stream()
                             .map(s::applyToVariable)
                             .collect(ImmutableCollectors.toSet()))

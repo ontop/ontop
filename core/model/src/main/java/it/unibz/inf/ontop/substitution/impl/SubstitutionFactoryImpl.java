@@ -141,9 +141,28 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
+    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableSubstitution<Variable> substitution) {
+        return getInjectiveVar2VarSubstitution(((ImmutableSubstitutionImpl<Variable>)substitution).getImmutableMap());
+    }
+
+    @Override
+    public InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverse(ImmutableSubstitution<Variable> substitution) {
+        return getInjectiveVar2VarSubstitution(
+                substitution.inverseMap().entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().iterator().next())));
+    }
+
+    @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer) {
         ImmutableMap<Variable, Variable> map = stream.collect(ImmutableCollectors.toMap(v -> v, transformer));
         return getInjectiveVar2VarSubstitution(map);
+    }
+
+    @Override
+    public InjectiveVar2VarSubstitution getInjectiveFreshVar2VarSubstitution(Stream<Variable> stream, VariableGenerator variableGenerator) {
+        return getInjectiveVar2VarSubstitution(stream, variableGenerator::generateNewVariableFromVar);
     }
 
     /**
@@ -160,18 +179,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(ImmutableCollectors.toMap());
 
         return getInjectiveVar2VarSubstitution(newMap);
-    }
-
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> replace(ImmutableSubstitution<T> substitution, Variable variable, T newValue) {
-        if (!substitution.isDefining(variable))
-            throw new IllegalArgumentException("SubstitutionFactory.replace: variable " + variable + " is not defined by " + substitution);
-
-        return getSubstitution(Stream.concat(
-                        Stream.of(Maps.immutableEntry(variable, newValue)),
-                        substitution.entrySet().stream()
-                                .filter(e -> !e.getKey().equals(variable)))
-                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override

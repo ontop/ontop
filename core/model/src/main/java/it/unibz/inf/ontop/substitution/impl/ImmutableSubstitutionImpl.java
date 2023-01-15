@@ -295,8 +295,12 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     }
 
 
-    @Override
-    public ImmutableMap<Variable, T> getImmutableMap() {
+    /**
+     * NB: to be used only by the factory
+     *
+     * @return
+     */
+    ImmutableMap<Variable, T> getImmutableMap() {
         return map;
     }
 

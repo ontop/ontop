@@ -207,7 +207,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					Stream.concat(
 							getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
 							extractedObject.getVariableStream()),
-					toVariableRenamingMap(TMP_PREFIX));
+					v -> toVariableRenamingMap(TMP_PREFIX, v));
 
 			sourceQuery = getSQL(
 					sub.builder().toStream((v, t) -> getSelectClauseItem(TMP_PREFIX, v, t)),
@@ -217,11 +217,11 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		else {
 			sub = substitutionFactory.getInjectiveVar2VarSubstitution(
 					getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
-					toVariableRenamingMap(CHILD_PREFIX));
+					v -> toVariableRenamingMap(CHILD_PREFIX, v));
 
 			ob = substitutionFactory.getInjectiveVar2VarSubstitution(
 					extractedObject.getVariableStream(),
-					toVariableRenamingMap(PARENT_PREFIX));
+					v -> toVariableRenamingMap(PARENT_PREFIX, v));
 
 			sourceQuery = getSQL(
 					Stream.concat(
@@ -287,8 +287,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				Stream.concat(l1.stream(), l2.stream()).flatMap(ImmutableTerm::getVariableStream));
 	}
 
-	private Function<Variable, Variable> toVariableRenamingMap(String prefix) {
-		return v -> prefixAttributeName(prefix + "_", v);
+	private Variable toVariableRenamingMap(String prefix, Variable v) {
+		return prefixAttributeName(prefix + "_", v);
 	}
 
 	private Variable prefixAttributeName(String prefix, Variable var) {

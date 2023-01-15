@@ -276,11 +276,11 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(s -> s.get(variable))
                     .orElse(variable);
 
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
                     originalDefinition.getVariableStream()
                             .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
                             .distinct(),
-                    variableGenerator::generateNewVariableFromVar);
+                    variableGenerator);
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 

@@ -61,9 +61,9 @@ public class JoinLikeChildBindingLifter {
                 .flatMap(iq -> iq.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
-        InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
+        InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
                 Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream(),
-                variableGenerator::generateNewVariableFromVar);
+                variableGenerator);
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),

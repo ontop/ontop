@@ -69,8 +69,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
                             atomFactory.getDistinctVariableOnlyDataAtom(def.getProjectionAtom().getPredicate(),
                                     disjointVariableSetRenaming.applyToVariableArguments(def.getProjectionAtom().getArguments())),
-                            projectionAtom)
-                            .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
+                            projectionAtom);
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
                             /*
@@ -99,23 +98,14 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }
 
-    /**
-     * When such substitution DO NOT EXIST, returns an EMPTY OPTIONAL.
-     * When NO renaming is NEEDED returns an EMPTY SUBSTITUTION.
-     *
-     */
-    private Optional<InjectiveVar2VarSubstitution> computeRenamingSubstitution(
-            DistinctVariableOnlyDataAtom sourceProjectionAtom,
-            DistinctVariableOnlyDataAtom targetProjectionAtom) {
+    private InjectiveVar2VarSubstitution computeRenamingSubstitution(DistinctVariableOnlyDataAtom sourceProjectionAtom,
+                                                                     DistinctVariableOnlyDataAtom targetProjectionAtom) {
 
-        if (!sourceProjectionAtom.getPredicate().equals(targetProjectionAtom.getPredicate())
-                || (sourceProjectionAtom.getEffectiveArity() != targetProjectionAtom.getEffectiveArity())) {
-            return Optional.empty();
-        }
-        else {
-            ImmutableSubstitution<Variable> newMap = substitutionFactory.getSubstitution(sourceProjectionAtom.getArguments(), targetProjectionAtom.getArguments());
+        if (!sourceProjectionAtom.getPredicate().equals(targetProjectionAtom.getPredicate()))
+            throw new IllegalStateException("Bug: unexpected incompatible atoms");
 
-            return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(newMap.getImmutableMap()));
-        }
+        ImmutableSubstitution<Variable> newMap = substitutionFactory.getSubstitution(sourceProjectionAtom.getArguments(), targetProjectionAtom.getArguments());
+
+        return substitutionFactory.getInjectiveVar2VarSubstitution(newMap);
     }
 }

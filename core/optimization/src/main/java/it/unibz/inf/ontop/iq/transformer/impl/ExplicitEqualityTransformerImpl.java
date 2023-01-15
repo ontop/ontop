@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multiset;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -141,11 +138,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .collect(ImmutableCollectors.toSet());
 
             return children.stream()
-                    .map(t -> substitutionFactory.getInjectiveVar2VarSubstitution(
-                                        t.getVariables().stream()
-                                                .filter(repeatedVariables::contains)
+                    .map(t -> substitutionFactory.getInjectiveFreshVar2VarSubstitution(
+                                        Sets.intersection(t.getVariables(), repeatedVariables).stream()
                                                 .filter(v -> !isFirstOcc(v, children, t)),
-                                        variableGenerator::generateNewVariableFromVar))
+                                        variableGenerator))
                     .collect(ImmutableCollectors.toList());
         }
 

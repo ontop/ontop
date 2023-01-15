@@ -52,12 +52,16 @@ public interface SubstitutionFactory {
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableSubstitution<Variable> substitution);
+
+    InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverse(ImmutableSubstitution<Variable> substitution);
+
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer);
+
+    InjectiveVar2VarSubstitution getInjectiveFreshVar2VarSubstitution(Stream<Variable> stream, VariableGenerator variableGenerator);
 
     InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
                                                                 ImmutableSet<Variable> variables);
-
-    <T extends ImmutableTerm> ImmutableSubstitution<T> replace(ImmutableSubstitution<T> substitution, Variable variable, T newValue);
 
     /**
      *

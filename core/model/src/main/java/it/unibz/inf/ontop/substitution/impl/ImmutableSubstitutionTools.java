@@ -35,20 +35,16 @@ public class ImmutableSubstitutionTools {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> prioritizeRenaming(
             ImmutableSubstitution<T> substitution, ImmutableSet<Variable> priorityVariables) {
 
-        ImmutableMap<Variable, Collection<Variable>> renamingMultimap = substitution.builder()
+        ImmutableSubstitution<Variable> renaming = substitution.builder()
                 .restrictDomainTo(priorityVariables)
                 .restrictRangeTo(Variable.class)
                 .restrict((v, t) -> !priorityVariables.contains(t))
-                .build()
-                .inverseMap();
+                .build();
 
-        if (renamingMultimap.isEmpty())
+        if (renaming.isEmpty())
             return substitution;
 
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMultimap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next())));
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverse(renaming);
 
         // TODO: refactor
         return (ImmutableSubstitution<T>) substitutionFactory.compose(renamingSubstitution, substitution);

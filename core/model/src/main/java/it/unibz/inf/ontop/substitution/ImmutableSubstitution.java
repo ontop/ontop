@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  */
 public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
-    ImmutableMap<Variable, T> getImmutableMap();
-
     ImmutableSet<Map.Entry<Variable, T>> entrySet();
 
     boolean isDefining(Variable variable);
