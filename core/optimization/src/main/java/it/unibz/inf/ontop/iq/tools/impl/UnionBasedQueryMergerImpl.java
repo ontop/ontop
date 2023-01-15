@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -112,14 +113,9 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
             return Optional.empty();
         }
         else {
-            ImmutableMap<Variable, Variable> newMap = FunctionalTools.zip(
-                    sourceProjectionAtom.getArguments(),
-                    targetProjectionAtom.getArguments()).stream()
-                    .distinct()
-                    .filter(e -> !e.getKey().equals(e.getValue()))
-                    .collect(ImmutableCollectors.toMap());
+            ImmutableSubstitution<Variable> newMap = substitutionFactory.getSubstitution(sourceProjectionAtom.getArguments(), targetProjectionAtom.getArguments());
 
-            return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(newMap));
+            return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(newMap.getImmutableMap()));
         }
     }
 }

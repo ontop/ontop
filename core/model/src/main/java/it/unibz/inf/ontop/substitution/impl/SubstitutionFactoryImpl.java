@@ -97,8 +97,9 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         ImmutableMap<Variable, T> map = IntStream.range(0, variables.size())
                 .filter(i -> !variables.get(i).equals(values.get(i)))
-                .boxed()
-                .collect(ImmutableCollectors.toMap(variables::get, values::get));
+                .mapToObj(i -> Maps.<Variable, T>immutableEntry(variables.get(i), values.get(i)))
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
 
         return getSubstitution(map);
     }

@@ -529,8 +529,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                     .filter(e -> e.getKey() instanceof GroundTerm)
                     .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
 
-            ImmutableSet<ImmutableExpression> equalities = Stream.concat(
-                    Stream.concat(
+            ImmutableSet<ImmutableExpression> equalities = Stream.concat(Stream.concat(
                             newVarEqualities,
                             equalitiesWithLeftVariable),
                             groundTermEqualities)

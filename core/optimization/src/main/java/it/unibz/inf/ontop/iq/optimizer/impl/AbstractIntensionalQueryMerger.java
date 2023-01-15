@@ -111,9 +111,6 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
             if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
                 throw new IllegalStateException("Incompatible predicates");
             }
-            else if (sourceAtom.getEffectiveArity() != targetAtom.getEffectiveArity()) {
-                throw new IllegalStateException("Different arities");
-            }
 
             return substitutionFactory.getSubstitution(sourceAtom.getArguments(), targetAtom.getArguments());
         }

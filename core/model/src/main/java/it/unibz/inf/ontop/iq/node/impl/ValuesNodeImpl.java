@@ -375,8 +375,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return this;
         getVariableNullability();
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .filter(constants -> !((ImmutableExpression) substitutionFactory.getSubstitution(orderedVariables, constants)
-                        .apply(constraint))
+                .filter(constants -> !(substitutionFactory.getSubstitution(orderedVariables, constants)
+                        .applyToBooleanExpression(constraint))
                         .evaluate(variableNullability)
                         .isEffectiveFalse())
                 .collect(ImmutableCollectors.toList());
@@ -389,7 +389,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             Stream<ImmutableList<Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
                     ? values.stream()
                     : values.stream().distinct();
-
 
             possibleVariableDefinitions = distinctValuesStream
                     .map(row -> substitutionFactory.<NonVariableTerm>getSubstitution(orderedVariables, row))
