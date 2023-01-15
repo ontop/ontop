@@ -390,25 +390,28 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         InjectiveVar2VarSubstitution sharedVarsSub = sub.restrictDomainTo(sharedVars);
 
         return termFactory.getConjunction(Stream.concat(
-                        sharedVarsSub.builder().transform((v, t) -> getEqOrNullable(v, t, leftNullableVars, rightNullableVars)).build().getRange().stream(),
+                        sharedVarsSub.builder()
+                                .toStream((v, t) -> termFactory.getDisjunction(getEqOrNullable(v, t, leftNullableVars, rightNullableVars))),
                         Stream.of(termFactory.getDisjunction(sharedVarsSub.builder()
                                         .toStrictEqualities().collect(ImmutableCollectors.toList()))))
                 .collect(ImmutableCollectors.toList()));
     }
 
-    private ImmutableExpression getEqOrNullable(Variable leftVar, Variable renamedVar, ImmutableSet<Variable> leftNullableVars,
-                                   ImmutableSet<Variable> rightNullableVars) {
+    private ImmutableList<ImmutableExpression> getEqOrNullable(Variable leftVar, Variable renamedVar, ImmutableSet<Variable> leftNullableVars,
+                                                  ImmutableSet<Variable> rightNullableVars) {
 
-        List<ImmutableExpression> disjuncts = new ArrayList<>();
-        disjuncts.add(termFactory.getStrictEquality(leftVar, renamedVar));
+        ImmutableExpression equality = termFactory.getStrictEquality(leftVar, renamedVar);
 
         if (leftNullableVars.contains(leftVar)) {
-            disjuncts.add(termFactory.getDBIsNull(leftVar));
+            return rightNullableVars.contains(leftVar)
+                ? ImmutableList.of(equality, termFactory.getDBIsNull(leftVar), termFactory.getDBIsNull(renamedVar))
+                : ImmutableList.of(equality, termFactory.getDBIsNull(leftVar));
         }
-        if (rightNullableVars.contains(leftVar)) {
-            disjuncts.add(termFactory.getDBIsNull(renamedVar));
+        else {
+            return rightNullableVars.contains(leftVar)
+                ? ImmutableList.of(equality, termFactory.getDBIsNull(renamedVar))
+                : ImmutableList.of(equality);
         }
-        return termFactory.getDisjunction(ImmutableList.copyOf(disjuncts));
     }
 
 

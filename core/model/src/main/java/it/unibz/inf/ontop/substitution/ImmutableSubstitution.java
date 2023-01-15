@@ -134,6 +134,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         Stream<ImmutableExpression> toStrictEqualities();
 
+        <S> Stream<S> toStream(BiFunction<Variable, T, S> transformer);
+
         <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, T, S> transformer);
 
         <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, T, Optional<S>> transformer);

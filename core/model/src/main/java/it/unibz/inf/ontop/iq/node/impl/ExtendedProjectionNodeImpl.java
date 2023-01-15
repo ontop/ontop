@@ -210,12 +210,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Stream<ImmutableExpression> newConditionStream =
                 Stream.concat(
                         // tauF vs thetaBar
-                        tauF.restrictDomainTo(thetaBar.getDomain()).entrySet().stream()
-                                .map(e -> termFactory.getStrictEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
+                        tauF.builder()
+                                .restrictDomainTo(thetaBar.getDomain())
+                                .toStream((v, t) -> termFactory.getStrictEquality(thetaBar.apply(v), tauF.apply(t))),
                         // tauF vs newDelta
-                        tauF.restrictDomainTo(tauCPropagationResults.delta.getDomain()).entrySet().stream()
-                                .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
-                                        tauF.apply(e.getValue()))));
+                        tauF.builder()
+                                .restrictDomainTo(tauCPropagationResults.delta.getDomain())
+                                .toStream((v, t) -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(v), tauF.apply(t))));
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 

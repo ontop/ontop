@@ -263,7 +263,12 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
         @Override
         public Stream<ImmutableExpression> toStrictEqualities() {
-            return stream.map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
+            return toStream(termFactory::getStrictEquality);
+        }
+
+        @Override
+        public <S> Stream<S> toStream(BiFunction<Variable, B, S> transformer) {
+            return stream.map(e -> transformer.apply(e.getKey(), e.getValue()));
         }
 
         @Override

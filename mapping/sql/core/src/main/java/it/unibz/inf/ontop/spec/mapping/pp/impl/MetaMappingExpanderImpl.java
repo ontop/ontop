@@ -127,8 +127,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = substitutionFactory.replace(assertion.getTopSubstitution(), topVariable, instantiatedTemplate);
 
             IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                            termFactory.getConjunction(values.entrySet().stream()
-                                    .map(e -> termFactory.getNotYetTypedEquality(e.getKey(), e.getValue()))
+                            termFactory.getConjunction(values.builder()
+                                    .toStream(termFactory::getNotYetTypedEquality)
                                     .collect(ImmutableCollectors.toList()))),
                             assertion.getTopChild());
 

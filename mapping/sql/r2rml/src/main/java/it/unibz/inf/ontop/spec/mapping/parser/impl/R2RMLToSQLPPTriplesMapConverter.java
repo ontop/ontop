@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -210,9 +209,9 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							extractedObject.getVariableStream()),
 					toVariableRenamingMap(TMP_PREFIX));
 
-			sourceQuery = getSQL(sub.entrySet().stream()
-							.map(e -> Maps.immutableEntry(TMP_PREFIX + "." + e.getKey(), e.getValue())),
-					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), TMP_PREFIX)),
+			sourceQuery = getSQL(
+					sub.builder().toStream((v, t) -> getSelectClauseItem(TMP_PREFIX, v, t)),
+					Stream.of(getFromClauseItem(tm.getLogicalTable(), TMP_PREFIX)),
 					Stream.of());
 		}
 		else {
@@ -224,19 +223,19 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					extractedObject.getVariableStream(),
 					toVariableRenamingMap(PARENT_PREFIX));
 
-			sourceQuery = getSQL(Stream.concat(
-					sub.entrySet().stream()
-							.map(e -> Maps.immutableEntry(CHILD_PREFIX + "." + e.getKey(), e.getValue())),
-					ob.entrySet().stream()
-							.map(e -> Maps.immutableEntry(PARENT_PREFIX + "." + e.getKey(), e.getValue()))),
-					Stream.of(Maps.immutableEntry(tm.getLogicalTable(), CHILD_PREFIX),
-							Maps.immutableEntry(parent.getLogicalTable(), PARENT_PREFIX)),
+			sourceQuery = getSQL(
+					Stream.concat(
+							sub.builder().toStream((v, t) -> getSelectClauseItem(CHILD_PREFIX, v, t)),
+							ob.builder().toStream((v, t) -> getSelectClauseItem(PARENT_PREFIX, v, t))),
+					Stream.of(
+							getFromClauseItem(tm.getLogicalTable(), CHILD_PREFIX),
+							getFromClauseItem(parent.getLogicalTable(), PARENT_PREFIX)),
 					robm.getJoinConditions().stream()
-							.map(j -> Maps.immutableEntry(CHILD_PREFIX + "." + j.getChild(), PARENT_PREFIX + "." + j.getParent())));
+							.map(j -> getQualifiedName(CHILD_PREFIX, j.getChild()) + " = " + getQualifiedName(PARENT_PREFIX, j.getParent())));
 		}
 
 		ImmutableTerm subject = sub.apply(extractedSubject);
-		ImmutableList<ImmutableTerm>  graphs = extractedGraphs.stream()
+		ImmutableList<ImmutableTerm> graphs = extractedGraphs.stream()
 				.map(sub::apply)
 				.collect(ImmutableCollectors.toList());
 		ImmutableTerm object = ob.apply(extractedObject);
@@ -252,15 +251,24 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		return ppTriplesMap;
 	}
 
-	private static String getSQL(Stream<Map.Entry<String, Variable>> selectItems,
-								 Stream<Map.Entry<LogicalTable, String>> fromItems,
-								 Stream<Map.Entry<String, String>> whereClause) {
-		String condition = whereClause.map(e -> e.getKey() + " = " + e.getValue())
-				.collect(Collectors.joining(" AND "));
-		return "SELECT " + selectItems.map(e -> e.getKey() + " AS " + e.getValue().getName())
-				.collect(Collectors.joining(", ")) +
-				" FROM " + fromItems.map(e -> "(" + e.getKey().getSQLQuery().trim() + ") " + e.getValue())
-				.collect(Collectors.joining(", ")) +
+	private static String getSelectClauseItem(String tableAlias, Variable column, Variable alias) {
+		return getQualifiedName(tableAlias, column.getName()) + " AS " + alias.getName();
+	}
+
+	private static String getFromClauseItem(LogicalTable table, String tableAlias) {
+		return "(" + table.getSQLQuery().trim() + ") " + tableAlias;
+	}
+
+	private static String getQualifiedName(String tableAlias, String column) {
+		return tableAlias + "." + column;
+	}
+
+	private static String getSQL(Stream<String> selectItems, Stream<String> fromItems, Stream<String> whereClause) {
+
+		String condition = whereClause.collect(Collectors.joining(" AND "));
+
+		return "SELECT " + selectItems.collect(Collectors.joining(", ")) +
+				" FROM " + fromItems.collect(Collectors.joining(", ")) +
 				(condition.isEmpty() ? "" : " WHERE " + condition);
 	}
 
