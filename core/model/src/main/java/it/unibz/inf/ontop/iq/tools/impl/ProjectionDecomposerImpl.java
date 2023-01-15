@@ -66,17 +66,15 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
 
                 Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(childDecompositions);
 
-                ImmutableFunctionalTerm newFunctionalTerm = subSubstitution
-                        .map(s -> childDecompositions.stream()
-                                .map(d -> d.term)
-                                .collect(ImmutableCollectors.toList()))
-                        .map(children -> termFactory.getImmutableFunctionalTerm(
-                                functionalTerm.getFunctionSymbol(), children))
-                        .orElse(functionalTerm);
-
                 return subSubstitution
-                        .map(s -> new DefinitionDecomposition(newFunctionalTerm, s))
-                        .orElse(new DefinitionDecomposition(functionalTerm));
+                        .map(s -> new DefinitionDecomposition(
+                                termFactory.getImmutableFunctionalTerm(
+                                        functionalTerm.getFunctionSymbol(),
+                                        childDecompositions.stream()
+                                                .map(d -> d.term)
+                                                .collect(ImmutableCollectors.toList())),
+                                s))
+                        .orElseGet(() -> new DefinitionDecomposition(functionalTerm));
             }
             else {
                 Variable variable = definedVariable

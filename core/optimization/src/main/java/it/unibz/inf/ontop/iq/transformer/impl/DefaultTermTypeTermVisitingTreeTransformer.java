@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -120,10 +121,10 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .map(n -> (ConstructionNode)n)
                 .map(ConstructionNode::getSubstitution)
                 .filter(s -> !s.isEmpty())
-                .map(s -> s.builder().transform(this::replaceTypeTermConstants).build())
+                .map(s -> s.transform(this::replaceTypeTermConstants))
                 .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                 .filter(n -> !n.equals(child.getRootNode()))
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
                 .orElse(child);
     }
 
@@ -255,35 +256,25 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                                         ImmutableSet<Variable> metaTermTypeVariables,
                                         ImmutableSet<RDFTermTypeConstant> possibleConstants) {
 
-        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-        ImmutableList<ImmutableList<Constant>> values = valuesNode.getValues();
+        ImmutableSet<Variable> variables = ImmutableSet.copyOf(valuesNode.getOrderedVariables());
 
-        ImmutableMap<Variable, Variable> generatedVariableNamesMap = orderedVariables.stream().collect(ImmutableCollectors.toMap(
-                key -> key,
-                key -> variableGenerator.generateNewVariable()));
+        InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
+                metaTermTypeVariables.stream(),
+                v -> variableGenerator.generateNewVariable());
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
-                orderedVariables.stream()
-                        .map(variable -> metaTermTypeVariables.contains(variable)
-                                            ? generatedVariableNamesMap.get(variable)
-                                            : variable)
+                valuesNode.getOrderedVariables().stream()
+                        .map(renaming::applyToVariable)
                         .collect(ImmutableCollectors.toList()),
-                values.stream()
+                valuesNode.getValues().stream()
                         .map(tuple -> tuple.stream()
                                 .map(this::replaceTypeTermConstantWithFunctionalTerm)
                                 .collect(ImmutableCollectors.toList()))
                         .collect(ImmutableCollectors.toList()));
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(orderedVariables),
-                substitutionFactory.getSubstitution(
-                        metaTermTypeVariables,
-                        v -> v,
-                        v -> termFactory.getRDFTermTypeFunctionalTerm(
-                                generatedVariableNamesMap.get(v),
-                                dictionary,
-                                possibleConstants,
-                                false)));
+                variables,
+                renaming.transform(t -> termFactory.getRDFTermTypeFunctionalTerm(t, dictionary, possibleConstants, false)));
 
         return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);
     }
@@ -297,9 +288,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         else
             return constant;
     }
-
-
-
 
 
 

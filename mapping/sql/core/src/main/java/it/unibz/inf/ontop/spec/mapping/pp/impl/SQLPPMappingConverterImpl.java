@@ -111,7 +111,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.builder().transform(targetRenamingPart::apply).build();
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
 
         ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 

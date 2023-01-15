@@ -425,7 +425,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return shrunkChild;
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    substitution.builder().transform(t -> t.simplify(shrunkChild.getVariableNullability())).build(), projectedVariables);
+                    substitution.transform(t -> t.simplify(shrunkChild.getVariableNullability())),
+                    projectedVariables);
 
             Optional<ConstructionNode> newTopConstructionNode = normalization.generateTopConstructionNode();
 
@@ -475,10 +476,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution).builder()
-                        .transform(t -> t.simplify(grandChild.getVariableNullability())).build(),
-                projectedVariables
-        );
+                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution)
+                        .transform(t -> t.simplify(grandChild.getVariableNullability())),
+                projectedVariables);
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
 

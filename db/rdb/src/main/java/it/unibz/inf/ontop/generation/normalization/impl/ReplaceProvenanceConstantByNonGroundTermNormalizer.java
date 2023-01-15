@@ -66,7 +66,7 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
                     .map(v -> termFactory.getIfThenElse(termFactory.getDBIsNotNull(v),
                             termFactory.getDBStringConstant("placeholder1"),
                             termFactory.getDBStringConstant("placeholder2")))
-                    .map(t -> rightConstructionNode.getSubstitution().builder().transform(v -> v.equals(provenanceConstant) ? t : v).build())
+                    .map(t -> rightConstructionNode.getSubstitution().transform(v -> v.equals(provenanceConstant) ? t : v))
                     .map(s -> iqFactory.createConstructionNode(rightConstructionNode.getVariables(), s))
                     .map(c -> iqFactory.createUnaryIQTree(c, rightGrandChild))
                     .map(r -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild, r));

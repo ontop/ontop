@@ -510,7 +510,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
 
             ImmutableSubstitution<ImmutableTerm> liftableSubstitution = ljCondition
-                    .map(c -> rightSubstitution.builder().<ImmutableTerm>transform(t -> termFactory.getIfElseNull(c, t)).build())
+                    .map(c -> rightSubstitution.<ImmutableTerm>transform(t -> termFactory.getIfElseNull(c, t)))
                     .orElse(rightSubstitution);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(

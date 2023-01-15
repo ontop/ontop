@@ -31,13 +31,13 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         IQTree newChild = transform(child);
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder().transform(t -> transformTerm(t, child)).build();
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.transform(t -> transformTerm(t, child));
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
-                newChild);
+                        iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
+                        newChild);
     }
 
     @Override
@@ -45,13 +45,13 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
         IQTree newChild = transform(child);
 
         ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.builder().transform(t -> transformFunctionalTerm(t, child)).build();
+        ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.transform(t -> transformFunctionalTerm(t, child));
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution),
-                newChild);
+                        iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution),
+                        newChild);
     }
 
     @Override

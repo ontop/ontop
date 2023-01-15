@@ -42,6 +42,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     boolean isEmpty();
 
+    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
+
     /**
      * Applies the substitution to an immutable term.
      */
@@ -122,9 +124,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type);
 
-        <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function); // one occur can be simplified
+        <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function);
 
-        <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function); // make a shortcut
+        <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
 
         <U> Builder<T> transformOrRetain(Function<Variable, U> lookup, BiFunction<T, U, T> function);
 
