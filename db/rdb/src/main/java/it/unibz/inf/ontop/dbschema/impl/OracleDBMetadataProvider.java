@@ -89,7 +89,6 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "'DVSYS', " +
                         "'APPQOSSYS', " +
                         "'AUDSYS') AND " +
-                // System tables
                 "   NOT (owner = 'SYSTEM' AND table_name IN ('ROLLING$DIRECTIVES', " +
                         "'SCHEDULER_JOB_ARGS_TBL', " +
                         "'REDO_DB', " +
@@ -110,12 +109,25 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "'HELP', " +
                         "'ROLLING$STATUS' )) " +
                 "UNION ALL " +
-                "SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM, view_name as TABLE_NAME " +
-                "FROM user_views " +
+                "SELECT NULL AS TABLE_CAT, owner as TABLE_SCHEM, view_name as TABLE_NAME " +
+                "FROM all_views " +
                 "WHERE " +
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
-                "   NOT view_name LIKE 'AQ$_%'");
+                "   NOT view_name LIKE 'AQ$_%' AND " +
+                "   owner NOT IN ('SYS', " +
+                                "'GSMADMIN_INTERNAL', " +
+                                "'OUTLN', " +
+                                "'DBSNMP', " +
+                                "'DBSFWUSER', " +
+                                "'XDB', " +
+                                "'LBACSYS', " +
+                                "'DVSYS', " +
+                                "'APPQOSSYS', " +
+                                "'AUDSYS') AND " +
+                "   NOT (owner = 'SYSTEM' AND view_name IN ('SCHEDULER_PROGRAM_ARGS', " +
+                                "'SCHEDULER_JOB_ARGS', " +
+                                "'PRODUCT_PRIVS'))");
     }
 
     @Override
