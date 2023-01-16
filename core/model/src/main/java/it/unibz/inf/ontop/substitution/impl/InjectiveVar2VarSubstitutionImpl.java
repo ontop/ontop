@@ -65,7 +65,7 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
 
     @Override
     public InjectiveVar2VarSubstitution restrictDomainTo(ImmutableSet<Variable> set) {
-        return new InjectiveVar2VarSubstitutionImpl(entrySet().stream()
+        return new InjectiveVar2VarSubstitutionImpl(map.entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }

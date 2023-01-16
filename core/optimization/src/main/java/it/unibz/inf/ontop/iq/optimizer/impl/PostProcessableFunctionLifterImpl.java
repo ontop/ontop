@@ -272,8 +272,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(ConstructionNode::getSubstitution);
 
             ImmutableTerm originalDefinition = originalSubstitution
-                    .filter(s -> s.isDefining(variable))
-                    .map(s -> s.get(variable))
+                    .map(s -> s.applyToVariable(variable))
                     .orElse(variable);
 
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(

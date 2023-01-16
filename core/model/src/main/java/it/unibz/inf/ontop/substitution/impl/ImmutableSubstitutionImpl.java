@@ -144,21 +144,21 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set) {
-        return new ImmutableSubstitutionImpl<>(entrySet().stream()
+        return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<? extends S> type) {
-        return new ImmutableSubstitutionImpl<>(entrySet().stream()
+        return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> type.isInstance(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> type.cast(e.getValue()))), termFactory);
     }
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type) {
-        if (entrySet().stream()
+        if (map.entrySet().stream()
                 .anyMatch(e -> !type.isInstance(e.getValue())))
             throw new ClassCastException();
 
@@ -173,7 +173,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public Builder<T> builder() {
-        return new BuilderImpl<>(entrySet().stream(), termFactory);
+        return new BuilderImpl<>(map.entrySet().stream(), termFactory);
     }
 
     protected static class BuilderImpl<B extends ImmutableTerm> implements Builder<B> {
@@ -191,12 +191,12 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
         @Override
         public <S extends ImmutableTerm> ImmutableSubstitution<S> build(Class<S> type) {
-            ImmutableSubstitution<B> built = build();
-            if (built.entrySet().stream()
+            ImmutableMap<Variable, B> map = stream.collect(ImmutableCollectors.toMap());
+            if (map.entrySet().stream()
                     .anyMatch(e -> !type.isInstance(e.getValue())))
                 throw new ClassCastException();
 
-            return (ImmutableSubstitution<S>) built;
+            return new ImmutableSubstitutionImpl<>((ImmutableMap<Variable, S>)map, termFactory);
         }
 
         protected <S extends ImmutableTerm> Builder<S> create(Stream<Map.Entry<Variable, S>> stream) {

@@ -49,10 +49,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
                 ImmutableList<Variable> answerVariables = Stream.concat(
-                        constructionNode.getSubstitution().getRange().stream()
-                                .flatMap(ImmutableTerm::getVariableStream),
-                        rootNode.getOptionalFilterCondition()
-                                .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
+                                constructionNode.getSubstitution().getRange().stream(),
+                                rootNode.getOptionalFilterCondition().stream())
+                        .flatMap(ImmutableTerm::getVariableStream)
                         .distinct()
                         .collect(ImmutableCollectors.toList());
 
