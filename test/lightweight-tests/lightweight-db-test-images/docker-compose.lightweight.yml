@@ -4,7 +4,6 @@ services:
   pgsql:
     build: ./pgsql
     env_file: .env
-    container_name: ontop_pgsql_running
     ports:
       - "7777:5432"
     environment:
@@ -13,7 +12,6 @@ services:
   oracle:
     build: ./oracle
     env_file: .env
-    container_name: ontop_oracle_running
     ports:
       - "49160:8080"
       - "49161:1521"
@@ -22,7 +20,6 @@ services:
     #image: ontop_mssql_lightweight:v1
     build: ./mssql
     env_file: .env
-    container_name: ontop_mssql_running
     ports:
       - "1533:1433"
     environment:
@@ -33,7 +30,6 @@ services:
   mysql:
     build: ./mysql
     env_file: .env
-    container_name: ontop_mysql_lw_running
     ports:
       - "3694:3306"
     environment:
@@ -42,7 +38,6 @@ services:
   mariadb:
     build: ./mariadb
     env_file: .env
-    container_name: ontop_mariadb_lw_running
     ports:
       - "3694:3306"
     environment:
@@ -51,7 +46,6 @@ services:
   db2:
     build: ./db2
     env_file: .env
-    container_name: ontop_db2_lw_running
     privileged: true
     ports:
       - "50000:50000"
