@@ -57,7 +57,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new ImmutableUnificationTools(TERM_FACTORY, SUBSTITUTION_FACTORY);
+		unifier = new ImmutableUnificationTools(SUBSTITUTION_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
 	}
 

@@ -20,12 +20,10 @@ import java.util.stream.Stream;
 @Singleton
 public class ImmutableUnificationTools {
 
-    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    public ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        this.termFactory = termFactory;
+    public ImmutableUnificationTools(SubstitutionFactory substitutionFactory) {
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -39,11 +37,7 @@ public class ImmutableUnificationTools {
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
-        ImmutableMap<Variable, ImmutableTerm> sub = unify(ImmutableMap.of(), args1, args2);
-        if (sub == null)
-            return Optional.empty();
-
-        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap<Variable, T>)sub));
+        return (Optional)unify(substitutionFactory.getSubstitution(), args1, args2);
     }
 
     private Optional<ArgumentMapUnification> computeArgumentMapMGU(
@@ -169,32 +163,6 @@ public class ImmutableUnificationTools {
 
 
 
-
-    private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
-        if (term instanceof ImmutableFunctionalTerm)
-            return ((ImmutableFunctionalTerm)term).getTerms().stream()
-                    .anyMatch(t -> variableOccursInTerm(v, t));
-        return v.equals(term);
-    }
-
-    /**
-     * Recursive
-     */
-    private ImmutableTerm apply(ImmutableTerm t, ImmutableMap<Variable, ImmutableTerm> sub) {
-        if (sub.isEmpty())
-            return t;
-
-        if (t instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)t;
-            ImmutableList<ImmutableTerm> terms = f.getTerms().stream()
-                    .map(tt -> apply(tt, sub))
-                    .collect(ImmutableCollectors.toList());
-            return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), terms);
-        }
-        return sub.getOrDefault(t, t);
-    }
-
-
     /**
      * Creates a unifier for args1 and args2
      *
@@ -205,15 +173,16 @@ public class ImmutableUnificationTools {
      * @return true the substitution (of null if it does not)
      */
 
-    private ImmutableMap<Variable, ImmutableTerm> unify(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+    private <T> Optional<ImmutableSubstitution<ImmutableTerm>> unify(ImmutableSubstitution<ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
         if (args1.size() != args2.size())
-            return null;
+            return Optional.empty();
 
+        ImmutableSubstitution<ImmutableTerm> result = sub;
         int arity = args1.size();
         for (int i = 0; i < arity; i++) {
             // applying the computed substitution first
-            ImmutableTerm term1 = apply(args1.get(i), sub);
-            ImmutableTerm term2 = apply(args2.get(i), sub);
+            ImmutableTerm term1 = result.apply(args1.get(i));
+            ImmutableTerm term2 = result.apply(args2.get(i));
 
             if (term1.equals(term2))
                 continue;
@@ -223,32 +192,28 @@ public class ImmutableUnificationTools {
                 ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
                 ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
                 if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
-                    return null;
+                    return Optional.empty();
 
-                sub = unify(sub, f1.getTerms(), f2.getTerms());
-                if (sub == null)
-                    return null;
+                Optional<ImmutableSubstitution<ImmutableTerm>> resultForSubTerms = unify(result, f1.getTerms(), f2.getTerms());
+                if (resultForSubTerms.isEmpty())
+                    return Optional.empty();
+
+                result = resultForSubTerms.get();
             }
             else {
-                ImmutableMap<Variable, ImmutableTerm> s;
+                ImmutableSubstitution<ImmutableTerm> s;
                 // avoid unifying x with f(g(x))
-                if (term1 instanceof Variable && !variableOccursInTerm((Variable) term1, term2))
-                    s = ImmutableMap.of((Variable) term1, term2);
-                else if (term2 instanceof Variable && !variableOccursInTerm((Variable) term2, term1))
-                    s = ImmutableMap.of((Variable) term2, term1);
+                if (term1 instanceof Variable && term2.getVariableStream().noneMatch(term1::equals))
+                    s = substitutionFactory.getSubstitution((Variable) term1, term2);
+                else if (term2 instanceof Variable && term1.getVariableStream().noneMatch(term2::equals))
+                    s = substitutionFactory.getSubstitution((Variable) term2, term1);
                 else
-                    return null; // neither is a variable, impossible to unify distinct terms
+                    return Optional.empty(); // neither is a variable, impossible to unify distinct terms
 
-                sub = Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
-                                // The substitution for the current variable has become
-                                // trivial, e.g., x/x with the current composition. We
-                                // remove it to keep only a non-trivial unifier
-                                .filter(e -> !e.getValue().equals(e.getKey())))
-                        .collect(ImmutableCollectors.toMap());
+                result = substitutionFactory.compose(s, result);
             }
         }
-        return sub;
+        return Optional.of(result);
     }
 
 }

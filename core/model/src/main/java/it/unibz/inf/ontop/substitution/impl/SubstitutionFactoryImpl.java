@@ -28,8 +28,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
+    private <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
         return new ImmutableSubstitutionImpl<>(newSubstitutionMap, termFactory);
     }
 

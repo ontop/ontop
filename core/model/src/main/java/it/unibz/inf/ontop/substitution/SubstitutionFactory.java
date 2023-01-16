@@ -17,7 +17,6 @@ import java.util.stream.Stream;
  */
 public interface SubstitutionFactory {
 
-    <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap);
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider);
 
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider);
