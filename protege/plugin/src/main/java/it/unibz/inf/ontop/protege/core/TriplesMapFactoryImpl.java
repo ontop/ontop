@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
@@ -11,7 +10,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
@@ -20,13 +18,12 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 public class TriplesMapFactoryImpl implements TriplesMapFactory {
     private SQLPPMappingFactory ppMappingFactory;
     private TargetQueryParserFactory targetQueryParserFactory;
     private TargetAtomFactory targetAtomFactory;
-    private SubstitutionFactory substitutionFactory;
     private SQLPPSourceQueryFactory sourceQueryFactory;
     private TermFactory termFactory;
 
@@ -42,14 +39,13 @@ public class TriplesMapFactoryImpl implements TriplesMapFactory {
         Injector injector = configuration.getInjector();
         ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
         targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
-        substitutionFactory = injector.getInstance(SubstitutionFactory.class);
         targetQueryParserFactory = injector.getInstance(TargetQueryParserFactory.class);
         sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
     @Override
-    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableMap<Variable, ImmutableTerm> map) {
-        return targetAtomFactory.getTargetAtom(projectionAtom, substitutionFactory.getSubstitution(map));
+    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> sub) {
+        return targetAtomFactory.getTargetAtom(projectionAtom, sub);
     }
 
     @Override

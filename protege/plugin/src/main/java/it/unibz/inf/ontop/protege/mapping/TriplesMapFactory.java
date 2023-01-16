@@ -11,11 +11,12 @@ import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 public interface TriplesMapFactory {
 
-    TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableMap<Variable, ImmutableTerm> map);
+    TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> sub);
 
     SQLPPSourceQuery getSourceQuery(String query);
 
