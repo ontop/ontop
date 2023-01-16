@@ -20,7 +20,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
 
     @BeforeAll
     public static void before() {
-        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
+        initOBDA("/books/oracle/books-oracle.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll

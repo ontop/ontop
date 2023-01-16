@@ -156,7 +156,7 @@
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
-        <opencsv.version>4.6</opencsv.version>
+        <opencsv.version>5.7.1</opencsv.version>
         <owlapi.version>5.1.20</owlapi.version>
         <owlapi-osgi.version>5.1.20</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
@@ -168,7 +168,7 @@
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
-        <spring-boot.version>2.6.6</spring-boot.version>
+        <spring-boot.version>2.6.14</spring-boot.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -183,7 +183,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
+        <tomcat-embed-core.version>9.0.71</tomcat-embed-core.version>
         
         <!-- JDK version -->
         <jdk.version>11</jdk.version>
@@ -729,6 +729,12 @@
                 <artifactId>rdf4j-model-api</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>${opencsv.version}</version>
+            </dependency>
+
 
             <!-- Spring Boot -->
             <dependency>
