@@ -68,8 +68,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         stmt.closeOnCompletion();
         // Obtain the relational objects (i.e., tables and views)
         // filter out all irrelevant table and view names
-        return stmt.executeQuery("SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM, table_name as TABLE_NAME " +
-                "FROM user_tables " +
+        return stmt.executeQuery("SELECT NULL AS TABLE_CAT, OWNER as TABLE_SCHEM, table_name as TABLE_NAME " +
+                "FROM all_tables " +
                 "WHERE " +
                 "   NOT table_name LIKE 'MVIEW$_%' AND " +
                 "   NOT table_name LIKE 'LOGMNR_%' AND " +
@@ -77,14 +77,56 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                 "   NOT table_name LIKE 'DEF$_%' AND " +
                 "   NOT table_name LIKE 'REPCAT$_%' AND " +
                 "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
-                "   NOT table_name LIKE 'OL$%' " +
+                "   NOT table_name LIKE 'OL$%' AND" +
+                "   owner NOT IN ('SYS', " +
+                        "'GSMADMIN_INTERNAL', " +
+                        "'OUTLN', " +
+                        "'DBSNMP', " +
+                        "'DBSFWUSER', " +
+                        "'XDB', " +
+                        "'LBACSYS', " +
+                        "'DVSYS', " +
+                        "'APPQOSSYS', " +
+                        "'AUDSYS') AND " +
+                "   NOT (owner = 'SYSTEM' AND table_name IN ('ROLLING$DIRECTIVES', " +
+                        "'SCHEDULER_JOB_ARGS_TBL', " +
+                        "'REDO_DB', " +
+                        "'REDO_LOG', " +
+                        "'ROLLING$DATABASES', " +
+                        "'ROLLING$EVENTS', " +
+                        "'SCHEDULER_PROGRAM_ARGS', " +
+                        "'REPL_SUPPORT_MATRIX', " +
+                        "'ROLLING$PARAMETERS', " +
+                        "'ROLLING$STATISTICS', " +
+                        "'SCHEDULER_PROGRAM_ARGS_TBL', " +
+                        "'PRODUCT_PRIVS', " +
+                        "'SQLPLUS_PRODUCT_PROFILE', " +
+                        "'REPL_VALID_COMPAT', " +
+                        "'SCHEDULER_JOB_ARGS', " +
+                        "'ROLLING$CONNECTIONS', " +
+                        "'ROLLING$PLAN', " +
+                        "'HELP', " +
+                        "'ROLLING$STATUS' )) " +
                 "UNION ALL " +
-                "SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM, view_name as TABLE_NAME " +
-                "FROM user_views " +
+                "SELECT NULL AS TABLE_CAT, owner as TABLE_SCHEM, view_name as TABLE_NAME " +
+                "FROM all_views " +
                 "WHERE " +
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
-                "   NOT view_name LIKE 'AQ$_%'");
+                "   NOT view_name LIKE 'AQ$_%' AND " +
+                "   owner NOT IN ('SYS', " +
+                                "'GSMADMIN_INTERNAL', " +
+                                "'OUTLN', " +
+                                "'DBSNMP', " +
+                                "'DBSFWUSER', " +
+                                "'XDB', " +
+                                "'LBACSYS', " +
+                                "'DVSYS', " +
+                                "'APPQOSSYS', " +
+                                "'AUDSYS') AND " +
+                "   NOT (owner = 'SYSTEM' AND view_name IN ('SCHEDULER_PROGRAM_ARGS', " +
+                                "'SCHEDULER_JOB_ARGS', " +
+                                "'PRODUCT_PRIVS'))");
     }
 
     @Override
