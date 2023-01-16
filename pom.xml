@@ -74,12 +74,13 @@
         <module>mapping</module>
         <module>ontology</module>
         <module>test</module>
+        <module>protege</module>
     </modules>
 
     <scm>
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-        <tag>ontop-4.0.0</tag>
+        <tag>ontop-5.0.0</tag>
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 

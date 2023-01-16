@@ -7,7 +7,7 @@
     <!-- important: no parent declaration to Ontop-->
 
     <groupId>it.unibz.inf.ontop</groupId>
-    <artifactId>ontop-protege-parent</artifactId>
+    <artifactId>ontop-protege</artifactId>
     <version>5.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
