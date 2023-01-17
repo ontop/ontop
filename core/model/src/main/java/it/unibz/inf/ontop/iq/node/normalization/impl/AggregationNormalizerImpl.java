@@ -361,36 +361,25 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableList<? extends ImmutableTerm> arguments = functionalTerm.getTerms();
 
             // One entry per functional sub-term
-            ImmutableMap<Integer, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> subTermDecompositions =
+            ImmutableMap<Integer, ImmutableFunctionalTerm.FunctionalTermDecomposition> subTermDecompositions =
                     IntStream.range(0, arguments.size())
                     .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
                     .boxed()
                     .collect(ImmutableCollectors.toMap(
                             i -> i,
                             // Recursive
-                            i -> decomposeFunctionalTerm((ImmutableFunctionalTerm) arguments.get(i))));
+                            i -> getFunctionalTermDecomposition((ImmutableFunctionalTerm) arguments.get(i))));
 
             ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, arguments.size())
                     .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
-                            // Functional term
-                            .map(optionalDecomposition -> optionalDecomposition
-                                    // Injective functional sub-term
-                                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
-                                    // Otherwise a fresh variable
-                                    .orElseGet(variableGenerator::generateNewVariable))
+                            .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                             // Previous argument when non-functional
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
-                    .flatMap(e -> e.getValue()
-                            // Decomposition case
-                            .map(d -> d.getSubTermSubstitutionMap().stream()
-                                    .flatMap(s -> s.entrySet().stream()))
-                            // Not decomposed: new entry (new variable -> functional term)
-                            .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                    (Variable) newArguments.get(e.getKey()),
-                                    (ImmutableFunctionalTerm) arguments.get(e.getKey())))))
+            ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.values().stream()
+                    .flatMap(d -> d.getSubTermSubstitutionMap().stream())
+                    .flatMap(m -> m.entrySet().stream())
                     .collect(ImmutableCollectors.toMap());
 
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
@@ -398,6 +387,18 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             return subTermSubstitutionMap.isEmpty()
                     ? Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm))
                     : Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+        }
+
+        private ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
+
+            Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> optional = decomposeFunctionalTerm(arg);
+            // Injective functional sub-term
+            if (optional.isPresent())
+                return optional.get();
+
+            // Otherwise a fresh variable
+            Variable var = variableGenerator.generateNewVariable();
+            return termFactory.getFunctionalTermDecomposition(var, ImmutableMap.of(var, arg));
         }
 
 
