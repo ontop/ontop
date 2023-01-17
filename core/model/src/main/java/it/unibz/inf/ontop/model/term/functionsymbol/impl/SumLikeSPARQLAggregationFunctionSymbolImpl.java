@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.ConcreteNumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -80,7 +81,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         Optional<Variable> optionalIncompatibleCountVariable = optionalIncompatibleSubVariable
                 .map(v -> variableGenerator.generateNewVariable("nonNumCount"));
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap = computeSubstitutionMap(
+        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
                 numericAggregateVarMap, numericSubVarMap, optionalIncompatibleCountVariable,
                 optionalIncompatibleSubVariable, termFactory);
 
@@ -88,7 +89,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                 termFactory);
 
         return AggregationSimplification.create(
-                termFactory.getFunctionalTermDecomposition(liftableTerm, substitutionMap),
+                termFactory.getFunctionalTermDecomposition(liftableTerm, substitution),
                 pushDownRequests);
     }
 
@@ -129,7 +130,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         return DefinitionPushDownRequest.create(numericVariable, definition, condition);
     }
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> computeSubstitutionMap(
+    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(
             ImmutableMap<ConcreteNumericRDFDatatype, Variable> numericAggregateVarMap,
             ImmutableMap<ConcreteNumericRDFDatatype, Variable> numericSubTermVarMap, Optional<Variable> optionalIncompatibleCountVariable,
             Optional<Variable> optionalIncompatibleSubVariable, TermFactory termFactory) {
@@ -146,8 +147,8 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                 .map(v -> Maps.immutableEntry(v, termFactory.getDBCount(optionalIncompatibleSubVariable.get(), false)))
                 .stream();
 
-        return Stream.concat(numericAggregationStream, incompatibleEntryStream)
-                .collect(ImmutableCollectors.toMap());
+        return termFactory.getSubstitution(Stream.concat(numericAggregationStream, incompatibleEntryStream)
+                .collect(ImmutableCollectors.toMap()));
     }
 
     private ImmutableFunctionalTerm computeLiftableTerm(ImmutableMap<ConcreteNumericRDFDatatype, Variable> numericAggregateVarMap,

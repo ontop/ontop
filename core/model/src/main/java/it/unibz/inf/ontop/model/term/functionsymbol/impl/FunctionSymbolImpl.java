@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -19,12 +18,12 @@ import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -498,16 +497,14 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.values().stream()
-                    .flatMap(v -> v.getSubTermSubstitutionMap().stream())
+            ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(subTermDecompositions.values().stream()
+                    .map(FunctionalTermDecomposition::getSubstitution)
                     .flatMap(m -> m.entrySet().stream())
-                    .collect(ImmutableCollectors.toMap());
+                    .collect(ImmutableCollectors.toMap()));
 
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(FunctionSymbolImpl.this, newArguments);
 
-            return subTermSubstitutionMap.isEmpty()
-                    ? termFactory.getFunctionalTermDecomposition(newFunctionalTerm)
-                    : termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap);
+            return termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution);
         }
 
         private FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
@@ -519,7 +516,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
             // Otherwise a fresh variable
             Variable var = variableGenerator.generateNewVariable();
-            return termFactory.getFunctionalTermDecomposition(var, ImmutableMap.of(var, arg));
+            return termFactory.getFunctionalTermDecomposition(var, termFactory.getSubstitution(ImmutableMap.of(var, arg)));
         }
     }
 
@@ -533,7 +530,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         .collect(ImmutableCollectors.toSet()), termFactory);
 
         return analyzeInjectivity(arguments, ImmutableSet.of(), variableNullability, testVariableGenerator, termFactory)
-                .filter(d -> !d.getSubTermSubstitutionMap().isPresent())
+                .filter(d -> d.getSubstitution().isEmpty())
                 .isPresent();
     }
 

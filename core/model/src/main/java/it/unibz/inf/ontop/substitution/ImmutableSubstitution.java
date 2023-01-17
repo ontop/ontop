@@ -130,7 +130,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
 
-        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, T>>> function);
+        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, ImmutableSubstitution<T>> function);
 
         Stream<ImmutableExpression> toStrictEqualities();
 

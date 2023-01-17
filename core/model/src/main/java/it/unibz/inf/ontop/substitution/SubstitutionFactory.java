@@ -70,6 +70,8 @@ public interface SubstitutionFactory {
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2);
 
+    <T extends ImmutableTerm> ImmutableSubstitution<T> union(Stream<ImmutableSubstitution<? extends T>> substitutions);
+
     /**
      *  Viewing a substitution as a function (takes a term, returns a term).
      *  this method yield the substitution "(g o f)", where (g o f)(x) = g(f(x))

@@ -111,7 +111,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
+			ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution);
 
 
 
@@ -513,7 +513,7 @@ public interface TermFactory {
 	 *
 	 * See the SubstitutionFactory for richer substitutions
 	 */
-	<T extends ImmutableTerm> ImmutableSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
 	 * TODO: find a better name

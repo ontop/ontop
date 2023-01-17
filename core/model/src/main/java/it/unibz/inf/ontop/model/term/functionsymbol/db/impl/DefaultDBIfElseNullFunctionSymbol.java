@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -210,9 +211,9 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                 ImmutableFunctionalTerm newFunctionalTerm = termFactory.getIfElseNull(
                         termFactory.getIsTrue(newVariable),
                         thenValue);
-                ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = ImmutableMap.of(newVariable, thenCondition);
+                ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(ImmutableMap.of(newVariable, thenCondition));
 
-                return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+                return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution));
             }
 
         }

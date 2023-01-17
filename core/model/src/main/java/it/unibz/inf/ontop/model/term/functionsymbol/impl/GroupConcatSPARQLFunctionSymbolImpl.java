@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -111,7 +112,7 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
 
         ImmutableFunctionalTerm.FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
                 liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbAggTerm));
+                termFactory.getSubstitution(ImmutableMap.of(dbAggregationVariable, dbAggTerm)));
 
         return AggregationSimplification.create(decomposition);
     }
@@ -140,14 +141,14 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
         Variable strAggregateVar = variableGenerator.generateNewVariable("agg");
         Variable incompatibleCountVariable = variableGenerator.generateNewVariable("nonStrCount");
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap = computeSubstitutionMap(
+        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitutionMap(
                 strAggregateVar, stringSubVar, incompatibleCountVariable, incompatibleSubVariable, termFactory, separator);
 
         ImmutableFunctionalTerm liftableTerm = computeLiftableTerm(strAggregateVar, incompatibleCountVariable,
                 termFactory);
 
         return AggregationSimplification.create(
-                termFactory.getFunctionalTermDecomposition(liftableTerm, substitutionMap),
+                termFactory.getFunctionalTermDecomposition(liftableTerm, substitution),
                 pushDownRequests);
     }
 
@@ -181,13 +182,13 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
         return DefinitionPushDownRequest.create(nonStrVariable, definition, condition);
     }
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> computeSubstitutionMap(
+    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitutionMap(
             Variable strAggregateVar, Variable strSubTermVar, Variable incompatibleCountVariable,
             Variable incompatibleSubVariable, TermFactory termFactory, String separator) {
 
-        return ImmutableMap.of(
+        return termFactory.getSubstitution(ImmutableMap.of(
                 strAggregateVar, createAggregate(strSubTermVar, separator, termFactory),
-                incompatibleCountVariable, termFactory.getDBCount(incompatibleSubVariable, false));
+                incompatibleCountVariable, termFactory.getDBCount(incompatibleSubVariable, false)));
     }
 
     private ImmutableFunctionalTerm computeLiftableTerm(Variable strAggregateVar, Variable incompatibleCountVariable,

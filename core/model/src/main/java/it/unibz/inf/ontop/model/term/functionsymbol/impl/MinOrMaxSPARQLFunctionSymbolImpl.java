@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -137,7 +138,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
 
         ImmutableFunctionalTerm.FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
                 liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbAggTerm));
+                termFactory.getSubstitution(ImmutableMap.of(dbAggregationVariable, dbAggTerm)));
 
         return AggregationSimplification.create(decomposition);
     }
@@ -172,13 +173,13 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
                         t -> t,
                         t -> variableGenerator.generateNewVariable()));
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap = computeSubstitution(subVariableMap, aggregateMap,
+        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(subVariableMap, aggregateMap,
                 termFactory);
 
         ImmutableFunctionalTerm liftableTerm = computeLiftableTerm(aggregateMap, termFactory);
 
         return AggregationSimplification.create(
-                termFactory.getFunctionalTermDecomposition(liftableTerm, substitutionMap),
+                termFactory.getFunctionalTermDecomposition(liftableTerm, substitution),
                 pushDownRequests);
     }
 
@@ -202,13 +203,13 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
         return DefinitionPushDownRequest.create(newVariable, definition, condition);
     }
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> computeSubstitution(ImmutableMap<RDFTermType, Variable> subVariableMap,
+    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(ImmutableMap<RDFTermType, Variable> subVariableMap,
                                                                                 ImmutableMap<RDFTermType, Variable> aggregateMap,
                                                                                 TermFactory termFactory) {
-        return aggregateMap.entrySet().stream()
+        return termFactory.getSubstitution(aggregateMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getValue,
-                        e -> createAggregate(e.getKey(), subVariableMap.get(e.getKey()), termFactory)));
+                        e -> createAggregate(e.getKey(), subVariableMap.get(e.getKey()), termFactory))));
     }
 
     private ImmutableFunctionalTerm computeLiftableTerm(ImmutableMap<RDFTermType, Variable> aggregateMap,

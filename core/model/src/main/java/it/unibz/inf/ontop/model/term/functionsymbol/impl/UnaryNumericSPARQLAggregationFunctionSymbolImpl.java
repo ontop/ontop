@@ -147,7 +147,7 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
 
         ImmutableFunctionalTerm.FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
                 liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbAggTerm));
+                termFactory.getSubstitution(ImmutableMap.of(dbAggregationVariable, dbAggTerm)));
 
         return AggregationSimplification.create(decomposition);
     }

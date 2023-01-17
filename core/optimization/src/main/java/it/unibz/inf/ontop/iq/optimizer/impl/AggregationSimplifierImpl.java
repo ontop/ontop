@@ -93,7 +93,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                             .toMapWithoutOptional((v, t) -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = initialSubstitution.builder()
-                            .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubTermSubstitutionMap())
+                            .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubstitution())
                             .build();
 
             AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);

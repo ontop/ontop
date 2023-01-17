@@ -309,17 +309,15 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
     		ImmutableTerm liftableTerm) {
-		return new FunctionalTermDecompositionImpl(liftableTerm);
+		return new FunctionalTermDecompositionImpl(liftableTerm, getSubstitution(ImmutableMap.of()));
     }
 
 	@Override
 	public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
+			ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution) {
 
-		return (subTermSubstitutionMap.isEmpty())
-				? getFunctionalTermDecomposition(liftableTerm)
-				: new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitutionMap);
+		return new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitution);
 	}
 
 	@Override
@@ -450,7 +448,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public <T extends ImmutableTerm> ImmutableSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map) {
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> map) {
 		return new ImmutableSubstitutionImpl<>(map, this);
 	}
 

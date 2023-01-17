@@ -201,6 +201,22 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getSubstitution(map);
     }
 
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(Stream<ImmutableSubstitution<? extends T>> substitutions) {
+
+        ImmutableMap<Variable, T> map = substitutions
+                .map(ImmutableSubstitution::entrySet)
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (val1, val2) -> {
+                            if (!val1.equals(val2))
+                                throw new IllegalArgumentException("Substitutions do not agree on one of the variables");
+                            return val1;
+                        }));
+
+        return getSubstitution(map);
+    }
+
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
                                                            ImmutableSet<Variable> variables) {
 

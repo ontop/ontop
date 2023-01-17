@@ -259,11 +259,11 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         }
 
         @Override
-        public <U> Builder<B> flatTransform(Function<Variable, U> lookup, Function<U, Optional<ImmutableMap<Variable, B>>> function) {
+        public <U> Builder<B> flatTransform(Function<Variable, U> lookup, Function<U, ImmutableSubstitution<B>> function) {
             return create(stream
                     .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
-                            .map(u -> function.apply(u).stream()
-                                    .flatMap(s -> s.entrySet().stream()))
+                            .map(function)
+                            .map(s -> s.entrySet().stream())
                             .orElseGet(() -> Stream.of(e))));
         }
 
@@ -291,7 +291,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
                     .map(Optional::get)
                     .collect(ImmutableCollectors.toMap());
         }
-
     }
 
 

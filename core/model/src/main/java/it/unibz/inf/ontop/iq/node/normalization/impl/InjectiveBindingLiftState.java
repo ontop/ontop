@@ -128,7 +128,7 @@ public class InjectiveBindingLiftState {
 
         ImmutableSubstitution<ImmutableFunctionalTerm> newChildSubstitution =  childSubstitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                 .build();
 
         Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)

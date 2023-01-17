@@ -123,7 +123,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                                 .map(t -> (NonNullConstant) t)
                                 .findAny()
                                 .get()))
-                .map(termFactory::getProtoSubstitution);
+                .map(termFactory::getSubstitution);
 
         return substitution
                 .map(s -> IntStream.range(0, terms.size())

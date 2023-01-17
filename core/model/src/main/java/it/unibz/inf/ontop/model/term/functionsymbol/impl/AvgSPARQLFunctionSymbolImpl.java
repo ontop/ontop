@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -111,7 +112,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
                         t -> variableGenerator.generateNewVariable("count1")));
 
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap = computeSubstitutionMap(
+        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
                 optionalNumAvgVariable, optionalNumSubVariable,
                 optionalIncompatibleCountVariable, optionalIncompatibleSubVariable,
                 floatAndDoubleNumVariableMap, floatAndDoubleCountVariableMap,
@@ -121,7 +122,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
                 optionalIncompatibleCountVariable, termFactory);
 
         return AggregationSimplification.create(
-                termFactory.getFunctionalTermDecomposition(liftableTerm, substitutionMap),
+                termFactory.getFunctionalTermDecomposition(liftableTerm, substitution),
                 pushDownRequests);
     }
 
@@ -184,13 +185,13 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         return DefinitionPushDownRequest.create(numericVariable, decimalDefinition, condition);
     }
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> computeSubstitutionMap(Optional<Variable> optionalNumAvgVariable,
-                                                                                   Optional<Variable> optionalNumSubVariable,
-                                                                                   Optional<Variable> optionalIncompatibleCountVariable,
-                                                                                   Optional<Variable> optionalIncompatibleSubVariable,
-                                                                                   ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleNumVariableMap,
-                                                                                   ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleCountVariableMap,
-                                                                                   TermFactory termFactory) {
+    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(Optional<Variable> optionalNumAvgVariable,
+                                                                               Optional<Variable> optionalNumSubVariable,
+                                                                               Optional<Variable> optionalIncompatibleCountVariable,
+                                                                               Optional<Variable> optionalIncompatibleSubVariable,
+                                                                               ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleNumVariableMap,
+                                                                               ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleCountVariableMap,
+                                                                               TermFactory termFactory) {
 
         ConcreteNumericRDFDatatype xsdDecimal = termFactory.getTypeFactory().getXsdDecimalDatatype();
         
@@ -211,12 +212,12 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
                         e.getValue(),
                         termFactory.getDBCount(floatAndDoubleNumVariableMap.get(e.getKey()), false)));
 
-        return Stream.concat(
+        return termFactory.getSubstitution(Stream.concat(
                 floatDoubleCountStream,
                 Stream.of(avgEntryStream, incompatibleEntry)
                         .filter(Optional::isPresent)
                         .map(Optional::get))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toMap()));
     }
 
     private ImmutableFunctionalTerm computeLiftableTerm(Optional<Variable> optionalNumAvgVariable,

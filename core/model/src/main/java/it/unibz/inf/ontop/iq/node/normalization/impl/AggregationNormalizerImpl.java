@@ -323,7 +323,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = simplifiedSubstitution.builder()
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
-                    .flatTransform(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubTermSubstitutionMap)
+                    .flatTransform(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                     .build();
 
             if (liftedSubstitution.isEmpty())
@@ -377,16 +377,14 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.values().stream()
-                    .flatMap(d -> d.getSubTermSubstitutionMap().stream())
-                    .flatMap(m -> m.entrySet().stream())
-                    .collect(ImmutableCollectors.toMap());
+            ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution =
+                    substitutionFactory.union(
+                            subTermDecompositions.values().stream()
+                                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution));
 
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
 
-            return subTermSubstitutionMap.isEmpty()
-                    ? Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm))
-                    : Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+            return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution));
         }
 
         private ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
@@ -398,7 +396,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // Otherwise a fresh variable
             Variable var = variableGenerator.generateNewVariable();
-            return termFactory.getFunctionalTermDecomposition(var, ImmutableMap.of(var, arg));
+            return termFactory.getFunctionalTermDecomposition(var, substitutionFactory.getSubstitution(var, arg));
         }
 
 
