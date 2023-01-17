@@ -139,6 +139,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return tree;
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof SliceNode) {
+            // recursive
             return iqFactory.createUnaryIQTree((SliceNode) rootNode, replaceRDFByDBTerms(tree, rdfTypes));
         }
         else if (rootNode instanceof ConstructionNode) {
@@ -149,8 +150,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution),
-                    ((UnaryIQTree)tree).getChild()
-            );
+                    ((UnaryIQTree)tree).getChild());
         }
         else
             throw new MinorOntopInternalBugException("Unexpected tree shape " +

@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -232,46 +233,63 @@ public class VariableNullabilityImpl implements VariableNullability {
     private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
-        ImmutableTable<Variable, Integer, Variable> subTermNames = substitution
+        ImmutableMap<Variable, SplitImmutableFunctionalTerm> subTermNames = substitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .entrySet().stream()
-                .flatMap(e -> {
-                    ImmutableFunctionalTerm def = e.getValue();
-                    return IntStream.range(0, def.getArity())
-                            .filter(i -> def.getTerm(i) instanceof ImmutableFunctionalTerm)
-                            .mapToObj(i -> Tables.immutableCell(e.getKey(), i, variableGenerator.generateNewVariable()));
-                })
-                .collect(ImmutableCollectors.toTable());
+                .toMap((v, t) -> new SplitImmutableFunctionalTerm(t, variableGenerator));
 
-        if (subTermNames.isEmpty())
+        if (subTermNames.values().stream().allMatch(SplitImmutableFunctionalTerm::isEmpty))
             return Stream.of(substitution);
 
         ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution.builder()
-                .transform((v, t) -> {
-                            ImmutableMap<Integer, Variable> indexes = subTermNames.row(v);
-                            if (indexes.isEmpty())
-                                return t;
+                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .transformOrRetain(subTermNames::get, (t, split) -> split.getSplitTerm())
+                .build(ImmutableTerm.class);
 
-                            ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) t;
-                            ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                    .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(indexes.get(i))
-                                            .orElseGet(() -> def.getTerm(i)))
-                                    .collect(ImmutableCollectors.toList());
-
-                            return termFactory.getImmutableFunctionalTerm(def.getFunctionSymbol(), newArgs);
-                        })
-                .build();
-
-        //noinspection DataFlowIssue
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(
-                subTermNames.cellSet(),
-                Table.Cell::getValue,
-                c -> ((ImmutableFunctionalTerm) substitution.get(c.getRowKey())).getTerm(c.getColumnKey()));
+        ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.union(
+                subTermNames.values().stream()
+                        .map(SplitImmutableFunctionalTerm::getSubstitution));
 
         return Stream.concat(
                 // Recursive
                 splitSubstitution(childSubstitution, variableGenerator),
                 Stream.of(parentSubstitution));
+    }
+
+    private final class SplitImmutableFunctionalTerm {
+        final ImmutableFunctionalTerm term;
+        final ImmutableMap<Integer, Variable> map;
+
+        SplitImmutableFunctionalTerm(ImmutableFunctionalTerm term, VariableGenerator variableGenerator) {
+            this.term = term;
+
+            this.map = IntStream.range(0, term.getArity())
+                    .filter(i -> term.getTerm(i) instanceof ImmutableFunctionalTerm)
+                    .mapToObj(i -> Maps.immutableEntry(i, variableGenerator.generateNewVariable()))
+                    .collect(ImmutableCollectors.toMap());
+        }
+
+        ImmutableFunctionalTerm getSplitTerm() {
+            if (isEmpty())
+                return term;
+
+            ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, term.getArity())
+                    .mapToObj(i -> Optional.<ImmutableTerm>ofNullable(map.get(i))
+                            .orElseGet(() -> term.getTerm(i)))
+                    .collect(ImmutableCollectors.toList());
+
+            return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), newArgs);
+        }
+
+        ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+            return substitutionFactory.getSubstitutionFromStream(
+                    map.entrySet().stream(),
+                    Map.Entry::getValue,
+                    e -> term.getTerm(e.getKey()));
+        }
+
+        boolean isEmpty() {
+            return map.isEmpty();
+        }
     }
 
 

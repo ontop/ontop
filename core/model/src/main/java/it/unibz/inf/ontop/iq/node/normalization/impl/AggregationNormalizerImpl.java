@@ -239,7 +239,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         }
 
         private AggregationNormalizationState convertIntoState(InjectiveBindingLiftState subState) {
-            ImmutableSet<Variable> aggregateVariables = aggregationSubstitution.getDomain();
 
             ImmutableList<ConstructionNode> subStateAncestors = subState.getAncestors();
 
@@ -249,7 +248,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     // Ancestors of the sub-state modified so as to project the aggregation variables
                     subStateAncestors.stream()
                             .map(a -> iqFactory.createConstructionNode(
-                                    Sets.union(a.getVariables(), aggregateVariables).immutableCopy(), a.getSubstitution())))
+                                    Sets.union(a.getVariables(), aggregationSubstitution.getDomain()).immutableCopy(),
+                                    a.getSubstitution())))
                     .collect(ImmutableCollectors.toList());
 
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
@@ -257,7 +257,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
                             (s, a) -> substitutionFactory.compose(a.getSubstitution(), s).builder()
-                                            .restrictDomainTo(aggregateVariables)
+                                            .restrictDomainTo(aggregationSubstitution.getDomain())
                                             .build(ImmutableFunctionalTerm.class),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");

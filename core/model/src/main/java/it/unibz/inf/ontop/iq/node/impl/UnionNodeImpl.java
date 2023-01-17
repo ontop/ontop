@@ -583,8 +583,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 projectedVariables.stream()
                         .map(v -> mergeDefinitions(v, childSubstitutions, variableGenerator)
                                 .map(d -> Maps.immutableEntry(v, d)))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get),
+                        .flatMap(Optional::stream),
                 Map.Entry::getKey,
                 Map.Entry::getValue);
     }
