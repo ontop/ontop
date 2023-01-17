@@ -335,9 +335,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             IQTree newRightChild = rightProvenance.map(RightProvenance::getRightTree)
                     .orElse(rightSubTree);
 
+            Optional<Variable> defaultProvenanceVariable = rightProvenance.map(RightProvenance::getProvenanceVariable);
+
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution =
-                    makeRightSpecificDefsProvenanceDependent(naiveAscendingSubstitution,
-                            rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
+                    naiveAscendingSubstitution.builder()
+                            .transform((v, t) -> !leftVariables.contains(v)
+                                    ? transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable)
+                                    : t)
+                            .build();
 
             ImmutableSet<Variable> parentVariables = children.stream()
                     .flatMap(c -> c.getVariables().stream())
@@ -346,16 +351,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             ConstructionNode parentConstructionNode = iqFactory.createConstructionNode(parentVariables, ascendingSubstitution);
 
             return updateParentConditionChildren(parentConstructionNode, ljCondition, leftGrandChild, newRightChild);
-        }
-
-        private ImmutableSubstitution<ImmutableTerm> makeRightSpecificDefsProvenanceDependent(
-                ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, Optional<Variable> defaultProvenanceVariable,
-                ImmutableSet<Variable> leftVariables) {
-            return ascendingSubstitution.builder()
-                    .transform((v, t) -> leftVariables.contains(v) || isNullWhenRightIsRejected(t, leftVariables)
-                            ? t
-                            : transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
-                    .build();
         }
 
         @Override
