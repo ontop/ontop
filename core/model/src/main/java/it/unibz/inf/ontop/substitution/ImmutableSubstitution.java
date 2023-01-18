@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -48,11 +47,11 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
      * Applies the substitution to an immutable term.
      */
     default ImmutableTerm apply(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            return term;
-        }
         if (term instanceof Variable) {
             return applyToVariable((Variable) term);
+        }
+        if (term instanceof Constant) {
+            return term;
         }
         if (term instanceof ImmutableFunctionalTerm) {
             return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
@@ -63,40 +62,38 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
     /**
      * This method can be applied to simple variables
      */
-    default ImmutableTerm applyToVariable(Variable variable) {
-        T r = get(variable);
-        return r == null ? variable : r;
-    }
+    ImmutableTerm applyToVariable(Variable variable);
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
-    default ImmutableList<ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
+    default ImmutableList<ImmutableTerm> applyToVariableList(ImmutableList<Variable> terms) {
         return terms.stream()
-                .map(this::apply)
+                .map(this::applyToVariable)
                 .collect(ImmutableCollectors.toList());
     }
 
 
+    private static VariableOrGroundTerm applyToVariableOrGroundTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
+        if (t instanceof GroundTerm)
+            return t;
 
-    /**
-     * Only guaranteed for T extends VariableOrGroundTerm.
-     * <p>
-     * If T == ImmutableTerm, throws a ConversionException if
-     * a substituted term is not a VariableOrGroundTerm.
-     */
-    ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) throws ConversionException;
+        return Optional.<VariableOrGroundTerm>ofNullable(substitution.get((Variable) t)).orElse(t);
+    }
 
-    /**
-     * Only guaranteed for T extends VariableOrGroundTerm.
-     * <p>
-     * If T == ImmutableTerm, throws a ConversionException if
-     * a substituted term is not a VariableOrGroundTerm.
-     */
-    ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
-            throws ConversionException;
+    static ImmutableList<VariableOrGroundTerm> applyToVariableOrGroundTermList(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, ImmutableList<? extends VariableOrGroundTerm> terms) {
+        return terms.stream()
+                .map(t -> applyToVariableOrGroundTerm(substitution, t))
+                .collect(ImmutableCollectors.toList());
+    }
 
+    static ImmutableMap<Integer, VariableOrGroundTerm> applyToVariableOrGroundTermArgumentMap(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
+        return argumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> ImmutableSubstitution.applyToVariableOrGroundTerm(substitution, e.getValue())));
+    }
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 

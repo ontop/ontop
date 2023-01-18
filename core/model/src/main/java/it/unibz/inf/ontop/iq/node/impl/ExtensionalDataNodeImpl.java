@@ -115,7 +115,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArguments = descendingSubstitution.applyToArgumentMap(argumentMap);
+        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(descendingSubstitution, argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 
@@ -164,7 +164,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      */
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = freshRenamingSubstitution.applyToArgumentMap(argumentMap);
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(freshRenamingSubstitution, argumentMap);
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,

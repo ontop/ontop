@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -59,7 +58,7 @@ public class ImmutableUnificationTools {
         return unifier
                 .map(u -> new ArgumentMapUnification(
                         // Merges the argument maps and applies the unifier
-                        u.applyToArgumentMap(
+                        ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u,
                                 Sets.union(firstIndexes, secondIndexes).stream()
                                         .collect(ImmutableCollectors.toMap(
                                                 i -> i,
@@ -130,8 +129,8 @@ public class ImmutableUnificationTools {
         private Optional<ImmutableUnificationTools.ArgumentMapUnification> unify(
                 ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap) {
 
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
-                    substitution.applyToArgumentMap(newArgumentMap);
+            ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
+                    ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(substitution, newArgumentMap);
 
             return computeArgumentMapMGU(argumentMap, updatedArgumentMap)
                     .flatMap(u -> substitution.isEmpty()
@@ -173,7 +172,7 @@ public class ImmutableUnificationTools {
      * @return true the substitution (of null if it does not)
      */
 
-    private <T> Optional<ImmutableSubstitution<ImmutableTerm>> unify(ImmutableSubstitution<ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+    private Optional<ImmutableSubstitution<ImmutableTerm>> unify(ImmutableSubstitution<ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
         if (args1.size() != args2.size())
             return Optional.empty();
 

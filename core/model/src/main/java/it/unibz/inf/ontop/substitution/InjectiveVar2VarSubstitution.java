@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -18,15 +17,12 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
-    ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments) throws ConversionException;
+    <T extends ImmutableTerm> ImmutableList<T> applyToList(ImmutableList<T> arguments);
 
     <T extends ImmutableTerm> T applyToTerm(T term);
 
     @Override // more specific return type
-    default Variable applyToVariable(Variable variable) {
-        Variable r = get(variable);
-        return r == null ? variable : r;
-    }
+    Variable applyToVariable(Variable variable);
 
     @Override
     InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set);

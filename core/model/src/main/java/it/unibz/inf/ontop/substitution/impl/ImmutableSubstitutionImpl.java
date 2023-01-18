@@ -81,16 +81,22 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     }
 
 
+    @Override
+    public ImmutableTerm applyToVariable(Variable variable) {
+        return Optional.<ImmutableTerm>ofNullable(get(variable)).orElse(variable);
+    }
 
     @Override
     public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
         if (isEmpty())
             return functionalTerm;
 
-        ImmutableList<ImmutableTerm> subTerms = apply(functionalTerm.getTerms());
+        ImmutableList<ImmutableTerm> subTerms = functionalTerm.getTerms().stream()
+                .map(this::apply)
+                .collect(ImmutableCollectors.toList());
 
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-        // Distinguishes the BooleanExpression from the other functional terms.
+
         return (functionSymbol instanceof BooleanFunctionSymbol)
                 ? termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, subTerms)
                 : termFactory.getImmutableFunctionalTerm(functionSymbol, subTerms);
@@ -102,34 +108,11 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
             return booleanExpression;
 
         return termFactory.getImmutableExpression(booleanExpression.getFunctionSymbol(),
-                apply(booleanExpression.getTerms()));
+                booleanExpression.getTerms().stream()
+                        .map(this::apply)
+                        .collect(ImmutableCollectors.toList()));
     }
 
-
-
-    @Override
-    public ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
-
-        if (!newArguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm))
-            throw new ConversionException("The substitution applied to a DataAtom has produced some non-VariableOrGroundTerm arguments " + newArguments);
-
-        return (ImmutableList<? extends VariableOrGroundTerm>) newArguments;
-    }
-
-    @Override
-    public ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
-            throws ConversionException {
-        ImmutableMap<Integer, ? extends ImmutableTerm> newArgumentMap = argumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> apply(e.getValue())));
-
-        if (!newArgumentMap.values().stream().allMatch(t -> t instanceof VariableOrGroundTerm))
-            throw new ConversionException("The substitution applied to an argument map has produced some non-VariableOrGroundTerm arguments " + newArgumentMap);
-
-        return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
-    }
 
     @Override
     public boolean isInjective() {

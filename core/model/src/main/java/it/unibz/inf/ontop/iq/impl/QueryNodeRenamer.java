@@ -45,7 +45,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
         return iqFactory.createExtensionalDataNode(
                 extensionalDataNode.getRelationDefinition(),
-                renamingSubstitution.applyToArgumentMap(extensionalDataNode.getArgumentMap()));
+                ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(renamingSubstitution, extensionalDataNode.getArgumentMap()));
     }
 
     @Override
@@ -64,9 +64,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
         return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(
                 atom.getPredicate(),
-                atom.getArguments().stream()
-                        .map(renamingSubstitution::applyToTerm)
-                        .collect(ImmutableCollectors.toList())));
+                renamingSubstitution.applyToList(atom.getArguments())));
     }
 
     @Override

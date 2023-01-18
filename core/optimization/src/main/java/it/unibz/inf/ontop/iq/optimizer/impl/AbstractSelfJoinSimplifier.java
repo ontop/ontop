@@ -243,17 +243,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         map.entrySet().stream()
                                 .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
                                 .flatMap(e -> e.getValue().stream()))
-                .map(n -> applySubstitution(unifier, n))
+                .map(n -> iqFactory.createExtensionalDataNode(
+                        n.getRelationDefinition(),
+                        ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);
-    }
-
-    private ExtensionalDataNode applySubstitution(ImmutableSubstitution<VariableOrGroundTerm> substitution,
-                                                  ExtensionalDataNode dataNode) {
-        return iqFactory.createExtensionalDataNode(
-                dataNode.getRelationDefinition(),
-                substitution.applyToArgumentMap(dataNode.getArgumentMap()));
     }
 
     protected abstract Optional<DeterminantGroupEvaluation> evaluateDeterminantGroup(ImmutableList<VariableOrGroundTerm> determinants,

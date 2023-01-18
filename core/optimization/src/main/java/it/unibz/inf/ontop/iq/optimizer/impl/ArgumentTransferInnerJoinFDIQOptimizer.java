@@ -167,7 +167,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
                     .sorted()
                     .collect(ImmutableCollectors.toMap(
                             i -> i,
-                            i -> Optional.ofNullable((VariableOrGroundTerm) argumentMapUnification.argumentMap.get(i))
+                            i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMapUnification.argumentMap.get(i))
                                     .orElseGet(() -> targetArgumentMap.get(i))));
 
             // Here we only consider the first occurrence of the node! Important for not wrongly introducing implicit equalities

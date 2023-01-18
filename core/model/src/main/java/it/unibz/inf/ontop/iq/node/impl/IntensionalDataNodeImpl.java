@@ -122,7 +122,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     private IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
-        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), descendingSubstitution.applyToArguments(atom.getArguments()));
+        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), ImmutableSubstitution.applyToVariableOrGroundTermList(descendingSubstitution, atom.getArguments()));
         return newAtom(newAtom);
     }
 

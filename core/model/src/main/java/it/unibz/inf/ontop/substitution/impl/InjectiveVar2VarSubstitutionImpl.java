@@ -28,15 +28,14 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
     }
 
     @Override
-    public <T extends ImmutableTerm> T applyToTerm(T term) {
-        return (T) super.apply(term);
+    public Variable applyToVariable(Variable variable) {
+        Variable r = get(variable);
+        return r == null ? variable : r;
     }
 
     @Override
-    public ImmutableList<? extends VariableOrGroundTerm> applyToArguments(ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        return arguments.stream()
-                .map(this::applyToTerm)
-                .collect(ImmutableCollectors.toList());
+    public <T extends ImmutableTerm> T applyToTerm(T term) {
+        return (T) super.apply(term);
     }
 
     @Override
@@ -55,13 +54,10 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
     }
 
     @Override
-    public ImmutableList<Variable> applyToVariableArguments(ImmutableList<Variable> arguments) throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(arguments);
-
-        if (!newArguments.stream().allMatch(t -> t instanceof Variable))
-            throw new ConversionException("The substitution applied to an argument map has produced some non-Variable arguments " + newArguments);
-
-        return (ImmutableList) newArguments;
+    public <T extends ImmutableTerm> ImmutableList<T> applyToList(ImmutableList<T> arguments) {
+        return arguments.stream()
+                .map(this::applyToTerm)
+                .collect(ImmutableCollectors.toList());
     }
 
 

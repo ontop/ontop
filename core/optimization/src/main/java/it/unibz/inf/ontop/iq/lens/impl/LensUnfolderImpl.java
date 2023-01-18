@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.lens.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.dbschema.Lens;
@@ -108,7 +107,7 @@ public class LensUnfolderImpl implements LensUnfolder {
                     ? definition
                     : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableList<Variable> sourceAtomArguments = renamingSubstitution.applyToVariableArguments(renamedDefinition.getProjectionAtom().getArguments());
+            ImmutableList<Variable> sourceAtomArguments = renamingSubstitution.applyToList(renamedDefinition.getProjectionAtom().getArguments());
 
             ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
                     dataNode.getArgumentMap().entrySet(),
