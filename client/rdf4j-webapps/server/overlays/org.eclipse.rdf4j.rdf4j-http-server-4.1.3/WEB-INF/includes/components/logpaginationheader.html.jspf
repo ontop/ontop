@@ -1,0 +1,14 @@
+<p><fmt:message key="system.logging.overview.pagination.txt1"/>&nbsp; 
+	<c:forEach var="item" items="${countsAvailable}">		
+		<c:choose>
+			<c:when test="${item == count}">
+			<a href="?count=${item}&offset=${offset}" style="font-size: 150%; font-weight: bold">${item}</a>
+			</c:when>
+			<c:otherwise>
+				<a href="?count=${item}&offset=${offset}">${item}</a>
+			</c:otherwise>
+		</c:choose>		
+		&nbsp;
+	</c:forEach>	
+	<fmt:message key="system.logging.overview.pagination.txt2"/>
+</p>

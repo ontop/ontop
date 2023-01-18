@@ -1,0 +1,21 @@
+	<c:if test="${fn:length(view.parent.views) > 1}">
+	<div id="tabs">
+		<ul>
+		<c:forEach var="sibling" items="${view.parent.views}">
+			<c:if test="${!sibling.hidden}">
+				<c:choose>
+					<c:when test="${sibling == view}">
+			<li class="current"><span><fmt:message key="${sibling.i18n}" /></span></li>
+					</c:when>
+					<c:when test="${!sibling.enabled}">
+			<li class="disabled"><span><fmt:message key="${sibling.i18n}" /></span></li>
+					</c:when>
+					<c:otherwise>
+			<li><a href="${path}${sibling.path}"><span><fmt:message key="${sibling.i18n}" /></span></a></li>
+					</c:otherwise>
+				</c:choose>
+			</c:if>
+		</c:forEach>
+		</ul>		
+	</div>
+	</c:if>

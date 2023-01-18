@@ -1,0 +1,5 @@
+<c:if test="${message != NULL}">
+<div id="message" class="${message.type}">
+	<p><img src="${path}/images/${message.type}.png" alt="${message.type}" /> <fmt:message key="${message.i18n}" /></p>
+</div>
+</c:if>
