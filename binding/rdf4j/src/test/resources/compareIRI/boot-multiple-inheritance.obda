@@ -11,7 +11,7 @@ target		<http://semanticweb.org/skyserver/d/id={id}> a <http://semanticweb.org/s
 source		SELECT * FROM "a"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID2
-target		<http://semanticweb.org/skyserver/d/id={id}> a <http://semanticweb.org/skyserver/b> ; <http://semanticweb.org/skyserver/b#id> {id}^^xsd:integer .
+target		<http://semanticweb.org/skyserver/d/id2={id2}> a <http://semanticweb.org/skyserver/b> ; <http://semanticweb.org/skyserver/b#id> {id}^^xsd:integer .
 source		SELECT * FROM "b"
 ]]
 
