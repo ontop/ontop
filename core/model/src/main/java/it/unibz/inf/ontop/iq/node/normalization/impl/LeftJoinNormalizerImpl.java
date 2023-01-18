@@ -463,7 +463,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .findFirst();
 
             ImmutableSubstitution<ImmutableTerm> selectedSubstitution = provenanceVariable
-                    .map(pv -> rightSubstitution.builder().removeFromDomain(ImmutableSet.of(pv)).build())
+                    .map(pv -> rightSubstitution.removeFromDomain(ImmutableSet.of(pv)))
                     .orElse(rightSubstitution);
 
             /*
@@ -475,8 +475,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         rightChildRequiredVariables,
                         rightGrandChild);
 
-            Optional<ImmutableExpression> notOptimizedLJCondition = applyRightSubstitutionToLJCondition(
-                    ljCondition, selectedSubstitution, leftVariables);
+            Optional<ImmutableExpression> notOptimizedLJCondition = termFactory.getConjunction(
+                    ljCondition.map(selectedSubstitution::applyToBooleanExpression),
+                    selectedSubstitution.builder()
+                            .restrictDomainTo(leftVariables)
+                            .toStrictEqualities());
 
             // TODO: only create a right provenance when really needed
             Optional<RightProvenance> rightProvenance = provenanceVariable
@@ -712,9 +715,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                                                    ImmutableSet<Variable> rightRequiredVariables,
                                                                    VariableGenerator variableGenerator) {
 
-            if (selectedSubstitution.builder()
-                    .removeFromDomain(leftVariables)
-                    .build()
+            if (selectedSubstitution.removeFromDomain(leftVariables)
                     .getRange().stream()
                     .anyMatch(t -> needsAnExternalProvenanceVariable(t, leftVariables))) {
                 return Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
@@ -752,21 +753,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return nullSubstitution.apply(immutableTerm)
                     .simplify()
                     .isNull();
-        }
-
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private Optional<ImmutableExpression> applyRightSubstitutionToLJCondition(
-                Optional<ImmutableExpression> ljCondition,
-                ImmutableSubstitution<ImmutableTerm> selectedSubstitution,
-                ImmutableSet<Variable> leftVariables) {
-
-            Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.builder()
-                    .restrictDomainTo(leftVariables)
-                    .toStrictEqualities();
-
-            return termFactory.getConjunction(
-                            ljCondition.map(selectedSubstitution::applyToBooleanExpression),
-                            equalitiesToInsert);
         }
 
         public LJNormalizationState propagateDownLJCondition() {

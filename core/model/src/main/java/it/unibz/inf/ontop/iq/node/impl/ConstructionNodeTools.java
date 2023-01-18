@@ -35,11 +35,9 @@ public class ConstructionNodeTools {
     public ImmutableSet<Variable> computeNewProjectedVariables(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        Sets.SetView<Variable> remainingVariables = Sets.difference(projectedVariables, descendingSubstitution.getDomain());
-
         ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
 
-        return Sets.union(newVariables, remainingVariables).immutableCopy();
+        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
     }
 
     /**
@@ -70,7 +68,7 @@ public class ConstructionNodeTools {
 
         ImmutableSubstitution<ImmutableTerm> delta = normalizedEta.builder()
                 .removeFromDomain(formerTheta.getDomain())
-                .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV).immutableCopy())
+                .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV))
                 .build();
 
         return new NewSubstitutionPair(newTheta, delta);

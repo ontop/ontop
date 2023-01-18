@@ -172,9 +172,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return this;
 
             // NB: non grouping variables that are USED by the aggregation node (we can safely ignore the non-used ones)
-            ImmutableSet<Variable> nonGroupingVariables = Sets.difference(
+            Sets.SetView<Variable> nonGroupingVariables = Sets.difference(
                     extractChildVariables(groupingVariables, aggregationSubstitution),
-                    groupingVariables).immutableCopy();
+                    groupingVariables);
 
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
                     .restrictDomainTo(nonGroupingVariables);

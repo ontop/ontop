@@ -186,8 +186,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                     getProjectedVariables(children)),
                             expressionAndSubstitution.getSubstitution()),
                     joinTree);
-        } catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+        }
+        catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(
+                    constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
         }
     }
 
@@ -456,12 +458,4 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private ImmutableSet<Variable> computeNewlyProjectedVariables(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableList<IQTree> children) {
-        ImmutableSet<Variable> formerProjectedVariables = getProjectedVariables(children);
-
-        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
-    }
-
- }
+}

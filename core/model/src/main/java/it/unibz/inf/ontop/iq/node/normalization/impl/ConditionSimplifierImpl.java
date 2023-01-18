@@ -120,7 +120,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         .allMatch(c -> c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(v, true)))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> variablesToRemainInEqualities = Sets.union(nonLiftableVariables, rejectedByChildrenVariablesEqToConstant).immutableCopy();
+        Sets.SetView<Variable> variablesToRemainInEqualities = Sets.union(nonLiftableVariables, rejectedByChildrenVariablesEqToConstant);
 
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
@@ -145,7 +145,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
             : partiallySimplifiedExpression;
 
         ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
-                        normalizedUnifier.builder().removeFromDomain(variablesToRemainInEqualities).build(),
+                        normalizedUnifier.removeFromDomain(variablesToRemainInEqualities),
                         groundFunctionalSubstitution.orElseGet(substitutionFactory::getSubstitution));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);

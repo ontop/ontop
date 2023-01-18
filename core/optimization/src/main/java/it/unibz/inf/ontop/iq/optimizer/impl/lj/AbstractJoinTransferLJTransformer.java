@@ -516,7 +516,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                     substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
                             replacementSub.builder()
                                     .restrictRangeTo(Variable.class)
-                                    .restrict((v, t) -> !leftVariables.contains(t))
+                                    .restrictRange(t -> !leftVariables.contains(t))
                                     .build());
 
             ImmutableMap<VariableOrGroundTerm, Collection<Variable>> replacement = replacementSub.inverseMap();

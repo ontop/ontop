@@ -66,9 +66,9 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
             ImmutableSubstitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
                     .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
                     .build();
-            ImmutableSubstitution<ImmutableTerm> primeSubstitution = cn.getSubstitution().builder()
-                    .removeFromDomain(flattenedVarSubstitution.getDomain())
-                    .build();
+
+            ImmutableSubstitution<ImmutableTerm> primeSubstitution = cn.getSubstitution()
+                    .removeFromDomain(flattenedVarSubstitution.getDomain());
 
             // Nothing can be lifted, declare the new tree normalized
             if (primeSubstitution.isEmpty()) {

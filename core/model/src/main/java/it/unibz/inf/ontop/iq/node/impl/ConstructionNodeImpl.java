@@ -139,21 +139,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
-
-        collectedVariableBuilder.addAll(projectedVariables);
-
-        collectedVariableBuilder.addAll(substitution.getDomain());
-        for (ImmutableTerm term : substitution.getRange()) {
-            if (term instanceof Variable) {
-                collectedVariableBuilder.add((Variable)term);
-            }
-            else if (term instanceof ImmutableFunctionalTerm) {
-                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm)term).getVariables());
-            }
-        }
-
-        return collectedVariableBuilder.build();
+        return Sets.union(
+                projectedVariables,
+                Sets.union(
+                        substitution.getDomain(),
+                        substitution.getRangeVariables())).immutableCopy();
     }
 
     @Override
@@ -164,11 +154,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return true;
 
         QueryNode childRoot = child.getRootNode();
-        if ((childRoot instanceof SliceNode)
-                && ((SliceNode) childRoot).getLimit().filter(l -> l == 1).isPresent())
-            return true;
-
-        return false;
+        return (childRoot instanceof SliceNode)
+                && ((SliceNode) childRoot).getLimit().filter(l -> l == 1).isPresent();
     }
 
     @Override
@@ -241,10 +228,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         return childDefs.stream()
                 .map(childDef -> substitutionFactory.compose(childDef, substitution))
-                .map(ImmutableSubstitution::builder)
-                .map(b -> b.restrictDomainTo(projectedVariables))
-                .map(b -> b.restrictRangeTo(NonVariableTerm.class))
-                .map(ImmutableSubstitution.Builder::build)
+                .map(s -> s.builder()
+                        .restrictDomainTo(projectedVariables)
+                        .restrictRangeTo(NonVariableTerm.class)
+                        .build())
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -295,7 +282,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                                                               VariableNullability variableNullability) {
         Stream<ImmutableSet<Variable>> atomicConstraints = substitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .restrict((v, t) -> isAtomicConstraint(t, childConstraint, variableNullability))
+                .restrictRange(t -> isAtomicConstraint(t, childConstraint, variableNullability))
                 .build()
                 .getDomain().stream()
                 .map(ImmutableSet::of);
@@ -324,7 +311,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
         ImmutableSubstitution<Variable> fullRenaming = getSubstitution().builder()
                 .restrictRangeTo(Variable.class)
-                .restrict((v, t) -> childConstraint.contains(t))
+                .restrictRange(childConstraint::contains)
                 .build();
 
         if (fullRenaming.isEmpty())
@@ -336,7 +323,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return IntStream.range(1, fullRenamingDomain.size() + 1)
                 .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
                 .flatMap(Collection::stream)
-                .map(comb -> fullRenaming.restrictDomainTo(ImmutableSet.copyOf(comb)))
+                .map(fullRenaming::restrictDomainTo)
                 .filter(ImmutableSubstitution::isInjective)
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
                 .map(s -> childConstraint.stream()

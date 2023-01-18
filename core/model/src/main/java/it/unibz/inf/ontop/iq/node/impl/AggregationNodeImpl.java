@@ -86,17 +86,16 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
         ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.builder()
-                .restrictRangeTo(GroundTerm.class)
                 .restrictDomainTo(aggregationVariables)
+                .restrictRangeTo(GroundTerm.class)
                 .build();
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
                 descendingSubstitution.restrictRangeTo(Variable.class),
                 aggregationVariables);
 
-        ImmutableSet<Variable> domain = Sets.difference(descendingSubstitution.getDomain(),
-                        Sets.union(blockedSubstitutionToGroundTerm.getDomain(), blockedVar2VarSubstitution.getDomain()))
-                .immutableCopy();
+        Sets.SetView<Variable> domain = Sets.difference(descendingSubstitution.getDomain(),
+                        Sets.union(blockedSubstitutionToGroundTerm.getDomain(), blockedVar2VarSubstitution.getDomain()));
 
         ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.restrictDomainTo(domain);
 
@@ -283,9 +282,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                             groupingVariables, substitution.getDomain()));
         }
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> nonAggregateSubstitution = substitution.builder()
-                .restrict((v, t) -> !t.getFunctionSymbol().isAggregation())
-                .build();
+        ImmutableSubstitution<ImmutableFunctionalTerm> nonAggregateSubstitution = substitution
+                .restrictRange(t -> !t.getFunctionSymbol().isAggregation());
 
         if (!nonAggregateSubstitution.isEmpty()) {
             throw new InvalidIntermediateQueryException("The substitution of the aggregation node " +

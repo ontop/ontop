@@ -145,7 +145,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<NonFunctionalTerm> deltaC = newEta.builder()
                 .removeFromDomain(thetaC.getDomain())
-                .removeFromDomain(Sets.difference(thetaCBar.getDomain(), projectedVariables).immutableCopy())
+                .removeFromDomain(Sets.difference(thetaCBar.getDomain(), projectedVariables))
                 .build();
 
         /* ---------------
@@ -168,7 +168,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
-                .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables).immutableCopy())
+                .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables))
                 .transform(thetaFBar::apply)
                 .build();
 

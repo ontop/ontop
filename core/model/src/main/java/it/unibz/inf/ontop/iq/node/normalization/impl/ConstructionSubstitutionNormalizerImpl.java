@@ -46,7 +46,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
                 reducedAscendingSubstitution.builder()
                         .restrictRangeTo(Variable.class)
-                        .restrict((v, t) -> !projectedVariables.contains(t))
+                        .restrictRange(t -> !projectedVariables.contains(t))
                         .build());
 
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.compose(downRenamingSubstitution, reducedAscendingSubstitution).builder()

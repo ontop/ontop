@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -143,9 +144,16 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     }
 
     @Override
-    public ImmutableSubstitution<T> restrictDomainTo(ImmutableSet<Variable> set) {
+    public ImmutableSubstitution<T> restrictDomainTo(Set<Variable> set) {
         return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap()), termFactory);
+    }
+
+    @Override
+    public ImmutableSubstitution<T> removeFromDomain(Set<Variable> set) {
+        return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
+                .filter(e -> !set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
@@ -154,6 +162,13 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> type.isInstance(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> type.cast(e.getValue()))), termFactory);
+    }
+
+    @Override
+    public ImmutableSubstitution<T> restrictRange(Predicate<T> predicate) {
+        return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
+                .filter(e -> predicate.test(e.getValue()))
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)), termFactory);
     }
 
     @Override
@@ -208,18 +223,23 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         }
 
         @Override
-        public Builder<B> restrictDomainTo(ImmutableSet<Variable> set) {
+        public Builder<B> restrictDomainTo(Set<Variable> set) {
             return restrictDomain(set::contains);
         }
 
         @Override
-        public Builder<B> removeFromDomain(ImmutableSet<Variable> set) {
+        public Builder<B> removeFromDomain(Set<Variable> set) {
             return restrictDomain(v -> !set.contains(v));
         }
 
         @Override
         public Builder<B> restrict(BiPredicate<Variable, B> predicate) {
             return create(stream.filter(e -> predicate.test(e.getKey(), e.getValue())));
+        }
+
+        @Override
+        public Builder<B> restrictRange(Predicate<B> predicate) {
+            return create(stream.filter(e -> predicate.test(e.getValue())));
         }
 
         @Override

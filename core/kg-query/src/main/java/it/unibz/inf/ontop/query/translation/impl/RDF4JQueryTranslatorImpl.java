@@ -440,9 +440,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private ImmutableSet<Variable> getAggregateOutputNullableVars(AggregationNode an, ImmutableSet<Variable> childNullableVars) {
         return Sets.union(
                         Sets.intersection(an.getGroupingVariables(), childNullableVars),
-                        an.getSubstitution().builder()
-                                .restrict((v, t) -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0)))
-                                .build()
+                        an.getSubstitution().restrictRange(t -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0)))
                                 .getDomain())
                 .immutableCopy();
     }
@@ -1067,9 +1065,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private ImmutableSet<Variable> getNewNullableVars(ImmutableSubstitution<ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
-        return sub.builder()
-                .restrict((v, t) -> t.getVariableStream().anyMatch(nullableVariables::contains))
-                .build()
+        return sub.restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
                 .getDomain();
     }
 

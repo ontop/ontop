@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Set;
+
 public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<Variable> implements InjectiveVar2VarSubstitution {
 
     protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, TermFactory termFactory) {
@@ -64,7 +66,7 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
 
 
     @Override
-    public InjectiveVar2VarSubstitution restrictDomainTo(ImmutableSet<Variable> set) {
+    public InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set) {
         return new InjectiveVar2VarSubstitutionImpl(map.entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);

@@ -166,8 +166,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
 
-        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
-                .immutableCopy();
+        Sets.SetView<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
                 .map(s -> s.restrictDomainTo(rightSpecificVariables))
@@ -527,9 +526,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSubstitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
         Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
-        ImmutableSet<Variable> freshVariables = restricted.builder()
-                .restrict((v, t) -> !variables.contains(t))
-                .build()
+        ImmutableSet<Variable> freshVariables = restricted.restrictRange(t -> !variables.contains(t))
                 .getDomain();
 
         return !Sets.intersection(

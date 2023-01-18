@@ -32,7 +32,7 @@ public class ImmutableSubstitutionTools {
         ImmutableSubstitution<Variable> renaming = substitution.builder()
                 .restrictDomainTo(priorityVariables)
                 .restrictRangeTo(Variable.class)
-                .restrict((v, t) -> !priorityVariables.contains(t))
+                .restrictRange(t -> !priorityVariables.contains(t))
                 .build();
 
         if (renaming.isEmpty())
