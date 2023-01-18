@@ -184,7 +184,7 @@
         <semargl.version>0.7</semargl.version>
         <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
         <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
-        
+        <log4j2.version>2.19.0</log4j2.version>
         <!-- JDK version -->
         <jdk.version>11</jdk.version>
     </properties>
@@ -433,8 +433,32 @@
                 <groupId>edu.stanford.protege</groupId>
                 <artifactId>org.protege.xmlcatalog</artifactId>
                 <version>${protege-xmlcatalog.version}</version>
+                <exclusions>
+                    <!-- log4j v1 excluded because of security issue -->
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
+            <!-- https://logging.apache.org/log4j/2.x/manual/migration.html -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-1.2-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            
             <!-- Optique R2RML API -->
             <dependency>
                 <groupId>eu.optique-project</groupId>
