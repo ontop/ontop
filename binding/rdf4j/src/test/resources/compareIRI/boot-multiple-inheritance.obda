@@ -7,7 +7,7 @@ obda:		https://w3id.org/obda/vocabulary#
 
 [MappingDeclaration] @collection [[
 mappingId	BOOTSTRAPPED-MAPPING-ID1
-target		<http://semanticweb.org/skyserver/d/id={id}> a <http://semanticweb.org/skyserver/a> ; <http://semanticweb.org/skyserver/a#id> {id}^^xsd:integer . 
+target		<http://semanticweb.org/skyserver/d/id={id}> a <http://semanticweb.org/skyserver/a> ; <http://semanticweb.org/skyserver/a#id> {id}^^xsd:integer .
 source		SELECT * FROM "a"
 
 mappingId	BOOTSTRAPPED-MAPPING-ID2
