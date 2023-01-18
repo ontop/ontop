@@ -8,19 +8,20 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.semanticweb.owlapi.io.ToStringRenderer;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
 
@@ -35,7 +36,7 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
     private String queryFile;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
-            title = "output", description = "output file (default)")
+            title = "output", description = "output file in the CSV format. If not specified, will print the results in the standard output.")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
@@ -64,8 +65,8 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         if (dbMetadataFile != null)
             configurationBuilder.dbMetadataFile(dbMetadataFile);
 
-        if (ontopViewFile != null)
-            configurationBuilder.ontopViewFile(ontopViewFile);
+        if (ontopLensesFile != null)
+            configurationBuilder.lensesFile(ontopLensesFile);
 
         if (sparqlRulesFile != null)
             configurationBuilder.sparqlRulesFile(sparqlRulesFile);
@@ -82,67 +83,52 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         if (dbDriver != null)
             configurationBuilder.jdbcDriver(dbDriver);
 
-        try (OntopOWLEngine engine = new SimpleOntopOWLEngine(configurationBuilder.build());
-             OWLConnection conn = engine.getConnection();
-             OWLStatement st = conn.createStatement();
-        ) {
+        try (OntopRepository repo = OntopRepository.defaultRepository(configurationBuilder.build())) {
+            repo.init();
+            OntopRepositoryConnection connection = repo.getConnection();
 
-			/*
-             * Reading query file:
-			 */
-//            String query = Joiner.on("\n").
-//                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+            String query = Files.lines(Paths.get(queryFile)).collect(joining("\n"));
 
-            String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
+            try (TupleQueryResult result = connection.prepareTupleQuery(QueryLanguage.SPARQL, query)
+                    .evaluate()) {
 
-            TupleOWLResultSet result = st.executeSelectQuery(query);
+                OutputStream out = outputFile == null
+                        ? System.out
+                        : new FileOutputStream(outputFile);
 
-            OutputStream out = null;
-            if (outputFile == null) {
-                out = System.out;
-            } else {
-                out = new FileOutputStream(new File(outputFile));
+                printResult(out, result);
+                if (outputFile != null)
+                    out.close();
             }
-            printResult(out, result);
-
-
         } catch (Exception e1) {
             e1.printStackTrace();
-
         }
     }
 
-    public static void printResult(OutputStream out, TupleOWLResultSet result) throws Exception {
-        BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
+    public static void printResult(OutputStream out, TupleQueryResult result) throws Exception {
+        BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
 
-		/*
+        /*
          * Printing the header
-		 */
-        List<String> signature = result.getSignature();
-
-        int columns = result.getColumnCount();
-        for (int c = 0; c < columns; c++) {
-            String value = signature.get(c);
-            wr.append(value);
-            if (c + 1 < columns)
-                wr.append(",");
-        }
+         */
+        List<String> signature = result.getBindingNames();
+        wr.write(String.join(",", signature));
         wr.newLine();
 
         while (result.hasNext()) {
-            final OWLBindingSet bindingSet = result.next();
+            BindingSet bindingSet = result.next();
             ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
             for (String columnName : signature) {
-                // TODO: make it robust to NULLs
-                valueListBuilder.add(ToStringRenderer.getInstance().render(bindingSet.getOWLObject(columnName)));
+                valueListBuilder.add(
+                        Optional.ofNullable(bindingSet.getValue(columnName))
+                                .map(Value::stringValue)
+                                .map(StringEscapeUtils::escapeCsv)
+                                .orElse(""));
             }
             wr.append(String.join(",", valueListBuilder.build()));
             wr.newLine();
         }
         wr.flush();
-
-        result.close();
+        wr.close();
     }
-
-
 }

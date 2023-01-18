@@ -67,7 +67,7 @@ public class ADPDemo {
 	      for (String v : next) {
 	        System.out.print(v + "\t");
 	      }
-	      System.out.println("");
+	      System.out.println();
 	      ++count;
 	    }
 	    System.out.println("Count: " + count + "\n\tSize: " + size);

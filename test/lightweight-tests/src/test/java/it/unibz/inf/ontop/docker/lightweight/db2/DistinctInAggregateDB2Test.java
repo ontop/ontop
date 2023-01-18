@@ -7,21 +7,18 @@ import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 @DB2LightweightTest
 public class DistinctInAggregateDB2Test extends AbstractDistinctInAggregateTest {
 
     private static final String PROPERTIES_FILE = "/prof/db2/prof-db2.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 

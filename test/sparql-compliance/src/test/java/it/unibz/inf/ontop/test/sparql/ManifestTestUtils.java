@@ -167,12 +167,8 @@ public class ManifestTestUtils {
 			// Check for lax-cardinality conditions
 			boolean laxCardinality ;
 			laxCardinalityQuery.setBinding("testIRI", testIRI);
-			TupleQueryResult laxCardinalityResult = laxCardinalityQuery.evaluate();
-			try {
+			try (TupleQueryResult laxCardinalityResult = laxCardinalityQuery.evaluate()) {
 				laxCardinality = laxCardinalityResult.hasNext();
-			}
-			finally {
-				laxCardinalityResult.close();
 			}
 
 			// if this is enabled, Sesame passes all tests, showing that the only
@@ -213,14 +209,10 @@ public class ManifestTestUtils {
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
 				"SELECT ?ManifestName WHERE {?ManifestURL rdfs:label ?ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
-		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
-		try {
+		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {
 			if (manifestNames.hasNext()) {
 				return manifestNames.next().getValue("ManifestName").stringValue();
 			}
-		}
-		finally {
-			manifestNames.close();
 		}
 
 		// Derive name from manifest URL
@@ -236,14 +228,12 @@ public class ManifestTestUtils {
 			baseURI = url.toExternalForm();
 		}
 
-		InputStream in = url.openStream();
-
-		try {
+		try (InputStream in = url.openStream()) {
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 
 			ParserConfig config = rdfParser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
+			// To emulate DatatypeHandling.IGNORE
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
@@ -260,22 +250,16 @@ public class ManifestTestUtils {
 
 			try {
 				rdfParser.parse(in, baseURI);
-			}
-			catch (RDFHandlerException e) {
-					con.rollback();
+			} catch (RDFHandlerException e) {
+				con.rollback();
 				// RDFInserter only throws wrapped RepositoryExceptions
-				throw (RepositoryException)e.getCause();
-			}
-			catch (RuntimeException e) {
-					con.rollback();
+				throw (RepositoryException) e.getCause();
+			} catch (RuntimeException e) {
+				con.rollback();
 				throw e;
-			}
-			finally {
+			} finally {
 				con.commit();
 			}
-		}
-		finally {
-			in.close();
 		}
 	}
 }

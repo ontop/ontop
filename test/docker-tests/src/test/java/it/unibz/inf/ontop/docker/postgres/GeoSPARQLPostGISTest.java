@@ -1,17 +1,15 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests to check if PostGIS supports GeoSPARQL properly.
@@ -19,17 +17,15 @@ import static org.junit.Assert.assertEquals;
 @Ignore
 public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "/pgsql/geosparql/geosparql.owl";
-    static final String obdafile = "/pgsql/geosparql/geosparql-postgres.obda";
-    static final String propertiesfile = "/pgsql/geosparql/geosparql-postgres.properties";
+    private static final String owlfile = "/pgsql/geosparql/geosparql.owl";
+    private static final String obdafile = "/pgsql/geosparql/geosparql-postgres.obda";
+    private static final String propertiesfile = "/pgsql/geosparql/geosparql-postgres.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-        CONNECTION = REASONER.getConnection();
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
     @Override
@@ -40,7 +36,6 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     /**
@@ -63,7 +58,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfIntersects(?xWkt, ?bWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -115,7 +110,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfWithin(?xWkt, ?bWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -134,7 +129,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER (geof:sfContains(?bWkt, ?xWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
     /**
@@ -203,7 +198,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER(?x < 350000) .\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertEquals(val, true);
+        assertTrue(val);
     }
 
 

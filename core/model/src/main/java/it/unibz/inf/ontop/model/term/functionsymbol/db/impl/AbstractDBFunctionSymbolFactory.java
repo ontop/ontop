@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -125,10 +124,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol rowNumberFct;
     private DBFunctionSymbol rowNumberWithOrderByFct;
 
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
-    private Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
+    private final Map<DBTermType, DBBooleanFunctionSymbol> isArrayMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -947,12 +946,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getExtractFunctionSymbol(String component) {
-        return extractFunctionSymbolsMap.computeIfAbsent(component, c -> createExtractFunctionSymbol(c));
+        return extractFunctionSymbolsMap.computeIfAbsent(component, this::createExtractFunctionSymbol);
     }
 
     @Override
     public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
-        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, this::createCurrentDateTimeFunctionSymbol);
     }
 
     /**
@@ -1056,14 +1055,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBMin(DBTermType dbType) {
-        return minMap
-                .computeIfAbsent(dbType, t -> createDBMin(t));
+        return minMap.computeIfAbsent(dbType, this::createDBMin);
     }
 
     @Override
     public DBFunctionSymbol getDBMax(DBTermType dbType) {
-        return maxMap
-                .computeIfAbsent(dbType, t -> createDBMax(t));
+        return maxMap.computeIfAbsent(dbType, this::createDBMax);
     }
 
     @Override
@@ -1304,7 +1301,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDBRowNumberWithOrderBy() {
         return new UnaryDBFunctionSymbolWithSerializerImpl("ROW_NUMBER_WITH_ORDERBY", rootDBType, dbIntegerType, true,
-                (t, c, f) -> serializeDBRowNumberWithOrderBy(t, c, f));
+                this::serializeDBRowNumberWithOrderBy);
     }
 
 

@@ -108,15 +108,15 @@ public class QuadsTest {
       StringBuilder builder = new StringBuilder();
       while (rs.hasNext()) {
         final OWLBindingSet bindingSet = rs.next();
-        builder.append(i + "\n");
+        builder.append(i).append("\n");
         String graph = stringify(bindingSet.getBinding("g").getValue());
         String subject = stringify(bindingSet.getBinding("subject").getValue());
         String predicate = stringify(bindingSet.getBinding("predicate").getValue());
         String object = stringify(bindingSet.getBinding("object").getValue());
-        builder.append("\t" + "g" + "\t" + graph + "\n");
-        builder.append("\t" + "subject" + "\t" + subject + "\n");
-        builder.append("\t" + "predicate" + "\t" + predicate + "\n");
-        builder.append("\t" + "object" + "\t" + object + "\n");
+        builder.append("\t" + "g" + "\t").append(graph).append("\n");
+        builder.append("\t" + "subject" + "\t").append(subject).append("\n");
+        builder.append("\t" + "predicate" + "\t").append(predicate).append("\n");
+        builder.append("\t" + "object" + "\t").append(object).append("\n");
         i++;
       }
       assertEquals(expectedCardinality, i);

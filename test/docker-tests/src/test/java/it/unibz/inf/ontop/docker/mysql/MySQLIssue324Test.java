@@ -1,17 +1,13 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -20,17 +16,15 @@ import static org.junit.Assert.assertTrue;
  */
 public class MySQLIssue324Test extends AbstractVirtualModeTest {
 
-    static final String owlFile = "/mysql/issue324/ontology.ttl";
-    static final String r2rmlFile = "/mysql/issue324/mapping.ttl";
-    static final String propertyFile = "/mysql/issue324/issue324.properties";
+    private static final String owlFile = "/mysql/issue324/ontology.ttl";
+    private static final String r2rmlFile = "/mysql/issue324/mapping.ttl";
+    private static final String propertyFile = "/mysql/issue324/issue324.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createR2RMLReasoner(owlFile, r2rmlFile, propertyFile);
-        CONNECTION = REASONER.getConnection();
+    public static void before() {
+        CONNECTION = createR2RMLReasoner(owlFile, r2rmlFile, propertyFile);
     }
 
     @Override
@@ -41,7 +35,6 @@ public class MySQLIssue324Test extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     private void runTests(String query1) throws Exception {

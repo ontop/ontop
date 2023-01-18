@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
  *  {@code ---> } that is, downgrading to a non-strict equality?
  */
 public class DefaultDBStrictNEqFunctionSymbol extends AbstractDBStrictEqNeqFunctionSymbol {
-    private static String OPERATOR = " <> ";
-    private static String CONNECTOR = " OR ";
+    private static final String OPERATOR = " <> ";
+    private static final String CONNECTOR = " OR ";
 
     protected DefaultDBStrictNEqFunctionSymbol(int arity, TermType rootTermType, DBTermType dbBooleanTermType) {
         super("STRICT_NEQ", arity, false, rootTermType, dbBooleanTermType);
@@ -32,7 +32,7 @@ public class DefaultDBStrictNEqFunctionSymbol extends AbstractDBStrictEqNeqFunct
 
         return terms.stream()
                 .skip(1)
-                .map(termConverter::apply)
+                .map(termConverter)
                 .map(s -> prefix + s)
                 .collect(Collectors.joining(CONNECTOR));
     }

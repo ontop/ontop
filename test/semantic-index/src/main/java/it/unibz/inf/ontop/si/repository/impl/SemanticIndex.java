@@ -8,9 +8,6 @@ import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.SQLException;
 import java.util.Map.Entry;
 
 public class SemanticIndex {

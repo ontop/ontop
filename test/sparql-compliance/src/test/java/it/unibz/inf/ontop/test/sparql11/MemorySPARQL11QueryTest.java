@@ -38,10 +38,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			/* AGGREGATES */
 			aggregatesManifest + "agg-err-02", // SPARQL cast with function call on the datatype is not supported, e.g., COALESCE(xsd:double(?p),0)))
 
-			aggregatesManifest + "agg-groupconcat-01", // Function "LISTAGG" not found (H2 issue)
-			aggregatesManifest + "agg-groupconcat-02", // Function "LISTAGG" not found (H2 issue)
-			aggregatesManifest + "agg-groupconcat-03", // Function "LISTAGG" not found (H2 issue)
-
 			/* FUNCTIONS*/
 			functionsManifest + "hours", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)
 			functionsManifest + "day", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)

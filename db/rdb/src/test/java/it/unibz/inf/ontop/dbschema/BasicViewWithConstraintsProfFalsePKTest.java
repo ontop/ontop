@@ -12,7 +12,7 @@ public class BasicViewWithConstraintsProfFalsePKTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints-falsePK.json";
     private static final String DBMETADATA_FILE = "src/test/resources/prof/prof_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithConstraintsProfFalsePKTest() throws Exception {
     }
@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsProfFalsePKTest {
      * Constraint involving a hidden column is not inherited from parent
      */
     @Test
-    public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
+    public void testProfUniqueConstraintOnHiddenColumns() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)

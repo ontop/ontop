@@ -1,20 +1,20 @@
 CREATE TABLE T1 (
     id integer NOT NULL,
     well character varying(100),
-    name character varying(100),
+    name character varying(100)
 );
 
 
 CREATE TABLE T2 (
     id integer NOT NULL,
     well character varying(100),
-    name character varying(100),
+    name character varying(100)
 );
 
 CREATE TABLE T3 (
     id integer NOT NULL,
     well character varying(100),
-    name character varying(100),
+    name character varying(100)
 );
 
 CREATE TABLE W1 (
@@ -97,7 +97,3 @@ ADD CONSTRAINT T_can_pkey_23 UNIQUE (id2, id3);
 
 ALTER TABLE T_can_link
 ADD CONSTRAINT T_can_pkey_13 UNIQUE (id1, id3);
-
-ALTER TABLE T1 ADD FOREIGN KEY ( id ) REFERENCES T_can_link(id1) ;
-ALTER TABLE T2 ADD FOREIGN KEY ( id ) REFERENCES T_can_link(id2) ;
-ALTER TABLE T3 ADD FOREIGN KEY ( id ) REFERENCES T_can_link(id3) ;

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
@@ -38,7 +37,7 @@ import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndCla
 public class S_Equivalences_NewDAGTest extends TestCase{
 
 
-	Logger log = LoggerFactory.getLogger(S_Equivalences_NewDAGTest.class);
+	private final Logger log = LoggerFactory.getLogger(S_Equivalences_NewDAGTest.class);
 
 	public S_Equivalences_NewDAGTest(String name){
 		super(name);

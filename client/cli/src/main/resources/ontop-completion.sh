@@ -49,7 +49,7 @@ function _complete_ontop_command_query() {
   COMMANDS=$1
 
   FLAG_OPTS="--disable-reasoning --enable-annotations"
-  ARG_OPTS="-m -o -p --ontop-views -q --mapping -t --properties -u --constraint -v -x --db-password --xml-catalog --db-url --db-user --ontology --db-metadata -c -d --query --output"
+  ARG_OPTS="-m -o -p --lenses -q --mapping -t --properties -u --constraint -v -x --db-password --xml-catalog --db-url --db-user --ontology --db-metadata -c -d --query --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -83,6 +83,11 @@ function _complete_ontop_command_query() {
         return 0
         ;;
       --db-url)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -l|--lenses)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -134,7 +139,7 @@ function _complete_ontop_command_materialize() {
   COMMANDS=$1
 
   FLAG_OPTS="--disable-reasoning --enable-annotations --no-streaming --separate-files"
-  ARG_OPTS="-m -o -p --ontop-views --mapping -t --properties -u --constraint -v -x --db-password --xml-catalog --db-url --db-user --ontology --db-metadata -c -d -f --format --output"
+  ARG_OPTS="-m -o -p --lenses --mapping -t --properties -u --constraint -v -x --db-password --xml-catalog --db-url --db-user --ontology --db-metadata -c -d -f --format --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -168,6 +173,11 @@ function _complete_ontop_command_materialize() {
         return 0
         ;;
       --db-url)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -l|--lenses)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -219,7 +229,7 @@ function _complete_ontop_command_bootstrap() {
   COMMANDS=$1
 
   FLAG_OPTS=""
-  ARG_OPTS="-m -p --ontop-views --mapping --base-iri -t -u --properties -v --constraint --db-password --db-user --db-url --ontology --db-metadata -b -c -d"
+  ARG_OPTS="-m -p --lenses --mapping --base-iri -t -u --properties -v --constraint --db-password --db-user --db-url --ontology --db-metadata -b -c -d"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -227,6 +237,11 @@ function _complete_ontop_command_bootstrap() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
+      -l|--lenses)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
       -v|--ontop-views)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -294,7 +309,7 @@ function _complete_ontop_command_validate() {
   COMMANDS=$1
 
   FLAG_OPTS=""
-  ARG_OPTS="-m -p --ontop-views --mapping -t -u --properties -v --constraint --db-password --db-user --db-url --ontology --db-metadata -c -d"
+  ARG_OPTS="-m -p --lenses --mapping -t -u --properties -v --constraint --db-password --db-user --db-url --ontology --db-metadata -c -d"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -302,6 +317,11 @@ function _complete_ontop_command_validate() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
+      -l|--lenses)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
       -v|--ontop-views)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -364,7 +384,7 @@ function _complete_ontop_command_endpoint() {
   COMMANDS=$1
 
   FLAG_OPTS="--disable-reasoning --lazy --dev --enable-annotations --disable-portal-page"
-  ARG_OPTS="--ontop-views --xml-catalog --db-metadata -c -d --port --cors-allowed-origins --contexts --predefined-config -m -o -p --mapping -t --properties -u --constraint -v -x --db-password --db-url --db-user --ontology --portal --predefined-queries --output"
+  ARG_OPTS="--lenses --xml-catalog --db-metadata -c -d --port --cors-allowed-origins --contexts --predefined-config -m -o -p --mapping -t --properties -u --constraint -v -x --db-password --db-url --db-user --ontology --portal --predefined-queries --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -408,6 +428,11 @@ function _complete_ontop_command_endpoint() {
         return 0
         ;;
       --predefined-queries)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -l|--lenses)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0

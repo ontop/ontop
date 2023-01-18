@@ -29,14 +29,12 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -48,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OntologyTypesTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	final String owlFile = "/oracle/ontologyType/dataPropertiesOntologyType.owl";
 	final String obdaFile = "/oracle/ontologyType/dataPropertiesOntologyType.obda";
@@ -62,10 +60,10 @@ public class OntologyTypesTest {
 	final String obdaErroredFileName =  this.getClass().getResource(obdaErroredFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
-	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
+	private void runTests(boolean isR2rml, String query, int numberResults) {
 
 		// Creating a new instance of the reasoner
-		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration.Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.ontologyFile(owlFileName);
@@ -76,26 +74,16 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
 
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
+		try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(configBuilder.build());
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
 
-
-		try {
 			executeQueryAssertResults(query, st, numberResults);
-
-		} catch (Exception e) {
-			st.close();
+		}
+		catch (Exception e) {
 			e.printStackTrace();
-			assertTrue(false);
-
-
-		} finally {
-
-			conn.close();
-			reasoner.close();
+			fail();
 		}
 	}
 
@@ -119,7 +107,7 @@ public class OntologyTypesTest {
 
 
 	@Test
-	public void testOntologyType() throws Exception {
+	public void testOntologyType() {
 		Properties p = new Properties();
 
 		//no value in the mapping
@@ -178,7 +166,7 @@ public class OntologyTypesTest {
 	}
 
 	@Test
-	public void testOntologyTypeR2rml() throws Exception {
+	public void testOntologyTypeR2rml() {
 
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
@@ -236,7 +224,7 @@ public class OntologyTypesTest {
 	@Test
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
-	public void failedMapping()  throws Exception  {
+	public void failedMapping()  {
 		try {
 			// Creating a new instance of the reasoner
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -249,12 +237,8 @@ public class OntologyTypesTest {
 
 
 		} catch (Exception e) {
-
-
 			assertTrue(e instanceof SimpleOntopOWLEngine.InvalidOBDASpecificationException);
 			log.debug(e.getMessage());
-
-
 		}
 	}
 

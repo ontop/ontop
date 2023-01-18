@@ -5,7 +5,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -13,7 +12,7 @@ import java.sql.SQLException;
 public class Issue381Test extends AbstractOWLAPITest {
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException, SQLException, IOException {
+    public static void before() throws SQLException, IOException {
         initOBDA("/issue381/data.sql", "/issue381/mapping.obda", "/issue381/ontology.owl");
     }
 

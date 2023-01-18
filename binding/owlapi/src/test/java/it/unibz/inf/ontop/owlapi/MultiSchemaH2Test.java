@@ -22,17 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static junit.framework.TestCase.assertTrue;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -102,12 +92,12 @@ public class MultiSchemaH2Test extends AbstractOWLAPITest {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
 				"SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkReturnedValues(query, "x", ImmutableList.of(
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-997>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-996>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-995>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-993>",
-				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-992>",
 				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-991>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-992>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-993>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-995>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-996>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-997>",
 				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-998>"));
 	}
 }

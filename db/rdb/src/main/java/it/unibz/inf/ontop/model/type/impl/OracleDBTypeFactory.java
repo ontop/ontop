@@ -6,7 +6,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;

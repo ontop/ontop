@@ -3,14 +3,9 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Map;
 
 /**
  * Wrapper above an {@code ImmutableMap<Variable, ImmutableTerm>} map.
@@ -80,6 +75,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     @Override
     public boolean equals(Object o) {
         return (o instanceof ImmutableSubstitution)
-                && map.equals(((ImmutableSubstitution) o).getImmutableMap());
+                && map.equals(((ImmutableSubstitution<?>) o).getImmutableMap());
     }
 }

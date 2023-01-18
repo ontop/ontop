@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Singleton
 public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
@@ -94,9 +93,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> visitValues(ValuesNode valuesNode) {
             ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
-                    .flatMap(c -> c.getOptionalType()
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
+                    .flatMap(c -> c.getOptionalType().stream())
                     .collect(ImmutableCollectors.toSet());
 
             return termTypes.stream()

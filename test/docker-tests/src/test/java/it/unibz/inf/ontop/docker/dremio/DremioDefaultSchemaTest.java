@@ -2,16 +2,12 @@ package it.unibz.inf.ontop.docker.dremio;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     private static final String owlFileName = "/redundant_join/redundant_join_fk_test.owl";
@@ -19,13 +15,11 @@ public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     private static final String propertyFileName = "/dremio/default_schema/redundant_join_fk_test.properties";
     private static final String constraintFileName = "/dremio/default_schema/keys.lst";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasonerWithConstraints(owlFileName, obdaFileName, propertyFileName, constraintFileName);
-        CONNECTION = REASONER.getConnection();
+    public static void before() {
+        CONNECTION = createReasonerWithConstraints(owlFileName, obdaFileName, propertyFileName, constraintFileName);
     }
 
     @Override
@@ -36,7 +30,6 @@ public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
     @Override

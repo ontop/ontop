@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.generation.algebra.SQLExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
@@ -22,7 +20,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -33,8 +30,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
     @Inject
     private SparkSQLSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory)
-        {
+        super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
@@ -118,7 +114,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
              * SPARKSQL "ORDER BY" construct doesn't accept "relationID.attribute" notation for listing attributes.
              * It is needed a custom serialization for extracting the COLUMN ALIASES.
              */
-            protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
+            private String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                               ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                               ImmutableMap<Variable, QuotedID> variableAliases,
                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
@@ -143,25 +139,21 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
-                String result = checkSubstitutionMap(term,substitution);
-                if (result == ""){
-                    result = checkColumnID(term, columnIDs);
-                    return result;
-                }
-                return result;
+                Optional<String> result = checkSubstitutionMap(term,substitution);
+                return result.orElseGet(() -> checkColumnID(term, columnIDs));
             }
 
             /**
              * Check the substitutionMap and extract the column alias if available.
              */
-            private String checkSubstitutionMap(ImmutableTerm term,
+            private Optional<String> checkSubstitutionMap(ImmutableTerm term,
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution){
                 for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
                     if (entry.getValue().equals(term)) {
-                        return ("`"+entry.getKey().getName()+"`");   // Return the COLUMN ALIAS
+                        return Optional.of("`" + entry.getKey().getName() + "`");   // Return the COLUMN ALIAS
                     }
                 }
-                return "";
+                return Optional.empty();
             }
 
             /**
@@ -204,7 +196,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return serializeDBConstant((DBConstant) constant);
             }
 
-            protected String serializeDBConstant(DBConstant constant) {
+            private String serializeDBConstant(DBConstant constant) {
                 DBTermType dbType = constant.getType();
 
                 switch (dbType.getCategory()) {
@@ -220,11 +212,11 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
             }
 
-            protected String castFloatingConstant(String value, DBTermType dbType) {
+            private String castFloatingConstant(String value, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", value, dbType.getCastName());
             }
 
-            protected String serializeStringConstant(String constant) {
+            private String serializeStringConstant(String constant) {
                 // duplicates single quotes, and adds outermost quotes
                 return "'" + constant.replace("'", "''") + "'";
             }

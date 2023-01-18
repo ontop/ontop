@@ -32,7 +32,7 @@ public class ColorSettings {
         public String getDescription() {
             return description;
         }
-    };
+    }
 
     private final Map<Category, Color> colors = new HashMap<>();
     private final Map<Category, Color> selectedColors = new HashMap<>();

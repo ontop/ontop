@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -284,16 +283,12 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs = Stream.concat(
                 Stream.concat(
                         // First: presence of non-numeric values
-                        incompatibleWhenPair
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty),
+                        incompatibleWhenPair.stream(),
                         // Second: presence of double
                         // and Third: presence of float
                         floatDoubleWhenPairs),
                 // Fourth: presence of decimal or integer
-                decimalEntry
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty));
+                decimalEntry.stream());
 
         return termFactory.getDBCase(
                 whenPairs,

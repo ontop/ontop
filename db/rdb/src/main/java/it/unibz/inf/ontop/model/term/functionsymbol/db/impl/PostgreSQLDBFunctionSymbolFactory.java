@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -159,15 +158,11 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     private String serializePath(ImmutableList<String> path) {
-        return "\'{"+
-                path.stream()
-                        .collect(Collectors.joining(","))
-                +"}\'";
+        return "'{" + String.join(",", path) + "}'";
     }
 
     private String printPath(ImmutableList<String> path) {
-        return path.stream()
-                        .collect(Collectors.joining("."));
+        return String.join(".", path);
     }
 
     @Override
@@ -283,7 +278,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                                 typeOfFunctionString,
                                 termConverter.apply(terms.get(0)),
                                 types.stream()
-                                        .map(t -> "\'"+ t+ "\'")
+                                        .map(t -> "'" + t+ "'")
                                         .collect(Collectors.joining(","))
                         ));
     }
@@ -508,5 +503,15 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeHexBinaryDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("decode(%s, 'hex')", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace3() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_REGEXP_REPLACE_3",
+                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootDBType), dbStringType, false,
+                ((terms, termConverter, termFactory) -> String.format("regexp_replace(%s,%s,%s,'g')",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(2)))));
     }
 }

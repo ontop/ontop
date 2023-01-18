@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
-import java.sql.ResultSet;
 
 /**
  * SQL-specific implementation of OBDAStatement.
@@ -213,7 +212,7 @@ public class SQLQuestStatement extends QuestStatement {
     @Override
     protected GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
                                                    boolean shouldAlsoCloseStatement)
-            throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+            throws OntopQueryEvaluationException {
         TupleResultSet tuples;
         try {
             String sqlQuery = extractSQLQuery(executableQuery);

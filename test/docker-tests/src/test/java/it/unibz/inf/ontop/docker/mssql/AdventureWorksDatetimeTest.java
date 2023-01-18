@@ -1,17 +1,11 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,19 +14,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlFile = "/mssql/adventureWorks.owl";
+	private static final String obdaFile = "/mssql/adventureWorks.obda";
+	private static final String propertiesFile = "/mssql/adventureWorks.properties";
 
-	static final String owlFile = "/mssql/adventureWorks.owl";
-	static final String obdaFile = "/mssql/adventureWorks.obda";
-	static final String propertiesFile = "/mssql/adventureWorks.properties";
-
-	private static OntopOWLEngine REASONER;
-	private static OntopOWLConnection CONNECTION;
+	private static EngineConnection CONNECTION;
 
 	@BeforeClass
-	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
-		CONNECTION = REASONER.getConnection();
+	public static void before() {
+		CONNECTION = createReasoner(owlFile, obdaFile, propertiesFile);
 	}
 
 	@Override
@@ -43,7 +33,6 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 	@AfterClass
 	public static void after() throws Exception {
 		CONNECTION.close();
-		REASONER.close();
 	}
 
     /**
@@ -57,10 +46,6 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 		String val = runQueryAndReturnStringOfLiteralX(query);
 		assertEquals("\"2005-05-02T00:00:00\"^^xsd:dateTime", val);
 	}
-
-
-
-
 
 }
 

@@ -78,8 +78,8 @@ public class BindTest extends AbstractOWLAPITest {
                 "}";
 
         checkReturnedValues(querySelect, "price", ImmutableList.of(
-                "\"33.6\"^^xsd:decimal",
-                "\"17.25\"^^xsd:decimal"));
+                "\"33.600000000000\"^^xsd:decimal",
+                "\"17.250000000000\"^^xsd:decimal"));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class BindTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"17.25\"^^xsd:decimal"));
+                "\"17.250000000000\"^^xsd:decimal"));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class BindTest extends AbstractOWLAPITest {
                 + "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"17.25\"^^xsd:decimal"));
+                "\"17.250000000000\"^^xsd:decimal"));
     }
 
     @Test
@@ -131,8 +131,8 @@ public class BindTest extends AbstractOWLAPITest {
                 "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"41.8\"^^xsd:decimal",
-                "\"22.75\"^^xsd:decimal"));
+                "\"41.800000\"^^xsd:decimal",
+                "\"22.750000\"^^xsd:decimal"));
     }
 
 
@@ -149,8 +149,8 @@ public class BindTest extends AbstractOWLAPITest {
                 "}";
 
         checkReturnedValues(queryBind, "w", ImmutableList.of(
-                "\"8.4\"^^xsd:decimal",
-                "\"5.75\"^^xsd:decimal"));
+                "\"8.40000000\"^^xsd:decimal",
+                "\"5.75000000\"^^xsd:decimal"));
     }
 
     @Test
@@ -164,8 +164,8 @@ public class BindTest extends AbstractOWLAPITest {
                 "}";
 
         checkReturnedValues(querySelect, "customerPrice", ImmutableList.of(
-                "\"33.6\"^^xsd:decimal",
-                "\"17.25\"^^xsd:decimal"));
+                "\"33.600000000000\"^^xsd:decimal",
+                "\"17.250000000000\"^^xsd:decimal"));
     }
 
     @Test//(expected = OntopOWLException.class)
@@ -195,8 +195,8 @@ public class BindTest extends AbstractOWLAPITest {
                 "}";
 
         checkReturnedValues(queryBind1, "customerPrice", ImmutableList.of(
-                "\"33.6\"^^xsd:decimal",
-                "\"17.25\"^^xsd:decimal"));
+                "\"33.600000000000\"^^xsd:decimal",
+                "\"17.250000000000\"^^xsd:decimal"));
     }
 
     @Test

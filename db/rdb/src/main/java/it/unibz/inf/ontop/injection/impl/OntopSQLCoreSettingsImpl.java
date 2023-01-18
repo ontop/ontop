@@ -5,11 +5,9 @@ import it.unibz.inf.ontop.dbschema.DBMetadataProvider;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
-import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.utils.IDGenerator;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;

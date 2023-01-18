@@ -1,6 +1,6 @@
 CREATE TABLE client (
     id integer NOT NULL,
-    namePerson character varying(100) NOT NULL,
+    namePerson character varying(100) NOT NULL
 );
 
 

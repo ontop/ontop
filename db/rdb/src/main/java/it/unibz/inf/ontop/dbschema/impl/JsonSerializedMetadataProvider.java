@@ -140,7 +140,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
+    public ImmutableList<RelationID> getRelationIDs() {
         return ImmutableList.copyOf(relationMap.keySet());
     }
 

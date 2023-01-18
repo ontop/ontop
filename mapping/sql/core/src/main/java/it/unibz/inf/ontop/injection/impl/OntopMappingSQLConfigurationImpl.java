@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.apache.commons.rdf.api.Graph;
@@ -80,20 +79,20 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                                         Supplier<Optional<File>> constraintFileSupplier,
                                         Supplier<Optional<File>> dbMetadataFileSupplier,
                                         Supplier<Optional<Reader>> dbMetadataReaderSupplier,
-                                        Supplier<Optional<File>> ontopViewFileSupplier,
-                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
+                                        Supplier<Optional<File>> lensesFileSupplier,
+                                        Supplier<Optional<Reader>> lensesReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
-                () -> options.ppMapping.map(m -> (PreProcessedMapping) m),
+                () -> options.ppMapping,
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
                 constraintFileSupplier,
                 dbMetadataFileSupplier,
                 dbMetadataReaderSupplier,
-                ontopViewFileSupplier,
-                ontopViewReaderSupplier
+                lensesFileSupplier,
+                lensesReaderSupplier
         );
     }
 

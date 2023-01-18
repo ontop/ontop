@@ -13,7 +13,7 @@ public class JoinViewPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/join_views.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public JoinViewPersonTest() throws Exception {
     }

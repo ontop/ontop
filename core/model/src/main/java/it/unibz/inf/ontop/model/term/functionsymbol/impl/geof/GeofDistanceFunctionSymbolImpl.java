@@ -22,7 +22,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EA
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
-    FunctionSymbolFactory functionSymbolFactory;
+    protected final FunctionSymbolFactory functionSymbolFactory;
 
     public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType, FunctionSymbolFactoryImpl functionSymbolFactory) {
         super("GEOF_DISTANCE", functionIRI,
@@ -72,47 +72,20 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == DEGREE) {
-            // NOTE: supportsDBDistanceSphere() refers to official support i.e. PostGIS and not experimental i.e. H2GIS
-            ImmutableTerm distanceInMetre = dbTypeFactory.supportsDBDistanceSphere()
-                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                    : termFactory.getDBSTDistanceSphere(
-                    removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
-                    removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
+            // NOTE: supportsDBDistanceSphere() refers to official support i.e. PostGIS and not experimental i.e. H2GIS v1
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == RADIAN) {
-            ImmutableTerm distanceInMetre = dbTypeFactory.supportsDBDistanceSphere()
-                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                    : termFactory.getDBSTDistanceSphere(
-                    removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
-                    removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == METRE) {
             // TODO: consider using getDBSTDistanceSpheroid to get more accurate results
-            return dbTypeFactory.supportsDBDistanceSphere()
-                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                    : termFactory.getDBSTDistanceSphere(
-                    removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
-                    removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
+            return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
         } else {
             throw new IllegalArgumentException(String.format("Unsupported combination of units for distance. input: %s, output: %s", inputUnit, outputUnit));
         }
-    }
-
-    /**
-     * H2GIS does not support SETSRID within DISTANCESPHERE unlike PostGIS
-     * e.g. ST_DISTANCESPHRE(geom1, ST_SETSRID(geom2)) fails
-     * Method returns the actual geometry instead for these cases
-     * H2GIS does not distinguish SRID 0 from SRID 4326, so most use cases still work
-     *
-     * @return Geometry if input from the user at query time
-     */
-    // TODO: Consider limitations of DISTANCESPHERE for H2GIS
-    static ImmutableTerm removeSetSRID(ImmutableTerm geom, TermFactory termFactory, ImmutableTerm subLexicalTerm) {
-        return geom.isGround()
-                ? GeoUtils.extractConstantWKTLiteralValue(termFactory, subLexicalTerm).get()
-                : geom;
     }
 
 }

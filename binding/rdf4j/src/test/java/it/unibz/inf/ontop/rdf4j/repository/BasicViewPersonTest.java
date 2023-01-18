@@ -23,7 +23,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test // Concatenation function
-    public void testPersonConcat() throws Exception {
+    public void testPersonConcat() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -35,7 +35,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test // Replace function
-    public void testPersonReplace() throws Exception {
+    public void testPersonReplace() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -47,7 +47,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test // Nullif function
-    public void testPersonNullif() throws Exception {
+    public void testPersonNullif() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -62,7 +62,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
      * Rename attribute with hidden column
      */
     @Test
-    public void testPersonRenameAttribute() throws Exception {
+    public void testPersonRenameAttribute() {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -74,7 +74,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testPersonNickname() throws Exception {
+    public void testPersonNickname()  {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +
@@ -86,7 +86,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testPersonNick() throws Exception {
+    public void testPersonNick()  {
         String query = "PREFIX : <http://person.example.org/>\n" +
                 "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT  ?v \n" +

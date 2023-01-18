@@ -38,11 +38,10 @@ public class DistinctResultSetTest {
     private static String propertyFileName;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         owlFileName =  this.getClass().getResource(owlFile).toString();
         obdaFileName =  this.getClass().getResource(obdaFile).toString();
         propertyFileName =  this.getClass().getResource(propertyFile).toString();
-
     }
 
     private int runTestsQuestOWL( String query) throws Exception {
@@ -53,20 +52,13 @@ public class DistinctResultSetTest {
                 .propertyFile(propertyFileName)
 //                .enableTestMode()
                 .build();
-        OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
-        // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
 
-        int results = 0;
+        try (OntopOWLEngine reasoner = new SimpleOntopOWLEngine(config);
+             OWLConnection conn = reasoner.getConnection();
+             OWLStatement st = conn.createStatement()) {
 
-        try (OWLStatement st = conn.createStatement()) {
-            results= executeQueryAssertResults(query, st);
+            return executeQueryAssertResults(query, st);
         }
-        finally {
-            conn.close();
-            reasoner.close();
-        }
-        return results;
 
     }
 
@@ -126,7 +118,7 @@ public class DistinctResultSetTest {
     }
 
     @Test
-    public void testDistinctSesame() throws Exception {
+    public void testDistinctSesame()  {
 
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Book}";

@@ -1,16 +1,12 @@
 package it.unibz.inf.ontop.docker.mysql;
 
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,17 +17,15 @@ import static org.junit.Assert.assertEquals;
 
 public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "/testcases-docker/datetime/datatypes.owl";
-    static final String obdafile = "/testcases-docker/datetime/datatypes-mysql.obda";
-    static final String propertiesfile = "/testcases-docker/datetime/datatypes-mysql.properties";
+    private static final String owlfile = "/testcases-docker/datetime/datatypes.owl";
+    private static final String obdafile = "/testcases-docker/datetime/datatypes-mysql.obda";
+    private static final String propertiesfile = "/testcases-docker/datetime/datatypes-mysql.properties";
 
-    private static OntopOWLEngine REASONER;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-        CONNECTION = REASONER.getConnection();
+    public static void before() {
+        CONNECTION = createReasoner(owlfile, obdafile, propertiesfile);
     }
 
     @Override
@@ -42,7 +36,6 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        REASONER.close();
     }
 
 

@@ -138,9 +138,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 .map(cl -> getLimit()
                         .map(l -> Math.min(cl, l))
                         .orElse(cl))
-                .map(Optional::of)
-                // No limit in the child
-                .orElseGet(this::getLimit);
+                .or(this::getLimit);
 
         SliceNode newSliceNode = newLimit
                 .map(l -> iqFactory.createSliceNode(newOffset, l))

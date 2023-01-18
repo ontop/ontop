@@ -12,7 +12,7 @@ public class BasicViewWithConstraintsPersonIncrTest {
     private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_FD.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public BasicViewWithConstraintsPersonIncrTest() throws Exception {
     }
@@ -21,7 +21,7 @@ public class BasicViewWithConstraintsPersonIncrTest {
      * The dependents of the FDs with identical determinants are merged
      */
     @Test
-    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+    public void testPersonAddFunctionalDependencyDependent() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -37,7 +37,7 @@ public class BasicViewWithConstraintsPersonIncrTest {
      * The determinant of the FD is correctly added by a viewfile and used to merge FDs
      */
     @Test
-    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+    public void testPersonAddFunctionalDependencyDeterminant() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)

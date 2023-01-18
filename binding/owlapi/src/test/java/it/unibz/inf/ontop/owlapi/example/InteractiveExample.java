@@ -56,9 +56,9 @@ public class InteractiveExample {
 			System.out.println("INSERT A SELECT QUERY");
 			try {
 				StringBuilder builder = new StringBuilder();
-				String curLine = null;
+				String curLine;
 				while( !(curLine = br.readLine()).equals("!!") ){
-					builder.append(curLine+"\n");
+					builder.append(curLine).append("\n");
 				}
 				String sparqlQuery = builder.toString();
 				System.out.println(sparqlQuery);

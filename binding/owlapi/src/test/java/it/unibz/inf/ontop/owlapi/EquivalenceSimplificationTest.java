@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.EquivalencesDAGImpl;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.owlapi.OWL2QLTranslatorTest.getIRI;

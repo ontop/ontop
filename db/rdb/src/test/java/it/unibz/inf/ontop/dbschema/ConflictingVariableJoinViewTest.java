@@ -17,14 +17,14 @@ public class ConflictingVariableJoinViewTest {
     @Test
     public void testPersonUniqueConstraint() throws Exception {
         try {
-            ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
-        } catch (ConflictingVariableInJoinViewException e) {
-            assertEquals(
-                    e.getConflictingAttributeIds().stream().map(
-                            QuotedID::getName).collect(ImmutableCollectors.toSet()),
-                    ImmutableSet.of("c_id"));
-            return;
+            LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
+            fail();
         }
-        fail();
+        catch (ConflictingVariableInJoinViewException e) {
+            assertEquals(ImmutableSet.of("c_id"),
+                    e.getConflictingAttributeIds().stream()
+                            .map(QuotedID::getName)
+                            .collect(ImmutableCollectors.toSet()));
+        }
     }
 }

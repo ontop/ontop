@@ -13,7 +13,7 @@ public class SQLViewWithConstraintsPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/sql_views_with_constraints.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsH2(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadLensesH2(VIEW_FILE, DBMETADATA_FILE);
 
     public SQLViewWithConstraintsPersonTest() throws Exception {
     }
@@ -22,7 +22,7 @@ public class SQLViewWithConstraintsPersonTest {
      * Both the parent "id" and added "status" constraints are present in the views
      */
     @Test
-    public void testPersonAddUniqueConstraint() throws Exception {
+    public void testPersonAddUniqueConstraint() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -38,7 +38,7 @@ public class SQLViewWithConstraintsPersonTest {
      * The dependent of the FD is correctly added by a viewfile
      */
     @Test
-    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+    public void testPersonAddFunctionalDependencyDependent() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -54,7 +54,7 @@ public class SQLViewWithConstraintsPersonTest {
      * The determinant of the FD is correctly added by a viewfile
      */
     @Test
-    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+    public void testPersonAddFunctionalDependencyDeterminant() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -70,7 +70,7 @@ public class SQLViewWithConstraintsPersonTest {
      * Non-null constraint taken into account
      */
     @Test
-    public void testPersonAddNonNullConstraint() throws Exception {
+    public void testPersonAddNonNullConstraint() {
         ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
                 .map(RelationDefinition::getAttributes)
                 .flatMap(Collection::stream)

@@ -42,7 +42,7 @@ public class OntopExtractDBMetadata implements OntopCommand {
 
             OutputStream out = outputFile == null
                     ? System.out
-                    : new FileOutputStream(new File(outputFile));
+                    : new FileOutputStream(outputFile);
 
             BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
             wr.write(payload);

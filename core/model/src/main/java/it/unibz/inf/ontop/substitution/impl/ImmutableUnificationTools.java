@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.Optional;
-
 import com.google.common.collect.*;
 
 import com.google.inject.Inject;

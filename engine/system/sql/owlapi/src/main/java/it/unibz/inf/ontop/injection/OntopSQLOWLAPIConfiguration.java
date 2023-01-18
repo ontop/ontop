@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.injection.impl.OntopSQLOWLAPIConfigurationImpl;
 
 public interface OntopSQLOWLAPIConfiguration extends OntopStandaloneSQLConfiguration, OntopMappingSQLAllOWLAPIConfiguration {
 
-    static Builder<? extends Builder<?>> defaultBuilder() {
+    static <B extends Builder<B>> Builder<B> defaultBuilder() {
         return new OntopSQLOWLAPIConfigurationImpl.BuilderImpl<>();
     }
 

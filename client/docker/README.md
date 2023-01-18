@@ -1,43 +1,94 @@
-# Ontop-endpoint
+# Ontop
 
 ## Introduction
 
-The image `ontop/ontop-endpoint` is the standard solution for setting up Ontop SPARQL endpoint. 
-One can either use `ontop/ontop-endpoint` directly, or create a dedicated image based on this image.
+The image `ontop/ontop` is the standard solution for running Ontop. It supports setting up an Ontop SPARQL endpoint (default behavior), as well as running any specified Ontop CLI [command](https://ontop-vkg.org/guide/cli.html) via Docker [`run` command](https://docs.docker.com/engine/reference/run/) as `docker run ontop/ontop ontop <command> <argument> ...` or by setting Docker Compose [`command` directive](https://docs.docker.com/compose/compose-file/#command) to `[ "<ontop>", "<command>", "<argument>", ... ]`.
+One can either use `ontop/ontop` directly, or create a dedicated image based on this image.
 
 ## Environment variables
-Here is a list of environment variables. Most of them directly correspond to arguments of the CLI `ontop-endpoint`command. Please refer to [its documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html#ontop-endpoint).
 
-- `ONTOP_MAPPING_FILE` (required). Corresponds to the argument `--mapping`.
-- `ONTOP_PROPERTIES_FILE` (optional). Corresponds to the argument `--properties`.
-- `ONTOP_ONTOLOGY_FILE` (optional). Corresponds to the argument `--ontology`.
-- `ONTOP_DB_PASSWORD` (optional). Corresponds to the argument `--db-password`. Added in 4.1.0.
-- `ONTOP_DB_PASSWORD_FILE` (optional). Loads the DB password from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
-- `ONTOP_DB_USER` (optional). Corresponds to the argument `--db-user`. Added in 4.1.0.
-- `ONTOP_DB_USER_FILE` (optional). Loads the DB user from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
-- `ONTOP_DB_URL` (optional). Corresponds to the argument `--db-url`. Added in 4.1.0.
-- `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
-- `ONTOP_DB_DRIVER` (optional). Corresponds to the argument `--db-driver`. Added in 4.2.0.
-- `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
-- `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
-- `ONTOP_DB_METADATA_FILE` (optional). Corresponds to the argument `--db-metadata`. Added in 4.1.0.
-- `ONTOP_VIEW_FILE` (optional). Corresponds to the argument `--ontop-views`. Added in 4.1.0.
-- `ONTOP_SPARQL_RULES_FILE` (optional). Corresponds to the argument `--sparql-rules`. Added in 5.0.0.
-- `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.
-- `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
-- `ONTOP_DISABLE_PORTAL_PAGE` (optional). Corresponds to the argument `--disable-portal-page`. Added in 4.2.0.
-- `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
-- `ONTOP_LAZY_INIT` (optional). Corresponds to the argument `--lazy`.
-- `ONTOP_PREDEFINED_CONFIG` (optional). Corresponds to the argument `--predefined-config`.
-- `ONTOP_PREDEFINED_QUERIES` (optional). Corresponds to the argument `--predefined-queries`.
-- `ONTOP_CONTEXTS` (optional). Corresponds to the argument `--contexts`.
-- `ONTOP_DEBUG` (optional). Uses debug for logback.
-- `ONTOP_JAVA_ARGS` (optional). Allows to set arbitrary Java arguments. Added in 4.1.0.
-- `ONTOP_FILE_ENCODING` (optional). File encoding. By default, set to "UTF-8". Added in 4.1.0.
-- `ONTOP_ENABLE_DOWNLOAD_ONTOLOGY` (optional). Corresponds to the argument`--enable-download-ontology`. Added in 4.2.0.
+Here is a list of environment variables, grouped in categories and distinguished between *command-specific* and *general-purpose*.
+Command-specific variables are directly mapped to specific arguments of Ontop CLI commands, and therefore can be used only with selected Ontop CLI commands (reported in parenthesis), resulting in errors otherwise. These variables are defined for users' convenience and their use is optional, as the same settings can be supplied by directly appending the corresponding Ontop CLI command arguments when invoking `docker run` or by using Docker Compose `command` directive. Please refer to [Ontop CLI documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html).
+General-purpose variables are supported for any Ontop CLI command and are all optional with reasonable defaults (which may depend on the Ontop command being run).
+Boolean flag variables can be enabled by setting them to any value (even empty) that is different from the literal string `false`. Invalid settings are reported via `WARNING` (non-fatal) or `ERROR` (fatal) messages.
+
+### Command-Specific Variables
+
+**Properties File** *(endpoint, materialize, query, validate, bootstrap, extract-db-metadata)*:
+- **`ONTOP_PROPERTIES_FILE`** *(file path)* - Specifies the properties file supplying further Ontop [configuration properties](https://ontop-vkg.org/guide/advanced/configuration.html). Corresponds to the argument `--properties`.
+
+**Ontology and Mapping Files** *(endpoint, materialize, query, validate, bootstrap)*:
+- **`ONTOP_MAPPING_FILE`** *(file path)* - Specifies the mandatory mapping file in R2RML (.ttl) or in Ontop native format (.obda). Corresponds to the argument `--mapping`.
+- **`ONTOP_ONTOLOGY_FILE`** *(file path)* - Specifies the ontology file in any supported RDF/OWL format. Corresponds to the argument `--ontology`.
+
+**Database Access** *(endpoint, materialize, query, validate, bootstrap)*:
+- **`ONTOP_DB_USER`** *(string)* - Specifies the DB user name, overriding any `jdbc.user` setting in the properties file. Corresponds to the argument `--db-user`. Added in 4.1.0.
+- **`ONTOP_DB_USER_FILE`** *(file path)* - Alternative to `ONTOP_DB_USER` that loads the DB user name from a separate file (e.g., a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
+- **`ONTOP_DB_PASSWORD`** *(string)* - Specifies the DB user password, overriding any `jdbc.password` setting in the properties file. Corresponds to the argument `--db-password`. Added in 4.1.0.
+- **`ONTOP_DB_PASSWORD_FILE`** *(file path)* - Alternative to `ONTOP_DB_PASSWORD` that loads the DB user password from a separate file (e.g., a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
+- **`ONTOP_DB_URL`** *(string)* - Specifies the DB JDBC URL, overriding any `jdbc.url` setting in the properties file. Corresponds to the argument `--db-url`. Added in 4.1.0.
+- **`ONTOP_DB_URL_FILE`** *(file path)* - Alternatove to `ONTOP_DB_URL` that loads the DB JDBC URL from a separate file (e.g., a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
+- **`ONTOP_DB_DRIVER`** *(string)* - Specifies the DB JDBC driver class name, overriding any `jdbc.driver` setting in the properties file. Corresponds to the argument `--db-driver`. Added in 4.2.0.
+
+  *Note: suggest configuring DB settings via environment variable (possibly using their `_FILE` variants) to avoid storing or exposing sensitive data such as DB passwords.*
+
+**Additional Database Metadata and Constraints Definitions** *(endpoint, materialize, query, validate)*:
+- **`ONTOP_DB_METADATA_FILE`** *(file path)* - Specifies a user-supplied DB metadata file. Corresponds to the argument `--db-metadata`. Added in 4.1.0.
+- **`ONTOP_CONSTRAINT_FILE`** *(file path)* - Specifies a user-supplied DB constraint file. Corresponds to the argument `--constraint`.
+
+**Additional Ontology Settings, Ontop Lenses and SPARQL Rules** *(endpoint, materialize, query, validate)*:
+- **`ONTOP_XML_CATALOG_FILE`** *(file path)* - Specifies the [XML Catalog file](https://protegewiki.stanford.edu/wiki/Importing_Ontologies_in_P41#Protege_and_XML_Catalogs) (e.g. catalog-v001.xml generated by Protege) for mapping URLs of ontologies imported via `owl:imports` statements to paths of local files, to avoid downloading them from the Web (if feasible). Corresponds to the argument `--xml-catalog`.
+- **`ONTOP_ENABLE_ANNOTATIONS`** *(boolean flag)* - Enables annotation properties defined in the ontology. Corresponds to the argument `--enable-annotations`. Added in 5.0.0.
+- **`ONTOP_LENSES_FILE`** *(file path, optional)* - Specifies a user-supplied lenses file (lenses were formerly named Ontop views). Corresponds to the argument `--ontop-lenses`. Added as `ONTOP_VIEW_FILE` in 4.1.0, renamed in 5.0.0.
+- **`ONTOP_SPARQL_RULES_FILE`** (file path) - Specifies a user-supplied SPARQL rules file. Corresponds to the argument `--sparql-rules`. Added in 5.0.0.
+
+**Endpoint Settings: Portal, Predefined Queries, Ontology Download, CORS, Start/Restart** *(endpoint)*:
+- **`ONTOP_PORTAL_FILE`** *(file path)* - Specifies the TOML portal configuration file ([example](https://ontop-vkg.org/examples/example-portal.toml)) with portal title and SPARQL queries organized in tabs. Corresponds to the argument `--portal`.
+- **`ONTOP_DISABLE_PORTAL_PAGE`** *(boolean flag)* - Disables the Ontop portal. Corresponds to the argument `--disable-portal-page`. Added in 4.2.0.
+- **`ONTOP_PREDEFINED_CONFIG`** *(file path)* - Specifies the [config file](https://ontop-vkg.org/guide/advanced/predefined.html#configuration) for predefined queries. Corresponds to the argument `--predefined-config`.
+- **`ONTOP_PREDEFINED_QUERIES`** *(file path)* - Specifies the predefined queries [SPARQL queries file](https://ontop-vkg.org/guide/advanced/predefined.html#predefined-queries) for predefined queries. Corresponds to the argument `--predefined-queries`.
+- **`ONTOP_CONTEXTS`** *(file path)* - Specifies the [file containing JSON-LD contexts](https://ontop-vkg.org/guide/advanced/predefined.html#cache-for-the-json-ld-contexts) for predefined queries. Corresponds to the argument `--contexts`.
+- **`ONTOP_ENABLE_DOWNLOAD_ONTOLOGY`** *(boolean flag)* - Enables `/ontology` endpoint (HTTP GET) that allows user to download the ontology as a plain text file. Corresponds to the argument `--enable-download-ontology`. Added in 4.2.0.
+- **`ONTOP_CORS_ALLOWED_ORIGINS`** *(string)* - Specifies the value of the `Access-Control-Allow-Origin` [response header](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing#Response_headers). Corresponds to the argument `--cors-allowed-origins`.
+- **`ONTOP_LAZY_INIT`** *(boolean flag)* - Postpones Ontop initialization at first query. Corresponds to the argument `--lazy`.
+- **`ONTOP_DEV_MODE`** *(boolean flag)* - Automatically restarts Ontop when a configuration file changes. Corresponds to the argument `--dev`.
+
+  *Note: the Ontop portal web UI is enabled by default at `http://localhost:8080/` (container address); the predefined queries endpoint is disabled by default and `ONTOP_PREDEFINED_CONFIG` and `ONTOP_PREDEFINED_QUERIES` must be jointly set to enable it.*
+
+### General-Purpose Variables
+
+**Delayed startup**:
+- **`ONTOP_WAIT_FOR`** *(string)* - Waits for zero or more space-separated `hostname:port` (e.g., the DBMS port) to be reachable before starting Ontop. Added in 5.0.0.
+- **`ONTOP_WAIT_TIMEOUT`** *(number)* - Specifies the maximum number of seconds to wait for the port(s) to be reachable. Added in 5.0.0.
+
+  *Note: most Ontop commands requires accessing the DBMS. These settings enable waiting for a configurable DBMS port to be accessible, before running the Ontop command.*
+
+**Logging configuration**:
+- **`ONTOP_LOG_ENTRYPOINT`** *(boolean flag)* - Logs all the commands of Ontop Docker entrypoint script (`/opt/ontop/entrypoint.sh`), for startup debugging. Added in 5.0.0.
+- **`ONTOP_LOG_CONFIG`** *(file path)* - Specifies the `logback.xml` file to use for configuring logging. Default is `/opt/ontop/log/logback.xml` (within the container). Added in 5.0.0.
+- **`ONTOP_LOG_LEVEL`** *(enum)* - Selects log verbosity when using the default `logback.xml` file. Possible values (from no logs to every message logged): `off`, `error`, `warn`, `info`, `debug`, `trace`, `all`. Default is `info`. Added in 5.0.0.
+- **`ONTOP_DEBUG`** *(boolean flag)* - Legacy configuration corresponding to setting the log level to `debug`.
+
+**JMX and JVM tuning**:
+- **`ONTOP_CONFIGURE_JMX`** *(boolean flag)* - Configures JMX on port 8686 of the container. Map it to a host port to debug Ontop via a JMX client (e.g., [visualvm](https://visualvm.github.io/)). Added in 5.0.0.
+- **`ONTOP_FILE_ENCODING`** *(string)* - File encoding. Default is `UTF-8`. Added in 4.1.0.
+- **`ONTOP_JAVA_ARGS`** *(string)* - Allows to set arbitrary Java arguments, such as the ones for memory and garbage collector configuration (e.g., `-Xms512M -Xmx512M`). Added in 4.1.0.
+
+**Docker Healthchecks**:
+- **`ONTOP_HEALTHCHECK`** *(enum)* - Selects the healtcheck strategy: `process` to check Ontop process state; `port` to check Ontop port reachability; `query` to send a probe SPARQL query. Default is `port` for Ontop `endpoint` command, `process` otherwise. Healthchecks are run every 5 seconds or less frequently for successful probe queries (to reduce overhead). Added in 5.0.0.
+- **`ONTOP_HEALTHCHECK_QUERY`** *(string)* - Specifies the probe SPARQL query. Default is `SELECT * {}` that just checks that Ontop is working and can reach the database. Added in 5.0.0.
+- **`ONTOP_HEALTHCHECK_QUERY_INTERVAL`** *(number)* - Specifies a longer interval between probe query executions when the previous query was successful. Default is 60 seconds. During this interval, simpler port checks are executed (every 5 seconds). Added in 5.0.0.
+
+  *Note: healtchecks are enabled by default and are further configurable via `docker run` [options](https://docs.docker.com/engine/reference/run/#healthcheck) and `docker-compose.yml` [directives](https://docs.docker.com/compose/compose-file/compose-file-v3/#healthcheck).*
 
 ## Tutorial
 
 A tutorial is provided on the Ontop Website: https://ontop-vkg.org/tutorial/endpoint/endpoint-docker
 
+## Links
 
+* website: https://ontop-vkg.org/
+* repository: https://github.com/ontop/ontop
+* image sources: https://github.com/ontop/ontop/tree/version5/client/docker
+* support: [mailing list](https://groups.google.com/g/ontop4obda), [issue tracker](https://github.com/ontop/ontop/issues)
+* license: [Apache-2.0](https://github.com/ontop/ontop/blob/version5/LICENSE.txt)

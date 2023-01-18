@@ -57,7 +57,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
      */
     @Override
     protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
-        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap();
+        Map<DBTermType, DBTypeConversionFunctionSymbol> map = new HashMap<>();
         map.putAll(super.createNormalizationMap());
 
         // TIMESTAMP is not the default

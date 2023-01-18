@@ -20,75 +20,65 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import junit.framework.TestCase;
+import it.unibz.inf.ontop.docker.AbstractRDF4JVirtualModeTest;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import java.util.List;
 
 
-public class SesameVirtualTest extends TestCase {
-
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+public class SesameVirtualTest extends AbstractRDF4JVirtualModeTest {
 
 	private static final String owlFile = "/mysql/example/exampleBooks.owl";
 	private static final String obdaFile = "/mysql/example/exampleBooks.obda";
 	private static final  String propertyFile = "/mysql/example/exampleBooks.properties";
-	private final String owlFileName = this.getClass().getResource(owlFile).toString();
-	private final String obdaFileName = this.getClass().getResource(obdaFile).toString();
-	private final String propertyFileName = this.getClass().getResource(propertyFile).toString();
 
-	public void test() {
+	private static RepositoryConnection con;
 
-		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFileName)
-				.nativeOntopMappingFile(obdaFileName)
-				.propertyFile(propertyFileName)
-				.enableTestMode()
-				.build();
+	@BeforeClass
+	public static void setUp() {
+		Repository repo = createReasoner(owlFile, obdaFile, propertyFile);
+		con = repo.getConnection();
+	}
 
-		Repository repo = OntopRepository.defaultRepository(configuration);
+	@AfterClass
+	public static void tearDown() {
+		if (con != null && con.isOpen()) {
+			con.close();
+		}
+	}
 
-		repo.init();
-
-		RepositoryConnection con = repo.getConnection();
-
-		///query repo
-
+	@Test
+	public void test1() {
 		String queryString = "select * where {?x ?z ?y }";
 		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
 		TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-		TupleQueryResult result = tupleQuery.evaluate();
-
-		List<String> bindings = result.getBindingNames();
-		while (result.hasNext()) {
-			BindingSet bindingSet = result.next();
-			for (String b : bindings)
-				log.debug("Binding: " + bindingSet.getBinding(b));
+		try (TupleQueryResult result = tupleQuery.evaluate()) {
+			List<String> bindings = result.getBindingNames();
+			while (result.hasNext()) {
+				BindingSet bindingSet = result.next();
+				for (String b : bindings) {
+					logger.debug("Binding: {}", bindingSet.getBinding(b));
+				}
+			}
 		}
-
-		result.close();
-
-		queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
-		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
-		GraphQueryResult gresult = graphQuery.evaluate();
-		while (gresult.hasNext()) {
-			Statement s = gresult.next();
-			System.out.println(s.toString());
-		}
-
-		System.out.println("Closing...");
-		con.close();
-
-		System.out.println("Done.");
 	}
-
+	@Test
+	public void test2() {
+		String queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
+		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+		try (GraphQueryResult gresult = graphQuery.evaluate()) {
+			while (gresult.hasNext()) {
+				Statement s = gresult.next();
+				logger.debug("Statement: {}", s.toString());
+			}
+		}
+	}
 
 }
 

@@ -3,33 +3,24 @@ package it.unibz.inf.ontop.docker.postgres.nested;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PubJsonTest extends AbstractVirtualModeTest {
 
-    Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final static String owlFile = "/pgsql/nested/pub/pub.owl";
+    private final static String obdaFile = "/pgsql/nested/pub/pub.obda";
+    private final static String propertyFile = "/pgsql/nested/pub/pub.properties";
+    private final static String lensesFile = "/pgsql/nested/pub/pub_lenses.json";
 
-    final static String owlFile = "/pgsql/nested/pub/pub.owl";
-    final static String obdaFile = "/pgsql/nested/pub/pub.obda";
-    final static String propertyFile = "/pgsql/nested/pub/pub.properties";
-    final static String viewFile = "/pgsql/nested/pub/pub_lenses.json";
-
-    private static OntopOWLEngine ENGINE;
-    private static OntopOWLConnection CONNECTION;
+    private static EngineConnection CONNECTION;
 
     @BeforeClass
-    public static void before() throws OWLOntologyCreationException {
-        ENGINE = createReasonerWithViews(owlFile, obdaFile, propertyFile, viewFile);
-        CONNECTION = ENGINE.getConnection();
+    public static void before() {
+        CONNECTION = createReasonerWithLenses(owlFile, obdaFile, propertyFile, lensesFile);
     }
 
     @Override
@@ -40,7 +31,6 @@ public class PubJsonTest extends AbstractVirtualModeTest {
     @AfterClass
     public static void after() throws Exception {
         CONNECTION.close();
-        ENGINE.close();
     }
 
     @Test

@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.h2gis.ext.H2GISExtension;
+import org.h2gis.functions.factory.H2GISFunctions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class GeoSPARQLTest {
     public void setUp() throws Exception {
 
         sqlConnection = DriverManager.getConnection("jdbc:h2:mem:geoms", "sa", "");
-        H2GISExtension.load(sqlConnection);
+        H2GISFunctions.load(sqlConnection);
         executeFromFile(sqlConnection, "src/test/resources/geosparql/create-h2.sql");
 
 //        org.h2.tools.Server.startWebServer(sqlConnection);
@@ -216,7 +216,7 @@ public class GeoSPARQLTest {
         assertEquals(339.241, val, 1.0);
     }
 
-    @Test // Test fails due to template hard coded input
+    @Test
     public void testSelectDistance_Kilometre_EPSG4326_fixedinput() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -225,7 +225,7 @@ public class GeoSPARQLTest {
                 "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                "<http://ex.org/crs84/22> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/crs84/27> a :Geom; geo:asWKT ?xWkt.\n" +
                 "BIND((geof:distance(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POINT(-0.0754 51.5055)'^^geo:wktLiteral, uom:metre)/1000) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
@@ -427,8 +427,7 @@ public class GeoSPARQLTest {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-            String retval = ind1.toString();
-            return retval;
+            return ind1.toString();
         }
     }
 
@@ -1196,7 +1195,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:boundary(?xWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertEquals("LINEARRING (2 2, 7 2, 7 5, 2 5, 2 2)", val);
+        assertEquals("LINESTRING (2 2, 7 2, 7 5, 2 5, 2 2)", val);
     }
 
     @Test
@@ -1221,7 +1220,6 @@ public class GeoSPARQLTest {
                 "ASK WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
                 ":6 a :Geom; geo:asWKT ?yWkt.\n" +
-                //"FILTER (geof:relate(?xWkt, ?yWkt, " + "\"TFFFTFFFT\"" + "))\n" +
                 "FILTER (geof:relate(?xWkt, ?yWkt, 'TFFFTFFFT'))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
@@ -1236,7 +1234,6 @@ public class GeoSPARQLTest {
                 "ASK WHERE {\n" +
                 ":1 a :Geom; geo:asWKT ?xWkt.\n" +
                 ":2 a :Geom; geo:asWKT ?yWkt.\n" +
-                //"FILTER (geof:relate(?xWkt, ?yWkt, " + "\"T*F**F***\"" + "))\n" +
                 "FILTER (geof:relate(?xWkt, ?yWkt, 'T*F**F***'))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
@@ -1421,8 +1418,7 @@ public class GeoSPARQLTest {
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
-            boolean retval = rs.getValue();
-            return retval;
+            return rs.getValue();
         }
     }
 

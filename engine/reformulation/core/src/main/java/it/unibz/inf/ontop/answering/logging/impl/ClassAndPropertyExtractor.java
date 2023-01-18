@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
@@ -32,14 +33,12 @@ public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<Intens
 
         ImmutableSet<IRI> classes = atoms.stream()
                 .map(a -> a.getPredicate().getClassIRI(a.getArguments()))
-                .flatMap(o -> o.map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<IRI> properties = atoms.stream()
                 .map(a -> a.getPredicate().getPropertyIRI(a.getArguments()))
-                .flatMap(o -> o.map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .flatMap(Optional::stream)
                 .filter(p -> !p.equals(RDF.TYPE))
                 .collect(ImmutableCollectors.toSet());
 

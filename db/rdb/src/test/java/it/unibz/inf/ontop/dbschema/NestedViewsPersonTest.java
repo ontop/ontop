@@ -7,14 +7,13 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class NestedViewsPersonTest {
 
     private static final String VIEW_FILE = "src/test/resources/person/nested_lenses.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/hr_person-xt.db-extract.json";
 
-    ImmutableSet<OntopViewDefinition> viewDefinitions = ViewDefinitionParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
+    private final ImmutableSet<Lens> viewDefinitions = LensParsingTest.loadViewDefinitionsPostgres(VIEW_FILE, DBMETADATA_FILE);
 
     public NestedViewsPersonTest() throws Exception {
     }
@@ -36,9 +35,9 @@ public class NestedViewsPersonTest {
     public void testInferredFD() {
         ImmutableSet<FunctionalDependency> fds = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
-                .flatMap(l -> l.stream())
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
-        assertTrue(fds.size() == 1);
+        assertEquals(1, fds.size());
 
         FunctionalDependency fd = fds.stream().findFirst().get();
         ImmutableSet<String> determinants = fd.getDeterminants().stream()
@@ -51,6 +50,6 @@ public class NestedViewsPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(dependents, ImmutableSet.of("ssn", "fullName"));
+        assertEquals(ImmutableSet.of("ssn", "fullName"), dependents);
     }
 }

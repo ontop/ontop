@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.query.RDF4JDescribeQuery;
 import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -59,7 +58,7 @@ class RDF4JDescribeQueryImpl implements RDF4JDescribeQuery {
     }
 
     @Override
-    public IQ translate(KGQueryTranslator translator) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+    public IQ translate(KGQueryTranslator translator) throws OntopUnsupportedKGQueryException {
         throw new UnsupportedOperationException("DESCRIBE queries cannot be translated in one step.");
     }
 

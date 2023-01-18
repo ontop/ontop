@@ -47,8 +47,7 @@ public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl impl
                                         .map(i -> "stale-while-revalidate=" + i),
                                 getInteger(HTTP_CACHE_STALE_IF_ERROR)
                                         .map(i -> "stale-if-error=" + i))
-                                .flatMap(e -> e.map(Stream::of)
-                                        .orElseGet(Stream::empty))
+                                .flatMap(Optional::stream)
                                 .collect(Collectors.joining(", ")));
         return Optional.of(cacheControl)
                 .filter(s -> !s.isEmpty());

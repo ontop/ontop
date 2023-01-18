@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
@@ -47,11 +46,11 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
     */
 @Ignore
 public class RDF4JResultIterationTest {
-    static String owlfile = "src/test/resources/userconstraints/uc.owl";
-    static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
+    private static final String owlfile = "src/test/resources/userconstraints/uc.owl";
+    private static final String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
-    static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-    static String uc_create = "src/test/resources/userconstraints/create.sql";
+    private static final String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
+    private static final String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private static final String URL = "jdbc:h2:mem:countries_iteration_test";
     private static final String USER = "sa";
@@ -119,7 +118,7 @@ public class RDF4JResultIterationTest {
      * @throws Exception
      */
     @Test
-    public void testIteration() throws Exception {
+    public void testIteration() {
         String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1. ?y :hasVal1 ?v2.}";
 
         // execute query

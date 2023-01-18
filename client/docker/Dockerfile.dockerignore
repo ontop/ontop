@@ -1,0 +1,26 @@
+# NOTE: In principle we may include everything because we use a multi-stage Docker build where the
+# context is copied only in the 'compile' stage and does not affect the final image size (where
+# only binaries generated in the 'compile' phase are copied). Still, to speed up the build process
+# by reducing the context size, we exclude the largest directories not required for building Ontop.
+# (as a result, the transfered context is around 75M)
+
+# Exclude .git history
+.git
+
+# Eclude .cache directories
+# (this comes from /test/lightweight-tests/lightweight-db-test-images/.dockerignore)
+**/.cache
+
+# Exclude test data (we are not testing when compiling, this can be done outside the Docker build)
+test/*/src
+
+# Exclude Maven generated files, except for directory /build/distribution/target/ontop-docker from
+# where pre-built binaries are imported when using Docker build option '--target image-from-binaries'
+**/target
+!/build/distribution/target/ontop-docker
+
+# Exclude the Dockerfile, this file, and the build-image.sh script, for convenience when working on
+# them (as changing them will not invalidate Docker cache and trigger a Maven build)
+client/docker/Dockerfile
+client/docker/Dockerfile.dockerignore
+client/docker/build-image.sh

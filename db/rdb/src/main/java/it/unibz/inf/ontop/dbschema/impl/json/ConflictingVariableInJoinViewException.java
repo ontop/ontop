@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 

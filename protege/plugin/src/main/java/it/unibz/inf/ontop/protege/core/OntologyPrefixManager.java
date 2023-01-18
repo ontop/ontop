@@ -28,8 +28,6 @@ import javax.annotation.Nonnull;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;

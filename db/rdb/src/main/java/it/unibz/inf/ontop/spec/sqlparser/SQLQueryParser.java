@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.statement.select.SelectBody;
 
 /**
  * High-level SQL query parser

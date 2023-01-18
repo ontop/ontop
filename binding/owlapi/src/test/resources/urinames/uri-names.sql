@@ -1,5 +1,5 @@
 CREATE TABLE zoos (
-    name character varying(100),
+    name character varying(100)
 );
 
 CREATE TABLE entertainments (

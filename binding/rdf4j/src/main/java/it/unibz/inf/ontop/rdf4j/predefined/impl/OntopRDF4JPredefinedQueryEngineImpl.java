@@ -132,12 +132,10 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             evaluate(queryId, bindings, acceptMediaTypes, httpHeaders, httpStatusSetter, httpHeaderSetter, outputStream);
-            return outputStream.toString(StandardCharsets.UTF_8.name());
+            return outputStream.toString(StandardCharsets.UTF_8);
         } catch (LateEvaluationOrConversionException e) {
             httpStatusSetter.accept(500);
             return e.getMessage();
-        } catch (UnsupportedEncodingException e) {
-            throw new MinorOntopInternalBugException("UTF-8 was expected to be supported");
         }
     }
 
@@ -245,9 +243,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return acceptMediaTypes
                 .map(m -> m.startsWith("*/*")
                         ? Optional.of(defaultFormat)
-                        : registry.getFileFormatForMIMEType(m)
-                        .map(Optional::of)
-                        .orElseGet(() -> otherFormatFct.apply(m)))
+                        : registry.getFileFormatForMIMEType(m).or(() -> otherFormatFct.apply(m)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(f -> registry.get(f).isPresent())
@@ -278,7 +274,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         }
     }
 
-    private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
+    private IQ createExecutableQuery(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
                                      QueryLogger queryLogger) throws OntopReformulationException, InvalidBindingSetException {
 
         // May throw an InvalidBindingSetException
@@ -301,11 +297,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return newIQ;
     }
 
-    private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
+    private IQ generateReferenceQuery(PredefinedQuery<?> predefinedQuery,
                                       ImmutableMap<String, String> bindingWithReferences)
             throws OntopReformulationException {
         BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
-        RDF4JQuery newQuery = predefinedQuery.getInputQuery()
+        RDF4JQuery<?> newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?
@@ -318,7 +314,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return queryReformulator.reformulateIntoNativeQuery(newQuery, tmpQueryLogger);
     }
 
-    private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
+    private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
                                           ImmutableMultimap<String, String> httpHeaders) {
         QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
         queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);

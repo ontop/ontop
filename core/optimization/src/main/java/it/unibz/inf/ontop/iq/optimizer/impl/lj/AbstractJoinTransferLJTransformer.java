@@ -113,9 +113,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         return rightDataNodes.stream()
                 .map(r -> selectForTransfer(r, leftDataNodeMultimap))
-                .flatMap(o -> o
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -139,7 +137,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     protected synchronized VariableNullability getInheritedVariableNullability() {
         if (variableNullability == null)
-        variableNullability = variableNullabilitySupplier.get();
+            variableNullability = variableNullabilitySupplier.get();
 
         return variableNullability;
     }

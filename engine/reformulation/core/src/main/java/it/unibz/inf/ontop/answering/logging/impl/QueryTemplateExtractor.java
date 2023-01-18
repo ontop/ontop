@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 /**
@@ -124,8 +123,7 @@ public class QueryTemplateExtractor {
                                 .filter(ImmutableTerm::isGround)
                                 .map(t -> (GroundTerm) t)
                                 .map(t -> Maps.immutableEntry(i, t))
-                                .map(Stream::of)
-                                .orElseGet(Stream::empty))
+                                .stream())
                         .collect(ImmutableCollectors.toMap());
 
                 if (groundTermIndex.isEmpty())

@@ -12,12 +12,12 @@ import java.util.stream.Collector;
  */
 public class ImmutableCollectors {
 
-    private static abstract class ImmutableCollectionCollector<T, A extends ImmutableCollection.Builder, R extends ImmutableCollection<T>>
+    private static abstract class ImmutableCollectionCollector<T, A extends ImmutableCollection.Builder<T>, R extends ImmutableCollection<T>>
             implements Collector<T, A, R> {
 
         @Override
         public BiConsumer<A, T> accumulator() {
-            return (c, v) -> c.add(v);
+            return ImmutableCollection.Builder::add;
         }
 
         @Override
@@ -111,7 +111,7 @@ public class ImmutableCollectors {
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMap.Builder::<K,U>build,
+                ImmutableMap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -144,11 +144,11 @@ public class ImmutableCollectors {
                 // Supplier
                 ImmutableMap::<K,U>builder,
                 // Accumulator
-                ImmutableMap.Builder::<K,U>put,
+                ImmutableMap.Builder::put,
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMap.Builder::<K,U>build,
+                ImmutableMap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -162,7 +162,7 @@ public class ImmutableCollectors {
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableBiMap.Builder::<K,U>build,
+                ImmutableBiMap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -186,11 +186,11 @@ public class ImmutableCollectors {
                 // Supplier
                 ImmutableBiMap::<K,U>builder,
                 // Accumulator
-                ImmutableBiMap.Builder::<K,U>put,
+                ImmutableBiMap.Builder::put,
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableBiMap.Builder::<K,U>build,
+                ImmutableBiMap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -199,11 +199,11 @@ public class ImmutableCollectors {
                 // Supplier
                 ImmutableTable::<R,C,U>builder,
                 // Accumulator
-                ImmutableTable.Builder::<R,C,U>put,
+                ImmutableTable.Builder::put,
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableTable.Builder::<R,C,U>build,
+                ImmutableTable.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -217,7 +217,7 @@ public class ImmutableCollectors {
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMultimap.Builder::<K,U>build,
+                ImmutableMultimap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -226,11 +226,11 @@ public class ImmutableCollectors {
                 // Supplier
                 ImmutableMultimap::<K,U>builder,
                 // Accumulator
-                ImmutableMultimap.Builder::<K,U>put,
+                ImmutableMultimap.Builder::put,
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMultimap.Builder::<K,U>build,
+                ImmutableMultimap.Builder::build,
                 Collector.Characteristics.UNORDERED);
     }
 

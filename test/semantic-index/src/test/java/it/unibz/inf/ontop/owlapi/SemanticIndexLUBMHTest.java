@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -69,8 +68,8 @@ public class SemanticIndexLUBMHTest {
 		axioms.addAll(manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"))
 				.getABoxAxioms(Imports.EXCLUDED));
 		end = System.nanoTime();
-//		double time1 = (end - start) / 1000000000;
-//		log.debug("File 1. Total insertion time: {}", time1);
+		long time1 = (end - start) / 1_0000_000;
+		log.debug("File 1. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University1.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 //		end = System.nanoTime();
 //		time1 = (end - start) / 1000000000;

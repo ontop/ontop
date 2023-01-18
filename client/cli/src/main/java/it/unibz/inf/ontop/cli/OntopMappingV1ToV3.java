@@ -222,7 +222,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         }
 
         String propertyFilePath = f.substring(0, f.lastIndexOf(".")) + ".properties";
-        try (FileOutputStream outputStream = new FileOutputStream(new File(propertyFilePath))) {
+        try (FileOutputStream outputStream = new FileOutputStream(propertyFilePath)) {
             dataSourceProperties.store(outputStream, null);
         }
     }
@@ -235,7 +235,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         InputStream in = new FileInputStream(mappingFile);
         URL documentUrl = new URL("file://" + mappingFile);
         parser.setRDFHandler(new RDFHandler() {
-            Map<BNode, List<Statement>> bmap = new HashMap<>();
+            Map<Resource, List<Statement>> bmap = new HashMap<>();
 
             Map<Resource, Resource> logicalTable = new HashMap<>();
             Map<Resource, String> sqlQuery = new HashMap<>();
@@ -439,7 +439,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 }
 
                 if (statement.getSubject() instanceof BNode) {
-                    List<Statement> list = bmap.computeIfAbsent((BNode) statement.getSubject(), k -> new ArrayList<>());
+                    List<Statement> list = bmap.computeIfAbsent(statement.getSubject(), k -> new ArrayList<>());
                     list.add(statement);
                 }
 
@@ -635,7 +635,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
 
             private String out(Value value) {
                 if (value instanceof IRI) {
-                    String uri = ((IRI) value).toString();
+                    String uri = value.toString();
                     if (uri.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
                         return "a";
                     for (Map.Entry<String, String> e : PREFIXES.entrySet())

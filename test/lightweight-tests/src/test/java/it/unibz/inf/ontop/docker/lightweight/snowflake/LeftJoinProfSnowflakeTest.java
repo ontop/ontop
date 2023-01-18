@@ -6,21 +6,18 @@ import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 @SnowflakeLightweightTest
 public class LeftJoinProfSnowflakeTest extends AbstractLeftJoinProfTest {
 
     private static final String PROPERTIES_FILE = "/prof/snowflake/prof-snowflake.properties";
 
     @BeforeAll
-    public static void before() throws IOException, SQLException {
+    public static void before() {
         initOBDA("/prof/snowflake/prof-snowflake.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
-    public static void after() throws SQLException {
+    public static void after() {
         release();
     }
 

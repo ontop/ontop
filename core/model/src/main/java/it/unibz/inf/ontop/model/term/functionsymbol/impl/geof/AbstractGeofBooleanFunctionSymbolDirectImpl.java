@@ -10,7 +10,7 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.function.BiFunction;
 
 // direct implementation by translating to a corresponding DB function
-public abstract class AbstractGeofBooleanFunctionSymbolDirectImpl extends AbstractGeofBooleanFunctionSymbolImpl{
+public abstract class AbstractGeofBooleanFunctionSymbolDirectImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
     protected AbstractGeofBooleanFunctionSymbolDirectImpl(String functionSymbolName, IRI functionIRI, ImmutableList<TermType> inputTypes, RDFDatatype xsdBooleanType) {
         super(functionSymbolName, functionIRI, inputTypes, xsdBooleanType);
