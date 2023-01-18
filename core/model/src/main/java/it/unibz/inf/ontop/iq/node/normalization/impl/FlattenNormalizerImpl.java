@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -15,21 +14,16 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
-import java.util.stream.Stream;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     @Override

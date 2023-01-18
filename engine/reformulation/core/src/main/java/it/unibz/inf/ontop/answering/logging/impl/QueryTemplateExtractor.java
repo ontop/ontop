@@ -75,7 +75,6 @@ public class QueryTemplateExtractor {
      */
     protected static class QueryTemplateTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final CoreSingletons coreSingletons;
         private final VariableGenerator variableGenerator;
 
         // Mutable
@@ -89,7 +88,6 @@ public class QueryTemplateExtractor {
         protected QueryTemplateTransformer(CoreSingletons coreSingletons, ImmutableSet<Variable> knownVariables,
                                            OntopModelSettings settings) {
             super(coreSingletons);
-            this.coreSingletons = coreSingletons;
             atomFactory = coreSingletons.getAtomFactory();
             this.settings = settings;
             this.variableGenerator = coreSingletons.getCoreUtilsFactory()

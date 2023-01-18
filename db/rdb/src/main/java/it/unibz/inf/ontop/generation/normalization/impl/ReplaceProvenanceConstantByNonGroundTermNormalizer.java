@@ -26,7 +26,6 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
         implements DialectExtraNormalizer {
 
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(IntermediateQueryFactory iqFactory,
@@ -34,7 +33,6 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultR
                                                                  SubstitutionFactory substitutionFactory) {
         super(iqFactory);
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     @Override

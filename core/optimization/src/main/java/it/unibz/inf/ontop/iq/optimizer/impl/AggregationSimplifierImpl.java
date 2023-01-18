@@ -59,7 +59,6 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     protected static class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         private final VariableGenerator variableGenerator;
-        private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
 
         protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
@@ -67,7 +66,6 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
         }
 

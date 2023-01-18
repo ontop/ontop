@@ -25,14 +25,12 @@ import java.util.stream.Stream;
 public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(IntermediateQueryFactory iqFactory,
                                                          SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqFactory);
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
 

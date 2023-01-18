@@ -26,7 +26,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
     private final SingleTermTypeExtractor typeExtractor;
@@ -37,7 +36,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                                       SingleTermTypeExtractor typeExtractor) {
         this.settings = settings;
         this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.typeExtractor = typeExtractor;

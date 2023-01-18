@@ -147,9 +147,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 newTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren);
         }
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                .normalizeSubstitution((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)unifier,
-                        projectedVariables);
+        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                substitutionNormalizer.normalizeSubstitution(unifier, projectedVariables);
         IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
         ImmutableSubstitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();

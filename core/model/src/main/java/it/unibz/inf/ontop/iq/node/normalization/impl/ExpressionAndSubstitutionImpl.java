@@ -15,7 +15,7 @@ public class ExpressionAndSubstitutionImpl implements ConditionSimplifier.Expres
     public ExpressionAndSubstitutionImpl(Optional<ImmutableExpression> optionalExpression,
                                          ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
         this.optionalExpression = optionalExpression;
-        this.substitution = (ImmutableSubstitution<VariableOrGroundTerm>) substitution;
+        this.substitution = substitution.castTo(VariableOrGroundTerm.class);
     }
 
     @Override

@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 
 @Singleton

@@ -49,7 +49,6 @@ public class DataSource {
 	
 	private final Properties properties = new Properties();
 
-	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
 	private final EventListenerList<DataSourceListener> listeners = new EventListenerList<>();
@@ -65,7 +64,7 @@ public class DataSource {
 
 
 	public DataSource() {
-		this.id = URI.create(UUID.randomUUID().toString());
+		URI id = URI.create(UUID.randomUUID().toString());
 	}
 
 	/**

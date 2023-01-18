@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ConstructionSubstitutionNormalizer {
 
     ConstructionSubstitutionNormalization normalizeSubstitution(
-            ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
+            ImmutableSubstitution<? extends ImmutableTerm> ascendingSubstitution,
             ImmutableSet<Variable> projectedVariables);
 
 

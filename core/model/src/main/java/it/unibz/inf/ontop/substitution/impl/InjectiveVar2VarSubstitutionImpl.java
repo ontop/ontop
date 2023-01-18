@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;

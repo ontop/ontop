@@ -26,7 +26,6 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
 
     private final OptimizerFactory transformerFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
@@ -34,7 +33,6 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
                                    SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.transformerFactory = transformerFactory;
         this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
 

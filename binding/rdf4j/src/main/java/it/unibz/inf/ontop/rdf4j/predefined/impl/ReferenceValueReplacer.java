@@ -28,14 +28,12 @@ public class ReferenceValueReplacer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceValueReplacer.class);
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     /**

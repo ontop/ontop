@@ -194,6 +194,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             if (possibleValues.isEmpty() || possibleValues.stream().anyMatch(t -> t instanceof Variable))
                 return Optional.empty();
             else
+                // correctness of the cast is ensured above
                 return Optional.of((ImmutableSet<NonVariableTerm>)(ImmutableSet<?>)possibleValues);
         }
 

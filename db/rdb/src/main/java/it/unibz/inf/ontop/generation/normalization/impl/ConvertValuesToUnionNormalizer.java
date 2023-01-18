@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.stream.IntStream;
 
 /**
  * Many databases do not support VALUES, they use this normalizer and replace ValuesNodes
