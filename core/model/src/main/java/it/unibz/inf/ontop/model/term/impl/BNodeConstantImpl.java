@@ -61,11 +61,6 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	}
 
 	@Override
-	public boolean isGround() {
-		return true;
-	}
-
-	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
 	}

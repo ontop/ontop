@@ -59,11 +59,6 @@ public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConst
 	}
 
 	@Override
-	public boolean isGround() {
-		return true;
-	}
-
-	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
 	}

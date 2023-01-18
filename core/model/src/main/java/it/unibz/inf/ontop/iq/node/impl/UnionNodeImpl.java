@@ -667,10 +667,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         return termFactory.getNonGroundFunctionalTerm(functionalTerm.getFunctionSymbol(),
                     functionalTerm.getTerms().stream()
-                        .map(a -> a.isGround()
-                                ? a
+                        .map(a -> a instanceof NonGroundTerm
                                 // RECURSIVE
-                                : replaceVariablesByFreshOnes((NonGroundTerm) a, variableGenerator))
+                                ? replaceVariablesByFreshOnes((NonGroundTerm) a, variableGenerator)
+                                : a)
                         .collect(ImmutableCollectors.toList()));
     }
 

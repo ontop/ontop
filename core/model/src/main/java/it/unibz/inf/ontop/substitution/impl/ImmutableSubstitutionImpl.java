@@ -168,7 +168,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function) {
         return new ImmutableSubstitutionImpl<>(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(e -> e.getKey(), e -> function.apply(e.getValue()))), termFactory);
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> function.apply(e.getValue()))), termFactory);
     }
 
     @Override

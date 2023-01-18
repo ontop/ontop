@@ -169,9 +169,9 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
-													  ImmutableList<? extends ImmutableTerm> arguments) {
-		if (GroundTermTools.areGroundTerms(arguments)) {
+	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> arguments) {
+
+		if (arguments.stream().allMatch(t -> t instanceof GroundTerm)) {
 			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments, this);
 		}
 		else {
@@ -326,8 +326,8 @@ public class TermFactoryImpl implements TermFactory {
 			return getImmutableExpression((BooleanFunctionSymbol) functor, terms);
 		}
 
-		if (GroundTermTools.areGroundTerms(terms)) {
-			return new GroundFunctionalTermImpl((ImmutableList<? extends GroundTerm>)terms, functor, this);
+		if (terms.stream().allMatch(t -> t instanceof GroundTerm)) {
+			return new GroundFunctionalTermImpl((ImmutableList<GroundTerm>)terms, functor, this);
 		}
 		else {
 			// Default constructor

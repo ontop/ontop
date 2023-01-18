@@ -507,13 +507,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                                      ImmutableMap<Variable, GroundTerm> externalBindings,
                                                                      boolean treatBNodeAsVariable) {
         ImmutableTerm expr = getTerm(oe.getExpr(), variables, externalBindings, treatBNodeAsVariable);
-        if (expr.isGround()) {
-            return Optional.empty();
-        }
-        return Optional.of(iqFactory.createOrderComparator(
-                (NonGroundTerm) expr,
-                oe.isAscending()
-        ));
+        if (expr instanceof NonGroundTerm)
+            return Optional.of(iqFactory.createOrderComparator((NonGroundTerm) expr, oe.isAscending()));
+
+        return Optional.empty();
     }
 
 

@@ -75,7 +75,7 @@ public class ImmutableUnificationTools {
     public Optional<ImmutableSubstitution<NonFunctionalTerm>> computeMGUS2(ImmutableSubstitution<NonFunctionalTerm> s1,
                                                                            ImmutableSubstitution<NonFunctionalTerm> s2) {
         return computeMGUS(s1,s2)
-                .map(u -> (ImmutableSubstitution<NonFunctionalTerm>)(ImmutableSubstitution<?>)u);
+                .map(u -> u.castTo(NonFunctionalTerm.class));
     }
 
     /**
@@ -112,7 +112,7 @@ public class ImmutableUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
         return optionalMGUS
-                .map(s -> s.transform(GroundTermTools::convertIntoVariableOrGroundTerm));
+                .map(s -> s.castTo(VariableOrGroundTerm.class));
     }
 
 
