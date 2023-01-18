@@ -5,9 +5,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -23,54 +22,24 @@ import java.util.stream.IntStream;
  *
  * @author Lukas Sundqvist
  */
-public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
-
-    private final IntermediateQueryFactory iqFactory;
+public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer implements DialectExtraNormalizer {
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected  ConvertValuesToUnionNormalizer(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
-        this.iqFactory = iqFactory;
+        super(iqFactory);
         this.substitutionFactory = substitutionFactory;
     }
 
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return containsValuesNode(tree)
-                ? normalize(tree)
-                : tree;
+        return transform(tree);
     }
 
-    /**
-     * Recursive. TODO: uncertain if it is more efficient to have this "checker" method or not
-     */
-    private boolean containsValuesNode(IQTree tree) {
-        return tree.isLeaf()
-                ? (tree instanceof ValuesNode)
-                : tree.getChildren().stream()
-                    .anyMatch(this::containsValuesNode);
-    }
-
-    /**
-     * Recursive.
-     */
-    private IQTree normalize(IQTree tree) {
-        if (tree.isLeaf()) {
-            return (tree instanceof ValuesNode)
-                    ? convertToUnion((ValuesNode) tree)
-                    : tree;
-        }
-        // Note, we assume here that every IQTree is either a LeafIQTree, NaryOperatorNode, or UnaryOperatorNode
-        return (tree.getRootNode() instanceof NaryOperatorNode)
-                ? iqFactory.createNaryIQTree(
-                    (NaryOperatorNode) tree.getRootNode(),
-                    tree.getChildren().stream()
-                        .map(this::normalize)
-                        .collect(ImmutableCollectors.toList()))
-                : iqFactory.createUnaryIQTree(
-                    (UnaryOperatorNode) tree.getRootNode(),
-                    normalize(tree.getChildren().get(0)));
+    @Override
+    public IQTree transformValues(ValuesNode node) {
+        return convertToUnion(node);
     }
 
     private IQTree convertToUnion(ValuesNode valuesNode) {
