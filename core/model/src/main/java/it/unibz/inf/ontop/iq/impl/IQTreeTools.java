@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -42,9 +43,7 @@ public class IQTreeTools {
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
 
-        Constant nullConstant = termFactory.getNullConstant();
-
-        if (reducedSubstitution.getRange().stream().anyMatch(v -> v.equals(nullConstant))) {
+        if (reducedSubstitution.getRange().stream().anyMatch(ImmutableTerm::isNull)) {
             throw new UnsatisfiableDescendingSubstitutionException();
         }
 
@@ -67,10 +66,7 @@ public class IQTreeTools {
         int size = descendingSubstitution.getDomain().size();
 
         if (var2VarFragment.getDomain().size() != size
-                || var2VarFragment.getRange().stream()
-                        .filter(v -> !projectedVariables.contains(v))
-                        .distinct()
-                        .count()  != size)
+                || Sets.difference(var2VarFragment.getRangeSet(), projectedVariables).size() != size)
             return Optional.empty();
 
         return Optional.of(substitutionFactory.injectiveVar2VarSubstitutionOf(var2VarFragment));

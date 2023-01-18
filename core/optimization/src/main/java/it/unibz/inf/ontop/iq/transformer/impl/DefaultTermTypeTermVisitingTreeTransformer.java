@@ -41,7 +41,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     private final VariableGenerator variableGenerator;
     private final TypeConstantDictionary dictionary;
     private final TermFactory termFactory;
-    private final Constant nullValue;
     private final SubstitutionFactory substitutionFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
 
@@ -56,7 +55,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         this.variableGenerator = variableGenerator;
         this.dictionary = typeConstantDictionary;
         this.termFactory = termFactory;
-        this.nullValue = termFactory.getNullConstant();
         this.substitutionFactory = substitutionFactory;
         this.functionSymbolFactory = functionSymbolFactory;
     }
@@ -167,7 +165,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() ->  new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to define the blocked definition of the RDF term type variable"));
 
-        if (definition.equals(nullValue))
+        if (definition.isNull())
             return Stream.of();
         else if (definition instanceof ImmutableFunctionalTerm)
             return extractPossibleTermTypeConstants((ImmutableFunctionalTerm) definition);

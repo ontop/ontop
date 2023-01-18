@@ -523,24 +523,22 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         ImmutableSet<Variable> leftVariables = leftChild.getVariables();
         ImmutableSet<Variable> rightVariables = rightChild.getVariables();
-        ImmutableSet<Variable> domain = descendingSubstitution.getDomain();
-        ImmutableCollection<? extends VariableOrGroundTerm> range = descendingSubstitution.getRange();
 
-        return Sets.difference(rightVariables, leftVariables).stream()
-                .anyMatch(v -> (domain.contains(v)
-                            && (!isFreshVariable(descendingSubstitution.get(v), leftVariables, rightVariables)))
-                        // The domain of the substitution is assumed not to contain fresh variables
-                        // (normalized before)
-                        || range.contains(v));
-    }
+        ImmutableSubstitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
-    private boolean isFreshVariable(ImmutableTerm term,
-                                    ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> rightVariables) {
-        if (term instanceof Variable) {
-            Variable variable = (Variable) term;
-            return !(leftVariables.contains(variable) || rightVariables.contains(variable));
-        }
-        return false;
+        Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
+        ImmutableSet<Variable> freshVariables = restricted.builder()
+                .restrict((v, t) -> !variables.contains(t))
+                .build()
+                .getDomain();
+
+        return !Sets.intersection(
+                        Sets.difference(rightVariables, leftVariables),
+                        Sets.union(
+                                // The domain of the substitution is assumed not to contain fresh variables (normalized before)
+                                Sets.difference(descendingSubstitution.getDomain(), freshVariables),
+                                restricted.getRangeSet()))
+                .isEmpty();
     }
 
     private IQTree transformIntoInnerJoinTree(IQTree leftChild, IQTree rightChild) {

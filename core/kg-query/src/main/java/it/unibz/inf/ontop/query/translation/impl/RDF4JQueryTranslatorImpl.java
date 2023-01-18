@@ -525,7 +525,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> maps =
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutions =
                 StreamSupport.stream(node.getBindingSets().spliterator(), false)
                         .map(bs -> substitutionFactory.getSubstitution(
                                 bs.getBindingNames(),
@@ -533,11 +533,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                 x -> getTermForBinding(x, bs, nullConstant)))
                         .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> nullableVars = maps.get(0).getDomain().stream()
-                .filter(v -> maps.stream().anyMatch(m -> m.get(v).equals(nullConstant)))
+        ImmutableSet<Variable> nullableVars = substitutions.get(0).getDomain().stream()
+                .filter(v -> substitutions.stream().anyMatch(s -> s.get(v).isNull()))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQTree> subtrees = maps.stream()
+        ImmutableList<IQTree> subtrees = substitutions.stream()
                 .map(sub -> iqFactory.createConstructionNode(sub.getDomain(), sub))
                 .map(cn -> iqFactory.createUnaryIQTree(cn, iqFactory.createTrueNode()))
                 .collect(ImmutableCollectors.toList());

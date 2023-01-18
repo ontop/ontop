@@ -90,7 +90,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
+        if ((!tolerateNulls()) && newTerms.stream().anyMatch(ImmutableTerm::isNull))
             return termFactory.getNullConstant();
 
         return simplifyIfElseNullOrCoalesce(newTerms, termFactory, variableNullability)
@@ -196,11 +196,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if ((otherTerm instanceof ImmutableFunctionalTerm))
             return evaluateStrictEqWithFunctionalTerm(terms, (ImmutableFunctionalTerm) otherTerm, termFactory,
                     variableNullability);
-        else if ((otherTerm instanceof Constant) && otherTerm.isNull())
-            return IncrementalEvaluation.declareIsNull();
         else if (otherTerm instanceof NonNullConstant) {
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
+        else if (otherTerm.isNull())
+            return IncrementalEvaluation.declareIsNull();
+
         return IncrementalEvaluation.declareSameExpression();
     }
 

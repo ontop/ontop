@@ -54,7 +54,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
             return falseValue;
 
         Optional<ImmutableTerm> optionalNull = simplifiedTerms.stream()
-                .filter(t -> (t instanceof Constant) && t.isNull())
+                .filter(ImmutableTerm::isNull)
                 .findFirst();
 
         ImmutableList<ImmutableExpression> others = simplifiedTerms.stream()

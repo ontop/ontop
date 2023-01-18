@@ -170,7 +170,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
                         projectedVariables,
-                        ImmutableSet.copyOf(analysis.getSubstitution().getRange()))
+                        analysis.getSubstitution().getRangeSet())
                 .immutableCopy();
 
         ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()

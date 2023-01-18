@@ -91,21 +91,21 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
     }
 
+
     private Optional<RDFConstant> evaluate(ImmutableTerm term) {
         ImmutableTerm simplifiedTerm = term.simplify();
-        if (simplifiedTerm instanceof Constant) {
-            if (simplifiedTerm instanceof RDFConstant) {
-                return Optional.of((RDFConstant) simplifiedTerm);
-            }
-            Constant constant = (Constant) simplifiedTerm;
-            if (constant.isNull()) {
-                return Optional.empty();
-            }
-            if (constant instanceof DBConstant) {
-                throw new SQLOntopBindingSet.InvalidConstantTypeInResultException(
-                        constant + " is a DB constant. But a binding cannot have a DB constant as value");
-            }
-            throw new SQLOntopBindingSet.InvalidConstantTypeInResultException("Unexpected constant type for " + constant);
+        if (simplifiedTerm instanceof RDFConstant) {
+            return Optional.of((RDFConstant) simplifiedTerm);
+        }
+        else if (simplifiedTerm.isNull()) {
+            return Optional.empty();
+        }
+        else if (simplifiedTerm instanceof DBConstant) {
+            throw new SQLOntopBindingSet.InvalidConstantTypeInResultException(
+                    simplifiedTerm + " is a DB constant. But a binding cannot have a DB constant as value");
+        }
+        else if (simplifiedTerm instanceof Constant) {
+            throw new SQLOntopBindingSet.InvalidConstantTypeInResultException("Unexpected constant type for " + simplifiedTerm);
         }
         throw new SQLOntopBindingSet.InvalidTermAsResultException(simplifiedTerm);
     }

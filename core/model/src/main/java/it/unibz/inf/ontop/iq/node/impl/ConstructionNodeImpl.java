@@ -63,7 +63,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         this.substitution = (ImmutableSubstitution<ImmutableTerm>) substitution;
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
-        this.childVariables = extractChildVariables(projectedVariables, this.substitution);
+
+        // only the variables that are also used in the bindings for the child of the construction node
+        this.childVariables = Sets.difference(
+                        Sets.union(this.projectedVariables, this.substitution.getRangeVariables()),
+                        this.substitution.getDomain())
+                .immutableCopy();
 
         if (settings.isTestModeEnabled())
             validateNode();
@@ -104,26 +109,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         // Substitution to non-projected variables is incorrect
-        if (substitution.getRange().stream()
-                .filter(v -> v instanceof Variable)
-                .map(v -> (Variable) v)
-                .anyMatch(v -> !projectedVariables.contains(v))) {
+        if (!Sets.difference(substitution.restrictRangeTo(Variable.class).getRangeSet(), projectedVariables).isEmpty()) {
             throw new InvalidQueryNodeException(
                     "ConstructionNode: substituting a variable " +
                             "by a non-projected variable is incorrect.\n" + this);
         }
-    }
-
-    private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
-                                                          ImmutableSubstitution<ImmutableTerm> substitution) {
-        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
-        ImmutableSet<Variable> variablesRequiredByBindings = substitution.getRangeVariables();
-
-        //return only the variables that are also used in the bindings for the child of the construction node
-        return Sets.difference(
-                        Sets.union(projectedVariables, variablesRequiredByBindings),
-                        variableDefinedByBindings)
-                .immutableCopy();
     }
 
     @Override

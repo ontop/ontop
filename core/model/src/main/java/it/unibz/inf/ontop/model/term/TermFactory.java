@@ -130,7 +130,7 @@ public interface TermFactory {
 
 	/**
 	 * To be used when parsing the mapping and when an equality is found.
-	 * Is expected to replaced later by a proper equality (may be strict or not)
+	 * Is expected to be replaced later by a proper equality (can be strict or not)
 	 */
 	ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2);
 

@@ -146,10 +146,8 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     protected ImmutableFunctionalTerm transformFunctionalTerm(ImmutableFunctionalTerm functionalTerm, IQTree tree) {
         ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
         ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        // Recursive
-                        ? transformFunctionalTerm((ImmutableFunctionalTerm) t, tree)
-                        : t)
+                // Recursive
+                .map(t -> transformTerm(t, tree))
                 .collect(ImmutableCollectors.toList());
 
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();

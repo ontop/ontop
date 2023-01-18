@@ -54,7 +54,7 @@ public class EBVSPARQLLikeFunctionSymbolImpl extends SPARQLLikeFunctionSymbolImp
                     .simplify(variableNullability);
 
             // NB: Only there for improving the performance
-            if (lexicalTerm.equals(termFactory.getNullConstant()))
+            if (lexicalTerm.isNull())
                 return lexicalTerm;
 
             ImmutableTerm typeTerm = termFactory.getIfElseNull(

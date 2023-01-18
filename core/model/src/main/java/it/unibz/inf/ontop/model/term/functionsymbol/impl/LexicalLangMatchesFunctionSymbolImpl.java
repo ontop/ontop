@@ -41,7 +41,7 @@ public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolI
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        if (newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
+        if (newTerms.stream().anyMatch(ImmutableTerm::isNull))
             return termFactory.getNullConstant();
 
         if (newTerms.stream().allMatch(t -> t instanceof NonNullConstant)) {

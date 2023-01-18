@@ -377,12 +377,12 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
+            ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
+
             ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution =
                     substitutionFactory.union(
                             subTermDecompositions.values().stream()
                                     .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution));
-
-            ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
 
             return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution));
         }

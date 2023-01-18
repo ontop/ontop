@@ -37,8 +37,9 @@ public abstract class SPARQLLikeFunctionSymbolImpl extends FunctionSymbolImpl {
             return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
         else if (rdfTerm instanceof RDFConstant)
             return termFactory.getRDFTermTypeConstant(((RDFConstant) rdfTerm).getType());
-        else if ((rdfTerm instanceof Constant) && rdfTerm.isNull())
+        else if (rdfTerm.isNull())
             return termFactory.getNullConstant();
+
         throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant or NULL");
     }
 
@@ -47,8 +48,9 @@ public abstract class SPARQLLikeFunctionSymbolImpl extends FunctionSymbolImpl {
             return ((ImmutableFunctionalTerm)rdfTerm).getTerm(0);
         else if (rdfTerm instanceof RDFConstant)
             return termFactory.getDBStringConstant(((RDFConstant) rdfTerm).getValue());
-        else if ((rdfTerm instanceof Constant) && rdfTerm.isNull())
+        else if (rdfTerm.isNull())
             return termFactory.getNullConstant();
+
         throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant or NULL");
     }
 }

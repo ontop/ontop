@@ -509,8 +509,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(s -> s.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
-                    projectedVariables, tmpNormalizedChildSubstitutions, variableGenerator);
+        ImmutableSubstitution<ImmutableTerm> mergedSubstitution = substitutionFactory.getSubstitutionFromStream(
+                projectedVariables.stream()
+                        .map(v -> mergeDefinitions(v, tmpNormalizedChildSubstitutions, variableGenerator)
+                                .map(d -> Maps.immutableEntry(v, d)))
+                        .flatMap(Optional::stream),
+                Map.Entry::getKey,
+                Map.Entry::getValue);
 
         if (mergedSubstitution.isEmpty()) {
             // Opportunistically flagged as normalized. May be discarded later on
@@ -567,25 +572,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     termFactory.getDBStringConstant(constant.getValue()),
                     termFactory.getRDFTermTypeConstant(constant.getType()));
         }
-        else if ((definition instanceof Constant) && definition.isNull())
+        else if (definition.isNull())
             return termFactory.getRDFFunctionalTerm(
                     termFactory.getNullConstant(), termFactory.getNullConstant());
         else
             return definition;
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> mergeChildSubstitutions(
-            ImmutableSet<Variable> projectedVariables,
-            ImmutableCollection<ImmutableSubstitution<ImmutableTerm>> childSubstitutions,
-            VariableGenerator variableGenerator) {
-
-        return substitutionFactory.getSubstitutionFromStream(
-                projectedVariables.stream()
-                        .map(v -> mergeDefinitions(v, childSubstitutions, variableGenerator)
-                                .map(d -> Maps.immutableEntry(v, d)))
-                        .flatMap(Optional::stream),
-                Map.Entry::getKey,
-                Map.Entry::getValue);
     }
 
     private Optional<ImmutableTerm> mergeDefinitions(
@@ -820,8 +811,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (child instanceof TrueNode)
             return Stream.of(
                     outputOrderedVariables.stream()
-                        .map(v -> Optional.ofNullable(substitution.get(v))
-                                .orElseThrow(() -> new MinorOntopInternalBugException("The variable should have been defined")))
+                        .map(substitution::get)
                         .map(t -> (Constant) t)
                         .collect(ImmutableCollectors.toList()));
 
