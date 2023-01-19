@@ -163,11 +163,4 @@ public class MarcoTest {
         System.out.println(subjectIRIs.get(0).equals(subjectIRIs.get(1)));
     }
 
-    @Test
-    public void testSQLParserGetTables() throws JSQLParserException {
-        String SQL = "SELECT\n" + "c.calendar_date,\n" + "c.calendar_year,\n" + "c.calendar_month,\n" + "c.calendar_dayname,\n" + "COUNT(DISTINCT sub.order_id) AS num_orders,\n" + "COUNT(sub.book_id) AS num_books,\n" + "SUM(sub.price) AS total_price,\n" + "SUM(COUNT(sub.book_id)) OVER (\n" + "  PARTITION BY c.calendar_year, c.calendar_month\n" + "  ORDER BY c.calendar_date\n" + ") AS running_total_num_books,\n" + "LAG(COUNT(sub.book_id), 7) OVER (ORDER BY c.calendar_date) AS prev_books\n" + "FROM calendar_days c\n" + "LEFT JOIN (\n" + "  SELECT\n" + "  DATE_FORMAT(co.order_date, '%Y-%m') AS order_month,\n" + "  DATE_FORMAT(co.order_date, '%Y-%m-%d') AS order_day,\n" + "  co.order_id,\n" + "  ol.book_id,\n" + "  ol.price\n" + "  FROM cust_order co\n" + "  INNER JOIN order_line ol ON co.order_id = ol.order_id\n" + ") sub ON c.calendar_date = sub.order_day\n" + "GROUP BY c.calendar_date, c.calendar_year, c.calendar_month, c.calendar_dayname\n" + "ORDER BY c.calendar_date ASC;";
-        List<String> tableNames = getTableNamesFromSQL(SQL);
-        System.out.println(tableNames);
-    }
-
 }
