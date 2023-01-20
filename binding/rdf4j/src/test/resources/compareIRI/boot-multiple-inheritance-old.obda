@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl:		http://www.w3.org/2002/07/owl#
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+mappingId	BOOTSTRAPPED-MAPPING-ID1
+target		<http://semanticweb.org/skyserver/d/id={id}> a <http://semanticweb.org/skyserver/a> ; <http://semanticweb.org/skyserver/a#id> {id}^^xsd:integer .
+source		SELECT * FROM "a"
+
+mappingId	BOOTSTRAPPED-MAPPING-ID2
+target		<http://semanticweb.org/skyserver/d/id2={id2}> a <http://semanticweb.org/skyserver/b> ; <http://semanticweb.org/skyserver/b#id> {id}^^xsd:integer .
+source		SELECT * FROM "b"
+]]
+
