@@ -30,13 +30,14 @@ import java.util.*;
 public abstract class AbstractPrefixManager implements PrefixManager {
 
 	protected abstract Optional<String> getIriDefinition(String prefix);
-
+	
 	protected abstract List<Map.Entry<String, String>> getOrderedMap();
-
+	
 	protected static List<Map.Entry<String, String>> orderMap(Map<String, String> map) {
 		Comparator<Map.Entry<String, String>> comparator =
 				Map.Entry.<String, String>comparingByValue()
-						.thenComparing(Map.Entry.comparingByKey());
+						.reversed()
+						.thenComparing(Map.Entry.comparingByKey());;
 		return map.entrySet().stream()
 				.sorted(comparator)
 				.collect(ImmutableCollectors.toList());
