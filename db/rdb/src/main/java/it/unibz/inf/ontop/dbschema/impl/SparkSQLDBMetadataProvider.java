@@ -11,6 +11,15 @@ public class SparkSQLDBMetadataProvider extends DefaultSchemaCatalogDBMetadataPr
 
     @AssistedInject
     SparkSQLDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
-        super(connection, metadata -> new SparkSQLQuotedIDFactory(), coreSingletons);
+        super(connection, metadata -> new SparkSQLQuotedIDFactory(), coreSingletons,
+                c -> {
+            String catalog = c.getCatalog();
+            String schema = c.getSchema();
+            System.out.println("OBTAINED FROM SPARK JDBC DRIVER: " + catalog + ", " + schema);
+            if (catalog == null)
+                catalog = "";
+            if (schema == null)
+                schema = "";
+            return new String[] {catalog, schema, "DUMMY" }; });
     }
 }

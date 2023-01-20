@@ -129,9 +129,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColum) throws SQLException;
 
     // can be overridden, 4 usages
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
+    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
         if (!extractedId.equals(givenId))
-            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
+            throw new MetadataExtractionException("Relation IDs mismatch: for relation " + givenId + ", the JDBC " + method + " returns " + extractedId);
     }
 
     protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
@@ -154,7 +154,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
+                checkSameRelationID(extractedId, id, "getColumns");
 
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
@@ -228,7 +228,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             String currentPkName = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
+                checkSameRelationID(extractedId, id, "getPrimaryKeys");
 
                 String pkName = rs.getString("PK_NAME"); // may be null
                 if (currentPkName != null && pkName != null && !currentPkName.equals(pkName))
@@ -269,7 +269,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             String constraintId = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
+                checkSameRelationID(extractedId, id, "getIndexInfo");
 
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
@@ -341,7 +341,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             String constraintId = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
-                checkSameRelationID(extractedId, id);
+                checkSameRelationID(extractedId, id, "getImportedKeys");
                 RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
 
                 try {
