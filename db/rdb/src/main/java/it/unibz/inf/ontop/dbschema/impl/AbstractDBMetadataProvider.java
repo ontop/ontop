@@ -48,6 +48,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     private final DBTypeFactory dbTypeFactory;
     private final OntopOBDASettings settings;
 
+    @FunctionalInterface
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
     }
