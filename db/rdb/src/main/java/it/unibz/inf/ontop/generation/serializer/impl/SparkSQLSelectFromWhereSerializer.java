@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Map;
@@ -84,13 +83,6 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
             }
 
-            ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
-                return variableAliases.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> new QualifiedAttributeID(alias, e.getValue())));
-            }
-
             @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
             private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
                 if (!limit.isPresent() && !offset.isPresent())
@@ -134,25 +126,12 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
-                String result = checkSubstitutionMap(term,substitution);
-                if (result == ""){
-                    result = checkColumnID(term, columnIDs);
-                    return result;
-                }
-                return result;
-            }
-
-            /**
-             * Check the substitutionMap and extract the column alias if available.
-             */
-            private String checkSubstitutionMap(ImmutableTerm term,
-                                                ImmutableSubstitution<? extends ImmutableTerm> substitution){
                 for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
                     if (entry.getValue().equals(term)) {
-                        return ("`"+entry.getKey().getName()+"`");   // Return the COLUMN ALIAS
+                        return  ("`" + entry.getKey().getName() + "`"); // Return the COLUMN ALIAS
                     }
                 }
-                return "";
+                return checkColumnID(term, columnIDs);
             }
 
             /**
