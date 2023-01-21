@@ -5,9 +5,9 @@ RUN install_packages wget procps openjdk-11-jdk-headless git python3 -y
 
 WORKDIR /tmp
 
-RUN wget http://downloads.apache.org/spark/spark-3.2.3/spark-3.2.3-bin-hadoop3.2.tgz
+RUN wget https://archive.apache.org/dist/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz
 RUN tar xvf spark-*
-RUN mv spark-3.2.3-bin-hadoop3.2 /opt/spark
+RUN mv spark-3.3.1-bin-hadoop3 /opt/spark
 
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${PATH}:${SPARK_HOME}/bin:${SPARK_HOME}/sbin
