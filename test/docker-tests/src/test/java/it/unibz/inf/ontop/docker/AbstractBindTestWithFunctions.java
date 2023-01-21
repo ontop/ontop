@@ -1827,6 +1827,7 @@ public abstract class AbstractBindTestWithFunctions {
                 }
             }
             if(!sameOrder){
+                expectedValues = new ArrayList<>(expectedValues);
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }

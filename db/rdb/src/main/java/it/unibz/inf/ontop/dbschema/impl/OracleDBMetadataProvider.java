@@ -85,6 +85,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "'DBSNMP', " +
                         "'DBSFWUSER', " +
                         "'XDB', " +
+                        "'CTXSYS', " +
+                        "'MDSYS', " +
+                        "'APPQOSSYS', " +
                         "'LBACSYS', " +
                         "'DVSYS', " +
                         "'APPQOSSYS', " +
@@ -121,6 +124,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                                 "'DBSNMP', " +
                                 "'DBSFWUSER', " +
                                 "'XDB', " +
+                                "'WMSYS', " +
+                                "'CTXSYS', " +
+                                "'ORDDATA', " +
+                                "'ORDSYS', " +
+                                "'OLAPSYS', " +
+                                "'MDSYS', " +
                                 "'LBACSYS', " +
                                 "'DVSYS', " +
                                 "'APPQOSSYS', " +
