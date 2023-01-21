@@ -1,9 +1,13 @@
 package it.unibz.inf.ontop.docker.lightweight.spark;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,6 +25,29 @@ public class DistinctInAggregateSparkTest extends AbstractDistinctInAggregateTes
     @AfterAll
     public static void after() throws SQLException {
         release();
+    }
+
+    @Override
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "ad", "\"10.5\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "ad", "\"12.0\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "ad", "\"13.0\"^^xsd:decimal"
+                ));
+    }
+
+    @Test
+    @Disabled("LISTAGG() WITHIN GROUP is not supported by Spark")
+    @Override
+    public void testGroupConcatDistinct() {
     }
 
 }

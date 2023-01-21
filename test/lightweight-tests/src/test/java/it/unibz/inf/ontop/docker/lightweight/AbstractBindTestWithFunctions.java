@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
 
@@ -220,7 +221,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (STRLEN(?title) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"15\"^^xsd:integer", "\"16\"^^xsd:integer", "\"20\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"15\"^^xsd:integer", "\"16\"^^xsd:integer", "\"20\"^^xsd:integer",
                 "\"44\"^^xsd:integer"));
     }
 
@@ -234,7 +235,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SUBSTR(?title, 3) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"ARQL Tutorial\"@en", "\"e Semantic Web\"@en",
+        executeAndCompareValues(query, ImmutableSet.of("\"ARQL Tutorial\"@en", "\"e Semantic Web\"@en",
                 "\"ime and Punishment\"@en", "\"e Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -248,7 +249,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (SUBSTR(?title, 3, 6) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"ARQL T\"@en", "\"e Sema\"@en", "\"ime an\"@en", "\"e Logi\"@en"));
+        executeAndCompareValues(query, ImmutableSet.of("\"ARQL T\"@en", "\"e Sema\"@en", "\"ime an\"@en", "\"e Logi\"@en"));
     }
     @Test
     public void testURIEncoding() {
@@ -452,7 +453,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (MONTH(?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"6\"^^xsd:integer","\"12\"^^xsd:integer", "\"9\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"6\"^^xsd:integer","\"12\"^^xsd:integer", "\"9\"^^xsd:integer",
                 "\"11\"^^xsd:integer"));
     }
 
@@ -465,7 +466,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (YEAR(?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"2014\"^^xsd:integer", "\"2011\"^^xsd:integer",
                 "\"2015\"^^xsd:integer", "\"1970\"^^xsd:integer"));
     }
 
@@ -478,7 +479,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (DAY(?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"5\"^^xsd:integer", "\"8\"^^xsd:integer", "\"21\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"5\"^^xsd:integer", "\"8\"^^xsd:integer", "\"21\"^^xsd:integer",
                 "\"5\"^^xsd:integer"));
     }
 
@@ -491,7 +492,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (MINUTES(?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"47\"^^xsd:integer", "\"30\"^^xsd:integer", "\"23\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"47\"^^xsd:integer", "\"30\"^^xsd:integer", "\"23\"^^xsd:integer",
                 "\"50\"^^xsd:integer"));
     }
 
@@ -504,7 +505,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (HOURS(?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"16\"^^xsd:integer", "\"11\"^^xsd:integer",
+        executeAndCompareValues(query, ImmutableSet.of("\"16\"^^xsd:integer", "\"11\"^^xsd:integer",
                 "\"9\"^^xsd:integer", "\"7\"^^xsd:integer"));
     }
 

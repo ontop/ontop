@@ -1,7 +1,6 @@
 -- Spark SQL CLI seems to have issues with multiple files
---CREATE DATABASE books;
 
-CREATE TABLE books (
+CREATE TABLE IF NOT EXISTS books (
                        id integer NOT NULL,
                        title varchar(100),
                        price integer,
@@ -20,7 +19,7 @@ INSERT INTO books VALUES (4, 'The Logic Book: Introduction, Second Edition', 10,
 
 --CREATE DATABASE university;
 
-CREATE TABLE professors (
+CREATE TABLE IF NOT EXISTS professors (
                                        prof_id int,
                                        first_name varchar(100) NOT NULL,
                                        last_name varchar(100) NOT NULL,
@@ -36,7 +35,7 @@ INSERT INTO professors VALUES (6, 'Johann', 'Helmer', NULL);
 INSERT INTO professors VALUES (7, 'Barbara', 'Dodero', NULL);
 INSERT INTO professors VALUES (8, 'Mary', 'Poppins', NULL);
 
-CREATE TABLE course (
+CREATE TABLE IF NOT EXISTS course (
                                    course_id varchar(100),
                                    nb_students int NOT NULL,
                                    duration decimal NOT NULL
@@ -48,7 +47,7 @@ INSERT INTO course VALUES ('AdvancedDatabases', 12, 20);
 INSERT INTO course VALUES ('ScientificWriting', 13, 18);
 INSERT INTO course VALUES ('OperatingSystems', 10, 30);
 
-CREATE TABLE teaching (
+CREATE TABLE IF NOT EXISTS teaching (
                                      course_id varchar(100) NOT NULL,
                                      prof_id int NOT NULL
 );

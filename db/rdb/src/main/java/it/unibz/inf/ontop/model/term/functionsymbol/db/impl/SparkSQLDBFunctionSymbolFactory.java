@@ -65,14 +65,14 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String getUUIDNameInDialect() {
-        return String.format("uuid()");
+        return String.format("uuid");
     }
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
                                        TermFactory termFactory) {
-        return String.format("(INSTR(%s,%s) > 0)",
+        return String.format("(POSITION(%s IN %s) > 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
@@ -157,7 +157,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/3600)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/3600)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }

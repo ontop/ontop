@@ -229,3 +229,33 @@ jobs:
       # Runs all tests specific to a db engine
       - name: Run CI for DB2 docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="db2lighttests" -DskipTests=false --fail-at-end
+
+
+  run-spark:
+    needs: run-postgresql
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d spark
+      - name: Sleep for 150 seconds
+        run: sleep 150s
+        shell: bash
+      # Runs all tests specific to a db engine
+      - name: Run CI for Spark SQL docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="sparksqllighttests" -DskipTests=false --fail-at-end
