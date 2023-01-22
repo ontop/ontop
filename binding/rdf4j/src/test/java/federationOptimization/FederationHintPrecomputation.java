@@ -7,7 +7,9 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.junit.Test;
 
@@ -38,7 +40,7 @@ public class FederationHintPrecomputation {
 
     public String getIRIFunction(ImmutableTerm it){
         String str = it.toString();
-        return str.endsWith("IRI)") ? str.substring(4, str.indexOf("=")): "";
+        return str.endsWith("IRI)") ? str.substring(4, str.indexOf("{")): "";
     }
 
     public String getAttribute(ImmutableTerm it){
@@ -59,6 +61,16 @@ public class FederationHintPrecomputation {
         return tableList;
     }
 
+    public List<String> getSelectItemsFromSQL(String SQL) throws JSQLParserException {
+        List<String> attributes = new ArrayList<String>();
+        Select selectStatement = (Select) CCJSqlParserUtil.parse(SQL);
+        PlainSelect pl = (PlainSelect) selectStatement.getSelectBody();
+        for(SelectItem item: pl.getSelectItems()){
+            attributes.add(item.toString());
+        }
+        return attributes;
+    }
+
     /**
      * Zhenzhen: assume the relations/tables in the VDBs or SQL queries are denoted as s.t, where s denotes the data source
      * @param tables
@@ -68,7 +80,12 @@ public class FederationHintPrecomputation {
     public boolean dynamicSourceCheck(List<String> tables, Map<String, String> sourceLab){
         boolean b = false;
         for(String t: tables){
-            String source = t.substring(1, t.indexOf("."));
+            String source = "";
+            if(t.startsWith("\"")){
+                source = t.substring(1, t.indexOf("."));
+            } else {
+                source = t.substring(0, t.indexOf("."));
+            }
             if(sourceLab.get(source).equals(SourceLab.DYNAMIC.toString())){
                 return true;
             }
@@ -85,12 +102,12 @@ public class FederationHintPrecomputation {
     public boolean candidateDuplicationCheck(EmptyFederatedJoin candidate, Set<EmptyFederatedJoin> candidates){
         boolean b = false;
         for(EmptyFederatedJoin can: candidates){
-            if(can.sql1.equals(candidate.sql1) && can.sql2.equals(candidate.sql2) && can.condition.equals(candidate.condition)){
+            if(can.relation1.equals(candidate.relation1) && can.relation2.equals(candidate.relation2) && can.joinCondition.equals(candidate.joinCondition)){
                 return true;
-            } else if(can.sql1.equals(candidate.sql2) && can.sql2.equals(candidate.sql1)){
-                String[] arr = candidate.condition.split("=");
+            } else if(can.relation1.equals(candidate.relation2) && can.relation2.equals(candidate.relation1)){
+                String[] arr = candidate.joinCondition.split("=");
                 String str = arr[1]+"="+arr[0];
-                if(can.condition.equals(str)){
+                if(can.joinCondition.equals(str)){
                     return true;
                 }
             }
@@ -101,8 +118,8 @@ public class FederationHintPrecomputation {
     public boolean candidateDuplicationCheck(Redundancy candidate, Set<Redundancy> candidates){
         boolean b = false;
         for(Redundancy can: candidates){
-            if((can.sql1.equals(candidate.sql1) && can.sql2.equals(candidate.sql2)) ||
-                    (can.sql1.equals(candidate.sql2) && can.sql2.equals(candidate.sql1))){
+            if((can.relation1.equals(candidate.relation1) && can.relation2.equals(candidate.relation2)) ||
+                    (can.relation1.equals(candidate.relation2) && can.relation2.equals(candidate.relation1))){
                 return true;
             }
         }
@@ -144,7 +161,7 @@ public class FederationHintPrecomputation {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(DBPropertyFile)));
         String line = null;
         while((line=br.readLine()) != null){
-            String[] arr = line.split(" = ");
+            String[] arr = line.split("=");
             if(arr[0].equals("jdbc.url")){
                 url = arr[1];
             } else if(arr[0].equals("jdbc.user")){
@@ -155,6 +172,7 @@ public class FederationHintPrecomputation {
                 driver = arr[1];
             }
         }
+
         Class.forName(driver);
         return DriverManager.getConnection(url, user, password);
     }
@@ -361,8 +379,18 @@ public class FederationHintPrecomputation {
                             !cm2.IRIFunction.equals(cm1.IRIFunction) || !differentSourceCheck(tables1, tables2)){
                         continue;
                     }
-                    String sql1 = "select "+cm1.attribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf("FROM"));
-                    String sql2 = "select "+cm2.attribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf("FROM"));
+
+                    String sql1 = "", sql2 = "";
+                    if(cm1.sourceSQL.contains(" FROM ")){
+                        sql1 = "SELECT "+cm1.attribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf(" FROM "));
+                    } else if(cm1.sourceSQL.contains(" from ")){
+                        sql1 = "SELECT "+cm1.attribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf(" from "));
+                    }
+                    if(cm2.sourceSQL.contains(" FROM ")){
+                        sql1 = "SELECT "+cm2.attribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf(" FROM "));
+                    } else if(cm2.sourceSQL.contains(" from ")){
+                        sql1 = "SELECT "+cm2.attribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf(" from "));
+                    }
                     Redundancy candidate = new Redundancy(sql1, sql2, null);
                     if(!candidateDuplicationCheck(candidate, candidateHints.redundancy)){
                         candidateHints.redundancy.add(candidate);
@@ -384,8 +412,18 @@ public class FederationHintPrecomputation {
                             ||!differentSourceCheck(tables1, tables2)){
                         continue;
                     }
-                    String sql1 = "select "+cm1.subjectAttribute+", "+cm1.objectAttribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf("FROM"));
-                    String sql2 = "select "+cm2.subjectAttribute+", "+cm2.objectAttribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf("FROM"));
+                    String sql1 = "", sql2 = "";
+                    if(cm1.sourceSQL.contains(" FROM ")){
+                        sql1 = "SELECT "+cm1.subjectAttribute+", "+cm1.objectAttribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf(" FROM "));
+                    } else if (cm1.sourceSQL.contains(" from ")){
+                        sql1 = "SELECT "+cm1.subjectAttribute+", "+cm1.objectAttribute+" "+cm1.sourceSQL.substring(cm1.sourceSQL.indexOf(" from "));
+                    }
+                    if(cm2.sourceSQL.contains(" FROM ")){
+                        sql2 = "SELECT "+cm2.subjectAttribute+", "+cm2.objectAttribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf(" FROM "));
+                    } else if (cm2.sourceSQL.contains(" from ")){
+                        sql2 = "SELECT "+cm2.subjectAttribute+", "+cm2.objectAttribute+" "+cm2.sourceSQL.substring(cm2.sourceSQL.indexOf(" from "));
+                    }
+
                     Redundancy candidate = new Redundancy(sql1, sql2, null);
                     if(!candidateDuplicationCheck(candidate, candidateHints.redundancy)){
                         candidateHints.redundancy.add(candidate);
@@ -401,24 +439,27 @@ public class FederationHintPrecomputation {
      * Zhenzhen: function for checking the computed candidate joins and unions, unfinished, only framework
      * @param candidateHints
      * @param federationSystemPropertyFile
-     * @param localDBPropertyFile
+     * @param matvDBPropertyFile
      * @return
      * @throws Exception
      */
 
-    public SourceHints computeSourceHints(SourceHints candidateHints, String federationSystemPropertyFile, String localDBPropertyFile) throws Exception {
+    public SourceHints computeSourceHints(SourceHints candidateHints, String federationSystemPropertyFile, String matvDBPropertyFile) throws Exception {
         SourceHints computedHints = new SourceHints();
         Connection conn_federation = getConnectionOfDB(federationSystemPropertyFile);
         Statement stmt_federation = conn_federation.createStatement();
 
-        Connection conn_localDB = getConnectionOfDB(localDBPropertyFile);
-        Statement stmt_localDB = conn_localDB.createStatement();
+        Connection conn_matvDB = getConnectionOfDB(matvDBPropertyFile);
+        Statement stmt_matvDB = conn_matvDB.createStatement();
 
         int matv_count = 0;
 
         for(EmptyFederatedJoin canEFJ: candidateHints.emptyFJs){
-            String sql = "SELECT * FROM (" + canEFJ.sql1+") AS V1, "+"("+canEFJ.sql2+") AS V2"+" WHERE "+"V1."+canEFJ.condition;
+            String[] arrs = canEFJ.joinCondition.split("=");
+            String sql = "SELECT * FROM (" + canEFJ.relation1+") AS V1, "+"("+canEFJ.relation2+") AS V2"+" WHERE "+"V1."+arrs[0]+"="+"V2."+arrs[1];
+
             //the sql query needs to be modified;
+            //the sql query needs to be make sure whether the two relations containing attributes with the same name;
             ResultSet rs = stmt_federation.executeQuery(sql);
             if(!rs.next()){
                 computedHints.emptyFJs.add(canEFJ);
@@ -426,23 +467,33 @@ public class FederationHintPrecomputation {
              //write into the local sources
              //import the schema of the local sources into federation system automatically
                 ResultSetMetaData rsmd = rs.getMetaData();
+                String viewName = "MatV_"+matv_count;
+                int column_count = rsmd.getColumnCount();
+                String create_table = "CREATE TABLE "+viewName+" ( ";
+                for(int i=1; i<column_count+1; i++){
+                    create_table = create_table + rsmd.getColumnName(i)+" "+rsmd.getColumnTypeName(i)+" , ";
+                }
+                create_table = create_table.substring(0, create_table.length()-2)+" )";
+                boolean b = stmt_matvDB.execute(create_table);
 
+                insertData(stmt_matvDB, rs, viewName);
                 matv_count = matv_count+1;
+                break;
             }
         }
 
-        for(Redundancy red: candidateHints.redundancy){
-            ResultSet rs_sql1 = stmt_federation.executeQuery(red.sql1);
-            ResultSet rs_sql2 = stmt_federation.executeQuery(red.sql2);
+        for(Redundancy candidate: candidateHints.redundancy){
+            ResultSet rs_sql1 = stmt_federation.executeQuery(candidate.relation1);
+            ResultSet rs_sql2 = stmt_federation.executeQuery(candidate.relation2);
             String res = checkRedundancy(rs_sql1, rs_sql2);
             if(res.length()>0){
-                red.relation = res;
-                computedHints.redundancy.add(red);
+                candidate.redundancyRelation = res;
+                computedHints.redundancy.add(candidate);
             }
         }
 
-        stmt_localDB.close();
-        conn_localDB.close();
+        stmt_matvDB.close();
+        conn_matvDB.close();
         stmt_federation.close();
         conn_federation.close();
 
@@ -497,17 +548,28 @@ public class FederationHintPrecomputation {
 
    @Test
     public void myTest() throws Exception {
-        SourceHints sh = detectCandidateHints("src/test/resources/compareIRI/boot-multiple-inheritance.owl","src/test/resources/compareIRI/boot-multiple-inheritance.obda","src/test/resources/compareIRI/boot-multiple-inheritance.properties","src/test/resources/compareIRI/SourceLab.txt");
-        System.out.println("detected candidate federated joins for checking:");
+        SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
+                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
+                "src/test/resources/federation-test/teiid.properties",
+                "src/test/resources/federation-test/SourceLab.txt");
+        System.out.println("detected candidate federated joins for checking: "+sh.emptyFJs.size());
         for(EmptyFederatedJoin efj: sh.emptyFJs){
             efj.print();
         }
 
-        System.out.println("detected candidate unions for checking: ");
+        System.out.println("detected candidate unions for checking: "+sh.redundancy.size());
         for(Redundancy red: sh.redundancy){
             red.print();
         }
+
+        System.out.println("start computing: ");
+
+        SourceHints sh_new = computeSourceHints(sh,
+                "src/test/resources/federation-test/federationSystem-property.txt",
+                "src/test/resources/federation-test/matvDB-property.txt");
+        System.out.println("finish");
    }
+
 }
 
 

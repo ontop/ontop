@@ -6,6 +6,8 @@ public class MaterializedView {
     String table;
     List<String> attributes;
     String sourceSQL;
+    //table is the name of the relation for the materialized view
+    //table(attributes) <- sourceSQL
 
     public MaterializedView(){
         table = null;

@@ -1,0 +1,243 @@
+[PrefixDeclaration]
+:		http://obda.inf.unibz.it/ontop/benchmark/bsbm.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rev:		http://purl.org/stuff/rev#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+bsbm:		http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/
+foaf:		http://xmlns.com/foaf/0.1/
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+iso3166:	http://downlode.org/rdf/iso-3166/countries#
+bsbm-inst:	http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/
+
+[MappingDeclaration] @collection [[
+
+mappingId	Product11
+target		bsbm-inst:dataFromProducer/Product{nr} a bsbm:Product ; bsbm:productId {nr} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss1.product1
+
+mappingId	Product12
+target		bsbm-inst:dataFromProducer/Product{nr} bsbm:productPropertyNumeric1 {propertynum1} ; bsbm:productPropertyNumeric2 {propertynum2} ; bsbm:productPropertyNumeric3 {propertynum3} ; bsbm:productPropertyNumeric4 {propertynum4} ; bsbm:productPropertyNumeric5 {propertynum5} ; bsbm:productPropertyNumeric6 {propertynum6} ; bsbm:productPropertyTextual1 {propertytex1} ; bsbm:productPropertyTextual2 {propertytex2} ; bsbm:productPropertyTextual3 {propertytex3} ; bsbm:productPropertyTextual4 {propertytex4} ; bsbm:productPropertyTextual5 {propertytex5} ; bsbm:productPropertyTextual6 {propertytex6} ; dc:date {publishdate} ; bsbm:producer bsbm-inst:dataFromProducer/Producer{producer} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss1.product1
+
+mappingId	Product13
+target		bsbm-inst:dataFromProducer/Product{nr} dc:publisher bsbm-inst:dataFromProducer/Producer{producer} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss1.product1
+
+mappingId	Product14
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:label {label} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss1.product1
+
+mappingId	Product15
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:comment {comment} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss1.product1
+
+mappingId	Product_has_Product_Feature1
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:productFeature bsbm-inst:ProductFeature{productfeature} .
+source		select product, productfeature from  ss1.productfeatureproduct1
+
+mappingId	Product_has_Product_Type1
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:type bsbm-inst:ProductType{producttype} .
+source		select product, producttype from ss1.producttypeproduct1
+
+mappingId	Review11
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:reviewDate {reviewdate} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review12
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:title {title} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review13
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:rating1 {rating1} ; bsbm:rating2 {rating2} ; bsbm:rating3 {rating3} ; bsbm:rating4 {rating4} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review14
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:reviewFor bsbm-inst:dataFromProducer/Product{product} ; bsbm:reviewProductId {product}.
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review15
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:reviewer bsbm-inst:dataFromRatingSite/Reviewer{person} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review16
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:publisher bsbm-inst:dataFromRatingSite/RatingSite{publisher} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review17
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:text {text}; bsbm:language {textlanguage} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+mappingId	Review18
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:date {publishdate} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss1.reviewc
+
+
+
+mappingId	Person
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} a foaf:Person ; bsbm:reviewerId {nr}.
+source		select nr, name, mbox_sha1sum, country, publisher, publishdate from ss2.person
+
+mappingId	Person2
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} foaf:name {name} ; foaf:mbox_sha1sum {mbox_sha1sum} ; bsbm:country iso3166:{country} .
+source		select nr, name, mbox_sha1sum, country, publisher, publishdate from ss2.person
+
+mappingId	Person3
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} dc:publisher bsbm-inst:dataFromRatingSite/RatingSite{publisher} .
+source		select nr, name, mbox_sha1sum, country, publisher, publishdate from ss2.person
+
+mappingId	Person4
+target		bsbm-inst:dataFromRatingSite/Reviewer{nr} dc:date {publishdate} .
+source		select nr, name, mbox_sha1sum, country, publisher, publishdate from ss2.person
+
+
+mappingId	Review1
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:reviewDate {reviewdate} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review2
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:title {title} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review3
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:rating1 {rating1} ; bsbm:rating2 {rating2} ; bsbm:rating3 {rating3} ; bsbm:rating4 {rating4} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review4
+target		bsbm-inst:dataFromRatingSite/Review{nr} bsbm:reviewFor bsbm-inst:dataFromProducer/Product{product} ; bsbm:reviewProductId {product}.
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review5
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:reviewer bsbm-inst:dataFromRatingSite/Reviewer{person} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review6
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:publisher bsbm-inst:dataFromRatingSite/RatingSite{publisher} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review7
+target		bsbm-inst:dataFromRatingSite/Review{nr} rev:text {text}; bsbm:language {textlanguage} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+mappingId	Review8
+target		bsbm-inst:dataFromRatingSite/Review{nr} dc:date {publishdate} .
+source		select nr, product, producer, person, reviewdate, title, text, textlanguage, rating1, rating2, rating3, rating4, publisher, publishdate from ss2.review
+
+
+mappingId	Product_Feature
+target		bsbm-inst:ProductFeature{nr} a bsbm:ProductFeature ; bsbm:productFeatureId {nr}.
+source		select nr, label, comment, publisher, publishdate from ss3.productfeature
+
+mappingId	Product_Feature2
+target		bsbm-inst:ProductFeature{nr} rdfs:label {label} .
+source		select nr, label, comment, publisher, publishdate from ss3.productfeature
+
+mappingId	Product_Feature3
+target		bsbm-inst:ProductFeature{nr} rdfs:comment {comment} .
+source		select nr, label, comment, publisher, publishdate from ss3.productfeature
+
+mappingId	Product_Feature4
+target		bsbm-inst:ProductFeature{nr} dc:publisher bsbm-inst:StandardizationInstitution{publisher} .
+source		select nr, label, comment, publisher, publishdate from ss3.productfeature
+
+mappingId	Product_Feature5
+target		bsbm-inst:ProductFeature{nr} dc:date {publishdate} .
+source		select nr, label, comment, publisher, publishdate from ss3.productfeature
+
+mappingId	Product_Type
+target		bsbm-inst:ProductType{nr} a bsbm:ProductType ; bsbm:productTypeId {nr} .
+source		select nr, label, comment, parent, publisher, publishdate from ss3.producttype
+
+mappingId	Product_Type2
+target		bsbm-inst:ProductType{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select nr, label, comment, parent, publisher, publishdate from ss3.producttype
+
+mappingId	Product_Type3
+target		bsbm-inst:ProductType{nr} dc:publisher bsbm-inst:StandardizationInstitution{publisher} .
+source		select nr, label, comment, parent, publisher, publishdate from ss3.producttype
+
+mappingId	Product_Type4
+target		bsbm-inst:ProductType{nr} bsbm:subClassOf bsbm-inst:ProductType{parent} .
+source		select nr, label, comment, parent, publisher, publishdate from ss3.producttype
+
+mappingId	Product_Type5
+target		bsbm-inst:ProductType{nr} dc:date {publishdate} .
+source		select nr, label, comment, parent, publisher, publishdate from ss3.producttype
+
+
+mappingId	Offer
+target		bsbm-inst:dataFromVendor/Offer{nr} a bsbm:Offer ; bsbm:offerId {nr} ; bsbm:price {price} ; bsbm:validFrom {validfrom} ; bsbm:validTo {validto} ; bsbm:deliveryDays {deliverydays} ; bsbm:offerWebpage {offerwebpage} ; dc:date {publishdate} ; bsbm:product bsbm-inst:dataFromProducer/Product{product} ; bsbm:vendor bsbm-inst:dataFromVendor/Vendor{vendor} ; dc:publisher bsbm-inst:dataFromVendor/Vendor{vendor} .
+source		select nr, product, producer, vendor, price, validfrom, validto, deliverydays, offerwebpage, publisher, publishdate from ss4.offer
+
+mappingId	Producer
+target		bsbm-inst:dataFromProducer/Producer{nr} a bsbm:Producer ; bsbm:producerId {nr} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.producer
+
+mappingId	Producer2
+target		bsbm-inst:dataFromProducer/Producer{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.producer
+
+mappingId	Producer3
+target		bsbm-inst:dataFromProducer/Producer{nr} foaf:homepage {homepage} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.producer
+
+mappingId	Producer4
+target		bsbm-inst:dataFromProducer/Producer{nr} bsbm:country iso3166:{country} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.producer
+
+mappingId	Producer6
+target		bsbm-inst:dataFromProducer/Producer{nr} dc:date {publishdate} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.producer
+
+mappingId	Vendor
+target		bsbm-inst:dataFromVendor/Vendor{nr} a bsbm:Vendor ; bsbm:vendorId {nr} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.vendor
+
+mappingId	Vendor2
+target		bsbm-inst:dataFromVendor/Vendor{nr} rdfs:label {label} ; rdfs:comment {comment} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.vendor
+
+mappingId	Vendor3
+target		bsbm-inst:dataFromVendor/Vendor{nr} foaf:homepage {homepage} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.vendor
+
+mappingId	Vendor4
+target		bsbm-inst:dataFromVendor/Vendor{nr} bsbm:country iso3166:{country} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.vendor
+
+mappingId	Vendor6
+target		bsbm-inst:dataFromVendor/Vendor{nr} dc:date {publishdate} .
+source		select nr, label, comment, homepage, country, publisher, publishdate from ss4.vendor
+
+
+mappingId	Product21
+target		bsbm-inst:dataFromProducer/Product{nr} a bsbm:Product ; bsbm:productId {nr} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2
+
+mappingId	Product22
+target		bsbm-inst:dataFromProducer/Product{nr} bsbm:productPropertyNumeric1 {propertynum1} ; bsbm:productPropertyNumeric2 {propertynum2} ; bsbm:productPropertyNumeric3 {propertynum3} ; bsbm:productPropertyNumeric4 {propertynum4} ; bsbm:productPropertyNumeric5 {propertynum5} ; bsbm:productPropertyNumeric6 {propertynum6} ; bsbm:productPropertyTextual1 {propertytex1} ; bsbm:productPropertyTextual2 {propertytex2} ; bsbm:productPropertyTextual3 {propertytex3} ; bsbm:productPropertyTextual4 {propertytex4} ; bsbm:productPropertyTextual5 {propertytex5} ; bsbm:productPropertyTextual6 {propertytex6} ; dc:date {publishdate} ; bsbm:producer bsbm-inst:dataFromProducer/Producer{producer} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2
+
+mappingId	Product23
+target		bsbm-inst:dataFromProducer/Product{nr} dc:publisher bsbm-inst:dataFromProducer/Producer{producer} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2
+
+mappingId	Product24
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:label {label} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2
+
+mappingId	Product25
+target		bsbm-inst:dataFromProducer/Product{nr} rdfs:comment {comment} .
+source		select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2
+
+mappingId	Product_has_Product_Feature2
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:productFeature bsbm-inst:ProductFeature{productfeature} .
+source		select product, productfeature from  ss5.productfeatureproduct2
+
+mappingId	Product_has_Product_Type2
+target		bsbm-inst:dataFromProducer/Product{product} bsbm:type bsbm-inst:ProductType{producttype} .
+source		select product, producttype from ss5.producttypeproduct2
+]]
