@@ -73,7 +73,8 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
                 String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs, variableAliases, selectFromWhere.getSubstitution());
-                String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
+                String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset(),
+                        selectFromWhere.getSortConditions().isEmpty());
 
                 String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                         fromString, whereString, groupByString, orderByString, sliceString);
@@ -81,20 +82,6 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 // Creates an alias for this SQLExpression and uses it for the projected columns
                 RelationID alias = generateFreshViewAlias();
                 return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
-            }
-
-            @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-            private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
-                if (!limit.isPresent() && !offset.isPresent())
-                    return "";
-
-                if (limit.isPresent() && offset.isPresent())
-                    return serializeLimitOffset(limit.get(), offset.get(), true);
-
-                if (limit.isPresent())
-                    return serializeLimit(limit.get(), true);
-
-                return serializeOffset(offset.get(), true);
             }
 
             /**
@@ -128,10 +115,14 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
                     if (entry.getValue().equals(term)) {
-                        return  ("`" + entry.getKey().getName() + "`"); // Return the COLUMN ALIAS
+                        return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
                     }
                 }
                 return checkColumnID(term, columnIDs);
+            }
+
+            private QuotedID variableNameToColumnAlias(Variable variable) {
+                return createAttributeAliasFactory().createAttributeAlias(variable.getName());
             }
 
             /**
@@ -145,7 +136,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 } else if (term instanceof Variable) {
                     for (Map.Entry<Variable, QualifiedAttributeID> entry : columnIDs.entrySet()) {
                         if (entry.getValue().equals(columnIDs.get(term))) {
-                            return ("`"+entry.getKey().getName()+"`");   // Return the COLUMN ALIAS
+                            return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
                         }
                     }
                     throw new SQLSerializationException(String.format(

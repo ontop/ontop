@@ -188,7 +188,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
+        protected String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
