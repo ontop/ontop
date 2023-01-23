@@ -23,7 +23,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
+        initOBDA("/books/oracle/books-oracle.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll

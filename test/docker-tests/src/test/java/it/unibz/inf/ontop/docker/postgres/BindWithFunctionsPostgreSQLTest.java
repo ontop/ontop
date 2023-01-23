@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -159,6 +160,15 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         expectedValues.add("\"255\"^^xsd:long");
 
         return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValues() {
+        return ImmutableList.of(
+                "\"52.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal",
+                "\"6.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal");
     }
 
 }
