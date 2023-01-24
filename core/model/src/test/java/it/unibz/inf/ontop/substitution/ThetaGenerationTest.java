@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.substitution;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,102 +24,50 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Vector;
 
-import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
-public class ThetaGenerationTest extends TestCase {
+public class ThetaGenerationTest {
 
-	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
+    //A(x),A(x)
+    @Test
+    public void test_1() {
+        ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
+        ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
 
-	private Vector<Map.Entry<Variable, ImmutableTerm>> getMGUAsVector(ImmutableFunctionalTerm t1, ImmutableFunctionalTerm t2) {
-		Optional<ImmutableSubstitution<ImmutableTerm>> mgu = UNIFICATION_TOOLS.computeMGU(
-				ImmutableList.of(t1), ImmutableList.of(t2));
-		return mgu.map(s -> new Vector<>(s.entrySet())).orElse(null);
-	}
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertTrue(s.get().isEmpty());
+    }
 
-	private static FunctionSymbol createClassLikePredicate(String name) {
-		return new OntopModelTestFunctionSymbol(SUBQUERY_PRED_PREFIX + name, 1);
-	}
+    //A(x),A(y)
+    @Test
+    public void test_2() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        Variable t2 = TERM_FACTORY.getVariable("y");
 
-
-
-
-	//A(x),A(x)
-	public void test_1(){
-			ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-			ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-
-			FunctionSymbol pred1 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-					ImmutableList.of(t1));
-
-			FunctionSymbol pred2 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-					ImmutableList.of(t2));
-
-			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-			assertEquals(0, s.size());
-	}
-
-	//A(x),A(y)
-	public void test_2(){
-			ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-			ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
-
-			FunctionSymbol pred1 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-					ImmutableList.of(t1));
-
-			FunctionSymbol pred2 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-					ImmutableList.of(t2));
-
-			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-			assertEquals(1, s.size());
-
-			Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
-			ImmutableTerm t = s0.getValue();
-			Variable v = s0.getKey();
-
-			assertEquals("y", ((Variable) t).getName());
-			assertEquals("x", v.getName());
-	}
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
+    }
 
 
-	//A(x),A('y')
-	public void test_3(){
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+    //A(x),A('y')
+    @Test
+    public void test_3() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(t1));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
+    }
 
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(t2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
-		RDFLiteralConstant t = (RDFLiteralConstant) s0.getValue();
-		Variable v = s0.getKey();
-
-		assertEquals("y", t.getValue());
-		assertEquals("x", v.getName());
-	}
-
-		//A(x),A('p(y)')
-	public void test_4(){
+    //A(x),A('p(y)')
+    public void test_4() {
 
 //		try {
 //			Term t1 = TERM_FACTORY.createVariable("x");
@@ -152,53 +100,30 @@ public class ThetaGenerationTest extends TestCase {
 //			e.printStackTrace();
 //			assertEquals(false, true);
 //		}
-	}
+    }
 
-	//A('y'),A(x)
-	public void test_5(){
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+    //A('y'),A(x)
+    @Test
+    public void test_5() {
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(t1));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, t1), s.get());
+    }
 
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(t2));
+    //A('y'),A('y')
+    @Test
+    public void test_6() {
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+        RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertTrue(s.get().isEmpty());
+    }
 
-		Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
-		RDFLiteralConstant t = (RDFLiteralConstant) s0.getValue();
-		Variable v = s0.getKey();
-
-		assertEquals(t + " y", "y", t.getValue());
-		assertEquals(t + " x", "x", v.getName());
-	}
-
-	//A('y'),A('y')
-	public void test_6(){
-
-
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(t1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(t2));
-
-			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-			assertEquals(0, s.size());
-	}
-
-	//A('y'),A('p(x)')
-	public void test_7(){
+    //A('y'),A('p(x)')
+    public void test_7() {
 
 //		try {
 //
@@ -227,558 +152,308 @@ public class ThetaGenerationTest extends TestCase {
 //			e.printStackTrace();
 //			assertEquals(false, true);
 //		}
-	}
-
-	//A('y'),A('x')
-	public void test_8(){
-			ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("x", XSD.STRING);
-			ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
-
-			FunctionSymbol pred1 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-					ImmutableList.of(t1));
-
-			FunctionSymbol pred2 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-					ImmutableList.of(t2));
-
-			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-			assertNull(s);
-	}
-
-	//A('y'),A(p(x))
-	public void test_9(){
-			ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
-			ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
-
-			FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
-			ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs,
-					ImmutableList.of(t2));
-
-			FunctionSymbol pred1 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-					ImmutableList.of(t1));
-
-			FunctionSymbol pred2 = createClassLikePredicate("A");
-			ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-					ImmutableList.of(ot));
-
-			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-			assertNull(s);
-	}
-
-	//A(p(x)), A(x)
-	public void test_10(){
-
-		ImmutableTerm t = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(t2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p(x)), A(y)
-	public void test_11(){
-
-		ImmutableTerm t = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs,
-				ImmutableList.of(t));
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(t2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		ImmutableFunctionalTerm term = (ImmutableFunctionalTerm) sub.getValue();
-		List<? extends ImmutableTerm> para = term.getTerms();
-		Variable var = sub.getKey();
-
-		assertEquals("y", var.getName());
-		assertEquals(1, para.size());
-		assertEquals("x", ((Variable) para.get(0)).getName());
-	}
-
-	//A(p(x)), A(q(x))
-	public void test_12(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p(x)), A(p(x))
-	public void test_13(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(0, s.size());
-	}
-
-	//A(p(x)), A(p(y))
-	public void test_14(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		ImmutableTerm term = sub.getValue();
-		Variable var = sub.getKey();
-
-		assertEquals("y", ((Variable) term).getName());
-		assertEquals("x", var.getName());
-	}
-
-	//A(p(x)), A(p(y,z))
-	public void test_15(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("y");
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2, t3));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p(x)), A(p('123'))
-	public void test_16(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		RDFLiteralConstant term = (RDFLiteralConstant) sub.getValue();
-		Variable var = sub.getKey();
-
-		assertEquals("123", term.getValue());
-		assertEquals("x", var.getName());
-	}
-
-	//A(p(x)), A(p('123',z))
-	public void test_17(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2, t3));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p(x)), A(q('123'))
-	public void test_18(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-
-	}
-
-	//A(p(x,z)), A(p('123'))
-	public void test_19(){
-
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1, t3));
-
-		ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(x), A(p(x))
-	public void test_20(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(t1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(y), A(p(x))
-	public void test_21(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("y");
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(t1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		ImmutableFunctionalTerm term = (ImmutableFunctionalTerm) sub.getValue();
-		ImmutableList<? extends ImmutableTerm> para = term.getTerms();
-		Variable var = sub.getKey();
-
-		assertEquals("y", var.getName());
-		assertEquals(1, para.size());
-		assertEquals("x", ((Variable) para.get(0)).getName());
-	}
-
-	//A(q(x)), A(p(x))
-	public void test_22(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("q", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p(y)), A(p(x))
-	public void test_24(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("y");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		ImmutableTerm term = sub.getValue();
-		Variable var = sub.getKey();
-
-		assertEquals("x", ((Variable) term).getName());
-		assertEquals("y", var.getName());
-	}
-
-	// A(p(y,z)), A(p(x))
-	public void test_25(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getVariable("y");
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1, t3));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p('123')), A(p(x))
-	public void test_26(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertEquals(1, s.size());
-
-		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
-		RDFLiteralConstant term = (RDFLiteralConstant) sub.getValue();
-		Variable var = sub.getKey();
-
-		assertEquals("123", term.getValue());
-		assertEquals("x", var.getName());
-	}
-
-	//A(p('123',z)),A(p(x))
-	public void test_27(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1, t3));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(q('123')),A(p(x))
-	public void test_28(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("q", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
-
-	//A(p('123')),A(p(x,z))
-	public void test_29(){
-
-		ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
-		FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
-		ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1,
-				ImmutableList.of(t1));
-
-		ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
-		ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
-		FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
-		ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2,
-				ImmutableList.of(t2, t3));
-
-		FunctionSymbol pred1 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom1 = TERM_FACTORY.getImmutableFunctionalTerm(pred1,
-				ImmutableList.of(ot1));
-
-		FunctionSymbol pred2 = createClassLikePredicate("A");
-		ImmutableFunctionalTerm atom2 = TERM_FACTORY.getImmutableFunctionalTerm(pred2,
-				ImmutableList.of(ot2));
-
-		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
-		assertNull(s);
-	}
+    }
+
+    //A('y'),A('x')
+    @Test
+    public void test_8() {
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("x", XSD.STRING);
+        RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        assertFalse(s.isPresent());
+    }
+
+    //A('y'),A(p(x))
+    @Test
+    public void test_9() {
+        RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+        Variable t2 = TERM_FACTORY.getVariable("y");
+        FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x)), A(x)
+    @Test
+    public void test_10() {
+        Variable t = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t));
+        Variable t2 = TERM_FACTORY.getVariable("x");
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot), ImmutableList.of(t2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x)), A(y)
+    @Test
+    public void test_11() {
+        Variable t = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t));
+        Variable t2 = TERM_FACTORY.getVariable("y");
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot), ImmutableList.of(t2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, ot), s.get());
+    }
+
+    //A(p(x)), A(q(x))
+    @Test
+    public void test_12() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x)), A(p(x))
+    @Test
+    public void test_13() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertTrue(s.get().isEmpty());
+    }
+
+    //A(p(x)), A(p(y))
+    @Test
+    public void test_14() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("y");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
+    }
+
+    //A(p(x)), A(p(y,z))
+    @Test
+    public void test_15() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("y");
+        Variable t3 = TERM_FACTORY.getVariable("z");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x)), A(p('123'))
+    @Test
+    public void test_16() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
+    }
+
+    //A(p(x)), A(p('123',z))
+    @Test
+    public void test_17() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        ImmutableTerm t3 = TERM_FACTORY.getVariable("z");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x)), A(q('123'))
+    @Test
+    public void test_18() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(x,z)), A(p('123'))
+    @Test
+    public void test_19() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        Variable t3 = TERM_FACTORY.getVariable("z");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1, t3));
+
+        ImmutableTerm t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(x), A(p(x))
+    @Test
+    public void test_20() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        assertFalse(s.isPresent());
+    }
+
+    //A(y), A(p(x))
+    @Test
+    public void test_21() {
+        Variable t1 = TERM_FACTORY.getVariable("y");
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, ot), s.get());
+    }
+
+    //A(q(x)), A(p(x))
+    @Test
+    public void test_22() {
+        Variable t1 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("q", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p(y)), A(p(x))
+    @Test
+    public void test_24() {
+        Variable t1 = TERM_FACTORY.getVariable("y");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
+    }
+
+    // A(p(y,z)), A(p(x))
+    @Test
+    public void test_25() {
+        Variable t1 = TERM_FACTORY.getVariable("y");
+        Variable t3 = TERM_FACTORY.getVariable("z");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1, t3));
+
+        ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p('123')), A(p(x))
+    @Test
+    public void test_26() {
+        ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, t1), s.get());
+    }
+
+    //A(p('123',z)),A(p(x))
+    @Test
+    public void test_27() {
+        ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        ImmutableTerm t3 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1, t3));
+
+        ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(q('123')),A(p(x))
+    @Test
+    public void test_28() {
+        ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("q", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
+
+    //A(p('123')),A(p(x,z))
+    @Test
+    public void test_29() {
+
+        ImmutableTerm t1 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
+        FunctionSymbol fs1 = new OntopModelTestFunctionSymbol("p", 1);
+        ImmutableFunctionalTerm ot1 = TERM_FACTORY.getImmutableFunctionalTerm(fs1, ImmutableList.of(t1));
+
+        Variable t2 = TERM_FACTORY.getVariable("x");
+        Variable t3 = TERM_FACTORY.getVariable("z");
+        FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
+        ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        assertFalse(s.isPresent());
+    }
 }

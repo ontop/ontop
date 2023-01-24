@@ -62,7 +62,7 @@ public class ImmutableUnificationTools {
                                 Sets.union(firstIndexes, secondIndexes).stream()
                                         .collect(ImmutableCollectors.toMap(
                                                 i -> i,
-                                                i -> Optional.ofNullable((VariableOrGroundTerm) argumentMap1.get(i))
+                                                i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap1.get(i))
                                                 .orElseGet(() -> argumentMap2.get(i))))),
                         u));
 
