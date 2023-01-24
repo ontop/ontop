@@ -21,8 +21,11 @@ package it.unibz.inf.ontop.substitution;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.io.BufferedReader;
@@ -33,94 +36,144 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import junit.framework.TestCase;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
+import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mariano Rodriguez Muro
  * 
  */
-public class AutomaticMGUGenerationTests extends TestCase {
+public class AutomaticMGUGenerationTests  {
 
-	private ImmutableUnificationTools unifier;
-	private AutomaticMGUTestDataGenerator	generator;
+	private static ImmutableUnificationTools unifier;
 	private final Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
-	public void setUp() {
+	@BeforeAll
+	public static void setUp() {
 		/*
 		 * TODO modify the API so that function symbols for object terms use the
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
 		unifier = new ImmutableUnificationTools(SUBSTITUTION_FACTORY);
-		generator = new AutomaticMGUTestDataGenerator();
 	}
 
+	@Test
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
 		File inputFile = new File("src/test/java/it/unibz/inf/ontop/substitution/mgu-computation-test-cases.txt");
-		BufferedReader in = new BufferedReader(new FileReader(inputFile));
+		try (BufferedReader in = new BufferedReader(new FileReader(inputFile))) {
+			String testcase;
+			int casecounter = 0;
+			while ((testcase = in.readLine()) != null) {
+				if (testcase.trim().equals("") || testcase.charAt(0) == '%') {
+					continue; // we read a comment, skip it
+				}
+				log.debug("case: {}", testcase);
+				String atomsstr = testcase.split("=")[0].trim();
+				String mgustr = testcase.split("=")[1].trim();
 
-		String testcase = in.readLine();
-		int casecounter = 0;
-		while (testcase != null) {
-			if (testcase.trim().equals("") || testcase.charAt(0) == '%') {
-				/* we read a comment, skip it */
-				testcase = in.readLine();
-				continue;
+				List<ImmutableTerm> atoms = getAtoms(atomsstr);
+				Optional<ImmutableSubstitution<ImmutableTerm>> expectedmgu = getMGU(mgustr);
+				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.computeMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+				log.debug("Expected MGU: {}", expectedmgu);
+				assertEquals(expectedmgu, mgu);
+				casecounter++;
 			}
-			log.debug("case: {}", testcase);
-			String input = testcase;
-			String atomsstr = input.split("=")[0].trim();
-			String mgustr = input.split("=")[1].trim();
-			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
-			List<Map.Entry<Variable, ImmutableTerm>> expectedmgu = generator.getMGU(mgustr);
-			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
-
-			Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.computeMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
-			if (!mgu.isPresent()) {
-				computedmgu = null;
-			} else {
-				computedmgu.addAll(mgu.get().entrySet());
-			}
-
-			log.debug("Expected MGU: {}", expectedmgu);
-
-			if (expectedmgu == null) {
-				assertNull(computedmgu);
-			} else {
-				assertNotNull(computedmgu);
-				assertEquals(computedmgu.size(), expectedmgu.size());
-				assertTrue(generator.compareUnifiers(expectedmgu, computedmgu));
-
-			}
-			casecounter += 1;
-			testcase = in.readLine();
+			log.info("Successfully executed {} test cases for MGU computation", casecounter);
 		}
-		in.close();
-		log.info("Successfully executed {} test cases for MGU computation", casecounter);
 	}
 
-//	/**
-//	 * Test method for
-//	 * {@link org.obda.reformulation.dllite.AtomUnifier#getMGU(org.obda.query.domain.CQIE, int, int, boolean)}
-//	 * .
-//	 */
-//	
-//	public void testGetMGUCQIEIntIntBoolean() {
-//		("Not yet implemented"); // TODO
-//	}
-//
-//	/**
-//	 * Test method for
-//	 */
-//	
-//	public void testApplySubstitution() {
-//		fail("Not yet implemented"); // TODO
-//	}
 
+	/***
+	 * Gets list of substitutions encoded in the string mgustr. mgustr is
+	 * normally used to encode the expected MGU for a test.
+	 *
+	 * @param mgustr
+	 * @return
+	 */
+	private static Optional<ImmutableSubstitution<ImmutableTerm>> getMGU(String mgustr) {
+		if (mgustr.trim().equals("NULL"))
+			return Optional.empty();
+
+		mgustr = mgustr.substring(1, mgustr.length() - 1);
+		String[] mguStrings = mgustr.split(" ");
+
+		ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
+		for (String string : mguStrings) {
+			if (string.equals(""))
+				continue;
+			String[] elements = string.split("/");
+			builder.put((Variable) getTerm(elements[0]), getTerm(elements[1]));
+		}
+		ImmutableMap<Variable, ImmutableTerm> map = builder.build();
+		return Optional.of(SUBSTITUTION_FACTORY.getSubstitutionFromStream(map.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+
+	/***
+	 * Gets the list of size 2, of the two atoms in the string atomstr. Only
+	 * supports 2 atoms!.
+	 *
+	 * @param atomstrs
+	 * @return
+	 */
+	private static ImmutableList<ImmutableTerm> getAtoms(String atomstrs) {
+		String[] atomstr = atomstrs.trim().split("\\|");
+		ImmutableTerm atom1 = getAtom(atomstr[0].trim());
+		ImmutableTerm atom2 = getAtom(atomstr[1].trim());
+		return ImmutableList.of(atom1, atom2);
+	}
+
+	private static ImmutableTerm getAtom(String atomstr) {
+		String termstr = atomstr.substring(2, atomstr.length() - 1);
+		List<ImmutableTerm> terms = new ArrayList<>();
+
+		String[] termstra = termstr.split(" ");
+		for (String s : termstra) {
+			terms.add(getTerm(s.trim()));
+		}
+		return TERM_FACTORY.getImmutableFunctionalTerm(
+				new OntopModelTestFunctionSymbol(atomstr.substring(0, 1), terms.size()),
+				ImmutableList.copyOf(terms));
+	}
+
+	private static ImmutableTerm getTerm(String termstrs) {
+		// List<Term> terms = new ArrayList<Term>();
+		// String[] termstra = termstrs.split(",");
+		// for (int i = 0; i < termstra.length; i++) {
+
+		String termstr = termstrs.trim();
+
+		if (termstr.indexOf('(') != -1) {
+			String[] subtermstr = termstr.substring(2, termstrs.length() - 1).split(",");
+			List<ImmutableTerm> fuctTerms = new ArrayList<>();
+			for (String s : subtermstr) {
+				fuctTerms.add(getTerm(s));
+			}
+			FunctionSymbol fs = new OntopModelTestFunctionSymbol(termstr.substring(0, 1), fuctTerms.size());
+			return TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.copyOf(fuctTerms));
+		}
+		else if (termstr.charAt(0) == '"') {
+			return TERM_FACTORY.getRDFLiteralConstant(termstr.substring(1, termstr.length() - 1), XSD.STRING);
+		}
+		else if (termstr.charAt(0) == '<') {
+			return TERM_FACTORY.getConstantIRI(RDF_FACTORY.createIRI(termstr.substring(1, termstr.length() - 1)));
+//		} else if (termstr.equals("#")) {
+//			return TERM_FACTORY.getVariableNondistinguished();
+		}
+		else {
+			return TERM_FACTORY.getVariable(termstr);
+			/* variable */
+		}
+		// }
+
+	}
 }
