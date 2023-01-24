@@ -274,9 +274,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             Iterator<Optional<Variable>> it = replacementVars.iterator();
             return iqFactory.createFilterNode(
                     termFactory.getConjunction(da.getArguments().stream()
-                            .map(a -> getEquality(a, it.next()))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
+                            .flatMap(a -> it.next().map(v -> termFactory.getStrictEquality(a, v)).stream())
                             .collect(ImmutableCollectors.toList())));
         }
 
@@ -288,10 +286,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             .collect(ImmutableCollectors.toList())));
         }
 
-        private Optional<ImmutableExpression> getEquality(VariableOrGroundTerm t, Optional<Variable> replacement) {
-            return replacement
-                    .map(variable -> termFactory.getStrictEquality(t, variable));
-        }
     }
 
 

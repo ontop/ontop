@@ -49,8 +49,7 @@ public class IQ2CQ {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = node.getArgumentMap();
         RelationPredicate predicate = node.getRelationDefinition().getAtomPredicate();
         ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
-                .mapToObj(i -> Optional.ofNullable(argumentMap.get(i))
-                        .map(t -> (VariableOrGroundTerm) t)
+                .mapToObj(i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(i))
                         .orElseGet(variableGenerator::generateNewVariable))
                 .collect(ImmutableCollectors.toList());
 

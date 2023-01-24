@@ -111,7 +111,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             ImmutableSet<ImmutableExpression> expressions = extractExpressions(dataNodes, normalization.equalities, dependentIndexes);
 
-            return unificationTools.getArgumentMapUnifier(normalization.dataNodes.stream().map(n -> extractDependentArgumentMap(n, dependentIndexes)))
+            return unificationTools.getArgumentMapUnifier(normalization.dataNodes.stream().map(n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), dependentIndexes)))
                     .map(u -> convertIntoDeterminantGroupEvaluation(u, targetDataNode,
                             ImmutableList.copyOf(normalization.dataNodes),
                             expressions, dependentIndexes));
@@ -129,20 +129,18 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             RelationDefinition relationDefinition = dataNodes.iterator().next().getRelationDefinition();
 
-            ImmutableList<Integer> externalArgumentIndexes = relationDefinition.getAttributes().stream()
+            ImmutableSet<Integer> externalArgumentIndexes = relationDefinition.getAttributes().stream()
                     .filter(a -> !dependentAttributes.contains(a))
                     .filter(a -> !determinantAttributes.contains(a))
                     .map(a -> a.getIndex() - 1)
-                    .collect(ImmutableCollectors.toList());
+                    .collect(ImmutableCollectors.toSet());
 
             ImmutableMap<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> nodeExternalArgumentMap =
                     dataNodes.stream()
                             .distinct()
                             .collect(ImmutableCollectors.toMap(
                                     n -> n,
-                                    n -> n.getArgumentMap().entrySet().stream()
-                                            .filter(e -> externalArgumentIndexes.contains(e.getKey()))
-                                            .collect(ImmutableCollectors.toMap())));
+                                    n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), externalArgumentIndexes)));
 
             return dataNodes.stream()
                     .max(Comparator.comparingInt(n -> nodeExternalArgumentMap.get(n).values().size()))
@@ -150,25 +148,12 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
         }
 
-        private static ImmutableMap<Integer, ? extends VariableOrGroundTerm> extractDependentArgumentMap(
-                ExtensionalDataNode node, ImmutableSet<Integer> dependentIndexes) {
-            return node.getArgumentMap().entrySet().stream()
-                    .filter(e -> dependentIndexes.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap());
-        }
-
         private DeterminantGroupEvaluation convertIntoDeterminantGroupEvaluation(
                 ImmutableUnificationTools.ArgumentMapUnification argumentMapUnification, ExtensionalDataNode targetDataNode,
                 ImmutableList<ExtensionalDataNode> dataNodes, ImmutableSet<ImmutableExpression> expressions, ImmutableSet<Integer> dependentIndexes) {
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = targetDataNode.getArgumentMap();
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newTargetArgumentMap = Sets.union(
-                        argumentMapUnification.argumentMap.keySet(), targetArgumentMap.keySet()).stream()
-                    // For better readability
-                    .sorted()
-                    .collect(ImmutableCollectors.toMap(
-                            i -> i,
-                            i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMapUnification.argumentMap.get(i))
-                                    .orElseGet(() -> targetArgumentMap.get(i))));
+
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newTargetArgumentMap = ExtensionalDataNode.union(
+                    argumentMapUnification.getArgumentMap(), targetDataNode.getArgumentMap());
 
             // Here we only consider the first occurrence of the node! Important for not wrongly introducing implicit equalities
             int targetIndex = dataNodes.indexOf(targetDataNode);
@@ -179,7 +164,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
                             : removeDependentArguments(dataNodes.get(i), dependentIndexes))
                     .collect(ImmutableCollectors.toList());
 
-            return new DeterminantGroupEvaluation(expressions, newNodes, argumentMapUnification.substitution);
+            return new DeterminantGroupEvaluation(expressions, newNodes, argumentMapUnification.getSubstitution());
         }
 
         private ExtensionalDataNode removeDependentArguments(ExtensionalDataNode extensionalDataNode,

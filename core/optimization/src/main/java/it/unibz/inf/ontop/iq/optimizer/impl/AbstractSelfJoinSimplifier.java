@@ -194,8 +194,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ImmutableMap<ImmutableList<Optional<VariableOrGroundTerm>>, Collection<ExtensionalDataNode>> map = state.extensionalDataNodes.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         n -> ucIndexes.stream()
-                                .map(i -> Optional.ofNullable(n.getArgumentMap().get(i))
-                                        .map(t -> (VariableOrGroundTerm) t))
+                                .map(i -> Optional.<VariableOrGroundTerm>ofNullable(n.getArgumentMap().get(i)))
                                 .collect(ImmutableCollectors.toList()),
                         n -> n)).asMap();
 
@@ -294,7 +293,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = dataNode.getArgumentMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> Optional.ofNullable((VariableOrGroundTerm) groundFunctionalTermMap.get(e.getValue()))
+                        e -> Optional.<VariableOrGroundTerm>ofNullable(groundFunctionalTermMap.get(e.getValue()))
                                 .orElseGet(e::getValue)));
         return iqFactory.createExtensionalDataNode(dataNode.getRelationDefinition(), newArgumentMap);
     }

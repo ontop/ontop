@@ -133,8 +133,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                             ImmutableList.of(
                                     iqFactory.createExtensionalDataNode(
                                             dataNodes.iterator().next().getRelationDefinition(),
-                                            u.argumentMap)),
-                            u.substitution));
+                                            u.getArgumentMap())),
+                            u.getSubstitution()));
         }
     }
 

@@ -5,6 +5,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -71,13 +72,21 @@ public class ImmutableUnificationTools {
 
 
     public final class ArgumentMapUnification {
-        public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
+        private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
 
         private ArgumentMapUnification(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                       ImmutableSubstitution<VariableOrGroundTerm> substitution) {
             this.argumentMap = argumentMap;
             this.substitution = substitution;
+        }
+
+        public  ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap() {
+            return argumentMap;
+        }
+
+        public ImmutableSubstitution<VariableOrGroundTerm> getSubstitution() {
+            return substitution;
         }
 
         private Optional<ImmutableUnificationTools.ArgumentMapUnification> unify(
@@ -86,10 +95,7 @@ public class ImmutableUnificationTools {
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
                     ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(substitution, newArgumentMap);
 
-            ImmutableSet<Integer> firstIndexes = argumentMap.keySet();
-            ImmutableSet<Integer> secondIndexes = updatedArgumentMap.keySet();
-
-            Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
+            Sets.SetView<Integer> commonIndexes = Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet());
 
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = computeMGU(
                     commonIndexes.stream()
@@ -98,18 +104,13 @@ public class ImmutableUnificationTools {
                     commonIndexes.stream()
                             .map(updatedArgumentMap::get)
                             .collect(ImmutableCollectors.toList()))
-                    .map(s1 -> s1.castTo(VariableOrGroundTerm.class));
+                    .map(s -> s.castTo(VariableOrGroundTerm.class));
 
             return unifier
-                    .map(u1 -> new ArgumentMapUnification(
-                            // Merges the argument maps and applies the unifier
-                            ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u1,
-                                    Sets.union(firstIndexes, secondIndexes).stream()
-                                            .collect(ImmutableCollectors.toMap(
-                                                    i -> i,
-                                                    i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(i))
-                                                            .orElseGet(() -> ((ImmutableMap<Integer, ? extends VariableOrGroundTerm>) updatedArgumentMap).get(i))))),
-                            u1))
+                    .map(u -> new ArgumentMapUnification(
+                            ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u,
+                                    ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
+                            u))
                     .flatMap(u -> substitution.isEmpty()
                             ? Optional.of(u)
                             : computeMGUS(substitution, u.substitution)

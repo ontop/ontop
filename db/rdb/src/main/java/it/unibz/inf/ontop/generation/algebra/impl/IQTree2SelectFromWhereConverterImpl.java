@@ -15,9 +15,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
@@ -183,11 +181,11 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     extensionalDataNode.getArgumentMap());
         }
         else if (rootNode instanceof InnerJoinNode){
-            List<SQLExpression> joinedExpressions = tree.getChildren().stream()
+            ImmutableList<SQLExpression> joinedExpressions = tree.getChildren().stream()
                     .map(this::convertIntoFromExpression)
-                    .collect(Collectors.toList());
+                    .collect(ImmutableCollectors.toList());
 
-            return sqlAlgebraFactory.createSQLNaryJoinExpression(ImmutableList.copyOf(joinedExpressions));
+            return sqlAlgebraFactory.createSQLNaryJoinExpression(joinedExpressions);
         }
         else if (rootNode instanceof LeftJoinNode){
             LeftJoinNode leftJoinNode = (LeftJoinNode) rootNode;
