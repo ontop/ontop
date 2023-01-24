@@ -110,6 +110,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = unificationTools.computeMGU(args1, args2)
+                .map(s -> s.castTo(NonFunctionalTerm.class))
                 // TODO: merge priorityRenaming with the orientate() method
                 .map(u -> substitutionTools.prioritizeRenaming(u, nonLiftableVariables))
                 .orElseThrow(UnsatisfiableConditionException::new);

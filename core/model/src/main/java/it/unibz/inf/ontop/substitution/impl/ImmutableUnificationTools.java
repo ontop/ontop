@@ -34,48 +34,11 @@ public class ImmutableUnificationTools {
      * @return the substitution corresponding to this unification.
      */
 
-    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
-                                                                                   ImmutableList<T> args2) {
-        return (Optional)unify(substitutionFactory.getSubstitution(), args1, args2);
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableList<? extends ImmutableTerm> args1,
+                                                                                   ImmutableList<? extends ImmutableTerm> args2) {
+        return unify(substitutionFactory.getSubstitution(), args1, args2);
     }
 
-    private Optional<ArgumentMapUnification> computeArgumentMapMGU(
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap1,
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap2) {
-        ImmutableSet<Integer> firstIndexes = argumentMap1.keySet();
-        ImmutableSet<Integer> secondIndexes = argumentMap2.keySet();
-
-        Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
-
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = computeMGU(
-                commonIndexes.stream()
-                        .map(argumentMap1::get)
-                        .collect(ImmutableCollectors.toList()),
-                commonIndexes.stream()
-                        .map(argumentMap2::get)
-                        .collect(ImmutableCollectors.toList()));
-
-        return unifier
-                .map(u -> new ArgumentMapUnification(
-                        // Merges the argument maps and applies the unifier
-                        ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u,
-                                Sets.union(firstIndexes, secondIndexes).stream()
-                                        .collect(ImmutableCollectors.toMap(
-                                                i -> i,
-                                                i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap1.get(i))
-                                                .orElseGet(() -> argumentMap2.get(i))))),
-                        u));
-
-    }
-
-    /**
-     * TODO: make it replace computeMGUS()
-     */
-    public Optional<ImmutableSubstitution<NonFunctionalTerm>> computeMGUS2(ImmutableSubstitution<NonFunctionalTerm> s1,
-                                                                           ImmutableSubstitution<NonFunctionalTerm> s2) {
-        return computeMGUS(s1,s2)
-                .map(u -> u.castTo(NonFunctionalTerm.class));
-    }
 
     /**
      * Computes one Most General Unifier (MGU) of (two) substitutions.
@@ -106,15 +69,6 @@ public class ImmutableUnificationTools {
         return computeMGU(firstArgList, secondArgList);
     }
 
-    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGUS(
-            ImmutableSubstitution<VariableOrGroundTerm> substitution1,
-            ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
-        return optionalMGUS
-                .map(s -> s.castTo(VariableOrGroundTerm.class));
-    }
-
-
 
     public final class ArgumentMapUnification {
         public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
@@ -132,10 +86,34 @@ public class ImmutableUnificationTools {
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
                     ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(substitution, newArgumentMap);
 
-            return computeArgumentMapMGU(argumentMap, updatedArgumentMap)
+            ImmutableSet<Integer> firstIndexes = argumentMap.keySet();
+            ImmutableSet<Integer> secondIndexes = updatedArgumentMap.keySet();
+
+            Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
+
+            Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = computeMGU(
+                    commonIndexes.stream()
+                            .map(argumentMap::get)
+                            .collect(ImmutableCollectors.toList()),
+                    commonIndexes.stream()
+                            .map(updatedArgumentMap::get)
+                            .collect(ImmutableCollectors.toList()))
+                    .map(s1 -> s1.castTo(VariableOrGroundTerm.class));
+
+            return unifier
+                    .map(u1 -> new ArgumentMapUnification(
+                            // Merges the argument maps and applies the unifier
+                            ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u1,
+                                    Sets.union(firstIndexes, secondIndexes).stream()
+                                            .collect(ImmutableCollectors.toMap(
+                                                    i -> i,
+                                                    i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(i))
+                                                            .orElseGet(() -> ((ImmutableMap<Integer, ? extends VariableOrGroundTerm>) updatedArgumentMap).get(i))))),
+                            u1))
                     .flatMap(u -> substitution.isEmpty()
                             ? Optional.of(u)
-                            : computeAtomMGUS(substitution, u.substitution)
+                            : computeMGUS(substitution, u.substitution)
+                            .map(s -> s.castTo(VariableOrGroundTerm.class))
                             .map(s -> new ArgumentMapUnification(u.argumentMap, s)));
         }
     }
@@ -144,7 +122,7 @@ public class ImmutableUnificationTools {
             Stream<ImmutableSubstitution<VariableOrGroundTerm>> substitutions) {
         return substitutions
                 .reduce(Optional.of(substitutionFactory.getSubstitution()),
-                        (o, s) -> o.flatMap(s1 -> computeAtomMGUS(s1, s)),
+                        (o, s) -> o.flatMap(s1 -> computeMGUS(s1, s).map(sub -> sub.castTo(VariableOrGroundTerm.class))),
                         (s1, s2) -> {
                             throw new MinorOntopInternalBugException("Not expected to be run in parallel");
                         });

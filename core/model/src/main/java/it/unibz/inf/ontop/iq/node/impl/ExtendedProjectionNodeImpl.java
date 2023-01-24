@@ -137,7 +137,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         // Projected variables after propagating tauC
         ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
 
-        ImmutableSubstitution<NonFunctionalTerm> newEta = unificationTools.computeMGUS2(thetaC, tauC)
+        ImmutableSubstitution<NonFunctionalTerm> newEta = unificationTools.computeMGUS(thetaC, tauC)
+                .map(s -> s.castTo(NonFunctionalTerm.class))
                 .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
