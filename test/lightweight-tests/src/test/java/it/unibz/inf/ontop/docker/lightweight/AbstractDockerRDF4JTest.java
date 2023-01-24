@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
@@ -121,6 +122,16 @@ public class AbstractDockerRDF4JTest {
     protected void executeAndCompareValues(String queryString, ImmutableSet<String> expectedVValues,
                                            BindingSet bindings) {
         ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
+        assertEquals(expectedVValues, vValues);
+    }
+
+    protected void executeAndCompareValues(String queryString, ImmutableMultiset<String> expectedVValues) {
+        executeAndCompareValues(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void executeAndCompareValues(String queryString, ImmutableMultiset<String> expectedVValues,
+                                           BindingSet bindings) {
+        ImmutableMultiset<String> vValues = ImmutableMultiset.copyOf(runQuery(queryString, bindings));
         assertEquals(expectedVValues, vValues);
     }
 

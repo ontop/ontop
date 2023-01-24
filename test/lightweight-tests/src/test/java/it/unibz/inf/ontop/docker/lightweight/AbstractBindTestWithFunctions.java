@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
@@ -111,8 +112,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getRoundExpectedValues());
     }
 
-    protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0, 43\"^^xsd:string", "\"0, 23\"^^xsd:string", "\"0, 34\"^^xsd:string",
+    protected ImmutableSet<String> getRoundExpectedValues() {
+        return ImmutableSet.of("\"0, 43\"^^xsd:string", "\"0, 23\"^^xsd:string", "\"0, 34\"^^xsd:string",
                 "\"0, 10\"^^xsd:string");
     }
 
@@ -129,8 +130,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getAbsExpectedValues());
     }
 
-    protected ImmutableList<String> getAbsExpectedValues() {
-        return ImmutableList.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
         "\"1.5\"^^xsd:decimal");
     }
 
@@ -261,7 +262,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"The%20Semantic%20Web\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"The%20Semantic%20Web\"^^xsd:string",
                 "\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string"));
     }
 
@@ -290,7 +291,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"The Semantic Web\"@en",
+        executeAndCompareValues(query, ImmutableSet.of("\"The Semantic Web\"@en",
                 "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -304,7 +305,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"The Semantic Web\"@en",
+        executeAndCompareValues(query, ImmutableSet.of("\"The Semantic Web\"@en",
                 "\"The Logic Book: Introduction, Second Edition\"@en"));
     }
 
@@ -317,7 +318,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND(CONTAINS(?title,\"Semantic\") AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareValues(query, ImmutableMultiset.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean"));
     }
 
@@ -345,7 +346,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string",
                 "\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string",
                 "\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string",
                 "\"The Logic Book: Introduction, Second Edition " +
@@ -363,7 +364,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (CONCAT(?title, \" \", ?w) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"SPARQL Tutorial sparql tutorial\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"SPARQL Tutorial sparql tutorial\"^^xsd:string",
                 "\"The Semantic Web the semantic web\"^^xsd:string",
                 "\"Crime and Punishment crime and punishment\"^^xsd:string",
                 "\"The Logic Book: Introduction, Second Edition " +
@@ -384,8 +385,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getBindWithBefore1ExpectedValues());
     }
 
-    protected ImmutableList<String> getBindWithBefore1ExpectedValues() {
-        return ImmutableList.of("\"\"^^xsd:string", "\"The Seman\"@en", "\"\"^^xsd:string",
+    protected ImmutableMultiset<String> getBindWithBefore1ExpectedValues() {
+        return ImmutableMultiset.of("\"\"^^xsd:string", "\"The Seman\"@en", "\"\"^^xsd:string",
                 "\"The Logic Book: Introduc\"@en");
     }
 
@@ -416,8 +417,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getBindWithAfter1ExpectedValues());
     }
 
-    protected ImmutableList<String> getBindWithAfter1ExpectedValues() {
-        return ImmutableList.of("\"\"^^xsd:string", "\" Semantic Web\"@en", "\"\"^^xsd:string",
+    protected ImmutableMultiset<String> getBindWithAfter1ExpectedValues() {
+        return ImmutableMultiset.of("\"\"^^xsd:string", "\" Semantic Web\"@en", "\"\"^^xsd:string",
         "\" Logic Book: Introduction, Second Edition\"@en");
     }
 
@@ -433,8 +434,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getBindWithAfter2ExpectedValues());
     }
 
-    protected ImmutableList<String> getBindWithAfter2ExpectedValues() {
-        return ImmutableList.of("\"SPARQL Tutorial\"@en", "\"The Semantic Web\"@en", "\"Crime and Punishment\"@en",
+    protected ImmutableSet<String> getBindWithAfter2ExpectedValues() {
+        return ImmutableSet.of("\"SPARQL Tutorial\"@en", "\"The Semantic Web\"@en", "\"Crime and Punishment\"@en",
         "\"The Logic Book: Introduction, Second Edition\"@en");
     }
 
@@ -521,8 +522,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getSecondsExpectedValues());
     }
 
-    protected ImmutableList<String> getSecondsExpectedValues() {
-        return ImmutableList.of("\"52\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"6\"^^xsd:decimal",
+    protected ImmutableMultiset<String> getSecondsExpectedValues() {
+        return ImmutableMultiset.of("\"52\"^^xsd:decimal", "\"0\"^^xsd:decimal", "\"6\"^^xsd:decimal",
                 "\"0\"^^xsd:decimal");
     }
 
@@ -578,8 +579,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getDivideExpectedValues());
     }
 
-    protected ImmutableList<String> getDivideExpectedValues() {
-        return ImmutableList.of("\"21.500000\"^^xsd:decimal", "\"11.500000\"^^xsd:decimal",
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.500000\"^^xsd:decimal", "\"11.500000\"^^xsd:decimal",
                 "\"17.000000\"^^xsd:decimal", "\"5.000000\"^^xsd:decimal");
     }
 
@@ -611,7 +612,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   } \n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
+        executeAndCompareValues(query, ImmutableMultiset.of("\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean",
                 "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
     }
 
@@ -856,8 +857,8 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         executeAndCompareValues(query, getDatatypeExpectedValues());
     }
 
-    protected ImmutableList<String> getDatatypeExpectedValues() {
-        return ImmutableList.of("\"0.20\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.20\"^^xsd:decimal",
+    protected ImmutableMultiset<String> getDatatypeExpectedValues() {
+        return ImmutableMultiset.of("\"0.20\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.20\"^^xsd:decimal",
                 "\"0.15\"^^xsd:decimal");
     }
 
@@ -1358,7 +1359,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     @Test
-    public void testMilliSeconds() {
+    public void testMilliSecondsBetween() {
 
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"

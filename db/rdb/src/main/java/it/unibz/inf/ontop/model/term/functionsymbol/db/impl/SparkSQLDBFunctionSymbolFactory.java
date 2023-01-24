@@ -68,6 +68,14 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return String.format("uuid");
     }
 
+    /**
+     * ORDER BY is required in the OVER clause
+     */
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
+    }
+
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
@@ -165,7 +173,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/60)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/60)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -173,7 +181,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s))))",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s)))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -184,7 +192,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR(UNIX_MILLIS(TO_TIMESTAMP(%s)) - UNIX_MILLIS(TO_TIMESTAMP(%s)))",
+        return String.format("FLOOR(UNIX_MILLIS(%s) - UNIX_MILLIS(%s))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }

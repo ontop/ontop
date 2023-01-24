@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.spark;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -25,6 +28,37 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
         release();
     }
 
+    @Override
+    protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.500000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.500000\"^^xsd:decimal", "\"11.500000\"^^xsd:decimal",
+                "\"17.000000\"^^xsd:decimal", "\"5.000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.600000\"^^xsd:decimal", "\"5.750000\"^^xsd:decimal", "\"6.800000\"^^xsd:decimal",
+                "\"1.500000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getStrExpectedValues() {
+        return ImmutableList.of("\"1970-11-05T07:50:00.000+00:00\"^^xsd:string",
+                "\"2011-12-08T11:30:00.000+00:00\"^^xsd:string",
+                "\"2014-06-05T16:47:52.000+00:00\"^^xsd:string",
+                "\"2015-09-21T09:23:06.000+00:00\"^^xsd:string");
+    }
+
+    @Override
+    protected ImmutableMultiset<String> getSecondsExpectedValues() {
+        return ImmutableMultiset.of("\"52.000000\"^^xsd:decimal", "\"0.000000\"^^xsd:decimal", "\"6.000000\"^^xsd:decimal",
+                "\"0.000000\"^^xsd:decimal");
+    }
+
     @Disabled("Spark SQL does not support OFFSET, Databricks does")
     @Test
     public void testOffset1() {
@@ -36,4 +70,40 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
     public void testOffset2() {
         super.testOffset2();
     }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testMilliSecondsBetween() { super.testMilliSecondsBetween(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testWeeksBetweenDateTime() { super.testWeeksBetweenDateTime(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testDaysBetweenDateTime() { super.testDaysBetweenDateTime(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testDaysBetweenDateTimeMappingInput() { super.testDaysBetweenDateTimeMappingInput(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testDaysBetweenDateMappingInput() { super.testDaysBetweenDateMappingInput(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testHoursBetween() { super.testHoursBetween(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testMinutesBetween() { super.testMinutesBetween(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testSecondsBetween() { super.testSecondsBetween(); }
+
+    @Disabled("Duration functions currently not supported for Spark SQL")
+    @Test
+    public void testSecondsBetweenMappingInput() { super.testSecondsBetweenMappingInput(); }
 }

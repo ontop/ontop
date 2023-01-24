@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS books (
                        id integer NOT NULL,
                        title varchar(100),
                        price integer,
-                       discount numeric,
+                       discount decimal(10,2),
                        description varchar(100),
                        lang varchar(100),
                        publication_date timestamp
@@ -38,7 +38,7 @@ INSERT INTO professors VALUES (8, 'Mary', 'Poppins', NULL);
 CREATE TABLE IF NOT EXISTS course (
                                    course_id varchar(100),
                                    nb_students int NOT NULL,
-                                   duration decimal NOT NULL
+                                   duration decimal(10,1) NOT NULL
 );
 
 INSERT INTO course VALUES ('LinearAlgebra', 10, 24.5);

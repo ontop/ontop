@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.oracle;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.OracleLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -93,14 +95,14 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getDivideExpectedValues() {
-        return ImmutableList.of("\"21.5\"^^xsd:decimal", "\"11.5\"^^xsd:decimal", "\"17\"^^xsd:decimal",
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.5\"^^xsd:decimal", "\"11.5\"^^xsd:decimal", "\"17\"^^xsd:decimal",
                 "\"5\"^^xsd:decimal");
     }
 
     @Override
-    protected ImmutableList<String> getDatatypeExpectedValues() {
-        return ImmutableList.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
+    protected ImmutableMultiset<String> getDatatypeExpectedValues() {
+        return ImmutableMultiset.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
                 "\"0.15\"^^xsd:decimal");
     }
 

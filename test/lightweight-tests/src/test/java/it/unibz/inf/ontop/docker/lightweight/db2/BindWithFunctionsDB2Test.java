@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.db2;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.DB2LightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -97,8 +99,8 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getDivideExpectedValues() {
-        return ImmutableList.of("\"21.2500000000000000000000000\"^^xsd:decimal",
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.2500000000000000000000000\"^^xsd:decimal",
                 "\"11.5000000000000000000000000\"^^xsd:decimal",
                 "\"16.7500000000000000000000000\"^^xsd:decimal",
                 "\"5.0000000000000000000000000\"^^xsd:decimal");
@@ -110,8 +112,8 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getAbsExpectedValues() {
-        return ImmutableList.of("\"8.5000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.7000\"^^xsd:decimal",
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.5000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.7000\"^^xsd:decimal",
                 "\"1.5000\"^^xsd:decimal");
     }
 
@@ -124,14 +126,14 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getRoundExpectedValues() {
-        return ImmutableList.of("\"0.00, 43.00\"^^xsd:string", "\"0.00, 23.00\"^^xsd:string",
+    protected ImmutableSet<String> getRoundExpectedValues() {
+        return ImmutableSet.of("\"0.00, 43.00\"^^xsd:string", "\"0.00, 23.00\"^^xsd:string",
                 "\"0.00, 34.00\"^^xsd:string", "\"0.00, 10.00\"^^xsd:string");
     }
 
     @Override
-    protected ImmutableList<String> getSecondsExpectedValues() {
-        return ImmutableList.of("\"52.000000\"^^xsd:decimal", "\"0.000000\"^^xsd:decimal", "\"6.000000\"^^xsd:decimal",
+    protected ImmutableMultiset<String> getSecondsExpectedValues() {
+        return ImmutableMultiset.of("\"52.000000\"^^xsd:decimal", "\"0.000000\"^^xsd:decimal", "\"6.000000\"^^xsd:decimal",
                 "\"0.000000\"^^xsd:decimal");
     }
 }

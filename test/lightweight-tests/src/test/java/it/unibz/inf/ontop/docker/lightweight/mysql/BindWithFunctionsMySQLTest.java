@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.lightweight.mysql;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -30,8 +31,8 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableList<String> getAbsExpectedValues() {
-        return ImmutableList.of("\"8.6000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.8000\"^^xsd:decimal",
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.6000\"^^xsd:decimal", "\"5.7500\"^^xsd:decimal", "\"6.8000\"^^xsd:decimal",
                 "\"1.5000\"^^xsd:decimal");
     }
 

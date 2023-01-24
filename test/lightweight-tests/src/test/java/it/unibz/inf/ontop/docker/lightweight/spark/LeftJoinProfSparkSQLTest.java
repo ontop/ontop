@@ -66,6 +66,25 @@ public class LeftJoinProfSparkSQLTest extends AbstractLeftJoinProfTest {
                 "\"13.0\"^^xsd:decimal");
     }
 
+    @Override
+    protected ImmutableList<String> getExpectedValuesDuration1() {
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"18.0000000000\"^^xsd:decimal", "\"20.0000000000\"^^xsd:decimal",
+                "\"84.5000000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
+        return ImmutableList.of("\"15.50000000000000\"^^xsd:decimal", "\"16.00000000000000\"^^xsd:decimal",
+                "\"19.25000000000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
+        return ImmutableList.of("\"31.000000000\"^^xsd:decimal", "\"32.000000000\"^^xsd:decimal",
+                "\"115.500000000\"^^xsd:decimal");
+    }
+
     @Disabled("Spark SQL does not support LISTAGG() WITHIN GROUP or GROUP_CONCAT")
     @Test
     public void testGroupConcat1() {
@@ -102,21 +121,47 @@ public class LeftJoinProfSparkSQLTest extends AbstractLeftJoinProfTest {
         super.testGroupConcat6();
     }
 
-    @Disabled("Cast to DECIMAL results in value with scale 0")
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
     @Test
-    public void testDuration1() {
-        super.testDuration1();
+    public void testCourseJoinOnLeft1() {
+        super.testCourseJoinOnLeft1();
     }
 
-    @Disabled("Cast to DECIMAL results in value with scale 0")
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
     @Test
-    public void testMultitypedAvg1() {
-        super.testMultitypedAvg1();
+    public void testCourseJoinOnLeft2() {
+        super.testCourseJoinOnLeft2();
     }
 
-    @Disabled("Cast to DECIMAL results in value with scale 0")
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
     @Test
-    public void testMultitypedSum1() {
-        super.testMultitypedSum1();
-    }
+    public void testFirstNameNickname() { super.testFirstNameNickname(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testUselessRightPart2() { super.testUselessRightPart2(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testCourseTeacherName() { super.testCourseTeacherName(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testPreferences() { super.testPreferences(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testMinus2() { super.testMinus2(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testMinusNickname() { super.testMinusNickname(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }
+
+    @Disabled("Spark SQL does not support integrity constraints, query optimization not possible")
+    @Test
+    public void testMinusMultitypedSum() { super.testMinusMultitypedSum(); }
 }
