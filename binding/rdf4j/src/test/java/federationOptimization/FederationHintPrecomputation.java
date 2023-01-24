@@ -219,6 +219,44 @@ public class FederationHintPrecomputation {
 
     }
 
+    public String getFromClauseFromSQL(String sql){
+        String from = "";
+        return sql.contains(" FROM ") ? sql.substring(sql.indexOf(" FROM ")) : sql.substring(sql.indexOf(" from "));
+    }
+
+    public boolean checkDuplicationAmongCandidateRedundancyAndJoins(Set<Redundancy> candidateReds, EmptyFederatedJoin candidateEFJ) throws Exception {
+        boolean b = false;
+        String sql1 = candidateEFJ.relation1;
+        String sql2 = candidateEFJ.relation2;
+        String[] attributes = candidateEFJ.joinCondition.split("=");
+        String attribute1 = attributes[0];
+        String attribute2 = attributes[1];
+        String fromClause1 = getFromClauseFromSQL(sql1);
+        String fromClause2 = getFromClauseFromSQL(sql2);
+
+        for(Redundancy candidate: candidateReds){
+            String fromClause1_new = getFromClauseFromSQL(candidate.relation1);
+            String fromClause2_new = getFromClauseFromSQL(candidate.relation2);
+            List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
+            List<String> attributes_2 = getSelectItemsFromSQL(candidate.relation2);
+
+            if(fromClause1.equals(fromClause1_new) && fromClause2.equals(fromClause2_new)){
+                if( (attributes_1.get(0).equals(attribute1)) && (attributes_2.get(0).equals(attribute2))){
+                    return true;
+                } else if ((attributes_1.size() == 2) && (attributes_1.get(1).equals(attribute1)) && (attributes_2.get(1).equals(attribute2))) {
+                    return true;
+                }
+            } else if (fromClause1.equals(fromClause2_new) && fromClause2.equals(fromClause1_new)){
+                if((attributes_1.get(0).equals(attribute2)) && (attributes_2.get(0).equals(attribute1))){
+                    return true;
+                } else if ((attributes_1.size() == 2) && (attributes_1.get(1).equals(attribute2)) && (attributes_2.get(1).equals(attribute1))){
+                    return true;
+                }
+            }
+        }
+        return b;
+    }
+
     /**
      * Zhenzhen: for the same datatype, different systems may use different names
      * @param stmt
@@ -454,42 +492,47 @@ public class FederationHintPrecomputation {
 
         int matv_count = 0;
 
-        for(EmptyFederatedJoin canEFJ: candidateHints.emptyFJs){
-            String[] arrs = canEFJ.joinCondition.split("=");
-            String sql = "SELECT * FROM (" + canEFJ.relation1+") AS V1, "+"("+canEFJ.relation2+") AS V2"+" WHERE "+"V1."+arrs[0]+"="+"V2."+arrs[1];
-
-            //the sql query needs to be modified;
-            //the sql query needs to be make sure whether the two relations containing attributes with the same name;
-            ResultSet rs = stmt_federation.executeQuery(sql);
-            if(!rs.next()){
-                computedHints.emptyFJs.add(canEFJ);
-            } else {
-             //write into the local sources
-             //import the schema of the local sources into federation system automatically
-                ResultSetMetaData rsmd = rs.getMetaData();
-                String viewName = "MatV_"+matv_count;
-                int column_count = rsmd.getColumnCount();
-                String create_table = "CREATE TABLE "+viewName+" ( ";
-                for(int i=1; i<column_count+1; i++){
-                    create_table = create_table + rsmd.getColumnName(i)+" "+rsmd.getColumnTypeName(i)+" , ";
-                }
-                create_table = create_table.substring(0, create_table.length()-2)+" )";
-                boolean b = stmt_matvDB.execute(create_table);
-
-                insertData(stmt_matvDB, rs, viewName);
-                matv_count = matv_count+1;
-                break;
-            }
-        }
-
+        //first redundancy checking, then checking candidate federated joins to filter out some candidates
         for(Redundancy candidate: candidateHints.redundancy){
-            ResultSet rs_sql1 = stmt_federation.executeQuery(candidate.relation1);
-            ResultSet rs_sql2 = stmt_federation.executeQuery(candidate.relation2);
-            String res = checkRedundancy(rs_sql1, rs_sql2);
-            if(res.length()>0){
+            ResultSet rs1 = stmt_federation.executeQuery(candidate.relation1);
+            ResultSet rs2 = stmt_federation.executeQuery(candidate.relation2);
+            String res = checkRedundancy(rs1, rs2);
+            if(res.length() > 0){
                 candidate.redundancyRelation = res;
                 computedHints.redundancy.add(candidate);
             }
+        }
+
+        for(EmptyFederatedJoin candidate: candidateHints.emptyFJs){
+            //check whether exists duplication with candidate redundancy;
+            if(! checkDuplicationAmongCandidateRedundancyAndJoins(computedHints.redundancy, candidate)){
+                String[] arrs = candidate.joinCondition.split("=");
+                String sql = "SELECT * FROM (" + candidate.relation1+") AS V1, "+"("+candidate.relation2+") AS V2"+" WHERE "+"V1."+arrs[0]+"="+"V2."+arrs[1];
+
+                //the sql query needs to be modified;
+                //the sql query needs to be make sure whether the two relations containing attributes with the same name;
+                ResultSet rs = stmt_federation.executeQuery(sql);
+                if(!rs.next()){
+                    computedHints.emptyFJs.add(candidate);
+                } else {
+                    //write into the local sources
+                    //import the schema of the local sources into federation system automatically
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    String viewName = "MatV_"+matv_count;
+                    int column_count = rsmd.getColumnCount();
+                    String create_table = "CREATE TABLE "+viewName+" ( ";
+                    for(int i=1; i<column_count+1; i++){
+                        create_table = create_table + rsmd.getColumnName(i)+" "+rsmd.getColumnTypeName(i)+" , ";
+                    }
+                    create_table = create_table.substring(0, create_table.length()-2)+" )";
+                    boolean b = stmt_matvDB.execute(create_table);
+
+                    insertData(stmt_matvDB, rs, viewName);
+                    matv_count = matv_count+1;
+                    break;
+                }
+            }
+
         }
 
         stmt_matvDB.close();
@@ -553,21 +596,21 @@ public class FederationHintPrecomputation {
                 "src/test/resources/federation-test/teiid.properties",
                 "src/test/resources/federation-test/SourceLab.txt");
         System.out.println("detected candidate federated joins for checking: "+sh.emptyFJs.size());
-        for(EmptyFederatedJoin efj: sh.emptyFJs){
-            efj.print();
+        for(EmptyFederatedJoin candidate: sh.emptyFJs){
+            candidate.print();
         }
 
         System.out.println("detected candidate unions for checking: "+sh.redundancy.size());
-        for(Redundancy red: sh.redundancy){
-            red.print();
+        for(Redundancy candidate: sh.redundancy){
+            candidate.print();
         }
 
         System.out.println("start computing: ");
 
-        SourceHints sh_new = computeSourceHints(sh,
-                "src/test/resources/federation-test/federationSystem-property.txt",
-                "src/test/resources/federation-test/matvDB-property.txt");
-        System.out.println("finish");
+//        SourceHints sh_new = computeSourceHints(sh,
+//                "src/test/resources/federation-test/federationSystem-property.txt",
+//                "src/test/resources/federation-test/matvDB-property.txt");
+//        System.out.println("finish");
    }
 
 }
