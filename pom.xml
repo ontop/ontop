@@ -168,7 +168,7 @@
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
-        <spring-boot.version>2.6.14</spring-boot.version>
+        <spring-boot.version>2.7.8</spring-boot.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
