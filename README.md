@@ -1,7 +1,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/it.unibz.inf.ontop/ontop.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22it.unibz.inf.ontop%22)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![SourceForge](https://img.shields.io/sourceforge/dm/ontop4obda.svg)](http://sourceforge.net/projects/ontop4obda/files/)
-[![Docker](https://img.shields.io/docker/image-size/ontop/ontop-endpoint?label=ontop%2Fontop-endpoint)](https://hub.docker.com/r/ontop/ontop-endpoint)
+[![Docker](https://img.shields.io/docker/image-size/ontop/ontop?label=ontop%2Fontop-endpoint)](https://hub.docker.com/r/ontop/ontop-endpoint)
 [![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
 
 
@@ -33,7 +33,7 @@ Links
 
 - [Official Website and Documentation](https://ontop-vkg.org)
 - [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
-- [Docker Hub](https://hub.docker.com/r/ontop/ontop-endpoint)
+- [Docker Hub](https://hub.docker.com/r/ontop/ontop)
 - [GitHub](https://github.com/ontop/ontop/)
 - [GitHub Issues](https://github.com/ontop/ontop/issues)
 - [Google Group](https://groups.google.com/forum/#!forum/ontop4obda)
