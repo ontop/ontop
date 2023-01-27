@@ -96,7 +96,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     return "";
 
                 String conditionString = sortConditions.stream()
-                        .map(c -> serializeOrderByTerm(c.getTerm(), columnIDs, substitution)
+                        .map(c -> serializeOrderByTerm(c.getTerm(), columnIDs, variableAliases, substitution)
                                 + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST"))
                         .collect(Collectors.joining(", "));
 
@@ -110,12 +110,14 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
              */
             private String serializeOrderByTerm(ImmutableTerm term,
                                                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
+                                                ImmutableMap<Variable, QuotedID> variableAliases,
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
+                // use the project expression alias instead of processing the expression itself
                 for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
                     if (entry.getValue().equals(term)) {
-                        return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
+                        return variableAliases.get(entry.getKey()).getSQLRendering();
                     }
                 }
                 return checkColumnID(term, columnIDs);
@@ -133,15 +135,18 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 if (term instanceof Constant) {
                     return getTermSerializer().serialize(term, columnIDs);
-                } else if (term instanceof Variable) {
+                }
+                else if (term instanceof Variable) {
+                    QualifiedAttributeID attribute = columnIDs.get(term);
                     for (Map.Entry<Variable, QualifiedAttributeID> entry : columnIDs.entrySet()) {
-                        if (entry.getValue().equals(columnIDs.get(term))) {
+                        if (entry.getValue().equals(attribute)) {
                             return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
                         }
                     }
                     throw new SQLSerializationException(String.format(
                             "The variable %s does not appear in the columnIDs", term));
-                } else {
+                }
+                else {
                     return Optional.of(term)
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
                             .map(t -> (ImmutableFunctionalTerm) t)
