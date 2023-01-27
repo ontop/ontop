@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -23,16 +24,16 @@ import java.util.stream.Stream;
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
     private final ImmutableUnificationTools unificationTools;
-    protected final ConstructionNodeTools constructionNodeTools;
+    protected final IQTreeTools iqTreeTools;
     private final ImmutableSubstitutionTools substitutionTools;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                       ImmutableUnificationTools unificationTools,
-                                      ConstructionNodeTools constructionNodeTools,
+                                      IQTreeTools iqTreeTools,
                                       ImmutableSubstitutionTools substitutionTools, TermFactory termFactory) {
         super(substitutionFactory, termFactory, iqFactory);
         this.unificationTools = unificationTools;
-        this.constructionNodeTools = constructionNodeTools;
+        this.iqTreeTools = iqTreeTools;
         this.substitutionTools = substitutionTools;
     }
 
@@ -88,7 +89,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> tau, IQTree child,
                                                DescendingSubstitutionChildUpdateFunction updateChildFct) {
 
-        ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, getVariables());
+        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.computeNewProjectedVariables(tau, getVariables());
 
         ImmutableSubstitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
         ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.restrictRangeTo(GroundFunctionalTerm.class);
@@ -135,7 +136,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
         // Projected variables after propagating tauC
-        ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
+        ImmutableSet<Variable> vC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
 
         ImmutableSubstitution<NonFunctionalTerm> newEta = unificationTools.getNonFunctionalTermUnifierBuilder(thetaC)
                 .unifyTermStreams(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)

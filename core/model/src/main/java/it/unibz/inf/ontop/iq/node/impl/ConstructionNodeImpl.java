@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
@@ -52,13 +53,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                 ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                 ImmutableUnificationTools unificationTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 OntopModelSettings settings,
+                                 OntopModelSettings settings, IQTreeTools iqTreeTools,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
+        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, substitutionTools, termFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution.castTo(ImmutableTerm.class);
         this.substitutionNormalizer = substitutionNormalizer;
@@ -79,14 +80,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      */
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                 ImmutableUnificationTools unificationTools, IQTreeTools iqTreeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
-        this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools, constructionNodeTools,
-                substitutionTools, substitutionFactory, termFactory, iqFactory, settings, substitutionNormalizer, notRequiredVariableRemover);
+        this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools,
+                substitutionTools, substitutionFactory, termFactory, iqFactory, settings, iqTreeTools,substitutionNormalizer, notRequiredVariableRemover);
     }
 
 

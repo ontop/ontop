@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
 
-    private final IQTreeTools iqTreeTools;
+    protected final IQTreeTools iqTreeTools;
 
     protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         super(iqFactory);

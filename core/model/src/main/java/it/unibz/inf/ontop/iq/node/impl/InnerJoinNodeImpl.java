@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -37,7 +38,7 @@ import java.util.stream.Stream;
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN";
-    private final ConstructionNodeTools constructionNodeTools;
+    private final IQTreeTools iqTreeTools;
     private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
@@ -45,13 +46,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 TermNullabilityEvaluator nullabilityEvaluator,
                                 TermFactory termFactory, TypeFactory typeFactory,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                ConstructionNodeTools constructionNodeTools,
+                                IQTreeTools iqTreeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
-        this.constructionNodeTools = constructionNodeTools;
+        this.iqTreeTools = iqTreeTools;
         this.normalizer = normalizer;
     }
 
@@ -60,21 +61,21 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermNullabilityEvaluator nullabilityEvaluator,
                               TermFactory termFactory, TypeFactory typeFactory,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                              ConstructionNodeTools constructionNodeTools,
+                              IQTreeTools iqTreeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
-                              SubstitutionFactory substitutionFactory, ConstructionNodeTools constructionNodeTools,
+                              SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override
@@ -155,7 +156,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(descendingSubstitution::applyToBooleanExpression);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint
                 .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
@@ -182,14 +183,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     ? joinTree
                     : iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
-                            constructionNodeTools.computeNewProjectedVariables(descendingSubstitution,
-                                    getProjectedVariables(children)),
+                            iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)),
                             expressionAndSubstitution.getSubstitution()),
                     joinTree);
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
-                    constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
         }
     }
 

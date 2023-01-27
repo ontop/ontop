@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
@@ -45,10 +46,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
                                   SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                   AggregationNormalizer aggregationNormalizer,
-                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                  ImmutableUnificationTools unificationTools, IQTreeTools iqTreeTools,
                                   ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
                                   OntopModelSettings settings) {
-        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory);
+        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, substitutionTools, termFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
@@ -120,7 +121,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
-                        constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getVariables())),
+                        iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables())),
                 filterTree);
     }
 

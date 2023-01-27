@@ -6,7 +6,9 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
@@ -19,6 +21,8 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -33,19 +37,25 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private final ImmutableSet<Variable> projectedVariables;
 
-    private final ConstructionNodeTools constructionTools;
+    private final ImmutableUnificationTools unificationTools;
+    private final ImmutableSubstitutionTools substitutionTools;
+
+    private final IQTreeTools iqTreeTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
 
     @AssistedInject
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                          ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
+                          IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                          CoreUtilsFactory coreUtilsFactory,
+                          CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools,
+                          ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                           NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, termFactory, iqFactory);
         this.projectedVariables = projectedVariables;
-        this.constructionTools = constructionTools;
+        this.unificationTools = unificationTools;
+        this.iqTreeTools = iqTreeTools;
+        this.substitutionTools = substitutionTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
@@ -435,8 +445,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
-                    descendingSubstitution, projectedVariables);
+        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator))
@@ -458,8 +467,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
-                descendingSubstitution, projectedVariables);
+        ImmutableSet<Variable> updatedProjectedVariables = iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
 
         ImmutableList<IQTree> updatedChildren = children.stream()
                 .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
@@ -663,6 +671,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private NonGroundTerm replaceVariablesByFreshOnes(NonGroundTerm term, VariableGenerator variableGenerator) {
         if (term instanceof Variable)
             return variableGenerator.generateNewVariableFromVar((Variable) term);
+
         NonGroundFunctionalTerm functionalTerm = (NonGroundFunctionalTerm) term;
 
         return termFactory.getNonGroundFunctionalTerm(functionalTerm.getFunctionSymbol(),
@@ -680,27 +689,46 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private IQTree updateChild(UnaryIQTree liftedChildTree, ImmutableSubstitution<ImmutableTerm> mergedSubstitution,
                                ImmutableSubstitution<ImmutableTerm> tmpNormalizedSubstitution,
                                ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
+
         ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
 
-        ConstructionNodeTools.NewSubstitutionPair substitutionPair = constructionTools.traverseConstructionNode(
-                mergedSubstitution, tmpNormalizedSubstitution,
-                constructionNode.getVariables(), projectedVariables);
+        ImmutableSet<Variable> formerV = constructionNode.getVariables();
 
-        // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
-        // this construction node
-        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
-                substitutionPair.propagatedSubstitution.castTo(VariableOrGroundTerm.class);
+        ImmutableSubstitution<ImmutableTerm> normalizedEta = unificationTools.getImmutableUnifierBuilder(tmpNormalizedSubstitution)
+                .unifyTermStreams(mergedSubstitution.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                .build()
+                /*
+                 * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.
+                 *
+                 * This normalization can be understood as a way to select a MGU (eta) among a set of equivalent MGUs.
+                 * Such a "selection" is done a posteriori.
+                 *
+                 * Due to the current implementation of MGUS, the normalization should have no effect
+                 * (already in a normal form). Here for safety.
+                 */
+                .map(eta -> substitutionTools.prioritizeRenaming(eta, projectedVariables))
+                .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + mergedSubstitution
+                        + " is incompatible with " + tmpNormalizedSubstitution));
+
+        ImmutableSubstitution<ImmutableTerm> newTheta = normalizedEta.restrictDomainTo(projectedVariables);
+
+        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = normalizedEta.builder()
+                .removeFromDomain(tmpNormalizedSubstitution.getDomain())
+                .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV))
+                // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
+                // this construction node
+                .build(VariableOrGroundTerm.class);
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                    // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
-                    substitutionPair.bindings.transform(ImmutableTerm::simplify));
-
-        return substitutionPair.bindings.isEmpty()
+        return newTheta.isEmpty()
                 ? newChild
-                : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+                : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(projectedVariables,
+                                // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
+                                    newTheta.transform(ImmutableTerm::simplify)),
+                            newChild);
     }
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {

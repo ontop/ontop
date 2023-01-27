@@ -32,9 +32,7 @@ public class ImmutableUnificationTools {
     }
 
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableTerm args1, ImmutableTerm args2) {
-        return getImmutableUnifierBuilder()
-                .unifyTerms(args1, args2)
-                .build();
+        return getImmutableUnifierBuilder().unifyTerms(args1, args2).build();
     }
 
 
@@ -42,7 +40,7 @@ public class ImmutableUnificationTools {
         return getImmutableUnifierBuilder(substitutionFactory.getSubstitution());
     }
 
-    public ImmutableUnifierBuilder getImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public ImmutableUnifierBuilder getImmutableUnifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
         return new ImmutableUnifierBuilder(substitution);
     }
 
@@ -136,13 +134,13 @@ public class ImmutableUnificationTools {
 
     public abstract class UnifierBuilder<T extends ImmutableTerm, R extends UnifierBuilder<T, R>> {
 
-        private final BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier;
+        private final BiFunction<ImmutableSubstitution<T>, T, T> substitutionApplier;
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private Optional<ImmutableSubstitution<T>> optionalSubstitution;
 
-        UnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
+        UnifierBuilder(BiFunction<ImmutableSubstitution<T>, T, T> substitutionApplier, ImmutableSubstitution<T> substitution) {
             this.substitutionApplier = substitutionApplier;
-            optionalSubstitution = Optional.of((ImmutableSubstitution<T>)substitution);
+            optionalSubstitution = Optional.of(substitution);
         }
 
         protected abstract R self();
@@ -205,7 +203,7 @@ public class ImmutableUnificationTools {
 
     public class VariableOrGroundTermUnifierBuilder<T extends VariableOrGroundTerm> extends UnifierBuilder<T, VariableOrGroundTermUnifierBuilder<T>> {
 
-        VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
+        VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<T>, T, T> substitutionApplier, ImmutableSubstitution<T> substitution) {
             super(substitutionApplier, substitution);
         }
 
@@ -227,7 +225,7 @@ public class ImmutableUnificationTools {
 
     public class ImmutableUnifierBuilder extends UnifierBuilder<ImmutableTerm, ImmutableUnifierBuilder> {
 
-        ImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        ImmutableUnifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
             super(ImmutableSubstitution::apply, substitution);
         }
 

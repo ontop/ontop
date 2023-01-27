@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -17,14 +16,11 @@ import java.util.Optional;
 public class IQTreeTools {
 
     private final TermFactory termFactory;
-    private final ConstructionNodeTools constructionNodeTools;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private IQTreeTools(TermFactory termFactory, ConstructionNodeTools constructionNodeTools,
-                        SubstitutionFactory substitutionFactory) {
+    private IQTreeTools(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
-        this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -53,7 +49,10 @@ public class IQTreeTools {
     public ImmutableSet<Variable> computeNewProjectedVariables(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
-        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
+
+        ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
+
+        return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
     }
 
     /**

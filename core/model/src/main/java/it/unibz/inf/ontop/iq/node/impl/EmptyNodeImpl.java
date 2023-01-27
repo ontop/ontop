@@ -28,16 +28,14 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
-    private final ConstructionNodeTools constructionNodeTools;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                          IQTreeTools iqTreeTools, ConstructionNodeTools constructionNodeTools,
+                          IQTreeTools iqTreeTools,
                           IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
         super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
-        this.constructionNodeTools = constructionNodeTools;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
@@ -97,7 +95,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return iqFactory.createEmptyNode(
-                constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
+                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
     }
 
     @Override

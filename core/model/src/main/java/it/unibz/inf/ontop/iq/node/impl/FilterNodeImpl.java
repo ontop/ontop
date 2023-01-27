@@ -8,6 +8,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -36,7 +37,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
 
-    private final ConstructionNodeTools constructionNodeTools;
+    private final IQTreeTools iqTreeTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
 
@@ -45,11 +46,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            TermFactory termFactory, TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            IntermediateQueryFactory iqFactory,
-                           ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
+                           IQTreeTools iqTreeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
-        this.constructionNodeTools = constructionNodeTools;
+        this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
     }
@@ -228,7 +229,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
 
-        ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
+        ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
         VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
