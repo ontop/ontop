@@ -79,9 +79,9 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         }
 
         // NB: may return an unifier with no entry
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unificationTools.getSubstitutionUnifier(
-                optimizationStates.stream()
-                        .map(s -> s.substitution));
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = optimizationStates.stream()
+                        .map(s -> s.substitution)
+                        .collect(unificationTools.unifierCollector());
 
         /*
          * Second empty case: incompatible unifications between relations
@@ -215,12 +215,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (simplifications.stream().anyMatch(s -> !s.isPresent()))
             return noSolutionState;
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unificationTools.getSubstitutionUnifier(
-                Stream.concat(
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = Stream.concat(
                         simplifications.stream()
                                 .map(Optional::get)
                                 .map(s -> s.substitution),
-                        Stream.of(state.substitution)));
+                        Stream.of(state.substitution))
+                .collect(unificationTools.unifierCollector());
 
         if (!optionalUnifier.isPresent()) {
             return noSolutionState;

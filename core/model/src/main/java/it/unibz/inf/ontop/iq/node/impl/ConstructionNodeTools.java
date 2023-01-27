@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
+import java.util.Map;
+
 /**
  * TODO: explain
  */
@@ -45,7 +47,9 @@ public class ConstructionNodeTools {
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSet<Variable> formerV, ImmutableSet<Variable> newV) throws QueryNodeSubstitutionException {
 
-        ImmutableSubstitution<ImmutableTerm> eta = unificationTools.computeMGUS(formerTheta, tau)
+        ImmutableSubstitution<ImmutableTerm> eta = unificationTools.getImmutableUnifierBuilder(formerTheta)
+                .unifyTermStreams(tau.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                .build()
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
                         + " is incompatible with " + formerTheta));
         /*

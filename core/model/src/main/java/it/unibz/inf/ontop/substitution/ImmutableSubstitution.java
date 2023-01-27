@@ -75,11 +75,18 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
     }
 
 
-    private static VariableOrGroundTerm applyToVariableOrGroundTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
+    static VariableOrGroundTerm applyToVariableOrGroundTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
         if (t instanceof GroundTerm)
             return t;
 
         return Optional.<VariableOrGroundTerm>ofNullable(substitution.get((Variable) t)).orElse(t);
+    }
+
+    static NonFunctionalTerm applyToNonFunctionalTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
+        if (t instanceof Constant)
+            return t;
+
+        return Optional.<NonFunctionalTerm>ofNullable(substitution.get((Variable) t)).orElse(t);
     }
 
     static ImmutableList<VariableOrGroundTerm> applyToVariableOrGroundTermList(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, ImmutableList<? extends VariableOrGroundTerm> terms) {

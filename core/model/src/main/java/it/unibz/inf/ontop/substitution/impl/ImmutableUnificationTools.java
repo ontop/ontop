@@ -9,9 +9,14 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -37,37 +42,24 @@ public class ImmutableUnificationTools {
 
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableList<? extends ImmutableTerm> args1,
                                                                                    ImmutableList<? extends ImmutableTerm> args2) {
-        return unify(substitutionFactory.getSubstitution(), args1, args2);
+        return new ImmutableUnifierBuilder()
+                .unifyTermLists(args1, args2)
+                .build();
+    }
+
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableTerm args1, ImmutableTerm args2) {
+        return new ImmutableUnifierBuilder()
+                .unifyTerms(args1, args2)
+                .build();
     }
 
 
-    /**
-     * Computes one Most General Unifier (MGU) of (two) substitutions.
-     */
-    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
-                                                                      ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
-        if (substitution1.isEmpty())
-            return Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution2);
-        else if (substitution2.isEmpty())
-            return Optional.of((ImmutableSubstitution<ImmutableTerm>)substitution1);
+    public ImmutableUnifierBuilder getImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        return new ImmutableUnifierBuilder(substitution);
+    }
 
-        ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution1.entrySet()) {
-            firstArgListBuilder.add(entry.getKey());
-            secondArgListBuilder.add(entry.getValue());
-        }
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution2.entrySet()) {
-            firstArgListBuilder.add(entry.getKey());
-            secondArgListBuilder.add(entry.getValue());
-        }
-
-        ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
-        ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
-
-        return computeMGU(firstArgList, secondArgList);
+    public VariableOrGroundTermUnifierBuilder<NonFunctionalTerm> getNonFunctionalTermUnifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
+        return new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToNonFunctionalTerm, substitution);
     }
 
 
@@ -95,38 +87,27 @@ public class ImmutableUnificationTools {
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
                     ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(substitution, newArgumentMap);
 
-            Sets.SetView<Integer> commonIndexes = Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet());
-
-            Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = computeMGU(
-                    commonIndexes.stream()
-                            .map(argumentMap::get)
-                            .collect(ImmutableCollectors.toList()),
-                    commonIndexes.stream()
-                            .map(updatedArgumentMap::get)
-                            .collect(ImmutableCollectors.toList()))
-                    .map(s -> s.castTo(VariableOrGroundTerm.class));
+            Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier =
+                    new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm)
+                            .unifyTermStreams(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
+                            .build();
 
             return unifier
-                    .map(u -> new ArgumentMapUnification(
-                            ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u,
-                                    ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
-                            u))
-                    .flatMap(u -> substitution.isEmpty()
-                            ? Optional.of(u)
-                            : computeMGUS(substitution, u.substitution)
-                            .map(s -> s.castTo(VariableOrGroundTerm.class))
-                            .map(s -> new ArgumentMapUnification(u.argumentMap, s)));
+                    .flatMap(u -> new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm, substitution)
+                            .unifyTermStreams(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                            .build()
+                            .map(s -> new ArgumentMapUnification(
+                                    ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
+                                    s)));
         }
     }
 
-    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutionUnifier(
-            Stream<ImmutableSubstitution<VariableOrGroundTerm>> substitutions) {
-        return substitutions
-                .reduce(Optional.of(substitutionFactory.getSubstitution()),
-                        (o, s) -> o.flatMap(s1 -> computeMGUS(s1, s).map(sub -> sub.castTo(VariableOrGroundTerm.class))),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("Not expected to be run in parallel");
-                        });
+    public Collector<ImmutableSubstitution<VariableOrGroundTerm>, VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm>, Optional<ImmutableSubstitution<VariableOrGroundTerm>>> unifierCollector() {
+        return Collector.of(
+                () -> new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm),
+                (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                UnifierBuilder::merge,
+                UnifierBuilder::build);
     }
 
     public Optional<ImmutableUnificationTools.ArgumentMapUnification> getArgumentMapUnifier(
@@ -151,47 +132,141 @@ public class ImmutableUnificationTools {
      * @return true the substitution (of null if it does not)
      */
 
-    private Optional<ImmutableSubstitution<ImmutableTerm>> unify(ImmutableSubstitution<ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
-        if (args1.size() != args2.size())
-            return Optional.empty();
 
-        ImmutableSubstitution<ImmutableTerm> result = sub;
-        int arity = args1.size();
-        for (int i = 0; i < arity; i++) {
-            // applying the computed substitution first
-            ImmutableTerm term1 = result.apply(args1.get(i));
-            ImmutableTerm term2 = result.apply(args2.get(i));
+    public abstract class UnifierBuilder<T extends ImmutableTerm, R extends UnifierBuilder<T, R>> {
+
+        private final BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier;
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private Optional<ImmutableSubstitution<T>> optionalSubstitution;
+
+        UnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier) {
+            this(substitutionApplier, substitutionFactory.getSubstitution());
+        }
+
+        UnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
+            this.substitutionApplier = substitutionApplier;
+            optionalSubstitution = Optional.of((ImmutableSubstitution<T>)substitution);
+        }
+
+        protected abstract R self();
+
+        protected R emptySelf() {
+            optionalSubstitution = Optional.empty();
+            return self();
+        }
+
+        public R unifyTermLists(ImmutableList<? extends T> args1, ImmutableList<? extends T> args2) {
+            if (args1.size() == args2.size())
+                return unifyTermStreams(IntStream.range(0, args1.size()), args1::get, args2::get);
+
+            return emptySelf();
+        }
+
+        public R unifyTermStreams(IntStream indexes, IntFunction<? extends T> args1, IntFunction<? extends T> args2) {
+            return indexes.collect(
+                    this::self,
+                    (s, i) -> s.unifyTerms(args1.apply(i), args2.apply(i)),
+                    UnifierBuilder::merge);
+        }
+
+        public <B> R unifyTermStreams(Stream<B> stream, Function<B, T> args1, Function<B, T> args2) {
+            return stream.collect(
+                    this::self,
+                    (s, i) -> s.unifyTerms(args1.apply(i), args2.apply(i)),
+                    UnifierBuilder::merge);
+        }
+
+        public R unifyTerms(T t1, T t2) {
+            if (optionalSubstitution.isEmpty())
+                return self();
+
+            T term1 = substitutionApplier.apply(optionalSubstitution.get(), t1);
+            T term2 = substitutionApplier.apply(optionalSubstitution.get(), t2);
 
             if (term1.equals(term2))
-                continue;
+                return self();
+
+            return unifyUnequalTerms(term1, term2);
+        }
+
+        abstract protected R unifyUnequalTerms(T t1, T t2);
+
+        protected R extendSubstitution(Variable variable, T term) {
+            ImmutableSubstitution<T> s = substitutionFactory.getSubstitution(variable, term);
+            optionalSubstitution = Optional.of(substitutionFactory.compose(s, optionalSubstitution.get()));
+            return self();
+        }
+
+        public Optional<ImmutableSubstitution<T>> build() {
+            return optionalSubstitution;
+        }
+
+        R merge(R another) {
+            throw new MinorOntopInternalBugException("Not expected to be run in parallel");
+        }
+    }
+
+    public class VariableOrGroundTermUnifierBuilder<T extends VariableOrGroundTerm> extends UnifierBuilder<T, VariableOrGroundTermUnifierBuilder<T>> {
+        VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier) {
+            super(substitutionApplier);
+        }
+
+        VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
+            super(substitutionApplier, substitution);
+        }
+
+        @Override
+        protected VariableOrGroundTermUnifierBuilder<T> self() {
+            return this;
+        }
+
+        @Override
+        protected VariableOrGroundTermUnifierBuilder<T> unifyUnequalTerms(T term1, T term2) {
+            if (term1 instanceof Variable)
+                return extendSubstitution((Variable) term1, term2);
+            if (term2 instanceof Variable)
+                return extendSubstitution((Variable) term2, term1);
+
+            return emptySelf(); // neither is a variable, impossible to unify distinct terms
+        }
+    }
+
+    public class ImmutableUnifierBuilder extends UnifierBuilder<ImmutableTerm, ImmutableUnifierBuilder> {
+
+        ImmutableUnifierBuilder() {
+            super(ImmutableSubstitution::apply);
+        }
+
+        ImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            super(ImmutableSubstitution::apply, substitution);
+        }
+
+        @Override
+        protected ImmutableUnifierBuilder self() {
+            return this;
+        }
+
+        @Override
+        protected ImmutableUnifierBuilder unifyUnequalTerms(ImmutableTerm term1, ImmutableTerm term2) {
 
             // Special case: unification of two functional terms (possibly recursive)
             if ((term1 instanceof ImmutableFunctionalTerm) && (term2 instanceof ImmutableFunctionalTerm)) {
                 ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
                 ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
-                if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
-                    return Optional.empty();
+                if (f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
+                    return unifyTermLists(f1.getTerms(), f2.getTerms());
 
-                Optional<ImmutableSubstitution<ImmutableTerm>> resultForSubTerms = unify(result, f1.getTerms(), f2.getTerms());
-                if (resultForSubTerms.isEmpty())
-                    return Optional.empty();
-
-                result = resultForSubTerms.get();
+                return emptySelf();
             }
             else {
-                ImmutableSubstitution<ImmutableTerm> s;
                 // avoid unifying x with f(g(x))
                 if (term1 instanceof Variable && term2.getVariableStream().noneMatch(term1::equals))
-                    s = substitutionFactory.getSubstitution((Variable) term1, term2);
-                else if (term2 instanceof Variable && term1.getVariableStream().noneMatch(term2::equals))
-                    s = substitutionFactory.getSubstitution((Variable) term2, term1);
-                else
-                    return Optional.empty(); // neither is a variable, impossible to unify distinct terms
+                    return extendSubstitution((Variable) term1, term2);
+                if (term2 instanceof Variable && term1.getVariableStream().noneMatch(term2::equals))
+                    return extendSubstitution((Variable) term2, term1);
 
-                result = substitutionFactory.compose(s, result);
+                return emptySelf(); // neither is a variable, impossible to unify distinct terms
             }
         }
-        return Optional.of(result);
     }
-
 }
