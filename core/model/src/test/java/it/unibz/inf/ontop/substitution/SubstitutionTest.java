@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -54,7 +55,9 @@ public class SubstitutionTest {
     }
 
     private void checkUnification(ImmutableList<ImmutableTerm> firstArguments, ImmutableList<ImmutableTerm> secondArguments) {
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier = UNIFICATION_TOOLS.computeMGU(firstArguments, secondArguments);
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier = UNIFICATION_TOOLS.getImmutableUnifierBuilder()
+                .unifyTermLists(firstArguments, secondArguments)
+                .build();
         assertTrue(optionalUnifier.isPresent());
         ImmutableSubstitution<ImmutableTerm> unifier = optionalUnifier.get();
 

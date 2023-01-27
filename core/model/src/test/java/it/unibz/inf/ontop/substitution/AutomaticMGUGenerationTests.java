@@ -82,7 +82,7 @@ public class AutomaticMGUGenerationTests  {
 
 				List<ImmutableTerm> atoms = getAtoms(atomsstr);
 				Optional<ImmutableSubstitution<ImmutableTerm>> expectedmgu = getMGU(mgustr);
-				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.computeMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.computeMGU(atoms.get(0), atoms.get(1));
 				log.debug("Expected MGU: {}", expectedmgu);
 				assertEquals(expectedmgu, mgu);
 				casecounter++;

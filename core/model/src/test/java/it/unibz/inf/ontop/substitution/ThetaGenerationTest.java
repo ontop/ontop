@@ -41,7 +41,7 @@ public class ThetaGenerationTest {
         ImmutableTerm t1 = TERM_FACTORY.getVariable("x");
         ImmutableTerm t2 = TERM_FACTORY.getVariable("x");
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertTrue(s.get().isEmpty());
     }
 
@@ -51,7 +51,7 @@ public class ThetaGenerationTest {
         Variable t1 = TERM_FACTORY.getVariable("x");
         Variable t2 = TERM_FACTORY.getVariable("y");
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
     }
 
@@ -62,7 +62,7 @@ public class ThetaGenerationTest {
         Variable t1 = TERM_FACTORY.getVariable("x");
         RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
     }
 
@@ -108,7 +108,7 @@ public class ThetaGenerationTest {
         Variable t2 = TERM_FACTORY.getVariable("x");
         RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, t1), s.get());
     }
 
@@ -118,7 +118,7 @@ public class ThetaGenerationTest {
         RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
         RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertTrue(s.get().isEmpty());
     }
 
@@ -160,7 +160,7 @@ public class ThetaGenerationTest {
         RDFLiteralConstant t2 = TERM_FACTORY.getRDFLiteralConstant("x", XSD.STRING);
         RDFLiteralConstant t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, t2);
         assertFalse(s.isPresent());
     }
 
@@ -172,7 +172,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, ot);
         assertFalse(s.isPresent());
     }
 
@@ -184,7 +184,7 @@ public class ThetaGenerationTest {
         ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t));
         Variable t2 = TERM_FACTORY.getVariable("x");
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot, t2);
         assertFalse(s.isPresent());
     }
 
@@ -196,7 +196,7 @@ public class ThetaGenerationTest {
         ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.of(t));
         Variable t2 = TERM_FACTORY.getVariable("y");
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot), ImmutableList.of(t2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot, t2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, ot), s.get());
     }
 
@@ -211,7 +211,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -226,7 +226,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertTrue(s.get().isEmpty());
     }
 
@@ -241,7 +241,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
     }
 
@@ -257,7 +257,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -272,7 +272,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
     }
 
@@ -288,7 +288,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -303,7 +303,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("q", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -319,7 +319,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -332,7 +332,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, ot);
         assertFalse(s.isPresent());
     }
 
@@ -344,7 +344,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(t1), ImmutableList.of(ot));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(t1, ot);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, ot), s.get());
     }
 
@@ -359,7 +359,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -374,7 +374,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t1, t2), s.get());
     }
 
@@ -390,7 +390,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -405,7 +405,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertEquals(SUBSTITUTION_FACTORY.getSubstitution(t2, t1), s.get());
     }
 
@@ -421,7 +421,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -436,7 +436,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 1);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 
@@ -453,7 +453,7 @@ public class ThetaGenerationTest {
         FunctionSymbol fs2 = new OntopModelTestFunctionSymbol("p", 2);
         ImmutableFunctionalTerm ot2 = TERM_FACTORY.getImmutableFunctionalTerm(fs2, ImmutableList.of(t2, t3));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ImmutableList.of(ot1), ImmutableList.of(ot2));
+        Optional<ImmutableSubstitution<ImmutableTerm>> s = UNIFICATION_TOOLS.computeMGU(ot1, ot2);
         assertFalse(s.isPresent());
     }
 }

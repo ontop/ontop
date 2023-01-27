@@ -15,7 +15,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -32,35 +31,38 @@ public class ImmutableUnificationTools {
         this.substitutionFactory = substitutionFactory;
     }
 
-    /**
-     * Computes the Most General Unifier (MGU) for two n-ary atoms.
-     *
-     * @param args1
-     * @param args2
-     * @return the substitution corresponding to this unification.
-     */
-
-    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableList<? extends ImmutableTerm> args1,
-                                                                                   ImmutableList<? extends ImmutableTerm> args2) {
-        return new ImmutableUnifierBuilder()
-                .unifyTermLists(args1, args2)
-                .build();
-    }
-
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableTerm args1, ImmutableTerm args2) {
-        return new ImmutableUnifierBuilder()
+        return getImmutableUnifierBuilder()
                 .unifyTerms(args1, args2)
                 .build();
     }
 
 
+    public ImmutableUnifierBuilder getImmutableUnifierBuilder() {
+        return getImmutableUnifierBuilder(substitutionFactory.getSubstitution());
+    }
+
     public ImmutableUnifierBuilder getImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new ImmutableUnifierBuilder(substitution);
+    }
+
+    public VariableOrGroundTermUnifierBuilder<NonFunctionalTerm> getNonFunctionalTermUnifierBuilder() {
+        return getNonFunctionalTermUnifierBuilder(substitutionFactory.getSubstitution());
     }
 
     public VariableOrGroundTermUnifierBuilder<NonFunctionalTerm> getNonFunctionalTermUnifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
         return new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToNonFunctionalTerm, substitution);
     }
+
+
+    public VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm> getVariableOrGroundTermUnifierBuilder() {
+        return getVariableOrGroundTermUnifierBuilder(substitutionFactory.getSubstitution());
+    }
+
+    public VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm> getVariableOrGroundTermUnifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+        return new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm, substitution);
+    }
+
 
 
     public final class ArgumentMapUnification {
@@ -87,13 +89,12 @@ public class ImmutableUnificationTools {
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
                     ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(substitution, newArgumentMap);
 
-            Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier =
-                    new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm)
+            Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = getVariableOrGroundTermUnifierBuilder()
                             .unifyTermStreams(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
                             .build();
 
             return unifier
-                    .flatMap(u -> new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm, substitution)
+                    .flatMap(u -> getVariableOrGroundTermUnifierBuilder(substitution)
                             .unifyTermStreams(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnification(
@@ -104,7 +105,7 @@ public class ImmutableUnificationTools {
 
     public Collector<ImmutableSubstitution<VariableOrGroundTerm>, VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm>, Optional<ImmutableSubstitution<VariableOrGroundTerm>>> unifierCollector() {
         return Collector.of(
-                () -> new VariableOrGroundTermUnifierBuilder<>(ImmutableSubstitution::applyToVariableOrGroundTerm),
+                this::getVariableOrGroundTermUnifierBuilder,
                 (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
                 UnifierBuilder::merge,
                 UnifierBuilder::build);
@@ -138,10 +139,6 @@ public class ImmutableUnificationTools {
         private final BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier;
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private Optional<ImmutableSubstitution<T>> optionalSubstitution;
-
-        UnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier) {
-            this(substitutionApplier, substitutionFactory.getSubstitution());
-        }
 
         UnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
             this.substitutionApplier = substitutionApplier;
@@ -207,9 +204,6 @@ public class ImmutableUnificationTools {
     }
 
     public class VariableOrGroundTermUnifierBuilder<T extends VariableOrGroundTerm> extends UnifierBuilder<T, VariableOrGroundTermUnifierBuilder<T>> {
-        VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier) {
-            super(substitutionApplier);
-        }
 
         VariableOrGroundTermUnifierBuilder(BiFunction<ImmutableSubstitution<? extends T>, T, T> substitutionApplier, ImmutableSubstitution<? extends T> substitution) {
             super(substitutionApplier, substitution);
@@ -232,10 +226,6 @@ public class ImmutableUnificationTools {
     }
 
     public class ImmutableUnifierBuilder extends UnifierBuilder<ImmutableTerm, ImmutableUnifierBuilder> {
-
-        ImmutableUnifierBuilder() {
-            super(ImmutableSubstitution::apply);
-        }
 
         ImmutableUnifierBuilder(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
             super(ImmutableSubstitution::apply, substitution);
