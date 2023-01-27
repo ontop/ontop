@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -82,15 +83,11 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         Decomposition decomposition = Decomposition.decomposeTree(tree);
 
         //Recursive
-        IQTree newDescendant = transform(decomposition.descendantTree, variableGenerator);
+        IQTree newDescendantTree = transform(decomposition.descendantTree, variableGenerator);
 
-        if (decomposition.descendantTree.equals(newDescendant))
-            return tree;
-        else
-            return decomposition.nodesInReverseOrder()
-                    .reduce(newDescendant,
-                            (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            (t1,t2) -> { throw new MinorOntopInternalBugException("Must not be run in parallel"); });
+        return decomposition.descendantTree.equals(newDescendantTree)
+            ? tree
+            : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
     }
 
     private IQTree normalize(IQTree tree, Analysis analysis, VariableGenerator variableGenerator) {
@@ -222,9 +219,9 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class Analysis {
-        private final boolean hasDistinct;
-        private final Optional<ConstructionNode> constructionNode;
-        private final ImmutableList<OrderByNode.OrderComparator> sortConditions;
+        final boolean hasDistinct;
+        final Optional<ConstructionNode> constructionNode;
+        final ImmutableList<OrderByNode.OrderComparator> sortConditions;
 
         private Analysis(boolean hasDistinct, Optional<ConstructionNode> constructionNode,
                          ImmutableList<OrderByNode.OrderComparator> sortConditions) {
@@ -247,20 +244,17 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
     /**
      * As the ancestors, we may get the following nodes: OrderByNode, ConstructionNode, DistinctNode, SliceNode.
-     *
      * NB: this order is bottom-up.
-     *
-     * Some nodes may be missing but the order must be respected. There is no multiple instances of the same kind of node.
+     * Some nodes may be missing but the order must be respected. There are no multiple instances of the same kind of node.
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class Decomposition {
-        // Starts with the parent, then the grand-parent, etc.
-        public final Optional<SliceNode> sliceNode;
-        public final Optional<DistinctNode> distinctNode;
-        public final Optional<ConstructionNode> constructionNode;
-        public final Optional<OrderByNode> orderByNode;
+        final Optional<SliceNode> sliceNode;
+        final Optional<DistinctNode> distinctNode;
+        final Optional<ConstructionNode> constructionNode;
+        final Optional<OrderByNode> orderByNode;
 
-        public final IQTree descendantTree;
+        final IQTree descendantTree;
 
         private Decomposition(Optional<SliceNode> sliceNode,
                               Optional<DistinctNode> distinctNode,
@@ -274,9 +268,12 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
             this.descendantTree = descendantTree;
         }
 
-        Stream<UnaryOperatorNode> nodesInReverseOrder() {
+        IQTree rebuildWithNewDescendantTree(IQTree newDescendantTree, IntermediateQueryFactory iqFactory) {
             return Stream.of(orderByNode, constructionNode, distinctNode, sliceNode)
-                    .flatMap(Optional::stream);
+                    .flatMap(Optional::stream)
+                    .reduce(newDescendantTree,
+                            (t, n) -> iqFactory.createUnaryIQTree(n, t),
+                            (t1, t2) -> { throw new MinorOntopInternalBugException("Must not be run in parallel"); });
         }
 
         static Decomposition decomposeTree(IQTree tree) {
@@ -319,8 +316,5 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
             return new Decomposition(sliceNode, distinctNode, constructionNode, orderByNode, descendantTree);
         }
-
     }
-
-
 }
