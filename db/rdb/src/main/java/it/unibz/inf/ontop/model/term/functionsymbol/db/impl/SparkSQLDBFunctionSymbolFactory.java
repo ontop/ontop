@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -195,6 +196,22 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return String.format("FLOOR(UNIX_MILLIS(%s) - UNIX_MILLIS(%s))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneDigitDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
     }
 }
 
