@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -65,14 +66,22 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected String getUUIDNameInDialect() {
-        return String.format("uuid()");
+        return String.format("uuid");
+    }
+
+    /**
+     * ORDER BY is required in the OVER clause
+     */
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
     }
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
                                        TermFactory termFactory) {
-        return String.format("(INSTR(%s,%s) > 0)",
+        return String.format("(POSITION(%s IN %s) > 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
@@ -157,7 +166,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/3600)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/3600)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -165,7 +174,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s)))/60)",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s))/60)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -173,7 +182,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR((BIGINT(TO_TIMESTAMP(%s)) - BIGINT(TO_TIMESTAMP(%s))))",
+        return String.format("FLOOR((BIGINT(%s) - BIGINT(%s)))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -184,9 +193,25 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("FLOOR(UNIX_MILLIS(TO_TIMESTAMP(%s)) - UNIX_MILLIS(TO_TIMESTAMP(%s)))",
+        return String.format("FLOOR(UNIX_MILLIS(%s) - UNIX_MILLIS(%s))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneDigitDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+    /**
+     * Experienced with Databricks
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
     }
 }
 
