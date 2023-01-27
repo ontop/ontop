@@ -26,4 +26,6 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
 
     @Override
     InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set);
+    @Override
+    InjectiveVar2VarSubstitution removeFromDomain(Set<Variable> set);
 }

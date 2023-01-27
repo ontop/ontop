@@ -66,6 +66,14 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
+    @Override
+    public InjectiveVar2VarSubstitution removeFromDomain(Set<Variable> set) {
+        return new InjectiveVar2VarSubstitutionImpl(map.entrySet().stream()
+                .filter(e -> !set.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap()), termFactory);
+    }
+
+
     static <T> boolean isInjective(ImmutableMap<Variable, T> map) {
         ImmutableCollection<T> values = map.values();
         return values.size() == ImmutableSet.copyOf(values).size();
