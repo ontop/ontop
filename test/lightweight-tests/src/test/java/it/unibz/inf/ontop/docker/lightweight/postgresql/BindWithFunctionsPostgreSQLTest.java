@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
@@ -28,8 +30,8 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     }
 
     @Override
-    protected ImmutableList<String> getAbsExpectedValues() {
-        return ImmutableList.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
                 "\"1.50\"^^xsd:decimal");
     }
 
@@ -68,14 +70,14 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     }
 
     @Override
-    protected ImmutableList<String> getDivideExpectedValues() {
-        return ImmutableList.of("\"21.5000000000000000\"^^xsd:decimal", "\"11.5000000000000000\"^^xsd:decimal",
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.5000000000000000\"^^xsd:decimal", "\"11.5000000000000000\"^^xsd:decimal",
                 "\"17.0000000000000000\"^^xsd:decimal", "\"5.0000000000000000\"^^xsd:decimal");
     }
 
     @Override
-    protected ImmutableList<String> getDatatypeExpectedValues() {
-        return ImmutableList.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
+    protected ImmutableMultiset<String> getDatatypeExpectedValues() {
+        return ImmutableMultiset.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
                 "\"0.15\"^^xsd:decimal");
     }
 

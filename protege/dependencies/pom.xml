@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ontop-protege</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-dependencies</artifactId>
@@ -234,7 +234,7 @@
                     </filters>
                     <relocations>
                         <relocation>
-                            <pattern></pattern>
+                            <pattern />
                             <shadedPattern>it.unibz.inf.ontop.shaded.</shadedPattern>
                             <includes>
                                 <include>com.google.common.**</include>
@@ -249,8 +249,8 @@
                                 <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
                             </manifestEntries>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
                             <addHeader>false</addHeader>
                         </transformer>

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +96,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        executeAndCompareValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
                 "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
@@ -142,7 +143,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        executeAndCompareValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
                 "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
@@ -169,7 +170,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        executeAndCompareValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
                 "\"Barbara\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
@@ -212,7 +213,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        executeAndCompareValues(query, ImmutableList.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
                 "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string"));
     }
 
@@ -978,7 +979,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
     }
 
     @Test
-    public void testGroupConcat3() throws Exception {
+    public void testGroupConcat3() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -1022,7 +1023,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
     }
 
     @Test
-    public void testGroupConcat5() throws Exception {
+    public void testGroupConcat5() {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
