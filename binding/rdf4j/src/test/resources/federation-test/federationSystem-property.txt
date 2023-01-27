@@ -1,4 +1,4 @@
-jdbc.url=jdbc:teiid:BSBM20KHom@mm://localhost:31000
+jdbc.url=jdbc:teiid:homogeneous@mm://localhost:11000
 jdbc.driver=org.teiid.jdbc.TeiidDriver
-jdbc.user=Lucy
-jdbc.password=Lucy123@
+jdbc.user=obdf
+jdbc.password=obdfPwd0

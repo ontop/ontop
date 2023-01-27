@@ -1,4 +1,4 @@
-jdbc.url=jdbc:postgresql://localhost:5432/BSBM20KMatV
+jdbc.url=jdbc:postgresql://localhost:10009/smatv
 jdbc.driver=org.postgresql.Driver
-jdbc.user=postgres
-jdbc.password=321456
+jdbc.user=obdf
+jdbc.password=obdfPwd0

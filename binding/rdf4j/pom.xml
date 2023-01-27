@@ -165,6 +165,21 @@
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
         </dependency>
+
+        <!-- added by Zhenzhen -->
+        <!-- Teiid -->
+        <dependency>
+            <groupId>org.teiid</groupId>
+            <artifactId>teiid</artifactId>
+            <classifier>jdbc</classifier>
+            <version>15.0.1</version>
+        </dependency>
+
+        <!-- PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
