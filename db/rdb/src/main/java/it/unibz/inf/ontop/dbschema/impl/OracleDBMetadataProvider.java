@@ -91,6 +91,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "'LBACSYS', " +
                         "'DVSYS', " +
                         "'APPQOSSYS', " +
+                        "'WMSYS', " +
+                        "'ORDDATA', " +
                         "'AUDSYS') AND " +
                 "   NOT (owner = 'SYSTEM' AND table_name IN ('ROLLING$DIRECTIVES', " +
                         "'SCHEDULER_JOB_ARGS_TBL', " +
