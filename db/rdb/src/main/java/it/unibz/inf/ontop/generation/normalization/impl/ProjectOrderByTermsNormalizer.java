@@ -64,7 +64,11 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
     protected IQTree transformConstructionSliceDistinctOrOrderByTree(IQTree tree, VariableGenerator variableGenerator) {
         IQTree newTree = applyTransformerToDescendantTree(tree, variableGenerator);
 
-        return analyze(newTree)
+        Decomposition decomposition = Decomposition.decomposeTree(newTree);
+
+        return decomposition.orderByNode
+                .filter(o -> decomposition.distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
+                .map(o -> new Analysis(decomposition.distinctNode.isPresent(), decomposition.constructionNode, o.getComparators()))
                 .map(a -> normalize(newTree, a, variableGenerator))
                 .orElse(newTree);
     }
@@ -75,7 +79,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
      * The root node of the parent tree must be a ConstructionNode, a SliceNode, a DistinctNode or an OrderByNode
      */
     private IQTree applyTransformerToDescendantTree(IQTree tree, VariableGenerator variableGenerator) {
-        Decomposition decomposition = decomposeTree(tree);
+        Decomposition decomposition = Decomposition.decomposeTree(tree);
 
         //Recursive
         IQTree newDescendant = transform(decomposition.descendantTree, variableGenerator);
@@ -83,95 +87,17 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
         if (decomposition.descendantTree.equals(newDescendant))
             return tree;
         else
-            return decomposition.ancestors.stream()
+            return decomposition.nodesInReverseOrder()
                     .reduce(newDescendant,
                             (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                            (t1,t2) -> {
-                        throw new MinorOntopInternalBugException("Must not be run in parallel");
-                            });
-    }
-
-    private Decomposition decomposeTree(IQTree tree) {
-        ImmutableList.Builder<UnaryOperatorNode> inversedAncestorBuilder = ImmutableList.builder();
-
-        QueryNode rootNode = tree.getRootNode();
-        Optional<SliceNode> sliceNode = Optional.of(rootNode)
-                .filter(n -> n instanceof SliceNode)
-                .map(n -> (SliceNode) n);
-
-        sliceNode.ifPresent(inversedAncestorBuilder::add);
-
-        IQTree firstNonSliceTree = sliceNode
-                .map(n -> ((UnaryIQTree) tree).getChild())
-                .orElse(tree);
-
-        Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof DistinctNode)
-                .map(n -> (DistinctNode) n);
-
-        distinctNode.ifPresent(inversedAncestorBuilder::add);
-
-        IQTree firstNonSliceDistinctTree = distinctNode
-                .map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
-                .orElse(firstNonSliceTree);
-
-        Optional<ConstructionNode> constructionNode = Optional.of(firstNonSliceDistinctTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n);
-
-        constructionNode.ifPresent(inversedAncestorBuilder::add);
-
-        IQTree firstNonSliceDistinctConstructionTree = constructionNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
-                .orElse(firstNonSliceDistinctTree);
-
-        Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctConstructionTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof OrderByNode)
-                .map(n -> (OrderByNode) n);
-
-        orderByNode.ifPresent(inversedAncestorBuilder::add);
-
-        IQTree descendantTree = orderByNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionTree);
-
-        return new Decomposition(inversedAncestorBuilder.build().reverse(), descendantTree);
-    }
-
-    private Optional<Analysis> analyze(IQTree tree) {
-        Decomposition decomposition = decomposeTree(tree);
-
-        if (decomposition.ancestors.isEmpty())
-            return Optional.empty();
-
-        Optional<DistinctNode> distinctNode = decomposition.ancestors.stream()
-                .filter(n -> n instanceof DistinctNode)
-                .map(n -> (DistinctNode) n)
-                .findFirst();
-
-        Optional<ConstructionNode> constructionNode = decomposition.ancestors.stream()
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .findFirst();
-
-        Optional<OrderByNode> orderByNode = decomposition.ancestors.stream()
-                .filter(n -> n instanceof OrderByNode)
-                .map(n -> (OrderByNode) n)
-                .findFirst();
-
-        return orderByNode
-                .filter(o -> distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
-                .map(o -> new Analysis(distinctNode.isPresent(), constructionNode, o.getComparators()));
+                            (t1,t2) -> { throw new MinorOntopInternalBugException("Must not be run in parallel"); });
     }
 
     private IQTree normalize(IQTree tree, Analysis analysis, VariableGenerator variableGenerator) {
 
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
 
-        ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode
+        ImmutableSet<ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode
                 .map(c -> Stream.concat(
                         projectedVariables.stream(),
                         c.getSubstitution().getImmutableMap().values().stream())
@@ -326,16 +252,74 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
      *
      * Some nodes may be missing but the order must be respected. There is no multiple instances of the same kind of node.
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class Decomposition {
         // Starts with the parent, then the grand-parent, etc.
-        public final ImmutableList<UnaryOperatorNode> ancestors;
+        public final Optional<SliceNode> sliceNode;
+        public final Optional<DistinctNode> distinctNode;
+        public final Optional<ConstructionNode> constructionNode;
+        public final Optional<OrderByNode> orderByNode;
 
         public final IQTree descendantTree;
 
-        private Decomposition(ImmutableList<UnaryOperatorNode> ancestors, IQTree descendantTree) {
-            this.ancestors = ancestors;
+        private Decomposition(Optional<SliceNode> sliceNode,
+                              Optional<DistinctNode> distinctNode,
+                              Optional<ConstructionNode> constructionNode,
+                              Optional<OrderByNode> orderByNode,
+                              IQTree descendantTree) {
+            this.sliceNode = sliceNode;
+            this.distinctNode = distinctNode;
+            this.constructionNode = constructionNode;
+            this.orderByNode = orderByNode;
             this.descendantTree = descendantTree;
         }
+
+        Stream<UnaryOperatorNode> nodesInReverseOrder() {
+            return Stream.of(orderByNode, constructionNode, distinctNode, sliceNode)
+                    .flatMap(Optional::stream);
+        }
+
+        static Decomposition decomposeTree(IQTree tree) {
+
+            QueryNode rootNode = tree.getRootNode();
+            Optional<SliceNode> sliceNode = Optional.of(rootNode)
+                    .filter(n -> n instanceof SliceNode)
+                    .map(n -> (SliceNode) n);
+
+            IQTree firstNonSliceTree = sliceNode
+                    .map(n -> ((UnaryIQTree) tree).getChild())
+                    .orElse(tree);
+
+            Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
+                    .map(IQTree::getRootNode)
+                    .filter(n -> n instanceof DistinctNode)
+                    .map(n -> (DistinctNode) n);
+
+            IQTree firstNonSliceDistinctTree = distinctNode
+                    .map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
+                    .orElse(firstNonSliceTree);
+
+            Optional<ConstructionNode> constructionNode = Optional.of(firstNonSliceDistinctTree)
+                    .map(IQTree::getRootNode)
+                    .filter(n -> n instanceof ConstructionNode)
+                    .map(n -> (ConstructionNode) n);
+
+            IQTree firstNonSliceDistinctConstructionTree = constructionNode
+                    .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
+                    .orElse(firstNonSliceDistinctTree);
+
+            Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctConstructionTree)
+                    .map(IQTree::getRootNode)
+                    .filter(n -> n instanceof OrderByNode)
+                    .map(n -> (OrderByNode) n);
+
+            IQTree descendantTree = orderByNode
+                    .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
+                    .orElse(firstNonSliceDistinctConstructionTree);
+
+            return new Decomposition(sliceNode, distinctNode, constructionNode, orderByNode, descendantTree);
+        }
+
     }
 
 
