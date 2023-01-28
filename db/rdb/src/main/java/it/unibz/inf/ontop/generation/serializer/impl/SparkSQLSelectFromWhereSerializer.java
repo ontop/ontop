@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @Singleton
 public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
-    private final TermFactory termFactory;
     private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s%s";
     private static final ImmutableMap<Character, String> BACKSLASH = ImmutableMap.of('\\', "\\\\");
 
@@ -39,7 +38,6 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return StringUtils.encode(super.serializeStringConstant(constant), BACKSLASH);
             }
         });
-        this.termFactory = termFactory;
     }
 
     @Override
@@ -96,7 +94,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     return "";
 
                 String conditionString = sortConditions.stream()
-                        .map(c -> serializeOrderByTerm(c.getTerm(), columnIDs, substitution)
+                        .map(c -> serializeOrderByTerm(c.getTerm(), columnIDs, variableAliases, substitution)
                                 + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST"))
                         .collect(Collectors.joining(", "));
 
@@ -110,48 +108,27 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
              */
             private String serializeOrderByTerm(ImmutableTerm term,
                                                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
+                                                ImmutableMap<Variable, QuotedID> variableAliases,
                                                 ImmutableSubstitution<? extends ImmutableTerm> substitution)
-                    throws SQLSerializationException {
-
-                for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-                    if (entry.getValue().equals(term)) {
-                        return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
-                    }
-                }
-                return checkColumnID(term, columnIDs);
-            }
-
-            private QuotedID variableNameToColumnAlias(Variable variable) {
-                return createAttributeAliasFactory().createAttributeAlias(variable.getName());
-            }
-
-            /**
-             * Check the columnIDs Map and extract the column alias if available. If not available, throw an exception.
-             */
-            private String checkColumnID(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> columnIDs)
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {
                     return getTermSerializer().serialize(term, columnIDs);
-                } else if (term instanceof Variable) {
-                    for (Map.Entry<Variable, QualifiedAttributeID> entry : columnIDs.entrySet()) {
-                        if (entry.getValue().equals(columnIDs.get(term))) {
-                            return variableNameToColumnAlias(entry.getKey()).getSQLRendering();
+                }
+                else if (term instanceof Variable) {
+                    Optional<QuotedID> alias = Optional.ofNullable(variableAliases.get(term));
+                    return alias.map(QuotedID::getSQLRendering)
+                            .orElseThrow(() -> new SQLSerializationException(String.format(
+                                    "Variable %s does not occur in the variableAliases %s", term, variableAliases)));
+                }
+                else {
+                    // use the project expression alias instead of processing the expression itself
+                    for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+                        if (entry.getValue().equals(term)) {
+                            return variableAliases.get(entry.getKey()).getSQLRendering();
                         }
                     }
-                    throw new SQLSerializationException(String.format(
-                            "The variable %s does not appear in the columnIDs", term));
-                } else {
-                    return Optional.of(term)
-                            .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t)
-                            .filter(t -> t.getFunctionSymbol() instanceof DBFunctionSymbol)
-                            .map(t -> ((DBFunctionSymbol) t.getFunctionSymbol()).getNativeDBString(
-                                    t.getTerms(),
-                                    t2 -> checkColumnID(t2, columnIDs),
-                                    termFactory))
-                            .orElseThrow(() -> new SQLSerializationException("Only DBFunctionSymbols must be provided " +
-                                    "to a SQLTermSerializer"));
+                    throw new SQLSerializationException(String.format("Term %s does not occur in the substitution %s", term, substitution));
                 }
             }
 
