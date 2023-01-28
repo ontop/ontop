@@ -272,6 +272,66 @@ public class FederationHintPrecomputation {
         return b;
     }
 
+    /**
+     * Zhenzhen: materialize data for non-empty federated joins, including create table and insert data in the DB for materialized views.
+     * @param conn
+     * @param rs
+     * @param tableName
+     * @param attributes
+     * @throws Exception
+     */
+
+    public void materializeData(Connection conn, Statement stmt, ResultSet rs, String tableName, List<String> attributes) throws Exception {
+        String create_table = "CREATE TABLE "+tableName+" ( ";
+        int column_count = attributes.size();
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        for(int i=1; i<column_count+1; i++){
+            String column_name = attributes.get(i-1);
+            String data_type = rsmd.getColumnTypeName(i);
+            //the mappings of datatypes between federation system and the DB system.
+            if(data_type.equals("string")){
+                data_type = "varchar";
+            } else if (data_type.equals("integer")){
+                data_type = "int4";
+            } else if (data_type.equals("double")){
+                data_type = "double precision";
+            }
+
+            create_table = create_table + column_name+" "+data_type+" , ";
+        }
+        create_table = create_table.substring(0, create_table.length()-2)+" )";
+        System.out.println("create_table for the join: "+create_table);
+        int b = stmt.executeUpdate(create_table);
+
+
+        String sql = "insert into "+tableName+" values (";
+        for(int i=0; i<column_count; i++){
+            sql = sql + "?,";
+        }
+        sql = sql.substring(0, sql.length()-1)+")";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        conn.setAutoCommit(false);
+        int count = 0;
+        while(rs.next()){
+            count = count +1;
+            for(int i=1; i<column_count+1; i++){
+                ps.setObject(i, rs.getObject(i));
+            }
+            ps.addBatch();
+            if(count % 500 ==0){
+                ps.executeBatch();
+                ps.clearBatch();
+            }
+        }
+        ps.executeBatch();
+        ps.clearBatch();
+        conn.commit();
+
+        ps.close();
+        rs.close();
+    }
+
 
 
     public void insertData(Statement stmt, ResultSet rs, String tableName, List<String> attributes) throws Exception {
@@ -295,7 +355,7 @@ public class FederationHintPrecomputation {
             create_table = create_table + column_name+" "+data_type+" , ";
         }
         create_table = create_table.substring(0, create_table.length()-2)+" )";
-        System.out.println("create_table: "+create_table);
+        System.out.println("create_table for the join: "+create_table);
         int b = stmt.executeUpdate(create_table);
 
         while(rs.next()){
@@ -515,6 +575,7 @@ public class FederationHintPrecomputation {
 
         //first redundancy checking, then checking candidate federated joins to filter out some candidates
         for(Redundancy candidate: candidateHints.redundancy){
+            long start = System.currentTimeMillis();
             System.out.println("checking: ");
             System.out.println("relation1: "+candidate.relation1);
             System.out.println("relation2: "+candidate.relation2);
@@ -527,23 +588,29 @@ public class FederationHintPrecomputation {
             } else {
                 System.out.println("Do not exist redundancy");
             }
+            long end = System.currentTimeMillis();
+            System.out.println("time for redundancy checking: "+(end-start));
+            System.out.println("\n");
         }
 
         for(EmptyFederatedJoin candidate: candidateHints.emptyFJs){
             //check whether exists duplication with candidate redundancy;
+            long start = System.currentTimeMillis();
             if(! checkDuplicationAmongCandidateRedundancyAndJoins(computedHints.redundancy, candidate)){
                 String[] arrs = candidate.joinCondition.split("=");
                 String sql = "SELECT * FROM (" + candidate.relation1+") AS V1, "+"("+candidate.relation2+") AS V2"+" WHERE "+"V1."+arrs[0]+"="+"V2."+arrs[1];
-                //System.out.println("sql: "+sql);
+                System.out.println("checked join: "+sql);
 
                 //the sql query needs to be modified;
                 //the sql query needs to be make sure whether the two relations containing attributes with the same name;
                 ResultSet rs = stmt_federation.executeQuery(sql);
                 if(!rs.next()){
                     computedHints.emptyFJs.add(candidate);
+                    System.out.println("checking result: empty");
                 } else {
                     //write into the local sources
                     //import the schema of the local sources into federation system automatically
+                    System.out.println("checking result: not empty");
                     String viewName = "MatV_"+matv_count;
 
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
@@ -564,7 +631,8 @@ public class FederationHintPrecomputation {
                         }
                     }
 
-                    insertData(stmt_matvDB, rs, viewName, attributes);
+                    //insertData(stmt_matvDB, rs, viewName, attributes);
+                    materializeData(conn_matvDB, stmt_matvDB, rs, viewName, attributes);
 
                     MaterializedView mv = new MaterializedView();
                     mv.sourceSQL = sql;
@@ -577,6 +645,9 @@ public class FederationHintPrecomputation {
                 rs.close();
                 rs = null;
             }
+            long end = System.currentTimeMillis();
+            System.out.println("time for federated join checking: "+(end-start));
+            System.out.println("\n");
 
         }
 
@@ -636,10 +707,14 @@ public class FederationHintPrecomputation {
 
    @Test
     public void myTest() throws Exception {
+        long start1 = System.currentTimeMillis();
         SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
                 "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
                 "src/test/resources/federation-test/teiid.properties",
                 "src/test/resources/federation-test/SourceLab.txt");
+        long end1 = System.currentTimeMillis();
+        System.out.println("total time used for detection: "+(end1-start1));
+
         System.out.println("detected candidate federated joins for checking: "+sh.emptyFJs.size());
         for(EmptyFederatedJoin candidate: sh.emptyFJs){
             candidate.print();
@@ -650,11 +725,15 @@ public class FederationHintPrecomputation {
             candidate.print();
         }
 
+        System.out.println("");
         System.out.println("start computing: ");
 
+        start1 = System.currentTimeMillis();
         SourceHints sh_new = computeSourceHints(sh,
                 "src/test/resources/federation-test/federationSystem-property.txt",
                 "src/test/resources/federation-test/matvDB-property.txt");
+        end1 = System.currentTimeMillis();
+        System.out.println("total time used for computation: "+(end1-start1));
         System.out.println("");
 
         System.out.println("finally computed source hints: ");

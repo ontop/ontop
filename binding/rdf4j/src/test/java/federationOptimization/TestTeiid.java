@@ -70,6 +70,14 @@ public class TestTeiid {
 
     }
 
+    public void testQuery(Statement stmt, String sql) throws Exception {
+        ResultSet rs = stmt.executeQuery(sql);
+        while(rs.next()){
+            System.out.println("query result not empty");
+            break;
+        }
+    }
+
 
     @Test
     public void myTest(){
@@ -78,20 +86,16 @@ public class TestTeiid {
             Connection conn = DriverManager.getConnection("jdbc:teiid:homogeneous@mm://localhost:11000", "obdf", "obdfPwd0");
             Statement stmt = conn.createStatement();
 
-//            relation1: SELECT nr, propertytex4  from ss1.product1
-//            relation2: SELECT nr, propertytex4  from ss5.product2
-//            checking:
-//            relation1: SELECT product, producttype  from ss1.producttypeproduct1
-//            relation2: SELECT product, producttype  from ss5.producttypeproduct2
-//            checking:
-//            relation1: SELECT nr, propertytex3  from ss1.product1
-//            relation2: SELECT nr, propertytex3  from ss5.product2
+           long start = System.currentTimeMillis();
 
+            String relation1 = "select nr, publisher from ss2.review";
+            String relation2 = "select nr, publisher from ss1.reviewc";
+            String sql = "("+relation2+") except ("+relation1+")";
+            //testQuery(stmt, sql);
+            checkRedundancy(stmt, relation1, relation2);
 
-            String relation1 = "SELECT product, producttype  from ss1.producttypeproduct1";
-            String relation2 = "SELECT product, producttype  from ss5.producttypeproduct2";
-            String relation = checkRedundancy(stmt, relation1, relation2);
-            System.out.println("a-"+relation+"?b");
+            long end = System.currentTimeMillis();
+            System.out.println("time used: "+(end-start));
 
         }catch(Exception e){
             e.printStackTrace();
