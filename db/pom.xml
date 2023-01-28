@@ -6,7 +6,8 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.1-SNAPSHOT
+</version>
     </parent>
 
     <artifactId>ontop-db</artifactId>
