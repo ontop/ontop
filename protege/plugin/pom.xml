@@ -191,6 +191,8 @@
 
                                 <Import-Package>
                                 	!javax.servlet.*,
+                                    !javax.jms.*,
+                                    !javax.mail.*,
                                     javax.*,
                                     com.google.common.*;version="[18.0,19)",
                                     org.osgi.framework;version="[1.8,2)",
