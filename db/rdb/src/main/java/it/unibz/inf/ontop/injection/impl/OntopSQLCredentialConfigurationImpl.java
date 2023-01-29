@@ -48,27 +48,24 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         }
     }
 
-    protected static class DefaultOntopSQLCredentialBuilderFragment<B extends OntopSQLCredentialConfiguration.Builder<B>> implements
+    protected abstract static class DefaultOntopSQLCredentialBuilderFragment<B extends OntopSQLCredentialConfiguration.Builder<B>> implements
             OntopSQLCredentialConfiguration.OntopSQLCredentialBuilderFragment<B> {
 
-        private final B builder;
         private Optional<String> jdbcUser = Optional.empty();
         private Optional<String> jbdcPassword = Optional.empty();
 
-        DefaultOntopSQLCredentialBuilderFragment(B builder) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B jdbcUser(String username) {
             this.jdbcUser = Optional.of(username);
-            return builder;
+            return self();
         }
 
         @Override
         public B jdbcPassword(String password) {
             this.jbdcPassword = Optional.of(password);
-            return builder;
+            return self();
         }
 
         Properties generateProperties() {
@@ -92,8 +89,12 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         private final DefaultOntopSQLCredentialBuilderFragment<B> sqlBuilderFragment;
 
         protected OntopSQLCredentialBuilderMixin() {
-            B builder = (B) this;
-            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLCredentialBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -118,8 +119,7 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
         }
     }
 
-    public static class BuilderImpl<B extends OntopSQLCredentialConfiguration.Builder<B>>
-            extends OntopSQLCredentialBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSQLCredentialBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSQLCredentialConfiguration build() {
@@ -127,6 +127,11 @@ public class OntopSQLCredentialConfigurationImpl extends OntopSQLCoreConfigurati
             OntopSQLCredentialOptions options = generateSQLCredentialOptions();
 
             return new OntopSQLCredentialConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 

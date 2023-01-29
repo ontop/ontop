@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.docker.lightweight.spark;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;

@@ -86,21 +86,17 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
         }
     }
 
-    static class DefaultOntopReformulationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
+    static abstract class DefaultOntopReformulationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
             implements OntopReformulationBuilderFragment<B> {
 
-        private final B builder;
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
-        DefaultOntopReformulationBuilderFragment(B builder) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B enableExistentialReasoning(boolean enable) {
             this.existentialReasoning = Optional.of(enable);
-            return builder;
-
+            return self();
         }
 
         Properties generateProperties() {
@@ -123,8 +119,12 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
         private final DefaultOntopReformulationBuilderFragment<B> localBuilderFragment;
 
         OntopReformulationBuilderMixin() {
-            B builder = (B) this;
-            localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopReformulationBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override

@@ -141,6 +141,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
      * Useful for extensions
      *
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static class OntopMappingSQLOptions {
         final OntopSQLCredentialOptions sqlOptions;
         final OntopMappingOptions mappingOptions;
@@ -154,36 +155,30 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         }
     }
 
-    protected static class DefaultMappingSQLBuilderFragment<B extends OntopMappingSQLConfiguration.Builder<B>>
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected abstract static class DefaultMappingSQLBuilderFragment<B extends OntopMappingSQLConfiguration.Builder<B>>
             implements OntopMappingSQLBuilderFragment<B> {
 
-        private final B builder;
-        private final Supplier<Boolean> isMappingDefinedSupplier;
-        private final Runnable declareMappingDefinedCB;
         private Optional<SQLPPMapping> ppMapping = Optional.empty();
 
-        /**
-         * Default constructor
-         */
-        protected DefaultMappingSQLBuilderFragment(B builder,
-                                                   Supplier<Boolean> isMappingDefinedSupplier,
-                                                   Runnable declareMappingDefinedCB) {
-            this.builder = builder;
-            this.isMappingDefinedSupplier = isMappingDefinedSupplier;
-            this.declareMappingDefinedCB = declareMappingDefinedCB;
-        }
+
+        protected abstract B self();
+
+        protected abstract void declareMappingDefined();
+
+        protected abstract boolean isMappingDefined();
 
         /**
          * Not for end-users! Please consider giving a mapping file or a mapping reader.
          */
         @Override
         public B ppMapping(@Nonnull SQLPPMapping ppMapping) {
-            if (isMappingDefinedSupplier.get()) {
+            if (isMappingDefined()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             this.ppMapping = Optional.of(ppMapping);
-            return builder;
+            return self();
         }
 
 
@@ -206,12 +201,34 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         private final DefaultOntopSQLCredentialBuilderFragment<B> sqlCredentialBuilderFragment;
 
         protected OntopMappingSQLBuilderMixin() {
-            B builder = (B) this;
-            localBuilderFragment = new DefaultMappingSQLBuilderFragment<>(builder,
-                    this::isMappingDefined,
-                    this::declareMappingDefined);
-            sqlCoreBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
-            sqlCredentialBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultMappingSQLBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingSQLBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareMappingDefined() {
+                    OntopMappingSQLBuilderMixin.this.declareMappingDefined();
+                }
+
+                @Override
+                protected boolean isMappingDefined() {
+                    return OntopMappingSQLBuilderMixin.this.isMappingDefined();
+                }
+            };
+            sqlCoreBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingSQLBuilderMixin.this.self();
+                }
+            };
+            sqlCredentialBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingSQLBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -259,8 +276,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     }
 
 
-    public static class BuilderImpl<B extends OntopMappingSQLConfiguration.Builder<B>>
-            extends OntopMappingSQLBuilderMixin<B> {
+    public static class BuilderImpl extends OntopMappingSQLBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopMappingSQLConfiguration build() {
@@ -271,6 +287,10 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
             return new OntopMappingSQLConfigurationImpl(settings, options);
         }
-    }
 
+        @Override
+        protected BuilderImpl self() {
+            return this;
+        }
+    }
 }

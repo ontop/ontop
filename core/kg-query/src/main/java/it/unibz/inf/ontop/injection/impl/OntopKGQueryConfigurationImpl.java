@@ -63,9 +63,13 @@ public abstract class OntopKGQueryConfigurationImpl extends OntopOBDAConfigurati
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopKGQueryBuilderMixin() {
-            B builder = (B) this;
-            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
+            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>();
+            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopKGQueryBuilderMixin.this.self();
+                }
+            };
         }
 
         final OntopKGQueryOptions generateKGQueryOptions() {
@@ -112,5 +116,4 @@ public abstract class OntopKGQueryConfigurationImpl extends OntopOBDAConfigurati
             return modelBuilderFragment.enableTestMode();
         }
     }
-
 }

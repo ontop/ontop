@@ -10,8 +10,8 @@ public interface OntopSQLCredentialConfiguration extends OntopSQLCoreConfigurati
     @Override
     OntopSQLCredentialSettings getSettings();
 
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new OntopSQLCredentialConfigurationImpl.BuilderImpl<>();
+    static Builder<? extends Builder<?>> defaultBuilder() {
+        return new OntopSQLCredentialConfigurationImpl.BuilderImpl();
     }
 
     interface OntopSQLCredentialBuilderFragment<B extends Builder<B>> {
@@ -19,8 +19,7 @@ public interface OntopSQLCredentialConfiguration extends OntopSQLCoreConfigurati
         B jdbcPassword(String password);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopSQLCredentialBuilderFragment<B>,
-            OntopSQLCoreConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopSQLCredentialBuilderFragment<B>, OntopSQLCoreConfiguration.Builder<B> {
 
         @Override
         OntopSQLCredentialConfiguration build();

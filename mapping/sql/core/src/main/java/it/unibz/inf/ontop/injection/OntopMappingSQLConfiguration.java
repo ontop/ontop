@@ -16,8 +16,8 @@ public interface OntopMappingSQLConfiguration extends OntopSQLCredentialConfigur
     /**
      * Default builder
      */
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new OntopMappingSQLConfigurationImpl.BuilderImpl<>();
+    static Builder<? extends Builder<?>>  defaultBuilder() {
+        return new OntopMappingSQLConfigurationImpl.BuilderImpl();
     }
 
     Optional<SQLPPMapping> loadPPMapping() throws MappingException;

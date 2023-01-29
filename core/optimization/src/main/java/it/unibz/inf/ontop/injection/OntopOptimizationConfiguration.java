@@ -10,8 +10,8 @@ public interface OntopOptimizationConfiguration extends OntopModelConfiguration 
     /**
      * Default builder
      */
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new OntopOptimizationConfigurationImpl.BuilderImpl<>();
+    static Builder<? extends Builder<?>> defaultBuilder() {
+        return new OntopOptimizationConfigurationImpl.BuilderImpl();
     }
 
     /**

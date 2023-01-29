@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public class OntopMappingOntologyBuilders {
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static class OntopMappingOntologyOptions {
 
         final Optional<File> ontologyFile;
@@ -38,21 +39,18 @@ public class OntopMappingOntologyBuilders {
         }
     }
 
-    static class StandardMappingOntologyBuilderFragment<B extends OntopMappingOntologyConfiguration.Builder<B>>
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static abstract class StandardMappingOntologyBuilderFragment<B extends OntopMappingOntologyConfiguration.Builder<B>>
             implements OntopMappingOntologyConfiguration.OntopMappingOntologyBuilderFragment<B> {
 
-        private final B builder;
-        private final Runnable declareOntologyDefinedCB;
         private Optional<File> ontologyFile = Optional.empty();
         private Optional<URL> ontologyURL = Optional.empty();
         private Optional<Reader> ontologyReader = Optional.empty();
         private Optional<String> xmlCatalogFile = Optional.empty();
 
-        StandardMappingOntologyBuilderFragment(B builder,
-                                               Runnable declareOntologyDefinedCB) {
-            this.builder = builder;
-            this.declareOntologyDefinedCB = declareOntologyDefinedCB;
-        }
+        protected abstract B self();
+
+        protected abstract void declareOntologyDefined();
 
         @Override
         public B ontologyFile(@Nonnull String urlOrPath) {
@@ -77,29 +75,28 @@ public class OntopMappingOntologyBuilders {
         @Override
         public B xmlCatalogFile(@Nonnull String xmlCatalogFile) {
             this.xmlCatalogFile = Optional.of(xmlCatalogFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B ontologyFile(@Nonnull URL url) {
-            declareOntologyDefinedCB.run();
+            declareOntologyDefined();
             this.ontologyURL = Optional.of(url);
-            return builder;
+            return self();
         }
-
 
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
-            declareOntologyDefinedCB.run();
+            declareOntologyDefined();
             this.ontologyFile = Optional.of(owlFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B ontologyReader(@Nonnull Reader reader) {
-            declareOntologyDefinedCB.run();
+            declareOntologyDefined();
             this.ontologyReader = Optional.of(reader);
-            return builder;
+            return self();
         }
 
         OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {

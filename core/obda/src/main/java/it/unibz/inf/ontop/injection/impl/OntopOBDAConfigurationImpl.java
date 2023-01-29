@@ -70,30 +70,27 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         }
     }
 
-    static class DefaultOntopOBDABuilderFragment<B extends OntopOBDAConfiguration.Builder<B>>
+    static abstract class DefaultOntopOBDABuilderFragment<B extends OntopOBDAConfiguration.Builder<B>>
             implements OntopOBDABuilderFragment<B> {
 
-        private final B builder;
-        private final Runnable declareSpecificationCB;
         private Optional<Boolean> sameAsMappings = Optional.empty();
         private Optional<OBDASpecification> specification = Optional.empty();
 
-        DefaultOntopOBDABuilderFragment(B builder, Runnable declareSpecificationCB) {
-            this.builder = builder;
-            this.declareSpecificationCB = declareSpecificationCB;
-        }
+        protected abstract B self();
+
+        protected abstract void declareOBDASpecificationAssigned();
 
         @Override
         public B obdaSpecification(OBDASpecification specification) {
-            declareSpecificationCB.run();
+            declareOBDASpecificationAssigned();
             this.specification = Optional.of(specification);
-            return builder;
+            return self();
         }
 
         @Override
         public B sameAsMappings(boolean sameAsMappings) {
             this.sameAsMappings = Optional.of(sameAsMappings);
-            return builder;
+            return self();
         }
 
         Properties generateProperties() {
@@ -123,11 +120,26 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopOBDAConfigurationBuilderMixin() {
-            B builder = (B) this;
-            localBuilderFragment = new DefaultOntopOBDABuilderFragment<>(
-                    builder, this::declareOBDASpecificationAssigned);
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultOntopOBDABuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopOBDAConfigurationBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareOBDASpecificationAssigned() {
+                    OntopOBDAConfigurationBuilderMixin.this.declareOBDASpecificationAssigned();
+                }
+            };
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopOBDAConfigurationBuilderMixin.this.self();
+                }
+            };
         }
+
+        protected abstract B self();
 
         @Override
         public B obdaSpecification(OBDASpecification specification) {
@@ -152,13 +164,13 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         /**
          * Hook: can be overloaded
          */
-        void declareOBDASpecificationAssigned() {
+        protected void declareOBDASpecificationAssigned() {
         }
 
         /**
          * Returns true if the user assigned a OBDA specification object
          */
-        boolean isOBDASpecificationAssigned() {
+        protected boolean isOBDASpecificationAssigned() {
             return localBuilderFragment.isOBDASpecificationAssigned();
         }
     }

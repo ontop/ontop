@@ -74,10 +74,19 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         private final DefaultOntopSystemBuilderFragment<B> systemFragmentBuilder;
 
         OntopStandaloneSQLBuilderMixin() {
-            B builder = (B) this;
-            this.sqlTranslationFragmentBuilder = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
-            this.translationFragmentBuilder = new DefaultOntopReformulationBuilderFragment<>(builder);
-            this.systemFragmentBuilder = new DefaultOntopSystemBuilderFragment<>(builder);
+            this.sqlTranslationFragmentBuilder = new DefaultOntopReformulationSQLBuilderFragment<>();
+            this.translationFragmentBuilder = new DefaultOntopReformulationBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopStandaloneSQLBuilderMixin.this.self();
+                }
+            };
+            this.systemFragmentBuilder = new DefaultOntopSystemBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopStandaloneSQLBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -114,11 +123,9 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
             return new OntopStandaloneSQLOptions(systemSQLOptions, sqlMappingOptions);
         }
-
     }
 
-    public static final class BuilderImpl<B extends OntopStandaloneSQLConfiguration.Builder<B>>
-            extends OntopStandaloneSQLBuilderMixin<B> {
+    public static final class BuilderImpl extends OntopStandaloneSQLBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopStandaloneSQLConfiguration build() {
@@ -126,6 +133,11 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
                     isR2rml());
             OntopStandaloneSQLOptions options = generateStandaloneSQLOptions();
             return new OntopStandaloneSQLConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 

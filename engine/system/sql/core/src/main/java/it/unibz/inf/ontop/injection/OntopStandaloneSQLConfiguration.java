@@ -10,8 +10,8 @@ public interface OntopStandaloneSQLConfiguration extends OntopSystemSQLConfigura
     @Override
     OntopStandaloneSQLSettings getSettings();
 
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new OntopStandaloneSQLConfigurationImpl.BuilderImpl<>();
+    static Builder<? extends Builder<?>>  defaultBuilder() {
+        return new OntopStandaloneSQLConfigurationImpl.BuilderImpl();
     }
 
     interface Builder<B extends Builder<B>> extends OntopSystemConfiguration.Builder<B>,
@@ -21,5 +21,4 @@ public interface OntopStandaloneSQLConfiguration extends OntopSystemSQLConfigura
         @Override
         OntopStandaloneSQLConfiguration build();
     }
-
 }

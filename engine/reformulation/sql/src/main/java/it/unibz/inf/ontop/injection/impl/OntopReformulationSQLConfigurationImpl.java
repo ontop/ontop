@@ -65,12 +65,6 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     static class DefaultOntopReformulationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
         implements OntopReformulationSQLBuilderFragment<B> {
 
-        private final B builder;
-
-        DefaultOntopReformulationSQLBuilderFragment(B builder) {
-            this.builder = builder;
-        }
-
         OntopReformulationSQLOptions generateSQLReformulationOptions(OntopReformulationOptions qaOptions,
                                                                      OntopSQLCoreOptions sqlOptions) {
             return new OntopReformulationSQLOptions(qaOptions, sqlOptions);
@@ -90,10 +84,19 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopReformulationSQLBuilderMixin() {
-            B builder = (B) this;
-            localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
-            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>();
+            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopReformulationSQLBuilderMixin.this.self();
+                }
+            };
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopReformulationSQLBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -147,8 +150,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     /**
      * Requires the OBDA specification to be already assigned
      */
-    public static class BuilderImpl<B extends OntopReformulationSQLConfiguration.Builder<B>>
-        extends OntopReformulationSQLBuilderMixin<B> {
+    public static class BuilderImpl extends OntopReformulationSQLBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopReformulationSQLConfiguration build() {
@@ -160,6 +162,10 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
             OntopReformulationSQLOptions options = generateSQLReformulationOptions();
             return new OntopReformulationSQLConfigurationImpl(settings, options);
         }
-    }
 
+        @Override
+        protected BuilderImpl self() {
+            return this;
+        }
+    }
 }

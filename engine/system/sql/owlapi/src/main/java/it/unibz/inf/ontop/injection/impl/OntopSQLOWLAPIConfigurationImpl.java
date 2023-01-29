@@ -56,10 +56,17 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         private boolean isOntologyDefined = false;
 
         OntopSQLOWLAPIBuilderMixin() {
-            B builder = (B) this;
-            ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>(builder,
-                    this::declareOntologyDefined
-                    );
+            ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLOWLAPIBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareOntologyDefined() {
+                    OntopSQLOWLAPIBuilderMixin.this.declareOntologyDefined();
+                }
+            };
         }
 
         @Override
@@ -104,14 +111,18 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
 
-    public static class BuilderImpl<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
-            extends OntopSQLOWLAPIBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSQLOWLAPIBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSQLOWLAPIConfiguration build() {
             OntopStandaloneSQLSettings settings = new OntopStandaloneSQLSettingsImpl(generateProperties(), isR2rml());
             OntopSQLOWLAPIOptions options = generateSQLOWLAPIOptions();
             return new OntopSQLOWLAPIConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 }
