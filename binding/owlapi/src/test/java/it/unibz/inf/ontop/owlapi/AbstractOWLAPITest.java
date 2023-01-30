@@ -55,7 +55,7 @@ public class AbstractOWLAPITest {
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
         executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractOWLAPITest.class.getResource(obdaFile).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)

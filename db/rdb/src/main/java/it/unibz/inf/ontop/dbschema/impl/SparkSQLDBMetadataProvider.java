@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 

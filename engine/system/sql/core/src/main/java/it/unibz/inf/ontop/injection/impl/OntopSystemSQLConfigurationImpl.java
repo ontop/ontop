@@ -54,15 +54,19 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
         }
     }
 
-    static abstract class OntopSystemSQLBuilderMixin<B extends OntopSystemSQLConfiguration.Builder<B>>
+    protected static abstract class OntopSystemSQLBuilderMixin<B extends OntopSystemSQLConfiguration.Builder<B>>
             extends OntopReformulationSQLBuilderMixin<B>
             implements OntopSystemSQLConfiguration.Builder<B> {
 
         private final DefaultOntopSQLCredentialBuilderFragment<B> sqlBuilderFragment;
 
         OntopSystemSQLBuilderMixin() {
-            B builder = (B) this;
-            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSystemSQLBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -82,7 +86,7 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
             return sqlBuilderFragment.jdbcPassword(password);
         }
 
-        final OntopSystemSQLOptions generateSystemSQLOptions() {
+        protected final OntopSystemSQLOptions generateSystemSQLOptions() {
             OntopReformulationSQLOptions reformulationOptions = generateSQLReformulationOptions();
 
             return new OntopSystemSQLOptions(reformulationOptions, sqlBuilderFragment.generateSQLCredentialOptions(
@@ -93,8 +97,7 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
     /**
      * Requires the OBDA specification to be already assigned
      */
-    public static class BuilderImpl<B extends OntopSystemSQLConfiguration.Builder<B>>
-            extends OntopSystemSQLBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSystemSQLBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSystemSQLConfiguration build() {
@@ -105,6 +108,11 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
             OntopSystemSQLSettings settings = new OntopSystemSQLSettingsImpl(generateProperties());
             OntopSystemSQLOptions options = generateSystemSQLOptions();
             return new OntopSystemSQLConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 }

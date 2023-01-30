@@ -48,18 +48,25 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         }
     }
 
-    static abstract class OntopSQLOWLAPIBuilderMixin<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
+    protected static abstract class OntopSQLOWLAPIBuilderMixin<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
             extends OntopStandaloneSQLBuilderMixin<B>
             implements OntopSQLOWLAPIConfiguration.Builder<B> {
 
         private final StandardMappingOntologyBuilderFragment<B> ontologyBuilderFragment;
         private boolean isOntologyDefined = false;
 
-        OntopSQLOWLAPIBuilderMixin() {
-            B builder = (B) this;
-            ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>(builder,
-                    this::declareOntologyDefined
-                    );
+        protected OntopSQLOWLAPIBuilderMixin() {
+            ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopSQLOWLAPIBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareOntologyDefined() {
+                    OntopSQLOWLAPIBuilderMixin.this.declareOntologyDefined();
+                }
+            };
         }
 
         @Override
@@ -87,14 +94,14 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
             return ontologyBuilderFragment.ontologyReader(reader);
         }
 
-        void declareOntologyDefined() {
+        protected final void declareOntologyDefined() {
             if (isOntologyDefined) {
                 throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
         }
 
-        final OntopSQLOWLAPIOptions generateSQLOWLAPIOptions() {
+        protected final OntopSQLOWLAPIOptions generateSQLOWLAPIOptions() {
             OntopStandaloneSQLOptions standaloneSQLOptions = generateStandaloneSQLOptions();
             OntopMappingOntologyOptions mappingOntologyOptions = ontologyBuilderFragment.generateMappingOntologyOptions(
                     standaloneSQLOptions.mappingOptions.mappingSQLOptions.mappingOptions);
@@ -104,14 +111,18 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
 
-    public static class BuilderImpl<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
-            extends OntopSQLOWLAPIBuilderMixin<B> {
+    public static class BuilderImpl extends OntopSQLOWLAPIBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopSQLOWLAPIConfiguration build() {
             OntopStandaloneSQLSettings settings = new OntopStandaloneSQLSettingsImpl(generateProperties(), isR2rml());
             OntopSQLOWLAPIOptions options = generateSQLOWLAPIOptions();
             return new OntopSQLOWLAPIConfigurationImpl(settings, options);
+        }
+
+        @Override
+        protected BuilderImpl self() {
+            return this;
         }
     }
 }

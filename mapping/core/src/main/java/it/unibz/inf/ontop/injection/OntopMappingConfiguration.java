@@ -17,9 +17,8 @@ public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
     OntopMappingSettings getSettings();
 
 
-
-    static <B extends Builder<B>> Builder<B> defaultBuilder() {
-        return new OntopMappingConfigurationImpl.BuilderImpl<>();
+    static Builder<?>  defaultBuilder() {
+        return new OntopMappingConfigurationImpl.BuilderImpl();
     }
 
 
@@ -36,7 +35,6 @@ public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
         B sparqlRulesFile(@Nonnull String path);
 
         B sparqlRulesReader(@Nonnull Reader reader);
-
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopKGQueryConfiguration.Builder<B> {
@@ -44,5 +42,4 @@ public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
         @Override
         OntopMappingConfiguration build();
     }
-
 }

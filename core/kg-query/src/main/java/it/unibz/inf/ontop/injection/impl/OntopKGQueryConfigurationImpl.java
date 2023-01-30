@@ -56,28 +56,32 @@ public abstract class OntopKGQueryConfigurationImpl extends OntopOBDAConfigurati
         }
     }
 
-    static abstract class OntopKGQueryBuilderMixin<B extends OntopKGQueryConfiguration.Builder<B>>
+    protected static abstract class OntopKGQueryBuilderMixin<B extends OntopKGQueryConfiguration.Builder<B>>
         extends OntopOBDAConfigurationBuilderMixin<B>
         implements OntopKGQueryConfiguration.Builder<B> {
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopKGQueryBuilderMixin() {
-            B builder = (B) this;
-            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
+            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>();
+            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopKGQueryBuilderMixin.this.self();
+                }
+            };
         }
 
-        final OntopKGQueryOptions generateKGQueryOptions() {
+        protected final OntopKGQueryOptions generateKGQueryOptions() {
             return generateKGQueryOptions(generateOBDAOptions());
         }
 
-        final OntopKGQueryOptions generateKGQueryOptions(OntopOBDAOptions obdaOptions) {
+        protected final OntopKGQueryOptions generateKGQueryOptions(OntopOBDAOptions obdaOptions) {
             return generateKGQueryOptions(obdaOptions, optimizationBuilderFragment.generateOptimizationOptions(
                     obdaOptions.modelOptions));
         }
 
-        final OntopKGQueryOptions generateKGQueryOptions(OntopOBDAOptions obdaOptions,
+        protected final OntopKGQueryOptions generateKGQueryOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
             return new OntopKGQueryOptions(obdaOptions, optimizationOptions);
         }
@@ -112,5 +116,4 @@ public abstract class OntopKGQueryConfigurationImpl extends OntopOBDAConfigurati
             return modelBuilderFragment.enableTestMode();
         }
     }
-
 }

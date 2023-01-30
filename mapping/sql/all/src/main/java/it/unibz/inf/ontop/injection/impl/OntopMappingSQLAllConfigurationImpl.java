@@ -105,13 +105,9 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
 
-    static class StandardMappingSQLAllBuilderFragment<B extends OntopMappingSQLAllConfiguration.Builder<B>>
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static abstract class StandardMappingSQLAllBuilderFragment<B extends OntopMappingSQLAllConfiguration.Builder<B>>
             implements OntopMappingSQLAllBuilderFragment<B> {
-        private final B builder;
-        private final Runnable declareMappingDefinedCB;
-        private final Runnable declareImplicitConstraintSetDefinedCB;
-        private final Runnable declareDBMetadataSetDefinedCB;
-        private final Runnable declareLensesDefinedCB;
 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
@@ -124,52 +120,47 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private boolean useR2rml = false;
 
 
-        /**
-         * Default constructor
-         */
-        protected StandardMappingSQLAllBuilderFragment(B builder, Runnable declareMappingDefinedCB,
-                                                       Runnable declareImplicitConstraintSetDefinedCB,
-                                                       Runnable declareDBMetadataSetDefinedCB,
-                                                       Runnable declareLensesDefinedCB) {
-            this.builder = builder;
-            this.declareMappingDefinedCB = declareMappingDefinedCB;
-            this.declareImplicitConstraintSetDefinedCB = declareImplicitConstraintSetDefinedCB;
-            this.declareDBMetadataSetDefinedCB = declareDBMetadataSetDefinedCB;
-            this.declareLensesDefinedCB = declareLensesDefinedCB;
-        }
+        protected abstract B self();
 
+        protected abstract void declareMappingDefined();
+
+        protected abstract void declareImplicitConstraintSetDefined();
+
+        protected abstract void declareDBMetadataDefined();
+
+        protected abstract void declareLensesDefined();
 
         @Override
         public B nativeOntopMappingFile(@Nonnull File mappingFile) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             this.mappingFile = Optional.of(mappingFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
             setMappingFile(mappingFilename);
-            return builder;
+            return self();
         }
 
         @Override
         public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             this.mappingReader = Optional.of(mappingReader);
-            return builder;
+            return self();
         }
 
         @Override
         public B r2rmlMappingFile(@Nonnull File mappingFile) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             useR2rml = true;
             this.mappingFile = Optional.of(mappingFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B r2rmlMappingFile(@Nonnull String mappingFilename) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             useR2rml = true;
 
             try {
@@ -185,7 +176,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                     throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as R2RML mapping files");
                 }
-                return builder;
+                return self();
             } catch (URISyntaxException e) {
                 throw new InvalidOntopConfigurationException("Invalid mapping file path: " + e.getMessage());
             }
@@ -193,30 +184,30 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         @Override
         public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             useR2rml = true;
             this.mappingReader = Optional.of(mappingReader);
-            return builder;
+            return self();
         }
 
         @Override
         public B r2rmlMappingGraph(@Nonnull Graph rdfGraph) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
-            return builder;
+            return self();
         }
 
         @Override
         public B basicImplicitConstraintFile(@Nonnull File constraintFile) {
-            declareImplicitConstraintSetDefinedCB.run();
+            declareImplicitConstraintSetDefined();
             this.constraintFile = Optional.of(constraintFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
-            declareImplicitConstraintSetDefinedCB.run();
+            declareImplicitConstraintSetDefined();
             try {
                 URI fileURI = new URI(constraintFilename);
                 String scheme = fileURI.getScheme();
@@ -230,7 +221,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                     throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as implicit constraint files");
                 }
-                return builder;
+                return self();
             } catch (URISyntaxException e) {
                 throw new InvalidOntopConfigurationException("Invalid implicit constraint file path: " + e.getMessage());
             }
@@ -238,14 +229,14 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
             @Override
             public B dbMetadataFile(@Nonnull File dbMetadataFile) {
-                declareDBMetadataSetDefinedCB.run();
+                declareDBMetadataDefined();
                 this.dbMetadataFile = Optional.of(dbMetadataFile);
-                return builder;
+                return self();
             }
 
             @Override
             public B dbMetadataFile(@Nonnull String dbMetadataFilename) {
-                declareDBMetadataSetDefinedCB.run();
+                declareDBMetadataDefined();
                 try {
                     URI fileURI = new URI(dbMetadataFilename);
                     String scheme = fileURI.getScheme();
@@ -259,7 +250,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                         throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                                 "as db-metadata files");
                     }
-                    return builder;
+                    return self();
                 } catch (URISyntaxException e) {
                     throw new InvalidOntopConfigurationException("Invalid db-metadata file path: " + e.getMessage());
                 }
@@ -267,21 +258,21 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         @Override
         public B dbMetadataReader(@Nonnull Reader dbMetadataReader) {
-            declareDBMetadataSetDefinedCB.run();
+            declareDBMetadataDefined();
             this.dbMetadataReader = Optional.of(dbMetadataReader);
-            return builder;
+            return self();
         }
 
         @Override
         public B lensesFile(@Nonnull File lensesFile) {
-            declareLensesDefinedCB.run();
+            declareLensesDefined();
             this.lensesFile = Optional.of(lensesFile);
-            return builder;
+            return self();
         }
 
         @Override
         public B lensesFile(@Nonnull String lensesFilename) {
-            declareLensesDefinedCB.run();
+            declareLensesDefined();
             try {
                 URI fileURI = new URI(lensesFilename);
                 String scheme = fileURI.getScheme();
@@ -295,7 +286,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                     throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as lerses files");
                 }
-                return builder;
+                return self();
             } catch (URISyntaxException e) {
                 throw new InvalidOntopConfigurationException("Invalid lenses file path: " + e.getMessage());
             }
@@ -303,9 +294,9 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         @Override
         public B lensesReader(@Nonnull Reader lensesReader) {
-            declareLensesDefinedCB.run();
+            declareLensesDefined();
             this.lensesReader = Optional.of(lensesReader);
-            return builder;
+            return self();
         }
 
 
@@ -322,7 +313,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         protected final void setMappingFile(String mappingFilename) {
-            declareMappingDefinedCB.run();
+            declareMappingDefined();
             try {
                 URI fileURI = new URI(mappingFilename);
                 String scheme = fileURI.getScheme();
@@ -356,10 +347,32 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private boolean isImplicitConstraintSetDefined = false;
 
         OntopMappingSQLAllBuilderMixin() {
-            B builder = (B) this;
-            this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>(builder,
-                    this::declareMappingDefined, this::declareImplicitConstraintSetDefined,
-                    this::declareDBMetadataDefined, this::declareLensesDefined);
+            this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopMappingSQLAllBuilderMixin.this.self();
+                }
+
+                @Override
+                protected void declareMappingDefined() {
+                    OntopMappingSQLAllBuilderMixin.this.declareMappingDefined();
+                }
+
+                @Override
+                protected void declareImplicitConstraintSetDefined() {
+                    OntopMappingSQLAllBuilderMixin.this.declareImplicitConstraintSetDefined();
+                }
+
+                @Override
+                protected void declareDBMetadataDefined() {
+                    OntopMappingSQLAllBuilderMixin.this.declareDBMetadataDefined();
+                }
+
+                @Override
+                protected void declareLensesDefined() {
+                    OntopMappingSQLAllBuilderMixin.this.declareLensesDefined();
+                }
+            };
         }
 
         @Override
@@ -437,7 +450,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return localFragmentBuilder.lensesReader(lensesReader);
         }
 
-        final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {
+        protected final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {
             OntopMappingSQLOptions sqlMappingOptions = generateMappingSQLOptions();
             return localFragmentBuilder.generateMappingSQLAllOptions(sqlMappingOptions);
         }
@@ -449,20 +462,18 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return p;
         }
 
-        boolean isR2rml() {
+        protected final boolean isR2rml() {
             return localFragmentBuilder.isR2rml();
         }
 
-        void declareImplicitConstraintSetDefined() {
+        protected final void declareImplicitConstraintSetDefined() {
             if (isImplicitConstraintSetDefined)
                 throw new InvalidOntopConfigurationException("The implicit constraint file is already defined");
             isImplicitConstraintSetDefined = true;
         }
-
     }
 
-    public static class BuilderImpl<B extends OntopMappingSQLAllConfiguration.Builder<B>>
-            extends OntopMappingSQLAllBuilderMixin<B> {
+    public static class BuilderImpl extends OntopMappingSQLAllBuilderMixin<BuilderImpl> {
 
         @Override
         public OntopMappingSQLAllConfiguration build() {
@@ -472,5 +483,9 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return new OntopMappingSQLAllConfigurationImpl(settings, options);
         }
 
+        @Override
+        protected BuilderImpl self() {
+            return this;
+        }
     }
 }
