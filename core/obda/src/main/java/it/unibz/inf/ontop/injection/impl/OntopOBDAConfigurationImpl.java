@@ -93,27 +93,27 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
             return self();
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties p = new Properties();
             sameAsMappings.ifPresent(b -> p.put(OntopOBDASettings.SAME_AS, b));
 
             return p;
         }
 
-        final OntopOBDAOptions generateOBDAOptions(OntopModelConfigurationOptions modelOptions) {
+        protected final OntopOBDAOptions generateOBDAOptions(OntopModelConfigurationOptions modelOptions) {
             return new OntopOBDAOptions(modelOptions, specification);
         }
 
         /**
          * Returns true if the user assigned a OBDA specification object
          */
-        boolean isOBDASpecificationAssigned() {
+        protected final boolean isOBDASpecificationAssigned() {
             return specification.isPresent();
         }
 
     }
 
-    static abstract class OntopOBDAConfigurationBuilderMixin<B extends OntopOBDAConfiguration.Builder<B>>
+    protected static abstract class OntopOBDAConfigurationBuilderMixin<B extends OntopOBDAConfiguration.Builder<B>>
             implements OntopOBDAConfiguration.Builder<B> {
 
         private final DefaultOntopOBDABuilderFragment<B> localBuilderFragment;
@@ -151,7 +151,7 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
             return localBuilderFragment.sameAsMappings(enable);
         }
 
-        final OntopOBDAOptions generateOBDAOptions() {
+        protected final OntopOBDAOptions generateOBDAOptions() {
             return localBuilderFragment.generateOBDAOptions(modelBuilderFragment.generateModelOptions());
         }
 
@@ -170,7 +170,7 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         /**
          * Returns true if the user assigned a OBDA specification object
          */
-        protected boolean isOBDASpecificationAssigned() {
+        protected final boolean isOBDASpecificationAssigned() {
             return localBuilderFragment.isOBDASpecificationAssigned();
         }
     }

@@ -23,8 +23,7 @@ public abstract class AbstractBasicMappingMistakeTest {
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {
-        OntopMappingSQLAllConfiguration.Builder<? extends OntopMappingSQLAllConfiguration.Builder<?>> builder =
-                OntopMappingSQLAllConfiguration.defaultBuilder()
+        OntopMappingSQLAllConfiguration.Builder<?> builder = OntopMappingSQLAllConfiguration.defaultBuilder()
                         .jdbcUrl("jdbc:h2:mem:dummy"); // need a database connection
         builder = createConfiguration(builder, mappingFile);
         OntopMappingSQLAllConfiguration configuration = builder.build();

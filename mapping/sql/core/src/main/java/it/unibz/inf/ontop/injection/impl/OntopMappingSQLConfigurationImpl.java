@@ -187,7 +187,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
             return new OntopMappingSQLOptions(ppMapping, sqlOptions, mappingOptions);
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             return new Properties();
         }
     }
@@ -245,7 +245,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
             return properties;
         }
 
-        final OntopMappingSQLOptions generateMappingSQLOptions() {
+        protected final OntopMappingSQLOptions generateMappingSQLOptions() {
             OntopOBDAConfigurationImpl.OntopOBDAOptions obdaOptions = generateOBDAOptions();
 
             OntopSQLCredentialOptions sqlOptions = sqlCredentialBuilderFragment.generateSQLCredentialOptions(

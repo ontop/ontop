@@ -45,7 +45,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         }
     }
 
-    static abstract class OntopMappingSQLAllOWLAPIBuilderMixin<B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<B>>
+    protected static abstract class OntopMappingSQLAllOWLAPIBuilderMixin<B extends OntopMappingSQLAllOWLAPIConfiguration.Builder<B>>
             extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopMappingSQLAllOWLAPIConfiguration.Builder<B> {
 
@@ -91,7 +91,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             return ontologyBuilderFragment.xmlCatalogFile(file);
         }
 
-        protected void declareOntologyDefined() {
+        protected final void declareOntologyDefined() {
             if (isOBDASpecificationAssigned())
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             if (isOntologyDefined) {
@@ -100,7 +100,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             isOntologyDefined = true;
         }
 
-        final OntopMappingSQLAllOWLAPIOptions generateSQLAllOWLAPIOptions() {
+        protected final OntopMappingSQLAllOWLAPIOptions generateSQLAllOWLAPIOptions() {
             OntopMappingSQLAllOptions sqlOptions = generateMappingSQLAllOptions();
 
             OntopMappingOntologyBuilders.OntopMappingOntologyOptions mappingOntologyOptions =

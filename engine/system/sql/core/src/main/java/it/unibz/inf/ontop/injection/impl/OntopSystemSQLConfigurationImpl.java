@@ -54,7 +54,7 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
         }
     }
 
-    static abstract class OntopSystemSQLBuilderMixin<B extends OntopSystemSQLConfiguration.Builder<B>>
+    protected static abstract class OntopSystemSQLBuilderMixin<B extends OntopSystemSQLConfiguration.Builder<B>>
             extends OntopReformulationSQLBuilderMixin<B>
             implements OntopSystemSQLConfiguration.Builder<B> {
 
@@ -86,7 +86,7 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
             return sqlBuilderFragment.jdbcPassword(password);
         }
 
-        final OntopSystemSQLOptions generateSystemSQLOptions() {
+        protected final OntopSystemSQLOptions generateSystemSQLOptions() {
             OntopReformulationSQLOptions reformulationOptions = generateSQLReformulationOptions();
 
             return new OntopSystemSQLOptions(reformulationOptions, sqlBuilderFragment.generateSQLCredentialOptions(

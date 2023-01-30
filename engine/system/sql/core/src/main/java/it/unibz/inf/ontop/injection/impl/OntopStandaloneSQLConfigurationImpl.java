@@ -65,7 +65,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
 
 
-    static abstract class OntopStandaloneSQLBuilderMixin<B extends OntopStandaloneSQLConfiguration.Builder<B>>
+    protected static abstract class OntopStandaloneSQLBuilderMixin<B extends OntopStandaloneSQLConfiguration.Builder<B>>
             extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopStandaloneSQLConfiguration.Builder<B> {
 
@@ -108,7 +108,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
             return p;
         }
 
-        final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
+        protected final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
             OntopReformulationConfigurationImpl.OntopReformulationOptions translationOptions =
                     this.translationFragmentBuilder.generateReformulationOptions(

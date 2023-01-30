@@ -17,7 +17,7 @@ public interface OntopMappingConfiguration extends OntopKGQueryConfiguration {
     OntopMappingSettings getSettings();
 
 
-    static Builder<? extends Builder<?>>  defaultBuilder() {
+    static Builder<?>  defaultBuilder() {
         return new OntopMappingConfigurationImpl.BuilderImpl();
     }
 

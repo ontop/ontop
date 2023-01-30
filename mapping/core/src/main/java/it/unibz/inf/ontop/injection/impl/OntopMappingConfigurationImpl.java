@@ -175,7 +175,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    static abstract class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder<B>>
+    protected static abstract class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder<B>>
             implements OntopMappingBuilderFragment<B> {
 
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
@@ -223,21 +223,20 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return self();
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
             return new OntopMappingOptions(excludeFromTMappings, sparqlRulesFile, sparqlRulesReader, queryOptions);
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties properties = new Properties();
             queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
             inferDefaultDatatype.ifPresent(b -> properties.put(OntopMappingSettings.INFER_DEFAULT_DATATYPE, b));
 
             return properties;
         }
-
     }
 
-    static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
+    protected static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
         extends OntopKGQueryBuilderMixin<B>
         implements OntopMappingConfiguration.Builder<B> {
 
@@ -287,15 +286,15 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return mappingBuilderFragment.sparqlRulesReader(reader);
         }
 
-        final OntopMappingOptions generateMappingOptions() {
+        protected final OntopMappingOptions generateMappingOptions() {
             return generateMappingOptions(generateOBDAOptions());
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
             return generateMappingOptions(generateKGQueryOptions(obdaOptions));
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
+        protected final OntopMappingOptions generateMappingOptions(OntopKGQueryOptions queryOptions) {
             return mappingBuilderFragment.generateMappingOptions(queryOptions);
         }
 
@@ -375,5 +374,4 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
             return this;
         }
     }
-
 }

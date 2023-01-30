@@ -450,7 +450,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return localFragmentBuilder.lensesReader(lensesReader);
         }
 
-        final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {
+        protected final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {
             OntopMappingSQLOptions sqlMappingOptions = generateMappingSQLOptions();
             return localFragmentBuilder.generateMappingSQLAllOptions(sqlMappingOptions);
         }
@@ -462,11 +462,11 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return p;
         }
 
-        boolean isR2rml() {
+        protected final boolean isR2rml() {
             return localFragmentBuilder.isR2rml();
         }
 
-        protected void declareImplicitConstraintSetDefined() {
+        protected final void declareImplicitConstraintSetDefined() {
             if (isImplicitConstraintSetDefined)
                 throw new InvalidOntopConfigurationException("The implicit constraint file is already defined");
             isImplicitConstraintSetDefined = true;

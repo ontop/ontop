@@ -31,7 +31,7 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
             System.exit(1);
         }
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder =
+        OntopSQLOWLAPIConfiguration.Builder<?> builder =
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
                         .ontologyFile(owlFile)
                         .enableOntologyAnnotationQuerying(enableAnnotations);

@@ -99,7 +99,7 @@ public class OntopMappingOntologyBuilders {
             return self();
         }
 
-        OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
+        protected OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
             return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, xmlCatalogFile, mappingOptions);
         }
     }

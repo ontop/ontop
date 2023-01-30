@@ -70,12 +70,12 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
             return new OntopReformulationSQLOptions(qaOptions, sqlOptions);
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             return new Properties();
         }
     }
 
-    static abstract class OntopReformulationSQLBuilderMixin<B extends OntopReformulationSQLConfiguration.Builder<B>>
+    protected static abstract class OntopReformulationSQLBuilderMixin<B extends OntopReformulationSQLConfiguration.Builder<B>>
             extends OntopReformulationBuilderMixin<B>
             implements OntopReformulationSQLConfiguration.Builder<B> {
 
@@ -108,7 +108,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
             return properties;
         }
 
-        OntopReformulationSQLOptions generateSQLReformulationOptions() {
+        protected final OntopReformulationSQLOptions generateSQLReformulationOptions() {
             OntopReformulationOptions reformulationOptions = generateReformulationOptions();
             OntopSQLCoreOptions sqlOptions = sqlBuilderFragment.generateSQLCoreOptions(
                     reformulationOptions.queryOptions.obdaOptions.modelOptions);

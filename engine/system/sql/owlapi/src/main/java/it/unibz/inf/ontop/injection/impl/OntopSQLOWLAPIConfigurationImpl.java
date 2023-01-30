@@ -48,14 +48,14 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         }
     }
 
-    static abstract class OntopSQLOWLAPIBuilderMixin<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
+    protected static abstract class OntopSQLOWLAPIBuilderMixin<B extends OntopSQLOWLAPIConfiguration.Builder<B>>
             extends OntopStandaloneSQLBuilderMixin<B>
             implements OntopSQLOWLAPIConfiguration.Builder<B> {
 
         private final StandardMappingOntologyBuilderFragment<B> ontologyBuilderFragment;
         private boolean isOntologyDefined = false;
 
-        OntopSQLOWLAPIBuilderMixin() {
+        protected OntopSQLOWLAPIBuilderMixin() {
             ontologyBuilderFragment = new StandardMappingOntologyBuilderFragment<>() {
                 @Override
                 protected B self() {
@@ -94,14 +94,14 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
             return ontologyBuilderFragment.ontologyReader(reader);
         }
 
-        void declareOntologyDefined() {
+        protected final void declareOntologyDefined() {
             if (isOntologyDefined) {
                 throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
         }
 
-        final OntopSQLOWLAPIOptions generateSQLOWLAPIOptions() {
+        protected final OntopSQLOWLAPIOptions generateSQLOWLAPIOptions() {
             OntopStandaloneSQLOptions standaloneSQLOptions = generateStandaloneSQLOptions();
             OntopMappingOntologyOptions mappingOntologyOptions = ontologyBuilderFragment.generateMappingOntologyOptions(
                     standaloneSQLOptions.mappingOptions.mappingSQLOptions.mappingOptions);

@@ -67,7 +67,7 @@ public class AbstractDockerRDF4JTest {
             System.out.println("- ERROR loading '" + propertyFile + "'");
         }
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractDockerRDF4JTest.class.getResource(obdaRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(username)

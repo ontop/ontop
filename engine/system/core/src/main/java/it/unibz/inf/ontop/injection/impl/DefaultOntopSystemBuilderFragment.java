@@ -25,7 +25,7 @@ public abstract class DefaultOntopSystemBuilderFragment<B extends OntopSystemCon
         return self();
     }
 
-    Properties generateProperties() {
+    protected Properties generateProperties() {
         Properties properties = new Properties();
         keepPermanentConnection
                 .ifPresent(v -> properties.put(OntopSystemSettings.PERMANENT_DB_CONNECTION, v));

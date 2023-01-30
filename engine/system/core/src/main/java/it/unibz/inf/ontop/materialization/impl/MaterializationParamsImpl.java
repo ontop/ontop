@@ -17,20 +17,18 @@ public class MaterializationParamsImpl implements MaterializationParams {
     }
 
 
-    public static class DefaultBuilder<B extends Builder<B>> implements Builder<B> {
+    public static class DefaultBuilder implements Builder<DefaultBuilder> {
 
-        private final B builder;
         private boolean canMaterializationBeIncomplete;
 
         public DefaultBuilder() {
             this.canMaterializationBeIncomplete = false;
-            this.builder = (B) this;
         }
 
         @Override
-        public B enableIncompleteMaterialization(boolean enable) {
+        public DefaultBuilder enableIncompleteMaterialization(boolean enable) {
             this.canMaterializationBeIncomplete = enable;
-            return builder;
+            return this;
         }
 
         @Override

@@ -86,6 +86,7 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
         }
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static abstract class DefaultOntopReformulationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
             implements OntopReformulationBuilderFragment<B> {
 
@@ -99,20 +100,18 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
             return self();
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties p = new Properties();
-
             existentialReasoning.ifPresent(r -> p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, r));
-
             return p;
         }
 
-        final OntopReformulationOptions generateReformulationOptions(OntopKGQueryOptions queryOptions) {
+        protected OntopReformulationOptions generateReformulationOptions(OntopKGQueryOptions queryOptions) {
             return new OntopReformulationOptions(queryOptions);
         }
     }
 
-    static abstract class OntopReformulationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
+    protected static abstract class OntopReformulationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
             extends OntopKGQueryBuilderMixin<B>
             implements OntopReformulationConfiguration.Builder<B> {
 
@@ -139,7 +138,7 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
             return properties;
         }
 
-        OntopReformulationOptions generateReformulationOptions() {
+        protected final OntopReformulationOptions generateReformulationOptions() {
             OntopKGQueryOptions queryOptions = generateKGQueryOptions();
             return localBuilderFragment.generateReformulationOptions(queryOptions);
         }
