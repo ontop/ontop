@@ -1,0 +1,158 @@
+{
+  "relations": [
+    {
+      "name": ["\"ss1_product1_lens\""],
+      "baseRelation": ["\"ss1\".\"product1\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss1_productfeatureproduct1_lens\""],
+      "baseRelation": ["\"ss1\".\"productfeatureproduct1\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss1_producttypeproduct1_lens\""],
+      "baseRelation": ["\"ss1\".\"producttypeproduct1\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss1_reviewc_lens\""],
+      "baseRelation": ["\"ss1\".\"reviewc\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss2_person_lens\""],
+      "baseRelation": ["\"ss2\".\"person\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss2_review_lens\""],
+      "baseRelation": ["\"ss2\".\"review\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss3_productfeature_lens\""],
+      "baseRelation": ["\"ss3\".\"productfeature\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss3_producttype_lens\""],
+      "baseRelation": ["\"ss3\".\"producttype\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss4_offer_lens\""],
+      "baseRelation": ["\"ss4\".\"offer\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss4_producer_lens\""],
+      "baseRelation": ["\"ss4\".\"producer\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss4_vendor_lens\""],
+      "baseRelation": ["\"ss4\".\"vendor\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss5_product2_lens\""],
+      "baseRelation": ["\"ss5\".\"product2\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss5_productfeatureproduct2_lens\""],
+      "baseRelation": ["\"ss5\".\"productfeatureproduct2\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"ss5_producttypeproduct2_lens\""],
+      "baseRelation": ["\"ss5\".\"producttypeproduct2\""],
+      "columns" : {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

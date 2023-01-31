@@ -92,7 +92,26 @@ public class TestTeiid {
             String relation2 = "select nr, publisher from ss1.reviewc";
             String sql = "("+relation2+") except ("+relation1+")";
             //testQuery(stmt, sql);
-            checkRedundancy(stmt, relation1, relation2);
+            //checkRedundancy(stmt, relation1, relation2);
+
+//            sql = "insert into smatv.MatV_0 ( V1_nr, V1_label, V1_comment, V1_parent, V1_publisher, V1_publishdate, V2_product, V2_producttype) " +
+//                    "SELECT * FROM (select nr, label, comment, parent, publisher, publishdate from ss3.producttype) AS V1, (select product, producttype from ss1.producttypeproduct1) AS V2 WHERE V1.parent=V2.producttype";
+//            int b = stmt.executeUpdate(sql);
+//            System.out.println("results of update: "+b);
+
+//            String sql1 = "set schema smatv";
+//            String sql2 = "CREATE FOREIGN TABLE MatV_0 ( V1_nr integer, V1_label string, V1_comment string, V1_parent string, V1_publisher integer, V1_publishdate date , V2_product integer, V2_producttype integer)";
+//            int b1 = stmt.executeUpdate(sql1);
+//            int b2 = stmt.executeUpdate(sql1);
+//
+//            System.out.println(b1+"--"+b2);
+
+              sql = "select * from smatv.MatV_0";
+              ResultSet rs = stmt.executeQuery(sql);
+              while(rs.next()){
+                  System.out.println("result set does not empty");
+                   break;
+              }
 
             long end = System.currentTimeMillis();
             System.out.println("time used: "+(end-start));
