@@ -1,0 +1,34 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"person\""],
+      "baseRelation": ["\"person\""],
+      "columns": {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": [
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+        ]
+      },
+      "iriSafeConstraint": {
+        "added": [
+          "country"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
