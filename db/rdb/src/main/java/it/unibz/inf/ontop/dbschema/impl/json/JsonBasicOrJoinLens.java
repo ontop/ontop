@@ -51,8 +51,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                   @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  @Nullable IRISafeConstraints iriSafeConstraints,
                                   @Nonnull Columns columns, @Nonnull String filterExpression) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns;
         this.filterExpression = filterExpression;
     }

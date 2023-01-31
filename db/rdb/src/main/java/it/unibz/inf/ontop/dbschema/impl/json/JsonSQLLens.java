@@ -49,8 +49,9 @@ public class JsonSQLLens extends JsonLens {
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                        @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
-                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints,
+                       @JsonProperty("iriSafeConstraints") IRISafeConstraints iriSafeConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.query = query;
     }
 

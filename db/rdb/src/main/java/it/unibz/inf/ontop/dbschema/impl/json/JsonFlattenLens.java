@@ -65,9 +65,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
             @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
             @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
-            @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints
+            @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints,
+            @JsonProperty("iriSafeConstraints") IRISafeConstraints iriSafeConstraints
     ) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns;
         this.baseRelation = baseRelation;
         this.flattenedColumn = flattenedColumn;

@@ -47,14 +47,19 @@ public abstract class JsonLens extends JsonOpenObject {
     @Nullable
     public final NonNullConstraints nonNullConstraints;
 
+    @Nullable
+    public final IRISafeConstraints iriSafeConstraints;
+
     public JsonLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                     @Nullable OtherFunctionalDependencies otherFunctionalDependencies, @Nullable ForeignKeys foreignKeys,
-                    @Nullable NonNullConstraints nonNullConstraints) {
+                    @Nullable NonNullConstraints nonNullConstraints,
+                    @Nullable IRISafeConstraints iriSafeConstraints) {
         this.name = name;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
         this.nonNullConstraints = nonNullConstraints;
+        this.iriSafeConstraints = iriSafeConstraints;
     }
 
     public abstract Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
@@ -320,6 +325,16 @@ public abstract class JsonLens extends JsonOpenObject {
 
         @JsonCreator
         public NonNullConstraints(@JsonProperty("added") List<String> added) {
+            this.added = added;
+        }
+    }
+
+    protected static class IRISafeConstraints extends JsonOpenObject {
+        @Nonnull
+        public final List<String> added;
+
+        @JsonCreator
+        public IRISafeConstraints(@JsonProperty("added") List<String> added) {
             this.added = added;
         }
     }

@@ -23,7 +23,7 @@
         "added": [
         ]
       },
-      "iriSafeConstraint": {
+      "iriSafeConstraints": {
         "added": [
           "country"
         ]
