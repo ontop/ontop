@@ -186,7 +186,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
+        protected String serializeSlice(Optional<Long> limit, Optional<Long> offset, boolean noSortCondition) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
@@ -279,7 +279,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         /**
          * NB: the systematic use of ON conditions for inner and left joins saves us from putting parentheses.
          *
-         * Indeed since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
+         * Indeed, since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
          * the decomposition is unambiguous just following this pattern.
          *
          * For instance, "T1 LEFT JOIN T2 INNER JOIN T3 ON 1=1 ON 2=2"
@@ -292,7 +292,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left,right).stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left, right).stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
 

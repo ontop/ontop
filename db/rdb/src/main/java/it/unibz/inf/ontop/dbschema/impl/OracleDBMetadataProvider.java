@@ -38,12 +38,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
+    protected void checkSameRelationID(RelationID extractedId, RelationID givenId, String method) throws MetadataExtractionException {
         // DUAL is retrieved as SYS.DUAL, but its canonical name is DUAL
         if (isDual(extractedId) && isDual(givenId))
             return;
 
-        super.checkSameRelationID(extractedId, givenId);
+        super.checkSameRelationID(extractedId, givenId, method);
     }
 
     @Override
@@ -84,9 +84,14 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                         "'DBSNMP', " +
                         "'DBSFWUSER', " +
                         "'XDB', " +
+                        "'CTXSYS', " +
+                        "'MDSYS', " +
+                        "'APPQOSSYS', " +
                         "'LBACSYS', " +
                         "'DVSYS', " +
                         "'APPQOSSYS', " +
+                        "'WMSYS', " +
+                        "'ORDDATA', " +
                         "'AUDSYS') AND " +
                 "   NOT (owner = 'SYSTEM' AND table_name IN ('ROLLING$DIRECTIVES', " +
                         "'SCHEDULER_JOB_ARGS_TBL', " +
@@ -120,6 +125,12 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                                 "'DBSNMP', " +
                                 "'DBSFWUSER', " +
                                 "'XDB', " +
+                                "'WMSYS', " +
+                                "'CTXSYS', " +
+                                "'ORDDATA', " +
+                                "'ORDSYS', " +
+                                "'OLAPSYS', " +
+                                "'MDSYS', " +
                                 "'LBACSYS', " +
                                 "'DVSYS', " +
                                 "'APPQOSSYS', " +

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.generation.normalization.impl.ConvertValuesToUnionNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
@@ -22,6 +23,8 @@ public class SQLTestingTools {
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
+    public static final ConvertValuesToUnionNormalizer CONVERT_VALUES_TO_UNION_NORMALIZER;
+
     static {
         OntopSQLCoreConfiguration defaultConfiguration = OntopSQLCoreConfiguration.defaultBuilder()
                 .jdbcUrl("jdbc:h2:mem:something")
@@ -39,6 +42,7 @@ public class SQLTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+        CONVERT_VALUES_TO_UNION_NORMALIZER = injector.getInstance(ConvertValuesToUnionNormalizer.class);
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {

@@ -53,3 +53,11 @@ services:
       - DB2INSTANCE=db2inst1
       - DB2INST1_PASSWORD=${DB2INST1_PASSWORD}
       - LICENSE=accept
+
+  spark:
+    build: ./spark
+    ports:
+      - "8050:8050"  # Spark master
+      - "8051:8051"  # Spark worker
+      - "7078:7078"
+      - "10000:10000"  # ThriftServer JDBC endpoint

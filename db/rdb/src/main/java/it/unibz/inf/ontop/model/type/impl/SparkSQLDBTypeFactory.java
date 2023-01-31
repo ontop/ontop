@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 
 public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -23,7 +22,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String SHORT_STR = "SHORT";
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
-    protected static final String DEC_STR = "DEC";
+    private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -40,11 +39,13 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         RDFDatatype xsdInt = typeFactory.getDatatype(XSD.INT);
         RDFDatatype xsdLong = typeFactory.getDatatype(XSD.LONG);
         RDFDatatype xsdFloat = typeFactory.getDatatype(XSD.FLOAT);
+        RDFDatatype xsdDecimal = typeFactory.getDatatype(XSD.DECIMAL);
 
         DBTermType byteType = new NumberDBTermType(BYTE_STR, rootAncestry, xsdByte, INTEGER);
         DBTermType shortType = new NumberDBTermType(SHORT_STR, rootAncestry, xsdShort, INTEGER);
         DBTermType intType = new NumberDBTermType(INT_STR, rootAncestry, xsdInt, INTEGER);
         DBTermType longType = new NumberDBTermType(LONG_STR, rootAncestry, xsdLong, INTEGER);
+        DBTermType decimal3810Type = new NumberDBTermType(DECIMAL_38_10_STR, rootAncestry, xsdDecimal, DECIMAL);
         DBTermType floatType = new NumberDBTermType(FLOAT_STR, rootAncestry, xsdFloat, FLOAT_DOUBLE);
         DBTermType stringType = new StringDBTermType(STRING_STR, rootAncestry, typeFactory.getXsdStringDatatype());
 
@@ -60,7 +61,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BIGINT_STR,longType);
         map.put(FLOAT_STR,floatType);
         map.put(REAL_STR,floatType);
-        map.put(DEC_STR, map.get(DECIMAL_STR));
+        map.put(DECIMAL_38_10_STR, decimal3810Type);
         return map;
     }
 
@@ -68,7 +69,16 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.STRING, STRING_STR);
         map.put(DefaultTypeCode.HEXBINARY,BINARY_STR);
+        map.put(DefaultTypeCode.DECIMAL, DECIMAL_38_10_STR);
         return ImmutableMap.copyOf(map);
     }
+
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "true";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() { return "false"; }
 
 }

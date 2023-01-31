@@ -86,45 +86,44 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
         }
     }
 
-    static class DefaultOntopReformulationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static abstract class DefaultOntopReformulationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
             implements OntopReformulationBuilderFragment<B> {
 
-        private final B builder;
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
-        DefaultOntopReformulationBuilderFragment(B builder) {
-            this.builder = builder;
-        }
+        protected abstract B self();
 
         @Override
         public B enableExistentialReasoning(boolean enable) {
             this.existentialReasoning = Optional.of(enable);
-            return builder;
-
+            return self();
         }
 
-        Properties generateProperties() {
+        protected Properties generateProperties() {
             Properties p = new Properties();
-
             existentialReasoning.ifPresent(r -> p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, r));
-
             return p;
         }
 
-        final OntopReformulationOptions generateReformulationOptions(OntopKGQueryOptions queryOptions) {
+        protected OntopReformulationOptions generateReformulationOptions(OntopKGQueryOptions queryOptions) {
             return new OntopReformulationOptions(queryOptions);
         }
     }
 
-    static abstract class OntopReformulationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
+    protected static abstract class OntopReformulationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
             extends OntopKGQueryBuilderMixin<B>
             implements OntopReformulationConfiguration.Builder<B> {
 
         private final DefaultOntopReformulationBuilderFragment<B> localBuilderFragment;
 
         OntopReformulationBuilderMixin() {
-            B builder = (B) this;
-            localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>() {
+                @Override
+                protected B self() {
+                    return OntopReformulationBuilderMixin.this.self();
+                }
+            };
         }
 
         @Override
@@ -139,7 +138,7 @@ public class OntopReformulationConfigurationImpl extends OntopKGQueryConfigurati
             return properties;
         }
 
-        OntopReformulationOptions generateReformulationOptions() {
+        protected final OntopReformulationOptions generateReformulationOptions() {
             OntopKGQueryOptions queryOptions = generateKGQueryOptions();
             return localBuilderFragment.generateReformulationOptions(queryOptions);
         }

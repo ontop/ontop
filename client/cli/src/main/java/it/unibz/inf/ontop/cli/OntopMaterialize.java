@@ -128,7 +128,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     private RDF4JMaterializer createMaterializer() {
         try {
-            Builder<? extends Builder<?>> configurationBuilder = createAndInitConfigurationBuilder();
+            Builder<?> configurationBuilder = createAndInitConfigurationBuilder();
 
             return RDF4JMaterializer.defaultMaterializer(
                     configurationBuilder.build(),
@@ -265,9 +265,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     /**
      * Mapping file + connection info
      */
-    private Builder<? extends Builder<?>> createAndInitConfigurationBuilder() {
+    private Builder<?> createAndInitConfigurationBuilder() {
 
-        final Builder<? extends Builder<?>> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+        final Builder<?> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
