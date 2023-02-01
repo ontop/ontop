@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -477,7 +477,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         rightGrandChild);
 
             Optional<ImmutableExpression> notOptimizedLJCondition = termFactory.getConjunction(
-                    ljCondition.map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(selectedSubstitution, e)),
+                    ljCondition.map(e -> SubstitutionOperations.onImmutableTerms().apply(selectedSubstitution, e)),
                     selectedSubstitution.builder()
                             .restrictDomainTo(leftVariables)
                             .toStrictEqualities());
@@ -750,7 +750,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             ImmutableSubstitution<ImmutableTerm> nullSubstitution = substitutionFactory.getNullSubstitution(
                     Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables));
 
-            return SubstitutionApplicator.getImmutableTermInstance().applyToTerm(nullSubstitution, immutableTerm)
+            return SubstitutionOperations.onImmutableTerms().applyToTerm(nullSubstitution, immutableTerm)
                     .simplify()
                     .isNull();
         }

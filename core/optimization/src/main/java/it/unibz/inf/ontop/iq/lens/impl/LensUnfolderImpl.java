@@ -105,7 +105,7 @@ public class LensUnfolderImpl implements LensUnfolder {
                     ? definition
                     : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableList<Variable> sourceAtomArguments = SubstitutionApplicator.getVariableInstance().apply(
+            ImmutableList<Variable> sourceAtomArguments = SubstitutionOperations.onVariables().apply(
                     renamingSubstitution,
                     renamedDefinition.getProjectionAtom().getArguments());
 

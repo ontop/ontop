@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -160,8 +160,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> SubstitutionApplicator.getImmutableTermInstance().apply(deltaC, e.getKey()),
-                        e -> SubstitutionApplicator.getImmutableTermInstance().apply(deltaC, e.getValue())));
+                        e -> SubstitutionOperations.onImmutableTerms().apply(deltaC, e.getKey()),
+                        e -> SubstitutionOperations.onImmutableTerms().apply(deltaC, e.getValue())));
 
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitutionFromStream(
                 m.asMap().entrySet().stream()
@@ -173,7 +173,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
                 .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables))
-                .transform(v -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(thetaFBar, v))
+                .transform(v -> SubstitutionOperations.onImmutableTerms().applyToTerm(thetaFBar, v))
                 .build();
 
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
@@ -182,7 +182,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
                 .filter(e -> !thetaFBarEntries.contains(e))
-                .map(e -> termFactory.getStrictEquality(SubstitutionApplicator.getImmutableTermInstance().applyToTerm(thetaFBar, e.getKey()), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(SubstitutionOperations.onImmutableTerms().applyToTerm(thetaFBar, e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()
                 .removeFromDomain(newDeltaC.getDomain())
@@ -217,14 +217,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         tauF.builder()
                                 .restrictDomainTo(thetaBar.getDomain())
                                 .toStream((v, t) -> termFactory.getStrictEquality(
-                                        SubstitutionApplicator.getImmutableTermInstance().apply(thetaBar, v),
-                                        SubstitutionApplicator.getImmutableTermInstance().apply(tauF, t))),
+                                        SubstitutionOperations.onImmutableTerms().apply(thetaBar, v),
+                                        SubstitutionOperations.onImmutableTerms().apply(tauF, t))),
                         // tauF vs newDelta
                         tauF.builder()
                                 .restrictDomainTo(tauCPropagationResults.delta.getDomain())
                                 .toStream((v, t) -> termFactory.getStrictEquality(
-                                        SubstitutionApplicator.getImmutableTermInstance().apply(tauCPropagationResults.delta, v),
-                                        SubstitutionApplicator.getImmutableTermInstance().apply(tauF, t))));
+                                        SubstitutionOperations.onImmutableTerms().apply(tauCPropagationResults.delta, v),
+                                        SubstitutionOperations.onImmutableTerms().apply(tauF, t))));
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 
@@ -251,7 +251,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                                  VariableNullability variableNullabilityForConstraint)
             throws EmptyTreeException {
 
-        ImmutableExpression.Evaluation descendingConstraintResults = SubstitutionApplicator.getImmutableTermInstance().apply(theta, initialConstraint)
+        ImmutableExpression.Evaluation descendingConstraintResults = SubstitutionOperations.onImmutableTerms().apply(theta, initialConstraint)
                 .evaluate2VL(variableNullabilityForConstraint);
 
         if (descendingConstraintResults.isEffectiveFalse())

@@ -251,7 +251,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), (T)SubstitutionApplicator.getImmutableTermInstance().applyToTerm(g, e.getValue()))),
+                                .map(e -> Maps.immutableEntry(e.getKey(), (T) SubstitutionOperations.onImmutableTerms().applyToTerm(g, e.getValue()))),
                         g.entrySet().stream())
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));

@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;

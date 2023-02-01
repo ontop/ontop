@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -48,7 +48,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
         }
 
         ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
-                .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(s, rdfTypeTerm))
+                .map(s -> SubstitutionOperations.onImmutableTerms().applyToTerm(s, rdfTypeTerm))
                 .map(t -> t.simplify(childTree.getVariableNullability()))
                 .flatMap(this::extractPossibleFromCase)
                 .filter(t -> !t.isNull())

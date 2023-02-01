@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -207,11 +207,11 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
-                : SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, variables);
+                : SubstitutionOperations.onVariables().apply(renamingSubstitution, variables);
 
         ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
                 ? null
-                : SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, notInternallyRequiredVariables);
+                : SubstitutionOperations.onVariables().apply(renamingSubstitution, notInternallyRequiredVariables);
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
@@ -222,7 +222,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         ImmutableSet<ImmutableSet<Variable>> newUniqueConstraints = uniqueConstraints == null
                 ? null
                 : uniqueConstraints.stream()
-                    .map(s -> SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, s))
+                    .map(s -> SubstitutionOperations.onVariables().apply(renamingSubstitution, s))
                     .collect(ImmutableCollectors.toSet());
 
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,

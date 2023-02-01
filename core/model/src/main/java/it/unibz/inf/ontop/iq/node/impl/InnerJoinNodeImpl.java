@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -154,7 +154,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               VariableGenerator variableGenerator) {
 
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, e));
+                .map(e -> SubstitutionOperations.onImmutableTerms().apply(descendingSubstitution, e));
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
@@ -200,7 +200,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, e))
+                .map(e -> SubstitutionOperations.onImmutableTerms().apply(descendingSubstitution, e))
                 .map(iqFactory::createInnerJoinNode)
                 .orElseGet(iqFactory::createInnerJoinNode);
 
@@ -219,7 +219,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, e));
+                .map(e -> SubstitutionOperations.onImmutableTerms().apply(renamingSubstitution, e));
 
         InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this

@@ -214,7 +214,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableList<Variable> newVariables = SubstitutionApplicator.getVariableInstance().apply(freshRenamingSubstitution, orderedVariables);
+        ImmutableList<Variable> newVariables = SubstitutionOperations.onVariables().apply(freshRenamingSubstitution, orderedVariables);
 
         return newVariables.equals(orderedVariables)
                 ? this
@@ -312,7 +312,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
         int formerArity = formerOrderedVariables.size();
 
-        ImmutableList<Variable> substitutedOrderedVariables = SubstitutionApplicator.getVariableInstance().apply(variableSubstitutionFragment, formerOrderedVariables);
+        ImmutableList<Variable> substitutedOrderedVariables = SubstitutionOperations.onVariables().apply(variableSubstitutionFragment, formerOrderedVariables);
 
         if (substitutedOrderedVariables.equals(formerOrderedVariables))
             return constructionAndFilterAndValues;
@@ -367,7 +367,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return this;
         getVariableNullability();
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .filter(constants -> !(SubstitutionApplicator.getImmutableTermInstance().apply(
+                .filter(constants -> !(SubstitutionOperations.onImmutableTerms().apply(
                                 substitutionFactory.getSubstitution(orderedVariables, constants),
                                 constraint))
                         .evaluate(variableNullability)

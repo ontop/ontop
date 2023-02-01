@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -51,7 +51,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList<OrderComparator> newComparators = comparators.stream()
-                .flatMap(c -> Stream.of(SubstitutionApplicator.getImmutableTermInstance().applyToTerm(substitution, c.getTerm()))
+                .flatMap(c -> Stream.of(SubstitutionOperations.onImmutableTerms().applyToTerm(substitution, c.getTerm()))
                         .filter(t -> t instanceof NonGroundTerm)
                         .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
                 .collect(ImmutableCollectors.toList());

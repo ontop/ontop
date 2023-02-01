@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -295,7 +295,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
                         rootNode.getOptionalFilterCondition()
-                                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingAndEqualities.renamingSubstitution, e)),
+                                .map(e -> SubstitutionOperations.onImmutableTerms().apply(renamingAndEqualities.renamingSubstitution, e)),
                         renamingAndEqualities.equalities.stream());
 
 

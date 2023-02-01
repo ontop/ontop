@@ -8,7 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -35,7 +35,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = SubstitutionApplicator.getImmutableTermInstance().apply(
+        ImmutableExpression nullCaseExpression = SubstitutionOperations.onImmutableTerms().apply(
                 substitutionFactory.getNullSubstitution(ImmutableSet.of(variable)), expression);
 
         return nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
@@ -50,7 +50,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         if (cacheResult != null)
             return cacheResult;
 
-        ImmutableExpression nullCaseExpression = SubstitutionApplicator.getImmutableTermInstance().apply(
+        ImmutableExpression nullCaseExpression = SubstitutionOperations.onImmutableTerms().apply(
                 substitutionFactory.getNullSubstitution(tightVariables), expression);
 
         boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))

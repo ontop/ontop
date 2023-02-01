@@ -22,7 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
@@ -234,13 +234,13 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							.map(j -> getQualifiedName(CHILD_PREFIX, j.getChild()) + " = " + getQualifiedName(PARENT_PREFIX, j.getParent())));
 		}
 
-		ImmutableTerm subject = SubstitutionApplicator.getImmutableTermInstance().applyToTerm(sub, extractedSubject);
+		ImmutableTerm subject = SubstitutionOperations.onImmutableTerms().applyToTerm(sub, extractedSubject);
 		ImmutableList<ImmutableTerm> graphs = extractedGraphs.stream()
-				.map(t -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(sub, t))
+				.map(t -> SubstitutionOperations.onImmutableTerms().applyToTerm(sub, t))
 				.collect(ImmutableCollectors.toList());
-		ImmutableTerm object = SubstitutionApplicator.getImmutableTermInstance().applyToTerm(ob, extractedObject);
+		ImmutableTerm object = SubstitutionOperations.onImmutableTerms().applyToTerm(ob, extractedObject);
 
-		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(t -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(sub, t))
+		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(t -> SubstitutionOperations.onImmutableTerms().applyToTerm(sub, t))
 				.flatMap(p -> getTargetAtoms(subject, p, object, graphs))
 				.collect(ImmutableCollectors.toList());
 

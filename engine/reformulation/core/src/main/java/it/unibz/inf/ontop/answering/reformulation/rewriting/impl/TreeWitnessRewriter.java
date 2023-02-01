@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -331,7 +331,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 e -> (Variable)e.getValue());
 
 	    return new ImmutableCQ<>(
-                SubstitutionApplicator.getVariableInstance().apply(s, vars),
+                SubstitutionOperations.onVariables().apply(s, vars),
                 ImmutableList.copyOf(cq.atoms));
     }
 

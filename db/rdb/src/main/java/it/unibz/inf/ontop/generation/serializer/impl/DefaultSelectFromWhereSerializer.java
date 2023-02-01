@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -139,7 +139,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "1 AS uselessVariable";
 
             return projectedVariables.stream()
-                    .map(v -> sqlTermSerializer.serialize(SubstitutionApplicator.getImmutableTermInstance().apply(substitution, v), columnIDs)
+                    .map(v -> sqlTermSerializer.serialize(SubstitutionOperations.onImmutableTerms().apply(substitution, v), columnIDs)
                             + " AS " + variableAliases.get(v).getSQLRendering())
                     .collect(Collectors.joining(", "));
         }

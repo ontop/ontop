@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -117,7 +117,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(SubstitutionApplicator.getImmutableTermInstance().apply(rootNode.getSubstitution(), variable), child);
+            return typeExtractor.extractSingleTermType(SubstitutionOperations.onImmutableTerms().apply(rootNode.getSubstitution(), variable), child);
         }
 
         @Override

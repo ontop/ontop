@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Objects;
@@ -51,8 +51,8 @@ public class DefPushDownRequestImpl implements DefinitionPushDownRequest {
     public DefinitionPushDownRequest newRequest(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new DefPushDownRequestImpl(newVariable,
-                SubstitutionApplicator.getImmutableTermInstance().applyToTerm(substitution, definition),
-                SubstitutionApplicator.getImmutableTermInstance().apply(substitution, condition));
+                SubstitutionOperations.onImmutableTerms().applyToTerm(substitution, definition),
+                SubstitutionOperations.onImmutableTerms().apply(substitution, condition));
     }
 
     @Override

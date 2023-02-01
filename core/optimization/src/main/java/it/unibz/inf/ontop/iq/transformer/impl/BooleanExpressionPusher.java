@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     public Optional<IQTree> visitConstruction(ConstructionNode rootNode, IQTree child) {
         ImmutableSubstitution<ImmutableTerm> substitution = rootNode.getSubstitution();
 
-        ImmutableExpression newExpression = SubstitutionApplicator.getImmutableTermInstance().apply(substitution, expressionToPushDown);
+        ImmutableExpression newExpression = SubstitutionOperations.onImmutableTerms().apply(substitution, expressionToPushDown);
 
         BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression, coreSingletons);
         IQTree newChild = child.acceptVisitor(newPusher)

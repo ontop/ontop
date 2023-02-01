@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -132,7 +132,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = expression
-                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(unifier, e));
+                .map(e -> SubstitutionOperations.onImmutableTerms().apply(unifier, e));
 
         IQTree newTree;
         switch (newChildren.size()) {
@@ -244,7 +244,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 .flatMap(e -> e.getValue().stream()))
                 .map(n -> iqFactory.createExtensionalDataNode(
                         n.getRelationDefinition(),
-                        SubstitutionApplicator.getVariableOrGroundTermInstance().applyToTerms(unifier, n.getArgumentMap())))
+                        SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);
