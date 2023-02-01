@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -42,13 +43,16 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected final IQTreeTools iqTreeTools;
     protected final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQTreeCache treeCache, IQTreeTools iqTreeTools,
-                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+                                      IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                      SubstitutionFactory substitutionFactory) {
         this.iqTreeTools = iqTreeTools;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -185,7 +189,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             return constraint;
 
         ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(v -> SubstitutionOperations.onVariableOrGroundTerms().apply(descendingSubstitution, v))
+                .map(v -> substitutionFactory.onVariableOrGroundTerms().apply(descendingSubstitution, v))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());

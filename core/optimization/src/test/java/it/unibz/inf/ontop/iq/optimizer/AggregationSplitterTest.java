@@ -138,7 +138,7 @@ public class AggregationSplitterTest {
     }
 
     private IQTree applyInDepthRenaming(IQTree tree, InjectiveVar2VarSubstitution renaming) {
-        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(IQ_FACTORY, renaming, ATOM_FACTORY);
+        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(IQ_FACTORY, renaming, ATOM_FACTORY, SUBSTITUTION_FACTORY);
         HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, IQ_FACTORY);
         return iqTransformer.transform(tree);
     }

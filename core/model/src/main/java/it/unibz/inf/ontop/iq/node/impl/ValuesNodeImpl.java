@@ -214,7 +214,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableList<Variable> newVariables = SubstitutionOperations.onVariables().apply(freshRenamingSubstitution, orderedVariables);
+        ImmutableList<Variable> newVariables = substitutionFactory.onVariables().apply(freshRenamingSubstitution, orderedVariables);
 
         return newVariables.equals(orderedVariables)
                 ? this
@@ -304,7 +304,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 iqFactory.createValuesNode(newOrderedVariables, newValues));
     }
 
-    private static ConstructionAndFilterAndValues substituteVariables(ImmutableSubstitution<Variable> variableSubstitutionFragment,
+    private ConstructionAndFilterAndValues substituteVariables(ImmutableSubstitution<Variable> variableSubstitutionFragment,
                                                                       ConstructionAndFilterAndValues constructionAndFilterAndValues,
                                                                       IntermediateQueryFactory iqFactory) {
         ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
@@ -312,7 +312,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
         int formerArity = formerOrderedVariables.size();
 
-        ImmutableList<Variable> substitutedOrderedVariables = SubstitutionOperations.onVariables().apply(variableSubstitutionFragment, formerOrderedVariables);
+        ImmutableList<Variable> substitutedOrderedVariables = substitutionFactory.onVariables().apply(variableSubstitutionFragment, formerOrderedVariables);
 
         if (substitutedOrderedVariables.equals(formerOrderedVariables))
             return constructionAndFilterAndValues;

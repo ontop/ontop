@@ -26,12 +26,14 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     private final IntermediateQueryFactory iqFactory;
     private final InjectiveVar2VarSubstitution renamingSubstitution;
     private final AtomFactory atomFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveVar2VarSubstitution renamingSubstitution,
-                            AtomFactory atomFactory) {
+                            AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.renamingSubstitution = renamingSubstitution;
         this.atomFactory = atomFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
         return iqFactory.createExtensionalDataNode(
                 extensionalDataNode.getRelationDefinition(),
-                SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, extensionalDataNode.getArgumentMap()));
+                substitutionFactory.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, extensionalDataNode.getArgumentMap()));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
         return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(
                 atom.getPredicate(),
-                SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, atom.getArguments())));
+                substitutionFactory.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, atom.getArguments())));
     }
 
     @Override
@@ -89,15 +91,15 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FlattenNode transform(FlattenNode flattenNode) {
         return iqFactory.createFlattenNode(
-                SubstitutionOperations.onVariables().apply(renamingSubstitution, flattenNode.getOutputVariable()),
-                SubstitutionOperations.onVariables().apply(renamingSubstitution, flattenNode.getFlattenedVariable()),
+                substitutionFactory.onVariables().apply(renamingSubstitution, flattenNode.getOutputVariable()),
+                substitutionFactory.onVariables().apply(renamingSubstitution, flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
-                        .map(v -> SubstitutionOperations.onVariables().apply(renamingSubstitution, v)),
+                        .map(v -> substitutionFactory.onVariables().apply(renamingSubstitution, v)),
                 flattenNode.getFlattenedType());
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
-        return SubstitutionOperations.onVariables().apply(renamingSubstitution, projectedVariables);
+        return substitutionFactory.onVariables().apply(renamingSubstitution, projectedVariables);
     }
 
     @Override
@@ -111,7 +113,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ValuesNode transform(ValuesNode valuesNode) throws QueryNodeTransformationException {
-        ImmutableList<Variable> newOrderedVariables = SubstitutionOperations.onVariables().apply(renamingSubstitution, valuesNode.getOrderedVariables());
+        ImmutableList<Variable> newOrderedVariables = substitutionFactory.onVariables().apply(renamingSubstitution, valuesNode.getOrderedVariables());
 
         return iqFactory.createValuesNode(newOrderedVariables, valuesNode.getValues());
     }

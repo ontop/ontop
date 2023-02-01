@@ -48,7 +48,7 @@ public class ImmutableUnificationTools {
     }
 
     public VariableOrGroundTermUnifierBuilder<NonFunctionalTerm> getNonFunctionalTermUnifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
-        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> SubstitutionOperations.onNonFunctionalTerms().applyToTerm(s, v), substitution);
+        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> substitutionFactory.onNonFunctionalTerms().applyToTerm(s, v), substitution);
     }
 
 
@@ -57,7 +57,7 @@ public class ImmutableUnificationTools {
     }
 
     public VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm> getVariableOrGroundTermUnifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
-        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> SubstitutionOperations.onVariableOrGroundTerms().applyToTerm(s, v), substitution);
+        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> substitutionFactory.onVariableOrGroundTerms().applyToTerm(s, v), substitution);
     }
 
 
@@ -84,7 +84,7 @@ public class ImmutableUnificationTools {
                 ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap) {
 
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
-                    SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(substitution, newArgumentMap);
+                    substitutionFactory.onVariableOrGroundTerms().applyToTerms(substitution, newArgumentMap);
 
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = getVariableOrGroundTermUnifierBuilder()
                             .unifyTermStreams(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
@@ -95,7 +95,7 @@ public class ImmutableUnificationTools {
                             .unifyTermStreams(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnification(
-                                    SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
+                                    substitutionFactory.onVariableOrGroundTerms().applyToTerms(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
                                     s)));
         }
     }

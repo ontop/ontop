@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.substitution;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -91,4 +93,10 @@ public interface SubstitutionFactory {
     InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f,
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
 
+
+    SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
+
+    SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms();
+
+    SubstitutionOperations<Variable> onVariables();
 }

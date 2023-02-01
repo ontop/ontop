@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 
 
@@ -21,30 +22,32 @@ public class QueryRenamerImpl implements QueryRenamer {
     private final InjectiveVar2VarSubstitution renamingSubstitution;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     /**
      * See {@link QueryTransformerFactory#createRenamer(InjectiveVar2VarSubstitution)}
      */
     @AssistedInject
     private QueryRenamerImpl(@Assisted InjectiveVar2VarSubstitution injectiveVar2VarSubstitution,
-                             IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
-        renamingSubstitution = injectiveVar2VarSubstitution;
+                             IntermediateQueryFactory iqFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
+        this.renamingSubstitution = injectiveVar2VarSubstitution;
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     /**
      * Renames the projected variables
      */
     private DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList<Variable> newArguments = SubstitutionOperations.onVariables().apply(renamingSubstitution, atom.getArguments());
+        ImmutableList<Variable> newArguments = substitutionFactory.onVariables().apply(renamingSubstitution, atom.getArguments());
 
         return atomFactory.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
     }
 
     @Override
     public IQ transform(IQ originalQuery) {
-        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory);
+        QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory, substitutionFactory);
         HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
 
         IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);

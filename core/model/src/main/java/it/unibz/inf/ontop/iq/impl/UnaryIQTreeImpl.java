@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -27,8 +28,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
+        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory, substitutionFactory);
 
         if (settings.isTestModeEnabled())
             validate();
@@ -37,9 +38,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings,
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings, SubstitutionFactory substitutionFactory,
                             IQTreeCache freshTreeCache) {
-        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings);
+        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings, substitutionFactory);
     }
 
     @Override

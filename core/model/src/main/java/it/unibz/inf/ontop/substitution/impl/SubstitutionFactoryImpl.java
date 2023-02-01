@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -12,6 +10,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -276,5 +275,51 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         return getInjectiveVar2VarSubstitution(newMap);
     }
+
+
+    @Override
+    public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
+        return new AbstractSubstitutionOperations<>() {
+            @Override
+            public NonFunctionalTerm apply(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, Variable variable) {
+                return Optional.<NonFunctionalTerm>ofNullable(substitution.get(variable)).orElse(variable);
+            }
+
+            @Override
+            public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
+                return (t instanceof Variable)  ? apply(substitution, (Variable) t) : t;
+            }
+        };
+    }
+
+    @Override
+    public SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
+        return new AbstractSubstitutionOperations<>() {
+            @Override
+            public VariableOrGroundTerm apply(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
+                return Optional.<VariableOrGroundTerm>ofNullable(substitution.get(variable)).orElse(variable);
+            }
+            @Override
+            public VariableOrGroundTerm applyToTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
+                return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
+            }
+        };
+    }
+
+    @Override
+    public SubstitutionOperations<Variable> onVariables() {
+        return new AbstractSubstitutionOperations<>() {
+            @Override
+            public Variable apply(ImmutableSubstitution<? extends Variable> substitution, Variable variable) {
+                return Optional.<Variable>ofNullable(substitution.get(variable)).orElse(variable);
+            }
+
+            @Override
+            public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
+                return apply(substitution, t);
+            }
+        };
+    }
+
 
 }

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -23,6 +24,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private final boolean isNormalizedForOptimization;
     private final boolean areDistinctAlreadyRemoved;
     private final CoreSingletons coreSingletons;
+    private final SubstitutionFactory substitutionFactory;
 
     @Nullable
     private VariableNullability variableNullability;
@@ -51,6 +53,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @AssistedInject
     private ConcreteIQTreeCacheImpl(@Assisted boolean isNormalizedForOptimization, CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = false;
     }
@@ -68,6 +71,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
         this.coreSingletons = coreSingletons;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.variableNullability = variableNullability;
         this.variables = variables;
         this.notInternallyRequiredVariables = notInternallyRequiredVariables;
@@ -207,11 +211,11 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
-                : SubstitutionOperations.onVariables().apply(renamingSubstitution, variables);
+                : substitutionFactory.onVariables().apply(renamingSubstitution, variables);
 
         ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
                 ? null
-                : SubstitutionOperations.onVariables().apply(renamingSubstitution, notInternallyRequiredVariables);
+                : substitutionFactory.onVariables().apply(renamingSubstitution, notInternallyRequiredVariables);
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
@@ -222,7 +226,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         ImmutableSet<ImmutableSet<Variable>> newUniqueConstraints = uniqueConstraints == null
                 ? null
                 : uniqueConstraints.stream()
-                    .map(s -> SubstitutionOperations.onVariables().apply(renamingSubstitution, s))
+                    .map(s -> substitutionFactory.onVariables().apply(renamingSubstitution, s))
                     .collect(ImmutableCollectors.toSet());
 
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,

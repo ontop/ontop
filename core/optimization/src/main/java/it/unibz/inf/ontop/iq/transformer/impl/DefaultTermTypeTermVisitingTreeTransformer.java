@@ -258,7 +258,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 substitutionFactory.getInjectiveFreshVar2VarSubstitution(metaTermTypeVariables.stream(), variableGenerator);
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
-                SubstitutionOperations.onVariables().apply(renaming, valuesNode.getOrderedVariables()),
+                substitutionFactory.onVariables().apply(renaming, valuesNode.getOrderedVariables()),
                 valuesNode.getValues().stream()
                         .map(tuple -> tuple.stream()
                                 .map(this::replaceTypeTermConstantWithFunctionalTerm)

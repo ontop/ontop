@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -40,8 +41,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                           OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory);
+                                           OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory, substitutionFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
 
@@ -61,9 +62,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
                                            TermFactory termFactory,
-                                           OntopModelSettings settings,
+                                           OntopModelSettings settings, SubstitutionFactory substitutionFactory,
                                            IQTreeCache freshTreeCash) {
-        this(rootNode, leftChild, rightChild, freshTreeCash, iqTreeTools, iqFactory, termFactory, settings);
+        this(rootNode, leftChild, rightChild, freshTreeCash, iqTreeTools, iqFactory, termFactory, settings, substitutionFactory);
     }
 
     @Override

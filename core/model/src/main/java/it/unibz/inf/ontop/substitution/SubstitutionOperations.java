@@ -70,45 +70,7 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  {
         };
     }
 
-    static SubstitutionOperations<Variable> onVariables() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public Variable apply(ImmutableSubstitution<? extends Variable> substitution, Variable variable) {
-                return Optional.<Variable>ofNullable(substitution.get(variable)).orElse(variable);
-            }
 
-            @Override
-            public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
-                return apply(substitution, t);
-            }
-        };
-    }
 
-    static SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public VariableOrGroundTerm apply(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
-                return Optional.<VariableOrGroundTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-            @Override
-            public VariableOrGroundTerm applyToTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
-                return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
-            }
-        };
-    }
-
-    static SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public NonFunctionalTerm apply(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, Variable variable) {
-                return Optional.<NonFunctionalTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
-            @Override
-            public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
-                return (t instanceof Variable)  ? apply(substitution, (Variable) t) : t;
-            }
-        };
-    }
 
 }

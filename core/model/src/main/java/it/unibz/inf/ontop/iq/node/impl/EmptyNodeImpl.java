@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -29,14 +30,16 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           IQTreeTools iqTreeTools,
-                          IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
+                          IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -82,7 +85,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = SubstitutionOperations.onVariables().apply(freshRenamingSubstitution, projectedVariables);
+        ImmutableSet<Variable> newVariables = substitutionFactory.onVariables().apply(freshRenamingSubstitution, projectedVariables);
 
         return newVariables.equals(projectedVariables)
                 ? this

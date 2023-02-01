@@ -244,7 +244,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 .flatMap(e -> e.getValue().stream()))
                 .map(n -> iqFactory.createExtensionalDataNode(
                         n.getRelationDefinition(),
-                        SubstitutionOperations.onVariableOrGroundTerms().applyToTerms(unifier, n.getArgumentMap())))
+                        substitutionFactory.onVariableOrGroundTerms().applyToTerms(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);

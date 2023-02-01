@@ -283,7 +283,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                     substitutionFactory.getInjectiveFreshVar2VarSubstitution(nonGroupingVariables.stream(), variableGenerator);
 
             if (!renaming.isEmpty()) {
-                QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory);
+                QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory, substitutionFactory);
                 HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
                 return iqTransformer.transform(tree);
             }
