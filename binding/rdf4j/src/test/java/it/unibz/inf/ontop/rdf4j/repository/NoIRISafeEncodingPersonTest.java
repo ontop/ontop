@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.assertFalse;
 
-public class NoIRIEncodingPersonTest extends AbstractRDF4JTest {
+public class NoIRISafeEncodingPersonTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/person/person-mirror.obda";
     private static final String SQL_SCRIPT = "/person/person.sql";
@@ -38,6 +38,6 @@ public class NoIRIEncodingPersonTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableList.of("http://person.example.org/country/it"));
         String sql = reformulateIntoNativeQuery(query);
-        assertFalse("R2RML safe encoding still present in " + sql, sql.toLowerCase().contains("replace"));
+        assertFalse("R2RML IRI safe encoding still present in " + sql, sql.toLowerCase().contains("replace"));
     }
 }
