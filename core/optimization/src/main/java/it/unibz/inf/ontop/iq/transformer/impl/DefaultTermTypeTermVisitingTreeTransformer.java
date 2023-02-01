@@ -17,10 +17,7 @@ import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -261,7 +258,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 substitutionFactory.getInjectiveFreshVar2VarSubstitution(metaTermTypeVariables.stream(), variableGenerator);
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
-                SubstitutionApplicatorVariable.apply(renaming, valuesNode.getOrderedVariables()),
+                SubstitutionApplicator.getVariableInstance().applyToVariables(renaming, valuesNode.getOrderedVariables()),
                 valuesNode.getValues().stream()
                         .map(tuple -> tuple.stream()
                                 .map(this::replaceTypeTermConstantWithFunctionalTerm)

@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
@@ -87,8 +84,8 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     }
 
     private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<Constant> sqlVar2Constant) {
-        ImmutableTerm term = SubstitutionApplicatorImmutableTerm.apply(sparqlVar2Term, v);
-        ImmutableTerm constantTerm = sqlVar2Constant.apply(term);
+        ImmutableTerm term = SubstitutionApplicator.getImmutableTermInstance().applyToVariable(sparqlVar2Term, v);
+        ImmutableTerm constantTerm = SubstitutionApplicator.getImmutableTermInstance().apply(sqlVar2Constant, term);
         Optional<RDFConstant> constant = evaluate(constantTerm);
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
     }

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -135,7 +136,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(AggregationNode::getSubstitution)
                         .map(s -> cs.stream()
                                 .map(c -> sqlAlgebraFactory.createSQLOrderComparator(
-                                        (NonConstantTerm) s.apply(c.getTerm()),
+                                        (NonConstantTerm) SubstitutionApplicator.getImmutableTermInstance().apply(s, c.getTerm()),
                                         c.isAscending()))
                                 .collect(ImmutableCollectors.toList()))
                         .orElseGet(() -> cs.stream()

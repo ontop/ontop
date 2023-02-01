@@ -6,8 +6,7 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -34,12 +33,12 @@ public class TargetAtomImpl implements TargetAtom {
 
     @Override
     public ImmutableTerm getSubstitutedTerm(int index) {
-        return SubstitutionApplicatorImmutableTerm.apply(substitution, atom.getTerm(index));
+        return SubstitutionApplicator.getImmutableTermInstance().applyToVariable(substitution, atom.getTerm(index));
     }
 
     @Override
     public ImmutableList<ImmutableTerm> getSubstitutedTerms() {
-        return SubstitutionApplicatorImmutableTerm.apply(substitution, atom.getArguments());
+        return SubstitutionApplicator.getImmutableTermInstance().applyToVariables(substitution, atom.getArguments());
     }
     
     @Override

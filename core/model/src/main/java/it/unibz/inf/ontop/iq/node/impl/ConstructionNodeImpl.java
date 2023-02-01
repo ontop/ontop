@@ -20,13 +20,10 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
@@ -328,7 +325,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(fullRenaming::restrictDomainTo)
                 .filter(ImmutableSubstitution::isInjective)
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
-                .map(s -> SubstitutionApplicatorVariable.apply(s, childConstraint))
+                .map(s -> SubstitutionApplicator.getVariableInstance().applyToVariables(s, childConstraint))
                 .filter(projectedVariables::containsAll);
     }
 
@@ -422,7 +419,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableSet<Variable> newVariables = SubstitutionApplicatorVariable.apply(renamingSubstitution, projectedVariables);
+        ImmutableSet<Variable> newVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, projectedVariables);
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                 newVariables,

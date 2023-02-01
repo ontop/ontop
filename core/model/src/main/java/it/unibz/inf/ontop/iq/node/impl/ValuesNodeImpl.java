@@ -18,10 +18,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -217,7 +214,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableList<Variable> newVariables = SubstitutionApplicatorVariable.apply(freshRenamingSubstitution, orderedVariables);
+        ImmutableList<Variable> newVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(freshRenamingSubstitution, orderedVariables);
 
         return newVariables.equals(orderedVariables)
                 ? this
@@ -315,7 +312,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
         int formerArity = formerOrderedVariables.size();
 
-        ImmutableList<Variable> substitutedOrderedVariables = SubstitutionApplicatorVariable.apply(variableSubstitutionFragment, formerOrderedVariables);
+        ImmutableList<Variable> substitutedOrderedVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(variableSubstitutionFragment, formerOrderedVariables);
 
         if (substitutedOrderedVariables.equals(formerOrderedVariables))
             return constructionAndFilterAndValues;

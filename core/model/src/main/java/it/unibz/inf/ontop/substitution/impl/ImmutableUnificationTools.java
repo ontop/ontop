@@ -7,10 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorNonFunctionalTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -51,7 +48,7 @@ public class ImmutableUnificationTools {
     }
 
     public VariableOrGroundTermUnifierBuilder<NonFunctionalTerm> getNonFunctionalTermUnifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
-        return new VariableOrGroundTermUnifierBuilder<>(SubstitutionApplicatorNonFunctionalTerm::apply, substitution);
+        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> SubstitutionApplicator.getNonFunctionalTermInstance().apply(s, v), substitution);
     }
 
 
@@ -60,7 +57,7 @@ public class ImmutableUnificationTools {
     }
 
     public VariableOrGroundTermUnifierBuilder<VariableOrGroundTerm> getVariableOrGroundTermUnifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
-        return new VariableOrGroundTermUnifierBuilder<>(SubstitutionApplicatorVariableOrGroundTerm::apply, substitution);
+        return new VariableOrGroundTermUnifierBuilder<>((s, v) -> SubstitutionApplicator.getVariableOrGroundTermInstance().apply(s, v), substitution);
     }
 
 
@@ -87,7 +84,7 @@ public class ImmutableUnificationTools {
                 ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap) {
 
             ImmutableMap<Integer, VariableOrGroundTerm> updatedArgumentMap =
-                    SubstitutionApplicatorVariableOrGroundTerm.apply(substitution, newArgumentMap);
+                    SubstitutionApplicator.getVariableOrGroundTermInstance().apply(substitution, newArgumentMap);
 
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = getVariableOrGroundTermUnifierBuilder()
                             .unifyTermStreams(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
@@ -98,7 +95,7 @@ public class ImmutableUnificationTools {
                             .unifyTermStreams(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnification(
-                                    SubstitutionApplicatorVariableOrGroundTerm.apply(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
+                                    SubstitutionApplicator.getVariableOrGroundTermInstance().apply(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),
                                     s)));
         }
     }
@@ -228,7 +225,7 @@ public class ImmutableUnificationTools {
     public class ImmutableUnifierBuilder extends UnifierBuilder<ImmutableTerm, ImmutableUnifierBuilder> {
 
         ImmutableUnifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
-            super(ImmutableSubstitution::apply, substitution);
+            super((s, v) -> SubstitutionApplicator.getImmutableTermInstance().apply(s, v), substitution);
         }
 
         @Override

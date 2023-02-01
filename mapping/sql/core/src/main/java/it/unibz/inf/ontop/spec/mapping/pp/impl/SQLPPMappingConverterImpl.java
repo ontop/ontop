@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap =
-                SubstitutionApplicatorImmutableTerm.apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                SubstitutionApplicator.getImmutableTermInstance().applyToVariables(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
                         .flatMap(ImmutableTerm::getVariableStream)
                         .distinct()
                         .collect(ImmutableCollectors.toMap(v -> v, lookup));
@@ -112,7 +112,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(t -> SubstitutionApplicator.getImmutableTermInstance().apply(targetRenamingPart, t));
 
         ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 

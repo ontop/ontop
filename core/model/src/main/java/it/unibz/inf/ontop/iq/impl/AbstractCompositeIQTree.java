@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -185,7 +185,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             return constraint;
 
         ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(v -> SubstitutionApplicatorVariableOrGroundTerm.apply(descendingSubstitution, v))
+                .map(v -> SubstitutionApplicator.getVariableOrGroundTermInstance().applyToVariable(descendingSubstitution, v))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());

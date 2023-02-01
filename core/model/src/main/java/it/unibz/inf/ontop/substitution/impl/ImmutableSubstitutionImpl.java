@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -95,9 +96,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         if (isEmpty())
             return functionalTerm;
 
-        ImmutableList<ImmutableTerm> subTerms = functionalTerm.getTerms().stream()
-                .map(this::apply)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableTerm> subTerms = SubstitutionApplicator.getImmutableTermInstance().apply(this, functionalTerm.getTerms());
 
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
@@ -112,9 +111,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
             return booleanExpression;
 
         return termFactory.getImmutableExpression(booleanExpression.getFunctionSymbol(),
-                booleanExpression.getTerms().stream()
-                        .map(this::apply)
-                        .collect(ImmutableCollectors.toList()));
+                SubstitutionApplicator.getImmutableTermInstance().apply(this, booleanExpression.getTerms()));
     }
 
 

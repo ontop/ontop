@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -121,7 +122,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         MappingAssertion createExpansion(ImmutableSubstitution<ImmutableTerm> values) {
 
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution().builder()
-                    .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.apply(t))
+                    .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> SubstitutionApplicator.getImmutableTermInstance().apply(sub, t))
                     .build();
 
             IQTree filterTree = iqFactory.createUnaryIQTree(

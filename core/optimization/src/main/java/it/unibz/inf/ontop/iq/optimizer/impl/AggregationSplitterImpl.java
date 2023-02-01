@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -186,7 +187,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private Optional<ImmutableSet<NonVariableTerm>> getDefinitions(IQTree tree, Variable variable) {
             ImmutableSet<ImmutableTerm> possibleValues = tree.getPossibleVariableDefinitions().stream()
-                    .map(s -> s.applyToVariable(variable))
+                    .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToVariable(s, variable))
                     .collect(ImmutableCollectors.toSet());
 
             // If a definition is not available (e.g. the possible value is a variable), everything is possible

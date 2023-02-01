@@ -7,10 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -170,10 +167,10 @@ public class VariableNullabilityImpl implements VariableNullability {
 
     @Override
     public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newScope = SubstitutionApplicatorVariable.apply(freshRenamingSubstitution, scope);
+        ImmutableSet<Variable> newScope = SubstitutionApplicator.getVariableInstance().applyToVariables(freshRenamingSubstitution, scope);
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
-                .map(s -> SubstitutionApplicatorVariable.apply(freshRenamingSubstitution, s))
+                .map(s -> SubstitutionApplicator.getVariableInstance().applyToVariables(freshRenamingSubstitution, s))
                 .collect(ImmutableCollectors.toSet());
 
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);

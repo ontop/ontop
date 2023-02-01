@@ -13,8 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 
 
 public class QueryRenamerImpl implements QueryRenamer {
@@ -38,7 +37,7 @@ public class QueryRenamerImpl implements QueryRenamer {
      * Renames the projected variables
      */
     private DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList<Variable> newArguments = SubstitutionApplicatorVariable.apply(renamingSubstitution, atom.getArguments());
+        ImmutableList<Variable> newArguments = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, atom.getArguments());
 
         return atomFactory.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
     }

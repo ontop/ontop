@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Set;
@@ -33,7 +34,7 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
 
     @Override
     public <T extends ImmutableTerm> T applyToTerm(T term) {
-        return (T) super.apply(term);
+        return (T) SubstitutionApplicator.getImmutableTermInstance().apply(this, term);
     }
 
     @Override

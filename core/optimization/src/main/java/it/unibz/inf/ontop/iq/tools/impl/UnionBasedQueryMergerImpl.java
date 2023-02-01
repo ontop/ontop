@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -68,7 +68,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                         throw new IllegalStateException("Bug: unexpected incompatible atoms");
 
                     ImmutableList<Variable> sourceProjectionAtomArguments =
-                            SubstitutionApplicatorVariable.apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
+                            SubstitutionApplicator.getVariableInstance().applyToVariables(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
 
                     InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveVar2VarSubstitutionOf(
                             substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));

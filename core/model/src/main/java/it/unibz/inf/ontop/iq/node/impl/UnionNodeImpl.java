@@ -16,12 +16,9 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -257,7 +254,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> s.applyToVariable(v))
+                .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToVariable(s, v))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -485,7 +482,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newUnionNode = iqFactory.createUnionNode(SubstitutionApplicatorVariable.apply(renamingSubstitution, getVariables()));
+        UnionNode newUnionNode = iqFactory.createUnionNode(SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
 

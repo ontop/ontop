@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -244,7 +244,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
             ImmutableMap<Variable, Optional<QuotedID>> targetPreMap =
-                    SubstitutionApplicatorImmutableTerm.apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                    SubstitutionApplicator.getImmutableTermInstance().applyToVariables(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
                             .flatMap(ImmutableTerm::getVariableStream)
                             .distinct()
                             .collect(ImmutableCollectors.toMap(v -> v, lookup));
@@ -266,7 +266,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitutionRemoveIdentityEntries(
                     targetPreMap.entrySet(), Map.Entry::getKey, e -> termFactory.getVariable(e.getValue().get().getSQLRendering()));
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::apply);
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(t -> SubstitutionApplicator.getImmutableTermInstance().apply(targetRenamingPart, t));
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }
 

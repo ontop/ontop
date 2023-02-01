@@ -46,22 +46,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
     <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
 
     /**
-     * Applies the substitution to an immutable term.
-     */
-    default ImmutableTerm apply(ImmutableTerm term) {
-        if (term instanceof Variable) {
-            return applyToVariable((Variable) term);
-        }
-        if (term instanceof Constant) {
-            return term;
-        }
-        if (term instanceof ImmutableFunctionalTerm) {
-            return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
-        }
-        throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
-    }
-
-    /**
      * This method can be applied to simple variables
      */
     ImmutableTerm applyToVariable(Variable variable);

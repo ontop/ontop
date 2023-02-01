@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -129,7 +130,8 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                 .map(s -> IntStream.range(0, terms.size())
                         .mapToObj(j -> i == j
                                 ? terms.get(i)
-                                : s.apply(terms.get(j)).simplify(variableNullability))
+                                : SubstitutionApplicator.getImmutableTermInstance().apply(s, terms.get(j))
+                                            .simplify(variableNullability))
                         .collect(ImmutableCollectors.toList()))
                 .orElse(terms);
     }
