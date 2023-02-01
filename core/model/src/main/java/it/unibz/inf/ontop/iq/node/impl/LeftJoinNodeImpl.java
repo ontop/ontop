@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -308,7 +309,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         LeftJoinNode newLJNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, e))
                 .map(iqFactory::createLeftJoinNode)
                 .orElse(this);
 
@@ -321,7 +322,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::applyToBooleanExpression);
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, e));
 
         LeftJoinNode newLeftJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this
@@ -437,7 +438,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableConditionException {
 
-        ImmutableExpression expression = descendingSubstitution.applyToBooleanExpression(initialExpression);
+        ImmutableExpression expression = SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, initialExpression);
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
@@ -491,7 +492,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .collect(ImmutableCollectors.toList()))
                 .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction)
-                .map(downSubstitution::applyToBooleanExpression);
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(downSubstitution, e));
 
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
     }
@@ -505,8 +506,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (nullVariables.isEmpty())
             return false;
 
-        ImmutableExpression nullifiedExpression = substitutionFactory.getNullSubstitution(nullVariables)
-                .applyToBooleanExpression(constraint);
+        ImmutableExpression nullifiedExpression = SubstitutionApplicator.getImmutableTermInstance().apply(
+                substitutionFactory.getNullSubstitution(nullVariables), constraint);
 
         return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))
                 .isEffectiveFalse();

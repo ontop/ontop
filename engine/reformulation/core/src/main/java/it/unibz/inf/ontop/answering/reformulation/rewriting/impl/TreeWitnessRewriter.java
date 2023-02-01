@@ -331,7 +331,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 e -> (Variable)e.getValue());
 
 	    return new ImmutableCQ<>(
-                SubstitutionApplicator.getVariableInstance().applyToVariables(s, vars),
+                SubstitutionApplicator.getVariableInstance().apply(s, vars),
                 ImmutableList.copyOf(cq.atoms));
     }
 

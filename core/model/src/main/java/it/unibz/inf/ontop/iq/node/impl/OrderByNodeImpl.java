@@ -51,7 +51,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList<OrderComparator> newComparators = comparators.stream()
-                .flatMap(c -> Stream.of(SubstitutionApplicator.getImmutableTermInstance().apply(substitution, c.getTerm()))
+                .flatMap(c -> Stream.of(SubstitutionApplicator.getImmutableTermInstance().applyToTerm(substitution, c.getTerm()))
                         .filter(t -> t instanceof NonGroundTerm)
                         .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
                 .collect(ImmutableCollectors.toList());

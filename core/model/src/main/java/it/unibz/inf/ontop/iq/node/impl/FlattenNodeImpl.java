@@ -155,7 +155,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     protected Variable applySubstitution(Variable var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
-        VariableOrGroundTerm newVar = SubstitutionApplicator.getVariableOrGroundTermInstance().applyToVariable(sub, var);
+        VariableOrGroundTerm newVar = SubstitutionApplicator.getVariableOrGroundTermInstance().apply(sub, var);
         if (!(newVar instanceof Variable))
             throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
 

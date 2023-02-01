@@ -185,7 +185,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             return constraint;
 
         ImmutableSet<Variable> newVariables = getVariables().stream()
-                .map(v -> SubstitutionApplicator.getVariableOrGroundTermInstance().applyToVariable(descendingSubstitution, v))
+                .map(v -> SubstitutionApplicator.getVariableOrGroundTermInstance().apply(descendingSubstitution, v))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toSet());

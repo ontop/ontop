@@ -130,7 +130,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                 .map(s -> IntStream.range(0, terms.size())
                         .mapToObj(j -> i == j
                                 ? terms.get(i)
-                                : SubstitutionApplicator.getImmutableTermInstance().apply(s, terms.get(j))
+                                : SubstitutionApplicator.getImmutableTermInstance().applyToTerm(s, terms.get(j))
                                             .simplify(variableNullability))
                         .collect(ImmutableCollectors.toList()))
                 .orElse(terms);

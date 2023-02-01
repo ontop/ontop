@@ -139,7 +139,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "1 AS uselessVariable";
 
             return projectedVariables.stream()
-                    .map(v -> sqlTermSerializer.serialize(SubstitutionApplicator.getImmutableTermInstance().applyToVariable(substitution, v), columnIDs)
+                    .map(v -> sqlTermSerializer.serialize(SubstitutionApplicator.getImmutableTermInstance().apply(substitution, v), columnIDs)
                             + " AS " + variableAliases.get(v).getSQLRendering())
                     .collect(Collectors.joining(", "));
         }

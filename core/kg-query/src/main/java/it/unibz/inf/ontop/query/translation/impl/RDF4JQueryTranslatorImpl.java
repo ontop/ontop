@@ -697,7 +697,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                             boolean treatBNodeAsVariable) {
         return join.getCondition() != null ?
                 Optional.of(
-                        topSubstitution.applyToBooleanExpression(
+                        SubstitutionApplicator.getImmutableTermInstance().apply(topSubstitution,
                                 getFilterExpression(join.getCondition(), variables, externalBindings, treatBNodeAsVariable))) :
                 Optional.empty();
     }
@@ -706,8 +706,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                              InjectiveVar2VarSubstitution leftChildSubstitution,
                                                              InjectiveVar2VarSubstitution rightChildSubstitution) {
 
-        Variable leftVariable = SubstitutionApplicator.getVariableInstance().applyToVariable(leftChildSubstitution, outputVariable);
-        Variable rightVariable = SubstitutionApplicator.getVariableInstance().applyToVariable(rightChildSubstitution, outputVariable);
+        Variable leftVariable = SubstitutionApplicator.getVariableInstance().apply(leftChildSubstitution, outputVariable);
+        Variable rightVariable = SubstitutionApplicator.getVariableInstance().apply(rightChildSubstitution, outputVariable);
 
         ImmutableExpression equalityCondition = termFactory.getStrictEquality(leftVariable, rightVariable);
         ImmutableExpression isNullExpression = termFactory.getDisjunction(
@@ -795,7 +795,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
 
-        ImmutableSet<Variable> nullableVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(substitution, child.nullableVariables);
+        ImmutableSet<Variable> nullableVariables = SubstitutionApplicator.getVariableInstance().apply(substitution, child.nullableVariables);
 
         return createTranslationResultFromExtendedProjection(projectNode, constructTree, nullableVariables, externalBindings);
     }

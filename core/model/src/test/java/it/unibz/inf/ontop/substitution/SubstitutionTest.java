@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -62,8 +61,8 @@ public class SubstitutionTest {
         ImmutableSubstitution<ImmutableTerm> unifier = optionalUnifier.get();
 
         for(int i = 0; i < firstArguments.size(); i++) {
-            assertEquals(SubstitutionApplicator.getImmutableTermInstance().apply(unifier, firstArguments.get(i)),
-                    SubstitutionApplicator.getImmutableTermInstance().apply(unifier, secondArguments.get(i)));
+            assertEquals(SubstitutionApplicator.getImmutableTermInstance().applyToTerm(unifier, firstArguments.get(i)),
+                    SubstitutionApplicator.getImmutableTermInstance().applyToTerm(unifier, secondArguments.get(i)));
         }
     }
 }

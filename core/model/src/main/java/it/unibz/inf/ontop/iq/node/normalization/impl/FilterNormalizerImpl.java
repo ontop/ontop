@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -189,7 +190,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State liftBindings(ConstructionNode childConstructionNode, UnaryIQTree child) {
             return condition
-                    .map(e -> childConstructionNode.getSubstitution().applyToBooleanExpression(e))
+                    .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(childConstructionNode.getSubstitution(), e))
                     .map(e -> updateParentChildAndCondition(childConstructionNode, e, child.getChild()))
                     .orElseGet(() -> liftChildAsParent(child));
         }

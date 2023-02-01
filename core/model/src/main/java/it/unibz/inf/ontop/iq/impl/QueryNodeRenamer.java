@@ -37,20 +37,20 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FilterNode transform(FilterNode filterNode) {
         ImmutableExpression booleanExpression = filterNode.getFilterCondition();
-        return iqFactory.createFilterNode(renamingSubstitution.applyToBooleanExpression(booleanExpression));
+        return iqFactory.createFilterNode(SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, booleanExpression));
     }
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
         return iqFactory.createExtensionalDataNode(
                 extensionalDataNode.getRelationDefinition(),
-                SubstitutionApplicator.getVariableOrGroundTermInstance().apply(renamingSubstitution, extensionalDataNode.getArgumentMap()));
+                SubstitutionApplicator.getVariableOrGroundTermInstance().applyToTerms(renamingSubstitution, extensionalDataNode.getArgumentMap()));
     }
 
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
         Optional<ImmutableExpression> optionalExpression = leftJoinNode.getOptionalFilterCondition();
-        return iqFactory.createLeftJoinNode(optionalExpression.map(renamingSubstitution::applyToBooleanExpression));
+        return iqFactory.createLeftJoinNode(optionalExpression.map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, e)));
     }
 
     @Override
@@ -63,13 +63,13 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
         return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(
                 atom.getPredicate(),
-                SubstitutionApplicator.getVariableOrGroundTermInstance().apply(renamingSubstitution, atom.getArguments())));
+                SubstitutionApplicator.getVariableOrGroundTermInstance().applyToTerms(renamingSubstitution, atom.getArguments())));
     }
 
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
         Optional<ImmutableExpression> optionalExpression = innerJoinNode.getOptionalFilterCondition();
-        return iqFactory.createInnerJoinNode(optionalExpression.map(renamingSubstitution::applyToBooleanExpression));
+        return iqFactory.createInnerJoinNode(optionalExpression.map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, e)));
     }
 
     @Override
@@ -89,15 +89,15 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FlattenNode transform(FlattenNode flattenNode) {
         return iqFactory.createFlattenNode(
-                SubstitutionApplicator.getVariableInstance().applyToVariable(renamingSubstitution, flattenNode.getOutputVariable()),
-                SubstitutionApplicator.getVariableInstance().applyToVariable(renamingSubstitution, flattenNode.getFlattenedVariable()),
+                SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, flattenNode.getOutputVariable()),
+                SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
-                        .map(v -> SubstitutionApplicator.getVariableInstance().applyToVariable(renamingSubstitution, v)),
+                        .map(v -> SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, v)),
                 flattenNode.getFlattenedType());
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
-        return SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, projectedVariables);
+        return SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, projectedVariables);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ValuesNode transform(ValuesNode valuesNode) throws QueryNodeTransformationException {
-        ImmutableList<Variable> newOrderedVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, valuesNode.getOrderedVariables());
+        ImmutableList<Variable> newOrderedVariables = SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, valuesNode.getOrderedVariables());
 
         return iqFactory.createValuesNode(newOrderedVariables, valuesNode.getValues());
     }

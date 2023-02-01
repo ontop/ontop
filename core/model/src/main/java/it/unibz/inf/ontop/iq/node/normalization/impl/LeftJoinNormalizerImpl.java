@@ -477,7 +477,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         rightGrandChild);
 
             Optional<ImmutableExpression> notOptimizedLJCondition = termFactory.getConjunction(
-                    ljCondition.map(selectedSubstitution::applyToBooleanExpression),
+                    ljCondition.map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(selectedSubstitution, e)),
                     selectedSubstitution.builder()
                             .restrictDomainTo(leftVariables)
                             .toStrictEqualities());
@@ -750,7 +750,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             ImmutableSubstitution<ImmutableTerm> nullSubstitution = substitutionFactory.getNullSubstitution(
                     Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables));
 
-            return SubstitutionApplicator.getImmutableTermInstance().apply(nullSubstitution, immutableTerm)
+            return SubstitutionApplicator.getImmutableTermInstance().applyToTerm(nullSubstitution, immutableTerm)
                     .simplify()
                     .isNull();
         }

@@ -254,7 +254,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToVariable(s, v))
+                .map(s -> SubstitutionApplicator.getImmutableTermInstance().apply(s, v))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -482,7 +482,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newUnionNode = iqFactory.createUnionNode(SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, getVariables()));
+        UnionNode newUnionNode = iqFactory.createUnionNode(SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
 

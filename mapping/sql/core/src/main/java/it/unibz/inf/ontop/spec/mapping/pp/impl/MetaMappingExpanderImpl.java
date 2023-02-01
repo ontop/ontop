@@ -122,7 +122,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         MappingAssertion createExpansion(ImmutableSubstitution<ImmutableTerm> values) {
 
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution().builder()
-                    .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> SubstitutionApplicator.getImmutableTermInstance().apply(sub, t))
+                    .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(sub, t))
                     .build();
 
             IQTree filterTree = iqFactory.createUnaryIQTree(

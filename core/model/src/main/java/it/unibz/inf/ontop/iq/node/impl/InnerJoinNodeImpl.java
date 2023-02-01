@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -153,7 +154,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               VariableGenerator variableGenerator) {
 
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(descendingSubstitution::applyToBooleanExpression);
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, e));
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
@@ -199,7 +200,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, e))
                 .map(iqFactory::createInnerJoinNode)
                 .orElseGet(iqFactory::createInnerJoinNode);
 
@@ -218,7 +219,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::applyToBooleanExpression);
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, e));
 
         InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this

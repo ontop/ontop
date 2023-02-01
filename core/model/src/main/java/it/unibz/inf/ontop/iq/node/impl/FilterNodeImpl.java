@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -227,7 +228,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
+        ImmutableExpression unoptimizedExpression = SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, getFilterCondition());
 
         ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
@@ -269,7 +270,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
             VariableGenerator variableGenerator) {
         FilterNode newFilterNode = iqFactory.createFilterNode(
-                descendingSubstitution.applyToBooleanExpression(getFilterCondition()));
+                SubstitutionApplicator.getImmutableTermInstance().apply(descendingSubstitution, getFilterCondition()));
 
         return iqFactory.createUnaryIQTree(newFilterNode,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
@@ -279,7 +280,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableExpression newCondition = renamingSubstitution.applyToBooleanExpression(getFilterCondition());
+        ImmutableExpression newCondition = SubstitutionApplicator.getImmutableTermInstance().apply(renamingSubstitution, getFilterCondition());
 
         FilterNode newFilterNode = newCondition.equals(getFilterCondition())
                 ? this

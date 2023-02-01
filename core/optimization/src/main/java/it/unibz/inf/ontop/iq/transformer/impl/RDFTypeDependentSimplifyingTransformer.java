@@ -48,7 +48,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
         }
 
         ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
-                .map(s -> SubstitutionApplicator.getImmutableTermInstance().apply(s, rdfTypeTerm))
+                .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(s, rdfTypeTerm))
                 .map(t -> t.simplify(childTree.getVariableNullability()))
                 .flatMap(this::extractPossibleFromCase)
                 .filter(t -> !t.isNull())

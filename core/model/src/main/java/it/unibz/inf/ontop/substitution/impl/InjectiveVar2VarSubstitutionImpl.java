@@ -34,7 +34,7 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
 
     @Override
     public <T extends ImmutableTerm> T applyToTerm(T term) {
-        return (T) SubstitutionApplicator.getImmutableTermInstance().apply(this, term);
+        return (T) SubstitutionApplicator.getImmutableTermInstance().applyToTerm(this, term);
     }
 
     @Override

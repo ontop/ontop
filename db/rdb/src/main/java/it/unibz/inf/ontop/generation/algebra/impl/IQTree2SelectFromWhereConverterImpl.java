@@ -136,7 +136,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(AggregationNode::getSubstitution)
                         .map(s -> cs.stream()
                                 .map(c -> sqlAlgebraFactory.createSQLOrderComparator(
-                                        (NonConstantTerm) SubstitutionApplicator.getImmutableTermInstance().apply(s, c.getTerm()),
+                                        (NonConstantTerm) SubstitutionApplicator.getImmutableTermInstance().applyToTerm(s, c.getTerm()),
                                         c.isAscending()))
                                 .collect(ImmutableCollectors.toList()))
                         .orElseGet(() -> cs.stream()

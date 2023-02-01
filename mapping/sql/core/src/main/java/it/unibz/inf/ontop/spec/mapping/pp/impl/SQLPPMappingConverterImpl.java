@@ -89,7 +89,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap =
-                SubstitutionApplicator.getImmutableTermInstance().applyToVariables(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                SubstitutionApplicator.getImmutableTermInstance().apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
                         .flatMap(ImmutableTerm::getVariableStream)
                         .distinct()
                         .collect(ImmutableCollectors.toMap(v -> v, lookup));
@@ -112,7 +112,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(t -> SubstitutionApplicator.getImmutableTermInstance().apply(targetRenamingPart, t));
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(t -> SubstitutionApplicator.getImmutableTermInstance().applyToTerm(targetRenamingPart, t));
 
         ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 

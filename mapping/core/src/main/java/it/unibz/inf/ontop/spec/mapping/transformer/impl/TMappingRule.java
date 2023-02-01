@@ -31,7 +31,7 @@ public class TMappingRule {
 
 	public TMappingRule(IQ iq, CoreSingletons coreSingletons) {
 		this.projectionAtom = iq.getProjectionAtom();
-		this.headTerms = SubstitutionApplicator.getImmutableTermInstance().applyToVariables(((ConstructionNode)iq.getTree().getRootNode()).getSubstitution(), projectionAtom.getArguments());
+		this.headTerms = SubstitutionApplicator.getImmutableTermInstance().apply(((ConstructionNode)iq.getTree().getRootNode()).getSubstitution(), projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons).get();

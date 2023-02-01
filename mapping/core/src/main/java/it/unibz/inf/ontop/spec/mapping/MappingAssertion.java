@@ -69,7 +69,7 @@ public class MappingAssertion {
     }
 
     public ImmutableList<ImmutableTerm> getTerms() {
-        return SubstitutionApplicator.getImmutableTermInstance().applyToVariables(getTopSubstitution(), getProjectionAtom().getArguments());
+        return SubstitutionApplicator.getImmutableTermInstance().apply(getTopSubstitution(), getProjectionAtom().getArguments());
     }
 
     public ImmutableSubstitution<ImmutableTerm> getTopSubstitution() {

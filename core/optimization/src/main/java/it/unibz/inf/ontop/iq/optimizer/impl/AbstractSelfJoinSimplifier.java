@@ -132,7 +132,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = expression
-                .map(unifier::applyToBooleanExpression);
+                .map(e -> SubstitutionApplicator.getImmutableTermInstance().apply(unifier, e));
 
         IQTree newTree;
         switch (newChildren.size()) {
@@ -244,7 +244,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 .flatMap(e -> e.getValue().stream()))
                 .map(n -> iqFactory.createExtensionalDataNode(
                         n.getRelationDefinition(),
-                        SubstitutionApplicator.getVariableOrGroundTermInstance().apply(unifier, n.getArgumentMap())))
+                        SubstitutionApplicator.getVariableOrGroundTermInstance().applyToTerms(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);

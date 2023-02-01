@@ -177,7 +177,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableSet<Variable> newGroupingVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, groupingVariables);
+        ImmutableSet<Variable> newGroupingVariables = SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, groupingVariables);
 
         AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
                 renamingSubstitution.applyRenaming(substitution));

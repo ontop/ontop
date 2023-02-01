@@ -325,7 +325,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(fullRenaming::restrictDomainTo)
                 .filter(ImmutableSubstitution::isInjective)
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
-                .map(s -> SubstitutionApplicator.getVariableInstance().applyToVariables(s, childConstraint))
+                .map(s -> SubstitutionApplicator.getVariableInstance().apply(s, childConstraint))
                 .filter(projectedVariables::containsAll);
     }
 
@@ -419,7 +419,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableSet<Variable> newVariables = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, projectedVariables);
+        ImmutableSet<Variable> newVariables = SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, projectedVariables);
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                 newVariables,

@@ -167,10 +167,10 @@ public class VariableNullabilityImpl implements VariableNullability {
 
     @Override
     public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newScope = SubstitutionApplicator.getVariableInstance().applyToVariables(freshRenamingSubstitution, scope);
+        ImmutableSet<Variable> newScope = SubstitutionApplicator.getVariableInstance().apply(freshRenamingSubstitution, scope);
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
-                .map(s -> SubstitutionApplicator.getVariableInstance().applyToVariables(freshRenamingSubstitution, s))
+                .map(s -> SubstitutionApplicator.getVariableInstance().apply(freshRenamingSubstitution, s))
                 .collect(ImmutableCollectors.toSet());
 
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);

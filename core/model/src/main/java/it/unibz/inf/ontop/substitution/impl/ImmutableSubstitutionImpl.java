@@ -39,6 +39,11 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
 
     @Override
+    public TermFactory getTermFactory() {
+        return termFactory;
+    }
+
+    @Override
     public ImmutableSet<Map.Entry<Variable, T>> entrySet() {
         return map.entrySet();
     }
@@ -89,29 +94,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     @Override
     public ImmutableTerm applyToVariable(Variable variable) {
         return Optional.<ImmutableTerm>ofNullable(get(variable)).orElse(variable);
-    }
-
-    @Override
-    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isEmpty())
-            return functionalTerm;
-
-        ImmutableList<ImmutableTerm> subTerms = SubstitutionApplicator.getImmutableTermInstance().apply(this, functionalTerm.getTerms());
-
-        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-
-        return (functionSymbol instanceof BooleanFunctionSymbol)
-                ? termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol, subTerms)
-                : termFactory.getImmutableFunctionalTerm(functionSymbol, subTerms);
-    }
-
-    @Override
-    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
-        if (isEmpty())
-            return booleanExpression;
-
-        return termFactory.getImmutableExpression(booleanExpression.getFunctionSymbol(),
-                SubstitutionApplicator.getImmutableTermInstance().apply(this, booleanExpression.getTerms()));
     }
 
 

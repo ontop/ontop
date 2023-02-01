@@ -68,7 +68,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                         throw new IllegalStateException("Bug: unexpected incompatible atoms");
 
                     ImmutableList<Variable> sourceProjectionAtomArguments =
-                            SubstitutionApplicator.getVariableInstance().applyToVariables(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
+                            SubstitutionApplicator.getVariableInstance().apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
 
                     InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveVar2VarSubstitutionOf(
                             substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));

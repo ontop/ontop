@@ -51,8 +51,8 @@ public class DefPushDownRequestImpl implements DefinitionPushDownRequest {
     public DefinitionPushDownRequest newRequest(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new DefPushDownRequestImpl(newVariable,
-                SubstitutionApplicator.getImmutableTermInstance().apply(substitution, definition),
-                substitution.applyToBooleanExpression(condition));
+                SubstitutionApplicator.getImmutableTermInstance().applyToTerm(substitution, definition),
+                SubstitutionApplicator.getImmutableTermInstance().apply(substitution, condition));
     }
 
     @Override

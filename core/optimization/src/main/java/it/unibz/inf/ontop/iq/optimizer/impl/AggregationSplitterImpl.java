@@ -187,7 +187,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private Optional<ImmutableSet<NonVariableTerm>> getDefinitions(IQTree tree, Variable variable) {
             ImmutableSet<ImmutableTerm> possibleValues = tree.getPossibleVariableDefinitions().stream()
-                    .map(s -> SubstitutionApplicator.getImmutableTermInstance().applyToVariable(s, variable))
+                    .map(s -> SubstitutionApplicator.getImmutableTermInstance().apply(s, variable))
                     .collect(ImmutableCollectors.toSet());
 
             // If a definition is not available (e.g. the possible value is a variable), everything is possible

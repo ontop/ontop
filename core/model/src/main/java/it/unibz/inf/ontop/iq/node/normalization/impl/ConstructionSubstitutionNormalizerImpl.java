@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -90,9 +91,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public ImmutableExpression updateExpression(ImmutableExpression expression) {
-            return downRenamingSubstitution.isEmpty()
-                    ? expression
-                    : downRenamingSubstitution.applyToBooleanExpression(expression);
+            return SubstitutionApplicator.getImmutableTermInstance().apply(downRenamingSubstitution, expression);
         }
 
         @Override

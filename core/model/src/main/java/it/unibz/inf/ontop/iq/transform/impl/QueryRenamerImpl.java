@@ -37,7 +37,7 @@ public class QueryRenamerImpl implements QueryRenamer {
      * Renames the projected variables
      */
     private DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList<Variable> newArguments = SubstitutionApplicator.getVariableInstance().applyToVariables(renamingSubstitution, atom.getArguments());
+        ImmutableList<Variable> newArguments = SubstitutionApplicator.getVariableInstance().apply(renamingSubstitution, atom.getArguments());
 
         return atomFactory.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
     }
