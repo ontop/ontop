@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
@@ -48,12 +49,12 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
                 Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
-                ImmutableList<Variable> answerVariables = Stream.concat(
-                                constructionNode.getSubstitution().getRange().stream(),
-                                rootNode.getOptionalFilterCondition().stream())
-                        .flatMap(ImmutableTerm::getVariableStream)
-                        .distinct()
-                        .collect(ImmutableCollectors.toList());
+                ImmutableList<Variable> answerVariables = ImmutableList.copyOf(
+                        Sets.union(
+                                constructionNode.getSubstitution().getRangeVariables(),
+                                rootNode.getOptionalFilterCondition().stream()
+                                        .flatMap(ImmutableTerm::getVariableStream)
+                                        .collect(ImmutableCollectors.toSet())));
 
                 ImmutableList<ExtensionalDataNode> children = c.get();
                 int currentIndex = 0;

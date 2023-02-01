@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -327,9 +328,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .map(fullRenaming::restrictDomainTo)
                 .filter(ImmutableSubstitution::isInjective)
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
-                .map(s -> childConstraint.stream()
-                            .map(s::applyToVariable)
-                            .collect(ImmutableCollectors.toSet()))
+                .map(s -> SubstitutionApplicatorVariable.apply(s, childConstraint))
                 .filter(projectedVariables::containsAll);
     }
 
@@ -423,9 +422,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableSet<Variable> newVariables = projectedVariables.stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newVariables = SubstitutionApplicatorVariable.apply(renamingSubstitution, projectedVariables);
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                 newVariables,

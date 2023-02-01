@@ -247,7 +247,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         if (rootNode instanceof ConstructionNode) {
             ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
 
-            if (substitution.getRange().stream().allMatch(ImmutableTerm::isGround)) {
+            if (substitution.rangeAllMatch(ImmutableTerm::isGround)) {
                 ConstructionNode newConstructionNode = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
 
                 IQTree initialChild = ((UnaryIQTree) rightTree).getChild();

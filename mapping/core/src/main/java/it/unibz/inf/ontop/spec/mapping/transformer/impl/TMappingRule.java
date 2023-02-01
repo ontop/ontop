@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -30,7 +31,7 @@ public class TMappingRule {
 
 	public TMappingRule(IQ iq, CoreSingletons coreSingletons) {
 		this.projectionAtom = iq.getProjectionAtom();
-		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().applyToVariableList(projectionAtom.getArguments());
+		this.headTerms = SubstitutionApplicatorImmutableTerm.apply(((ConstructionNode)iq.getTree().getRootNode()).getSubstitution(), projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons).get();

@@ -716,8 +716,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                                                    VariableGenerator variableGenerator) {
 
             if (selectedSubstitution.removeFromDomain(leftVariables)
-                    .getRange().stream()
-                    .anyMatch(t -> needsAnExternalProvenanceVariable(t, leftVariables))) {
+                    .rangeAnyMatch(t -> needsAnExternalProvenanceVariable(t, leftVariables))) {
                 return Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
                         rightTree, leftVariables, rightRequiredVariables, variableGenerator));
             }

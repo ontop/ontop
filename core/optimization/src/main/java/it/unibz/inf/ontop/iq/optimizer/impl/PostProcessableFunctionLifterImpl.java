@@ -21,9 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -272,7 +270,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(ConstructionNode::getSubstitution);
 
             ImmutableTerm originalDefinition = originalSubstitution
-                    .map(s -> s.applyToVariable(variable))
+                    .map(s -> SubstitutionApplicatorImmutableTerm.apply(s, variable))
                     .orElse(variable);
 
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
@@ -309,7 +307,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     childOfConstruction);
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
-            ImmutableTerm liftedDefinition = renamingSubstitution.apply(originalDefinition);
+            ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
             return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
         }

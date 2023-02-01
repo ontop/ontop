@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -415,7 +416,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
 
     private ImmutableExpression getFilterConditionForDifference(InjectiveVar2VarSubstitution sub) {
-        return termFactory.getConjunction(sub.getRange().stream()
+        return termFactory.getConjunction(sub.getRangeSet().stream()
                 .map(termFactory::getDBIsNull)
                 .collect(ImmutableCollectors.toList()));
     }
@@ -708,8 +709,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                              InjectiveVar2VarSubstitution leftChildSubstitution,
                                                              InjectiveVar2VarSubstitution rightChildSubstitution) {
 
-        Variable leftVariable = leftChildSubstitution.applyToVariable(outputVariable);
-        Variable rightVariable = rightChildSubstitution.applyToVariable(outputVariable);
+        Variable leftVariable = SubstitutionApplicatorVariable.apply(leftChildSubstitution, outputVariable);
+        Variable rightVariable = SubstitutionApplicatorVariable.apply(rightChildSubstitution, outputVariable);
 
         ImmutableExpression equalityCondition = termFactory.getStrictEquality(leftVariable, rightVariable);
         ImmutableExpression isNullExpression = termFactory.getDisjunction(
@@ -797,11 +798,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
 
-        ImmutableSet<Variable> nullableVariables = child.nullableVariables.stream()
-                .map(substitution::applyToVariable)
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> nullableVariables = SubstitutionApplicatorVariable.apply(substitution, child.nullableVariables);
 
         return createTranslationResultFromExtendedProjection(projectNode, constructTree, nullableVariables, externalBindings);
     }

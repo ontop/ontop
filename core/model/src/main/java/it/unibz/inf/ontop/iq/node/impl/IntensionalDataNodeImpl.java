@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -122,7 +123,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     private IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
-        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), ImmutableSubstitution.applyToVariableOrGroundTermList(descendingSubstitution, atom.getArguments()));
+        DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), SubstitutionApplicatorVariableOrGroundTerm.apply(descendingSubstitution, atom.getArguments()));
         return newAtom(newAtom);
     }
 

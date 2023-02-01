@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -242,11 +243,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
         private TargetAtom normalize(TargetAtom target, Function<Variable, Optional<QuotedID>> lookup) {
             ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
-            ImmutableMap<Variable, Optional<QuotedID>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(targetSubstitution::applyToVariable)
-                    .flatMap(ImmutableTerm::getVariableStream)
-                    .distinct()
-                    .collect(ImmutableCollectors.toMap(v -> v, lookup));
+            ImmutableMap<Variable, Optional<QuotedID>> targetPreMap =
+                    SubstitutionApplicatorImmutableTerm.apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                            .flatMap(ImmutableTerm::getVariableStream)
+                            .distinct()
+                            .collect(ImmutableCollectors.toMap(v -> v, lookup));
 
             ImmutableList<String> missingPlaceholders = targetPreMap.entrySet().stream()
                     .filter(e -> e.getValue().isEmpty())

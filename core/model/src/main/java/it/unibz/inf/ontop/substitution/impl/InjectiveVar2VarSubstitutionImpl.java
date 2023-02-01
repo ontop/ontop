@@ -51,13 +51,6 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
         return new ImmutableSubstitutionImpl<>(substitutionMap, termFactory);
     }
 
-    @Override
-    public <T extends ImmutableTerm> ImmutableList<T> applyToList(ImmutableList<T> arguments) {
-        return arguments.stream()
-                .map(this::applyToTerm)
-                .collect(ImmutableCollectors.toList());
-    }
-
 
     @Override
     public InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set) {

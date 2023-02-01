@@ -31,7 +31,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     ImmutableSet<Variable> getDomain();
 
-    ImmutableCollection<T> getRange();
+    boolean rangeAllMatch(Predicate<T> predicate);
+
+    boolean rangeAnyMatch(Predicate<T> predicate);
 
     ImmutableSet<T> getRangeSet();
 
@@ -68,39 +70,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
-    default ImmutableList<ImmutableTerm> applyToVariableList(ImmutableList<Variable> terms) {
-        return terms.stream()
-                .map(this::applyToVariable)
-                .collect(ImmutableCollectors.toList());
-    }
 
 
-    static VariableOrGroundTerm applyToVariableOrGroundTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
-        if (t instanceof GroundTerm)
-            return t;
-
-        return Optional.<VariableOrGroundTerm>ofNullable(substitution.get((Variable) t)).orElse(t);
-    }
-
-    static NonFunctionalTerm applyToNonFunctionalTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
-        if (t instanceof Constant)
-            return t;
-
-        return Optional.<NonFunctionalTerm>ofNullable(substitution.get((Variable) t)).orElse(t);
-    }
-
-    static ImmutableList<VariableOrGroundTerm> applyToVariableOrGroundTermList(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, ImmutableList<? extends VariableOrGroundTerm> terms) {
-        return terms.stream()
-                .map(t -> applyToVariableOrGroundTerm(substitution, t))
-                .collect(ImmutableCollectors.toList());
-    }
-
-    static ImmutableMap<Integer, VariableOrGroundTerm> applyToVariableOrGroundTermArgumentMap(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
-        return argumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> ImmutableSubstitution.applyToVariableOrGroundTerm(substitution, e.getValue())));
-    }
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -243,7 +244,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                 .flatMap(e -> e.getValue().stream()))
                 .map(n -> iqFactory.createExtensionalDataNode(
                         n.getRelationDefinition(),
-                        ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(unifier, n.getArgumentMap())))
+                        SubstitutionApplicatorVariableOrGroundTerm.apply(unifier, n.getArgumentMap())))
                 .collect(ImmutableCollectors.toList());
 
         return new OptimizationState(newExpressions, newDataNodes, unifier);

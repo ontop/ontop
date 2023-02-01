@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -107,7 +108,9 @@ public class LensUnfolderImpl implements LensUnfolder {
                     ? definition
                     : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableList<Variable> sourceAtomArguments = renamingSubstitution.applyToList(renamedDefinition.getProjectionAtom().getArguments());
+            ImmutableList<Variable> sourceAtomArguments = SubstitutionApplicatorVariable.apply(
+                    renamingSubstitution,
+                    renamedDefinition.getProjectionAtom().getArguments());
 
             ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
                     dataNode.getArgumentMap().entrySet(),

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.substitution;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -17,12 +16,12 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
-    <T extends ImmutableTerm> ImmutableList<T> applyToList(ImmutableList<T> arguments);
 
     <T extends ImmutableTerm> T applyToTerm(T term);
 
     @Override // more specific return type
     Variable applyToVariable(Variable variable);
+
 
     @Override
     InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set);

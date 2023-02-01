@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -115,7 +116,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(descendingSubstitution, argumentMap);
+        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = SubstitutionApplicatorVariableOrGroundTerm.apply(descendingSubstitution, argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 
@@ -164,7 +165,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      */
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(freshRenamingSubstitution, argumentMap);
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = SubstitutionApplicatorVariableOrGroundTerm.apply(freshRenamingSubstitution, argumentMap);
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,

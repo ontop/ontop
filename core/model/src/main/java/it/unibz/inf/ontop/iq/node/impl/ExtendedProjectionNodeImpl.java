@@ -215,11 +215,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         // tauF vs thetaBar
                         tauF.builder()
                                 .restrictDomainTo(thetaBar.getDomain())
-                                .toStream((v, t) -> termFactory.getStrictEquality(thetaBar.apply(v), tauF.apply(t))),
+                                .toStream((v, t) -> termFactory.getStrictEquality(thetaBar.applyToVariable(v), tauF.apply(t))),
                         // tauF vs newDelta
                         tauF.builder()
                                 .restrictDomainTo(tauCPropagationResults.delta.getDomain())
-                                .toStream((v, t) -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(v), tauF.apply(t))));
+                                .toStream((v, t) -> termFactory.getStrictEquality(tauCPropagationResults.delta.applyToVariable(v), tauF.apply(t))));
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 

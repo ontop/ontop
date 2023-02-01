@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -167,7 +168,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                                                         ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(iqFactory.createAggregationNode(
                 Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
-                (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)theta));
+                theta.castTo(ImmutableFunctionalTerm.class)));
     }
 
     @Override
@@ -179,9 +180,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableSet<Variable> newGroupingVariables = groupingVariables.stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newGroupingVariables = SubstitutionApplicatorVariable.apply(renamingSubstitution, groupingVariables);
 
         AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
                 renamingSubstitution.applyRenaming(substitution));

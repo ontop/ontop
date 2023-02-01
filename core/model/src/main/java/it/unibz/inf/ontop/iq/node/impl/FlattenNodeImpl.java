@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -157,14 +158,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     protected Variable applySubstitution(Variable var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
-        ImmutableTerm newVar = sub.apply(var);
+        VariableOrGroundTerm newVar = SubstitutionApplicatorVariableOrGroundTerm.apply(sub, var);
         if (!(newVar instanceof Variable))
             throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
-        return (Variable) newVar;
-    }
 
-    protected Optional<Variable> applySubstitution(Optional<Variable> var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
-        return var.map(variable -> applySubstitution(variable, sub));
+        return (Variable) newVar;
     }
 
     @Override
@@ -337,7 +335,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private FlattenNode applySubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
-        Optional<Variable> sIndexVar = applySubstitution(indexVariable, sub);
+        Optional<Variable> sIndexVar = indexVariable.map(variable -> applySubstitution(variable, sub));
         return sFlattenedVar.equals(flattenedVariable) &&
                 sOutputVar.equals(outputVariable) &&
                 sIndexVar.equals(indexVariable) ?

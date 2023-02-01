@@ -17,8 +17,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
@@ -82,9 +82,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = projectedVariables.stream()
-                .map(freshRenamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newVariables = SubstitutionApplicatorVariable.apply(freshRenamingSubstitution, projectedVariables);
 
         return newVariables.equals(projectedVariables)
                 ? this

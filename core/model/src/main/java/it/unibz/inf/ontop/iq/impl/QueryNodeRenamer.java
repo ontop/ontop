@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -45,7 +47,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
         return iqFactory.createExtensionalDataNode(
                 extensionalDataNode.getRelationDefinition(),
-                ImmutableSubstitution.applyToVariableOrGroundTermArgumentMap(renamingSubstitution, extensionalDataNode.getArgumentMap()));
+                SubstitutionApplicatorVariableOrGroundTerm.apply(renamingSubstitution, extensionalDataNode.getArgumentMap()));
     }
 
     @Override
@@ -64,7 +66,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         DataAtom<AtomPredicate> atom = intensionalDataNode.getProjectionAtom();
         return iqFactory.createIntensionalDataNode(atomFactory.getDataAtom(
                 atom.getPredicate(),
-                renamingSubstitution.applyToList(atom.getArguments())));
+                SubstitutionApplicatorVariableOrGroundTerm.apply(renamingSubstitution, atom.getArguments())));
     }
 
     @Override
@@ -90,17 +92,15 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FlattenNode transform(FlattenNode flattenNode) {
         return iqFactory.createFlattenNode(
-                renamingSubstitution.applyToVariable(flattenNode.getOutputVariable()),
-                renamingSubstitution.applyToVariable(flattenNode.getFlattenedVariable()),
+                SubstitutionApplicatorVariable.apply(renamingSubstitution, flattenNode.getOutputVariable()),
+                SubstitutionApplicatorVariable.apply(renamingSubstitution, flattenNode.getFlattenedVariable()),
                 flattenNode.getIndexVariable()
-                        .map(renamingSubstitution::applyToVariable),
+                        .map(v -> SubstitutionApplicatorVariable.apply(renamingSubstitution, v)),
                 flattenNode.getFlattenedType());
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
-        return projectedVariables.stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+        return SubstitutionApplicatorVariable.apply(renamingSubstitution, projectedVariables);
     }
 
     @Override
@@ -114,9 +114,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ValuesNode transform(ValuesNode valuesNode) throws QueryNodeTransformationException {
-        ImmutableList<Variable> newOrderedVariables = valuesNode.getOrderedVariables().stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<Variable> newOrderedVariables = SubstitutionApplicatorVariable.apply(renamingSubstitution, valuesNode.getOrderedVariables());
 
         return iqFactory.createValuesNode(newOrderedVariables, valuesNode.getValues());
     }

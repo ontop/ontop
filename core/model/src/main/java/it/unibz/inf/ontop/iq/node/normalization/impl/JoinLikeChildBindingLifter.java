@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -91,7 +89,7 @@ public class JoinLikeChildBindingLifter {
                                                                        InjectiveVar2VarSubstitution freshRenaming) {
 
         Stream<ImmutableExpression> expressions2 = freshRenaming.builder()
-                .toStream((v, t) -> termFactory.getStrictEquality(substitution.applyToVariable(v), t));
+                .toStream((v, t) -> termFactory.getStrictEquality(SubstitutionApplicatorImmutableTerm.apply(substitution, v), t));
 
         return termFactory.getConjunction(
                 initialJoiningCondition.map(substitution::applyToBooleanExpression), expressions2);

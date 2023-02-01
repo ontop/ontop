@@ -53,8 +53,13 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     }
 
     @Override
-    public  ImmutableCollection<T> getRange() {
-        return map.values();
+    public boolean rangeAllMatch(Predicate<T> predicate) {
+        return map.values().stream().allMatch(predicate);
+    }
+
+    @Override
+    public boolean rangeAnyMatch(Predicate<T> predicate) {
+        return map.values().stream().anyMatch(predicate);
     }
 
     @Override
@@ -64,7 +69,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public ImmutableSet<Variable> getRangeVariables() {
-        return getRange().stream()
+        return map.values().stream()
                 .flatMap(ImmutableTerm::getVariableStream)
                 .collect(ImmutableCollectors.toSet());
     }

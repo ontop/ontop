@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -484,10 +485,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newUnionNode = iqFactory.createUnionNode(
-                getVariables().stream()
-                        .map(renamingSubstitution::applyToVariable)
-                        .collect(ImmutableCollectors.toSet()));
+        UnionNode newUnionNode = iqFactory.createUnionNode(SubstitutionApplicatorVariable.apply(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
 
@@ -818,8 +816,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ConstructionNode constructionNode = (ConstructionNode) rootNode;
 
         //NB: RDF constants are already expected to be decomposed
-        return constructionNode.getSubstitution().getRange().stream()
-                .allMatch(v -> (v instanceof DBConstant) || v.isNull());
+        return constructionNode.getSubstitution().rangeAllMatch(v -> (v instanceof DBConstant) || v.isNull());
     }
 
     private Stream<ImmutableList<Constant>> extractValues(IQTree tree, ImmutableList<Variable> outputOrderedVariables) {

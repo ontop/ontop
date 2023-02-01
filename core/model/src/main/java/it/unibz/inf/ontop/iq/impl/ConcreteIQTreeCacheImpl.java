@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorVariable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -206,15 +207,11 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
-                : variables.stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+                : SubstitutionApplicatorVariable.apply(renamingSubstitution, variables);
 
         ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
                 ? null
-                : notInternallyRequiredVariables.stream()
-                .map(renamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toSet());
+                : SubstitutionApplicatorVariable.apply(renamingSubstitution, notInternallyRequiredVariables);
 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
@@ -225,10 +222,8 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         ImmutableSet<ImmutableSet<Variable>> newUniqueConstraints = uniqueConstraints == null
                 ? null
                 : uniqueConstraints.stream()
-                .map(vs -> vs.stream()
-                        .map(renamingSubstitution::applyToVariable)
-                        .collect(ImmutableCollectors.toSet()))
-                .collect(ImmutableCollectors.toSet());
+                    .map(s -> SubstitutionApplicatorVariable.apply(renamingSubstitution, s))
+                    .collect(ImmutableCollectors.toSet());
 
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,
                 newVariableNullability, newVariables, newNotInternallyRequiredVariables, newPossibleDefinitions,

@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -87,11 +88,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
         ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
-        ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(targetSubstitution::applyToVariable)
-                    .flatMap(ImmutableTerm::getVariableStream)
-                    .distinct()
-                    .collect(ImmutableCollectors.toMap(v -> v, lookup));
+        ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap =
+                SubstitutionApplicatorImmutableTerm.apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                        .flatMap(ImmutableTerm::getVariableStream)
+                        .distinct()
+                        .collect(ImmutableCollectors.toMap(v -> v, lookup));
 
         ImmutableList<String> missingPlaceholders = targetPreMap.entrySet().stream()
                 .filter(e -> e.getValue().isEmpty())

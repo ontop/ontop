@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionApplicatorImmutableTerm;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class MappingAssertion {
     }
 
     public ImmutableList<ImmutableTerm> getTerms() {
-        return getTopSubstitution().applyToVariableList(getProjectionAtom().getArguments());
+        return SubstitutionApplicatorImmutableTerm.apply(getTopSubstitution(), getProjectionAtom().getArguments());
     }
 
     public ImmutableSubstitution<ImmutableTerm> getTopSubstitution() {
