@@ -176,7 +176,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
                 .orElse(normalization.updateChild(parentTree, variableGenerator));
 
-        IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+
+        IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);

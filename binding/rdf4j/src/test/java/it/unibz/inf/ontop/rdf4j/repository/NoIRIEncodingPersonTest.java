@@ -38,6 +38,6 @@ public class NoIRIEncodingPersonTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableList.of("http://person.example.org/country/it"));
         String sql = reformulateIntoNativeQuery(query);
-        assertFalse(sql.toLowerCase().contains("replace"));
+        assertFalse("R2RML safe encoding still present in " + sql, sql.toLowerCase().contains("replace"));
     }
 }

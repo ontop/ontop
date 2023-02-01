@@ -25,7 +25,7 @@
       },
       "iriSafeConstraints": {
         "added": [
-          "country"
+          "\"country\""
         ]
       },
       "type": "BasicLens"
