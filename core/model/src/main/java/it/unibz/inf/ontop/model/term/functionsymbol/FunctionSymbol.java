@@ -86,6 +86,13 @@ public interface FunctionSymbol extends Predicate {
      */
     boolean shouldBeDecomposedInUnion();
 
+    /**
+     * Informs if injecting input types by casting its arguments with their types can help inferring the datatype.
+     * Useful for not running unnecessary inferences.
+     */
+    default boolean canDeriveTypeFromInputTypes() {
+        return false;
+    }
 
     interface FunctionalTermNullability {
 

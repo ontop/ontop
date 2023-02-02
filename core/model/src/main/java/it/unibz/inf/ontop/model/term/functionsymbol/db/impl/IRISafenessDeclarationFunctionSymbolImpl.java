@@ -50,4 +50,9 @@ public class IRISafenessDeclarationFunctionSymbolImpl extends FunctionSymbolImpl
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    @Override
+    public boolean canDeriveTypeFromInputTypes() {
+        return true;
+    }
 }

@@ -51,7 +51,8 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
     private Optional<TermTypeInference> inferByInjectingSubTermType(NonVariableTerm nonVariableTerm,
                                                                     IQTree subTree) {
-        if (!(nonVariableTerm instanceof ImmutableFunctionalTerm))
+        if (!((nonVariableTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) nonVariableTerm).getFunctionSymbol().canDeriveTypeFromInputTypes()))
             return Optional.empty();
 
         ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) nonVariableTerm;
@@ -61,7 +62,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
                 .map(t -> extractSingleTermType(t, subTree)
                         .filter(tp -> tp instanceof DBTermType)
                         // Casts it to its own type as a way to convey the type
-                        .map(tp -> (ImmutableTerm) termFactory.getDBCastFunctionalTerm((DBTermType) tp, t))
+                        .<ImmutableTerm>map(tp -> termFactory.getDBCastFunctionalTerm((DBTermType) tp, t))
                         .orElse(t))
                 .collect(ImmutableCollectors.toList());
 

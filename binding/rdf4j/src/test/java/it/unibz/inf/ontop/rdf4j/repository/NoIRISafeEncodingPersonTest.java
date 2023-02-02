@@ -40,4 +40,18 @@ public class NoIRISafeEncodingPersonTest extends AbstractRDF4JTest {
         String sql = reformulateIntoNativeQuery(query);
         assertFalse("R2RML IRI safe encoding still present in " + sql, sql.toLowerCase().contains("replace"));
     }
+
+    @Test
+    public void testCountry2() {
+        String query = "PREFIX : <http://person.example.org/>\n" +
+                "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT ?v ?code \n" +
+                "WHERE {\n" +
+                " ?p a :Person ; :country ?v . " +
+                " ?v :code ?code \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableList.of("http://person.example.org/country/it"));
+        String sql = reformulateIntoNativeQuery(query);
+        assertFalse("R2RML IRI safe encoding still present in " + sql, sql.toLowerCase().contains("replace"));
+    }
 }
