@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -33,12 +34,14 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     private final ImmutableList<OrderComparator> comparators;
     private final OrderByNormalizer normalizer;
+    private final SubstitutionFactory substitutionFactory;
 
 
     @AssistedInject
-    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
+    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                             OrderByNormalizer normalizer) {
         super(iqFactory);
+        this.substitutionFactory = substitutionFactory;
         this.comparators = comparators;
         this.normalizer = normalizer;
     }
@@ -51,7 +54,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList<OrderComparator> newComparators = comparators.stream()
-                .flatMap(c -> Stream.of(SubstitutionOperations.onImmutableTerms().applyToTerm(substitution, c.getTerm()))
+                .flatMap(c -> Stream.of(substitutionFactory.onImmutableTerms().applyToTerm(substitution, c.getTerm()))
                         .filter(t -> t instanceof NonGroundTerm)
                         .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
                 .collect(ImmutableCollectors.toList());

@@ -697,7 +697,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                                             boolean treatBNodeAsVariable) {
         return join.getCondition() != null ?
                 Optional.of(
-                        SubstitutionOperations.onImmutableTerms().apply(topSubstitution,
+                        substitutionFactory.onImmutableTerms().apply(topSubstitution,
                                 getFilterExpression(join.getCondition(), variables, externalBindings, treatBNodeAsVariable))) :
                 Optional.empty();
     }

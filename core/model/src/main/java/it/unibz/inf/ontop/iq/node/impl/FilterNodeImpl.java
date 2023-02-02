@@ -228,7 +228,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
 
-        ImmutableExpression unoptimizedExpression = SubstitutionOperations.onImmutableTerms().apply(descendingSubstitution, getFilterCondition());
+        ImmutableExpression unoptimizedExpression = substitutionFactory.onImmutableTerms().apply(descendingSubstitution, getFilterCondition());
 
         ImmutableSet<Variable> newlyProjectedVariables = iqTreeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
@@ -270,7 +270,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
             VariableGenerator variableGenerator) {
         FilterNode newFilterNode = iqFactory.createFilterNode(
-                SubstitutionOperations.onImmutableTerms().apply(descendingSubstitution, getFilterCondition()));
+                substitutionFactory.onImmutableTerms().apply(descendingSubstitution, getFilterCondition()));
 
         return iqFactory.createUnaryIQTree(newFilterNode,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
@@ -280,7 +280,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
-        ImmutableExpression newCondition = SubstitutionOperations.onImmutableTerms().apply(renamingSubstitution, getFilterCondition());
+        ImmutableExpression newCondition = substitutionFactory.onImmutableTerms().apply(renamingSubstitution, getFilterCondition());
 
         FilterNode newFilterNode = newCondition.equals(getFilterCondition())
                 ? this

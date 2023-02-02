@@ -39,7 +39,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FilterNode transform(FilterNode filterNode) {
         ImmutableExpression booleanExpression = filterNode.getFilterCondition();
-        return iqFactory.createFilterNode(SubstitutionOperations.onImmutableTerms().apply(renamingSubstitution, booleanExpression));
+        return iqFactory.createFilterNode(substitutionFactory.onImmutableTerms().apply(renamingSubstitution, booleanExpression));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
         Optional<ImmutableExpression> optionalExpression = leftJoinNode.getOptionalFilterCondition();
-        return iqFactory.createLeftJoinNode(optionalExpression.map(e -> SubstitutionOperations.onImmutableTerms().apply(renamingSubstitution, e)));
+        return iqFactory.createLeftJoinNode(optionalExpression.map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e)));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
         Optional<ImmutableExpression> optionalExpression = innerJoinNode.getOptionalFilterCondition();
-        return iqFactory.createInnerJoinNode(optionalExpression.map(e -> SubstitutionOperations.onImmutableTerms().apply(renamingSubstitution, e)));
+        return iqFactory.createInnerJoinNode(optionalExpression.map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e)));
     }
 
     @Override

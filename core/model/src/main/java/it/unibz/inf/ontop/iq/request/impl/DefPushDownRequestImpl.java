@@ -18,6 +18,7 @@ public class DefPushDownRequestImpl implements DefinitionPushDownRequest {
     private final ImmutableTerm definition;
     private final ImmutableExpression condition;
 
+
     public DefPushDownRequestImpl(Variable newVariable, ImmutableTerm definition, ImmutableExpression condition) {
         this.newVariable = newVariable;
         this.definition = definition;

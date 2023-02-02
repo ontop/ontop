@@ -84,8 +84,8 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     }
 
     private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<Constant> sqlVar2Constant) {
-        ImmutableTerm term = SubstitutionOperations.onImmutableTerms().apply(sparqlVar2Term, v);
-        ImmutableTerm constantTerm = SubstitutionOperations.onImmutableTerms().applyToTerm(sqlVar2Constant, term);
+        ImmutableTerm term = substitutionFactory.onImmutableTerms().apply(sparqlVar2Term, v);
+        ImmutableTerm constantTerm = substitutionFactory.onImmutableTerms().applyToTerm(sqlVar2Constant, term);
         Optional<RDFConstant> constant = evaluate(constantTerm);
         return constant.map(rdfConstant -> new OntopBindingImpl(v, rdfConstant));
     }

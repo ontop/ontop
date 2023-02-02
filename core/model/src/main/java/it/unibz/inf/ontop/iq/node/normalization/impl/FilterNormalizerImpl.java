@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -28,13 +29,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
     private final ConditionSimplifier conditionSimplifier;
 
     @Inject
-    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                  ConditionSimplifier conditionSimplifier) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         this.conditionSimplifier = conditionSimplifier;
     }
 
@@ -190,7 +193,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State liftBindings(ConstructionNode childConstructionNode, UnaryIQTree child) {
             return condition
-                    .map(e -> SubstitutionOperations.onImmutableTerms().apply(childConstructionNode.getSubstitution(), e))
+                    .map(e -> substitutionFactory.onImmutableTerms().apply(childConstructionNode.getSubstitution(), e))
                     .map(e -> updateParentChildAndCondition(childConstructionNode, e, child.getChild()))
                     .orElseGet(() -> liftChildAsParent(child));
         }

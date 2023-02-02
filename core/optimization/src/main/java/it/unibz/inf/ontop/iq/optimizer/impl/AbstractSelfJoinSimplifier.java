@@ -132,7 +132,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = expression
-                .map(e -> SubstitutionOperations.onImmutableTerms().apply(unifier, e));
+                .map(e -> substitutionFactory.onImmutableTerms().apply(unifier, e));
 
         IQTree newTree;
         switch (newChildren.size()) {

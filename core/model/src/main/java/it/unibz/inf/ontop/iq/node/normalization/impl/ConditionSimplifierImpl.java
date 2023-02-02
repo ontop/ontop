@@ -122,7 +122,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Expressions that are not function-free equalities
                         expressions.stream()
                                 .filter(e -> !functionFreeEqualities.contains(e))
-                                .map(e -> SubstitutionOperations.onImmutableTerms().apply(normalizedUnifier, e)),
+                                .map(e -> substitutionFactory.onImmutableTerms().apply(normalizedUnifier, e)),
 
                         // Equalities that must remain
                         normalizedUnifier.builder()
@@ -135,7 +135,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression> newExpression = groundFunctionalSubstitution.isPresent()
             ? evaluateCondition(
-                SubstitutionOperations.onImmutableTerms().apply(groundFunctionalSubstitution.get(), partiallySimplifiedExpression.get()),
+                substitutionFactory.onImmutableTerms().apply(groundFunctionalSubstitution.get(), partiallySimplifiedExpression.get()),
                     variableNullability)
             : partiallySimplifiedExpression;
 
@@ -152,7 +152,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                                VariableNullability childVariableNullability)
             throws UnsatisfiableConditionException {
         if (optionalConstraint.isPresent()) {
-            ImmutableExpression substitutedConstraint = SubstitutionOperations.onImmutableTerms().apply(
+            ImmutableExpression substitutedConstraint = substitutionFactory.onImmutableTerms().apply(
                     conditionSimplificationResults.getSubstitution(), optionalConstraint.get());
 
             ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()

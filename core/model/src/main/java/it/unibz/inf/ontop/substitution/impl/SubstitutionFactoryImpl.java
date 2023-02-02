@@ -250,7 +250,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), (T) SubstitutionOperations.onImmutableTerms().applyToTerm(g, e.getValue()))),
+                                .map(e -> Maps.immutableEntry(e.getKey(), (T) onImmutableTerms().applyToTerm(g, e.getValue()))),
                         g.entrySet().stream())
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
@@ -317,6 +317,30 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             @Override
             public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
                 return apply(substitution, t);
+            }
+        };
+    }
+
+    @Override
+    public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
+        return new AbstractSubstitutionOperations<>() {
+            @Override
+            public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
+                return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
+            }
+
+            @Override
+            public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
+                if (t instanceof Variable) {
+                    return apply(substitution, (Variable) t);
+                }
+                if (t instanceof Constant) {
+                    return t;
+                }
+                if (t instanceof ImmutableFunctionalTerm) {
+                    return apply(substitution, (ImmutableFunctionalTerm) t);
+                }
+                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
             }
         };
     }

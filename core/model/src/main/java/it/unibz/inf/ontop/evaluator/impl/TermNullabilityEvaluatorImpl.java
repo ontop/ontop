@@ -35,7 +35,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = SubstitutionOperations.onImmutableTerms().apply(
+        ImmutableExpression nullCaseExpression = substitutionFactory.onImmutableTerms().apply(
                 substitutionFactory.getNullSubstitution(ImmutableSet.of(variable)), expression);
 
         return nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
@@ -50,7 +50,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         if (cacheResult != null)
             return cacheResult;
 
-        ImmutableExpression nullCaseExpression = SubstitutionOperations.onImmutableTerms().apply(
+        ImmutableExpression nullCaseExpression = substitutionFactory.onImmutableTerms().apply(
                 substitutionFactory.getNullSubstitution(tightVariables), expression);
 
         boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))

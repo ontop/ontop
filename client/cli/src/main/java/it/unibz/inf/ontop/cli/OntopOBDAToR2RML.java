@@ -244,7 +244,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
             ImmutableMap<Variable, Optional<QuotedID>> targetPreMap =
-                    SubstitutionOperations.onImmutableTerms().apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
+                    substitutionFactory.onImmutableTerms().apply(targetSubstitution, target.getProjectionAtom().getArguments()).stream()
                             .flatMap(ImmutableTerm::getVariableStream)
                             .distinct()
                             .collect(ImmutableCollectors.toMap(v -> v, lookup));
@@ -266,7 +266,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitutionRemoveIdentityEntries(
                     targetPreMap.entrySet(), Map.Entry::getKey, e -> termFactory.getVariable(e.getValue().get().getSQLRendering()));
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(t -> SubstitutionOperations.onImmutableTerms().applyToTerm(targetRenamingPart, t));
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(t -> substitutionFactory.onImmutableTerms().applyToTerm(targetRenamingPart, t));
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }
 

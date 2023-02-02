@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -23,8 +24,10 @@ import java.util.Optional;
 @Singleton
 public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
+    private final SubstitutionFactory substitutionFactory;
     @Inject
-    private BasicSingleTermTypeExtractor() {
+    private BasicSingleTermTypeExtractor(SubstitutionFactory substitutionFactory) {
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
 
-    protected static class TermTypeVariableVisitor implements IQVisitor<Optional<TermType>> {
+    protected class TermTypeVariableVisitor implements IQVisitor<Optional<TermType>> {
 
         protected final Variable variable;
         protected final SingleTermTypeExtractor typeExtractor;
@@ -117,7 +120,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(SubstitutionOperations.onImmutableTerms().apply(rootNode.getSubstitution(), variable), child);
+            return typeExtractor.extractSingleTermType(substitutionFactory.onImmutableTerms().apply(rootNode.getSubstitution(), variable), child);
         }
 
         @Override

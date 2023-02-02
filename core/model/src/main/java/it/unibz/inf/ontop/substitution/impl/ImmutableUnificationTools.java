@@ -225,7 +225,7 @@ public class ImmutableUnificationTools {
     public class ImmutableUnifierBuilder extends UnifierBuilder<ImmutableTerm, ImmutableUnifierBuilder> {
 
         ImmutableUnifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
-            super((s, v) -> SubstitutionOperations.onImmutableTerms().applyToTerm(s, v), substitution);
+            super((s, v) -> substitutionFactory.onImmutableTerms().applyToTerm(s, v), substitution);
         }
 
         @Override

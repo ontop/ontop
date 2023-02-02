@@ -248,13 +248,13 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .allMatch(t -> compatibilityMap.get(t).equals(g)));
     }
 
-    private static ImmutableSet<ImmutableTerm> extractDefs(ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs,
+    private ImmutableSet<ImmutableTerm> extractDefs(ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs,
                                                            Variable v) {
         if (possibleDefs.isEmpty())
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> SubstitutionOperations.onImmutableTerms().apply(s, v))
+                .map(s -> substitutionFactory.onImmutableTerms().apply(s, v))
                 .collect(ImmutableCollectors.toSet());
     }
 

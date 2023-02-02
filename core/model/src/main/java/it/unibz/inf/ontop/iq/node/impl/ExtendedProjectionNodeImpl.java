@@ -160,8 +160,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> SubstitutionOperations.onImmutableTerms().apply(deltaC, e.getKey()),
-                        e -> SubstitutionOperations.onImmutableTerms().apply(deltaC, e.getValue())));
+                        e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getKey()),
+                        e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
 
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitutionFromStream(
                 m.asMap().entrySet().stream()
@@ -173,7 +173,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
                 .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables))
-                .transform(v -> SubstitutionOperations.onImmutableTerms().applyToTerm(thetaFBar, v))
+                .transform(v -> substitutionFactory.onImmutableTerms().applyToTerm(thetaFBar, v))
                 .build();
 
         ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
@@ -182,7 +182,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
                 .filter(e -> !thetaFBarEntries.contains(e))
-                .map(e -> termFactory.getStrictEquality(SubstitutionOperations.onImmutableTerms().applyToTerm(thetaFBar, e.getKey()), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(substitutionFactory.onImmutableTerms().applyToTerm(thetaFBar, e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()
                 .removeFromDomain(newDeltaC.getDomain())
@@ -217,14 +217,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         tauF.builder()
                                 .restrictDomainTo(thetaBar.getDomain())
                                 .toStream((v, t) -> termFactory.getStrictEquality(
-                                        SubstitutionOperations.onImmutableTerms().apply(thetaBar, v),
-                                        SubstitutionOperations.onImmutableTerms().apply(tauF, t))),
+                                        substitutionFactory.onImmutableTerms().apply(thetaBar, v),
+                                        substitutionFactory.onImmutableTerms().apply(tauF, t))),
                         // tauF vs newDelta
                         tauF.builder()
                                 .restrictDomainTo(tauCPropagationResults.delta.getDomain())
                                 .toStream((v, t) -> termFactory.getStrictEquality(
-                                        SubstitutionOperations.onImmutableTerms().apply(tauCPropagationResults.delta, v),
-                                        SubstitutionOperations.onImmutableTerms().apply(tauF, t))));
+                                        substitutionFactory.onImmutableTerms().apply(tauCPropagationResults.delta, v),
+                                        substitutionFactory.onImmutableTerms().apply(tauF, t))));
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
 
@@ -251,7 +251,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                                  VariableNullability variableNullabilityForConstraint)
             throws EmptyTreeException {
 
-        ImmutableExpression.Evaluation descendingConstraintResults = SubstitutionOperations.onImmutableTerms().apply(theta, initialConstraint)
+        ImmutableExpression.Evaluation descendingConstraintResults = substitutionFactory.onImmutableTerms().apply(theta, initialConstraint)
                 .evaluate2VL(variableNullabilityForConstraint);
 
         if (descendingConstraintResults.isEffectiveFalse())

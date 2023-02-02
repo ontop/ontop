@@ -99,4 +99,6 @@ public interface SubstitutionFactory {
     SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms();
 
     SubstitutionOperations<Variable> onVariables();
+
+    SubstitutionOperations<ImmutableTerm> onImmutableTerms();
 }
