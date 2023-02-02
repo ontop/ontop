@@ -125,6 +125,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol rowNumberFct;
     private DBFunctionSymbol rowNumberWithOrderByFct;
 
+    private IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol;
+
     private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsScalarMap;
     private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsBooleanMap;
     private Map<DBTermType, DBBooleanFunctionSymbol> jsonIsNumberMap;
@@ -420,6 +422,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         rowUniqueStrFct = createDBRowUniqueStr();
         rowNumberFct = createDBRowNumber();
         rowNumberWithOrderByFct = createDBRowNumberWithOrderBy();
+        iriSafenessDeclarationFunctionSymbol = new IRISafenessDeclarationFunctionSymbolImpl(rootDBType);
     }
 
     protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
@@ -1105,6 +1108,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
         return isArrayMap.computeIfAbsent(dbType, this::createIsArray);
+    }
+
+    @Override
+    public IRISafenessDeclarationFunctionSymbol getIRISafenessDeclaration() {
+        return iriSafenessDeclarationFunctionSymbol;
     }
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
