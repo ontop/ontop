@@ -30,8 +30,6 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             "REPLACE(TIME_FORMAT(TIMEDIFF(NOW(),CONVERT_TZ(NOW(),@@session.time_zone,'+00:00')),'+%H:%i'),'+-','-')";
     private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
 
-    private static final String UNSUPPORTED_MSG = "Not supported by MySQL";
-
     @Inject
     protected MySQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createMySQLRegularFunctionTable(typeFactory), typeFactory);
@@ -220,7 +218,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return createNullRejectingDBConcat(arity);
     }
 
     @Override
