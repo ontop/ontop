@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 @JsonDeserialize(as = JsonBasicLens.class)
@@ -23,8 +24,9 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                          @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                          @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
-                         @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, columns, filterExpression);
+                         @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints,
+                         @JsonProperty("iriSafeConstraints") IRISafeConstraints iriSafeConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints, columns, filterExpression);
         this.baseRelation = baseRelation;
     }
 

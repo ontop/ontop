@@ -368,4 +368,6 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBJsonIsScalar(DBTermType dbType);
     DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType);
 
+    IRISafenessDeclarationFunctionSymbol getIRISafenessDeclaration();
+
 }

@@ -15,7 +15,8 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop-protege</artifactId>
-    <version>5.0.2-SNAPSHOT</version>
+    <version>5.0.2-SNAPSHOT
+</version>
     <packaging>pom</packaging>
 
     <description>Ontop OBDA plugin for protégé</description>
@@ -297,7 +298,7 @@
     </build>
 
   <scm>
-    <tag>ontop-5.0.0</tag>
+    <tag>ontop-5.0.1</tag>
     <connection>scm:git:git@github.com:ontop/ontop.git</connection>
     <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
     <url>git@github.com:ontop/ontop.git</url>
