@@ -295,7 +295,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
                         rootNode.getOptionalFilterCondition()
-                                .map(e -> substitutionFactory.onImmutableTerms().apply(renamingAndEqualities.renamingSubstitution, e)),
+                                .map(renamingAndEqualities.renamingSubstitution::apply),
                         renamingAndEqualities.equalities.stream());
 
 

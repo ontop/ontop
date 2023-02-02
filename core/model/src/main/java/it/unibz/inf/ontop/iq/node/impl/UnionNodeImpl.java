@@ -254,7 +254,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return ImmutableSet.of(v);
 
         return possibleDefs.stream()
-                .map(s -> substitutionFactory.onImmutableTerms().apply(s, v))
+                .map(s -> s.apply(v))
                 .collect(ImmutableCollectors.toSet());
     }
 

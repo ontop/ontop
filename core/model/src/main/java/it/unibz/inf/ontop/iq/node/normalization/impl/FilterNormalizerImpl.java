@@ -193,7 +193,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State liftBindings(ConstructionNode childConstructionNode, UnaryIQTree child) {
             return condition
-                    .map(e -> substitutionFactory.onImmutableTerms().apply(childConstructionNode.getSubstitution(), e))
+                    .map(e -> childConstructionNode.getSubstitution().apply(e))
                     .map(e -> updateParentChildAndCondition(childConstructionNode, e, child.getChild()))
                     .orElseGet(() -> liftChildAsParent(child));
         }

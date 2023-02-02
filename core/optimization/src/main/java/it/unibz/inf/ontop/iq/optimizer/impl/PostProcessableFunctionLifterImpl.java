@@ -270,7 +270,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(ConstructionNode::getSubstitution);
 
             ImmutableTerm originalDefinition = originalSubstitution
-                    .map(s -> substitutionFactory.onImmutableTerms().apply(s, variable))
+                    .map(s -> s.apply(variable))
                     .orElse(variable);
 
             InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
@@ -307,7 +307,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     childOfConstruction);
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
-            ImmutableTerm liftedDefinition = substitutionFactory.onImmutableTerms().applyToTerm(renamingSubstitution, originalDefinition);
+            ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
             return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
         }

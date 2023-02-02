@@ -122,7 +122,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Expressions that are not function-free equalities
                         expressions.stream()
                                 .filter(e -> !functionFreeEqualities.contains(e))
-                                .map(e -> substitutionFactory.onImmutableTerms().apply(normalizedUnifier, e)),
+                                .map(e -> normalizedUnifier.apply(e)),
 
                         // Equalities that must remain
                         normalizedUnifier.builder()
@@ -135,7 +135,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression> newExpression = groundFunctionalSubstitution.isPresent()
             ? evaluateCondition(
-                substitutionFactory.onImmutableTerms().apply(groundFunctionalSubstitution.get(), partiallySimplifiedExpression.get()),
+                groundFunctionalSubstitution.get().apply(partiallySimplifiedExpression.get()),
                     variableNullability)
             : partiallySimplifiedExpression;
 
@@ -149,11 +149,10 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     @Override
     public Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
                                                                ExpressionAndSubstitution conditionSimplificationResults,
-                                                               VariableNullability childVariableNullability)
-            throws UnsatisfiableConditionException {
+                                                               VariableNullability childVariableNullability) throws UnsatisfiableConditionException {
         if (optionalConstraint.isPresent()) {
-            ImmutableExpression substitutedConstraint = substitutionFactory.onImmutableTerms().apply(
-                    conditionSimplificationResults.getSubstitution(), optionalConstraint.get());
+            ImmutableExpression substitutedConstraint =
+                    conditionSimplificationResults.getSubstitution().apply(optionalConstraint.get());
 
             ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
                     .flatMap(e -> termFactory.getConjunction(Stream.of(e, substitutedConstraint)))

@@ -260,7 +260,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
                         initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
 
-                // TODO: remove the casts
                 ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         substitutionFactory.compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
 
@@ -309,7 +308,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 
         LeftJoinNode newLJNode = getOptionalFilterCondition()
-                .map(e -> substitutionFactory.onImmutableTerms().apply(descendingSubstitution, e))
+                .map(descendingSubstitution::apply)
                 .map(iqFactory::createLeftJoinNode)
                 .orElse(this);
 
@@ -322,7 +321,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e));
+                .map(renamingSubstitution::apply);
 
         LeftJoinNode newLeftJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this
@@ -438,7 +437,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableConditionException {
 
-        ImmutableExpression expression = substitutionFactory.onImmutableTerms().apply(descendingSubstitution, initialExpression);
+        ImmutableExpression expression = descendingSubstitution.apply(initialExpression);
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
@@ -492,7 +491,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .collect(ImmutableCollectors.toList()))
                 .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction)
-                .map(e -> substitutionFactory.onImmutableTerms().apply(downSubstitution, e));
+                .map(downSubstitution::apply);
 
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
     }
@@ -506,8 +505,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (nullVariables.isEmpty())
             return false;
 
-        ImmutableExpression nullifiedExpression = substitutionFactory.onImmutableTerms().apply(
-                substitutionFactory.getNullSubstitution(nullVariables), constraint);
+        ImmutableExpression nullifiedExpression =
+                substitutionFactory.getNullSubstitution(nullVariables).apply(constraint);
 
         return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))
                 .isEffectiveFalse();

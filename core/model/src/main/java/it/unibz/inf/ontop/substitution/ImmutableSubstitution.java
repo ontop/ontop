@@ -53,6 +53,27 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
     ImmutableTerm applyToVariable(Variable variable);
 
 
+    SubstitutionOperations<ImmutableTerm> onImmutableTerms();
+
+
+    default ImmutableTerm apply(Variable variable) { return onImmutableTerms().apply(this, variable); }
+
+    default ImmutableTerm applyToTerm(ImmutableTerm t) { return onImmutableTerms().applyToTerm(this, t); }
+
+    default ImmutableFunctionalTerm apply(ImmutableFunctionalTerm term) { return onImmutableTerms().apply(this, term); }
+
+    default ImmutableExpression apply(ImmutableExpression expression) { return onImmutableTerms().apply(this, expression); }
+
+    default ImmutableList<ImmutableTerm> apply(ImmutableList<? extends Variable> variables) { return onImmutableTerms().apply(this, variables); }
+
+    default ImmutableSet<ImmutableTerm> apply(ImmutableSet<? extends Variable> terms) { return onImmutableTerms().apply(this, terms); }
+
+    default ImmutableList<ImmutableTerm> applyToTerms(ImmutableList<? extends ImmutableTerm> terms) { return onImmutableTerms().applyToTerms(this, terms); }
+
+    default ImmutableMap<Integer, ImmutableTerm> applyToTerms(ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) { return onImmutableTerms().applyToTerms(this, argumentMap); }
+
+
+
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
 

@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -91,6 +92,30 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     @Override
     public ImmutableTerm applyToVariable(Variable variable) {
         return Optional.<ImmutableTerm>ofNullable(get(variable)).orElse(variable);
+    }
+
+    @Override
+    public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
+        return new AbstractSubstitutionOperations<>() {
+            @Override
+            public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
+                return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
+            }
+
+            @Override
+            public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
+                if (t instanceof Variable) {
+                    return apply(substitution, (Variable) t);
+                }
+                if (t instanceof Constant) {
+                    return t;
+                }
+                if (t instanceof ImmutableFunctionalTerm) {
+                    return apply(substitution, (ImmutableFunctionalTerm) t);
+                }
+                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
+            }
+        };
     }
 
 

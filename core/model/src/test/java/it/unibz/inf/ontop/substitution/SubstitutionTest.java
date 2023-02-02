@@ -61,8 +61,7 @@ public class SubstitutionTest {
         ImmutableSubstitution<ImmutableTerm> unifier = optionalUnifier.get();
 
         for(int i = 0; i < firstArguments.size(); i++) {
-            assertEquals(SUBSTITUTION_FACTORY.onImmutableTerms().applyToTerm(unifier, firstArguments.get(i)),
-                    SUBSTITUTION_FACTORY.onImmutableTerms().applyToTerm(unifier, secondArguments.get(i)));
+            assertEquals(unifier.applyToTerm(firstArguments.get(i)), unifier.applyToTerm(secondArguments.get(i)));
         }
     }
 }

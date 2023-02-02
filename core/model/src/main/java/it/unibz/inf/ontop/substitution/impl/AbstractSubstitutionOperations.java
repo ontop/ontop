@@ -27,7 +27,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
             return term;
 
         return substitution.getTermFactory().getImmutableFunctionalTerm(term.getFunctionSymbol(),
-                SubstitutionOperations.onImmutableTerms().applyToTerms(substitution, term.getTerms()));
+                substitution.applyToTerms(term.getTerms()));
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
             return expression;
 
         return substitution.getTermFactory().getImmutableExpression(expression.getFunctionSymbol(),
-                SubstitutionOperations.onImmutableTerms().applyToTerms(substitution, expression.getTerms()));
+                substitution.applyToTerms(expression.getTerms()));
     }
 
     @Override

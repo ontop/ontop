@@ -33,12 +33,12 @@ public class TargetAtomImpl implements TargetAtom {
 
     @Override
     public ImmutableTerm getSubstitutedTerm(int index) {
-        return SubstitutionOperations.onImmutableTerms().apply(substitution, atom.getTerm(index));
+        return substitution.apply(atom.getTerm(index));
     }
 
     @Override
     public ImmutableList<ImmutableTerm> getSubstitutedTerms() {
-        return SubstitutionOperations.onImmutableTerms().apply(substitution, atom.getArguments());
+        return substitution.apply(atom.getArguments());
     }
     
     @Override

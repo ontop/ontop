@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.impl.AbstractSubstitutionOperations;
-
-import java.util.Optional;
 
 public interface SubstitutionOperations<T extends ImmutableTerm>  {
 
@@ -46,31 +43,4 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  {
         return getSubstitution(map);
     }
 */
-
-    static SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
-                return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
-            @Override
-            public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
-                if (t instanceof Variable) {
-                    return apply(substitution, (Variable) t);
-                }
-                if (t instanceof Constant) {
-                    return t;
-                }
-                if (t instanceof ImmutableFunctionalTerm) {
-                    return apply(substitution, (ImmutableFunctionalTerm) t);
-                }
-                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
-            }
-        };
-    }
-
-
-
-
 }

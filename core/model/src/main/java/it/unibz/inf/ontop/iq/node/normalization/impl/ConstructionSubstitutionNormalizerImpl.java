@@ -91,7 +91,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public ImmutableExpression updateExpression(ImmutableExpression expression) {
-            return substitutionFactory.onImmutableTerms().apply(downRenamingSubstitution, expression);
+            return downRenamingSubstitution.apply(expression);
         }
 
         @Override

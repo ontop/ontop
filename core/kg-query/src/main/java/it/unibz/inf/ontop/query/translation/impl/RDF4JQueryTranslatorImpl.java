@@ -660,14 +660,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         leftRenamingSubstitution.get(v),
                         rightRenamingSubstitution.get(v)));
 
-        Optional<ImmutableExpression> filterExpression = join instanceof LeftJoin
-                ? getLeftJoinFilter(
-                        (LeftJoin) join,
-                        topSubstitution,
-                        Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables()).immutableCopy(),
-                        externalBindings,
-                        treatBNodeAsVariable)
-                : Optional.empty();
+        Optional<ImmutableExpression> filterExpression;
+        if (join instanceof LeftJoin) {
+            ImmutableSet<Variable> variables = Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables()).immutableCopy();
+            filterExpression = Optional.ofNullable(((LeftJoin) join).getCondition())
+                    .map(c -> topSubstitution.apply(getFilterExpression(c, variables, externalBindings, treatBNodeAsVariable)));
+        }
+        else {
+            filterExpression = Optional.empty();
+        }
 
         Optional<ImmutableExpression> joinCondition = termFactory.getConjunction(filterExpression, toCoalesce.stream()
                 .map(v -> generateCompatibleExpression(v, leftRenamingSubstitution, rightRenamingSubstitution)));
@@ -690,16 +691,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 toCoalesce);
 
         return createTranslationResult(joinQuery, newSetOfNullableVars);
-    }
-
-    private Optional<ImmutableExpression> getLeftJoinFilter(LeftJoin join, ImmutableSubstitution<ImmutableTerm> topSubstitution, ImmutableSet<Variable> variables,
-                                                            ImmutableMap<Variable, GroundTerm> externalBindings,
-                                                            boolean treatBNodeAsVariable) {
-        return join.getCondition() != null ?
-                Optional.of(
-                        substitutionFactory.onImmutableTerms().apply(topSubstitution,
-                                getFilterExpression(join.getCondition(), variables, externalBindings, treatBNodeAsVariable))) :
-                Optional.empty();
     }
 
     private ImmutableExpression generateCompatibleExpression(Variable outputVariable,

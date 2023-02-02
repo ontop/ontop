@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -39,7 +40,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public FilterNode transform(FilterNode filterNode) {
         ImmutableExpression booleanExpression = filterNode.getFilterCondition();
-        return iqFactory.createFilterNode(substitutionFactory.onImmutableTerms().apply(renamingSubstitution, booleanExpression));
+        return iqFactory.createFilterNode(renamingSubstitution.apply(booleanExpression));
     }
 
     @Override
@@ -52,7 +53,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
         Optional<ImmutableExpression> optionalExpression = leftJoinNode.getOptionalFilterCondition();
-        return iqFactory.createLeftJoinNode(optionalExpression.map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e)));
+        return iqFactory.createLeftJoinNode(optionalExpression.map(renamingSubstitution::apply));
     }
 
     @Override
@@ -71,7 +72,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
         Optional<ImmutableExpression> optionalExpression = innerJoinNode.getOptionalFilterCondition();
-        return iqFactory.createInnerJoinNode(optionalExpression.map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e)));
+        return iqFactory.createInnerJoinNode(optionalExpression.map(renamingSubstitution::apply));
     }
 
     @Override
@@ -134,7 +135,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
-                        renamingSubstitution.applyToTerm(c.getTerm()),
+                        (NonGroundTerm) renamingSubstitution.applyToTerm(c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 

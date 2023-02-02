@@ -120,7 +120,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(substitutionFactory.onImmutableTerms().apply(rootNode.getSubstitution(), variable), child);
+            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override

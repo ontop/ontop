@@ -234,13 +234,13 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							.map(j -> getQualifiedName(CHILD_PREFIX, j.getChild()) + " = " + getQualifiedName(PARENT_PREFIX, j.getParent())));
 		}
 
-		ImmutableTerm subject = substitutionFactory.onImmutableTerms().applyToTerm(sub, extractedSubject);
+		ImmutableTerm subject = sub.applyToTerm(extractedSubject);
 		ImmutableList<ImmutableTerm> graphs = extractedGraphs.stream()
-				.map(t -> substitutionFactory.onImmutableTerms().applyToTerm(sub, t))
+				.map(sub::applyToTerm)
 				.collect(ImmutableCollectors.toList());
-		ImmutableTerm object = substitutionFactory.onImmutableTerms().applyToTerm(ob, extractedObject);
+		ImmutableTerm object = ob.applyToTerm(extractedObject);
 
-		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(t -> substitutionFactory.onImmutableTerms().applyToTerm(sub, t))
+		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(sub::applyToTerm)
 				.flatMap(p -> getTargetAtoms(subject, p, object, graphs))
 				.collect(ImmutableCollectors.toList());
 

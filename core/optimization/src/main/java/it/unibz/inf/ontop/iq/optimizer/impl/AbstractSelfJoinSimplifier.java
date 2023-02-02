@@ -131,8 +131,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
                 .collect(ImmutableCollectors.toList());
 
-        Optional<ImmutableExpression> newExpression = expression
-                .map(e -> substitutionFactory.onImmutableTerms().apply(unifier, e));
+        Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 
         IQTree newTree;
         switch (newChildren.size()) {
@@ -141,7 +140,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             case 1:
                 IQTree child = newChildren.iterator().next();
                 newTree = newExpression
-                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
+                        .<IQTree>map(e ->iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
                         .orElse(child);
                 break;
             default:

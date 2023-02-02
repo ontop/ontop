@@ -33,18 +33,13 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
     }
 
     @Override
-    public <T extends ImmutableTerm> T applyToTerm(T term) {
-        return (T) SubstitutionOperations.onImmutableTerms().applyToTerm(this, term);
-    }
-
-    @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename) {
         if (isEmpty())
             return substitutionToRename;
 
         ImmutableMap<Variable, T> substitutionMap = substitutionToRename.entrySet().stream()
                 // Substitutes the keys and values of the substitution to rename.
-                .map(e -> Maps.immutableEntry(applyToVariable(e.getKey()), applyToTerm(e.getValue())))
+                .map(e -> Maps.immutableEntry(applyToVariable(e.getKey()), (T)applyToTerm(e.getValue())))
                 // Safe because the local substitution is injective
                 .filter(e -> !e.getValue().equals(e.getKey()))
                 .collect(ImmutableCollectors.toMap());

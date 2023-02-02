@@ -48,7 +48,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     public Optional<IQTree> visitConstruction(ConstructionNode rootNode, IQTree child) {
         ImmutableSubstitution<ImmutableTerm> substitution = rootNode.getSubstitution();
 
-        ImmutableExpression newExpression = substitutionFactory.onImmutableTerms().apply(substitution, expressionToPushDown);
+        ImmutableExpression newExpression = substitution.apply(expressionToPushDown);
 
         BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression, coreSingletons);
         IQTree newChild = child.acceptVisitor(newPusher)

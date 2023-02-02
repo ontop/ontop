@@ -154,7 +154,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                               VariableGenerator variableGenerator) {
 
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(e -> substitutionFactory.onImmutableTerms().apply(descendingSubstitution, e));
+                .map(descendingSubstitution::apply);
 
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
@@ -200,7 +200,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
-                .map(e -> substitutionFactory.onImmutableTerms().apply(descendingSubstitution, e))
+                .map(descendingSubstitution::apply)
                 .map(iqFactory::createInnerJoinNode)
                 .orElseGet(iqFactory::createInnerJoinNode);
 
@@ -219,7 +219,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(e -> substitutionFactory.onImmutableTerms().apply(renamingSubstitution, e));
+                .map(renamingSubstitution::apply);
 
         InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
                 ? this
