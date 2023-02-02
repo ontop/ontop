@@ -153,10 +153,12 @@ public class JsonSQLLens extends JsonLens {
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);
 
+        IQTree finalTree = addIRISafeConstraints(transformedTree, dbParameters);
+
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
 
-        return iqFactory.createIQ(projectionAtom, transformedTree)
+        return iqFactory.createIQ(projectionAtom, finalTree)
                 .normalizeForOptimization();
     }
 

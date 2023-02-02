@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -113,7 +114,6 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         IntermediateQueryFactory iqFactory = cs.getIQFactory();
         VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
         QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
-        TermFactory termFactory = cs.getTermFactory();
 
         ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
         ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
@@ -182,17 +182,19 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                         cs
                 ));
 
-        return iqFactory.createIQ(projectionAtom,
+
+        IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(
+                extractionConstructionNode,
                 iqFactory.createUnaryIQTree(
-                        extractionConstructionNode,
+                        filterNode,
                         iqFactory.createUnaryIQTree(
-                                filterNode,
+                                flattennode,
                                 iqFactory.createUnaryIQTree(
-                                        flattennode,
-                                        iqFactory.createUnaryIQTree(
-                                                checkArrayConstructionNode,
-                                                dataNode
-                                        )))));
+                                        checkArrayConstructionNode,
+                                        dataNode
+                                ))));
+
+        return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
     }
 
     private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {
