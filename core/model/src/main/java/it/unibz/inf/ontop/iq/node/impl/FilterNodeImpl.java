@@ -23,9 +23,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -45,12 +43,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
                            TermFactory termFactory, TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                           ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                           ImmutableUnificationTools unificationTools,
                            IntermediateQueryFactory iqFactory,
                            IQTreeTools iqTreeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
@@ -248,7 +246,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                     expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
             IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()

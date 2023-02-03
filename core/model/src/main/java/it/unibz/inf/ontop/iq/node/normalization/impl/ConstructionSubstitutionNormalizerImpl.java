@@ -50,7 +50,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                         .restrictRange(t -> !projectedVariables.contains(t))
                         .build());
 
-        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.compose(downRenamingSubstitution, reducedAscendingSubstitution).builder()
+        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution.compose(reducedAscendingSubstitution).builder()
                 .restrictDomainTo(projectedVariables)
                 .transform(t -> t.simplify())
                 .build();

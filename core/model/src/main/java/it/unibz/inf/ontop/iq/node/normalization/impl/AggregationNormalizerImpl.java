@@ -180,7 +180,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .restrictDomainTo(nonGroupingVariables);
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                            substitutionFactory.compose(nonGroupingSubstitution, aggregationSubstitution).builder()
+                            nonGroupingSubstitution.compose(aggregationSubstitution).builder()
                                     .restrictDomainTo(aggregationSubstitution.getDomain())
                                     .build(ImmutableFunctionalTerm.class);
 
@@ -256,7 +256,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             // Needed when some grouping variables are also used in the aggregates
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
-                            (s, a) -> substitutionFactory.compose(a.getSubstitution(), s).builder()
+                            (s, a) -> a.getSubstitution().compose(s).builder()
                                             .restrictDomainTo(aggregationSubstitution.getDomain())
                                             .build(ImmutableFunctionalTerm.class),
                             (s1, s2) -> {

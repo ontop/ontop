@@ -10,9 +10,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -27,16 +25,13 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final ImmutableUnificationTools unificationTools;
-    private final ImmutableSubstitutionTools substitutionTools;
 
     @Inject
     private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory,
-                                    TermFactory termFactory, ImmutableUnificationTools unificationTools,
-                                    ImmutableSubstitutionTools substitutionTools) {
+                                    TermFactory termFactory, ImmutableUnificationTools unificationTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.unificationTools = unificationTools;
-        this.substitutionTools = substitutionTools;
     }
 
 
@@ -106,7 +101,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .unifyTermStreams(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
                 .build()
                 // TODO: merge priorityRenaming with the orientate() method
-                .map(u -> substitutionTools.prioritizeRenaming(u, nonLiftableVariables))
+                .map(u -> substitutionFactory.onNonFunctionalTerms().compose(unificationTools.getPrioritizingRenaming(u, nonLiftableVariables), u))
                 .orElseThrow(UnsatisfiableConditionException::new);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
@@ -122,7 +117,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Expressions that are not function-free equalities
                         expressions.stream()
                                 .filter(e -> !functionFreeEqualities.contains(e))
-                                .map(e -> normalizedUnifier.apply(e)),
+                                .map(normalizedUnifier::apply),
 
                         // Equalities that must remain
                         normalizedUnifier.builder()

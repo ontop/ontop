@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -26,16 +24,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     private final ImmutableUnificationTools unificationTools;
     protected final IQTreeTools iqTreeTools;
-    private final ImmutableSubstitutionTools substitutionTools;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                       ImmutableUnificationTools unificationTools,
                                       IQTreeTools iqTreeTools,
-                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory) {
+                                      TermFactory termFactory) {
         super(substitutionFactory, termFactory, iqFactory);
         this.unificationTools = unificationTools;
         this.iqTreeTools = iqTreeTools;
-        this.substitutionTools = substitutionTools;
     }
 
     @Override
@@ -142,7 +138,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<NonFunctionalTerm> newEta = unificationTools.getNonFunctionalTermUnifierBuilder(thetaC)
                 .unifyTermStreams(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
-                .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
+                .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(unificationTools.getPrioritizingRenaming(eta, vC), eta))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
         ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(vC);
@@ -193,7 +189,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction);
 
-        return new ConstructionNodeImpl.PropagationResults<>(substitutionFactory.compose(thetaFBar, thetaCBar), newDeltaC, f);
+        return new ConstructionNodeImpl.PropagationResults<>(thetaFBar.compose(thetaCBar), newDeltaC, f);
 
     }
 
@@ -202,7 +198,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
 
-        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.compose(
+        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.onVariableOrGroundTerms().compose(
                 tauF.builder()
                         .removeFromDomain(thetaBar.getDomain())
                         .removeFromDomain(tauCPropagationResults.delta.getDomain())

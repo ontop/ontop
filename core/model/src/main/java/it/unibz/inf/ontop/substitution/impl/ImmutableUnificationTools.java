@@ -256,4 +256,16 @@ public class ImmutableUnificationTools {
             }
         }
     }
+
+    public InjectiveVar2VarSubstitution getPrioritizingRenaming(ImmutableSubstitution<?> substitution, ImmutableSet<Variable> priorityVariables) {
+        ImmutableSubstitution<Variable> renaming = substitution.builder()
+                .restrictDomainTo(priorityVariables)
+                .restrictRangeTo(Variable.class)
+                .restrictRange(t -> !priorityVariables.contains(t))
+                .build();
+
+        return substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
+    }
+
+
 }

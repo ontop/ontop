@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.*;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -52,12 +51,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                  ImmutableUnificationTools unificationTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings, IQTreeTools iqTreeTools,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, substitutionTools, termFactory);
+        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, termFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution.castTo(ImmutableTerm.class);
         this.substitutionNormalizer = substitutionNormalizer;
@@ -79,13 +78,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  ImmutableUnificationTools unificationTools, IQTreeTools iqTreeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
         this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools,
-                substitutionTools, substitutionFactory, termFactory, iqFactory, settings, iqTreeTools,substitutionNormalizer, notRequiredVariableRemover);
+                substitutionFactory, termFactory, iqFactory, settings, iqTreeTools,substitutionNormalizer, notRequiredVariableRemover);
     }
 
 
@@ -226,7 +225,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
 
         return childDefs.stream()
-                .map(childDef -> substitutionFactory.compose(childDef, substitution))
+                .map(childDef -> childDef.compose(substitution))
                 .map(s -> s.builder()
                         .restrictDomainTo(projectedVariables)
                         .restrictRangeTo(NonVariableTerm.class)
@@ -442,7 +441,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         IQTree grandChild = childIQ.getChild();
 
         ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
-                substitutionFactory.compose(childConstructionNode.getSubstitution(), substitution)
+                childConstructionNode.getSubstitution().compose(substitution)
                         .transform(t -> t.simplify(grandChild.getVariableNullability())),
                 projectedVariables);
 

@@ -21,9 +21,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -48,11 +46,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 TermFactory termFactory, TypeFactory typeFactory,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 IQTreeTools iqTreeTools,
-                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                                ImmutableUnificationTools unificationTools,
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
         this.iqTreeTools = iqTreeTools;
         this.normalizer = normalizer;
     }
@@ -63,20 +61,20 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermFactory termFactory, TypeFactory typeFactory,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               IQTreeTools iqTreeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              ImmutableUnificationTools unificationTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, iqTreeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, unificationTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
                               SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              ImmutableUnificationTools unificationTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, iqTreeTools, unificationTools, substitutionTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, unificationTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override
@@ -171,7 +169,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
+                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             ImmutableList<IQTree> newChildren = children.stream()
                     .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))

@@ -66,6 +66,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     default ImmutableMap<Integer, ImmutableTerm> applyToTerms(ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) { return onImmutableTerms().applyToTerms(this, argumentMap); }
 
+    default ImmutableSubstitution<ImmutableTerm> compose(ImmutableSubstitution<? extends ImmutableTerm> f) { return onImmutableTerms().compose(this, f); }
 
 
 

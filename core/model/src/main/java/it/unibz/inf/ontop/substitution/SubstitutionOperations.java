@@ -25,22 +25,6 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  {
 
     ImmutableMap<Integer, T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap);
 
-/*
-    default ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
-        if (g.isEmpty())
-            return (ImmutableSubstitution) f;
+    ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
 
-        if (f.isEmpty())
-            return (ImmutableSubstitution) g;
-
-        ImmutableMap<Variable, T> map = Stream.concat(
-                        f.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), applyToTerm(g, e.getValue()))),
-                        g.entrySet().stream())
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
-
-        return getSubstitution(map);
-    }
-*/
 }

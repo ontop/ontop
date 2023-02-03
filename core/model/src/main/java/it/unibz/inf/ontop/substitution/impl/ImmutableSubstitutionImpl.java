@@ -30,6 +30,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.defaultOperations = new ImmutableTermsSubstitutionOperations(termFactory);
+        //noinspection unchecked
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
@@ -37,6 +38,10 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
                     "(for efficiency reasons)\n. Substitution: " + map);
     }
 
+    static <T extends ImmutableTerm> ImmutableSubstitution<T> invariantCast(ImmutableSubstitution<? extends T> substitution) {
+        //noinspection unchecked
+        return (ImmutableSubstitution<T>) substitution;
+    }
 
     @Override
     public ImmutableSet<Map.Entry<Variable, T>> entrySet() {
@@ -137,6 +142,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         if (map.entrySet().stream().anyMatch(e -> !type.isInstance(e.getValue())))
             throw new ClassCastException();
 
+        //noinspection unchecked
         return (ImmutableSubstitution<S>) this;
     }
 
@@ -170,6 +176,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
             if (map.entrySet().stream().anyMatch(e -> !type.isInstance(e.getValue())))
                 throw new ClassCastException();
 
+            //noinspection unchecked
             return new ImmutableSubstitutionImpl<>((ImmutableMap<Variable, S>)map, termFactory);
         }
 

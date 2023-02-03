@@ -277,6 +277,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
 
+
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
         return new AbstractSubstitutionOperations<>(termFactory) {

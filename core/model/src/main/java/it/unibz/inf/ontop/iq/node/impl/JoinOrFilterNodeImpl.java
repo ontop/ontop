@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -30,7 +29,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected final TermNullabilityEvaluator nullabilityEvaluator;
     protected final TypeFactory typeFactory;
     protected final ImmutableUnificationTools unificationTools;
-    protected final ImmutableSubstitutionTools substitutionTools;
     protected final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     protected final ConditionSimplifier conditionSimplifier;
 
@@ -38,14 +36,13 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, TypeFactory typeFactory,
                                    SubstitutionFactory substitutionFactory,
-                                   ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                                   ImmutableUnificationTools unificationTools,
                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
         super(substitutionFactory, termFactory, iqFactory);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.typeFactory = typeFactory;
         this.unificationTools = unificationTools;
-        this.substitutionTools = substitutionTools;
         this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
     }

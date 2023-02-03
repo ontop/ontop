@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> implements SubstitutionOperations<T> {
 
@@ -65,13 +67,13 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> applyToTerm(substitution, e.getValue())));
     }
 
-/*
-    default ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
+    @Override
+    public ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
         if (g.isEmpty())
-            return (ImmutableSubstitution) f;
+            return ImmutableSubstitutionImpl.invariantCast(f);
 
         if (f.isEmpty())
-            return (ImmutableSubstitution) g;
+            return ImmutableSubstitutionImpl.invariantCast(g);
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.entrySet().stream()
@@ -80,8 +82,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
-        return getSubstitution(map);
+        return new ImmutableSubstitutionImpl<>(map, termFactory);
     }
-*/
 
 }
