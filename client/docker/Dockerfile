@@ -9,14 +9,16 @@
 # JRE BUILD STAGE using 'jlink' to build a compact JRE with the only modules required by Ontop
 # - based on Eclipse Temurin JRE 11 (on Ubuntu 22.04 LTS 'jammy', for both amd64 and arm64)
 # - run './build-image.sh -d' to detect required Java modules to be used with '--add-modules'
-#   (note: jdk.management.agent must be added manually for JMX to work)
+#   then manually add the following modules (for JMX and SSL/TLS to work properly)
+#   jdk.management.agent,jdk.crypto.cryptoki,jdk.crypto.ec
 # - pass --build-arg ONTOP_JRE_MODULES=<comma-separated-list> to override the set of modules,
 #   or use "ALL-MODULE-PATH" as value to include *all* JRE modules (34M image size increase)
 FROM eclipse-temurin:11-jammy AS jre-builder
 ARG ONTOP_JRE_MODULES=\
 "java.base,java.compiler,java.desktop,java.instrument,java.management.rmi,"\
 "java.naming,java.prefs,java.scripting,java.security.jgss,java.sql,"\
-"jdk.httpserver,jdk.jfr,jdk.management,jdk.management.agent,jdk.unsupported"
+"jdk.httpserver,jdk.jfr,jdk.management,jdk.management.agent,jdk.unsupported,"\
+"jdk.crypto.cryptoki,jdk.crypto.ec"
 RUN ${JAVA_HOME}/bin/jlink \
     --add-modules "${ONTOP_JRE_MODULES}" \
     --strip-debug \
