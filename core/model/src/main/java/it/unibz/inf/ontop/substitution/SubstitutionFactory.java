@@ -94,6 +94,7 @@ public interface SubstitutionFactory {
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
 
 
+
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
 
     SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms();

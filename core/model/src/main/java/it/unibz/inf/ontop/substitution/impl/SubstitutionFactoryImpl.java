@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
-    private final TermFactory termFactory;
+    final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
@@ -290,6 +290,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
                 return (t instanceof Variable)  ? apply(substitution, (Variable) t) : t;
             }
+            @Override
+            public ImmutableUnificationTools.UnifierBuilder<NonFunctionalTerm, ?> unifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
+                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
+            }
         };
     }
 
@@ -303,6 +307,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             @Override
             public VariableOrGroundTerm applyToTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
+            }
+            @Override
+            public ImmutableUnificationTools.UnifierBuilder<VariableOrGroundTerm, ?> unifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
             }
         };
     }
@@ -318,6 +326,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             @Override
             public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
                 return apply(substitution, t);
+            }
+            @Override
+            public ImmutableUnificationTools.UnifierBuilder<Variable, ?> unifierBuilder(ImmutableSubstitution<Variable> substitution) {
+                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
             }
         };
     }

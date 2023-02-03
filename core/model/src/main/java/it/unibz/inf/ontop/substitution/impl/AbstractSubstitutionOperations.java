@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> implements SubstitutionOperations<T> {
 
-    private final TermFactory termFactory;
+    protected final TermFactory termFactory;
 
     AbstractSubstitutionOperations(TermFactory termFactory) {
         this.termFactory = termFactory;
@@ -85,4 +85,8 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
         return new ImmutableSubstitutionImpl<>(map, termFactory);
     }
 
+    @Override
+    public ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder() {
+        return unifierBuilder(termFactory.getSubstitution(ImmutableMap.of()));
+    }
 }

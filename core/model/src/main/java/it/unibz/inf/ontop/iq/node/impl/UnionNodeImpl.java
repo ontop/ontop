@@ -686,7 +686,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         ImmutableSet<Variable> formerV = constructionNode.getVariables();
 
-        ImmutableSubstitution<ImmutableTerm> normalizedEta = unificationTools.getImmutableUnifierBuilder(tmpNormalizedSubstitution)
+        ImmutableSubstitution<ImmutableTerm> normalizedEta = substitutionFactory.onImmutableTerms().unifierBuilder(tmpNormalizedSubstitution)
                 .unifyTermStreams(mergedSubstitution.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
                 /*

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 public interface SubstitutionOperations<T extends ImmutableTerm>  {
 
@@ -27,4 +28,7 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  {
 
     ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
 
+    ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder();
+
+    ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder(ImmutableSubstitution<T> substitution);
 }

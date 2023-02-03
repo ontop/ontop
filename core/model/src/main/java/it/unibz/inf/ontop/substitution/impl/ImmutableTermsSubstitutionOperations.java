@@ -29,6 +29,11 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
         }
         throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
     }
+
+    @Override
+    public ImmutableUnificationTools.UnifierBuilder<ImmutableTerm, ?> unifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
+        return new ImmutableUnificationTools.ImmutableUnifierBuilder(termFactory, this, substitution);
+    }
 }
 
 
