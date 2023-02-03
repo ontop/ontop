@@ -25,8 +25,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  */
 public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
-    TermFactory getTermFactory();
-
     ImmutableSet<Map.Entry<Variable, T>> entrySet();
 
     boolean isDefining(Variable variable);
@@ -47,10 +45,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
 
-    /**
-     * This method can be applied to simple variables
-     */
-    ImmutableTerm applyToVariable(Variable variable);
 
 
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();

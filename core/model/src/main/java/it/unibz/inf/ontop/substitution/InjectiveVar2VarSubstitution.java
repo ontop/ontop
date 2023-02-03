@@ -17,7 +17,6 @@ public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Vari
     <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
 
-    @Override // more specific return type
     Variable applyToVariable(Variable variable);
 
 

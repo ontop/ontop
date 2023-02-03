@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
@@ -16,7 +13,11 @@ import java.util.Map;
 
 public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> implements SubstitutionOperations<T> {
 
+    private final TermFactory termFactory;
 
+    AbstractSubstitutionOperations(TermFactory termFactory) {
+        this.termFactory = termFactory;
+    }
 
     @Override
     public ImmutableFunctionalTerm apply(ImmutableSubstitution<? extends T> substitution, ImmutableFunctionalTerm term) {
@@ -26,8 +27,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
         if (substitution.isEmpty())
             return term;
 
-        return substitution.getTermFactory().getImmutableFunctionalTerm(term.getFunctionSymbol(),
-                substitution.applyToTerms(term.getTerms()));
+        return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), substitution.applyToTerms(term.getTerms()));
     }
 
     @Override
@@ -35,8 +35,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
         if (substitution.isEmpty())
             return expression;
 
-        return substitution.getTermFactory().getImmutableExpression(expression.getFunctionSymbol(),
-                substitution.applyToTerms(expression.getTerms()));
+        return termFactory.getImmutableExpression(expression.getFunctionSymbol(), substitution.applyToTerms(expression.getTerms()));
     }
 
     @Override
@@ -63,9 +62,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> im
     @Override
     public ImmutableMap<Integer, T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap) {
         return argumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> applyToTerm(substitution, e.getValue())));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> applyToTerm(substitution, e.getValue())));
     }
 
 /*

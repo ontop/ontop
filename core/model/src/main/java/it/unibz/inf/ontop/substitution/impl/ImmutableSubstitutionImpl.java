@@ -24,10 +24,12 @@ import java.util.stream.Stream;
 public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements ImmutableSubstitution<T> {
 
     protected final TermFactory termFactory;
+    protected final SubstitutionOperations<ImmutableTerm> defaultOperations;
     protected final ImmutableMap<Variable, T> map;
 
     public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
+        this.defaultOperations = new ImmutableTermsSubstitutionOperations(termFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
@@ -35,11 +37,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
                     "(for efficiency reasons)\n. Substitution: " + map);
     }
 
-
-    @Override
-    public TermFactory getTermFactory() {
-        return termFactory;
-    }
 
     @Override
     public ImmutableSet<Map.Entry<Variable, T>> entrySet() {
@@ -90,32 +87,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
 
     @Override
-    public ImmutableTerm applyToVariable(Variable variable) {
-        return Optional.<ImmutableTerm>ofNullable(get(variable)).orElse(variable);
-    }
-
-    @Override
     public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
-                return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
-            @Override
-            public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
-                if (t instanceof Variable) {
-                    return apply(substitution, (Variable) t);
-                }
-                if (t instanceof Constant) {
-                    return t;
-                }
-                if (t instanceof ImmutableFunctionalTerm) {
-                    return apply(substitution, (ImmutableFunctionalTerm) t);
-                }
-                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
-            }
-        };
+        return defaultOperations;
     }
 
 
@@ -161,8 +134,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type) {
-        if (map.entrySet().stream()
-                .anyMatch(e -> !type.isInstance(e.getValue())))
+        if (map.entrySet().stream().anyMatch(e -> !type.isInstance(e.getValue())))
             throw new ClassCastException();
 
         return (ImmutableSubstitution<S>) this;
@@ -195,8 +167,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         @Override
         public <S extends ImmutableTerm> ImmutableSubstitution<S> build(Class<S> type) {
             ImmutableMap<Variable, B> map = stream.collect(ImmutableCollectors.toMap());
-            if (map.entrySet().stream()
-                    .anyMatch(e -> !type.isInstance(e.getValue())))
+            if (map.entrySet().stream().anyMatch(e -> !type.isInstance(e.getValue())))
                 throw new ClassCastException();
 
             return new ImmutableSubstitutionImpl<>((ImmutableMap<Variable, S>)map, termFactory);
@@ -259,11 +230,9 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         @Override
         public <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function) {
             return create(stream
-                    .map(e -> Optional.ofNullable(lookup.apply(e.getKey()))
+                    .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
-                            .map(r -> Maps.immutableEntry(e.getKey(), r)))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get));
+                            .map(r -> Maps.immutableEntry(e.getKey(), r)).stream()));
         }
 
         @Override
@@ -293,20 +262,13 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
         @Override
         public <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, B, Optional<S>> transformer) {
             return stream
-                    .map(e -> transformer.apply(e.getKey(), e.getValue())
-                            .map(v -> Maps.immutableEntry(e.getKey(), v)))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(e -> transformer.apply(e.getKey(), e.getValue())
+                            .map(v -> Maps.immutableEntry(e.getKey(), v)).stream())
                     .collect(ImmutableCollectors.toMap());
         }
     }
 
 
-    /**
-     * NB: to be used only by the factory
-     *
-     * @return
-     */
     ImmutableMap<Variable, T> getImmutableMap() {
         return map;
     }

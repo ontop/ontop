@@ -279,7 +279,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
-        return new AbstractSubstitutionOperations<>() {
+        return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
             public NonFunctionalTerm apply(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, Variable variable) {
                 return Optional.<NonFunctionalTerm>ofNullable(substitution.get(variable)).orElse(variable);
@@ -294,7 +294,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
-        return new AbstractSubstitutionOperations<>() {
+        return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
             public VariableOrGroundTerm apply(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
                 return Optional.<VariableOrGroundTerm>ofNullable(substitution.get(variable)).orElse(variable);
@@ -308,7 +308,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<Variable> onVariables() {
-        return new AbstractSubstitutionOperations<>() {
+        return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
             public Variable apply(ImmutableSubstitution<? extends Variable> substitution, Variable variable) {
                 return Optional.<Variable>ofNullable(substitution.get(variable)).orElse(variable);
@@ -323,26 +323,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
-        return new AbstractSubstitutionOperations<>() {
-            @Override
-            public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
-                return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
-            @Override
-            public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
-                if (t instanceof Variable) {
-                    return apply(substitution, (Variable) t);
-                }
-                if (t instanceof Constant) {
-                    return t;
-                }
-                if (t instanceof ImmutableFunctionalTerm) {
-                    return apply(substitution, (ImmutableFunctionalTerm) t);
-                }
-                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
-            }
-        };
+        return new ImmutableTermsSubstitutionOperations(termFactory);
     }
 
 
