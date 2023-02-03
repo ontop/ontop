@@ -258,24 +258,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getSubstitution(map);
     }
 
-    @Override
-    public InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f, Set<Variable> variablesToExcludeFromTheDomain) {
-        ImmutableSet<Variable> fDomain = f.getDomain();
-
-        Stream<Map.Entry<Variable, Variable>> fEntryStream = f.entrySet().stream()
-                .map(e -> Maps.immutableEntry(e.getKey(), g.applyToVariable(e.getValue())));
-
-        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.entrySet().stream()
-                .filter(e -> !fDomain.contains(e.getKey()));
-
-        ImmutableMap<Variable, Variable> newMap = Stream.concat(fEntryStream, gEntryStream)
-                .filter(e -> !variablesToExcludeFromTheDomain.contains(e.getKey()))
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap());
-
-        return getInjectiveVar2VarSubstitution(newMap);
-    }
-
 
 
     @Override

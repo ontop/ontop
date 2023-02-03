@@ -80,7 +80,9 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
                                NB: this guarantees that the renaming substitution is injective
                              */
-                            substitutionFactory.compose(headSubstitution, disjointVariableSetRenaming, disjointVariableSetRenaming.getRangeSet());
+                            substitutionFactory.injectiveVar2VarSubstitutionOf(
+                                    substitutionFactory.onVariables().compose(headSubstitution, disjointVariableSetRenaming)
+                                            .removeFromDomain(disjointVariableSetRenaming.getRangeSet()));
 
                     QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
                     return queryRenamer.transform(def).getTree();

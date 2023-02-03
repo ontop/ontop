@@ -84,16 +84,6 @@ public interface SubstitutionFactory {
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
 
-    /**
-     * { (x,y) | (x,y) \in (g o f), x not excluded }
-     * Returns Optional.empty() when the resulting substitution is not injective.
-     * Variables to exclude from the domain are typically fresh temporary variables that can be ignored.
-     * Ignoring them is sufficient in many cases to guarantee that the substitution is injective.
-     */
-    InjectiveVar2VarSubstitution compose(InjectiveVar2VarSubstitution g, InjectiveVar2VarSubstitution f,
-                                                                             Set<Variable> variablesToExcludeFromTheDomain);
-
-
 
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
 
