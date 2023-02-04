@@ -18,10 +18,9 @@ import java.util.stream.Stream;
 public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution();
+    <T extends ImmutableTerm> Collector<Variable, ?, ImmutableSubstitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper);
     <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
-
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries();
-
     <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
 
@@ -40,8 +39,6 @@ public interface SubstitutionFactory {
 
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values);
-
-   ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Set<Variable> variables);
 
 
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution();

@@ -282,8 +282,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
                 Optional<ConstructionNode> constructionNode = Optional.of(projectedVariables)
                         .filter(vars -> !leftVariables.containsAll(vars))
-                        .map(vars -> substitutionFactory.getNullSubstitution(
-                                Sets.difference(projectedVariables, leftVariables)))
+                        .map(vars -> Sets.difference(projectedVariables, leftVariables).stream()
+                                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())))
                         .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
                 return constructionNode
@@ -503,8 +503,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (nullVariables.isEmpty())
             return false;
 
-        ImmutableExpression nullifiedExpression =
-                substitutionFactory.getNullSubstitution(nullVariables).apply(constraint);
+        ImmutableExpression nullifiedExpression = nullVariables.stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()))
+                .apply(constraint);
 
         return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))
                 .isEffectiveFalse();

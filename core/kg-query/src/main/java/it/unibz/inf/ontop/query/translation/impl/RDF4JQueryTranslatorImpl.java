@@ -654,7 +654,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableSubstitution<ImmutableTerm> topSubstitution = toCoalesce.stream()
                 .collect(substitutionFactory.toSubstitution(
-                        v -> v,
                         v -> termFactory.getImmutableFunctionalTerm(
                                 functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
                                 leftRenamingSubstitution.get(v),
@@ -780,8 +779,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
 
         // Substitution for possibly unbound variables
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getNullSubstitution(
-                Sets.difference(projectedVars, subQueryVariables));
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = Sets.difference(projectedVars, subQueryVariables).stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
@@ -837,8 +836,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, substitutionFactory.getNullSubstitution(nullOnLeft));
-        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, substitutionFactory.getNullSubstitution(nullOnRight));
+        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, nullOnLeft.stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
+        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, nullOnRight.stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
         UnionNode unionNode = iqFactory.createUnionNode(rootVariables);
 

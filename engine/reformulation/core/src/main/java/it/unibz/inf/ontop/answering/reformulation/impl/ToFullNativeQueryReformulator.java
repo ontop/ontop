@@ -112,15 +112,14 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                 nativeTree.getVariables(),
                 nativeTree.getVariables().stream()
                         .collect(substitutionFactory.toSubstitution(
-                        v -> v,
-                        v -> termFactory.getRDFFunctionalTerm(
-                                termFactory.getConversion2RDFLexical(
-                                        Optional.ofNullable(dbTypeMap.get(v))
-                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting a type from the native node")),
-                                        v,
-                                        Optional.ofNullable(rdfTypes.get(v))
-                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
-                                termFactory.getRDFTermTypeConstant(rdfTypes.get(v))))));
+                                v -> termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                                Optional.ofNullable(dbTypeMap.get(v))
+                                                        .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting a type from the native node")),
+                                                v,
+                                                Optional.ofNullable(rdfTypes.get(v))
+                                                        .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
+                                        termFactory.getRDFTermTypeConstant(rdfTypes.get(v))))));
 
         IQTree executableTree = iqFactory.createUnaryIQTree(
                 postProcessingToRDFNode,

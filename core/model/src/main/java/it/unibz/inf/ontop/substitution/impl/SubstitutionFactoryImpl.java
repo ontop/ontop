@@ -79,17 +79,11 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         ImmutableMap<Variable, T> map = IntStream.range(0, variables.size())
                 .filter(i -> !variables.get(i).equals(values.get(i)))
                 .mapToObj(i -> Maps.<Variable, T>immutableEntry(variables.get(i), values.get(i)))
-                .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
         return getSubstitution(map);
     }
 
-    @Override
-    public ImmutableSubstitution<ImmutableTerm> getNullSubstitution(Set<Variable> variables) {
-        return getSubstitution(
-                variables.stream().collect(ImmutableCollectors.toMap(v -> v, v -> termFactory.getNullConstant())));
-    }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution() {
@@ -198,7 +192,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, Map.Entry::getValue);
     }
 
-        @Override
+    @Override
     public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
         return Collector.of(
                 ImmutableMap::<Variable, T>builder,   // supplier
@@ -211,6 +205,11 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     private static <T> void putSkippingIdentityEntries(ImmutableMap.Builder<Variable, T> builder, Variable v, T t) {
         if (!v.equals(t))
             builder.put(v, t);
+    }
+
+    @Override
+    public <T extends ImmutableTerm> Collector<Variable, ?, ImmutableSubstitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper) {
+        return toSubstitution(v -> v, termMapper);
     }
 
 

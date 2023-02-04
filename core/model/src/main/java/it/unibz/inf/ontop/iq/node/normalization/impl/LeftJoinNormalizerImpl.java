@@ -626,7 +626,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
                         Sets.union(leftChild.getVariables(), rightSpecificVariables).immutableCopy(),
-                        substitutionFactory.getNullSubstitution(rightSpecificVariables));
+                        rightSpecificVariables.stream()
+                                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
                 ljLevelTree = iqFactory.createUnaryIQTree(newParentConstructionNode, leftChild, normalizedProperties);
             }
@@ -747,8 +748,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          * Return true when the term is guaranteed to be NULL when the right is rejected
          */
         private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm, ImmutableSet<Variable> leftVariables) {
-            ImmutableSubstitution<ImmutableTerm> nullSubstitution = substitutionFactory.getNullSubstitution(
-                    Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables));
+            ImmutableSubstitution<ImmutableTerm> nullSubstitution =
+                    Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables).stream()
+                            .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
             return nullSubstitution.applyToTerm(immutableTerm)
                     .simplify()
