@@ -263,8 +263,10 @@ public class OntopOBDAToR2RML implements OntopCommand {
                                         + target + "]")));
 
             //noinspection OptionalGetWithoutIsPresent
-            ImmutableSubstitution<Variable> targetRenamingPart = substitutionFactory.getSubstitutionRemoveIdentityEntries(
-                    targetPreMap.entrySet(), Map.Entry::getKey, e -> termFactory.getVariable(e.getValue().get().getSQLRendering()));
+            ImmutableSubstitution<Variable> targetRenamingPart = targetPreMap.entrySet().stream()
+                    .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
+                            Map.Entry::getKey,
+                            e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
 
             ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);

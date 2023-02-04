@@ -108,8 +108,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     + provenance.getProvenanceInfo() + "]")));
 
         //noinspection OptionalGetWithoutIsPresent
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
-                targetPreMap.entrySet(), Map.Entry::getKey, e -> e.getValue().get());
+        ImmutableSubstitution<ImmutableTerm> substitution = targetPreMap.entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, e -> e.getValue().get()));
 
         ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
         ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);

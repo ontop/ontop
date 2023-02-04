@@ -244,7 +244,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(
                 map.keySet(),
-                substitutionFactory.getSubstitutionRemoveIdentityEntries(map.entrySet(), Map.Entry::getKey, Map.Entry::getValue));
+                map.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()));
 
         IQ newIQ = iqFactory.createIQ(
                 projectionAtom,
@@ -764,8 +764,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         pe -> termFactory.getVariable(pe.getName()),
                         pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName()))));
 
-        ImmutableSubstitution<Variable> substitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
-                        map.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+        ImmutableSubstitution<Variable> substitution = map.entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries());
 
         ImmutableSet<Variable> projectedVars = ImmutableSet.copyOf(map.values());
 

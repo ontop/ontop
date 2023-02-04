@@ -39,8 +39,8 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
         ImmutableMap<Variable, DefinitionDecomposition> decompositionMap = substitution.builder()
                 .toMap((v, t) -> decomposeDefinition(t, variableGenerator, Optional.of(v)));
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitutionRemoveIdentityEntries(
-                decompositionMap.entrySet(), Map.Entry::getKey, e -> e.getValue().term);
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = decompositionMap.entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, e -> e.getValue().term));
 
         Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(decompositionMap.values());
 
@@ -111,8 +111,7 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
            ImmutableCollection<DefinitionDecomposition> decompositions) {
         return decompositions.stream()
                 .map(d -> d.substitution)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .reduce(substitutionFactory::union);
     }
 

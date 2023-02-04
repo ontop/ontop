@@ -17,10 +17,12 @@ import java.util.stream.Stream;
  */
 public interface SubstitutionFactory {
 
-    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider);
-
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution();
-    <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> valueMapper);
+    <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
+
+    <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries();
+
+    <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
 
     @FunctionalInterface

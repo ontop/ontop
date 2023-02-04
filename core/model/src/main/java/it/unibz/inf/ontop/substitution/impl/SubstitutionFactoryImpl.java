@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
@@ -22,7 +21,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-
     private final ImmutableTermsSubstitutionOperations immutableTermsSubstitutionOperations;
 
     @Inject
@@ -34,14 +32,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     private <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
         return new ImmutableSubstitutionImpl<>(newSubstitutionMap, termFactory);
-    }
-
-    @Override
-    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
-        return new ImmutableSubstitutionImpl<>(entries.stream()
-                .map(e -> Maps.immutableEntry(variableProvider.apply(e), termProvider.apply(e)))
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
     @Override
@@ -194,14 +184,35 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> valueMapper) {
+    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
         return Collector.of(
                 ImmutableMap::<Variable, T>builder,   // supplier
-                (builder, e) -> builder.put(variableMapper.apply(e), valueMapper.apply(e)), // accumulator
+                (builder, e) -> builder.put(variableMapper.apply(e), termMapper.apply(e)), // accumulator
                 (builder1, builder2) -> builder1.putAll(builder2.build()), // merger
-                builder -> getSubstitution(ImmutableMap.copyOf(builder.build())), // finisher
+                builder -> getSubstitution(builder.build()), // finisher
                 Collector.Characteristics.UNORDERED);
     }
+
+    @Override
+    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries() {
+        return toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, Map.Entry::getValue);
+    }
+
+        @Override
+    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
+        return Collector.of(
+                ImmutableMap::<Variable, T>builder,   // supplier
+                (builder, e) -> putSkippingIdentityEntries(builder, variableMapper.apply(e), termMapper.apply(e)), // accumulator
+                (builder1, builder2) -> builder1.putAll(builder2.build()), // merger
+                builder -> getSubstitution(builder.build()), // finisher
+                Collector.Characteristics.UNORDERED);
+    }
+
+    private static <T> void putSkippingIdentityEntries(ImmutableMap.Builder<Variable, T> builder, Variable v, T t) {
+        if (!v.equals(t))
+            builder.put(v, t);
+    }
+
 
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
                                                            ImmutableSet<Variable> variables) {
