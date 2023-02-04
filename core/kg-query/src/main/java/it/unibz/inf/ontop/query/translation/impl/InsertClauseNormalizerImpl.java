@@ -81,7 +81,8 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(whereTree.getVariables())
                 : createBNodeDefinitionsFromNonNullableUniqueConstraint(nonNullableUniqueConstraints.iterator().next());
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bNodeMap.entrySet(), Map.Entry::getValue, e -> term);
+        ImmutableSubstitution<ImmutableTerm> substitution = bNodeMap.entrySet().stream()
+                .collect(substitutionFactory.toSubstitution(Map.Entry::getValue, e -> term));
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))
                 .immutableCopy();

@@ -198,7 +198,14 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(toSubstitution());
     }
 
+
+    @Override
     public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution() {
+        return toSubstitution(Map.Entry::getKey, Map.Entry::getValue);
+    }
+
+    @Override
+    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableFunction, Function<U, T> valueFunction) {
         BinaryOperator<T> mergeFunction = (t1, t2) -> {
             if (!t1.equals(t2))
                 throw new IllegalArgumentException("Values " + t1 + " and " + t2 + " are assigned to the same variable");
@@ -207,7 +214,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         return Collector.of(
                 Maps::<Variable, T>newHashMap,   // Supplier
-                (m, e) -> m.merge(e.getKey(), e.getValue(), mergeFunction), // Accumulator
+                (m, u) -> m.merge(variableFunction.apply(u), valueFunction.apply(u), mergeFunction), // Accumulator
                 (m1, m2) -> {     // Merger
                     m2.forEach((v, t) -> m1.merge(v, t, mergeFunction));
                     return m1;

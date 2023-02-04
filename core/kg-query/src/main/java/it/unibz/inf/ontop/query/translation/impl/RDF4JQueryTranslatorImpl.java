@@ -520,10 +520,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutions =
                 StreamSupport.stream(node.getBindingSets().spliterator(), false)
-                        .map(bs -> substitutionFactory.getSubstitution(
-                                bs.getBindingNames(),
-                                termFactory::getVariable,
-                                x -> getTermForBinding(x, bs, nullConstant)))
+                        .map(bs -> bs.getBindingNames().stream()
+                                .collect(substitutionFactory.toSubstitution(
+                                        termFactory::getVariable,
+                                        x -> getTermForBinding(x, bs, nullConstant))))
                         .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> nullableVars = substitutions.get(0).getDomain().stream()
@@ -652,13 +652,13 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         InjectiveVar2VarSubstitution rightRenamingSubstitution =
                 substitutionFactory.getInjectiveFreshVar2VarSubstitution(toCoalesce.stream(), variableGenerator);
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(
-                toCoalesce,
-                v -> v,
-                v -> termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
-                        leftRenamingSubstitution.get(v),
-                        rightRenamingSubstitution.get(v)));
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toSubstitution(
+                        v -> v,
+                        v -> termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
+                                leftRenamingSubstitution.get(v),
+                        rightRenamingSubstitution.get(v))));
 
         Optional<ImmutableExpression> filterExpression;
         if (join instanceof LeftJoin) {

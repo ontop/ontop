@@ -109,10 +109,10 @@ public class LensUnfolderImpl implements LensUnfolder {
                     renamingSubstitution,
                     renamedDefinition.getProjectionAtom().getArguments());
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
-                    dataNode.getArgumentMap().entrySet(),
-                    e -> sourceAtomArguments.get(e.getKey()),
-                    Map.Entry::getValue);
+            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            e -> sourceAtomArguments.get(e.getKey()),
+                            Map.Entry::getValue));
 
             IQTree substitutedDefinition = renamedDefinition.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);

@@ -129,10 +129,10 @@ public class JsonSQLLens extends JsonLens {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
-        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
-                raExpression.getUnqualifiedAttributes().entrySet(),
-                e -> termFactory.getVariable(e.getKey().getName()),
-                Map.Entry::getValue);
+        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = raExpression.getUnqualifiedAttributes().entrySet().stream()
+                .collect(substitutionFactory.toSubstitution(
+                        e -> termFactory.getVariable(e.getKey().getName()),
+                        Map.Entry::getValue));
 
         ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 

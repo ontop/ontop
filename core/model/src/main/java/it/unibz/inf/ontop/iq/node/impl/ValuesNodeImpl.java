@@ -99,10 +99,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         if (!singleValueVariableIndices.isEmpty()) {
             // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
-            ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
-                    singleValueVariableIndices,
-                    orderedVariables::get,
-                    i -> values.get(0).get(i));
+            ImmutableSubstitution<ImmutableTerm> substitutions = singleValueVariableIndices.stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            orderedVariables::get,
+                            i -> values.get(0).get(i)));
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
