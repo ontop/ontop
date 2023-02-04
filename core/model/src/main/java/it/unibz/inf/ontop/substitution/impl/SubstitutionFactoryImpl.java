@@ -45,12 +45,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
-        return new ImmutableSubstitutionImpl<>(entries.stream()
-                .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
-    }
-
-    @Override
     public     <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U,T,E> termProvider) throws E {
         ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder(); // exceptions - no stream
         for (U u : entries) {
@@ -59,12 +53,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             substitutionMapBuilder.put(v, t);
         }
         return getSubstitution(substitutionMapBuilder.build());
-    }
-
-    @Override
-    public <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U, T> termProvider) {
-        return new ImmutableSubstitutionImpl<>(stream
-                .collect(ImmutableCollectors.toMap(variableProvider, termProvider)), termFactory);
     }
 
 
@@ -195,6 +183,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return Stream.of(substitution1, substitution2)
                 .map(ImmutableSubstitution::entrySet)
                 .flatMap(Collection::stream)
+                .distinct()
                 .collect(toSubstitution());
     }
 
@@ -205,21 +194,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableFunction, Function<U, T> valueFunction) {
-        BinaryOperator<T> mergeFunction = (t1, t2) -> {
-            if (!t1.equals(t2))
-                throw new IllegalArgumentException("Values " + t1 + " and " + t2 + " are assigned to the same variable");
-            return t1;
-        };
-
+    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> valueMapper) {
         return Collector.of(
-                Maps::<Variable, T>newHashMap,   // Supplier
-                (m, u) -> m.merge(variableFunction.apply(u), valueFunction.apply(u), mergeFunction), // Accumulator
-                (m1, m2) -> {     // Merger
-                    m2.forEach((v, t) -> m1.merge(v, t, mergeFunction));
-                    return m1;
-                },
-                m -> getSubstitution(ImmutableMap.copyOf(m)), // Finisher
+                ImmutableMap::<Variable, T>builder,   // supplier
+                (builder, e) -> builder.put(variableMapper.apply(e), valueMapper.apply(e)), // accumulator
+                (builder1, builder2) -> builder1.putAll(builder2.build()), // merger
+                builder -> getSubstitution(ImmutableMap.copyOf(builder.build())), // finisher
                 Collector.Characteristics.UNORDERED);
     }
 

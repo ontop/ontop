@@ -274,10 +274,10 @@ public class VariableNullabilityImpl implements VariableNullability {
         }
 
         ImmutableSubstitution<ImmutableTerm> getSubstitution() {
-            return substitutionFactory.getSubstitutionFromStream(
-                    map.entrySet().stream(),
-                    Map.Entry::getValue,
-                    e -> term.getTerm(e.getKey()));
+            return map.entrySet().stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            Map.Entry::getValue,
+                            e -> term.getTerm(e.getKey())));
         }
 
         boolean isEmpty() {
@@ -350,11 +350,11 @@ public class VariableNullabilityImpl implements VariableNullability {
                         getNullableVariables().stream())
                         .collect(ImmutableCollectors.toSet()));
 
-        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitutionFromStream(
-                terms.stream()
-                        .filter(t -> t instanceof NonVariableTerm),
-                t -> variableGenerator.generateNewVariable(),
-                t -> t);
+        ImmutableSubstitution<? extends ImmutableTerm> substitution = terms.stream()
+                .filter(t -> t instanceof NonVariableTerm)
+                .collect(substitutionFactory.toSubstitution(
+                        t -> variableGenerator.generateNewVariable(),
+                        t -> t));
 
         VariableNullability newVariableNullability = update(substitution, substitution.getDomain(), variableGenerator);
 

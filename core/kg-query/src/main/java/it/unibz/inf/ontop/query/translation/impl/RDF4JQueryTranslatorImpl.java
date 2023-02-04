@@ -1067,7 +1067,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         }
 
         return substitutionMapList.stream()
-                .map(m -> substitutionFactory.getSubstitutionFromStream(m.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue))
+                .map(m -> m.entrySet().stream().collect(substitutionFactory.toSubstitution()))
                 .collect(ImmutableCollectors.toList());
     }
 

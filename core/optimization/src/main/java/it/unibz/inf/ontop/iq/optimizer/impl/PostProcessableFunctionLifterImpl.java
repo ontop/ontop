@@ -334,13 +334,13 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
             ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
 
-            ImmutableSubstitution<ImmutableTerm> paddingSubstitution = substitutionFactory.getSubstitutionFromStream(
-                    newVarTypeMap.entrySet().stream()
-                            .filter(v -> !childVariables.contains(v.getKey())),
-                    Map.Entry::getKey,
-                    e -> e.getValue()
-                            .map(t -> termFactory.getTypedNull(t).simplify())
-                            .orElseGet(termFactory::getNullConstant));
+            ImmutableSubstitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
+                    .filter(v -> !childVariables.contains(v.getKey()))
+                    .collect(substitutionFactory.toSubstitution(
+                            Map.Entry::getKey,
+                            e -> e.getValue()
+                                    .map(t -> termFactory.getTypedNull(t).simplify())
+                                    .orElseGet(termFactory::getNullConstant)));
 
             return paddingSubstitution.isEmpty()
                     ? partiallyPaddedChild

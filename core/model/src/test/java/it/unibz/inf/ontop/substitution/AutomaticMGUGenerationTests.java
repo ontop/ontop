@@ -114,7 +114,7 @@ public class AutomaticMGUGenerationTests  {
 			builder.put((Variable) getTerm(elements[0]), getTerm(elements[1]));
 		}
 		ImmutableMap<Variable, ImmutableTerm> map = builder.build();
-		return Optional.of(SUBSTITUTION_FACTORY.getSubstitutionFromStream(map.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue));
+		return Optional.of(map.entrySet().stream().collect(SUBSTITUTION_FACTORY.toSubstitution()));
 	}
 
 

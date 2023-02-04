@@ -20,10 +20,8 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionRemoveIdentityEntries(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider);
 
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution();
-    <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableFunction, Function<U, T> valueFunction);
+    <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> valueMapper);
 
-
-    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitution(Collection<U> entries, Function<U, Variable> variableProvider, Function<U, T> termProvider);
 
     @FunctionalInterface
     interface FunctionThrowsExceptions<U, T, E extends Throwable> {
@@ -31,8 +29,6 @@ public interface SubstitutionFactory {
     }
 
     <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U, T, E> termProvider) throws E;
-
-    <T extends ImmutableTerm, U> ImmutableSubstitution<T> getSubstitutionFromStream(Stream<U> stream, Function<U, Variable> variableProvider, Function<U, T> termProvider);
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1);

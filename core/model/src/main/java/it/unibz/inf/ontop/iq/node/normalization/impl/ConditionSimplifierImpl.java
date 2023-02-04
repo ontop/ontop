@@ -189,16 +189,15 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .collect(ImmutableCollectors.toMultimap());
 
         return Optional.of(binaryEqualitiesSubset)
-                .map(m -> substitutionFactory.getSubstitutionFromStream(
-                        m.asMap().entrySet().stream()
-                                // Filter out ground terms that would be "rejected" by all the children using the variable
-                                .filter(e -> children.stream()
-                                        .filter(c -> c.getVariables().contains(e.getKey()))
-                                        .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(e.getKey(), false))),
-                        // Picks one of the ground functional term
-                        Map.Entry::getKey, e -> e.getValue().iterator().next()))
+                .map(m -> m.asMap().entrySet().stream()
+                        // Filter out ground terms that would be "rejected" by all the children using the variable
+                        .filter(e -> children.stream()
+                                .filter(c -> c.getVariables().contains(e.getKey()))
+                                .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(e.getKey(), false)))
+                        .collect(substitutionFactory.toSubstitution(
+                                Map.Entry::getKey,
+                                // Picks one of the ground functional terms
+                                e -> e.getValue().iterator().next())))
                 .filter(s -> !s.isEmpty());
     }
-
-
 }

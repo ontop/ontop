@@ -507,11 +507,9 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
             // replacementStream is effectively a substitution: the domain is fresh variables (unique)
-            ImmutableSubstitution<VariableOrGroundTerm> replacementSub = substitutionFactory.getSubstitutionFromStream(
-                    replacementStream
-                            .flatMap(Collection::stream),
-                    Map.Entry::getKey,
-                    Map.Entry::getValue);
+            ImmutableSubstitution<VariableOrGroundTerm> replacementSub = replacementStream
+                    .flatMap(Collection::stream)
+                    .collect(substitutionFactory.toSubstitution());
 
             InjectiveVar2VarSubstitution renamingSubstitution =
                     substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(

@@ -159,12 +159,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getKey()),
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitutionFromStream(
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar =
                 m.asMap().entrySet().stream()
                         .filter(e -> e.getKey() instanceof Variable)
-                        .filter(e -> !child.getVariables().contains((Variable)e.getKey())),
-                e -> (Variable) e.getKey(),
-                e -> e.getValue().iterator().next());
+                        .filter(e -> !child.getVariables().contains((Variable)e.getKey()))
+                        .collect(substitutionFactory.toSubstitution(
+                                e -> (Variable) e.getKey(),
+                                e -> e.getValue().iterator().next()));
 
         ImmutableSubstitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())

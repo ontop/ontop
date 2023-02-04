@@ -509,13 +509,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(s -> s.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSubstitution<ImmutableTerm> mergedSubstitution = substitutionFactory.getSubstitutionFromStream(
-                projectedVariables.stream()
-                        .map(v -> mergeDefinitions(v, tmpNormalizedChildSubstitutions, variableGenerator)
-                                .map(d -> Maps.immutableEntry(v, d)))
-                        .flatMap(Optional::stream),
-                Map.Entry::getKey,
-                Map.Entry::getValue);
+        ImmutableSubstitution<ImmutableTerm> mergedSubstitution = projectedVariables.stream()
+                .map(v -> mergeDefinitions(v, tmpNormalizedChildSubstitutions, variableGenerator)
+                        .map(d -> Maps.immutableEntry(v, d)))
+                .flatMap(Optional::stream)
+                .collect(substitutionFactory.toSubstitution());
 
         if (mergedSubstitution.isEmpty()) {
             // Opportunistically flagged as normalized. May be discarded later on

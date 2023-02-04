@@ -473,15 +473,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution = substitutionFactory.getSubstitutionFromStream(
-                downSubstitutionExpressions.stream()
+        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()
                         .map(ImmutableFunctionalTerm::getTerms)
                         .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
                         // Rename right-specific variables if possible
                         .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
-                                ? args.reverse() : args),
-                args -> (Variable) args.get(0),
-                args -> (VariableOrGroundTerm) args.get(1));
+                                ? args.reverse() : args)
+                        .collect(substitutionFactory.toSubstitution(
+                                args -> (Variable) args.get(0),
+                                args -> (VariableOrGroundTerm) args.get(1)));
 
         Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
                         .filter(e -> !downSubstitutionExpressions.contains(e)
