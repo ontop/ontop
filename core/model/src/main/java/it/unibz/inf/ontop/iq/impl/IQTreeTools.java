@@ -68,7 +68,7 @@ public class IQTreeTools {
                 || Sets.difference(var2VarFragment.getRangeSet(), projectedVariables).size() != size)
             return Optional.empty();
 
-        return Optional.of(substitutionFactory.injectiveVar2VarSubstitutionOf(var2VarFragment));
+        return Optional.of(substitutionFactory.injectiveOf(var2VarFragment));
     }
 
 

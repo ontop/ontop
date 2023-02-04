@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -70,7 +69,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     ImmutableList<Variable> sourceProjectionAtomArguments =
                             substitutionFactory.onVariables().apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
 
-                    InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveVar2VarSubstitutionOf(
+                    InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveOf(
                             substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
@@ -80,7 +79,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
                                NB: this guarantees that the renaming substitution is injective
                              */
-                            substitutionFactory.injectiveVar2VarSubstitutionOf(
+                            substitutionFactory.injectiveOf(
                                     substitutionFactory.onVariables().compose(headSubstitution, disjointVariableSetRenaming)
                                             .removeFromDomain(disjointVariableSetRenaming.getRangeSet()));
 

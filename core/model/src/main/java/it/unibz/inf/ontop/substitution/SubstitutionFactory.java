@@ -7,10 +7,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
 
 /**
  * Accessible through Guice (recommended) or through CoreSingletons.
@@ -18,21 +16,21 @@ import java.util.stream.Stream;
 public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution();
+
     <T extends ImmutableTerm> Collector<Variable, ?, ImmutableSubstitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper);
+
     <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
+
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries();
+
     <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
 
     Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitution(Function<Variable, Variable> termMapper);
 
+    Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitutionSkippingIdentityEntries(Function<Variable, Variable> termMapper);
 
-    @FunctionalInterface
-    interface FunctionThrowsExceptions<U, T, E extends Throwable> {
-        T apply(U arg) throws E;
-    }
 
-    <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U, T, E> termProvider) throws E;
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable v1, T t1);
@@ -43,21 +41,22 @@ public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values);
 
+    @FunctionalInterface
+    interface FunctionThrowsExceptions<U, T, E extends Throwable> {
+        T apply(U arg) throws E;
+    }
 
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution();
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1);
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2);
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2, Variable v3, Variable t3);
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Variable v1, Variable t1, Variable v2, Variable t2, Variable v3, Variable t3, Variable v4, Variable t4);
+    <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U, T, E> termProvider) throws E;
 
 
-    InjectiveVar2VarSubstitution injectiveVar2VarSubstitutionOf(ImmutableSubstitution<Variable> substitution);
+
+
+    InjectiveVar2VarSubstitution injectiveOf(ImmutableSubstitution<Variable> substitution);
 
     InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverseOf(ImmutableSubstitution<Variable> substitution);
 
 
-    InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
-                                                                ImmutableSet<Variable> variables);
+    InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables);
 
     /**
      *

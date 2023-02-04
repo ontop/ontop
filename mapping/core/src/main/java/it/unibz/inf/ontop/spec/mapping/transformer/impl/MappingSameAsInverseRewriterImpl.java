@@ -73,9 +73,8 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 rdfAtomPredicate.updateSPO(variables, newSubject, rdfAtomPredicate.getProperty(variables), newObject));
 
         // swap subjects and objects
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
-                originalSubject, newObject,
-                originalObject, newSubject);
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.injectiveOf(
+                substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject));
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
 
