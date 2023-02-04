@@ -128,16 +128,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                                 e -> e.getValue().iterator().next())));
     }
 
-    @Override
-    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer) {
-        ImmutableMap<Variable, Variable> map = stream.collect(ImmutableCollectors.toMap(v -> v, transformer));
-        return getInjectiveVar2VarSubstitution(map);
-    }
-
-    @Override
-    public InjectiveVar2VarSubstitution getInjectiveFreshVar2VarSubstitution(Stream<Variable> stream, VariableGenerator variableGenerator) {
-        return getInjectiveVar2VarSubstitution(stream, variableGenerator::generateNewVariableFromVar);
-    }
 
     /**
      * Non-conflicting variable:
@@ -210,6 +200,16 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public <T extends ImmutableTerm> Collector<Variable, ?, ImmutableSubstitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper) {
         return toSubstitution(v -> v, termMapper);
+    }
+
+    @Override
+    public Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitution(Function<Variable, Variable> termMapper) {
+        return Collector.of(
+                ImmutableMap::<Variable, Variable>builder,   // supplier
+                (builder, v) -> builder.put(v, termMapper.apply(v)), // accumulator
+                (builder1, builder2) -> builder1.putAll(builder2.build()), // merger
+                builder -> getInjectiveVar2VarSubstitution(builder.build()), // finisher
+                Collector.Characteristics.UNORDERED);
     }
 
 

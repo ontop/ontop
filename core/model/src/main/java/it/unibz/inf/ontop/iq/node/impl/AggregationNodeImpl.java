@@ -110,8 +110,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
 
-        InjectiveVar2VarSubstitution renamingSubstitution =
-                substitutionFactory.getInjectiveFreshVar2VarSubstitution(filterNode.getLocalVariables().stream(), variableGenerator);
+        InjectiveVar2VarSubstitution renamingSubstitution = filterNode.getLocalVariables().stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
         IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
                 .applyFreshRenaming(renamingSubstitution);

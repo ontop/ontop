@@ -254,8 +254,8 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
         ImmutableSet<Variable> variables = ImmutableSet.copyOf(valuesNode.getOrderedVariables());
 
-        InjectiveVar2VarSubstitution renaming =
-                substitutionFactory.getInjectiveFreshVar2VarSubstitution(metaTermTypeVariables.stream(), variableGenerator);
+        InjectiveVar2VarSubstitution renaming = metaTermTypeVariables.stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
                 substitutionFactory.onVariables().apply(renaming, valuesNode.getOrderedVariables()),

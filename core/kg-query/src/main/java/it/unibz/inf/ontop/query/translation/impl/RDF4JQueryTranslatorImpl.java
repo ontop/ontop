@@ -343,7 +343,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
                 Sets.union(leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
-        InjectiveVar2VarSubstitution sub = substitutionFactory.getInjectiveFreshVar2VarSubstitution(sharedVars.stream(), vGen);
+        InjectiveVar2VarSubstitution sub = sharedVars.stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(vGen::generateNewVariableFromVar));
 
         ImmutableExpression ljCond = getLJConditionForDifference(
                 sharedVars,
@@ -646,11 +647,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 Sets.union(leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
         // May update the variable generator!!
-        InjectiveVar2VarSubstitution leftRenamingSubstitution =
-                substitutionFactory.getInjectiveFreshVar2VarSubstitution(toCoalesce.stream(), variableGenerator);
+        InjectiveVar2VarSubstitution leftRenamingSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
-        InjectiveVar2VarSubstitution rightRenamingSubstitution =
-                substitutionFactory.getInjectiveFreshVar2VarSubstitution(toCoalesce.stream(), variableGenerator);
+        InjectiveVar2VarSubstitution rightRenamingSubstitution = toCoalesce.stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
         ImmutableSubstitution<ImmutableTerm> topSubstitution = toCoalesce.stream()
                 .collect(substitutionFactory.toSubstitution(
@@ -1039,13 +1040,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
          *  - non-projected variables from the right operand that are also present in the left operand
          */
 
-        InjectiveVar2VarSubstitution leftSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
-                Sets.intersection(Sets.difference(leftKnownVars, leftProjVars), rightKnownVars).stream(),
-                variableGenerator);
+        InjectiveVar2VarSubstitution leftSubstitution = Sets.intersection(Sets.difference(leftKnownVars, leftProjVars), rightKnownVars).stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
-        InjectiveVar2VarSubstitution rightSubstitution = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
-                Sets.intersection(Sets.difference(rightKnownVars, rightProjVars), leftKnownVars).stream(),
-                variableGenerator);
+        InjectiveVar2VarSubstitution rightSubstitution = Sets.intersection(Sets.difference(rightKnownVars, rightProjVars), leftKnownVars).stream()
+                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
         return new NonProjVarRenamings(leftSubstitution, rightSubstitution);
     }

@@ -92,9 +92,8 @@ public class IQ2CQ {
 
             SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-            InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveFreshVar2VarSubstitution(
-                    originalValuesNode.getOrderedVariables().stream(),
-                    variableGenerator);
+            InjectiveVar2VarSubstitution freshRenaming = originalValuesNode.getOrderedVariables().stream()
+                    .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
             ValuesNode freshValuesNode = originalValuesNode.applyFreshRenaming(freshRenaming);
             ImmutableList<Variable> freshVariables = freshValuesNode.getOrderedVariables();

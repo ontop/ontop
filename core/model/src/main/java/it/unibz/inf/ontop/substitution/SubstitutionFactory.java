@@ -24,6 +24,9 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
 
+    Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitution(Function<Variable, Variable> termMapper);
+
+
     @FunctionalInterface
     interface FunctionThrowsExceptions<U, T, E extends Throwable> {
         T apply(U arg) throws E;
@@ -52,9 +55,6 @@ public interface SubstitutionFactory {
 
     InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverseOf(ImmutableSubstitution<Variable> substitution);
 
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Stream<Variable> stream, Function<Variable, Variable> transformer);
-
-    InjectiveVar2VarSubstitution getInjectiveFreshVar2VarSubstitution(Stream<Variable> stream, VariableGenerator variableGenerator);
 
     InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
                                                                 ImmutableSet<Variable> variables);

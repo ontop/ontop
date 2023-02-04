@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
@@ -203,11 +202,11 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
 						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
-			sub = ob = substitutionFactory.getInjectiveVar2VarSubstitution(
-					Stream.concat(
-							getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
-							extractedObject.getVariableStream()),
-					v -> toVariableRenamingMap(TMP_PREFIX, v));
+			sub = ob = Stream.of(Stream.of(extractedSubject, extractedObject),
+							extractedPredicates.stream(), extractedGraphs.stream())
+					.flatMap(s -> s)
+					.flatMap(ImmutableTerm::getVariableStream)
+					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(TMP_PREFIX, v)));
 
 			sourceQuery = getSQL(
 					sub.builder().toStream((v, t) -> getSelectClauseItem(TMP_PREFIX, v, t)),
@@ -215,13 +214,13 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					Stream.of());
 		}
 		else {
-			sub = substitutionFactory.getInjectiveVar2VarSubstitution(
-					getVariableStreamOf(extractedSubject, extractedPredicates, extractedGraphs),
-					v -> toVariableRenamingMap(CHILD_PREFIX, v));
+			sub = Stream.of(Stream.of(extractedSubject), extractedPredicates.stream(), extractedGraphs.stream())
+					.flatMap(s -> s)
+					.flatMap(ImmutableTerm::getVariableStream)
+					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(CHILD_PREFIX, v)));
 
-			ob = substitutionFactory.getInjectiveVar2VarSubstitution(
-					extractedObject.getVariableStream(),
-					v -> toVariableRenamingMap(PARENT_PREFIX, v));
+			ob = extractedObject.getVariableStream()
+					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(PARENT_PREFIX, v)));
 
 			sourceQuery = getSQL(
 					Stream.concat(
@@ -235,9 +234,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		}
 
 		ImmutableTerm subject = sub.applyToTerm(extractedSubject);
-		ImmutableList<ImmutableTerm> graphs = extractedGraphs.stream()
-				.map(sub::applyToTerm)
-				.collect(ImmutableCollectors.toList());
+		ImmutableList<ImmutableTerm> graphs = sub.applyToTerms(extractedGraphs);
 		ImmutableTerm object = ob.applyToTerm(extractedObject);
 
 		ImmutableList<TargetAtom> targetAtoms = extractedPredicates.stream().map(sub::applyToTerm)
@@ -282,24 +279,16 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				.orElseGet(() -> extract(iriOrBnodeTerm, tm.getSubjectMap()));
 	}
 
-	private static Stream<Variable> getVariableStreamOf(ImmutableTerm t, ImmutableList<? extends ImmutableTerm> l1, ImmutableList<? extends ImmutableTerm> l2) {
-		return Stream.concat(t.getVariableStream(),
-				Stream.concat(l1.stream(), l2.stream()).flatMap(ImmutableTerm::getVariableStream));
-	}
-
-	private Variable toVariableRenamingMap(String prefix, Variable v) {
-		return prefixAttributeName(prefix + "_", v);
-	}
-
-	private Variable prefixAttributeName(String prefix, Variable var) {
-		String attributeName = var.getName();
+	private Variable rename(String prefix, Variable v) {
+		String attributeName = v.getName();
+		String underscorePrefix = prefix + "_";
 
 		String newAttributeName;
 		if (attributeName.startsWith("\"") && attributeName.endsWith("\"")
 				|| attributeName.startsWith("`") && attributeName.endsWith("`"))
-			newAttributeName = attributeName.substring(0,1) + prefix + attributeName.substring(1);
+			newAttributeName = attributeName.substring(0,1) + underscorePrefix + attributeName.substring(1);
 		else
-			newAttributeName = prefix + attributeName;
+			newAttributeName = underscorePrefix + attributeName;
 
 		return termFactory.getVariable(newAttributeName);
 	}

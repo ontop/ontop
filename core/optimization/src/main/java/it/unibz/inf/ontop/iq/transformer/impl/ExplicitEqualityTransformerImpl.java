@@ -138,10 +138,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .collect(ImmutableCollectors.toSet());
 
             return children.stream()
-                    .map(t -> substitutionFactory.getInjectiveFreshVar2VarSubstitution(
-                                        Sets.intersection(t.getVariables(), repeatedVariables).stream()
-                                                .filter(v -> !isFirstOcc(v, children, t)),
-                                        variableGenerator))
+                    .map(t -> Sets.intersection(t.getVariables(), repeatedVariables).stream()
+                            .filter(v -> !isFirstOcc(v, children, t))
+                            .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar)))
                     .collect(ImmutableCollectors.toList());
         }
 
