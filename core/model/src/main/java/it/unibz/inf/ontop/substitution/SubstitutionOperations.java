@@ -6,12 +6,10 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
-public interface SubstitutionOperations<T extends ImmutableTerm>  {
+public interface SubstitutionOperations<T extends ImmutableTerm>  extends SubstitutionComposition<T> {
 
 
     T apply(ImmutableSubstitution<? extends T> substitution, Variable variable);
-
-    T applyToTerm(ImmutableSubstitution<? extends T> substitution, T t);
 
 
     ImmutableFunctionalTerm apply(ImmutableSubstitution<? extends T> substitution, ImmutableFunctionalTerm term);
@@ -21,12 +19,6 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  {
     ImmutableList<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends Variable> variables);
 
     ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
-
-    ImmutableList<T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends T> terms);
-
-    ImmutableMap<Integer, T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap);
-
-    ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
 
     ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder();
 

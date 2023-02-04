@@ -21,10 +21,13 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
+    private final ImmutableTermsSubstitutionOperations immutableTermsSubstitutionOperations;
+
     @Inject
     private SubstitutionFactoryImpl(TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.immutableTermsSubstitutionOperations = new ImmutableTermsSubstitutionOperations(termFactory);
     }
 
     private <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
@@ -240,24 +243,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
 
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
-        if (g.isEmpty())
-            return (ImmutableSubstitution) f;
-
-        if (f.isEmpty())
-            return (ImmutableSubstitution) g;
-
-        ImmutableMap<Variable, T> map = Stream.concat(
-                        f.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), (T) g.applyToTerm(e.getValue()))),
-                        g.entrySet().stream())
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
-
-        return getSubstitution(map);
-    }
-
 
 
     @Override
@@ -318,8 +303,22 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
-        return new ImmutableTermsSubstitutionOperations(termFactory);
+        return immutableTermsSubstitutionOperations;
     }
 
-
+    @Override
+    public SubstitutionComposition<NonVariableTerm> onNonVariableTerms() {
+        return new AbstractSubstitutionComposition<>(termFactory) {
+            @Override
+            public NonVariableTerm applyToTerm(ImmutableSubstitution<? extends NonVariableTerm> substitution, NonVariableTerm t) {
+                if (t instanceof Constant) {
+                    return t;
+                }
+                if (t instanceof ImmutableFunctionalTerm) {
+                    return immutableTermsSubstitutionOperations.apply(substitution, (ImmutableFunctionalTerm) t);
+                }
+                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
+            }
+        };
+    }
 }

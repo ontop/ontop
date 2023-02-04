@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -73,17 +70,6 @@ public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> union(Stream<ImmutableSubstitution<? extends T>> substitutions);
 
-    /**
-     *  Viewing a substitution as a function (takes a term, returns a term).
-     *  this method yield the substitution "(g o f)", where (g o f)(x) = g(f(x))
-     *  Note that we assume f(x) = x if x is not explicitly in the domain of substitution f
-     * @param g
-     * @param f
-     * @return
-     * @param <T>
-     */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
-
 
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
 
@@ -92,4 +78,6 @@ public interface SubstitutionFactory {
     SubstitutionOperations<Variable> onVariables();
 
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();
+
+    SubstitutionComposition<NonVariableTerm> onNonVariableTerms();
 }

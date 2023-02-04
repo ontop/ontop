@@ -111,7 +111,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 ? s2
                 : s1.stream()
                     .flatMap(d1 -> s2.stream()
-                        .map(d2 -> substitutionFactory.compose(d2, d1)))
+                        .map(d2 -> substitutionFactory.onNonVariableTerms().compose(d2, d1)))
                     .collect(ImmutableCollectors.toSet());
     }
 
