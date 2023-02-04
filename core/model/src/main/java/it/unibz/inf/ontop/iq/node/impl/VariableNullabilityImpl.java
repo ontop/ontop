@@ -238,9 +238,9 @@ public class VariableNullabilityImpl implements VariableNullability {
                 .transformOrRetain(subTermNames::get, (t, split) -> split.getSplitTerm())
                 .build(ImmutableTerm.class);
 
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.union(
-                subTermNames.values().stream()
-                        .map(SplitImmutableFunctionalTerm::getSubstitution));
+        ImmutableSubstitution<ImmutableTerm> childSubstitution = subTermNames.values().stream()
+                        .map(SplitImmutableFunctionalTerm::getSubstitution)
+                        .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
         return Stream.concat(
                 // Recursive

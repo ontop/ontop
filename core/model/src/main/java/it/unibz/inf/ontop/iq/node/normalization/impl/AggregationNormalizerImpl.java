@@ -379,10 +379,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution =
-                    substitutionFactory.union(
-                            subTermDecompositions.values().stream()
-                                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution));
+            ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution = subTermDecompositions.values().stream()
+                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
+                    .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
             return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution));
         }

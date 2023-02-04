@@ -130,8 +130,7 @@ public class ImmutableCollectors {
                 Collector.Characteristics.UNORDERED);
     }
 
-    private static <K, U>
-    BinaryOperator<Map<K,U>> mapMerger(BinaryOperator<U> mergeFunction) {
+    private static <K, U> BinaryOperator<Map<K,U>> mapMerger(BinaryOperator<U> mergeFunction) {
         return (m1, m2) -> {
             for (Map.Entry<K,U> e : m2.entrySet())
                 m1.merge(e.getKey(), e.getValue(), mergeFunction);

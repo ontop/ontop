@@ -12,7 +12,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -185,38 +187,33 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2) {
 
         if (substitution1.isEmpty())
-            return (ImmutableSubstitution)substitution2;
+            return ImmutableSubstitutionImpl.invariantCast(substitution2);
 
         if (substitution2.isEmpty())
-            return (ImmutableSubstitution)substitution1;
+            return ImmutableSubstitutionImpl.invariantCast(substitution1);
 
-        ImmutableMap<Variable, T> map = Stream.of(substitution1, substitution2)
+        return Stream.of(substitution1, substitution2)
                 .map(ImmutableSubstitution::entrySet)
                 .flatMap(Collection::stream)
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (val1, val2) -> {
-                            if (!val1.equals(val2))
-                                throw new IllegalArgumentException("Substitutions " + substitution1 + " and " + substitution2 + " do not agree on one of the variables");
-                            return val1;
-                        }));
-
-        return getSubstitution(map);
+                .collect(toSubstitution());
     }
 
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(Stream<ImmutableSubstitution<? extends T>> substitutions) {
+    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution() {
+        BinaryOperator<T> mergeFunction = (t1, t2) -> {
+            if (!t1.equals(t2))
+                throw new IllegalArgumentException("Values " + t1 + " and " + t2 + " are assigned to the same variable");
+            return t1;
+        };
 
-        ImmutableMap<Variable, T> map = substitutions
-                .map(ImmutableSubstitution::entrySet)
-                .flatMap(Collection::stream)
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (val1, val2) -> {
-                            if (!val1.equals(val2))
-                                throw new IllegalArgumentException("Substitutions do not agree on one of the variables");
-                            return val1;
-                        }));
-
-        return getSubstitution(map);
+        return Collector.of(
+                Maps::<Variable, T>newHashMap,   // Supplier
+                (m, e) -> m.merge(e.getKey(), e.getValue(), mergeFunction), // Accumulator
+                (m1, m2) -> {     // Merger
+                    m2.forEach((v, t) -> m1.merge(v, t, mergeFunction));
+                    return m1;
+                },
+                m -> getSubstitution(ImmutableMap.copyOf(m)), // Finisher
+                Collector.Characteristics.UNORDERED);
     }
 
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
