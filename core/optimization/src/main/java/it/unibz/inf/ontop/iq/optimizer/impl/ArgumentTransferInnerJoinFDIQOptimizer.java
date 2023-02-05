@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -111,7 +111,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             ImmutableSet<ImmutableExpression> expressions = extractExpressions(dataNodes, normalization.equalities, dependentIndexes);
 
-            return unificationTools.getArgumentMapUnifier(normalization.dataNodes.stream().map(n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), dependentIndexes)))
+            return normalization.dataNodes.stream().map(n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), dependentIndexes))
+                    .collect(substitutionFactory.onVariableOrGroundTerms().toArgumentMapUnifier())
                     .map(u -> convertIntoDeterminantGroupEvaluation(u, targetDataNode,
                             ImmutableList.copyOf(normalization.dataNodes),
                             expressions, dependentIndexes));
@@ -149,7 +150,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
         }
 
         private DeterminantGroupEvaluation convertIntoDeterminantGroupEvaluation(
-                ImmutableUnificationTools.ArgumentMapUnification argumentMapUnification, ExtensionalDataNode targetDataNode,
+                SubstitutionOperations.ArgumentMapUnifier<VariableOrGroundTerm> argumentMapUnification, ExtensionalDataNode targetDataNode,
                 ImmutableList<ExtensionalDataNode> dataNodes, ImmutableSet<ImmutableExpression> expressions, ImmutableSet<Integer> dependentIndexes) {
 
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> newTargetArgumentMap = ExtensionalDataNode.union(

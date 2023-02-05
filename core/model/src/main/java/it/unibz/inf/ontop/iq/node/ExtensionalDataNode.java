@@ -25,15 +25,13 @@ public interface ExtensionalDataNode extends LeafIQTree {
     ExtensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 
-    static ImmutableMap<Integer, ? extends VariableOrGroundTerm> union(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap1, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap2) {
-        return Sets.union(
-                        argumentMap1.keySet(), argumentMap2.keySet()).stream()
+    static <T> ImmutableMap<Integer, ? extends T> union(ImmutableMap<Integer, ? extends T> argumentMap1, ImmutableMap<Integer, ? extends T> argumentMap2) {
+        return Sets.union(argumentMap1.keySet(), argumentMap2.keySet()).stream()
                 // For better readability
                 .sorted()
                 .collect(ImmutableCollectors.toMap(
                         i -> i,
-                        i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap1.get(i))
-                                .orElseGet(() -> argumentMap2.get(i))));
+                        i -> Optional.<T>ofNullable(argumentMap1.get(i)).orElseGet(() -> argumentMap2.get(i))));
     }
 
     static ImmutableMap<Integer, ? extends VariableOrGroundTerm> restrictTo(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap, Collection<Integer> indexes) {

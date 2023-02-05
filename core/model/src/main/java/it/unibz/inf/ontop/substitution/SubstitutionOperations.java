@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -21,11 +22,17 @@ public interface SubstitutionOperations<T extends ImmutableTerm> extends Substit
     ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
 
 
-
     UnifierBuilder<T> unifierBuilder();
 
     UnifierBuilder<T> unifierBuilder(ImmutableSubstitution<T> substitution);
 
     Collector<ImmutableSubstitution<T>, ?, Optional<ImmutableSubstitution<T>>> toUnifier();
 
+    interface ArgumentMapUnifier<T extends ImmutableTerm> {
+        ImmutableMap<Integer, ? extends T> getArgumentMap();
+
+        ImmutableSubstitution<T> getSubstitution();
+    }
+
+    Collector<ImmutableMap<Integer, ? extends T>, ?, Optional<ArgumentMapUnifier<T>>> toArgumentMapUnifier();
 }

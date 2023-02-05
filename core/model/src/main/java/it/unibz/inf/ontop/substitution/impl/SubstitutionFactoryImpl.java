@@ -237,13 +237,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                     }
                 };
             }
+
             @Override
-            public Collector<ImmutableSubstitution<NonFunctionalTerm>, ?, Optional<ImmutableSubstitution<NonFunctionalTerm>>> toUnifier() {
-                return Collector.of(
-                        () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
-                        AbstractUnifierBuilder::merge,
-                        UnifierBuilder::build);
+            protected NonFunctionalTerm keyMapper(Map.Entry<Variable, NonFunctionalTerm> e) {
+                return e.getKey();
             }
         };
     }
@@ -271,12 +268,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 };
             }
             @Override
-            public Collector<ImmutableSubstitution<VariableOrGroundTerm>, ?, Optional<ImmutableSubstitution<VariableOrGroundTerm>>> toUnifier() {
-                return Collector.of(
-                        () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
-                        AbstractUnifierBuilder::merge,
-                        UnifierBuilder::build);
+            protected VariableOrGroundTerm keyMapper(Map.Entry<Variable, VariableOrGroundTerm> e) {
+                return e.getKey();
             }
         };
     }
@@ -304,12 +297,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 };
             }
             @Override
-            public Collector<ImmutableSubstitution<Variable>, ?, Optional<ImmutableSubstitution<Variable>>> toUnifier() {
-                return Collector.of(
-                        () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
-                        AbstractUnifierBuilder::merge,
-                        UnifierBuilder::build);
+            protected Variable keyMapper(Map.Entry<Variable, Variable> e) {
+                return e.getKey();
             }
         };
     }
