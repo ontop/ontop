@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -54,7 +55,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
 
 
     @Override
-    public ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder() {
+    public UnifierBuilder<T> unifierBuilder() {
         return unifierBuilder(termFactory.getSubstitution(ImmutableMap.of()));
     }
 }

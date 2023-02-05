@@ -1,13 +1,10 @@
 package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
-public interface SubstitutionOperations<T extends ImmutableTerm>  extends SubstitutionComposition<T> {
-
+public interface SubstitutionOperations<T extends ImmutableTerm> extends SubstitutionComposition<T> {
 
     T apply(ImmutableSubstitution<? extends T> substitution, Variable variable);
 
@@ -20,7 +17,7 @@ public interface SubstitutionOperations<T extends ImmutableTerm>  extends Substi
 
     ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
 
-    ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder();
+    UnifierBuilder<T> unifierBuilder();
 
-    ImmutableUnificationTools.UnifierBuilder<T, ?> unifierBuilder(ImmutableSubstitution<T> substitution);
+    UnifierBuilder<T> unifierBuilder(ImmutableSubstitution<T> substitution);
 }

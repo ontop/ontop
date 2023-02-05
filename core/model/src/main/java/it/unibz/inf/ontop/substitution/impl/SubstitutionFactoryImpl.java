@@ -224,11 +224,21 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
             @Override
             public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
-                return (t instanceof Variable)  ? apply(substitution, (Variable) t) : t;
+                return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
             @Override
-            public ImmutableUnificationTools.UnifierBuilder<NonFunctionalTerm, ?> unifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
-                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
+            public UnifierBuilder<NonFunctionalTerm> unifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
+                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+                    @Override
+                    protected UnifierBuilder<NonFunctionalTerm> unifyUnequalTerms(NonFunctionalTerm term1, NonFunctionalTerm term2) {
+                        if (term1 instanceof Variable)
+                            return extendSubstitution((Variable) term1, term2);
+                        if (term2 instanceof Variable)
+                            return extendSubstitution((Variable) term2, term1);
+
+                        return emptySelf(); // neither is a variable, impossible to unify distinct terms
+                    }
+                };
             }
         };
     }
@@ -245,8 +255,18 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
             @Override
-            public ImmutableUnificationTools.UnifierBuilder<VariableOrGroundTerm, ?> unifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
-                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
+            public UnifierBuilder<VariableOrGroundTerm> unifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+                    @Override
+                    protected UnifierBuilder<VariableOrGroundTerm> unifyUnequalTerms(VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
+                        if (term1 instanceof Variable)
+                            return extendSubstitution((Variable) term1, term2);
+                        if (term2 instanceof Variable)
+                            return extendSubstitution((Variable) term2, term1);
+
+                        return emptySelf(); // neither is a variable, impossible to unify distinct terms
+                    }
+                };
             }
         };
     }
@@ -264,8 +284,13 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 return apply(substitution, t);
             }
             @Override
-            public ImmutableUnificationTools.UnifierBuilder<Variable, ?> unifierBuilder(ImmutableSubstitution<Variable> substitution) {
-                return new ImmutableUnificationTools.VariableOrGroundTermUnifierBuilder<>(termFactory, this, substitution);
+            public UnifierBuilder<Variable> unifierBuilder(ImmutableSubstitution<Variable> substitution) {
+                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+                    @Override
+                    protected UnifierBuilder<Variable> unifyUnequalTerms(Variable term1, Variable term2) {
+                        return extendSubstitution(term1, term2);
+                    }
+                };
             }
         };
     }
