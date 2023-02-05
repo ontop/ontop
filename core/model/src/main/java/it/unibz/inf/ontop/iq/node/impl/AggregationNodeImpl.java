@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -43,10 +42,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
                                   SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
                                   AggregationNormalizer aggregationNormalizer,
-                                  ImmutableUnificationTools unificationTools, IQTreeTools iqTreeTools,
+                                  IQTreeTools iqTreeTools,
                                   TermFactory termFactory,
                                   OntopModelSettings settings) {
-        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, termFactory);
+        super(substitutionFactory, iqFactory, iqTreeTools, termFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;

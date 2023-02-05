@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
@@ -69,6 +70,9 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2);
 
 
+    default Optional<ImmutableSubstitution<ImmutableTerm>> unify(ImmutableTerm t1, ImmutableTerm t2) { return onImmutableTerms().unify(t1, t2); }
+
+    InjectiveVar2VarSubstitution getPrioritizingRenaming(ImmutableSubstitution<?> substitution, ImmutableSet<Variable> priorityVariables);
 
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
 

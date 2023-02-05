@@ -28,6 +28,8 @@ public interface SubstitutionOperations<T extends ImmutableTerm> extends Substit
 
     Collector<ImmutableSubstitution<T>, ?, Optional<ImmutableSubstitution<T>>> toUnifier();
 
+    default Optional<ImmutableSubstitution<T>> unify(T t1, T t2) { return unifierBuilder().unify(t1, t2).build(); }
+
     interface ArgumentMapUnifier<T extends ImmutableTerm> {
         ImmutableMap<Integer, ? extends T> getArgumentMap();
 

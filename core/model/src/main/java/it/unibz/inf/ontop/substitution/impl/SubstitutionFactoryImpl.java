@@ -103,10 +103,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2) {
 
         if (substitution1.isEmpty())
-            return ImmutableSubstitutionImpl.invariantCast(substitution2);
+            return ImmutableSubstitutionImpl.covariantCast(substitution2);
 
         if (substitution2.isEmpty())
-            return ImmutableSubstitutionImpl.invariantCast(substitution1);
+            return ImmutableSubstitutionImpl.covariantCast(substitution1);
 
         return Stream.of(substitution1, substitution2)
                 .map(ImmutableSubstitution::entrySet)
@@ -211,7 +211,16 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return newVariable;
     }
 
+    @Override
+    public InjectiveVar2VarSubstitution getPrioritizingRenaming(ImmutableSubstitution<?> substitution, ImmutableSet<Variable> priorityVariables) {
+        ImmutableSubstitution<Variable> renaming = substitution.builder()
+                .restrictDomainTo(priorityVariables)
+                .restrictRangeTo(Variable.class)
+                .restrictRange(t -> !priorityVariables.contains(t))
+                .build();
 
+        return extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
+    }
 
 
     @Override

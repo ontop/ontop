@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -34,8 +33,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private final ImmutableSet<Variable> projectedVariables;
 
-    private final ImmutableUnificationTools unificationTools;
-
     private final IQTreeTools iqTreeTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final NotRequiredVariableRemover notRequiredVariableRemover;
@@ -45,11 +42,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                           IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools,
-                          ImmutableUnificationTools unificationTools,
                           NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, termFactory, iqFactory);
         this.projectedVariables = projectedVariables;
-        this.unificationTools = unificationTools;
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
@@ -696,7 +691,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                  * Due to the current implementation of MGUS, the normalization should have no effect
                  * (already in a normal form). Here for safety.
                  */
-                .map(eta -> unificationTools.getPrioritizingRenaming(eta, projectedVariables).compose(eta))
+                .map(eta -> substitutionFactory.getPrioritizingRenaming(eta, projectedVariables).compose(eta))
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + mergedSubstitution
                         + " is incompatible with " + tmpNormalizedSubstitution));
 

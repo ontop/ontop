@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionComposition;
-import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -38,10 +37,10 @@ public abstract class AbstractSubstitutionComposition<T extends ImmutableTerm> i
     @Override
     public ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
         if (g.isEmpty())
-            return ImmutableSubstitutionImpl.invariantCast(f);
+            return ImmutableSubstitutionImpl.covariantCast(f);
 
         if (f.isEmpty())
-            return ImmutableSubstitutionImpl.invariantCast(g);
+            return ImmutableSubstitutionImpl.covariantCast(g);
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.entrySet().stream()

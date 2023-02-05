@@ -10,12 +10,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.

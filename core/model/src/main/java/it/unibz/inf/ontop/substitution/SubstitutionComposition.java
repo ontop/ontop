@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
-import java.util.Optional;
-import java.util.stream.Collector;
-
 public interface SubstitutionComposition<T extends ImmutableTerm> {
 
     T applyToTerm(ImmutableSubstitution<? extends T> substitution, T t);

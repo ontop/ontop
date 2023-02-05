@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -43,12 +42,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
                            TermFactory termFactory, TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                           ImmutableUnificationTools unificationTools,
                            IntermediateQueryFactory iqFactory,
                            IQTreeTools iqTreeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
         this.iqTreeTools = iqTreeTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;

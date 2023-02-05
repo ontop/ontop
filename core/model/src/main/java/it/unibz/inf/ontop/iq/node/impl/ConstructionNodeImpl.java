@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.*;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -50,13 +49,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                 ImmutableUnificationTools unificationTools,
                                  SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings, IQTreeTools iqTreeTools,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
-        super(substitutionFactory, iqFactory, unificationTools, iqTreeTools, termFactory);
+        super(substitutionFactory, iqFactory, iqTreeTools, termFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution.castTo(ImmutableTerm.class);
         this.substitutionNormalizer = substitutionNormalizer;
@@ -77,13 +75,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
      */
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 ImmutableUnificationTools unificationTools, IQTreeTools iqTreeTools,
+                                 IQTreeTools iqTreeTools,
                                  SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
-        this(projectedVariables, substitutionFactory.getSubstitution(), unificationTools,
+        this(projectedVariables, substitutionFactory.getSubstitution(),
                 substitutionFactory, termFactory, iqFactory, settings, iqTreeTools,substitutionNormalizer, notRequiredVariableRemover);
     }
 

@@ -27,18 +27,18 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> implements Immut
     protected final SubstitutionOperations<ImmutableTerm> defaultOperations;
     protected final ImmutableMap<Variable, T> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap, TermFactory termFactory) {
+    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> map, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.defaultOperations = new ImmutableTermsSubstitutionOperations(termFactory);
         //noinspection unchecked
-        this.map = (ImmutableMap<Variable, T>) substitutionMap;
+        this.map = (ImmutableMap<Variable, T>) map;
 
-        if (map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
+        if (this.map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
             throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
-                    "(for efficiency reasons)\n. Substitution: " + map);
+                    "(for efficiency reasons)\n. Substitution: " + this.map);
     }
 
-    static <T extends ImmutableTerm> ImmutableSubstitution<T> invariantCast(ImmutableSubstitution<? extends T> substitution) {
+    static <T extends ImmutableTerm> ImmutableSubstitution<T> covariantCast(ImmutableSubstitution<? extends T> substitution) {
         //noinspection unchecked
         return (ImmutableSubstitution<T>) substitution;
     }

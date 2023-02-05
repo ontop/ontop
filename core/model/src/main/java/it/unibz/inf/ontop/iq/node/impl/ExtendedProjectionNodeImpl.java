@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -22,15 +21,13 @@ import java.util.stream.Stream;
 
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
-    private final ImmutableUnificationTools unificationTools;
     protected final IQTreeTools iqTreeTools;
 
-    public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
-                                      ImmutableUnificationTools unificationTools,
+    public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory,
+                                      IntermediateQueryFactory iqFactory,
                                       IQTreeTools iqTreeTools,
                                       TermFactory termFactory) {
         super(substitutionFactory, termFactory, iqFactory);
-        this.unificationTools = unificationTools;
         this.iqTreeTools = iqTreeTools;
     }
 
@@ -138,7 +135,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSubstitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
-                .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(unificationTools.getPrioritizingRenaming(eta, vC), eta))
+                .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(substitutionFactory.getPrioritizingRenaming(eta, vC), eta))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
         ImmutableSubstitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(vC);

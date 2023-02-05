@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashSet;
@@ -25,10 +24,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
-                               ImmutableUnificationTools unificationTools,
                                JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
     }
 
 

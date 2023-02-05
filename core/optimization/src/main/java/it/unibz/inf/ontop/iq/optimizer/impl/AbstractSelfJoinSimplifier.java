@@ -14,9 +14,7 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -28,14 +26,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     private final OptimizationState noSolutionState;
     protected final IntermediateQueryFactory iqFactory;
     protected final TermFactory termFactory;
-    protected final ImmutableUnificationTools unificationTools;
     protected final SubstitutionFactory substitutionFactory;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
     public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
-        this.unificationTools = coreSingletons.getUnificationTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());

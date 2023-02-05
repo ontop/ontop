@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -46,11 +45,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 TermFactory termFactory, TypeFactory typeFactory,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 IQTreeTools iqTreeTools,
-                                ImmutableUnificationTools unificationTools,
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
         this.iqTreeTools = iqTreeTools;
         this.normalizer = normalizer;
     }
@@ -61,20 +59,18 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermFactory termFactory, TypeFactory typeFactory,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               IQTreeTools iqTreeTools,
-                              ImmutableUnificationTools unificationTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, iqTreeTools, unificationTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
                               SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools,
-                              ImmutableUnificationTools unificationTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         this(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, iqFactory,
-                substitutionFactory, iqTreeTools, unificationTools, variableNullabilityTools, conditionSimplifier, normalizer);
+                substitutionFactory, iqTreeTools, variableNullabilityTools, conditionSimplifier, normalizer);
     }
 
     @Override

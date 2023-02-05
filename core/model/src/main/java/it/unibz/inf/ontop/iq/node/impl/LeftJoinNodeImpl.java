@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -44,11 +43,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
-                             ImmutableUnificationTools unificationTools,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
-                substitutionFactory, unificationTools, variableNullabilityTools, conditionSimplifier);
+                substitutionFactory, variableNullabilityTools, conditionSimplifier);
         this.ljNormalizer = ljNormalizer;
         this.coreUtilsFactory = coreUtilsFactory;
     }
@@ -57,21 +55,21 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory,
-                             IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                             IntermediateQueryFactory iqFactory,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, substitutionFactory,
-                termFactory, typeFactory, iqFactory, unificationTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory,
-                             IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                             IntermediateQueryFactory iqFactory,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
         this(Optional.empty(), nullabilityEvaluator, substitutionFactory,
-                termFactory, typeFactory, iqFactory, unificationTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, nullabilityEvaluator, substitutionFactory,
                 termFactory, typeFactory, iqFactory,
-                unificationTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
     }
 
     @Override

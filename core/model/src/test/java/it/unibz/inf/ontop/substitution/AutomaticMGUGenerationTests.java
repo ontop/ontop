@@ -26,18 +26,15 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,18 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class AutomaticMGUGenerationTests  {
 
-	private static ImmutableUnificationTools unifier;
 	private final Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
-
-	@BeforeAll
-	public static void setUp() {
-		/*
-		 * TODO modify the API so that function symbols for object terms use the
-		 * Predicate class instead of FunctionSymbol class
-		 */
-
-		unifier = new ImmutableUnificationTools(SUBSTITUTION_FACTORY);
-	}
 
 	@Test
 	public void testGetMGUAtomAtomBoolean() throws Exception {
@@ -82,7 +68,7 @@ public class AutomaticMGUGenerationTests  {
 
 				List<ImmutableTerm> atoms = getAtoms(atomsstr);
 				Optional<ImmutableSubstitution<ImmutableTerm>> expectedmgu = getMGU(mgustr);
-				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.computeMGU(atoms.get(0), atoms.get(1));
+				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = SUBSTITUTION_FACTORY.unify(atoms.get(0), atoms.get(1));
 				log.debug("Expected MGU: {}", expectedmgu);
 				assertEquals(expectedmgu, mgu);
 				casecounter++;
