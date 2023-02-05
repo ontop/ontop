@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionComposition;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
@@ -19,11 +20,11 @@ import java.util.stream.Stream;
 public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements UnifierBuilder<T> {
 
     private final TermFactory termFactory;
-    private final SubstitutionOperations<T> operations;
+    private final SubstitutionComposition<T> operations;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Optional<ImmutableSubstitution<T>> optionalSubstitution;
 
-    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionOperations<T> operations, ImmutableSubstitution<T> substitution) {
+    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionComposition<T> operations, ImmutableSubstitution<T> substitution) {
         this.termFactory = termFactory;
         this.operations = operations;
         this.optionalSubstitution = Optional.of(substitution);
@@ -85,7 +86,7 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private UnifierBuilder<T> merge(UnifierBuilder<T> another) {
+    AbstractUnifierBuilder<T> merge(UnifierBuilder<T> another) {
         throw new MinorOntopInternalBugException("Not expected to be run in parallel");
     }
 }

@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 
+import java.util.Optional;
+import java.util.stream.Collector;
+
 public interface SubstitutionOperations<T extends ImmutableTerm> extends SubstitutionComposition<T> {
 
     T apply(ImmutableSubstitution<? extends T> substitution, Variable variable);
@@ -17,7 +20,12 @@ public interface SubstitutionOperations<T extends ImmutableTerm> extends Substit
 
     ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
 
+
+
     UnifierBuilder<T> unifierBuilder();
 
     UnifierBuilder<T> unifierBuilder(ImmutableSubstitution<T> substitution);
+
+    Collector<ImmutableSubstitution<T>, ?, Optional<ImmutableSubstitution<T>>> toUnifier();
+
 }

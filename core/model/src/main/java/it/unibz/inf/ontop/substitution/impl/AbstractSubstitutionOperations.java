@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> extends AbstractSubstitutionComposition<T> implements SubstitutionOperations<T> {

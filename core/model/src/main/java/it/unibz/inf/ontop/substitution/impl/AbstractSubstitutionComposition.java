@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionComposition;
+import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -51,5 +52,4 @@ public abstract class AbstractSubstitutionComposition<T extends ImmutableTerm> i
 
         return new ImmutableSubstitutionImpl<>(map, termFactory);
     }
-
 }

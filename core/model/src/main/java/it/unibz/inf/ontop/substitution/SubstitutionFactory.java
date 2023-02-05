@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
@@ -79,4 +80,5 @@ public interface SubstitutionFactory {
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();
 
     SubstitutionComposition<NonVariableTerm> onNonVariableTerms();
+
 }

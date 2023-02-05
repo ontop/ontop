@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.substitution.impl;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collector;
 
 public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOperations<ImmutableTerm> {
 
@@ -32,7 +35,7 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     }
 
     @Override
-    public UnifierBuilder<ImmutableTerm> unifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
+    public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
         return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
             @Override
             protected UnifierBuilder<ImmutableTerm> unifyUnequalTerms(ImmutableTerm term1, ImmutableTerm term2) {
@@ -56,6 +59,14 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
                 }
             }
         };
+    }
+    @Override
+    public Collector<ImmutableSubstitution<ImmutableTerm>, ?, Optional<ImmutableSubstitution<ImmutableTerm>>> toUnifier() {
+        return Collector.of(
+                () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
+                (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                AbstractUnifierBuilder::merge,
+                UnifierBuilder::build);
     }
 }
 
