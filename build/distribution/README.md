@@ -31,7 +31,7 @@ The [Ontop](http://ontop-vkg.org) framework is an open source project available 
 - Official Website: https://ontop-vkg.org
 - Download (Github): https://github.com/ontop/ontop/releases
 - Download (Sourceforge): http://sourceforge.net/projects/ontop4obda/files/
-- Docker Hub: https://hub.docker.com/r/ontop/ontop-endpoint
+- Docker Hub: https://hub.docker.com/r/ontop/ontop
 - Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 - Source Code: https://github.com/ontop/ontop
 - Facebook: https://www.facebook.com/obdaontop/
