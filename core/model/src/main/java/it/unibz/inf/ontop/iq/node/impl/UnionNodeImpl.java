@@ -685,7 +685,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableSet<Variable> formerV = constructionNode.getVariables();
 
         ImmutableSubstitution<ImmutableTerm> normalizedEta = substitutionFactory.onImmutableTerms().unifierBuilder(tmpNormalizedSubstitution)
-                .unifyTermStreams(mergedSubstitution.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                .unify(mergedSubstitution.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
                 /*
                  * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.

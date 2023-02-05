@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionComposition;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
 import java.util.Optional;
@@ -31,31 +30,31 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
     }
 
     @Override
-    public UnifierBuilder<T> unifyTermLists(ImmutableList<? extends T> args1, ImmutableList<? extends T> args2) {
+    public UnifierBuilder<T> unify(ImmutableList<? extends T> args1, ImmutableList<? extends T> args2) {
         if (args1.size() == args2.size())
-            return unifyTermStreams(IntStream.range(0, args1.size()), args1::get, args2::get);
+            return unify(IntStream.range(0, args1.size()), args1::get, args2::get);
 
-        return emptySelf();
+        return empty();
     }
 
     @Override
-    public UnifierBuilder<T> unifyTermStreams(IntStream indexes, IntFunction<? extends T> args1, IntFunction<? extends T> args2) {
+    public UnifierBuilder<T> unify(IntStream indexes, IntFunction<? extends T> args1, IntFunction<? extends T> args2) {
         return indexes.collect(
                 () -> this,
-                (s, i) -> s.unifyTerms(args1.apply(i), args2.apply(i)),
+                (s, i) -> s.unify(args1.apply(i), args2.apply(i)),
                 AbstractUnifierBuilder<T>::merge);
     }
 
     @Override
-    public <B> UnifierBuilder<T> unifyTermStreams(Stream<B> stream, Function<B, T> args1, Function<B, T> args2) {
+    public <B> UnifierBuilder<T> unify(Stream<B> stream, Function<B, T> args1, Function<B, T> args2) {
         return stream.collect(
                 () -> this,
-                (s, i) -> s.unifyTerms(args1.apply(i), args2.apply(i)),
+                (s, i) -> s.unify(args1.apply(i), args2.apply(i)),
                 AbstractUnifierBuilder<T>::merge);
     }
 
     @Override
-    public UnifierBuilder<T> unifyTerms(T t1, T t2) {
+    public UnifierBuilder<T> unify(T t1, T t2) {
         if (optionalSubstitution.isEmpty())
             return this;
 
@@ -70,13 +69,32 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
 
     abstract protected UnifierBuilder<T> unifyUnequalTerms(T t1, T t2);
 
-    protected UnifierBuilder<T> extendSubstitution(Variable variable, T term) {
-        ImmutableSubstitution<T> s = termFactory.getSubstitution(ImmutableMap.of(variable, term));
-        optionalSubstitution = Optional.of(operations.compose(s, optionalSubstitution.get()));
-        return this;
+    /**
+     * Checks that the variable is not contained in the term.
+     * This method is required for avoiding unifying x with f(g(x))
+     * and should be overridden for non-ground functional terms.
+     *
+     * @param variable variable
+     * @param term that is checked to contain the variable
+     * @return
+     */
+    protected boolean doesNotContainVariable(Variable variable, T term) {
+        return true;
     }
 
-    protected UnifierBuilder<T> emptySelf() {
+    protected Optional<UnifierBuilder<T>> attemptUnifying(T term1, T term2) {
+        if (term1 instanceof Variable) {
+            Variable variable = (Variable)term1;
+            if (doesNotContainVariable(variable, term2)) {
+                ImmutableSubstitution<T> s = termFactory.getSubstitution(ImmutableMap.of(variable, term2));
+                optionalSubstitution = Optional.of(operations.compose(s, optionalSubstitution.get()));
+                return Optional.of(this);
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected UnifierBuilder<T> empty() {
         optionalSubstitution = Optional.empty();
         return this;
     }

@@ -55,7 +55,7 @@ public class SubstitutionTest {
 
     private void checkUnification(ImmutableList<ImmutableTerm> firstArguments, ImmutableList<ImmutableTerm> secondArguments) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier = SUBSTITUTION_FACTORY.onImmutableTerms().unifierBuilder()
-                .unifyTermLists(firstArguments, secondArguments)
+                .unify(firstArguments, secondArguments)
                 .build();
         assertTrue(optionalUnifier.isPresent());
         ImmutableSubstitution<ImmutableTerm> unifier = optionalUnifier.get();

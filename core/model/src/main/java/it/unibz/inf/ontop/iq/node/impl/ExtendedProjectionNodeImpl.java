@@ -136,7 +136,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSet<Variable> vC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
 
         ImmutableSubstitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
-                .unifyTermStreams(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                .unify(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
                 .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(unificationTools.getPrioritizingRenaming(eta, vC), eta))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);

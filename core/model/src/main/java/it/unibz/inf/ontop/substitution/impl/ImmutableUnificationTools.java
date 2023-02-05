@@ -26,7 +26,7 @@ public class ImmutableUnificationTools {
     }
 
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableTerm args1, ImmutableTerm args2) {
-        return substitutionFactory.onImmutableTerms().unifierBuilder().unifyTerms(args1, args2).build();
+        return substitutionFactory.onImmutableTerms().unifierBuilder().unify(args1, args2).build();
     }
 
 
@@ -56,12 +56,12 @@ public class ImmutableUnificationTools {
                     substitutionFactory.onVariableOrGroundTerms().applyToTerms(substitution, newArgumentMap);
 
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = substitutionFactory.onVariableOrGroundTerms().unifierBuilder()
-                            .unifyTermStreams(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
+                            .unify(Sets.intersection(argumentMap.keySet(), updatedArgumentMap.keySet()).stream(), argumentMap::get, updatedArgumentMap::get)
                             .build();
 
             return unifier
                     .flatMap(u -> substitutionFactory.onVariableOrGroundTerms().unifierBuilder(substitution)
-                            .unifyTermStreams(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                            .unify(u.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnification(
                                     substitutionFactory.onVariableOrGroundTerms().applyToTerms(u, ExtensionalDataNode.union(argumentMap, updatedArgumentMap)),

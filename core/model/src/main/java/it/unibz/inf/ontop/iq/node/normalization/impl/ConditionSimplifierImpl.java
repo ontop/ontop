@@ -98,7 +98,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
-                .unifyTermStreams(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
+                .unify(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
                 .build()
                 // TODO: merge priorityRenaming with the orientate() method
                 .map(u -> substitutionFactory.onNonFunctionalTerms().compose(unificationTools.getPrioritizingRenaming(u, nonLiftableVariables), u))

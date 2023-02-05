@@ -44,19 +44,20 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
                     ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
                     ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
                     if (f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
-                        return unifyTermLists(f1.getTerms(), f2.getTerms());
+                        return unify(f1.getTerms(), f2.getTerms());
 
-                    return emptySelf();
+                    return empty();
                 }
                 else {
-                    // avoid unifying x with f(g(x))
-                    if (term1 instanceof Variable && term2.getVariableStream().noneMatch(term1::equals))
-                        return extendSubstitution((Variable) term1, term2);
-                    if (term2 instanceof Variable && term1.getVariableStream().noneMatch(term2::equals))
-                        return extendSubstitution((Variable) term2, term1);
-
-                    return emptySelf(); // neither is a variable, impossible to unify distinct terms
+                    return attemptUnifying(term1, term2)
+                            .or(() -> attemptUnifying(term2, term1))
+                            .orElseGet(this::empty);
                 }
+            }
+
+            @Override
+            protected boolean doesNotContainVariable(Variable variable, ImmutableTerm term) {
+                return term.getVariableStream().noneMatch(variable::equals);
             }
         };
     }
@@ -64,7 +65,7 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     public Collector<ImmutableSubstitution<ImmutableTerm>, ?, Optional<ImmutableSubstitution<ImmutableTerm>>> toUnifier() {
         return Collector.of(
                 () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
                 AbstractUnifierBuilder::merge,
                 UnifierBuilder::build);
     }

@@ -231,12 +231,9 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<NonFunctionalTerm> unifyUnequalTerms(NonFunctionalTerm term1, NonFunctionalTerm term2) {
-                        if (term1 instanceof Variable)
-                            return extendSubstitution((Variable) term1, term2);
-                        if (term2 instanceof Variable)
-                            return extendSubstitution((Variable) term2, term1);
-
-                        return emptySelf(); // neither is a variable, impossible to unify distinct terms
+                        return attemptUnifying(term1, term2)
+                                .or(() -> attemptUnifying(term2, term1))
+                                .orElseGet(this::empty);
                     }
                 };
             }
@@ -244,7 +241,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public Collector<ImmutableSubstitution<NonFunctionalTerm>, ?, Optional<ImmutableSubstitution<NonFunctionalTerm>>> toUnifier() {
                 return Collector.of(
                         () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
                         AbstractUnifierBuilder::merge,
                         UnifierBuilder::build);
             }
@@ -267,12 +264,9 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<VariableOrGroundTerm> unifyUnequalTerms(VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
-                        if (term1 instanceof Variable)
-                            return extendSubstitution((Variable) term1, term2);
-                        if (term2 instanceof Variable)
-                            return extendSubstitution((Variable) term2, term1);
-
-                        return emptySelf(); // neither is a variable, impossible to unify distinct terms
+                        return attemptUnifying(term1, term2)
+                                .or(() -> attemptUnifying(term2, term1))
+                                .orElseGet(this::empty);
                     }
                 };
             }
@@ -280,7 +274,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public Collector<ImmutableSubstitution<VariableOrGroundTerm>, ?, Optional<ImmutableSubstitution<VariableOrGroundTerm>>> toUnifier() {
                 return Collector.of(
                         () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
                         AbstractUnifierBuilder::merge,
                         UnifierBuilder::build);
             }
@@ -304,7 +298,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<Variable> unifyUnequalTerms(Variable term1, Variable term2) {
-                        return extendSubstitution(term1, term2);
+                        //noinspection OptionalGetWithoutIsPresent
+                        return attemptUnifying(term1, term2).get();
                     }
                 };
             }
@@ -312,7 +307,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public Collector<ImmutableSubstitution<Variable>, ?, Optional<ImmutableSubstitution<Variable>>> toUnifier() {
                 return Collector.of(
                         () -> unifierBuilder(termFactory.getSubstitution(ImmutableMap.of())),
-                        (a, s) -> a.unifyTermStreams(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
+                        (a, s) -> a.unify(s.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue),
                         AbstractUnifierBuilder::merge,
                         UnifierBuilder::build);
             }
