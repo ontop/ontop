@@ -291,6 +291,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-jdbc</artifactId>
+            <version>406</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-jdbc</artifactId>
             <version>3.1.3</version>

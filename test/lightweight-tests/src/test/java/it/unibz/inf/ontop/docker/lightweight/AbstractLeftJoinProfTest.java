@@ -192,7 +192,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
         String ontopSQLtranslation = reformulate(query);
 
         Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
-        executeAndCompareValues(query, ImmutableList.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
+        executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string"));
     }
 
