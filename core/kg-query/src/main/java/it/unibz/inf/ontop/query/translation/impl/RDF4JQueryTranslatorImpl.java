@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
