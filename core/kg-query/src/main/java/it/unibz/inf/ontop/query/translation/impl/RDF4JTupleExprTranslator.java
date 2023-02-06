@@ -78,10 +78,7 @@ public class RDF4JTupleExprTranslator {
         }
 
         if (node instanceof StatementPattern) {
-            StatementPattern stmt = (StatementPattern)node;
-            return (stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))
-                ? translateQuadPattern(stmt)
-                : translateTriplePattern(stmt);
+            return translate((StatementPattern) node);
         }
 
         if (node instanceof Join)
@@ -236,7 +233,8 @@ public class RDF4JTupleExprTranslator {
                                 .getDomain())
                 .immutableCopy();
 
-        return createTranslationResultFromExtendedProjection(an, aggregationTree, nullableVariables);
+        IQTree iqTree = applyExternalBindingFilter(aggregationTree, an.getSubstitution().getDomain());
+        return createTranslationResult(iqTree, nullableVariables);
     }
 
     private ImmutableList<ImmutableSubstitution<ImmutableTerm>> getGroupVarDefs(List<GroupElem> list,
@@ -307,15 +305,8 @@ public class RDF4JTupleExprTranslator {
                 ? subtrees.get(0)
                 : iqFactory.createNaryIQTree(iqFactory.createUnionNode(allVars), subtrees);
 
-        // Most of the time
-        if (externalBindings.isEmpty())
-            return createTranslationResult(tree, nullableVars);
-
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(allVars, externalBindings.keySet());
-
-        return createTranslationResult(
-                applyExternalBindingFilter(tree, externalBindings, externallyBoundedVariables),
-                nullableVars);
+        IQTree iqTree = applyExternalBindingFilter(tree, allVars);
+        return createTranslationResult(iqTree, nullableVars);
     }
 
     private TranslationResult translate(Reduced reduced) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
@@ -493,28 +484,7 @@ public class RDF4JTupleExprTranslator {
 
         ImmutableSet<Variable> nullableVariables = substitutionFactory.onVariables().apply(substitution, child.nullableVariables);
 
-        return createTranslationResultFromExtendedProjection(projectNode, constructTree, nullableVariables);
-    }
-
-    /**
-     * Looks for new variables introduced by the extended projection node.
-     * Applies a filter condition to those externally bounded.
-     *
-     * The externally bounded coming from the sub-tree are supposed to have already handled.
-     *
-     */
-    private TranslationResult createTranslationResultFromExtendedProjection(ExtendedProjectionNode extendedProjectNode,
-                                                                            UnaryIQTree tree,
-                                                                            ImmutableSet<Variable> nullableVariables) {
-        // Most of the time
-        if (externalBindings.isEmpty())
-            return createTranslationResult(tree, nullableVariables);
-
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(
-                extendedProjectNode.getSubstitution().getDomain(),
-                externalBindings.keySet());
-
-        IQTree iqTree = applyExternalBindingFilter(tree, externalBindings, externallyBoundedVariables);
+        IQTree iqTree = applyExternalBindingFilter(constructTree, projectNode.getSubstitution().getDomain());
         return createTranslationResult(iqTree, nullableVariables);
     }
 
@@ -553,16 +523,30 @@ public class RDF4JTupleExprTranslator {
                 allNullable);
     }
 
-    private TranslationResult translateTriplePattern(StatementPattern triple) {
-        RDF4JValueExprTranslator translator = getValueTranslator(ImmutableSet.of());
+    private TranslationResult translate(StatementPattern pattern) {
 
-        VariableOrGroundTerm subject = translator.translateRDF4JVar(triple.getSubjectVar(), true);
-        VariableOrGroundTerm predicate = translator.translateRDF4JVar(triple.getPredicateVar(), true);
-        VariableOrGroundTerm object = translator.translateRDF4JVar(triple.getObjectVar(), true);
+        RDF4JValueExprTranslator translator = getValueTranslator(ImmutableSet.of());
+        VariableOrGroundTerm subject = translator.translateRDF4JVar(pattern.getSubjectVar(), true);
+        VariableOrGroundTerm predicate = translator.translateRDF4JVar(pattern.getPredicateVar(), true);
+        VariableOrGroundTerm object = translator.translateRDF4JVar(pattern.getObjectVar(), true);
 
         IQTree subTree;
+        if (pattern.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))  {
+            VariableOrGroundTerm graph = translator.translateRDF4JVar(pattern.getContextVar(), true);
+            subTree = translateQuadPattern(subject, predicate, object, graph);
+        }
+        else  {
+            subTree = translateTriplePattern(subject, predicate, object);
+        }
+
+        IQTree iqTree = applyExternalBindingFilter(subTree, subTree.getVariables());
+        return createTranslationResult(iqTree, ImmutableSet.of());
+    }
+
+    private IQTree translateTriplePattern(VariableOrGroundTerm subject, VariableOrGroundTerm predicate, VariableOrGroundTerm object) {
+
         if (dataset == null || dataset.getDefaultGraphs().isEmpty() && dataset.getNamedGraphs().isEmpty()) {
-            subTree = iqFactory.createIntensionalDataNode(
+            return iqFactory.createIntensionalDataNode(
                     atomFactory.getIntensionalTripleAtom(subject, predicate, object));
         }
         else {
@@ -571,16 +555,17 @@ public class RDF4JTupleExprTranslator {
 
             // From SPARQL 1.1 "If there is no FROM clause, but there is one or more FROM NAMED clauses,
             // then the dataset includes an empty graph for the default graph."
-            if (defaultGraphCount == 0)
-                subTree = iqFactory.createEmptyNode(
+            if (defaultGraphCount == 0) {
+                return iqFactory.createEmptyNode(
                         Stream.of(subject, predicate, object)
                                 .filter(t -> t instanceof Variable)
                                 .map(t -> (Variable) t)
                                 .collect(ImmutableCollectors.toSet()));
+            }
             // NB: INSERT blocks cannot have more than 1 default graph. Important for the rest
             else if (defaultGraphCount == 1) {
                 IRIConstant graph = termFactory.getConstantIRI(defaultGraphs.iterator().next().stringValue());
-                subTree = iqFactory.createIntensionalDataNode(
+                return iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
             }
             else {
@@ -589,65 +574,36 @@ public class RDF4JTupleExprTranslator {
                 IntensionalDataNode quadNode = iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
-                ImmutableExpression graphFilter = termFactory.getDisjunction(defaultGraphs.stream()
-                                .map(g -> termFactory.getConstantIRI(g.stringValue()))
-                                .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
-                        .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
+                FilterNode filterNode = getGraphFilter(graph, defaultGraphs);
 
                 ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
 
                 // Merges the default trees -> removes duplicates
-                subTree = iqFactory.createUnaryIQTree(
-                        iqFactory.createDistinctNode(),
+                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
                         iqFactory.createUnaryIQTree(
                                 iqFactory.createConstructionNode(projectedVariables),
-                                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(graphFilter), quadNode)));
+                                iqFactory.createUnaryIQTree(filterNode, quadNode)));
             }
         }
-
-        // In most cases
-        if (externalBindings.isEmpty())
-            return createTranslationResult(subTree, ImmutableSet.of());
-
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(subTree.getVariables(), externalBindings.keySet());
-        IQTree iqTree = applyExternalBindingFilter(subTree, externalBindings, externallyBoundedVariables);
-
-        return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
-    private TranslationResult translateQuadPattern(StatementPattern quad) {
-        RDF4JValueExprTranslator translator = getValueTranslator(ImmutableSet.of());
-
-        VariableOrGroundTerm graph = translator.translateRDF4JVar(quad.getContextVar(), true);
+    private IQTree translateQuadPattern(VariableOrGroundTerm subject, VariableOrGroundTerm predicate, VariableOrGroundTerm object, VariableOrGroundTerm graph) {
 
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalQuadAtom(
-                        translator.translateRDF4JVar(quad.getSubjectVar(), true),
-                        translator.translateRDF4JVar(quad.getPredicateVar(), true),
-                        translator.translateRDF4JVar(quad.getObjectVar(), true),
-                        graph));
+                atomFactory.getIntensionalQuadAtom(subject, predicate, object, graph));
 
-        IQTree subTree;
-        if (dataset == null || dataset.getNamedGraphs().isEmpty()) {
-            subTree = dataNode;
-        }
-        else {
-            ImmutableExpression graphFilter = termFactory.getDisjunction(dataset.getNamedGraphs().stream()
-                            .map(g -> termFactory.getConstantIRI(g.stringValue()))
-                            .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
+        return (dataset == null || dataset.getNamedGraphs().isEmpty())
+            ? dataNode
+            : iqFactory.createUnaryIQTree(getGraphFilter(graph, dataset.getNamedGraphs()), dataNode);
+    }
 
-            subTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(graphFilter), dataNode);
-        }
+    private FilterNode getGraphFilter(VariableOrGroundTerm graph, Set<IRI> graphIris) {
+        ImmutableExpression graphFilter = termFactory.getDisjunction(graphIris.stream()
+                        .map(g -> termFactory.getConstantIRI(g.stringValue()))
+                        .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
+                .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
 
-        // In most cases
-        if (externalBindings.isEmpty())
-            return createTranslationResult(subTree, ImmutableSet.of());
-
-        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(subTree.getVariables(), externalBindings.keySet());
-        IQTree iqTree = applyExternalBindingFilter(subTree, externalBindings, externallyBoundedVariables);
-
-        return createTranslationResult(iqTree, ImmutableSet.of());
+        return iqFactory.createFilterNode(graphFilter);
     }
 
     private TranslationResult translate(Extension node) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
@@ -665,7 +621,26 @@ public class RDF4JTupleExprTranslator {
             return childTranslation;
         }
 
-        return translateExtensionElems(mergedVarDefs, childTranslation);
+        TranslationResult result = createTranslationResult(childTranslation.iqTree, childTranslation.nullableVariables);
+
+        for (ImmutableSubstitution<ImmutableTerm> substitution : mergedVarDefs) {
+
+            ImmutableSet<Variable> nullableVariables = result.nullableVariables;
+            ImmutableSet<Variable> newNullableVariables = substitution
+                    .restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
+                    .getDomain();
+
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                    Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),
+                    substitution);
+
+            UnaryIQTree tree = iqFactory.createUnaryIQTree(constructionNode, result.iqTree);
+
+            IQTree iqTree = applyExternalBindingFilter(tree, constructionNode.getSubstitution().getDomain());
+            result = createTranslationResult(iqTree, Sets.union(nullableVariables, newNullableVariables).immutableCopy());
+        }
+
+        return result;
     }
 
     private ImmutableList<ImmutableSubstitution<ImmutableTerm>> getVarDefs(List<ExtensionElem> list,
@@ -688,31 +663,6 @@ public class RDF4JTupleExprTranslator {
                 .collect(ImmutableCollectors.toList());
 
         return mergeVarDefs(varDefs);
-    }
-
-    private TranslationResult translateExtensionElems(ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutions,
-                                                      TranslationResult subquery) {
-
-        TranslationResult result = createTranslationResult(subquery.iqTree, subquery.nullableVariables);
-
-        for (ImmutableSubstitution<ImmutableTerm> substitution : substitutions) {
-
-            ImmutableSet<Variable> nullableVariables = result.nullableVariables;
-            ImmutableSet<Variable> newNullableVariables = substitution
-                    .restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
-                    .getDomain();
-
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                    Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),
-                    substitution);
-
-            result = createTranslationResultFromExtendedProjection(
-                    constructionNode,
-                    iqFactory.createUnaryIQTree(constructionNode, result.iqTree),
-                    Sets.union(nullableVariables, newNullableVariables).immutableCopy());
-        }
-
-        return result;
     }
 
     /** Returns the injective substitution that renames the non-projected variables from the left
@@ -769,18 +719,22 @@ public class RDF4JTupleExprTranslator {
         return new TranslationResult(iqTree, nullableVariables);
     }
 
-    private IQTree applyExternalBindingFilter(IQTree iqTree, ImmutableMap<Variable, GroundTerm> externalBindings,
-                                              Set<Variable> bindingVariablesToFilter) {
+    private IQTree applyExternalBindingFilter(IQTree tree, ImmutableSet<Variable> variables) {
+        // Most of the time
+        if (externalBindings.isEmpty())
+            return tree;
+
+        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(variables, externalBindings.keySet());
 
         Optional<ImmutableExpression> conjunction = termFactory.getConjunction(
-                bindingVariablesToFilter.stream()
+                externallyBoundedVariables.stream()
                         .map(v -> termFactory.getStrictEquality(v, externalBindings.get(v))));
 
         // Filter variables according to bindings
         return conjunction
                 .map(iqFactory::createFilterNode)
-                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, iqTree))
-                .orElse(iqTree);
+                .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, tree))
+                .orElse(tree);
     }
 
 
