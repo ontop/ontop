@@ -4,13 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
+import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-@SnowflakeLightweightTest
+@TrinoLightweightTest
 public class DistinctInAggregateTrinoTest extends AbstractDistinctInAggregateTest {
 
     private static final String PROPERTIES_FILE = "/university/university-trino.properties";
