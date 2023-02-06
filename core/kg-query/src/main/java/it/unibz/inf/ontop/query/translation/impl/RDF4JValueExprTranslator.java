@@ -30,18 +30,23 @@ public class RDF4JValueExprTranslator {
 
     private final TermFactory termFactory;
     private final RDF rdfFactory;
-    private final TypeFactory typeFactory;
-
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final RDF4JValueTranslator valueTranslator;
 
-    public RDF4JValueExprTranslator(Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable, TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory) {
+    public RDF4JValueExprTranslator(Set<Variable> knownVariables,
+                                    ImmutableMap<Variable, GroundTerm> externalBindings,
+                                    boolean treatBNodeAsVariable,
+                                    TermFactory termFactory,
+                                    RDF rdfFactory,
+                                    TypeFactory typeFactory,
+                                    FunctionSymbolFactory functionSymbolFactory) {
         this.knownVariables = knownVariables;
         this.externalBindings = externalBindings;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
-        this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.valueTranslator = new RDF4JValueTranslator(termFactory, rdfFactory, typeFactory);
     }
 
 
@@ -55,7 +60,7 @@ public class RDF4JValueExprTranslator {
             return translateRDF4JVar((Var) expr, false);
         if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
-            return getValueTranslator().getTermForLiteralOrIri(v);
+            return valueTranslator.getTermForLiteralOrIri(v);
         }
         if (expr instanceof Bound) {
             // BOUND (Sec 17.4.1.1)
@@ -147,8 +152,7 @@ public class RDF4JValueExprTranslator {
             if (aggExpr instanceof GroupConcat) {
                 String separator = Optional.ofNullable(((GroupConcat) aggExpr).getSeparator())
                         .map(e -> ((ValueConstant) e).getValue().stringValue())
-                        // Default separator
-                        .orElse(" ");
+                        .orElse(" "); // Default separator
 
                 return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()),
@@ -181,6 +185,7 @@ public class RDF4JValueExprTranslator {
         if (expr instanceof Lang) {
             if (expr.getArg() instanceof Var)
                 return getFunctionalTerm(SPARQL.LANG, term);
+
             throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
         }
         if (expr instanceof IRIFunction) {
@@ -321,14 +326,15 @@ public class RDF4JValueExprTranslator {
         return term.inferType()
                 .flatMap(TermTypeInference::getTermType)
                 .filter(t -> t instanceof RDFDatatype)
-                .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
-                .isPresent() ?
-                term :
-                termFactory.getSPARQLEffectiveBooleanValue(term);
+                .map(t -> (RDFDatatype) t)
+                .filter(t -> t.isA(XSD.BOOLEAN))
+                .isPresent()
+                    ? term
+                    : termFactory.getSPARQLEffectiveBooleanValue(term);
     }
 
     private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
-            new ImmutableMap.Builder<MathExpr.MathOp, String>()
+            ImmutableMap.<MathExpr.MathOp, String>builder()
                     .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
                     .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
                     .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
@@ -367,7 +373,8 @@ public class RDF4JValueExprTranslator {
     public VariableOrGroundTerm translateRDF4JVar(Var v, boolean leafNode) {
         // If this "Var" is a constant
         if ((v.hasValue()))
-            return getValueTranslator().getTermForLiteralOrIri(v.getValue());
+            return valueTranslator.getTermForLiteralOrIri(v.getValue());
+
         if (v.isAnonymous() && !treatBNodeAsVariable)
             return termFactory.getConstantBNode(v.getName());
 
@@ -377,15 +384,9 @@ public class RDF4JValueExprTranslator {
         if (leafNode)
             return var;
         // Otherwise, check whether the variable is projected
-        return knownVariables.contains(var) ?
-                var :
-                Optional.ofNullable(externalBindings.get(var))
+        return knownVariables.contains(var)
+                ? var
+                : Optional.ofNullable(externalBindings.get(var))
                         .orElseGet(termFactory::getNullConstant);
     }
-
-    private RDF4JValueTranslator getValueTranslator() {
-        return new RDF4JValueTranslator(termFactory, rdfFactory, typeFactory);
-    }
-
-
 }
