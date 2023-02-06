@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
@@ -274,7 +273,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             return translate(((QueryRoot) node).getArg(), externalBindings, dataset, treatBNodeAsVariable);
         }
 
-        if (node instanceof StatementPattern){
+        if (node instanceof StatementPattern) {
             StatementPattern stmt = (StatementPattern)node;
             if (stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS))
                 return translateQuadPattern(stmt, externalBindings, dataset, treatBNodeAsVariable);
@@ -422,45 +421,30 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private TranslationResult translateAggregate(Group groupNode, ImmutableMap<Variable, GroundTerm> externalBindings,
                                                  @Nullable Dataset dataset, boolean treatBNodeAsVariable) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(groupNode.getArg(), externalBindings, dataset, treatBNodeAsVariable);
-        AggregationNode an = getAggregationNode(groupNode, child.iqTree.getVariables(), externalBindings, treatBNodeAsVariable);
-
-        UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(
-                an,
-                child.iqTree
-        );
-        ImmutableSet<Variable> nullableVariables = getAggregateOutputNullableVars(
-                an,
-                child.nullableVariables
-        );
-
-        return createTranslationResultFromExtendedProjection(an, aggregationTree, nullableVariables, externalBindings);
-    }
-
-    private ImmutableSet<Variable> getAggregateOutputNullableVars(AggregationNode an, ImmutableSet<Variable> childNullableVars) {
-        return Sets.union(
-                        Sets.intersection(an.getGroupingVariables(), childNullableVars),
-                        an.getSubstitution().restrictRange(t -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0)))
-                                .getDomain())
-                .immutableCopy();
-    }
-
-    private AggregationNode getAggregationNode(Group groupNode, ImmutableSet<Variable> childVariables,
-                                               ImmutableMap<Variable, GroundTerm> externalBindings, boolean treatBNodeAsVariable) {
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergedVarDefs =
-                getGroupVarDefs(groupNode.getGroupElements(), childVariables, externalBindings, treatBNodeAsVariable);
+                getGroupVarDefs(groupNode.getGroupElements(), child.iqTree.getVariables(), externalBindings, treatBNodeAsVariable);
 
         if (mergedVarDefs.size() > 1) {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
                     "within an RDF4J Group node: " + groupNode);
         }
-        return iqFactory.createAggregationNode(
+        AggregationNode an = iqFactory.createAggregationNode(
                 groupNode.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.get(0).castTo(ImmutableFunctionalTerm.class) // the only substitution
-        );
+                mergedVarDefs.get(0).castTo(ImmutableFunctionalTerm.class)); // only one substitution guaranteed by the if
+
+        UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(an, child.iqTree);
+
+        ImmutableSet<Variable> nullableVariables = Sets.union(
+                        Sets.intersection(an.getGroupingVariables(), child.nullableVariables),
+                        an.getSubstitution().restrictRange(t -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0)))
+                                .getDomain())
+                .immutableCopy();
+
+        return createTranslationResultFromExtendedProjection(an, aggregationTree, nullableVariables, externalBindings);
     }
 
     private ImmutableList<ImmutableSubstitution<ImmutableTerm>> getGroupVarDefs(List<GroupElem> list,
@@ -819,14 +803,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         TranslationResult leftTranslation = translate(union.getLeftArg(), externalBindings, dataset, treatBNodeAsVariable);
         TranslationResult rightTranslation = translate(union.getRightArg(), externalBindings, dataset, treatBNodeAsVariable);
 
-        IQTree leftQuery = leftTranslation.iqTree;
-        IQTree rightQuery = rightTranslation.iqTree;
-
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()));
+                Sets.union(leftTranslation.iqTree.getKnownVariables(), rightTranslation.iqTree.getKnownVariables()));
 
-        ImmutableSet<Variable> leftVariables = leftQuery.getVariables();
-        ImmutableSet<Variable> rightVariables = rightQuery.getVariables();
+        ImmutableSet<Variable> leftVariables = leftTranslation.iqTree.getVariables();
+        ImmutableSet<Variable> rightVariables = rightTranslation.iqTree.getVariables();
 
         Sets.SetView<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables);
         Sets.SetView<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables);
@@ -846,7 +827,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         ConstructionNode rootNode = iqFactory.createConstructionNode(rootVariables);
 
-        NonProjVarRenamings nonProjVarsRenamings = getNonProjVarsRenamings(leftQuery, rightQuery, variableGenerator);
+        NonProjVarRenamings nonProjVarsRenamings = getNonProjVarsRenamings(leftTranslation.iqTree, rightTranslation.iqTree, variableGenerator);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
@@ -854,8 +835,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         iqFactory.createNaryIQTree(
                                 unionNode,
                                 ImmutableList.of(
-                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(leftCn, leftQuery), nonProjVarsRenamings.left),
-                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(rightCn, rightQuery), nonProjVarsRenamings.right)))),
+                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(leftCn, leftTranslation.iqTree), nonProjVarsRenamings.left),
+                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(rightCn, rightTranslation.iqTree), nonProjVarsRenamings.right)))),
                 allNullable);
     }
 
@@ -899,9 +880,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                                 .map(iriConstant -> termFactory.getStrictEquality(graph, iriConstant)))
                         .orElseThrow(() -> new MinorOntopInternalBugException("The empty case already handled"));
 
-                ImmutableSet<Variable> projectedVariables = quadNode.getVariables().stream()
-                        .filter(v -> !v.equals(graph))
-                        .collect(ImmutableCollectors.toSet());
+                ImmutableSet<Variable> projectedVariables = Sets.difference(quadNode.getVariables(), ImmutableSet.of(graph)).immutableCopy();
 
                 // Merges the default trees -> removes duplicates
                 subTree = iqFactory.createUnaryIQTree(
@@ -932,8 +911,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                         translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
                         translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
                         translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true, externalBindings, treatBNodeAsVariable),
-                        graph
-                ));
+                        graph));
 
         IQTree subTree;
         if (dataset == null || dataset.getNamedGraphs().isEmpty()) {
@@ -1010,7 +988,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         for (ImmutableSubstitution<ImmutableTerm> substitution : substitutions) {
 
-            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(substitution, result.nullableVariables);
+            ImmutableSet<Variable> nullableVariables = result.nullableVariables;
+            ImmutableSet<Variable> newNullableVariables = substitution
+                    .restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
+                    .getDomain();
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(
                     Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),
@@ -1019,7 +1000,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             result = createTranslationResultFromExtendedProjection(
                     constructionNode,
                     iqFactory.createUnaryIQTree(constructionNode, result.iqTree),
-                    Sets.union(result.nullableVariables, newNullableVariables).immutableCopy(),
+                    Sets.union(nullableVariables, newNullableVariables).immutableCopy(),
                     externalBindings);
         }
 
@@ -1049,11 +1030,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         return new NonProjVarRenamings(leftSubstitution, rightSubstitution);
     }
 
-    private ImmutableSet<Variable> getNewNullableVars(ImmutableSubstitution<ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
-        return sub.restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
-                .getDomain();
-    }
-
     private ImmutableList<ImmutableSubstitution<ImmutableTerm>> mergeVarDefs(ImmutableList<VarDef> varDefs)  {
         Deque<Map<Variable, ImmutableTerm>> substitutionMapList = new LinkedList<>();
         substitutionMapList.add(new HashMap<>());
@@ -1073,15 +1049,16 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
     private GroundTerm getTermForLiteralOrIri(Value v) {
 
+        if (v instanceof IRI)
+            return termFactory.getConstantIRI(rdfFactory.createIRI(((IRI) v).stringValue()));
         if (v instanceof Literal) {
             try {
                 return getTermForLiteral((Literal) v);
-            } catch (OntopUnsupportedKGQueryException e) {
+            }
+            catch (OntopUnsupportedKGQueryException e) {
                 throw new RuntimeException(e);
             }
         }
-        if (v instanceof IRI)
-            return getTermForIri((IRI) v);
 
         throw new RuntimeException(new OntopUnsupportedKGQueryException("The value " + v + " is not supported yet!"));
     }
@@ -1093,17 +1070,11 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
 
         if (lang.isPresent()) {
             return termFactory.getRDFLiteralConstant(value, lang.get());
-
-        } else {
-            RDFDatatype type;
-            /*
-             * default data type is xsd:string
-             */
-            if (typeURI == null) {
-                type = typeFactory.getXsdStringDatatype();
-            } else {
-                type = typeFactory.getDatatype(rdfFactory.createIRI(typeURI.stringValue()));
-            }
+        }
+        else {
+            RDFDatatype type = (typeURI == null)
+                ? typeFactory.getXsdStringDatatype() // default data type is xsd:string
+                : typeFactory.getDatatype(rdfFactory.createIRI(typeURI.stringValue()));
 
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
@@ -1156,12 +1127,9 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
      * @return term
      */
 
+    // TODO: QueryModelVisitor
     private ImmutableTerm getTerm(ValueExpr expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings,
                                   boolean treatBNodeAsVariable) {
-
-        // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
-        //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
-        // iriOrFunction ::= iri ArgList?
 
         if (expr instanceof Var)
             return translateRDF4JVar((Var) expr, knownVariables, false, externalBindings, treatBNodeAsVariable);
@@ -1174,246 +1142,15 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return knownVariables.contains(var) ?
-                    termFactory.getImmutableFunctionalTerm(
-                            functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                    SPARQL.BOUND,
-                                    1
-                            ),
-                            var
-                    ) :
-                    termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
+            return knownVariables.contains(var)
+                    ? getFunctionalTerm(SPARQL.BOUND, var)
+                    : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
         }
         if (expr instanceof UnaryValueOperator) {
-            // O-ary count
-            if (expr instanceof Count && ((Count) expr).getArg() == null) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.COUNT,
-                                0
-                        ));
-            }
-
-            ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables, externalBindings, treatBNodeAsVariable);
-
-            //Unary count
-            if (expr instanceof Count) {
-                return termFactory.getImmutableFunctionalTerm(
-                        getSPARQLAggregateFunctionSymbol(
-                                SPARQL.COUNT,
-                                1,
-                                ((Count)expr).isDistinct()
-                        ),
-                        term);
-            }
-            if (expr instanceof Avg) {
-                return termFactory.getImmutableFunctionalTerm(
-                        getSPARQLAggregateFunctionSymbol(
-                                SPARQL.AVG,
-                                1,
-                                ((Avg)expr).isDistinct()
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof Sum) {
-                return termFactory.getImmutableFunctionalTerm(
-                        getSPARQLAggregateFunctionSymbol(
-                                SPARQL.SUM,
-                                1,
-                                ((Sum) expr).isDistinct()
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof Min) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.MIN,
-                                1
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof Max) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.MAX,
-                                1
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof Sample) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.SAMPLE,
-                                1
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof GroupConcat) {
-                String separator = Optional.ofNullable(((GroupConcat) expr).getSeparator())
-                        .map(e -> ((ValueConstant) e).getValue().stringValue())
-                        // Default separator
-                        .orElse(" ");
-
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(
-                                separator,
-                                ((GroupConcat) expr).isDistinct()
-                        ),
-                        term
-                );
-            }
-            if (expr instanceof Not) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                        convertToXsdBooleanTerm(term));
-            }
-            if (expr instanceof IsNumeric) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_NUMERIC, 1),
-                        term);
-            }
-            if (expr instanceof IsLiteral) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1),
-                        term);
-            }
-            if (expr instanceof IsURI) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_IRI, 1),
-                        term);
-            }
-            if (expr instanceof Str) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.STR, 1),
-                        term);
-            }
-            if (expr instanceof Datatype) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.DATATYPE, 1),
-                        term);
-            }
-            if (expr instanceof IsBNode) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_BLANK, 1),
-                        term);
-            }
-            if (expr instanceof Lang) {
-                ValueExpr arg = ((UnaryValueOperator) expr).getArg();
-                if (arg instanceof Var)
-                    return termFactory.getImmutableFunctionalTerm(
-                            functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG, 1),
-                            term);
-                throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
-            }
-            // other subclasses
-            // IRIFunction: IRI (Sec 17.4.2.8) for constructing IRIs
-            // IsNumeric:  isNumeric (Sec 17.4.2.4) for checking whether the argument is a numeric value
-            // AggregateOperatorBase: Avg, Min, Max, etc.
-            // Like:  ??
-            // IsResource: ??
-            // LocalName: ??
-            // Namespace: ??
-            // Label: ??
+            return getTerm((UnaryValueOperator) expr, knownVariables, externalBindings, treatBNodeAsVariable);
         }
         if (expr instanceof BinaryValueOperator) {
-            BinaryValueOperator bexpr = (BinaryValueOperator) expr;
-            ImmutableTerm term1 = getTerm(bexpr.getLeftArg(), knownVariables, externalBindings, treatBNodeAsVariable);
-            ImmutableTerm term2 = getTerm(bexpr.getRightArg(), knownVariables, externalBindings, treatBNodeAsVariable);
-
-            if (expr instanceof And) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2),
-                        convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            }
-            if (expr instanceof Or) {
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2),
-                        convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            }
-            if (expr instanceof SameTerm) {
-                // sameTerm (Sec 17.4.1.8)
-                // Corresponds to the STRICT equality (same lexical value, same type)
-                return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.SAME_TERM, 2),
-                        term1, term2);
-            }
-            if (expr instanceof Regex) {
-                // REGEX (Sec 17.4.3.14)
-                // xsd:boolean  REGEX (string literal text, simple literal pattern)
-                // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
-                Regex reg = (Regex) expr;
-                return (reg.getFlagsArg() != null)
-                        ? termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 3),
-                        term1, term2,
-                        getTerm(reg.getFlagsArg(), knownVariables, externalBindings, treatBNodeAsVariable))
-                        : termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
-                        term1, term2);
-            }
-            if (expr instanceof Compare) {
-                final SPARQLFunctionSymbol p;
-
-                switch (((Compare) expr).getOperator()) {
-                    case NE:
-                        return termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getImmutableFunctionalTerm(
-                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2),
-                                        term1, term2));
-                    case EQ:
-                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
-                        break;
-                    case LT:
-                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2);
-                        break;
-                    case LE:
-                        return termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getImmutableFunctionalTerm(
-                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2),
-                                        term1, term2));
-                    case GE:
-                        return termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getImmutableFunctionalTerm(
-                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2),
-                                        term1, term2));
-                    case GT:
-                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2);
-                        break;
-                    default:
-                        throw new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr));
-                }
-                return termFactory.getImmutableFunctionalTerm(p, term1, term2);
-            }
-            if (expr instanceof MathExpr) {
-                SPARQLFunctionSymbol f = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                        NumericalOperations.get(((MathExpr) expr).getOperator()), 2);
-                return termFactory.getImmutableFunctionalTerm(f, term1, term2);
-            }
-            /*
-             * Restriction: the first argument must be LANG(...) and the second  a constant
-             * (for guaranteeing that the langMatches logic is not delegated to the native query)
-             */
-            if (expr instanceof LangMatches) {
-                if (!(term1 instanceof ImmutableFunctionalTerm
-                        && ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
-                        || !(term2 instanceof RDFConstant)) {
-                    throw new RuntimeException(new OntopUnsupportedKGQueryException("The function langMatches is " +
-                            "only supported with lang(..) function for the first argument and a constant for the second")
-                    );
-                }
-
-                SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2);
-
-                return termFactory.getImmutableFunctionalTerm(langMatchesFunctionSymbol, term1, term2);
-            }
+            return getTerm((BinaryValueOperator) expr, knownVariables, externalBindings, treatBNodeAsVariable);
         }
         if (expr instanceof FunctionCall) {
             FunctionCall f = (FunctionCall) expr;
@@ -1432,31 +1169,103 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
             }
         }
         if (expr instanceof NAryValueOperator) {
-            NAryValueOperator op = (NAryValueOperator) expr;
-
-            ImmutableList<ImmutableTerm> terms = op.getArguments().stream()
-                    .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
-                    .collect(ImmutableCollectors.toList());
-
-            if (expr instanceof Coalesce) {
-                SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                        SPARQL.COALESCE, terms.size());
-                return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
-            }
-            //Others: ListMemberOperator
+            return getTerm((NAryValueOperator) expr, knownVariables, externalBindings, treatBNodeAsVariable);
         }
         if (expr instanceof BNodeGenerator) {
             Optional<ImmutableTerm> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
                     .map(t -> getTerm(t, knownVariables, externalBindings, treatBNodeAsVariable));
 
-            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                    SPARQL.BNODE, term.isPresent() ? 1 : 0);
             return term
-                    .map(t -> termFactory.getImmutableFunctionalTerm(functionSymbol, t))
-                    .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol));
+                    .map(t -> getFunctionalTerm(SPARQL.BNODE, t))
+                    .orElseGet(() -> getFunctionalTerm(SPARQL.BNODE));
+        }
+        if (expr instanceof If) {
+            If ifExpr = (If) expr;
+
+            return getFunctionalTerm(SPARQL.IF,
+                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables, externalBindings, treatBNodeAsVariable)),
+                    getTerm(ifExpr.getResult(), knownVariables, externalBindings, treatBNodeAsVariable),
+                    getTerm(ifExpr.getAlternative(), knownVariables, externalBindings, treatBNodeAsVariable));
+        }
+        // other subclasses
+        // SubQueryValueOperator
+        // ValueExprTripleRef
+        throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
+    }
+
+    private ImmutableTerm getTerm(UnaryValueOperator expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                  boolean treatBNodeAsVariable) {
+
+        if (expr.getArg() == null) {
+            if (expr instanceof Count)  // O-ary count
+                return getFunctionalTerm(SPARQL.COUNT);
+
+            throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
+        }
+
+        ImmutableTerm term = getTerm(expr.getArg(), knownVariables, externalBindings, treatBNodeAsVariable);
+
+        if (expr instanceof AbstractAggregateOperator) {
+            AbstractAggregateOperator aggExpr = (AbstractAggregateOperator) expr;
+            if (aggExpr instanceof Count) { //Unary count
+                return getAggregateFunctionalTerm(SPARQL.COUNT, aggExpr.isDistinct(), term);
+            }
+            if (aggExpr instanceof Avg) {
+                return getAggregateFunctionalTerm(SPARQL.AVG, aggExpr.isDistinct(), term);
+            }
+            if (aggExpr instanceof Sum) {
+                return getAggregateFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), term);
+            }
+            if (aggExpr instanceof Min) {
+                return getFunctionalTerm(SPARQL.MIN, term);
+            }
+            if (aggExpr instanceof Max) {
+                return getFunctionalTerm(SPARQL.MAX, term);
+            }
+            if (aggExpr instanceof Sample) {
+                return getFunctionalTerm(SPARQL.SAMPLE, term);
+            }
+            if (aggExpr instanceof GroupConcat) {
+                String separator = Optional.ofNullable(((GroupConcat) aggExpr).getSeparator())
+                        .map(e -> ((ValueConstant) e).getValue().stringValue())
+                        // Default separator
+                        .orElse(" ");
+
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()),
+                        term);
+            }
+            throw new RuntimeException("Unreachable: all subclasses covered");
+        }
+        if (expr instanceof Not) {
+            return getFunctionalTerm(XPathFunction.NOT.getIRIString(), convertToXsdBooleanTerm(term));
+        }
+        if (expr instanceof IsNumeric) {
+            // isNumeric (Sec 17.4.2.4) for checking whether the argument is a numeric value
+            return getFunctionalTerm(SPARQL.IS_NUMERIC, term);
+        }
+        if (expr instanceof IsLiteral) {
+            return getFunctionalTerm(SPARQL.IS_LITERAL, term);
+        }
+        if (expr instanceof IsURI) {
+            return getFunctionalTerm(SPARQL.IS_IRI, term);
+        }
+        if (expr instanceof Str) {
+            return getFunctionalTerm(SPARQL.STR, term);
+        }
+        if (expr instanceof Datatype) {
+            return getFunctionalTerm(SPARQL.DATATYPE, term);
+        }
+        if (expr instanceof IsBNode) {
+            return getFunctionalTerm(SPARQL.IS_BLANK, term);
+        }
+        if (expr instanceof Lang) {
+            if (expr.getArg() instanceof Var)
+                return getFunctionalTerm(SPARQL.LANG, term);
+            throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
         }
         if (expr instanceof IRIFunction) {
-            ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables, externalBindings, treatBNodeAsVariable);
+            // IRIFunction: IRI (Sec 17.4.2.8) for constructing IRIs
             Optional<org.apache.commons.rdf.api.IRI> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI())
                     .map(rdfFactory::createIRI);
 
@@ -1464,49 +1273,130 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                     .map(functionSymbolFactory::getIRIFunctionSymbol)
                     .orElseGet(functionSymbolFactory::getIRIFunctionSymbol);
 
-            return termFactory.getImmutableFunctionalTerm(functionSymbol, argument);
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, term);
         }
-        if (expr instanceof If) {
-            If ifExpr = (If) expr;
-
-            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                    SPARQL.IF, 3);
-
-            return termFactory.getImmutableFunctionalTerm(
-                    functionSymbol,
-                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables, externalBindings, treatBNodeAsVariable)),
-                    getTerm(ifExpr.getResult(), knownVariables, externalBindings, treatBNodeAsVariable),
-                    getTerm(ifExpr.getAlternative(), knownVariables, externalBindings, treatBNodeAsVariable));
-        }
-        if (expr instanceof ListMemberOperator) {
-            ListMemberOperator listMemberOperator = (ListMemberOperator) expr;
-            List<ValueExpr> arguments = listMemberOperator.getArguments();
-            if (arguments.size() < 2)
-                throw new MinorOntopInternalBugException("Was not expecting a ListMemberOperator from RDF4J with less than 2 args");
-
-            ImmutableList<ImmutableTerm> argTerms = arguments.stream()
-                    .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
-                    .collect(ImmutableCollectors.toList());
-            ImmutableTerm firstArgument = argTerms.get(0);
-
-            SPARQLFunctionSymbol eq = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
-            SPARQLFunctionSymbol or = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2);
-
-            return argTerms.stream()
-                    .skip(1)
-                    .map(t -> termFactory.getImmutableFunctionalTerm(eq, firstArgument, t))
-                    .reduce((e1, e2) -> termFactory.getImmutableFunctionalTerm(or, e1, e2))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen because of the check above"));
-        }
-        // other subclasses
-        // SubQueryValueOperator
+        // subclasses missing:
+        //  - IsResource
+        //   - LocalName
+        //   - Namespace
+        //   - Label
+        //   - Like
         throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
     }
 
-    private FunctionSymbol getSPARQLAggregateFunctionSymbol(String officialName, int arity, boolean isDistinct) {
-        return isDistinct
-                ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, arity)
-                : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, arity);
+    private ImmutableTerm getTerm(BinaryValueOperator expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                  boolean treatBNodeAsVariable) {
+
+        ImmutableTerm term1 = getTerm(expr.getLeftArg(), knownVariables, externalBindings, treatBNodeAsVariable);
+        ImmutableTerm term2 = getTerm(expr.getRightArg(), knownVariables, externalBindings, treatBNodeAsVariable);
+
+        if (expr instanceof And) {
+            return getFunctionalTerm(SPARQL.LOGICAL_AND, convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
+        }
+        if (expr instanceof Or) {
+            return getFunctionalTerm(SPARQL.LOGICAL_OR, convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
+        }
+        if (expr instanceof SameTerm) {
+            // sameTerm (Sec 17.4.1.8)
+            // Corresponds to the STRICT equality (same lexical value, same type)
+            return getFunctionalTerm(SPARQL.SAME_TERM, term1, term2);
+        }
+        if (expr instanceof Regex) {
+            // REGEX (Sec 17.4.3.14)
+            // xsd:boolean  REGEX (string literal text, simple literal pattern)
+            // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
+            Regex reg = (Regex) expr;
+            return (reg.getFlagsArg() != null)
+                    ? getFunctionalTerm(SPARQL.REGEX, term1, term2,
+                            getTerm(reg.getFlagsArg(), knownVariables, externalBindings, treatBNodeAsVariable))
+                    : getFunctionalTerm(SPARQL.REGEX, term1, term2);
+        }
+        if (expr instanceof Compare) {
+            switch (((Compare) expr).getOperator()) {
+                case EQ:
+                    return getFunctionalTerm(SPARQL.EQ, term1, term2);
+                case LT:
+                    return getFunctionalTerm(SPARQL.LESS_THAN, term1, term2);
+                case GT:
+                    return getFunctionalTerm(SPARQL.GREATER_THAN, term1, term2);
+                case NE:
+                    return getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.EQ, term1, term2));
+                case LE:
+                    return getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.GREATER_THAN, term1, term2));
+                case GE:
+                    return getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.LESS_THAN, term1, term2));
+                default:
+                    throw new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr));
+            }
+        }
+        if (expr instanceof MathExpr) {
+            return getFunctionalTerm(NumericalOperations.get(((MathExpr) expr).getOperator()), term1, term2);
+        }
+        /*
+         * Restriction: the first argument must be LANG(...) and the second  a constant
+         * (for guaranteeing that the langMatches logic is not delegated to the native query)
+         */
+        if (expr instanceof LangMatches) {
+            if (!(term1 instanceof ImmutableFunctionalTerm
+                    && ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
+                    || !(term2 instanceof RDFConstant)) {
+                throw new RuntimeException(new OntopUnsupportedKGQueryException("The function langMatches is " +
+                        "only supported with lang(..) function for the first argument and a constant for the second"));
+            }
+
+            return getFunctionalTerm(SPARQL.LANG_MATCHES, term1, term2);
+        }
+        throw new RuntimeException("Unreachable: all subclasses covered");
+    }
+
+    private ImmutableTerm getTerm(NAryValueOperator expr, Set<Variable> knownVariables, ImmutableMap<Variable, GroundTerm> externalBindings,
+                                  boolean treatBNodeAsVariable) {
+
+        ImmutableList<ImmutableTerm> terms = expr.getArguments().stream()
+                .map(a -> getTerm(a, knownVariables, externalBindings, treatBNodeAsVariable))
+                .collect(ImmutableCollectors.toList());
+
+        if (expr instanceof Coalesce) {
+            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                    SPARQL.COALESCE, terms.size());
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
+        }
+        if (expr instanceof ListMemberOperator) {
+            if (terms.size() < 2)
+                throw new MinorOntopInternalBugException("Was not expecting a ListMemberOperator from RDF4J with less than 2 terms");
+
+            ImmutableTerm firstArgument = terms.get(0);
+            return terms.stream()
+                    .skip(1)
+                    .map(t -> getFunctionalTerm(SPARQL.EQ, firstArgument, t))
+                    .reduce((e1, e2) -> getFunctionalTerm(SPARQL.LOGICAL_OR, e1, e2))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen because there are at least 2 terms"));
+        }
+        throw new RuntimeException("Unreachable: all subclasses covered");
+    }
+
+    private ImmutableFunctionalTerm getFunctionalTerm(String functionName) {
+        return termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(functionName, 0));
+    }
+
+    private ImmutableFunctionalTerm getFunctionalTerm(String functionName, ImmutableTerm t) {
+        return termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(functionName, 1), t);
+    }
+
+    private ImmutableFunctionalTerm getFunctionalTerm(String functionName, ImmutableTerm t1, ImmutableTerm t2) {
+        return termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(functionName, 2), t1, t2);
+    }
+
+    private ImmutableFunctionalTerm getFunctionalTerm(String functionName, ImmutableTerm t1, ImmutableTerm t2, ImmutableTerm t3) {
+        return termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(functionName, 3), t1, t2, t3);
+    }
+
+    private ImmutableFunctionalTerm getAggregateFunctionalTerm(String officialName, boolean isDistinct, ImmutableTerm t) {
+        return termFactory.getImmutableFunctionalTerm(
+                isDistinct
+                        ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, 1)
+                        : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, 1),
+                t);
     }
 
     /**
@@ -1556,14 +1446,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
                 var :
                 Optional.ofNullable(externalBindings.get(var))
                         .orElseGet(termFactory::getNullConstant);
-    }
-
-    /**
-     * @param v URI object
-     * @return term (URI template)
-     */
-    private GroundTerm getTermForIri(IRI v) {
-        return termFactory.getConstantIRI(rdfFactory.createIRI(v.stringValue()));
     }
 
     private TranslationResult createTranslationResult(IQTree iqTree, ImmutableSet<Variable> nullableVariables)  {
