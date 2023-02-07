@@ -9,17 +9,8 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-  trino_pg:
-    build: ./trino/postgres
-    hostname: trinopg
-    env_file: .env
-    ports:
-      - "7001:5432"
-    environment:
-      - POSTGRES_PASSWORD=${TRINO_PASSWORD}
-
   trino:
-    build: ./trino/trino
+    build: ./trino
     env_file: .env
     ports:
       - "7002:8080"

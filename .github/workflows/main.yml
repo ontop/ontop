@@ -281,7 +281,7 @@ jobs:
         run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
-          docker-compose -f "docker-compose.lightweight.yml" up -d trino_pg trino
+          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql trino
       - name: Sleep for 20 seconds
         run: sleep 20s
         shell: bash
