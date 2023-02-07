@@ -23,8 +23,6 @@ services:
     env_file: .env
     ports:
       - "7002:8080"
-    volumes:
-      - ./trino/trino/catalog:/etc/trino/catalog
     environment:
       - POSTGRES_PASSWORD=${TRINO_PASSWORD}
 
