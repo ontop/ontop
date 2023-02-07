@@ -16,8 +16,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionS
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -104,7 +103,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         ImmutableFunctionalTerm objectTermDefinition = termFactory.getRDFLiteralFunctionalTerm(objectLexicalTerm, datatype);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().builder()
+        Substitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().builder()
                         .transformOrRetain(ImmutableMap.of(objectVariable, objectTermDefinition)::get, (t, u) -> u)
                         .build();
 

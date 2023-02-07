@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -173,7 +173,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
                         t -> t,
                         t -> variableGenerator.generateNewVariable()));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(subVariableMap, aggregateMap,
+        Substitution<ImmutableFunctionalTerm> substitution = computeSubstitution(subVariableMap, aggregateMap,
                 termFactory);
 
         ImmutableFunctionalTerm liftableTerm = computeLiftableTerm(aggregateMap, termFactory);
@@ -203,9 +203,9 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
         return DefinitionPushDownRequest.create(newVariable, definition, condition);
     }
 
-    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(ImmutableMap<RDFTermType, Variable> subVariableMap,
-                                                                                ImmutableMap<RDFTermType, Variable> aggregateMap,
-                                                                                TermFactory termFactory) {
+    private Substitution<ImmutableFunctionalTerm> computeSubstitution(ImmutableMap<RDFTermType, Variable> subVariableMap,
+                                                                      ImmutableMap<RDFTermType, Variable> aggregateMap,
+                                                                      TermFactory termFactory) {
         return termFactory.getSubstitution(aggregateMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getValue,

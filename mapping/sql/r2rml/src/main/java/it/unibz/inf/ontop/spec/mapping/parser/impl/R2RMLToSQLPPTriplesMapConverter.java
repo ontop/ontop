@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
@@ -194,7 +194,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		ImmutableTerm extractedSubject = getSubjectTerm(tm, regularTriplesMap);
 		ImmutableTerm extractedObject = getSubjectTerm(parent, regularTriplesMap);
 
-		InjectiveVar2VarSubstitution sub, ob;
+		InjectiveSubstitution<Variable> sub, ob;
 		String sourceQuery;
 
 		if (robm.getJoinConditions().isEmpty()) {

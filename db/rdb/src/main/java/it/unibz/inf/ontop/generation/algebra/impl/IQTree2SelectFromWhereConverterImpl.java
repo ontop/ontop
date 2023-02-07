@@ -11,8 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -91,7 +90,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByAggregationTree).getChild())
                 .orElse(firstNonSliceDistinctConstructionOrderByAggregationTree);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
+        Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
                         .map(AggregationNode::getSubstitution)
                         .map(s2 -> s2.compose(c.getSubstitution())

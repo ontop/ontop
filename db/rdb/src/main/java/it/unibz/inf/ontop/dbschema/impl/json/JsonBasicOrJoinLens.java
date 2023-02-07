@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -138,7 +138,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionThrowsExceptions(
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionThrowsExceptions(
                 columns.added,
                 a -> getVariable(a.name, idFactory, termFactory),
                 a -> extractExpression(a, parentAttributeMap, idFactory, coreSingletons));

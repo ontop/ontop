@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -92,13 +92,13 @@ public class IQ2CQ {
 
             SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-            InjectiveVar2VarSubstitution freshRenaming = originalValuesNode.getOrderedVariables().stream()
+            InjectiveSubstitution<Variable> freshRenaming = originalValuesNode.getOrderedVariables().stream()
                     .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
             ValuesNode freshValuesNode = originalValuesNode.applyFreshRenaming(freshRenaming);
             ImmutableList<Variable> freshVariables = freshValuesNode.getOrderedVariables();
 
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
                     .collect(substitutionFactory.toSubstitution(
                             e -> freshVariables.get(e.getKey()),
                             Map.Entry::getValue));

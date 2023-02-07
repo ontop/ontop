@@ -3,21 +3,20 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Set;
 
-public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<Variable> implements InjectiveVar2VarSubstitution {
+public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends SubstitutionImpl<T> implements InjectiveSubstitution<T> {
 
-    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, TermFactory termFactory) {
-        super(substitutionMap, termFactory);
+    protected InjectiveSubstitutionImpl(ImmutableMap<Variable, T> map, TermFactory termFactory) {
+        super(map, termFactory);
 
         if (!isInjective(this.map))
-            throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
+            throw new IllegalArgumentException("Non-injective map given: " + map);
     }
 
     @Override
@@ -27,15 +26,15 @@ public class InjectiveVar2VarSubstitutionImpl extends ImmutableSubstitutionImpl<
 
 
     @Override
-    public InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set) {
-        return new InjectiveVar2VarSubstitutionImpl(map.entrySet().stream()
+    public InjectiveSubstitution<T> restrictDomainTo(Set<Variable> set) {
+        return new InjectiveSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }
 
     @Override
-    public InjectiveVar2VarSubstitution removeFromDomain(Set<Variable> set) {
-        return new InjectiveVar2VarSubstitutionImpl(map.entrySet().stream()
+    public InjectiveSubstitution<T> removeFromDomain(Set<Variable> set) {
+        return new InjectiveSubstitutionImpl<>(map.entrySet().stream()
                 .filter(e -> !set.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()), termFactory);
     }

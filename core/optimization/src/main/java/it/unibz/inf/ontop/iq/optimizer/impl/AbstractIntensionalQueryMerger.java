@@ -83,7 +83,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
          *
          */
         private IQTree replaceIntensionalData(IntensionalDataNode dataNode, IQ definition) {
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
             IQ renamedIQ;
@@ -94,7 +94,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                 renamedIQ = queryRenamer.transform(definition);
             }
 
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
                     atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),
                             substitutionFactory.onVariables().apply(renamingSubstitution, renamedIQ.getProjectionAtom().getArguments())),
                     dataNode.getProjectionAtom());
@@ -104,8 +104,8 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
                     .normalizeForOptimization(variableGenerator);
         }
 
-        private ImmutableSubstitution<? extends VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
-                                                                                DataAtom<AtomPredicate> targetAtom) {
+        private Substitution<? extends VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
+                                                                                 DataAtom<AtomPredicate> targetAtom) {
             if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
                 throw new IllegalStateException("Incompatible predicates");
             }

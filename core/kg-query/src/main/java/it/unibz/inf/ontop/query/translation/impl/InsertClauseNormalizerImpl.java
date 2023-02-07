@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -81,7 +81,7 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(whereTree.getVariables())
                 : createBNodeDefinitionsFromNonNullableUniqueConstraint(nonNullableUniqueConstraints.iterator().next());
 
-        ImmutableSubstitution<ImmutableTerm> substitution = bNodeMap.entrySet().stream()
+        Substitution<ImmutableTerm> substitution = bNodeMap.entrySet().stream()
                 .collect(substitutionFactory.toSubstitution(Map.Entry::getValue, e -> term));
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))

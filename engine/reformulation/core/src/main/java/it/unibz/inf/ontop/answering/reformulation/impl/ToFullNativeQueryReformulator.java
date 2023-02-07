@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         DistinctVariableOnlyDataAtom initialProjectionAtom = iq.getProjectionAtom();
         IQTree initialTree = iq.getTree();
 
-        ImmutableSubstitution<ImmutableTerm> definitions = extractDefinitions(initialTree);
+        Substitution<ImmutableTerm> definitions = extractDefinitions(initialTree);
         ImmutableMap<Variable, RDFTermType> rdfTypes = extractRDFTypes(definitions);
 
         IQTree dbTree = replaceRDFByDBTerms(initialTree, rdfTypes);
@@ -142,7 +142,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         }
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
                     .transform((v, t) -> replaceRDFByDBTerm(t, rdfTypes.get(v)))
                     .build();
 
@@ -155,11 +155,11 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                     "(proper exception should have already been thrown)");
     }
 
-    private ImmutableSubstitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
+    private Substitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
         QueryNode rootNode = rdfTree.getRootNode();
         if (rootNode instanceof ConstructionNode) {
             // NB: should not include any non-projected variable (illegal IQ)
-            ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
             Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
             if (missingVariables.isEmpty())
                 return substitution;
@@ -195,7 +195,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                 "(proper exception should have already been thrown)");
     }
 
-    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(ImmutableSubstitution<ImmutableTerm> definitions)
+    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(Substitution<ImmutableTerm> definitions)
             throws NotFullyTranslatableToNativeQueryException {
 
         ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder(); // in order to handle checked exceptions
@@ -207,7 +207,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     }
 
     private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition,
-                                       ImmutableSubstitution<ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
+                                       Substitution<ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
         if (definition instanceof Variable) {
             Variable otherVariable = (Variable) definition;
             return extractRDFType(otherVariable, definitions.get(otherVariable), definitions);

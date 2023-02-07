@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -45,7 +45,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
 
     @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(
                 tree.getVariables(),

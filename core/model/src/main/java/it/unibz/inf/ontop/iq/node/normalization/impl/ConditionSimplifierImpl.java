@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -94,7 +94,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 .filter(e -> e.getTerms().stream().allMatch(t -> t instanceof NonFunctionalTerm))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
+        Substitution<NonFunctionalTerm> normalizedUnifier = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
                 .unify(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
                 .build()
                 // TODO: merge priorityRenaming with the orientate() method
@@ -122,7 +122,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .toStrictEqualities()
                                 .sorted(Comparator.comparing(eq -> (Variable) eq.getTerm(0)))));
 
-        Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
+        Optional<Substitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
                 .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
 
         Optional<ImmutableExpression> newExpression = groundFunctionalSubstitution.isPresent()
@@ -131,7 +131,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     variableNullability)
             : partiallySimplifiedExpression;
 
-        ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
+        Substitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
                         normalizedUnifier.removeFromDomain(variablesToRemainInEqualities),
                         groundFunctionalSubstitution.orElseGet(substitutionFactory::getSubstitution));
 
@@ -167,7 +167,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      * Treated differently from non-functional terms because functional terms are not robust to unification.
      * Does not include in the substitution ground terms that are "rejected" by all the children using the variable
      */
-    private Optional<ImmutableSubstitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
+    private Optional<Substitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
             ImmutableExpression expression, ImmutableList<IQTree> children) {
 
         ImmutableMultimap<Variable, GroundFunctionalTerm> binaryEqualitiesSubset = expression.flattenAND()

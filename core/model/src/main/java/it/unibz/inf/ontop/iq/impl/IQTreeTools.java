@@ -6,8 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.Optional;
@@ -30,11 +30,11 @@ public class IQTreeTools {
      * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
      *
      */
-    public Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            IQTree tree, ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
+    public Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
+            IQTree tree, Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws UnsatisfiableDescendingSubstitutionException {
 
-        ImmutableSubstitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
+        Substitution<? extends VariableOrGroundTerm> reducedSubstitution = descendingSubstitution.restrictDomainTo(tree.getVariables());
 
         if (reducedSubstitution.isEmpty())
             return Optional.empty();
@@ -47,7 +47,7 @@ public class IQTreeTools {
     }
 
     public ImmutableSet<Variable> computeNewProjectedVariables(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            Substitution<? extends ImmutableTerm> descendingSubstitution,
             ImmutableSet<Variable> projectedVariables) {
 
         ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
@@ -58,10 +58,10 @@ public class IQTreeTools {
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution
      */
-    public Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
-                                                                       ImmutableSet<Variable> projectedVariables) {
+    public Optional<InjectiveSubstitution<Variable>> extractFreshRenaming(Substitution<? extends ImmutableTerm> descendingSubstitution,
+                                                                          ImmutableSet<Variable> projectedVariables) {
 
-        ImmutableSubstitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
+        Substitution<Variable> var2VarFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         int size = descendingSubstitution.getDomain().size();
 
         if (var2VarFragment.getDomain().size() != size

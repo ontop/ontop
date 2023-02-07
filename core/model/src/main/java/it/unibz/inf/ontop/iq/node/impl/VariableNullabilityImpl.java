@@ -158,7 +158,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     @Override
-    public VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    public VariableNullability update(Substitution<? extends ImmutableTerm> substitution,
                                       ImmutableSet<Variable> newScope) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(substitution.getDomain(), getNullableVariables()).immutableCopy());
@@ -166,7 +166,7 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     @Override
-    public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public VariableNullability applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         ImmutableSet<Variable> newScope = substitutionFactory.onVariables().apply(freshRenamingSubstitution, scope);
 
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
@@ -195,7 +195,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
     }
 
-    private VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    private VariableNullability update(Substitution<? extends ImmutableTerm> substitution,
                                        ImmutableSet<Variable> newScope,
                                        VariableGenerator variableGenerator) {
         /*
@@ -223,8 +223,8 @@ public class VariableNullabilityImpl implements VariableNullability {
     /*
      * TODO: explain
      */
-    private Stream<ImmutableSubstitution<? extends ImmutableTerm>> splitSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
+    private Stream<Substitution<? extends ImmutableTerm>> splitSubstitution(
+            Substitution<? extends ImmutableTerm> substitution, VariableGenerator variableGenerator) {
 
         ImmutableMap<Variable, SplitImmutableFunctionalTerm> subTermNames = substitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
@@ -233,12 +233,12 @@ public class VariableNullabilityImpl implements VariableNullability {
         if (subTermNames.values().stream().allMatch(SplitImmutableFunctionalTerm::isEmpty))
             return Stream.of(substitution);
 
-        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitution.builder()
+        Substitution<ImmutableTerm> parentSubstitution = substitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
                 .transformOrRetain(subTermNames::get, (t, split) -> split.getSplitTerm())
                 .build(ImmutableTerm.class);
 
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = subTermNames.values().stream()
+        Substitution<ImmutableTerm> childSubstitution = subTermNames.values().stream()
                         .map(SplitImmutableFunctionalTerm::getSubstitution)
                         .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
@@ -273,7 +273,7 @@ public class VariableNullabilityImpl implements VariableNullability {
             return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), newArgs);
         }
 
-        ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+        Substitution<ImmutableTerm> getSubstitution() {
             return map.entrySet().stream()
                     .collect(substitutionFactory.toSubstitution(
                             Map.Entry::getValue,
@@ -287,7 +287,7 @@ public class VariableNullabilityImpl implements VariableNullability {
 
 
     private VariableNullabilityImpl updateVariableNullability(
-            ImmutableSubstitution<? extends ImmutableTerm> nonNestedSubstitution, VariableNullabilityImpl childNullability) {
+            Substitution<? extends ImmutableTerm> nonNestedSubstitution, VariableNullabilityImpl childNullability) {
 
         // TODO: find a better name
         ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.builder()
@@ -350,7 +350,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                         getNullableVariables().stream())
                         .collect(ImmutableCollectors.toSet()));
 
-        ImmutableSubstitution<? extends ImmutableTerm> substitution = terms.stream()
+        Substitution<? extends ImmutableTerm> substitution = terms.stream()
                 .filter(t -> t instanceof NonVariableTerm)
                 .collect(substitutionFactory.toSubstitution(
                         t -> variableGenerator.generateNewVariable(),

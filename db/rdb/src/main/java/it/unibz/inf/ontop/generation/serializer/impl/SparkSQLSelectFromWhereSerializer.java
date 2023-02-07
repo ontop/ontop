@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Map;
@@ -87,7 +87,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                             ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                             ImmutableMap<Variable, QuotedID> variableAliases,
-                                            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+                                            Substitution<? extends ImmutableTerm> substitution) {
                 if (sortConditions.isEmpty())
                     return "";
 
@@ -107,7 +107,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderByTerm(ImmutableTerm term,
                                                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                                 ImmutableMap<Variable, QuotedID> variableAliases,
-                                                ImmutableSubstitution<? extends ImmutableTerm> substitution)
+                                                Substitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {

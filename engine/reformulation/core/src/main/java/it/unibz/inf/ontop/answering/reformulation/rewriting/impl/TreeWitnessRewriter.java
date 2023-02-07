@@ -40,8 +40,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -323,7 +322,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
     ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
 
-        ImmutableSubstitution<Variable> s = cq.equalities.entrySet().stream()
+        Substitution<Variable> s = cq.equalities.entrySet().stream()
                 // the check needs to be done before cast in collect: equalities can contain a = a
                 .filter(e -> e.getKey() != e.getValue())
                 .collect(substitutionFactory.toSubstitution(
@@ -341,7 +340,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSubstitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
+        Substitution<? extends ImmutableTerm> substitution = substitutionFactory.getSubstitution(vars, cq.getAnswerVariables());
         if (substitution.isEmpty())
             return body;
 

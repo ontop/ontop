@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
@@ -498,7 +498,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(subTermDecompositions.values().stream()
+            Substitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(subTermDecompositions.values().stream()
                     .map(FunctionalTermDecomposition::getSubstitution)
                     .flatMap(m -> m.entrySet().stream())
                     .collect(ImmutableCollectors.toMap()));

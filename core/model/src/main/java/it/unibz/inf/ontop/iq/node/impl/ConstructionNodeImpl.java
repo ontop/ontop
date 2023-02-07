@@ -40,7 +40,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
     private final ImmutableSet<Variable> projectedVariables;
-    private final ImmutableSubstitution<ImmutableTerm> substitution;
+    private final Substitution<ImmutableTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
 
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
@@ -48,7 +48,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                 @Assisted Substitution<? extends ImmutableTerm> substitution,
                                  SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings, IQTreeTools iqTreeTools,
@@ -118,7 +118,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+    public Substitution<ImmutableTerm> getSubstitution() {
         return substitution;
     }
 
@@ -212,11 +212,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        ImmutableSet<Substitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
 
         if (childDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.restrictRangeTo(NonVariableTerm.class);
+            Substitution<NonVariableTerm> def = substitution.restrictRangeTo(NonVariableTerm.class);
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -305,7 +305,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     private Stream<ImmutableSet<Variable>> extractDuplicatedConstraints(ImmutableSet<Variable> childConstraint) {
-        ImmutableSubstitution<Variable> fullRenaming = getSubstitution().builder()
+        Substitution<Variable> fullRenaming = getSubstitution().builder()
                 .restrictRangeTo(Variable.class)
                 .restrictRange(childConstraint::contains)
                 .build();
@@ -320,7 +320,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .mapToObj(i -> Sets.combinations(fullRenamingDomain, i))
                 .flatMap(Collection::stream)
                 .map(fullRenaming::restrictDomainTo)
-                .filter(ImmutableSubstitution::isInjective)
+                .filter(Substitution::isInjective)
                 .map(substitutionFactory::extractAnInjectiveVar2VarSubstitutionFromInverseOf)
                 .map(s -> substitutionFactory.onVariables().apply(s, childConstraint))
                 .filter(projectedVariables::containsAll);
@@ -413,7 +413,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
         ImmutableSet<Variable> newVariables = substitutionFactory.onVariables().apply(renamingSubstitution, projectedVariables);
@@ -428,7 +428,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
-                                                                        ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild) {
+                                                                        Substitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(theta)
                 .filter(t -> !(t.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
                 .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
@@ -443,7 +443,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                         .transform(t -> t.simplify(grandChild.getVariableNullability())),
                 projectedVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
+        Substitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
@@ -460,13 +460,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     public static class PropagationResults<T extends VariableOrGroundTerm> {
 
-        public final ImmutableSubstitution<T> delta;
+        public final Substitution<T> delta;
         public final Optional<ImmutableExpression> filter;
-        public final ImmutableSubstitution<ImmutableTerm> theta;
+        public final Substitution<ImmutableTerm> theta;
 
-       PropagationResults(ImmutableSubstitution<ImmutableTerm> theta,
-                           ImmutableSubstitution<T> delta,
-                           Optional<ImmutableExpression> newF) {
+       PropagationResults(Substitution<ImmutableTerm> theta,
+                          Substitution<T> delta,
+                          Optional<ImmutableExpression> newF) {
             this.theta = theta;
             this.delta = delta;
             this.filter = newF;

@@ -22,11 +22,11 @@ import java.util.Optional;
 public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final InjectiveVar2VarSubstitution renamingSubstitution;
+    private final InjectiveSubstitution<Variable> renamingSubstitution;
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
 
-    public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveVar2VarSubstitution renamingSubstitution,
+    public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveSubstitution<Variable> renamingSubstitution,
                             AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.renamingSubstitution = renamingSubstitution;
@@ -74,14 +74,14 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
+        Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
                 substitutionFactory.rename(renamingSubstitution, substitution));
     }
 
     @Override
     public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
+        Substitution<ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
         return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
                 substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
     }

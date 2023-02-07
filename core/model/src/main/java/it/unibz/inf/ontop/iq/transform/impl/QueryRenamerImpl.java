@@ -11,24 +11,23 @@ import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 
 
 public class QueryRenamerImpl implements QueryRenamer {
 
-    private final InjectiveVar2VarSubstitution renamingSubstitution;
+    private final InjectiveSubstitution<Variable> renamingSubstitution;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
 
     /**
-     * See {@link QueryTransformerFactory#createRenamer(InjectiveVar2VarSubstitution)}
+     * See {@link QueryTransformerFactory#createRenamer(InjectiveSubstitution)}
      */
     @AssistedInject
-    private QueryRenamerImpl(@Assisted InjectiveVar2VarSubstitution injectiveVar2VarSubstitution,
+    private QueryRenamerImpl(@Assisted InjectiveSubstitution<Variable> injectiveVar2VarSubstitution,
                              IntermediateQueryFactory iqFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
         this.renamingSubstitution = injectiveVar2VarSubstitution;
         this.iqFactory = iqFactory;

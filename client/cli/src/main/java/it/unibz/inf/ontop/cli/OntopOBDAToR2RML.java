@@ -30,8 +30,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpression;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -241,7 +240,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
 
         private TargetAtom normalize(TargetAtom target, Function<Variable, Optional<QuotedID>> lookup) {
-            ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
+            Substitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
             ImmutableMap<Variable, Optional<QuotedID>> targetPreMap =
                     targetSubstitution.apply(target.getProjectionAtom().getArguments()).stream()
@@ -263,12 +262,12 @@ public class OntopOBDAToR2RML implements OntopCommand {
                                         + target + "]")));
 
             //noinspection OptionalGetWithoutIsPresent
-            ImmutableSubstitution<Variable> targetRenamingPart = targetPreMap.entrySet().stream()
+            Substitution<Variable> targetRenamingPart = targetPreMap.entrySet().stream()
                     .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
                             Map.Entry::getKey,
                             e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
+            Substitution<ImmutableTerm> newSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubstitution);
         }
 

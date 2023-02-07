@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -141,7 +141,7 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
         Variable strAggregateVar = variableGenerator.generateNewVariable("agg");
         Variable incompatibleCountVariable = variableGenerator.generateNewVariable("nonStrCount");
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitutionMap(
+        Substitution<ImmutableFunctionalTerm> substitution = computeSubstitutionMap(
                 strAggregateVar, stringSubVar, incompatibleCountVariable, incompatibleSubVariable, termFactory, separator);
 
         ImmutableFunctionalTerm liftableTerm = computeLiftableTerm(strAggregateVar, incompatibleCountVariable,
@@ -182,7 +182,7 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
         return DefinitionPushDownRequest.create(nonStrVariable, definition, condition);
     }
 
-    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitutionMap(
+    private Substitution<ImmutableFunctionalTerm> computeSubstitutionMap(
             Variable strAggregateVar, Variable strSubTermVar, Variable incompatibleCountVariable,
             Variable incompatibleSubVariable, TermFactory termFactory, String separator) {
 

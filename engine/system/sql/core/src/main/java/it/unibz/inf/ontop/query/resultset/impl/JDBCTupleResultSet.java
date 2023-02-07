@@ -21,7 +21,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     private final ImmutableMap<Integer, Variable> indexedSqlSignature;
     private final ImmutableMap<Variable, DBTermType> sqlTypeMap;
-    private final ImmutableSubstitution<ImmutableTerm> sparqlVar2Term;
+    private final Substitution<ImmutableTerm> sparqlVar2Term;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
@@ -50,7 +50,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
     @Override
     protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException {
-        ImmutableSubstitution<Constant> substitution;
+        Substitution<Constant> substitution;
         try {
             substitution = substitutionFactory.getSubstitutionThrowsExceptions(
                     indexedSqlSignature.entrySet(),
@@ -74,7 +74,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         return termFactory.getDBConstant(jdbcValue, termType);
     }
 
-    private OntopBinding[] computeBindingMap(ImmutableSubstitution<Constant> sqlVar2Constant) {
+    private OntopBinding[] computeBindingMap(Substitution<Constant> sqlVar2Constant) {
         //this can be improved and simplified
         return signature.stream()
                        .map(v -> getBinding(v, sqlVar2Constant))
@@ -83,7 +83,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                        .toArray(OntopBinding[]::new);
     }
 
-    private Optional<OntopBinding> getBinding(Variable v, ImmutableSubstitution<Constant> sqlVar2Constant) {
+    private Optional<OntopBinding> getBinding(Variable v, Substitution<Constant> sqlVar2Constant) {
         ImmutableTerm term = sparqlVar2Term.apply(v);
         ImmutableTerm constantTerm = sqlVar2Constant.applyToTerm(term);
         Optional<RDFConstant> constant = evaluate(constantTerm);

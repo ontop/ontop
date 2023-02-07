@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -111,7 +111,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution);
+			Substitution<ImmutableFunctionalTerm> subTermSubstitution);
 
 
 
@@ -513,7 +513,7 @@ public interface TermFactory {
 	 *
 	 * See the SubstitutionFactory for richer substitutions
 	 */
-	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> map);
+	<T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
 	 * TODO: find a better name

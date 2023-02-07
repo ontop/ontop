@@ -14,8 +14,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -73,7 +72,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                 NativeNode nativeNode = position.getDatabaseQuery(dbParameters);
                 try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                     while (rs.next()) {
-                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionThrowsExceptions(
+                        Substitution<ImmutableTerm> sub = substitutionFactory.getSubstitutionThrowsExceptions(
                                 nativeNode.getVariables(),
                                 v -> v,
                                 v -> termFactory.getDBConstant(
@@ -119,9 +118,9 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             return nativeNodeGenerator.generate(transformedTree, dbParameters, true);
         }
 
-        MappingAssertion createExpansion(ImmutableSubstitution<ImmutableTerm> values) {
+        MappingAssertion createExpansion(Substitution<ImmutableTerm> values) {
 
-            ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution().builder()
+            Substitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution().builder()
                     .transformOrRetain(ImmutableMap.of(topVariable, values)::get, (t, sub) -> sub.applyToTerm(t))
                     .build();
 

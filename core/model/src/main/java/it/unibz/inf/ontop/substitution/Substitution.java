@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
  * See SubstitutionFactory for creating new instances
  *
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm>  {
+public interface Substitution<T extends ImmutableTerm>  {
 
     ImmutableSet<Map.Entry<Variable, T>> entrySet();
 
@@ -41,7 +41,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     boolean isEmpty();
 
-    <S extends ImmutableTerm> ImmutableSubstitution<S> transform(Function<T, S> function);
+    <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function);
 
 
 
@@ -64,19 +64,19 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
     default ImmutableMap<Integer, ImmutableTerm> applyToTerms(ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) { return onImmutableTerms().applyToTerms(this, argumentMap); }
 
-    default ImmutableSubstitution<ImmutableTerm> compose(ImmutableSubstitution<? extends ImmutableTerm> f) { return onImmutableTerms().compose(this, f); }
+    default Substitution<ImmutableTerm> compose(Substitution<? extends ImmutableTerm> f) { return onImmutableTerms().compose(this, f); }
 
 
 
-    <S extends ImmutableTerm> ImmutableSubstitution<S> castTo(Class<S> type);
+    <S extends ImmutableTerm> Substitution<S> castTo(Class<S> type);
 
-    ImmutableSubstitution<T> restrictDomainTo(Set<Variable> set);
+    Substitution<T> restrictDomainTo(Set<Variable> set);
 
-    ImmutableSubstitution<T> removeFromDomain(Set<Variable> set);
+    Substitution<T> removeFromDomain(Set<Variable> set);
 
-    <S extends ImmutableTerm> ImmutableSubstitution<S> restrictRangeTo(Class<? extends S> type);
+    <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type);
 
-    ImmutableSubstitution<T> restrictRange(Predicate<T> predicate);
+    Substitution<T> restrictRange(Predicate<T> predicate);
 
     boolean isInjective();
 
@@ -85,9 +85,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
     Builder<T> builder();
 
     interface Builder<T extends ImmutableTerm> {
-        ImmutableSubstitution<T> build();
+        Substitution<T> build();
 
-        <S extends ImmutableTerm> ImmutableSubstitution<S> build(Class<S> type);
+        <S extends ImmutableTerm> Substitution<S> build(Class<S> type);
 
         Builder<T> restrictDomainTo(Set<Variable> set);
 
@@ -107,7 +107,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm>  {
 
         <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
 
-        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, ImmutableSubstitution<T>> function);
+        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, Substitution<T>> function);
 
         Stream<ImmutableExpression> toStrictEqualities();
 

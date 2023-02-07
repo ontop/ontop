@@ -192,7 +192,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().builder()
+        Substitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().builder()
                 .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
                 .build();
 
@@ -254,7 +254,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
 
         ImmutableSet<Variable> variables = ImmutableSet.copyOf(valuesNode.getOrderedVariables());
 
-        InjectiveVar2VarSubstitution renaming = metaTermTypeVariables.stream()
+        InjectiveSubstitution<Variable> renaming = metaTermTypeVariables.stream()
                 .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(

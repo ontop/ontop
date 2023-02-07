@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.ConcreteNumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -81,7 +81,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         Optional<Variable> optionalIncompatibleCountVariable = optionalIncompatibleSubVariable
                 .map(v -> variableGenerator.generateNewVariable("nonNumCount"));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
+        Substitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
                 numericAggregateVarMap, numericSubVarMap, optionalIncompatibleCountVariable,
                 optionalIncompatibleSubVariable, termFactory);
 
@@ -130,7 +130,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
         return DefinitionPushDownRequest.create(numericVariable, definition, condition);
     }
 
-    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(
+    private Substitution<ImmutableFunctionalTerm> computeSubstitution(
             ImmutableMap<ConcreteNumericRDFDatatype, Variable> numericAggregateVarMap,
             ImmutableMap<ConcreteNumericRDFDatatype, Variable> numericSubTermVarMap, Optional<Variable> optionalIncompatibleCountVariable,
             Optional<Variable> optionalIncompatibleSubVariable, TermFactory termFactory) {

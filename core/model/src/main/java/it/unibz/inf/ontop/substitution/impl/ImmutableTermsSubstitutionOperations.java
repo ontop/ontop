@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.substitution.impl;
 
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
 import java.util.Map;
@@ -14,12 +14,12 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     }
 
     @Override
-    public ImmutableTerm apply(ImmutableSubstitution<? extends ImmutableTerm> substitution, Variable variable) {
+    public ImmutableTerm apply(Substitution<? extends ImmutableTerm> substitution, Variable variable) {
         return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
     }
 
     @Override
-    public ImmutableTerm applyToTerm(ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
+    public ImmutableTerm applyToTerm(Substitution<? extends ImmutableTerm> substitution, ImmutableTerm t) {
         if (t instanceof Variable) {
             return apply(substitution, (Variable) t);
         }
@@ -33,12 +33,12 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     }
 
     @Override
-    public ImmutableTerm rename(ImmutableSubstitution<Variable> renaming, ImmutableTerm t) {
+    public ImmutableTerm rename(Substitution<Variable> renaming, ImmutableTerm t) {
         return applyToTerm(renaming, t);
     }
 
     @Override
-    public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
+    public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder(Substitution<ImmutableTerm> substitution) {
         return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
             @Override
             protected UnifierBuilder<ImmutableTerm> unifyUnequalTerms(ImmutableTerm term1, ImmutableTerm term2) {

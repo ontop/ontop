@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -112,7 +112,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
                         t -> variableGenerator.generateNewVariable("count1")));
 
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
+        Substitution<ImmutableFunctionalTerm> substitution = computeSubstitution(
                 optionalNumAvgVariable, optionalNumSubVariable,
                 optionalIncompatibleCountVariable, optionalIncompatibleSubVariable,
                 floatAndDoubleNumVariableMap, floatAndDoubleCountVariableMap,
@@ -185,13 +185,13 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         return DefinitionPushDownRequest.create(numericVariable, decimalDefinition, condition);
     }
 
-    private ImmutableSubstitution<ImmutableFunctionalTerm> computeSubstitution(Optional<Variable> optionalNumAvgVariable,
-                                                                               Optional<Variable> optionalNumSubVariable,
-                                                                               Optional<Variable> optionalIncompatibleCountVariable,
-                                                                               Optional<Variable> optionalIncompatibleSubVariable,
-                                                                               ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleNumVariableMap,
-                                                                               ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleCountVariableMap,
-                                                                               TermFactory termFactory) {
+    private Substitution<ImmutableFunctionalTerm> computeSubstitution(Optional<Variable> optionalNumAvgVariable,
+                                                                      Optional<Variable> optionalNumSubVariable,
+                                                                      Optional<Variable> optionalIncompatibleCountVariable,
+                                                                      Optional<Variable> optionalIncompatibleSubVariable,
+                                                                      ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleNumVariableMap,
+                                                                      ImmutableMap<ConcreteNumericRDFDatatype, Variable> floatAndDoubleCountVariableMap,
+                                                                      TermFactory termFactory) {
 
         ConcreteNumericRDFDatatype xsdDecimal = termFactory.getTypeFactory().getXsdDecimalDatatype();
         

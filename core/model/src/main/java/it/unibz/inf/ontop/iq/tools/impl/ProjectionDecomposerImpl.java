@@ -7,7 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -34,15 +34,15 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
     }
 
     @Override
-    public ProjectionDecomposition decomposeSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+    public ProjectionDecomposition decomposeSubstitution(Substitution<? extends ImmutableTerm> substitution,
                                                          VariableGenerator variableGenerator) {
         ImmutableMap<Variable, DefinitionDecomposition> decompositionMap = substitution.builder()
                 .toMap((v, t) -> decomposeDefinition(t, variableGenerator, Optional.of(v)));
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = decompositionMap.entrySet().stream()
+        Substitution<ImmutableTerm> topSubstitution = decompositionMap.entrySet().stream()
                 .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, e -> e.getValue().term));
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(decompositionMap.values());
+        Optional<Substitution<ImmutableTerm>> subSubstitution = combineSubstitutions(decompositionMap.values());
 
         return subSubstitution
                 .map(s -> topSubstitution.isEmpty()
@@ -64,7 +64,7 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                         .map(t -> decomposeDefinition(t, variableGenerator, Optional.empty()))
                         .collect(ImmutableCollectors.toList());
 
-                Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(childDecompositions);
+                Optional<Substitution<ImmutableTerm>> subSubstitution = combineSubstitutions(childDecompositions);
 
                 return subSubstitution
                         .map(s -> new DefinitionDecomposition(
@@ -107,7 +107,7 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
             return new DefinitionDecomposition(term);
     }
 
-    private Optional<ImmutableSubstitution<ImmutableTerm>> combineSubstitutions(
+    private Optional<Substitution<ImmutableTerm>> combineSubstitutions(
            ImmutableCollection<DefinitionDecomposition> decompositions) {
         return decompositions.stream()
                 .map(d -> d.substitution)
@@ -118,9 +118,9 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class DefinitionDecomposition {
         final ImmutableTerm term;
-        final Optional<ImmutableSubstitution<ImmutableTerm>> substitution;
+        final Optional<Substitution<ImmutableTerm>> substitution;
 
-        private DefinitionDecomposition(ImmutableTerm term, ImmutableSubstitution<ImmutableTerm> substitution) {
+        private DefinitionDecomposition(ImmutableTerm term, Substitution<ImmutableTerm> substitution) {
             this.term = term;
             this.substitution = Optional.of(substitution);
         }

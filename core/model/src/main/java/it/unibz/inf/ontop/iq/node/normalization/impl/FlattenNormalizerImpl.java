@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -57,11 +57,11 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              */
             Variable flattenedVar = flattenNode.getFlattenedVariable();
 
-            ImmutableSubstitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
+            Substitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
                     .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
                     .build();
 
-            ImmutableSubstitution<ImmutableTerm> primeSubstitution = cn.getSubstitution()
+            Substitution<ImmutableTerm> primeSubstitution = cn.getSubstitution()
                     .removeFromDomain(flattenedVarSubstitution.getDomain());
 
             // Nothing can be lifted, declare the new tree normalized

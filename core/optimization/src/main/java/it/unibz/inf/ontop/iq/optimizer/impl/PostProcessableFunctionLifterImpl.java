@@ -264,7 +264,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
                                                      ImmutableSet<Variable> unionVariables, Variable idVariable) {
-            Optional<ImmutableSubstitution<ImmutableTerm>> originalSubstitution = Optional.of(childTree.getRootNode())
+            Optional<Substitution<ImmutableTerm>> originalSubstitution = Optional.of(childTree.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map(n -> (ConstructionNode) n)
                     .map(ConstructionNode::getSubstitution);
@@ -273,7 +273,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(s -> s.apply(variable))
                     .orElse(variable);
 
-            InjectiveVar2VarSubstitution renamingSubstitution = originalDefinition.getVariableStream()
+            InjectiveSubstitution<Variable> renamingSubstitution = originalDefinition.getVariableStream()
                     .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
                     .distinct()
                     .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
@@ -288,10 +288,10 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .filter(v -> isVariableNotDefinedInSubstitution || !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
-            ImmutableSubstitution<ImmutableTerm> positionSubstitution =
+            Substitution<ImmutableTerm> positionSubstitution =
                     substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
-            ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
+            Substitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
                     .map(s -> substitutionFactory.union(s, positionSubstitution))
                     .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
@@ -333,7 +333,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
             ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
 
-            ImmutableSubstitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
+            Substitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
                     .filter(v -> !childVariables.contains(v.getKey()))
                     .collect(substitutionFactory.toSubstitution(
                             Map.Entry::getKey,

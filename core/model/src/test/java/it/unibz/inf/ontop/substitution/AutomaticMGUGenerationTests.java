@@ -67,8 +67,8 @@ public class AutomaticMGUGenerationTests  {
 				String mgustr = testcase.split("=")[1].trim();
 
 				List<ImmutableTerm> atoms = getAtoms(atomsstr);
-				Optional<ImmutableSubstitution<ImmutableTerm>> expectedmgu = getMGU(mgustr);
-				Optional<ImmutableSubstitution<ImmutableTerm>> mgu = SUBSTITUTION_FACTORY.unify(atoms.get(0), atoms.get(1));
+				Optional<Substitution<ImmutableTerm>> expectedmgu = getMGU(mgustr);
+				Optional<Substitution<ImmutableTerm>> mgu = SUBSTITUTION_FACTORY.unify(atoms.get(0), atoms.get(1));
 				log.debug("Expected MGU: {}", expectedmgu);
 				assertEquals(expectedmgu, mgu);
 				casecounter++;
@@ -85,7 +85,7 @@ public class AutomaticMGUGenerationTests  {
 	 * @param mgustr
 	 * @return
 	 */
-	private static Optional<ImmutableSubstitution<ImmutableTerm>> getMGU(String mgustr) {
+	private static Optional<Substitution<ImmutableTerm>> getMGU(String mgustr) {
 		if (mgustr.trim().equals("NULL"))
 			return Optional.empty();
 

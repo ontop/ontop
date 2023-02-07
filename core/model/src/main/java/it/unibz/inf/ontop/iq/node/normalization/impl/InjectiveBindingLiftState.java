@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -92,7 +92,7 @@ public class InjectiveBindingLiftState {
         if (childConstructionNode == null)
             return this;
 
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
+        Substitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
         if (childSubstitution.isEmpty())
             return this;
 
@@ -107,7 +107,7 @@ public class InjectiveBindingLiftState {
 
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-        ImmutableSubstitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
+        Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                 // All variables and constants
                 childSubstitution.restrictRangeTo(NonFunctionalTerm.class),
                 // (Possibly decomposed) injective functional terms
@@ -126,7 +126,7 @@ public class InjectiveBindingLiftState {
                 .map(ConstructionNode::getChildVariables)
                 .orElseGet(childConstructionNode::getVariables);
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> newChildSubstitution =  childSubstitution.builder()
+        Substitution<ImmutableFunctionalTerm> newChildSubstitution =  childSubstitution.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
                 .flatTransform(injectivityDecompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
                 .build();

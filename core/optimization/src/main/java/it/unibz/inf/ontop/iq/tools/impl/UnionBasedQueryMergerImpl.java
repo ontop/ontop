@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -60,7 +60,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 .skip(1)
                 .map(def -> {
                     // Updates the variable generator
-                    InjectiveVar2VarSubstitution disjointVariableSetRenaming =
+                    InjectiveSubstitution<Variable> disjointVariableSetRenaming =
                             substitutionFactory.generateNotConflictingRenaming(variableGenerator, def.getTree().getKnownVariables());
 
                     if (!def.getProjectionAtom().getPredicate().equals(projectionAtom.getPredicate()))
@@ -69,10 +69,10 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     ImmutableList<Variable> sourceProjectionAtomArguments =
                             substitutionFactory.onVariables().apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
 
-                    InjectiveVar2VarSubstitution headSubstitution = substitutionFactory.injectiveOf(
+                    InjectiveSubstitution<Variable> headSubstitution = substitutionFactory.injectiveOf(
                             substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));
 
-                    InjectiveVar2VarSubstitution renamingSubstitution =
+                    InjectiveSubstitution<Variable> renamingSubstitution =
                             /*
                               fresh variables are excluded from the domain of the renaming substitution
                                since they are in use in the sub-query.

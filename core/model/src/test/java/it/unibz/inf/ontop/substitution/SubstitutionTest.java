@@ -54,11 +54,11 @@ public class SubstitutionTest {
     }
 
     private void checkUnification(ImmutableList<ImmutableTerm> firstArguments, ImmutableList<ImmutableTerm> secondArguments) {
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier = SUBSTITUTION_FACTORY.onImmutableTerms().unifierBuilder()
+        Optional<Substitution<ImmutableTerm>> optionalUnifier = SUBSTITUTION_FACTORY.onImmutableTerms().unifierBuilder()
                 .unify(firstArguments, secondArguments)
                 .build();
         assertTrue(optionalUnifier.isPresent());
-        ImmutableSubstitution<ImmutableTerm> unifier = optionalUnifier.get();
+        Substitution<ImmutableTerm> unifier = optionalUnifier.get();
 
         for(int i = 0; i < firstArguments.size(); i++) {
             assertEquals(unifier.applyToTerm(firstArguments.get(i)), unifier.applyToTerm(secondArguments.get(i)));

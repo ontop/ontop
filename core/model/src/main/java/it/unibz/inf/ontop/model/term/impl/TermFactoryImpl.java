@@ -18,8 +18,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -315,7 +315,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableSubstitution<ImmutableFunctionalTerm> subTermSubstitution) {
+			Substitution<ImmutableFunctionalTerm> subTermSubstitution) {
 
 		return new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitution);
 	}
@@ -448,8 +448,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> map) {
-		return new ImmutableSubstitutionImpl<>(map, this);
+	public <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map) {
+		return new SubstitutionImpl<>(map, this);
 	}
 
 	@Override

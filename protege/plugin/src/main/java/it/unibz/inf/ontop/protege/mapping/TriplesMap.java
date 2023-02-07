@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -103,7 +103,7 @@ public class TriplesMap {
                 ? predicate.getObject(projectionAtom.getArguments())
                 : predicate.getProperty(projectionAtom.getArguments());
 
-        ImmutableSubstitution<ImmutableTerm> newSub = a.getSubstitution().builder()
+        Substitution<ImmutableTerm> newSub = a.getSubstitution().builder()
                 .transformOrRetain(ImmutableMap.of(predicateVariable, newIri)::get, (t, i) -> factory.getConstantIRI(i))
                 .build();
 

@@ -17,10 +17,10 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -85,16 +85,16 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(IQTree::getPossibleVariableDefinitions)
                 .filter(s -> !s.isEmpty())
                 .reduce(ImmutableSet.of(), this::combineVarDefs);
     }
 
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> combineVarDefs(
-            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s1,
-            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s2) {
+    private ImmutableSet<Substitution<NonVariableTerm>> combineVarDefs(
+            ImmutableSet<Substitution<NonVariableTerm>> s1,
+            ImmutableSet<Substitution<NonVariableTerm>> s2) {
 
          // substitutionFactory.compose takes the first definition of a common variable.
          // It behaves like a union except that is robust to "non-identical" definitions.
@@ -143,7 +143,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                               VariableGenerator variableGenerator) {
 
@@ -164,7 +164,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
                     expressionAndSubstitution, extendedVariableNullability);
 
-            ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
+            Substitution<? extends VariableOrGroundTerm> downSubstitution =
                     substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
 
             ImmutableList<IQTree> newChildren = children.stream()
@@ -190,7 +190,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
             VariableGenerator variableGenerator) {
 
         InnerJoinNode newJoinNode = getOptionalFilterCondition()
@@ -206,7 +206,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
                                      IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))

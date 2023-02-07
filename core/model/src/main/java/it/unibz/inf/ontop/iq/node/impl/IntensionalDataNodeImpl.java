@@ -18,10 +18,9 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -77,7 +76,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return applyDescendingSubstitutionWithoutOptimizing(freshRenamingSubstitution);
     }
 
@@ -119,12 +118,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         return applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
     }
 
     private IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
         DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, atom.getArguments()));
         return newAtom(newAtom);

@@ -9,9 +9,8 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -40,17 +39,17 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
      */
     @Override
     public ConstructionSubstitutionNormalization normalizeSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+            Substitution<? extends ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        ImmutableSubstitution<? extends ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
+        Substitution<? extends ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
 
-        InjectiveVar2VarSubstitution downRenamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
+        InjectiveSubstitution<Variable> downRenamingSubstitution = substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
                 reducedAscendingSubstitution.builder()
                         .restrictRangeTo(Variable.class)
                         .restrictRange(t -> !projectedVariables.contains(t))
                         .build());
 
-        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution.compose(reducedAscendingSubstitution).builder()
+        Substitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution.compose(reducedAscendingSubstitution).builder()
                 .restrictDomainTo(projectedVariables)
                 .transform(t -> t.simplify())
                 .build();
@@ -62,12 +61,12 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
     public class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
-        private final ImmutableSubstitution<ImmutableTerm> normalizedSubstitution;
-        private final InjectiveVar2VarSubstitution downRenamingSubstitution;
+        private final Substitution<ImmutableTerm> normalizedSubstitution;
+        private final InjectiveSubstitution<Variable> downRenamingSubstitution;
         private final ImmutableSet<Variable> projectedVariables;
 
-        private ConstructionSubstitutionNormalizationImpl(ImmutableSubstitution<ImmutableTerm> normalizedSubstitution,
-                                                          InjectiveVar2VarSubstitution downRenamingSubstitution,
+        private ConstructionSubstitutionNormalizationImpl(Substitution<ImmutableTerm> normalizedSubstitution,
+                                                          InjectiveSubstitution<Variable> downRenamingSubstitution,
                                                           ImmutableSet<Variable> projectedVariables) {
             this.normalizedSubstitution = normalizedSubstitution;
             this.downRenamingSubstitution = downRenamingSubstitution;
@@ -95,7 +94,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         }
 
         @Override
-        public ImmutableSubstitution<ImmutableTerm> getNormalizedSubstitution() {
+        public Substitution<ImmutableTerm> getNormalizedSubstitution() {
             return normalizedSubstitution;
         }
     }

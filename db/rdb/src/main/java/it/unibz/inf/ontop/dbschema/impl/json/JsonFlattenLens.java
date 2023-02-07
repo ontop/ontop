@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
@@ -135,7 +135,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
         Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
-        ImmutableSubstitution<ImmutableTerm> extractionSubstitution = cs.getSubstitutionFactory().getSubstitutionThrowsExceptions(
+        Substitution<ImmutableTerm> extractionSubstitution = cs.getSubstitutionFactory().getSubstitutionThrowsExceptions(
                 columns.extracted,
                 c -> variableGenerator.generateNewVariable(normalizeAttributeName(c.name, idFactory)),
                 c -> getCheckDatatypeExtractAndCastFromJson(
@@ -251,8 +251,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
     }
 
 
-    private ImmutableSubstitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, DBTermType dbType,
-                                                                             Variable flattenedIfArrayVar, CoreSingletons cs){
+    private Substitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, DBTermType dbType,
+                                                                    Variable flattenedIfArrayVar, CoreSingletons cs){
 
         TermFactory termFactory = cs.getTermFactory();
         return cs.getSubstitutionFactory().getSubstitution(

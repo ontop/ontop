@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -49,7 +49,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
                     .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
                     .build();
 

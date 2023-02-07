@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -254,8 +254,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         private State convertIntoState(
                 ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
-                Optional<ImmutableExpression> notNormalizedCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-                ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+                Optional<ImmutableExpression> notNormalizedCondition, Substitution<ImmutableTerm> ascendingSubstitution,
+                Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                     .normalizeSubstitution(ascendingSubstitution, extractProjectedVariables(liftedChildren));

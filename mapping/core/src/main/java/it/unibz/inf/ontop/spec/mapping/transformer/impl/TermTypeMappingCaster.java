@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -60,7 +60,7 @@ public class TermTypeMappingCaster implements MappingCaster {
         }
         IQTree childTree = assertion.getTopChild();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution()
+        Substitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution()
                             .transform(t -> transformDefinition(t, childTree));
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);

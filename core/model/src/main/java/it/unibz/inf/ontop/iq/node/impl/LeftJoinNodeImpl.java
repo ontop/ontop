@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -160,12 +160,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      * Returns possible definitions for left and right-specific variables.
      */
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
+        ImmutableSet<Substitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
 
         Sets.SetView<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
+        ImmutableSet<Substitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
                 .map(s -> s.restrictDomainTo(rightSpecificVariables))
                 .collect(ImmutableCollectors.toSet());
 
@@ -237,7 +237,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      */
     @Override
     public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild,
             VariableGenerator variableGenerator) {
 
@@ -256,7 +256,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
                         initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
 
-                ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
+                Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
 
                 IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty(), variableGenerator);
@@ -294,7 +294,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
         if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
@@ -312,7 +312,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
         IQTree newLeftChild = leftChild.applyFreshRenaming(renamingSubstitution);
         IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
 
@@ -429,7 +429,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
             ImmutableExpression initialExpression,
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableConditionException {
 
@@ -471,7 +471,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()
+        Substitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()
                         .map(ImmutableFunctionalTerm::getTerms)
                         .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
                         // Rename right-specific variables if possible
@@ -514,13 +514,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      * is propagated down through a substitution.
      */
     private boolean containsEqualityRightSpecificVariable(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             IQTree leftChild, IQTree rightChild) {
 
         ImmutableSet<Variable> leftVariables = leftChild.getVariables();
         ImmutableSet<Variable> rightVariables = rightChild.getVariables();
 
-        ImmutableSubstitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
+        Substitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
         Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
         ImmutableSet<Variable> freshVariables = restricted.restrictRange(t -> !variables.contains(t))

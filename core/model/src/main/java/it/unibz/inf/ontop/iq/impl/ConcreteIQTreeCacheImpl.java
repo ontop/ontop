@@ -9,10 +9,9 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -36,7 +35,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private ImmutableSet<Variable> notInternallyRequiredVariables;
 
     @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
+    private ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @Nullable
     private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
@@ -65,7 +64,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                                       boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability,
                                       @Nullable ImmutableSet<Variable> variables,
                                       @Nullable ImmutableSet<Variable> notInternallyRequiredVariables,
-                                      @Nullable ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions,
+                                      @Nullable ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions,
                                       @Nullable ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
                                       @Nullable Boolean isDistinct) {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
@@ -109,7 +108,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
     @Nullable
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         return possibleVariableDefinitions;
     }
 
@@ -180,7 +179,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     }
 
     @Override
-    public synchronized void setPossibleVariableDefinitions(@Nonnull ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions) {
+    public synchronized void setPossibleVariableDefinitions(@Nonnull ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions) {
         if (this.possibleVariableDefinitions != null)
             throw new IllegalStateException("Possible variable definitions already present. Only call this method once");
         this.possibleVariableDefinitions = possibleVariableDefinitions;
@@ -204,7 +203,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
      * TODO: explicit assumptions about the effects
      */
     @Override
-    public IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution) {
+    public IQTreeCache applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         VariableNullability newVariableNullability = variableNullability == null
                 ? null
                 : variableNullability.applyFreshRenaming(renamingSubstitution);
@@ -217,7 +216,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 ? null
                 : substitutionFactory.onVariables().apply(renamingSubstitution, notInternallyRequiredVariables);
 
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
+        ImmutableSet<Substitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
                 : possibleVariableDefinitions.stream()
                     .map(s -> substitutionFactory.onNonVariableTerms().rename(renamingSubstitution, s))

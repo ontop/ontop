@@ -18,8 +18,8 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -86,8 +86,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
-            if (substitutions.stream().allMatch(ImmutableSubstitution::isEmpty))
+            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
+            if (substitutions.stream().allMatch(Substitution::isEmpty))
                 return tree;
 
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -105,8 +105,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
-            ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
-            if (substitutions.stream().allMatch(ImmutableSubstitution::isEmpty))
+            ImmutableList<InjectiveSubstitution<Variable>> substitutions = computeSubstitutions(children);
+            if (substitutions.stream().allMatch(Substitution::isEmpty))
                 return tree;
 
            ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -126,7 +126,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                    ));
         }
 
-        private ImmutableList<InjectiveVar2VarSubstitution> computeSubstitutions(ImmutableList<IQTree> children) {
+        private ImmutableList<InjectiveSubstitution<Variable>> computeSubstitutions(ImmutableList<IQTree> children) {
             if (children.size() < 2) {
                 throw new ExplicitEqualityTransformerInternalException("At least 2 children are expected");
             }
@@ -144,7 +144,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .collect(ImmutableCollectors.toList());
         }
 
-        private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
+        private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveSubstitution<Variable>> substitutions, ImmutableList<IQTree> children) {
             Iterator<IQTree> it = children.iterator();
             return substitutions.stream()
                     .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s, variableGenerator))
@@ -159,10 +159,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     == tree;
         }
 
-        private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
+        private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveSubstitution<Variable>> substitutions) {
             Stream<ImmutableExpression> varEqualities = substitutions.stream()
-                    .map(ImmutableSubstitution::builder)
-                    .flatMap(ImmutableSubstitution.Builder::toStrictEqualities);
+                    .map(Substitution::builder)
+                    .flatMap(Substitution.Builder::toStrictEqualities);
             
             return termFactory.getConjunction(optionalFilterCondition, varEqualities).get();
         }

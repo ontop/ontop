@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -73,7 +73,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 rdfAtomPredicate.updateSPO(variables, newSubject, rdfAtomPredicate.getProperty(variables), newObject));
 
         // swap subjects and objects
-        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.injectiveOf(
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.injectiveOf(
                 substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject));
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);

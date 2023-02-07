@@ -16,9 +16,8 @@ import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -246,7 +245,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     private Optional<IQTree> moveTopConstructionNodeAside(IQTree rightTree) {
         QueryNode rootNode = rightTree.getRootNode();
         if (rootNode instanceof ConstructionNode) {
-            ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
 
             if (substitution.rangeAllMatch(ImmutableTerm::isGround)) {
                 ConstructionNode newConstructionNode = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
@@ -320,7 +319,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
      * In this context, renaming is safe to apply after.
      */
     private IQTree replaceSelectedNodesAndRename(ImmutableSet<SelectedNode> selectedNodes, IQTree rightChild,
-                                                 InjectiveVar2VarSubstitution renamingSubstitution) {
+                                                 InjectiveSubstitution<Variable> renamingSubstitution) {
 
         ReplaceNodeByTrueTransformer transformer = new ReplaceNodeByTrueTransformer(
                 selectedNodes.stream()
@@ -334,14 +333,14 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     private ConstructionNode createConstructionNode(ImmutableSet<Variable> initialLeftVariables,
                                                     ImmutableSet<Variable> initialRightVariables,
-                                                    InjectiveVar2VarSubstitution renamingSubstitution,
+                                                    InjectiveSubstitution<Variable> renamingSubstitution,
                                                     Variable provenanceVariable) {
         ImmutableSet<Variable> projectedVariables = Sets.union(initialLeftVariables, initialRightVariables)
                 .immutableCopy();
 
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = renamingSubstitution.builder()
+        Substitution<ImmutableTerm> substitution = renamingSubstitution.builder()
                 .restrictDomainTo(projectedVariables)
                 .<ImmutableTerm>transform(t -> termFactory.getIfElseNull(condition, t))
                 .build();
@@ -492,10 +491,10 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     }
 
     protected static class RenamingAndEqualities {
-        public final InjectiveVar2VarSubstitution renamingSubstitution;
+        public final InjectiveSubstitution<Variable> renamingSubstitution;
         public final ImmutableSet<ImmutableExpression> equalities;
 
-        private RenamingAndEqualities(InjectiveVar2VarSubstitution renamingSubstitution,
+        private RenamingAndEqualities(InjectiveSubstitution<Variable> renamingSubstitution,
                                       ImmutableSet<ImmutableExpression> equalities) {
             this.renamingSubstitution = renamingSubstitution;
             this.equalities = equalities;
@@ -507,11 +506,11 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
             // replacementStream is effectively a substitution: the domain is fresh variables (unique)
-            ImmutableSubstitution<VariableOrGroundTerm> replacementSub = replacementStream
+            Substitution<VariableOrGroundTerm> replacementSub = replacementStream
                     .flatMap(Collection::stream)
                     .collect(substitutionFactory.toSubstitution());
 
-            InjectiveVar2VarSubstitution renamingSubstitution =
+            InjectiveSubstitution<Variable> renamingSubstitution =
                     substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
                             replacementSub.builder()
                                     .restrictRangeTo(Variable.class)

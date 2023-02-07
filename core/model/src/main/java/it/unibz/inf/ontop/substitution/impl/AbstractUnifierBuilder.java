@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
@@ -21,9 +21,9 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
     private final TermFactory termFactory;
     private final SubstitutionBasicOperations<T> operations;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private Optional<ImmutableSubstitution<T>> optionalSubstitution;
+    private Optional<Substitution<T>> optionalSubstitution;
 
-    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionBasicOperations<T> operations, ImmutableSubstitution<T> substitution) {
+    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionBasicOperations<T> operations, Substitution<T> substitution) {
         this.termFactory = termFactory;
         this.operations = operations;
         this.optionalSubstitution = Optional.of(substitution);
@@ -86,7 +86,7 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
         if (term1 instanceof Variable) {
             Variable variable = (Variable)term1;
             if (doesNotContainVariable(variable, term2)) {
-                ImmutableSubstitution<T> s = termFactory.getSubstitution(ImmutableMap.of(variable, term2));
+                Substitution<T> s = termFactory.getSubstitution(ImmutableMap.of(variable, term2));
                 optionalSubstitution = Optional.of(operations.compose(s, optionalSubstitution.get()));
                 return Optional.of(this);
             }
@@ -99,7 +99,7 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
         return this;
     }
 
-    public Optional<ImmutableSubstitution<T>> build() {
+    public Optional<Substitution<T>> build() {
         return optionalSubstitution;
     }
 

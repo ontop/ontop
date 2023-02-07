@@ -7,10 +7,9 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -140,21 +139,21 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return toString().hashCode();
     }
 
-    protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
+    protected Optional<Substitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution)
             throws IQTreeTools.UnsatisfiableDescendingSubstitutionException {
         return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
 
         ImmutableSet<Variable> variables = getVariables();
 
         try {
-            Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
+            Optional<Substitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
 
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
@@ -179,12 +178,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
         return applyFreshRenaming(freshRenamingSubstitution, false);
     }
 
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
-                                                              ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+                                                              Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         if (!constraint.isPresent())
             return constraint;
 
@@ -198,9 +197,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 .filter(e -> e.getVariableStream().anyMatch(newVariables::contains)));
     }
 
-    protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);
+    protected abstract IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution, boolean alreadyNormalized);
 
-    protected abstract IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    protected abstract IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                  Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator);
 
     @Override
@@ -238,9 +237,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     @Override
-    public synchronized ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+    public synchronized ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         // Non-final
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
+        ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
         if (possibleVariableDefinitions == null) {
             possibleVariableDefinitions = computePossibleVariableDefinitions();
             treeCache.setPossibleVariableDefinitions(possibleVariableDefinitions);
@@ -248,7 +247,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return possibleVariableDefinitions;
     }
 
-    protected abstract ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions();
+    protected abstract ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions();
 
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {

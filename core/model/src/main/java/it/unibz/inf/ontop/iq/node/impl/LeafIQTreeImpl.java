@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -54,7 +54,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
      */
     @Override
     public final IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator) {
         try {
@@ -79,7 +79,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         return ImmutableSet.of();
     }
 

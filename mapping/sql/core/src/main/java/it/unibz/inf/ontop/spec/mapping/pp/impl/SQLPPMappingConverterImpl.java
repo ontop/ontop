@@ -18,8 +18,7 @@ import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -86,7 +85,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
-        ImmutableSubstitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
+        Substitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
         ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap =
                 targetSubstitution.apply(target.getProjectionAtom().getArguments()).stream()
@@ -108,13 +107,13 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     + provenance.getProvenanceInfo() + "]")));
 
         //noinspection OptionalGetWithoutIsPresent
-        ImmutableSubstitution<ImmutableTerm> substitution = targetPreMap.entrySet().stream()
+        Substitution<ImmutableTerm> substitution = targetPreMap.entrySet().stream()
                 .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, e -> e.getValue().get()));
 
-        ImmutableSubstitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
+        Substitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
+        Substitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
 
-        ImmutableSubstitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
+        Substitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 
         IQTree selectTree = iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(spoSubstitution.getRangeVariables(), selectSubstitution),

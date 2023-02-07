@@ -16,30 +16,30 @@ import java.util.stream.Collector;
 
 public interface SubstitutionOperations<T extends ImmutableTerm> extends SubstitutionBasicOperations<T> {
 
-    T apply(ImmutableSubstitution<? extends T> substitution, Variable variable);
+    T apply(Substitution<? extends T> substitution, Variable variable);
 
 
-    ImmutableFunctionalTerm apply(ImmutableSubstitution<? extends T> substitution, ImmutableFunctionalTerm term);
+    ImmutableFunctionalTerm apply(Substitution<? extends T> substitution, ImmutableFunctionalTerm term);
 
-    ImmutableExpression apply(ImmutableSubstitution<? extends T> substitution, ImmutableExpression expression);
+    ImmutableExpression apply(Substitution<? extends T> substitution, ImmutableExpression expression);
 
-    ImmutableList<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends Variable> variables);
+    ImmutableList<T> apply(Substitution<? extends T> substitution, ImmutableList<? extends Variable> variables);
 
-    ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
+    ImmutableSet<T> apply(Substitution<? extends T> substitution, ImmutableSet<? extends Variable> terms);
 
 
     UnifierBuilder<T> unifierBuilder();
 
-    UnifierBuilder<T> unifierBuilder(ImmutableSubstitution<T> substitution);
+    UnifierBuilder<T> unifierBuilder(Substitution<T> substitution);
 
-    Collector<ImmutableSubstitution<T>, ?, Optional<ImmutableSubstitution<T>>> toUnifier();
+    Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier();
 
-    default Optional<ImmutableSubstitution<T>> unify(T t1, T t2) { return unifierBuilder().unify(t1, t2).build(); }
+    default Optional<Substitution<T>> unify(T t1, T t2) { return unifierBuilder().unify(t1, t2).build(); }
 
     interface ArgumentMapUnifier<T extends ImmutableTerm> {
         ImmutableMap<Integer, ? extends T> getArgumentMap();
 
-        ImmutableSubstitution<T> getSubstitution();
+        Substitution<T> getSubstitution();
     }
 
     Collector<ImmutableMap<Integer, ? extends T>, ?, Optional<ArgumentMapUnifier<T>>> toArgumentMapUnifier();

@@ -16,8 +16,8 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -57,8 +57,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
-        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+    protected IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveSubstitution<Variable> selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
                 : renamingSubstitution.restrictDomainTo(getVariables());
 
@@ -68,14 +68,14 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    protected IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
         return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild(), variableGenerator);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         try {
             return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChild(), variableGenerator))
@@ -118,7 +118,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+    protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
             return getRootNode().getPossibleVariableDefinitions(getChild());
     }
 

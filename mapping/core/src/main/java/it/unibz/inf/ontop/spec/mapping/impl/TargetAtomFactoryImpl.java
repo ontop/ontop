@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 public class TargetAtomFactoryImpl implements TargetAtomFactory {
@@ -33,7 +33,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 (pred instanceof Variable) && !pred.equals(subject) ? (Variable) pred : p,
                 (object instanceof Variable) && !object.equals(subject) && !object.equals(pred) ? (Variable) object : o);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
                 projectionAtom.getArguments(),
                 ImmutableList.of(subject, pred, object));
 
@@ -50,7 +50,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 (graph instanceof Variable) && !graph.equals(subject) && !graph.equals(pred)
                         && !graph.equals(object) ? (Variable) graph : g);
 
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
                 projectionAtom.getArguments(),
                 ImmutableList.of(subject, pred, object, graph));
 
@@ -58,7 +58,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     @Override
-    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
+    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> substitution) {
         return new TargetAtomImpl(projectionAtom, substitution);
     }
 }

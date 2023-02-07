@@ -13,11 +13,11 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 public interface SubstitutionBasicOperations<T extends ImmutableTerm> {
 
-    T applyToTerm(ImmutableSubstitution<? extends T> substitution, T t);
+    T applyToTerm(Substitution<? extends T> substitution, T t);
 
-    ImmutableList<T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends T> terms);
+    ImmutableList<T> applyToTerms(Substitution<? extends T> substitution, ImmutableList<? extends T> terms);
 
-    ImmutableMap<Integer, T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap);
+    ImmutableMap<Integer, T> applyToTerms(Substitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap);
 
     /**
      *  Viewing a substitution as a function (takes a term, returns a term).
@@ -28,11 +28,11 @@ public interface SubstitutionBasicOperations<T extends ImmutableTerm> {
      * @return
      */
 
-    ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f);
+    Substitution<T> compose(Substitution<? extends T> g, Substitution<? extends T> f);
 
 
 
-    T rename(ImmutableSubstitution<Variable> renaming, T t);
+    T rename(Substitution<Variable> renaming, T t);
 
-    ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<? extends T> substitution);
+    Substitution<T> rename(InjectiveSubstitution<Variable> renaming, Substitution<? extends T> substitution);
 }

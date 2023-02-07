@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -76,7 +76,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         }
 
         // NB: may return an unifier with no entry
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = optimizationStates.stream()
+        Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = optimizationStates.stream()
                         .map(s -> s.substitution)
                         .collect(substitutionFactory.onVariableOrGroundTerms().toUnifier());
 
@@ -86,7 +86,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (!optionalUnifier.isPresent()) {
             return Optional.of(iqFactory.createEmptyNode(projectedVariables));
         }
-        ImmutableSubstitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
+        Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
         ImmutableList<IQTree> optimizedExtensionalDataNodes = optimizationStates.stream()
                 .flatMap(s -> s.extensionalDataNodes.stream())
@@ -117,7 +117,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected abstract boolean hasConstraint(ExtensionalDataNode node);
 
     private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
-                                ImmutableSubstitution<VariableOrGroundTerm> unifier,
+                                Substitution<VariableOrGroundTerm> unifier,
                                 ImmutableSet<Variable> projectedVariables,
                                 VariableGenerator variableGenerator) {
 
@@ -147,7 +147,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 substitutionNormalizer.normalizeSubstitution(unifier, projectedVariables);
         IQTree normalizedNewTree = normalization.updateChild(newTree, variableGenerator);
 
-        ImmutableSubstitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
+        Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
 
         return normalizedTopSubstitution.isEmpty()
                 ? normalizedNewTree.getVariables().size() == projectedVariables.size()
@@ -211,7 +211,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (simplifications.stream().anyMatch(s -> !s.isPresent()))
             return noSolutionState;
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = Stream.concat(
+        Optional<Substitution<VariableOrGroundTerm>> optionalUnifier = Stream.concat(
                         simplifications.stream()
                                 .map(Optional::get)
                                 .map(s -> s.substitution),
@@ -221,7 +221,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         if (!optionalUnifier.isPresent()) {
             return noSolutionState;
         }
-        ImmutableSubstitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
+        Substitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
         ImmutableSet<ImmutableExpression> newExpressions = Stream.concat(
                 state.newExpressions.stream(),
@@ -300,11 +300,11 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected static class OptimizationState {
         public final ImmutableSet<ImmutableExpression> newExpressions;
         public final Collection<ExtensionalDataNode> extensionalDataNodes;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        public final Substitution<VariableOrGroundTerm> substitution;
 
         protected OptimizationState(ImmutableSet<ImmutableExpression> newExpressions,
                                   Collection<ExtensionalDataNode> extensionalDataNodes,
-                                  ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                                  Substitution<VariableOrGroundTerm> substitution) {
             this.newExpressions = newExpressions;
             this.extensionalDataNodes = extensionalDataNodes;
             this.substitution = substitution;
@@ -314,10 +314,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected static class DeterminantGroupEvaluation {
         public final ImmutableSet<ImmutableExpression> expressions;
         public final ImmutableList<ExtensionalDataNode> dataNodes;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        public final Substitution<VariableOrGroundTerm> substitution;
 
         protected DeterminantGroupEvaluation(ImmutableSet<ImmutableExpression> expressions, ImmutableList<ExtensionalDataNode> dataNodes,
-                                             ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+                                             Substitution<VariableOrGroundTerm> substitution) {
             this.expressions = expressions;
             this.dataNodes = dataNodes;
             this.substitution = substitution;

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -43,7 +43,7 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
 
     private IQTree convertToUnion(ValuesNode valuesNode) {
         ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-        ImmutableList<ImmutableSubstitution<ImmutableTerm>> substitutionList =
+        ImmutableList<Substitution<ImmutableTerm>> substitutionList =
                 valuesNode.getValues().stream()
                         .map(tuple -> substitutionFactory.<ImmutableTerm>getSubstitution(orderedVariables, tuple))
                 .collect(ImmutableCollectors.toList());
@@ -56,7 +56,7 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private IQTree createConstructionTrueTree(ImmutableSubstitution<ImmutableTerm> substitution) {
+    private IQTree createConstructionTrueTree(Substitution<ImmutableTerm> substitution) {
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(substitution.getDomain(), substitution),
                 iqFactory.createTrueNode());

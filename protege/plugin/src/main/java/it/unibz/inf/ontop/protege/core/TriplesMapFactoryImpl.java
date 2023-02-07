@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 public class TriplesMapFactoryImpl implements TriplesMapFactory {
     private SQLPPMappingFactory ppMappingFactory;
@@ -44,7 +44,7 @@ public class TriplesMapFactoryImpl implements TriplesMapFactory {
     }
 
     @Override
-    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> sub) {
+    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, Substitution<ImmutableTerm> sub) {
         return targetAtomFactory.getTargetAtom(projectionAtom, sub);
     }
 

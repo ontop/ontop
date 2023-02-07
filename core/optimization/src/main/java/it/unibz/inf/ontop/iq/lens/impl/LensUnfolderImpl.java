@@ -98,7 +98,7 @@ public class LensUnfolderImpl implements LensUnfolder {
         }
 
         protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
             IQ renamedDefinition = renamingSubstitution.isEmpty()
@@ -109,7 +109,7 @@ public class LensUnfolderImpl implements LensUnfolder {
                     renamingSubstitution,
                     renamedDefinition.getProjectionAtom().getArguments());
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+            Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
                     .collect(substitutionFactory.toSubstitution(
                             e -> sourceAtomArguments.get(e.getKey()),
                             Map.Entry::getValue));

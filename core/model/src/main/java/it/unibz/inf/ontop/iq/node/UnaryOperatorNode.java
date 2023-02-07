@@ -13,8 +13,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -26,13 +26,13 @@ public interface UnaryOperatorNode extends QueryNode {
 
     IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache);
 
-    IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator);
 
-    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                       IQTree child, VariableGenerator variableGenerator);
+    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                        IQTree child, VariableGenerator variableGenerator);
 
-    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache);
+    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache);
 
     VariableNullability getVariableNullability(IQTree child);
 
@@ -60,7 +60,7 @@ public interface UnaryOperatorNode extends QueryNode {
      */
     void validateNode(IQTree child) throws InvalidIntermediateQueryException;
 
-    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child);
+    ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child);
 
     IQTree removeDistincts(IQTree child, IQTreeCache treeCache);
 

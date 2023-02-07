@@ -28,5 +28,5 @@ public interface UnifierBuilder<T extends ImmutableTerm> {
 
     UnifierBuilder<T> unify(T t1, T t2);
 
-    Optional<ImmutableSubstitution<T>> build();
+    Optional<Substitution<T>> build();
 }

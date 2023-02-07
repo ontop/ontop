@@ -10,8 +10,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -132,7 +131,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
                                              ImmutableMap<Variable, QuotedID> variableAliases,
-                                             ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                             Substitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
 
             if (projectedVariables.isEmpty())

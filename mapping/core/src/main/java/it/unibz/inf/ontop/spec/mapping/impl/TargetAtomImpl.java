@@ -4,9 +4,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -14,9 +13,9 @@ import java.util.Optional;
 public class TargetAtomImpl implements TargetAtom {
 
     protected final DistinctVariableOnlyDataAtom atom;
-    protected final ImmutableSubstitution<ImmutableTerm> substitution;
+    protected final Substitution<ImmutableTerm> substitution;
 
-    protected TargetAtomImpl(DistinctVariableOnlyDataAtom atom, ImmutableSubstitution<ImmutableTerm> substitution) {
+    protected TargetAtomImpl(DistinctVariableOnlyDataAtom atom, Substitution<ImmutableTerm> substitution) {
         this.atom = atom;
         this.substitution = substitution;
     }
@@ -27,7 +26,7 @@ public class TargetAtomImpl implements TargetAtom {
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+    public Substitution<ImmutableTerm> getSubstitution() {
         return substitution;
     }
 

@@ -15,12 +15,11 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -119,7 +118,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(projectedVariables, newBindings.keySet()).immutableCopy();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
+        Substitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
                         newBindings.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()),
                         analysis.getSubstitution());
 
@@ -199,7 +198,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
             this.sortConditions = sortConditions;
         }
 
-        ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+        Substitution<ImmutableTerm> getSubstitution() {
             return constructionNode.map(ConstructionNode::getSubstitution).orElseGet(substitutionFactory::getSubstitution);
         }
     }

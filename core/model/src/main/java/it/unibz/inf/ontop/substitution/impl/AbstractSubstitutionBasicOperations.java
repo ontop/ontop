@@ -6,8 +6,8 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -24,25 +24,25 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
     }
 
     @Override
-    public ImmutableList<T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends T> terms) {
+    public ImmutableList<T> applyToTerms(Substitution<? extends T> substitution, ImmutableList<? extends T> terms) {
         return terms.stream()
                 .map(t -> applyToTerm(substitution, t))
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public ImmutableMap<Integer, T> applyToTerms(ImmutableSubstitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap) {
+    public ImmutableMap<Integer, T> applyToTerms(Substitution<? extends T> substitution, ImmutableMap<Integer, ? extends T> argumentMap) {
         return argumentMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> applyToTerm(substitution, e.getValue())));
     }
 
     @Override
-    public ImmutableSubstitution<T> compose(ImmutableSubstitution<? extends T> g, ImmutableSubstitution<? extends T> f) {
+    public Substitution<T> compose(Substitution<? extends T> g, Substitution<? extends T> f) {
         if (g.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(f);
+            return SubstitutionImpl.covariantCast(f);
 
         if (f.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(g);
+            return SubstitutionImpl.covariantCast(g);
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.entrySet().stream()
@@ -51,17 +51,17 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
-        return new ImmutableSubstitutionImpl<>(map, termFactory);
+        return new SubstitutionImpl<>(map, termFactory);
     }
 
-    private static Variable applyToVariable(ImmutableSubstitution<Variable> substitution, Variable v) {
+    private static Variable applyToVariable(Substitution<Variable> substitution, Variable v) {
         return Optional.ofNullable(substitution.get(v)).orElse(v);
     }
 
     @Override
-    public ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<? extends T> substitution) {
+    public Substitution<T> rename(InjectiveSubstitution<Variable> renaming, Substitution<? extends T> substitution) {
         if (renaming.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(substitution);
+            return SubstitutionImpl.covariantCast(substitution);
 
         ImmutableMap<Variable, T> map = substitution.entrySet().stream()
                 // no clashes in new keys because the substitution is injective
@@ -69,6 +69,6 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(map, termFactory);
+        return new SubstitutionImpl<>(map, termFactory);
     }
 }

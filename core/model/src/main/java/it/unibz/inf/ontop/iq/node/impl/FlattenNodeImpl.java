@@ -142,7 +142,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child,
                                               VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(
@@ -154,7 +154,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 ));
     }
 
-    protected Variable applySubstitution(Variable var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
+    protected Variable applySubstitution(Variable var, Substitution<? extends VariableOrGroundTerm> sub) {
         VariableOrGroundTerm newVar = substitutionFactory.onVariableOrGroundTerms().apply(sub, var);
         if (!(newVar instanceof Variable))
             throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
@@ -163,7 +163,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                IQTree child, VariableGenerator variableGenerator) {
 
         return iqFactory.createUnaryIQTree(
@@ -177,7 +177,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return ImmutableSet.of();
     }
 
@@ -276,7 +276,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createUnaryIQTree(applySubstitution(renamingSubstitution), newChild, newTreeCache);
@@ -329,7 +329,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     /**
      * Avoids creating an instance if unnecessary (a similar optimization is implemented for Filter Nodes)
      */
-    private FlattenNode applySubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
+    private FlattenNode applySubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
         Optional<Variable> sIndexVar = indexVariable.map(variable -> applySubstitution(variable, sub));

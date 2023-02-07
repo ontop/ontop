@@ -29,12 +29,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         this.immutableTermsSubstitutionOperations = new ImmutableTermsSubstitutionOperations(termFactory);
     }
 
-    private <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> substitutionMap) {
-        return new ImmutableSubstitutionImpl<>(substitutionMap, termFactory);
+    private <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> substitutionMap) {
+        return new SubstitutionImpl<>(substitutionMap, termFactory);
     }
 
     @Override
-    public <T extends ImmutableTerm, U, E extends Throwable> ImmutableSubstitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U,T,E> termProvider) throws E {
+    public <T extends ImmutableTerm, U, E extends Throwable> Substitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U,T,E> termProvider) throws E {
         ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder(); // exceptions - no stream
         for (U u : entries) {
             Variable v = variableProvider.apply(u);
@@ -45,32 +45,32 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution() {
         return getSubstitution(ImmutableMap.of());
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1) {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1) {
         return getSubstitution(ImmutableMap.of(k1, v1));
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2) {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2) {
         return getSubstitution(ImmutableMap.of(k1, v1, k2, v2));
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3) {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3) {
         return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3));
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3, Variable k4, T v4) {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3, Variable k4, T v4) {
         return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values) {
+    public <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableList<Variable> variables, ImmutableList<? extends T> values) {
         if (variables.size() != values.size())
             throw new IllegalArgumentException("lists of different lengths");
 
@@ -80,17 +80,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
 
-    private InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, termFactory);
+    private <T extends ImmutableTerm> InjectiveSubstitution<T> getInjectiveVar2VarSubstitution(ImmutableMap<Variable, T> substitutionMap) {
+        return new InjectiveSubstitutionImpl<>(substitutionMap, termFactory);
     }
 
     @Override
-    public InjectiveVar2VarSubstitution injectiveOf(ImmutableSubstitution<Variable> substitution) {
-        return getInjectiveVar2VarSubstitution(((ImmutableSubstitutionImpl<Variable>)substitution).getImmutableMap());
+    public InjectiveSubstitution<Variable> injectiveOf(Substitution<Variable> substitution) {
+        return getInjectiveVar2VarSubstitution(((SubstitutionImpl<Variable>)substitution).getImmutableMap());
     }
 
     @Override
-    public InjectiveVar2VarSubstitution extractAnInjectiveVar2VarSubstitutionFromInverseOf(ImmutableSubstitution<Variable> substitution) {
+    public InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution) {
         return getInjectiveVar2VarSubstitution(
                 substitution.inverseMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
@@ -100,16 +100,16 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
 
     @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> union(ImmutableSubstitution<? extends T> substitution1, ImmutableSubstitution<? extends T> substitution2) {
+    public <T extends ImmutableTerm> Substitution<T> union(Substitution<? extends T> substitution1, Substitution<? extends T> substitution2) {
 
         if (substitution1.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(substitution2);
+            return SubstitutionImpl.covariantCast(substitution2);
 
         if (substitution2.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(substitution1);
+            return SubstitutionImpl.covariantCast(substitution1);
 
         return Stream.of(substitution1, substitution2)
-                .map(ImmutableSubstitution::entrySet)
+                .map(Substitution::entrySet)
                 .flatMap(Collection::stream)
                 .distinct()
                 .collect(toSubstitution());
@@ -117,40 +117,42 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
 
     @Override
-    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitution() {
+    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, Substitution<T>> toSubstitution() {
         return toSubstitution(Map.Entry::getKey, Map.Entry::getValue);
     }
 
     @Override
-    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
-        return SubstitutionFactoryImpl.<T, U, ImmutableSubstitution<T>>getCollector(
+    public <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
+        return SubstitutionFactoryImpl.<T, U, Substitution<T>>getCollector(
                 variableMapper, termMapper, ImmutableMap.Builder::put, this::getSubstitution);
     }
 
     @Override
-    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries() {
+    public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, Substitution<T>> toSubstitutionSkippingIdentityEntries() {
         return toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, Map.Entry::getValue);
     }
 
     @Override
-    public <T extends ImmutableTerm, U> Collector<U, ?, ImmutableSubstitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
-        return SubstitutionFactoryImpl.<T, U, ImmutableSubstitution<T>>getCollector(
+    public <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
+        return SubstitutionFactoryImpl.<T, U, Substitution<T>>getCollector(
                 variableMapper, termMapper, SubstitutionFactoryImpl::putSkippingIdentityEntries, this::getSubstitution);
     }
 
     @Override
-    public <T extends ImmutableTerm> Collector<Variable, ?, ImmutableSubstitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper) {
+    public <T extends ImmutableTerm> Collector<Variable, ?, Substitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper) {
         return toSubstitution(v -> v, termMapper);
     }
 
     @Override
-    public Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitution(Function<Variable, Variable> termMapper) {
-        return getCollector(v -> v, termMapper, ImmutableMap.Builder::put, this::getInjectiveVar2VarSubstitution);
+    public <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitution(Function<Variable, ? extends T> termMapper) {
+        return SubstitutionFactoryImpl.<T, Variable, InjectiveSubstitution<T>>
+                getCollector(v -> v, termMapper, ImmutableMap.Builder::put, this::getInjectiveVar2VarSubstitution);
     }
 
     @Override
-    public Collector<Variable, ?, InjectiveVar2VarSubstitution> toInjectiveSubstitutionSkippingIdentityEntries(Function<Variable, Variable> termMapper) {
-        return getCollector(v -> v, termMapper, SubstitutionFactoryImpl::putSkippingIdentityEntries, this::getInjectiveVar2VarSubstitution);
+    public <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitutionSkippingIdentityEntries(Function<Variable, ? extends T> termMapper) {
+        return SubstitutionFactoryImpl.<T, Variable, InjectiveSubstitution<T>>
+                getCollector(v -> v, termMapper, SubstitutionFactoryImpl::putSkippingIdentityEntries, this::getInjectiveVar2VarSubstitution);
     }
 
     @FunctionalInterface
@@ -184,7 +186,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
      *   - or a fresh variable generated by the generator NOT PRESENT in the variable set
      */
     @Override
-    public InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables) {
+    public InjectiveSubstitution<Variable> generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables) {
         return variables.stream()
                 .collect(toInjectiveSubstitutionSkippingIdentityEntries(v -> generateNonConflictingVariable(v, variableGenerator, variables)));
     }
@@ -212,8 +214,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveVar2VarSubstitution getPrioritizingRenaming(ImmutableSubstitution<?> substitution, ImmutableSet<Variable> priorityVariables) {
-        ImmutableSubstitution<Variable> renaming = substitution.builder()
+    public InjectiveSubstitution<Variable> getPrioritizingRenaming(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables) {
+        Substitution<Variable> renaming = substitution.builder()
                 .restrictDomainTo(priorityVariables)
                 .restrictRangeTo(Variable.class)
                 .restrictRange(t -> !priorityVariables.contains(t))
@@ -226,22 +228,22 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
         return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
-            public NonFunctionalTerm apply(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, Variable variable) {
+            public NonFunctionalTerm apply(Substitution<? extends NonFunctionalTerm> substitution, Variable variable) {
                 return Optional.<NonFunctionalTerm>ofNullable(substitution.get(variable)).orElse(variable);
             }
 
             @Override
-            public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
+            public NonFunctionalTerm applyToTerm(Substitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
 
             @Override
-            public NonFunctionalTerm rename(ImmutableSubstitution<Variable> renaming, NonFunctionalTerm t) {
+            public NonFunctionalTerm rename(Substitution<Variable> renaming, NonFunctionalTerm t) {
                 return applyToTerm(renaming, t);
             }
 
             @Override
-            public AbstractUnifierBuilder<NonFunctionalTerm> unifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
+            public AbstractUnifierBuilder<NonFunctionalTerm> unifierBuilder(Substitution<NonFunctionalTerm> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<NonFunctionalTerm> unifyUnequalTerms(NonFunctionalTerm term1, NonFunctionalTerm term2) {
@@ -263,21 +265,21 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
         return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
-            public VariableOrGroundTerm apply(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
+            public VariableOrGroundTerm apply(Substitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
                 return Optional.<VariableOrGroundTerm>ofNullable(substitution.get(variable)).orElse(variable);
             }
             @Override
-            public VariableOrGroundTerm applyToTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
+            public VariableOrGroundTerm applyToTerm(Substitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
 
             @Override
-            public VariableOrGroundTerm rename(ImmutableSubstitution<Variable> renaming, VariableOrGroundTerm t) {
+            public VariableOrGroundTerm rename(Substitution<Variable> renaming, VariableOrGroundTerm t) {
                 return applyToTerm(renaming, t);
             }
 
             @Override
-            public AbstractUnifierBuilder<VariableOrGroundTerm> unifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+            public AbstractUnifierBuilder<VariableOrGroundTerm> unifierBuilder(Substitution<VariableOrGroundTerm> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<VariableOrGroundTerm> unifyUnequalTerms(VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
@@ -298,22 +300,22 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public SubstitutionOperations<Variable> onVariables() {
         return new AbstractSubstitutionOperations<>(termFactory) {
             @Override
-            public Variable apply(ImmutableSubstitution<? extends Variable> substitution, Variable variable) {
+            public Variable apply(Substitution<? extends Variable> substitution, Variable variable) {
                 return Optional.<Variable>ofNullable(substitution.get(variable)).orElse(variable);
             }
 
             @Override
-            public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
+            public Variable applyToTerm(Substitution<? extends Variable> substitution, Variable t) {
                 return apply(substitution, t);
             }
 
             @Override
-            public Variable rename(ImmutableSubstitution<Variable> renaming, Variable variable) {
+            public Variable rename(Substitution<Variable> renaming, Variable variable) {
                 return apply(renaming, variable);
             }
 
             @Override
-            public AbstractUnifierBuilder<Variable> unifierBuilder(ImmutableSubstitution<Variable> substitution) {
+            public AbstractUnifierBuilder<Variable> unifierBuilder(Substitution<Variable> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
                     @Override
                     protected UnifierBuilder<Variable> unifyUnequalTerms(Variable term1, Variable term2) {
@@ -334,7 +336,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return new AbstractSubstitutionBasicOperations<>(termFactory) {
 
             @Override
-            public NonGroundTerm applyToTerm(ImmutableSubstitution<? extends NonGroundTerm> substitution, NonGroundTerm t) {
+            public NonGroundTerm applyToTerm(Substitution<? extends NonGroundTerm> substitution, NonGroundTerm t) {
                 if (t instanceof Variable) {
                     Variable v = (Variable) t;
                     return Optional.<NonGroundTerm>ofNullable(substitution.get(v)).orElse(v);
@@ -347,7 +349,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             }
 
             @Override
-            public NonGroundTerm rename(ImmutableSubstitution<Variable> renaming, NonGroundTerm t) {
+            public NonGroundTerm rename(Substitution<Variable> renaming, NonGroundTerm t) {
                 return applyToTerm(renaming, t);
             }
         };
@@ -358,7 +360,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return new AbstractSubstitutionBasicOperations<>(termFactory) {
 
             @Override
-            public NonConstantTerm applyToTerm(ImmutableSubstitution<? extends NonConstantTerm> substitution, NonConstantTerm t) {
+            public NonConstantTerm applyToTerm(Substitution<? extends NonConstantTerm> substitution, NonConstantTerm t) {
                 if (t instanceof Variable) {
                     Variable v = (Variable) t;
                     return Optional.<NonConstantTerm>ofNullable(substitution.get(v)).orElse(v);
@@ -371,7 +373,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             }
 
             @Override
-            public NonConstantTerm rename(ImmutableSubstitution<Variable> renaming, NonConstantTerm t) {
+            public NonConstantTerm rename(Substitution<Variable> renaming, NonConstantTerm t) {
                 return applyToTerm(renaming, t);
             }
         };
@@ -386,16 +388,16 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public SubstitutionBasicOperations<NonVariableTerm> onNonVariableTerms() {
         return new AbstractSubstitutionBasicOperations<>(termFactory) {
             @Override
-            public NonVariableTerm applyToTerm(ImmutableSubstitution<? extends NonVariableTerm> substitution, NonVariableTerm t) {
+            public NonVariableTerm applyToTerm(Substitution<? extends NonVariableTerm> substitution, NonVariableTerm t) {
                 return internalApplyToTerm(substitution, t);
             }
 
             @Override
-            public NonVariableTerm rename(ImmutableSubstitution<Variable> renaming, NonVariableTerm t) {
+            public NonVariableTerm rename(Substitution<Variable> renaming, NonVariableTerm t) {
                return internalApplyToTerm(renaming, t);
             }
 
-            private NonVariableTerm internalApplyToTerm(ImmutableSubstitution<?> renaming, NonVariableTerm t) {
+            private NonVariableTerm internalApplyToTerm(Substitution<?> renaming, NonVariableTerm t) {
                 if (t instanceof Constant)
                     return t;
 
@@ -411,12 +413,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public SubstitutionBasicOperations<ImmutableFunctionalTerm> onImmutableFunctionalTerms() {
         return new AbstractSubstitutionBasicOperations<>(termFactory) {
             @Override
-            public ImmutableFunctionalTerm applyToTerm(ImmutableSubstitution<? extends ImmutableFunctionalTerm> substitution, ImmutableFunctionalTerm t) {
+            public ImmutableFunctionalTerm applyToTerm(Substitution<? extends ImmutableFunctionalTerm> substitution, ImmutableFunctionalTerm t) {
                 return immutableTermsSubstitutionOperations.apply(substitution, t);
             }
 
             @Override
-            public ImmutableFunctionalTerm rename(ImmutableSubstitution<Variable> renaming, ImmutableFunctionalTerm t) {
+            public ImmutableFunctionalTerm rename(Substitution<Variable> renaming, ImmutableFunctionalTerm t) {
                 return immutableTermsSubstitutionOperations.apply(renaming, t);
             }
         };

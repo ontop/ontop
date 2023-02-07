@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -96,14 +96,14 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
         @Override
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+            Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
             ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.builder()
                     .restrictDomainTo(nonNullVariables)
                     .restrictRangeTo(ImmutableFunctionalTerm.class)
                     .toMap((v, t) -> t.simplifyAsGuaranteedToBeNonNull());
 
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
+            Substitution<ImmutableTerm> newSubstitution = initialSubstitution.builder()
                     .transformOrRetain(updatedEntryMap::get, (t, u) -> u.getSimplifiedTerm())
                     .build();
 

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -83,11 +83,11 @@ public class ReferenceValueReplacer {
 
     private ConstructionNode transformConstructionNode(ConstructionNode constructionNode,
                                                        ImmutableMap<String, String> referenceToInputMap) {
-        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
+        Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         if (substitution.isEmpty())
             return constructionNode;
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform(t -> transformTerm(t, referenceToInputMap));
+        Substitution<ImmutableTerm> newSubstitution = substitution.transform(t -> transformTerm(t, referenceToInputMap));
 
         return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }

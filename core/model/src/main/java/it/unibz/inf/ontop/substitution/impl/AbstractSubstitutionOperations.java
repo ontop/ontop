@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -24,7 +24,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     }
 
     @Override
-    public ImmutableFunctionalTerm apply(ImmutableSubstitution<? extends T> substitution, ImmutableFunctionalTerm term) {
+    public ImmutableFunctionalTerm apply(Substitution<? extends T> substitution, ImmutableFunctionalTerm term) {
         if (term.getFunctionSymbol() instanceof BooleanFunctionSymbol)
             return apply(substitution, (ImmutableExpression)term);
 
@@ -35,7 +35,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     }
 
     @Override
-    public ImmutableExpression apply(ImmutableSubstitution<? extends T> substitution, ImmutableExpression expression) {
+    public ImmutableExpression apply(Substitution<? extends T> substitution, ImmutableExpression expression) {
         if (substitution.isEmpty())
             return expression;
 
@@ -43,20 +43,20 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     }
 
     @Override
-    public ImmutableList<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableList<? extends Variable> variables) {
+    public ImmutableList<T> apply(Substitution<? extends T> substitution, ImmutableList<? extends Variable> variables) {
         return variables.stream()
                 .map(v -> apply(substitution, v))
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public ImmutableSet<T> apply(ImmutableSubstitution<? extends T> substitution, ImmutableSet<? extends Variable> terms) {
+    public ImmutableSet<T> apply(Substitution<? extends T> substitution, ImmutableSet<? extends Variable> terms) {
         return terms.stream()
                 .map(v -> apply(substitution, v))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    protected ImmutableSubstitution<T> emptySubstitution() {
+    protected Substitution<T> emptySubstitution() {
         return termFactory.getSubstitution(ImmutableMap.of());
     }
 
@@ -66,10 +66,10 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     }
 
     @Override // ensures that there is no cast in toUnifier()
-    public abstract AbstractUnifierBuilder<T> unifierBuilder(ImmutableSubstitution<T> substitution);
+    public abstract AbstractUnifierBuilder<T> unifierBuilder(Substitution<T> substitution);
 
     @Override
-    public Collector<ImmutableSubstitution<T>, ?, Optional<ImmutableSubstitution<T>>> toUnifier() {
+    public Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier() {
         return Collector.of(
                 this::unifierBuilder,
                 (a, s) -> a.unify(s.entrySet().stream(), this::keyMapper, Map.Entry::getValue),
@@ -87,9 +87,9 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
 
     private static final class ArgumentMapUnifierImpl<T extends ImmutableTerm> implements ArgumentMapUnifier<T> {
         private final ImmutableMap<Integer, ? extends T> argumentMap;
-        private final ImmutableSubstitution<T> substitution;
+        private final Substitution<T> substitution;
 
-        ArgumentMapUnifierImpl(ImmutableMap<Integer, ? extends T> argumentMap, ImmutableSubstitution<T> substitution) {
+        ArgumentMapUnifierImpl(ImmutableMap<Integer, ? extends T> argumentMap, Substitution<T> substitution) {
             this.argumentMap = argumentMap;
             this.substitution = substitution;
         }
@@ -100,7 +100,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
         }
 
         @Override
-        public ImmutableSubstitution<T> getSubstitution() {
+        public Substitution<T> getSubstitution() {
             return substitution;
         }
 
@@ -125,7 +125,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
 
             ImmutableMap<Integer, T> updatedArgumentMap = applyToTerms(unifier.getSubstitution(), argumentMap);
 
-            Optional<ImmutableSubstitution<T>> optionalUpdatedSubstitution = unifierBuilder()
+            Optional<Substitution<T>> optionalUpdatedSubstitution = unifierBuilder()
                     .unify(
                             Sets.intersection(unifier.getArgumentMap().keySet(), updatedArgumentMap.keySet()).stream(),
                             unifier.getArgumentMap()::get,

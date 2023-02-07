@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -43,8 +43,8 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution()
+        Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution()
                 .transform(t -> (t instanceof ImmutableExpression)
                         ? transformExpression((ImmutableExpression) t)
                         : t);
