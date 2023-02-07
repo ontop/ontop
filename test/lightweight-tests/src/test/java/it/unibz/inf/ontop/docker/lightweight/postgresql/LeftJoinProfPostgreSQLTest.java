@@ -45,4 +45,15 @@ public class LeftJoinProfPostgreSQLTest extends AbstractLeftJoinProfTest {
                 "\"13.0000000000000000\"^^xsd:decimal");
     }
 
+    @Override
+    protected ImmutableList<String> getExpectedValuesDuration1() {
+        return ImmutableList.of("\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"18.0000\"^^xsd:decimal", "\"20.0000\"^^xsd:decimal", "\"84.5000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1() {
+        return ImmutableList.of("\"31.0000\"^^xsd:decimal", "\"32.0000\"^^xsd:decimal", "\"115.5000\"^^xsd:decimal");
+    }
+
 }

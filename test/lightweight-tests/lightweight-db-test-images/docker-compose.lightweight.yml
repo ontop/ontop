@@ -9,6 +9,14 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
+  trino:
+    build: ./trino
+    env_file: .env
+    ports:
+      - "7002:8080"
+    environment:
+      - POSTGRES_PASSWORD=${TRINO_PASSWORD}
+
   oracle:
     build: ./oracle
     env_file: .env
