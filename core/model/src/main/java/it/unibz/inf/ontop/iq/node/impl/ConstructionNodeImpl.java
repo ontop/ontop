@@ -420,7 +420,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
                 newVariables,
-                renamingSubstitution.applyRenaming(substitution));
+                substitutionFactory.rename(renamingSubstitution, substitution));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createUnaryIQTree(newConstructionNode, newChild, newTreeCache);

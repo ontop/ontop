@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -79,14 +76,14 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ConstructionNode transform(ConstructionNode constructionNode) {
         ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
-                renamingSubstitution.applyRenaming(substitution));
+                substitutionFactory.rename(renamingSubstitution, substitution));
     }
 
     @Override
     public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
-        ImmutableSubstitution<it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
+        ImmutableSubstitution<ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
         return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
-                renamingSubstitution.applyRenaming(substitution));
+                substitutionFactory.rename(renamingSubstitution, substitution));
     }
 
     @Override

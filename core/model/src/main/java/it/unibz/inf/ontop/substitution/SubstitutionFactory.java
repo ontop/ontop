@@ -59,6 +59,12 @@ public interface SubstitutionFactory {
 
     InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables);
 
+
+    /**
+     * Applies the renaming on the keys and values of the given substitution.
+     */
+    <T extends ImmutableTerm> ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<T> substitution);
+
     /**
      *
      * @param substitution1

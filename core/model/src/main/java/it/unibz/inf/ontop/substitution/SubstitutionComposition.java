@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.substitution;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 
 public interface SubstitutionComposition<T extends ImmutableTerm> {
 

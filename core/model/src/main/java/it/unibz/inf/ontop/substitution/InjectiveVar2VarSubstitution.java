@@ -11,17 +11,9 @@ import java.util.Set;
  */
 public interface InjectiveVar2VarSubstitution extends ImmutableSubstitution<Variable> {
 
-    /**
-     * Applies it (the Var2VarSubstitution) on the keys and values of the given substitution.
-     */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
-
-
-    Variable applyToVariable(Variable variable);
-
 
     @Override
     InjectiveVar2VarSubstitution restrictDomainTo(Set<Variable> set);
-    @Override
-    InjectiveVar2VarSubstitution removeFromDomain(Set<Variable> set);
+//    @Override
+//    InjectiveVar2VarSubstitution removeFromDomain(Set<Variable> set);
 }

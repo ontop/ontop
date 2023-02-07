@@ -222,6 +222,28 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
     }
 
+    private static Variable applyToVariable(ImmutableSubstitution<Variable> substitution, Variable v) {
+        return Optional.ofNullable(substitution.get(v)).orElse(v);
+    }
+
+    private static <T extends ImmutableTerm> T applyToTerm(ImmutableSubstitution<Variable> substitution, T t) {
+        // the cast below is guaranteed to succeed
+        //noinspection unchecked
+        return (T) substitution.applyToTerm(t);
+    }
+
+
+    @Override
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<T> substitution) {
+        if (renaming.isEmpty())
+            return ImmutableSubstitutionImpl.covariantCast(substitution);
+
+        return substitution.entrySet().stream()
+                // no clashes in new keys because the substitution is injective
+                .collect(toSubstitutionSkippingIdentityEntries(e -> applyToVariable(renaming, e.getKey()), e -> applyToTerm(renaming, e.getValue())));
+    }
+
+
 
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
