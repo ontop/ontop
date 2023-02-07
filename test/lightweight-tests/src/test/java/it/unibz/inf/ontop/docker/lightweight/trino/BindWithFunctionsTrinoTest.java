@@ -34,11 +34,6 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected ImmutableMultiset<String> getDatatypeExpectedValues() {
-        return ImmutableMultiset.of("\"0.2000000000000000000\"^^xsd:decimal", "\"0.2000000000000000000\"^^xsd:decimal", "\"0.2500000000000000000\"^^xsd:decimal", "\"0.1500000000000000000\"^^xsd:decimal");
-    }
-
-    @Override
     protected ImmutableSet<String> getAbsExpectedValues() {
         return ImmutableSet.of("\"8.600000000000000000000000000000000000\"^^xsd:decimal", "\"5.750000000000000000000000000000000000\"^^xsd:decimal", "\"6.800000000000000000000000000000000000\"^^xsd:decimal",
                 "\"1.500000000000000000000000000000000000\"^^xsd:decimal");
@@ -83,74 +78,5 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
     public void testHashSHA384() {
         super.testHashSHA384();
     }
-
-
-    @Test
-    @Override
-    public void testIn1() {
-
-        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?v WHERE \n"
-                + "{  \n"
-                + "   ?x ns:discount ?v .\n"
-                + "   VALUES (?w) { \n"
-                + "         (\"0.15\"^^xsd:decimal) \n"
-                + "         (\"0.25\"^^xsd:decimal) } \n"
-                + "   FILTER(?v IN (?w)) \n"
-                + "   } ORDER BY ?v";
-
-        executeAndCompareValues(query, ImmutableList.of("\"0.1500000000000000000\"^^xsd:decimal",
-                "\"0.2500000000000000000\"^^xsd:decimal"));
-    }
-
-    @Test
-    @Override
-    public void testIn2() {
-
-        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?v WHERE \n"
-                + "{  \n"
-                + "   ?x ns:discount ?v .\n"
-                + "   FILTER(?v IN (\"0.15\"^^xsd:decimal, \n"
-                + "                     \"0.25\"^^xsd:decimal)) \n"
-                + "   } ORDER BY ?v";
-
-        executeAndCompareValues(query, ImmutableList.of("\"0.1500000000000000000\"^^xsd:decimal",
-                "\"0.2500000000000000000\"^^xsd:decimal"));
-    }
-
-    @Test
-    @Override
-    public void testNotIn1() {
-
-        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?v WHERE \n"
-                + "{  \n"
-                + "   ?x ns:discount ?v .\n"
-                + "   VALUES (?w) { \n"
-                + "         (\"0.20\"^^xsd:decimal) } \n"
-                + "   FILTER(?v NOT IN (?w)) \n"
-                + "   } ORDER BY ?v";
-
-        executeAndCompareValues(query, ImmutableList.of( "\"0.1500000000000000000\"^^xsd:decimal",
-                "\"0.2500000000000000000\"^^xsd:decimal"));
-    }
-
-    @Test
-    @Override
-    public void testNotIn2() {
-
-        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT ?v WHERE \n"
-                + "{  \n"
-                + "   ?x ns:discount ?v .\n"
-                + "   FILTER(?v NOT IN (\"0.20\"^^xsd:decimal)) \n"
-                + "   } ORDER BY ?v";
-
-        executeAndCompareValues(query, ImmutableList.of("\"0.1500000000000000000\"^^xsd:decimal",
-                "\"0.2500000000000000000\"^^xsd:decimal"));
-    }
-
-
 
 }

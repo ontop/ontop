@@ -21,7 +21,7 @@ INSERT INTO professors (prof_id, first_name, last_name) VALUES (8, 'Mary', 'Popp
 CREATE TABLE course (
 	course_id varchar(100) PRIMARY KEY,
 	nb_students int NOT NULL,
-	duration decimal NOT NULL
+	duration decimal(38,4) NOT NULL
 );
 
 INSERT INTO course (course_id, nb_students, duration) VALUES ('LinearAlgebra', 10, 24.5);

@@ -34,7 +34,7 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
 
     @Override
     protected ImmutableSet<String> getAbsExpectedValues() {
-        return ImmutableSet.of("\"8.6\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.8\"^^xsd:decimal",
+        return ImmutableSet.of("\"8.60\"^^xsd:decimal", "\"5.75\"^^xsd:decimal", "\"6.80\"^^xsd:decimal",
                 "\"1.50\"^^xsd:decimal");
     }
 
@@ -80,7 +80,7 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
 
     @Override
     protected ImmutableMultiset<String> getDatatypeExpectedValues() {
-        return ImmutableMultiset.of("\"0.2\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.2\"^^xsd:decimal",
+        return ImmutableMultiset.of("\"0.20\"^^xsd:decimal", "\"0.25\"^^xsd:decimal", "\"0.20\"^^xsd:decimal",
                 "\"0.15\"^^xsd:decimal");
     }
 
