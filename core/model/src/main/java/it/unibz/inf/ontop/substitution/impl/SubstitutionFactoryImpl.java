@@ -222,29 +222,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
     }
 
-    private static Variable applyToVariable(ImmutableSubstitution<Variable> substitution, Variable v) {
-        return Optional.ofNullable(substitution.get(v)).orElse(v);
-    }
-
-    private static <T extends ImmutableTerm> T applyToTerm(ImmutableSubstitution<Variable> substitution, T t) {
-        // the cast below is guaranteed to succeed
-        //noinspection unchecked
-        return (T) substitution.applyToTerm(t);
-    }
-
-
-    @Override
-    public <T extends ImmutableTerm> ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<T> substitution) {
-        if (renaming.isEmpty())
-            return ImmutableSubstitutionImpl.covariantCast(substitution);
-
-        return substitution.entrySet().stream()
-                // no clashes in new keys because the substitution is injective
-                .collect(toSubstitutionSkippingIdentityEntries(e -> applyToVariable(renaming, e.getKey()), e -> applyToTerm(renaming, e.getValue())));
-    }
-
-
-
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
         return new AbstractSubstitutionOperations<>(termFactory) {
@@ -257,6 +234,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public NonFunctionalTerm applyToTerm(ImmutableSubstitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
+
+            @Override
+            public NonFunctionalTerm rename(ImmutableSubstitution<Variable> renaming, NonFunctionalTerm t) {
+                return applyToTerm(renaming, t);
+            }
+
             @Override
             public AbstractUnifierBuilder<NonFunctionalTerm> unifierBuilder(ImmutableSubstitution<NonFunctionalTerm> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
@@ -287,6 +270,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public VariableOrGroundTerm applyToTerm(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
             }
+
+            @Override
+            public VariableOrGroundTerm rename(ImmutableSubstitution<Variable> renaming, VariableOrGroundTerm t) {
+                return applyToTerm(renaming, t);
+            }
+
             @Override
             public AbstractUnifierBuilder<VariableOrGroundTerm> unifierBuilder(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
@@ -317,6 +306,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             public Variable applyToTerm(ImmutableSubstitution<? extends Variable> substitution, Variable t) {
                 return apply(substitution, t);
             }
+
+            @Override
+            public Variable rename(ImmutableSubstitution<Variable> renaming, Variable variable) {
+                return apply(renaming, variable);
+            }
+
             @Override
             public AbstractUnifierBuilder<Variable> unifierBuilder(ImmutableSubstitution<Variable> substitution) {
                 return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
@@ -335,22 +330,94 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
+    public SubstitutionBasicOperations<NonGroundTerm> onNonGroundTerms() {
+        return new AbstractSubstitutionBasicOperations<>(termFactory) {
+
+            @Override
+            public NonGroundTerm applyToTerm(ImmutableSubstitution<? extends NonGroundTerm> substitution, NonGroundTerm t) {
+                if (t instanceof Variable) {
+                    Variable v = (Variable) t;
+                    return Optional.<NonGroundTerm>ofNullable(substitution.get(v)).orElse(v);
+                }
+
+                if (t instanceof NonGroundFunctionalTerm)
+                    return (NonGroundFunctionalTerm)immutableTermsSubstitutionOperations.apply(substitution, (NonGroundFunctionalTerm) t);
+
+                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
+            }
+
+            @Override
+            public NonGroundTerm rename(ImmutableSubstitution<Variable> renaming, NonGroundTerm t) {
+                return applyToTerm(renaming, t);
+            }
+        };
+    }
+
+    @Override
+    public SubstitutionBasicOperations<NonConstantTerm> onNonConstantTerms() {
+        return new AbstractSubstitutionBasicOperations<>(termFactory) {
+
+            @Override
+            public NonConstantTerm applyToTerm(ImmutableSubstitution<? extends NonConstantTerm> substitution, NonConstantTerm t) {
+                if (t instanceof Variable) {
+                    Variable v = (Variable) t;
+                    return Optional.<NonConstantTerm>ofNullable(substitution.get(v)).orElse(v);
+                }
+
+                if (t instanceof ImmutableFunctionalTerm)
+                    return immutableTermsSubstitutionOperations.apply(substitution, (ImmutableFunctionalTerm) t);
+
+                throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
+            }
+
+            @Override
+            public NonConstantTerm rename(ImmutableSubstitution<Variable> renaming, NonConstantTerm t) {
+                return applyToTerm(renaming, t);
+            }
+        };
+    }
+
+    @Override
     public SubstitutionOperations<ImmutableTerm> onImmutableTerms() {
         return immutableTermsSubstitutionOperations;
     }
 
     @Override
-    public SubstitutionComposition<NonVariableTerm> onNonVariableTerms() {
-        return new AbstractSubstitutionComposition<>(termFactory) {
+    public SubstitutionBasicOperations<NonVariableTerm> onNonVariableTerms() {
+        return new AbstractSubstitutionBasicOperations<>(termFactory) {
             @Override
             public NonVariableTerm applyToTerm(ImmutableSubstitution<? extends NonVariableTerm> substitution, NonVariableTerm t) {
-                if (t instanceof Constant) {
+                return internalApplyToTerm(substitution, t);
+            }
+
+            @Override
+            public NonVariableTerm rename(ImmutableSubstitution<Variable> renaming, NonVariableTerm t) {
+               return internalApplyToTerm(renaming, t);
+            }
+
+            private NonVariableTerm internalApplyToTerm(ImmutableSubstitution<?> renaming, NonVariableTerm t) {
+                if (t instanceof Constant)
                     return t;
-                }
-                if (t instanceof ImmutableFunctionalTerm) {
-                    return immutableTermsSubstitutionOperations.apply(substitution, (ImmutableFunctionalTerm) t);
-                }
+
+                if (t instanceof ImmutableFunctionalTerm)
+                    return immutableTermsSubstitutionOperations.apply(renaming, (ImmutableFunctionalTerm) t);
+
                 throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
+            }
+        };
+    }
+
+    @Override
+    public SubstitutionBasicOperations<ImmutableFunctionalTerm> onImmutableFunctionalTerms() {
+        return new AbstractSubstitutionBasicOperations<>(termFactory) {
+            @Override
+            public ImmutableFunctionalTerm applyToTerm(ImmutableSubstitution<? extends ImmutableFunctionalTerm> substitution, ImmutableFunctionalTerm t) {
+                return immutableTermsSubstitutionOperations.apply(substitution, t);
+            }
+
+            @Override
+            public ImmutableFunctionalTerm rename(ImmutableSubstitution<Variable> renaming, ImmutableFunctionalTerm t) {
+                return immutableTermsSubstitutionOperations.apply(renaming, t);
             }
         };
     }

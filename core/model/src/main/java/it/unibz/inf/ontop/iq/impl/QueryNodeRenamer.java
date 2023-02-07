@@ -83,7 +83,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
         ImmutableSubstitution<ImmutableFunctionalTerm> substitution = aggregationNode.getSubstitution();
         return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
-                substitutionFactory.rename(renamingSubstitution, substitution));
+                substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
     }
 
     @Override
@@ -132,7 +132,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
                 .map(c -> iqFactory.createOrderComparator(
-                        (NonGroundTerm) renamingSubstitution.applyToTerm(c.getTerm()),
+                        substitutionFactory.onNonGroundTerms().rename(renamingSubstitution, c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 

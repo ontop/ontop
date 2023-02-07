@@ -63,7 +63,7 @@ public interface SubstitutionFactory {
     /**
      * Applies the renaming on the keys and values of the given substitution.
      */
-    <T extends ImmutableTerm> ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<T> substitution);
+    default ImmutableSubstitution<ImmutableTerm> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<?> substitution) { return onImmutableTerms().rename(renaming, substitution); }
 
     /**
      *
@@ -80,14 +80,22 @@ public interface SubstitutionFactory {
 
     InjectiveVar2VarSubstitution getPrioritizingRenaming(ImmutableSubstitution<?> substitution, ImmutableSet<Variable> priorityVariables);
 
+
+
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
 
     SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms();
 
     SubstitutionOperations<Variable> onVariables();
 
+    SubstitutionBasicOperations<NonGroundTerm> onNonGroundTerms();
+
+    SubstitutionBasicOperations<NonConstantTerm> onNonConstantTerms();
+
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();
 
-    SubstitutionComposition<NonVariableTerm> onNonVariableTerms();
+    SubstitutionBasicOperations<NonVariableTerm> onNonVariableTerms();
+
+    SubstitutionBasicOperations<ImmutableFunctionalTerm> onImmutableFunctionalTerms();
 
 }

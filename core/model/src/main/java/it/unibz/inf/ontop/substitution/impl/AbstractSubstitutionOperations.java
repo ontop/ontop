@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collector;
 
-public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> extends AbstractSubstitutionComposition<T> implements SubstitutionOperations<T> {
+public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> extends AbstractSubstitutionBasicOperations<T> implements SubstitutionOperations<T> {
 
     AbstractSubstitutionOperations(TermFactory termFactory) {
         super(termFactory);

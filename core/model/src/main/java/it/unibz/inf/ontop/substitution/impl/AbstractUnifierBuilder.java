@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionComposition;
+import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
 import java.util.Optional;
@@ -19,11 +19,11 @@ import java.util.stream.Stream;
 public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements UnifierBuilder<T> {
 
     private final TermFactory termFactory;
-    private final SubstitutionComposition<T> operations;
+    private final SubstitutionBasicOperations<T> operations;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Optional<ImmutableSubstitution<T>> optionalSubstitution;
 
-    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionComposition<T> operations, ImmutableSubstitution<T> substitution) {
+    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionBasicOperations<T> operations, ImmutableSubstitution<T> substitution) {
         this.termFactory = termFactory;
         this.operations = operations;
         this.optionalSubstitution = Optional.of(substitution);

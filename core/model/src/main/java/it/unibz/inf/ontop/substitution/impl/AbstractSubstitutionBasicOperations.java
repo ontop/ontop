@@ -7,17 +7,19 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionComposition;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class AbstractSubstitutionComposition<T extends ImmutableTerm> implements SubstitutionComposition<T> {
+public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTerm> implements SubstitutionBasicOperations<T> {
 
     protected final TermFactory termFactory;
 
-    AbstractSubstitutionComposition(TermFactory termFactory) {
+    AbstractSubstitutionBasicOperations(TermFactory termFactory) {
         this.termFactory = termFactory;
     }
 
@@ -48,6 +50,24 @@ public abstract class AbstractSubstitutionComposition<T extends ImmutableTerm> i
                         g.entrySet().stream())
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
+
+        return new ImmutableSubstitutionImpl<>(map, termFactory);
+    }
+
+    private static Variable applyToVariable(ImmutableSubstitution<Variable> substitution, Variable v) {
+        return Optional.ofNullable(substitution.get(v)).orElse(v);
+    }
+
+    @Override
+    public ImmutableSubstitution<T> rename(InjectiveVar2VarSubstitution renaming, ImmutableSubstitution<? extends T> substitution) {
+        if (renaming.isEmpty())
+            return ImmutableSubstitutionImpl.covariantCast(substitution);
+
+        ImmutableMap<Variable, T> map = substitution.entrySet().stream()
+                // no clashes in new keys because the substitution is injective
+                .map(e -> Maps.immutableEntry(applyToVariable(renaming, e.getKey()), rename(renaming, e.getValue())))
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
 
         return new ImmutableSubstitutionImpl<>(map, termFactory);
     }

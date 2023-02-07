@@ -8,7 +8,13 @@ import it.unibz.inf.ontop.model.term.*;
 import java.util.Optional;
 import java.util.stream.Collector;
 
-public interface SubstitutionOperations<T extends ImmutableTerm> extends SubstitutionComposition<T> {
+/**
+ * Operations that are available only to Substitution classes where T has Variable as a subclass
+ *
+ * @param <T> the type of elements in the range of the substitution
+ */
+
+public interface SubstitutionOperations<T extends ImmutableTerm> extends SubstitutionBasicOperations<T> {
 
     T apply(ImmutableSubstitution<? extends T> substitution, Variable variable);
 

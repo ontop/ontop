@@ -220,7 +220,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
                 : possibleVariableDefinitions.stream()
-                    .map(s -> substitutionFactory.rename(renamingSubstitution, s))
+                    .map(s -> substitutionFactory.onNonVariableTerms().rename(renamingSubstitution, s))
                     .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<ImmutableSet<Variable>> newUniqueConstraints = uniqueConstraints == null

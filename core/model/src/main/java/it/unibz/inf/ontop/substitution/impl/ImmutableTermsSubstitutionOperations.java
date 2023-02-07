@@ -33,6 +33,11 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     }
 
     @Override
+    public ImmutableTerm rename(ImmutableSubstitution<Variable> renaming, ImmutableTerm t) {
+        return applyToTerm(renaming, t);
+    }
+
+    @Override
     public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder(ImmutableSubstitution<ImmutableTerm> substitution) {
         return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
             @Override
