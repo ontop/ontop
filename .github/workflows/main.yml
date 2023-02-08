@@ -288,3 +288,32 @@ jobs:
       # Runs all tests specific to a db engine
       - name: Run CI for Trino Docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="trinolighttests" -DskipTests=false --fail-at-end
+
+  run-presto:
+    needs: run-db2
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql presto
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
+      # Runs all tests specific to a db engine
+      - name: Run CI for Presto Docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="prestolighttests" -DskipTests=false --fail-at-end

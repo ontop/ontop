@@ -17,6 +17,14 @@ services:
     environment:
       - POSTGRES_PASSWORD=${TRINO_PASSWORD}
 
+  presto:
+    build: ./presto
+    env_file: .env
+    ports:
+      - "7003:8080"
+    environment:
+      - POSTGRES_PASSWORD=${PRESTO_PASSWORD}
+
   oracle:
     build: ./oracle
     env_file: .env
