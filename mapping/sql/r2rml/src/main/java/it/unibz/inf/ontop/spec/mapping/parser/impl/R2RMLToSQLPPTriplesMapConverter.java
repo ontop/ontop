@@ -206,7 +206,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 							extractedPredicates.stream(), extractedGraphs.stream())
 					.flatMap(s -> s)
 					.flatMap(ImmutableTerm::getVariableStream)
-					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(TMP_PREFIX, v)));
+					.collect(substitutionFactory.toSubstitution(v -> rename(TMP_PREFIX, v)))
+					.injective();
 
 			sourceQuery = getSQL(
 					sub.builder().toStream((v, t) -> getSelectClauseItem(TMP_PREFIX, v, t)),
@@ -217,10 +218,12 @@ public class R2RMLToSQLPPTriplesMapConverter {
 			sub = Stream.of(Stream.of(extractedSubject), extractedPredicates.stream(), extractedGraphs.stream())
 					.flatMap(s -> s)
 					.flatMap(ImmutableTerm::getVariableStream)
-					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(CHILD_PREFIX, v)));
+					.collect(substitutionFactory.toSubstitution(v -> rename(CHILD_PREFIX, v)))
+					.injective();
 
 			ob = extractedObject.getVariableStream()
-					.collect(substitutionFactory.toInjectiveSubstitution(v -> rename(PARENT_PREFIX, v)));
+					.collect(substitutionFactory.toSubstitution(v -> rename(PARENT_PREFIX, v)))
+					.injective();
 
 			sourceQuery = getSQL(
 					Stream.concat(

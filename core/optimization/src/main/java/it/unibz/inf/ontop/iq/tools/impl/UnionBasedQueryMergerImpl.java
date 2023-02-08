@@ -69,8 +69,9 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     ImmutableList<Variable> sourceProjectionAtomArguments =
                             substitutionFactory.onVariables().apply(disjointVariableSetRenaming, def.getProjectionAtom().getArguments());
 
-                    InjectiveSubstitution<Variable> headSubstitution = substitutionFactory.injectiveOf(
-                            substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments()));
+                    InjectiveSubstitution<Variable> headSubstitution =
+                            substitutionFactory.getSubstitution(sourceProjectionAtomArguments, projectionAtom.getArguments())
+                                    .injective();
 
                     InjectiveSubstitution<Variable> renamingSubstitution =
                             /*
@@ -79,9 +80,9 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
                                NB: this guarantees that the renaming substitution is injective
                              */
-                            substitutionFactory.injectiveOf(
-                                    substitutionFactory.onVariables().compose(headSubstitution, disjointVariableSetRenaming)
-                                            .removeFromDomain(disjointVariableSetRenaming.getRangeSet()));
+                            substitutionFactory.onVariables().compose(headSubstitution, disjointVariableSetRenaming)
+                                    .removeFromDomain(disjointVariableSetRenaming.getRangeSet())
+                                    .injective();
 
                     QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
                     return queryRenamer.transform(def).getTree();

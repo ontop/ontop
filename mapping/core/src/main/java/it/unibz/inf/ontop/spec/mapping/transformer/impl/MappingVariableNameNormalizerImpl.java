@@ -43,8 +43,8 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
 
     private IQ appendSuffixToVariableNames(IQ query, int suffix) {
         InjectiveSubstitution<Variable> substitution = query.getTree().getKnownVariables().stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(
-                        v -> termFactory.getVariable(v.getName() + "m" + suffix)));
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getVariable(v.getName() + "m" + suffix)))
+                .injective();
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(substitution);
         return queryRenamer.transform(query);

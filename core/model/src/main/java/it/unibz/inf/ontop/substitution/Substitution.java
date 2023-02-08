@@ -44,6 +44,9 @@ public interface Substitution<T extends ImmutableTerm>  {
     <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function);
 
 
+    boolean isInjective();
+
+    InjectiveSubstitution<T> injective();
 
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();
 
@@ -77,8 +80,6 @@ public interface Substitution<T extends ImmutableTerm>  {
     <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type);
 
     Substitution<T> restrictRange(Predicate<T> predicate);
-
-    boolean isInjective();
 
     ImmutableMap<T, Collection<Variable>> inverseMap();
 

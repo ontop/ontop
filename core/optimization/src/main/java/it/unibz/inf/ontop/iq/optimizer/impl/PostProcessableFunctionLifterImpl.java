@@ -276,7 +276,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             InjectiveSubstitution<Variable> renamingSubstitution = originalDefinition.getVariableStream()
                     .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
                     .distinct()
-                    .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
+                    .collect(substitutionFactory.toSubstitution(variableGenerator::generateNewVariableFromVar))
+                    .injective();
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 

@@ -146,7 +146,8 @@ public class RDF4JTupleExprTranslator {
         VariableGenerator vGen = getVariableGenerator(leftTranslation, rightTranslation);
 
         InjectiveSubstitution<Variable> sub = sharedVariables.stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(vGen::generateNewVariableFromVar));
+                .collect(substitutionFactory.toSubstitution(vGen::generateNewVariableFromVar))
+                .injective();
 
         InjectiveSubstitution<Variable> sharedVarsSub = sub.restrictDomainTo(sharedVariables);
 
@@ -361,10 +362,12 @@ public class RDF4JTupleExprTranslator {
 
         // May update the variable generator!!
         InjectiveSubstitution<Variable> leftRenamingSubstitution = toCoalesce.stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
+                .collect(substitutionFactory.toSubstitution(variableGenerator::generateNewVariableFromVar))
+                .injective();
 
         InjectiveSubstitution<Variable> rightRenamingSubstitution = toCoalesce.stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
+                .collect(substitutionFactory.toSubstitution(variableGenerator::generateNewVariableFromVar))
+                .injective();
 
         Substitution<ImmutableTerm> topSubstitution = toCoalesce.stream()
                 .collect(substitutionFactory.toSubstitution(
@@ -675,7 +678,8 @@ public class RDF4JTupleExprTranslator {
         return Sets.intersection(
                         Sets.difference(left.iqTree.getKnownVariables(), left.iqTree.getVariables()),
                         right.iqTree.getKnownVariables()).stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
+                .collect(substitutionFactory.toSubstitution(variableGenerator::generateNewVariableFromVar))
+                .injective();
     }
 
 

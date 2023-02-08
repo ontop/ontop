@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -150,6 +151,11 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     public <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function) {
         return new SubstitutionImpl<>(map.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> function.apply(e.getValue()))), termFactory);
+    }
+
+    @Override
+    public InjectiveSubstitution<T> injective() {
+        return new InjectiveSubstitutionImpl<>(map, termFactory);
     }
 
     @Override

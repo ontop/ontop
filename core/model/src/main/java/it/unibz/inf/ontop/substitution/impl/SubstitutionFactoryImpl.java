@@ -84,10 +84,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return new InjectiveSubstitutionImpl<>(substitutionMap, termFactory);
     }
 
-    @Override
-    public InjectiveSubstitution<Variable> injectiveOf(Substitution<Variable> substitution) {
-        return getInjectiveVar2VarSubstitution(((SubstitutionImpl<Variable>)substitution).getImmutableMap());
-    }
 
     @Override
     public InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution) {
@@ -143,17 +139,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return toSubstitution(v -> v, termMapper);
     }
 
-    @Override
-    public <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitution(Function<Variable, ? extends T> termMapper) {
-        return SubstitutionFactoryImpl.<T, Variable, InjectiveSubstitution<T>>
-                getCollector(v -> v, termMapper, ImmutableMap.Builder::put, this::getInjectiveVar2VarSubstitution);
-    }
-
-    @Override
-    public <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitutionSkippingIdentityEntries(Function<Variable, ? extends T> termMapper) {
-        return SubstitutionFactoryImpl.<T, Variable, InjectiveSubstitution<T>>
-                getCollector(v -> v, termMapper, SubstitutionFactoryImpl::putSkippingIdentityEntries, this::getInjectiveVar2VarSubstitution);
-    }
 
     @FunctionalInterface
     private interface TriConsumer<B, V, T> {
@@ -188,7 +173,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public InjectiveSubstitution<Variable> generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables) {
         return variables.stream()
-                .collect(toInjectiveSubstitutionSkippingIdentityEntries(v -> generateNonConflictingVariable(v, variableGenerator, variables)));
+                .collect(toSubstitutionSkippingIdentityEntries(v -> v, v -> generateNonConflictingVariable(v, variableGenerator, variables)))
+                .injective();
     }
 
     private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator, ImmutableSet<Variable> variables) {

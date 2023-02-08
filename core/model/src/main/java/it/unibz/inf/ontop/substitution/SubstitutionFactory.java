@@ -27,11 +27,6 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
 
-    <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitution(Function<Variable, ? extends T> termMapper);
-
-    <T extends ImmutableTerm> Collector<Variable, ?, InjectiveSubstitution<T>> toInjectiveSubstitutionSkippingIdentityEntries(Function<Variable, ? extends T> termMapper);
-
-
 
     <T extends ImmutableTerm> Substitution<T> getSubstitution();
     <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable v1, T t1);
@@ -50,9 +45,6 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm, U, E extends Throwable> Substitution<T> getSubstitutionThrowsExceptions(Collection<U> entries, Function<U, Variable> variableProvider, FunctionThrowsExceptions<U, T, E> termProvider) throws E;
 
 
-
-
-    InjectiveSubstitution<Variable> injectiveOf(Substitution<Variable> substitution);
 
     InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution);
 

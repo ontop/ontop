@@ -252,7 +252,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                                                            VariableGenerator variableGenerator) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
         InjectiveSubstitution<Variable> renaming = Sets.intersection(valuesNode.getVariables(), substitution.getDomain()).stream()
-                .collect(substitutionFactory.toInjectiveSubstitution(variableGenerator::generateNewVariableFromVar));
+                .collect(substitutionFactory.toSubstitution(variableGenerator::generateNewVariableFromVar))
+                .injective();
 
         return termFactory.getConjunction(substitutionFactory.rename(renaming, substitution).builder().toStrictEqualities())
                 .map(filterCondition ->
