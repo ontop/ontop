@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDistinctInAggregateTest;
 import it.unibz.inf.ontop.docker.lightweight.PrestoLightweightTest;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -43,8 +45,7 @@ public class DistinctInAggregatePrestoTest extends AbstractDistinctInAggregateTe
         );
     }
 
-    @Override
-    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForConcat() {
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForConcat1() {
         return ImmutableSet.of(
                 ImmutableMap.of(
                         "p", buildAnswerIRI("1"),
@@ -58,5 +59,27 @@ public class DistinctInAggregatePrestoTest extends AbstractDistinctInAggregateTe
                         "p", buildAnswerIRI("8"),
                         "sd", "\"13\"^^xsd:string"
                 ));
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForConcat2() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "sd", "\"10|11\"^^xsd:string"
+                ),
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("3"),
+                        "sd", "\"12\"^^xsd:string"
+                ),
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("8"),
+                        "sd", "\"13\"^^xsd:string"
+                ));
+    }
+
+    @Test
+    public void testGroupConcatDistinct() throws Exception {
+        ImmutableSet results = executeQueryAndCompareBindingLexicalValues(readQueryFile(groupConcatDistinctQueryFile));
+        Assertions.assertTrue(results.equals(getTuplesForConcat1()) || results.equals(getTuplesForConcat2()));
     }
 }
