@@ -72,7 +72,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     public Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier() {
         return Collector.of(
                 this::unifierBuilder,
-                (a, s) -> a.unify(s.entrySet().stream(), this::keyMapper, Map.Entry::getValue),
+                (a, s) -> a.unify(s.stream(), this::keyMapper, Map.Entry::getValue),
                 AbstractUnifierBuilder::merge,
                 UnifierBuilder::build);
     }
@@ -134,7 +134,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
 
             optional = optionalUpdatedSubstitution
                     .flatMap(u -> unifierBuilder(unifier.getSubstitution())
-                            .unify(u.entrySet().stream(), AbstractSubstitutionOperations.this::keyMapper, Map.Entry::getValue)
+                            .unify(u.stream(), AbstractSubstitutionOperations.this::keyMapper, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnifierImpl<>(
                                     applyToTerms(u, ExtensionalDataNode.union(unifier.getArgumentMap(), updatedArgumentMap)),

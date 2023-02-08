@@ -37,7 +37,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     }
 
     protected Stream<Variable> extractNullVariables(ConstructionNode constructionNode) {
-        return constructionNode.getSubstitution().entrySet().stream()
+        return constructionNode.getSubstitution().stream()
                 .filter(e -> e.getValue().isNull())
                 .map(Map.Entry::getKey);
     }

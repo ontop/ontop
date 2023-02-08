@@ -133,7 +133,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSet<Variable> vC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
-                .unify(tauC.entrySet().stream(), Map.Entry::getKey, Map.Entry::getValue)
+                .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
                 .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(substitutionFactory.getPrioritizingRenaming(eta, vC), eta))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
@@ -151,7 +151,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          */
         Substitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
-        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.entrySet().stream()
+        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getKey()),
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
@@ -162,7 +162,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         .filter(e -> !child.getVariables().contains((Variable)e.getKey()))
                         .collect(substitutionFactory.toSubstitution(
                                 e -> (Variable) e.getKey(),
-                                e -> e.getValue().iterator().next()));
+                                e -> e.getValue().iterator().next())); // choose some
 
         Substitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
@@ -172,10 +172,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
 
-        ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.entrySet();
-
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
-                .filter(e -> !thetaFBarEntries.contains(e))
+                .filter(e -> !(e.getKey() instanceof Variable) || !thetaFBar.isDefining((Variable) e.getKey()) || !thetaFBar.get((Variable) e.getKey()).equals(e.getValue()))
                 .map(e -> termFactory.getStrictEquality(substitutionFactory.onImmutableTerms().applyToTerm(thetaFBar, e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()

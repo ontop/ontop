@@ -500,7 +500,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
             Substitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(subTermDecompositions.values().stream()
                     .map(FunctionalTermDecomposition::getSubstitution)
-                    .flatMap(m -> m.entrySet().stream())
+                    .flatMap(Substitution::stream)
                     .collect(ImmutableCollectors.toMap()));
 
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(FunctionSymbolImpl.this, newArguments);

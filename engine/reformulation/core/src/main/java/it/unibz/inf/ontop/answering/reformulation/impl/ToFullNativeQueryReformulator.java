@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,22 +199,26 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     private ImmutableMap<Variable, RDFTermType> extractRDFTypes(Substitution<ImmutableTerm> definitions)
             throws NotFullyTranslatableToNativeQueryException {
 
-        ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder(); // in order to handle checked exceptions
-
-        for (Map.Entry<Variable, ImmutableTerm> entry : definitions.entrySet()) {
-            mapBuilder.put(entry.getKey(), extractRDFType(entry.getKey(), entry.getValue(), definitions));
+        try {
+            return definitions.stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> extractRDFType(e.getKey(), e.getValue(), definitions)));
         }
-        return mapBuilder.build();
+        catch (NotFullyTranslatableToNativeQueryRuntimeException e) {
+            throw new NotFullyTranslatableToNativeQueryException(e.getMessage());
+        }
     }
 
-    private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition,
-                                       Substitution<ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
+    private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition, Substitution<ImmutableTerm> definitions)  {
         if (definition instanceof Variable) {
             Variable otherVariable = (Variable) definition;
+            // recursively unravel definitions
             return extractRDFType(otherVariable, definitions.get(otherVariable), definitions);
         }
-        else if (definition instanceof RDFConstant)
+        else if (definition instanceof RDFConstant) {
             return ((RDFConstant) definition).getType();
+        }
         else if ((definition instanceof ImmutableFunctionalTerm) &&
                 ((ImmutableFunctionalTerm) definition).getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
             ImmutableTerm termTypeTerm = ((ImmutableFunctionalTerm) definition).getTerms().get(1);
@@ -226,10 +231,10 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                         && (termTypeFunctionalTerm.getTerm(1) instanceof RDFTermTypeConstant))
                     return ((RDFTermTypeConstant) termTypeFunctionalTerm.getTerm(1)).getRDFTermType();
             }
-            throw new NotFullyTranslatableToNativeQueryException(String.format(
+            throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
                             "its variable %s may not be uniquely typed", variable));
         }
-        throw new NotFullyTranslatableToNativeQueryException(String.format(
+        throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
                 "could not infer the unique type of its variable %s", variable));
     }
 
@@ -237,7 +242,15 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         protected NotFullyTranslatableToNativeQueryException(String message) {
             super("Not fully translatable to a native query: " + message);
         }
+    }
 
+    /**
+     *  Exception required only for handling streams
+     */
+    private static class NotFullyTranslatableToNativeQueryRuntimeException extends RuntimeException {
+        private NotFullyTranslatableToNativeQueryRuntimeException(String message) {
+            super(message);
+        }
     }
 
 }

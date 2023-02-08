@@ -23,7 +23,7 @@ import it.unibz.inf.ontop.model.term.*;
  */
 public interface Substitution<T extends ImmutableTerm>  {
 
-    ImmutableSet<Map.Entry<Variable, T>> entrySet();
+    Stream<Map.Entry<Variable, T>> stream();
 
     boolean isDefining(Variable variable);
 

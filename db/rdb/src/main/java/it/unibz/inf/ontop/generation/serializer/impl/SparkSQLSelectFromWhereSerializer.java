@@ -121,12 +121,12 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
                 else {
                     // use the project expression alias instead of processing the expression itself
-                    for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.entrySet()) {
-                        if (entry.getValue().equals(term)) {
-                            return variableAliases.get(entry.getKey()).getSQLRendering();
-                        }
-                    }
-                    throw new SQLSerializationException(String.format("Term %s does not occur in the substitution %s", term, substitution));
+                    return substitution.stream()
+                            .filter(e -> e.getValue().equals(term))
+                            .findFirst()
+                            .map(e -> variableAliases.get(e.getKey()).getSQLRendering())
+                            .orElseThrow(() -> new SQLSerializationException(
+                                    String.format("Term %s does not occur in the substitution %s", term, substitution)));
                 }
             }
 

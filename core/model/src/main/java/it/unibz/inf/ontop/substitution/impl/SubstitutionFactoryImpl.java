@@ -105,8 +105,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             return SubstitutionImpl.covariantCast(substitution1);
 
         return Stream.of(substitution1, substitution2)
-                .map(Substitution::entrySet)
-                .flatMap(Collection::stream)
+                .flatMap(Substitution::stream)
                 .distinct()
                 .collect(toSubstitution());
     }

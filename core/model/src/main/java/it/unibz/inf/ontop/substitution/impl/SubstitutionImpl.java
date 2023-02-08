@@ -45,8 +45,8 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     }
 
     @Override
-    public ImmutableSet<Map.Entry<Variable, T>> entrySet() {
-        return map.entrySet();
+    public Stream<Map.Entry<Variable, T>> stream() {
+        return map.entrySet().stream();
     }
 
     @Override
@@ -253,7 +253,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
             return create(stream
                     .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
-                            .map(s -> s.entrySet().stream())
+                            .map(Substitution::stream)
                             .orElseGet(() -> Stream.of(e))));
         }
 

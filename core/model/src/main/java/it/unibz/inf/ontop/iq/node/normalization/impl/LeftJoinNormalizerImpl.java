@@ -457,7 +457,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return Optional.of(updateParentConditionRightChild(newParent, ljCondition, rightGrandChild));
             }
 
-            Optional<Variable> provenanceVariable = rightSubstitution.entrySet().stream()
+            Optional<Variable> provenanceVariable = rightSubstitution.stream()
                     .filter(e -> e.getValue().equals(specialProvenanceConstant))
                     .map(Map.Entry::getKey)
                     .findFirst();

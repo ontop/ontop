@@ -45,9 +45,8 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
             return SubstitutionImpl.covariantCast(g);
 
         ImmutableMap<Variable, T> map = Stream.concat(
-                        f.entrySet().stream()
-                                .map(e -> Maps.immutableEntry(e.getKey(), applyToTerm(g, e.getValue()))),
-                        g.entrySet().stream())
+                        f.stream().map(e -> Maps.immutableEntry(e.getKey(), applyToTerm(g, e.getValue()))),
+                        g.stream())
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
@@ -63,7 +62,7 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
         if (renaming.isEmpty())
             return SubstitutionImpl.covariantCast(substitution);
 
-        ImmutableMap<Variable, T> map = substitution.entrySet().stream()
+        ImmutableMap<Variable, T> map = substitution.stream()
                 // no clashes in new keys because the substitution is injective
                 .map(e -> Maps.immutableEntry(applyToVariable(renaming, e.getKey()), rename(renaming, e.getValue())))
                 .filter(e -> !e.getKey().equals(e.getValue()))
