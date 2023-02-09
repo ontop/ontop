@@ -110,6 +110,11 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(toSubstitution());
     }
 
+    @Override
+    public <T extends ImmutableTerm> Substitution<T> covariantCast(Substitution<? extends T> substitution) {
+        return  new SubstitutionImpl<>(((SubstitutionImpl<T>)substitution).map, termFactory);
+    }
+
 
     @Override
     public <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, Substitution<T>> toSubstitution() {

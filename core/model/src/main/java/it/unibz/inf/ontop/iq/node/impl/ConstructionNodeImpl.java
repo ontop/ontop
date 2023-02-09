@@ -57,7 +57,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory, iqTreeTools, termFactory);
         this.projectedVariables = projectedVariables;
-        this.substitution = substitution.castTo(ImmutableTerm.class);
+        this.substitution = substitutionFactory.covariantCast(substitution);
         this.substitutionNormalizer = substitutionNormalizer;
         this.notRequiredVariableRemover = notRequiredVariableRemover;
 

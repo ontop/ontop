@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.StringUtils;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -121,7 +120,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
                 else {
                     // use the project expression alias instead of processing the expression itself
-                    return substitution.preImage(t -> t.equals(term))
+                    return substitution.getPreImage(t -> t.equals(term))
                             .stream()
                             .findFirst()
                             .map(v -> variableAliases.get(v).getSQLRendering())

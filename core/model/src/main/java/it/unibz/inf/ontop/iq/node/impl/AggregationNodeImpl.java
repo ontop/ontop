@@ -278,7 +278,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                             groupingVariables, substitution.getDomain()));
         }
 
-        if (!substitution.rangeAllMatch(t -> t.getFunctionSymbol().isAggregation())) {
+        if (substitution.rangeAnyMatch(t -> !t.getFunctionSymbol().isAggregation())) {
             throw new InvalidIntermediateQueryException("The substitution of the aggregation node " +
                     "should only define aggregates, not " +
                     substitution.builder().restrictRange(t -> !t.getFunctionSymbol().isAggregation()).build());

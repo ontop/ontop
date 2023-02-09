@@ -67,6 +67,8 @@ public interface SubstitutionFactory {
      */
     <T extends ImmutableTerm> Substitution<T> union(Substitution<? extends T> substitution1, Substitution<? extends T> substitution2);
 
+    <T extends ImmutableTerm> Substitution<T> covariantCast(Substitution<? extends T> substitution);
+
 
     default Optional<Substitution<ImmutableTerm>> unify(ImmutableTerm t1, ImmutableTerm t2) { return onImmutableTerms().unify(t1, t2); }
 

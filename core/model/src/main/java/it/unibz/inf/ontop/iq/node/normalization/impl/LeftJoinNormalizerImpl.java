@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -456,7 +455,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return Optional.of(updateParentConditionRightChild(newParent, ljCondition, rightGrandChild));
             }
 
-            Optional<Variable> provenanceVariable = rightSubstitution.preImage(t -> t.equals(specialProvenanceConstant))
+            Optional<Variable> provenanceVariable = rightSubstitution.getPreImage(t -> t.equals(specialProvenanceConstant))
                     .stream()
                     .findFirst();
 

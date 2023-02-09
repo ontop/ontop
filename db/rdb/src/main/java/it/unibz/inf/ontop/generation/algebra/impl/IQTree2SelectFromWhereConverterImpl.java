@@ -98,7 +98,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .orElseGet(c::getSubstitution))
                 .orElseGet(() -> aggregationNode
                         .map(AggregationNode::getSubstitution)
-                        .map(s -> s.castTo(ImmutableTerm.class))
+                        .map(substitutionFactory::<ImmutableTerm>covariantCast)
                         .orElseGet(substitutionFactory::getSubstitution));
 
         SQLExpression fromExpression = convertIntoFromExpression(childTree);

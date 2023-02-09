@@ -16,9 +16,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
-import java.util.stream.Stream;
-
 public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
@@ -38,7 +35,7 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
     }
 
     protected ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {
-        return constructionNode.getSubstitution().preImage(ImmutableTerm::isNull);
+        return constructionNode.getSubstitution().getPreImage(ImmutableTerm::isNull);
     }
 
     /**

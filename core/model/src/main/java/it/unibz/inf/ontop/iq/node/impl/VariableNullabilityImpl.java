@@ -234,9 +234,9 @@ public class VariableNullabilityImpl implements VariableNullability {
             return Stream.of(substitution);
 
         Substitution<ImmutableTerm> parentSubstitution = substitution.builder()
-                .restrictRangeTo(ImmutableFunctionalTerm.class)
+                .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
                 .transformOrRetain(subTermNames::get, (t, split) -> split.getSplitTerm())
-                .build(ImmutableTerm.class);
+                .build();
 
         Substitution<ImmutableTerm> childSubstitution = subTermNames.values().stream()
                         .map(SplitImmutableFunctionalTerm::getSubstitution)

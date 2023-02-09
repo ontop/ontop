@@ -132,7 +132,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     }
 
     @Override
-    public ImmutableSet<Variable> preImage(Predicate<T> predicate) {
+    public ImmutableSet<Variable> getPreImage(Predicate<T> predicate) {
         return map.entrySet().stream()
                 .filter(e -> predicate.test(e.getValue()))
                 .map(Map.Entry::getKey)

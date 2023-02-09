@@ -25,17 +25,38 @@ public interface Substitution<T extends ImmutableTerm>  {
 
     Stream<Map.Entry<Variable, T>> stream();
 
+    /**
+     * Returns true if the variable is in the domain of the substitution.
+     *
+     * @param variable a variable
+     * @return true if the variable is in the domain, and false otherwise.
+     */
     boolean isDefining(Variable variable);
 
+    /**
+     * Returns the domain of the substitution.
+     * The domain consists of all variables on which applying the substitution
+     * gives a non-identity result.
+     * @return the domain
+     */
     ImmutableSet<Variable> getDomain();
 
-    boolean rangeAllMatch(Predicate<T> predicate);
-
-    boolean rangeAnyMatch(Predicate<T> predicate);
+    /**
+     * Returns the subset of the domain that is mapped to terms satisfying the predicate,
+     * which is the pre-image of the set of terms satisfying the predicate.
+     *
+     * @param predicate a predicate
+     * @return the set of variables that are mapped to terms satisfying the predicate
+     */
+    ImmutableSet<Variable> getPreImage(Predicate<T> predicate);
 
     ImmutableSet<T> getRangeSet();
 
     ImmutableSet<Variable> getRangeVariables();
+
+    boolean rangeAllMatch(Predicate<T> predicate);
+
+    boolean rangeAnyMatch(Predicate<T> predicate);
 
     T get(Variable variable);
 
@@ -80,7 +101,6 @@ public interface Substitution<T extends ImmutableTerm>  {
 
     <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type);
 
-    ImmutableSet<Variable> preImage(Predicate<T> predicate);
 
     ImmutableMap<T, Collection<Variable>> inverseMap();
 
