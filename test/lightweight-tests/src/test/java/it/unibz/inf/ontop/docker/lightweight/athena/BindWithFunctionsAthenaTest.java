@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.AthenaLightweightTest;
-import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -21,10 +20,13 @@ import java.sql.SQLException;
 public class BindWithFunctionsAthenaTest extends AbstractBindTestWithFunctions {
 
     private static final String PROPERTIES_FILE = "/books/athena/books-athena.properties";
+    private static final String OBDA_FILE_ATHENA = "/books/athena/books-athena.obda"; //Athena does not support default
+                                                                                //schemas, so we need to provide an
+                                                                                //obda file with fully qualified names.
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
+        initOBDA(OBDA_FILE_ATHENA, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
@@ -55,23 +57,23 @@ public class BindWithFunctionsAthenaTest extends AbstractBindTestWithFunctions {
         return ImmutableList.of("\"0.500000000000000000\"^^xsd:decimal");
     }
 
-    @Disabled("Trino counts one hour less on two results")
+    @Disabled("Athena counts one hour less on two results")
     @Test
     @Override
     public void testSecondsBetweenMappingInput() {
         super.testSecondsBetweenMappingInput();
     }
 
-    @Disabled("Since Trino does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
+    @Disabled("Since Athena does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
             "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
-            "queries does not conserve order in Trino, so while the results are correct, they are in the wrong order")
+            "queries does not conserve order in Athena, so while the results are correct, they are in the wrong order")
     @Test
     @Override
     public void testREPLACE() {
         super.testREPLACE();
     }
 
-    @Disabled("Trino does not support SHA384")
+    @Disabled("Athena does not support SHA384")
     @Test
     @Override
     public void testHashSHA384() {

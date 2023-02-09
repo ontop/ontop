@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.lightweight.athena;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.lightweight.AbstractLeftJoinProfTest;
-import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
+import it.unibz.inf.ontop.docker.lightweight.AthenaLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -11,14 +11,18 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@TrinoLightweightTest
+@AthenaLightweightTest
 public class LeftJoinProfAthenaTest extends AbstractLeftJoinProfTest {
 
     private static final String PROPERTIES_FILE = "/prof/athena/prof-athena.properties";
+    private static final String OBDA_FILE_ATHENA = "/prof/athena/prof-athena.obda"; //Athena does not support default
+                                                                                    //schemas, so we need to provide an
+                                                                                    //obda file with fully qualified names.
+
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
+        initOBDA(OBDA_FILE_ATHENA, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
@@ -60,63 +64,63 @@ public class LeftJoinProfAthenaTest extends AbstractLeftJoinProfTest {
         return ImmutableList.of("\"15.500000000000000000\"^^xsd:decimal", "\"16.000000000000000000\"^^xsd:decimal", "\"19.250000000000000000\"^^xsd:decimal");
     }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testCourseJoinOnLeft1() { super.testCourseJoinOnLeft1(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testCourseJoinOnLeft2() { super.testCourseJoinOnLeft2(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testCourseTeacherName() { super.testCourseTeacherName(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testFirstNameNickname() { super.testFirstNameNickname(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testFullName1() { super.testFullName1(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testFullName2() { super.testFullName2(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testMinus2() { super.testMinus2(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testMinusNickname() { super.testMinusNickname(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testNicknameAndCourse() { super.testNicknameAndCourse(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testPreferences() { super.testPreferences(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testSimpleFirstName() { super.testSimpleFirstName(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testSimpleNickname() { super.testSimpleNickname(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testUselessRightPart2() { super.testUselessRightPart2(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
+    @Disabled("This test requires integrity constraints that are not currently supported by athena.")
     @Test
     public void testMinusMultitypedSum() { super.testMinusMultitypedSum(); }
 }

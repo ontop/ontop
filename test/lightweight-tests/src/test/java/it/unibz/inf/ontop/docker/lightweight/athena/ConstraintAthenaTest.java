@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.docker.lightweight.athena;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractConstraintTest;
-import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
+import it.unibz.inf.ontop.docker.lightweight.AthenaLightweightTest;
 import org.junit.jupiter.api.Disabled;
 
-@Disabled("Trino does not currently support integrity constraints.")
-@TrinoLightweightTest
+@Disabled("Athena does not currently support integrity constraints.")
+@AthenaLightweightTest
 public class ConstraintAthenaTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-athena.properties";
