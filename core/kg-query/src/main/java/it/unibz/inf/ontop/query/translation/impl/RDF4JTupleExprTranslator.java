@@ -225,8 +225,7 @@ public class RDF4JTupleExprTranslator {
 
         ImmutableSet<Variable> nullableVariables = Sets.union(
                         Sets.intersection(an.getGroupingVariables(), child.nullableVariables),
-                        an.getSubstitution().restrictRange(t -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0)))
-                                .getDomain())
+                        an.getSubstitution().preImage(t -> t.getFunctionSymbol().isNullable(ImmutableSet.of(0))))
                 .immutableCopy();
 
         IQTree iqTree = applyExternalBindingFilter(aggregationTree, an.getSubstitution().getDomain());
@@ -615,8 +614,7 @@ public class RDF4JTupleExprTranslator {
 
             ImmutableSet<Variable> nullableVariables = result.nullableVariables;
             ImmutableSet<Variable> newNullableVariables = substitution
-                    .restrictRange(t -> t.getVariableStream().anyMatch(nullableVariables::contains))
-                    .getDomain();
+                    .preImage(t -> t.getVariableStream().anyMatch(nullableVariables::contains));
 
             ConstructionNode constructionNode = iqFactory.createConstructionNode(
                     Sets.union(result.iqTree.getVariables(), substitution.getDomain()).immutableCopy(),

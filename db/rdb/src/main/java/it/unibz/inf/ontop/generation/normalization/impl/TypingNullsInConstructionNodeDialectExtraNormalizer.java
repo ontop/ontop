@@ -28,8 +28,7 @@ public class TypingNullsInConstructionNodeDialectExtraNormalizer extends Abstrac
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = child.acceptTransformer(this);
 
-        ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode)
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);
 
         if (nullVariables.isEmpty())
             return newChild.equals(child) ? tree : iqFactory.createUnaryIQTree(rootNode, newChild);

@@ -132,10 +132,11 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     }
 
     @Override
-    public Substitution<T> restrictRange(Predicate<T> predicate) {
-        return new SubstitutionImpl<>(map.entrySet().stream()
+    public ImmutableSet<Variable> preImage(Predicate<T> predicate) {
+        return map.entrySet().stream()
                 .filter(e -> predicate.test(e.getValue()))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)), termFactory);
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -222,8 +223,8 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
         }
 
         @Override
-        public <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, B, S> function) {
-            return create(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getKey(), e.getValue()))));
+        public <U, S extends ImmutableTerm> Builder<S> transform(Function<Variable, U> lookup, BiFunction<B, U, S> function) {
+            return create(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue(), lookup.apply(e.getKey())))));
         }
 
         @Override

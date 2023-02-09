@@ -280,7 +280,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             n.getSubstitution()))
                     .orElse(null);
 
-
             return new AggregationNormalizationState(newAncestors, newGroupingVariables, newAggregationSubstitution,
                     newChildConstructionNode,
                     subState.getGrandChildTree(), variableGenerator);

@@ -494,6 +494,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
             return new DataNodeAndReplacement(extensionalDataNode, replacement);
         }
 
+        // TODO: compare with ExplicitEqualityTransformerImpl - why no "accumulator" sets of variables here?
         Variable generateFreshVariable(VariableOrGroundTerm term, VariableGenerator variableGenerator) {
             return Optional.of(term)
                     .filter(t -> t instanceof Variable)
@@ -520,10 +521,8 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         }
 
         public ExtensionalDataNode getExtensionalDataNode(IntermediateQueryFactory iqFactory) {
-            ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = extensionalDataNode.getArgumentMap().entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> Optional.<VariableOrGroundTerm>ofNullable(replacement.get(e.getKey())).orElse(e.getValue())));
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap =
+                    ExtensionalDataNode.replaceVars(extensionalDataNode.getArgumentMap(), replacement);
 
             return iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap);
         }

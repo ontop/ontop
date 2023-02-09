@@ -71,6 +71,7 @@ public interface Substitution<T extends ImmutableTerm>  {
 
 
 
+
     <S extends ImmutableTerm> Substitution<S> castTo(Class<S> type);
 
     Substitution<T> restrictDomainTo(Set<Variable> set);
@@ -79,7 +80,7 @@ public interface Substitution<T extends ImmutableTerm>  {
 
     <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type);
 
-    Substitution<T> restrictRange(Predicate<T> predicate);
+    ImmutableSet<Variable> preImage(Predicate<T> predicate);
 
     ImmutableMap<T, Collection<Variable>> inverseMap();
 
@@ -100,7 +101,7 @@ public interface Substitution<T extends ImmutableTerm>  {
 
         <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type);
 
-        <S extends ImmutableTerm> Builder<S> transform(BiFunction<Variable, T, S> function);
+        <U, S extends ImmutableTerm> Builder<S> transform(Function<Variable, U> lookup, BiFunction<T, U, S> function);
 
         <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
 

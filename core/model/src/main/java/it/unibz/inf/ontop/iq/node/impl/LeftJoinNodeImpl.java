@@ -523,8 +523,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         Substitution<Variable> restricted = descendingSubstitution.restrictRangeTo(Variable.class);
 
         Sets.SetView<Variable> variables = Sets.union(leftVariables, rightVariables);
-        ImmutableSet<Variable> freshVariables = restricted.restrictRange(t -> !variables.contains(t))
-                .getDomain();
+        ImmutableSet<Variable> freshVariables = restricted.preImage(t -> !variables.contains(t));
 
         return !Sets.intersection(
                         Sets.difference(rightVariables, leftVariables),

@@ -144,7 +144,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
             Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
-                    .transform((v, t) -> replaceRDFByDBTerm(t, rdfTypes.get(v)))
+                    .transform(rdfTypes::get, this::replaceRDFByDBTerm)
                     .build();
 
             return iqFactory.createUnaryIQTree(
@@ -200,10 +200,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             throws NotFullyTranslatableToNativeQueryException {
 
         try {
-            return definitions.stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> extractRDFType(e.getKey(), e.getValue(), definitions)));
+            return definitions.builder()
+                    .toMap((v, t) -> extractRDFType(v, t, definitions));
         }
         catch (NotFullyTranslatableToNativeQueryRuntimeException e) {
             throw new NotFullyTranslatableToNativeQueryException(e.getMessage());

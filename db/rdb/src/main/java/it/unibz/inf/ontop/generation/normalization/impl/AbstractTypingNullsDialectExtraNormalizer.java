@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -36,10 +37,8 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         return transform(tree);
     }
 
-    protected Stream<Variable> extractNullVariables(ConstructionNode constructionNode) {
-        return constructionNode.getSubstitution().stream()
-                .filter(e -> e.getValue().isNull())
-                .map(Map.Entry::getKey);
+    protected ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {
+        return constructionNode.getSubstitution().preImage(ImmutableTerm::isNull);
     }
 
     /**

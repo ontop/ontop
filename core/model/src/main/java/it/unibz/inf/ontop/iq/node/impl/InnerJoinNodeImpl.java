@@ -423,7 +423,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                     .flatMap(c -> c.getVariables().stream())
                                     .collect(ImmutableCollectors.toSet()),
                             s))
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, joinTree))
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, joinTree))
                     .orElse(joinTree);
 
         } catch (UnsatisfiableConditionException e) {

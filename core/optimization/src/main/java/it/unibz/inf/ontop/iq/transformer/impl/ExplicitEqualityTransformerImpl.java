@@ -98,8 +98,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                     Optional.of(updateJoinCondition(
                                             rootNode.getOptionalFilterCondition(),
                                             substitutions ))),
-                            updatedChildren
-                    ));
+                            updatedChildren));
         }
 
         @Override
@@ -111,7 +110,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
            ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
 
-
            return iqFactory.createUnaryIQTree(
                    iqFactory.createConstructionNode(tree.getVariables()),
                    iqFactory.createBinaryNonCommutativeIQTree(
@@ -119,11 +117,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                    Optional.of(
                                            updateJoinCondition(
                                                    rootNode.getOptionalFilterCondition(),
-                                                   substitutions
-                                           ))),
+                                                   substitutions))),
                            updatedChildren.get(0),
-                           updatedChildren.get(1)
-                   ));
+                           updatedChildren.get(1)));
         }
 
         private ImmutableList<InjectiveSubstitution<Variable>> computeSubstitutions(ImmutableList<IQTree> children) {
@@ -169,19 +165,24 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom().getArguments());
 
-            if (allAbsent(replacementVars))
+            if (replacementVars.stream().noneMatch(Optional::isPresent))
                 return dn;
 
-            FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
+            DataAtom<AtomPredicate> da = dn.getProjectionAtom();
+            Iterator<Optional<Variable>> it = replacementVars.iterator();
+            FilterNode filter = iqFactory.createFilterNode(
+                    termFactory.getConjunction(da.getArguments().stream()
+                            .flatMap(a -> it.next().map(v -> termFactory.getStrictEquality(a, v)).stream())
+                            .collect(ImmutableCollectors.toList())));
+            
             DataAtom<AtomPredicate> atom = replaceVars(dn.getProjectionAtom(), replacementVars);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
                             filter,
-                            dn.newAtom(atom))
-            );
+                            dn.newAtom(atom)));
         }
 
         private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {
@@ -191,19 +192,17 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (replacementVars.isEmpty())
                 return dn;
 
-            FilterNode filter = createFilter(initialArgumentMap, replacementVars);
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = replaceVars(initialArgumentMap, replacementVars);
+            FilterNode filter = iqFactory.createFilterNode(
+                    termFactory.getConjunction(replacementVars.entrySet().stream()
+                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))
+                            .collect(ImmutableCollectors.toList())));
+
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = ExtensionalDataNode.replaceVars(initialArgumentMap, replacementVars);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
                             filter,
-                            iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap))
-            );
-        }
-
-        private boolean allAbsent(ImmutableList<Optional<Variable>> replacementVars) {
-            return replacementVars.stream()
-                    .noneMatch(Optional::isPresent);
+                            iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap)));
         }
 
         private <P extends AtomPredicate> DataAtom<P> replaceVars(DataAtom<P> projectionAtom, ImmutableList<Optional<Variable>> replacements) {
@@ -217,75 +216,41 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                         r.get() :
                                         a;
                             })
-                            .collect(ImmutableCollectors.toList())
-            );
+                            .collect(ImmutableCollectors.toList()));
         }
 
-        private ImmutableMap<Integer, ? extends VariableOrGroundTerm> replaceVars(
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
-                ImmutableMap<Integer, Variable> replacements) {
+
+        private ImmutableList<Optional<Variable>> getArgumentReplacement(ImmutableList<? extends VariableOrGroundTerm> argumentList) {
+            Set<Variable> vars = new HashSet<>(); // mutable!
+            return argumentList.stream()
+                    .map(t -> getReplacement(t, vars))
+                    .collect(ImmutableCollectors.toList());
+        }
+
+        private ImmutableMap<Integer, Variable> getArgumentReplacement(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
+            Set<Variable> vars = new HashSet<>(); // mutable
             return argumentMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> Optional.ofNullable((VariableOrGroundTerm)replacements.get(e.getKey()))
-                                    .orElseGet(e::getValue)));
+                    .flatMap(e -> getReplacement(e.getValue(), vars)
+                            .map(v -> Maps.immutableEntry(e.getKey(), v))
+                            .stream())
+                    .collect(ImmutableCollectors.toMap());
         }
 
-        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom<AtomPredicate> dataAtom) {
-            Set<Variable> newVariables = new HashSet<>();
-            List<Optional<Variable>> replacements = new ArrayList<>();
-            for (VariableOrGroundTerm term: dataAtom.getArguments()) {
-                if (term instanceof GroundTerm) {
-                    replacements.add(Optional.of(variableGenerator.generateNewVariable()));
-                } else if (term instanceof Variable) {
-                    Variable var = (Variable) term;
-                    if (newVariables.contains(var)) {
-                        replacements.add(Optional.of(variableGenerator.generateNewVariableFromVar(var)));
-                    } else {
-                        replacements.add(Optional.empty());
-                        newVariables.add(var);
-                    }
+        private Optional<Variable> getReplacement(VariableOrGroundTerm term, Set<Variable> vars) { // vars is mutable
+            if (term instanceof GroundTerm) {
+                return Optional.of(variableGenerator.generateNewVariable());
+            }
+            else {
+                Variable var = (Variable) term;
+                if (vars.contains(var)) {
+                    return Optional.of(variableGenerator.generateNewVariableFromVar(var));
+                }
+                else {
+                    vars.add(var);
+                    return Optional.empty();
                 }
             }
-            return ImmutableList.copyOf(replacements);
         }
-
-        private ImmutableMap<Integer, Variable> getArgumentReplacement(
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
-            Set<Variable> vars = new HashSet<>();
-            Map<Integer, Variable> replacementMap = new HashMap<>();
-            for (Map.Entry<Integer, ? extends VariableOrGroundTerm> entry : argumentMap.entrySet()) {
-                VariableOrGroundTerm term = entry.getValue();
-                if (term instanceof GroundTerm) {
-                    replacementMap.put(entry.getKey(), variableGenerator.generateNewVariable());
-                } else if (term instanceof Variable) {
-                    Variable var = (Variable) term;
-                    if (vars.contains(var)) {
-                        replacementMap.put(entry.getKey(), variableGenerator.generateNewVariableFromVar(var));
-                    } else {
-                        vars.add(var);
-                    }
-                }
-            }
-            return ImmutableMap.copyOf(replacementMap);
-        }
-
-        private FilterNode createFilter(DataAtom<AtomPredicate> da, ImmutableList<Optional<Variable>> replacementVars) {
-            Iterator<Optional<Variable>> it = replacementVars.iterator();
-            return iqFactory.createFilterNode(
-                    termFactory.getConjunction(da.getArguments().stream()
-                            .flatMap(a -> it.next().map(v -> termFactory.getStrictEquality(a, v)).stream())
-                            .collect(ImmutableCollectors.toList())));
-        }
-
-        private FilterNode createFilter(ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap,
-                                        ImmutableMap<Integer, Variable> replacementVars) {
-            return iqFactory.createFilterNode(
-                    termFactory.getConjunction(replacementVars.entrySet().stream()
-                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))
-                            .collect(ImmutableCollectors.toList())));
-        }
-
     }
 
 
@@ -312,18 +277,15 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             Optional<ImmutableExpression> rightChildExpression = getOptionalChildExpression(rightChild);
 
             if(leftChildChildExpression.isPresent() || rightChildExpression.isPresent()) {
+                Optional<ImmutableExpression> joinCondition = rootNode.getOptionalFilterCondition();
+                Stream<ImmutableExpression> additionalConditions = rightChildExpression.stream();
                 IQTree leftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
                         rightChildExpression.isPresent() ?
-                                iqFactory.createLeftJoinNode(
-                                        Optional.of(
-                                                updateJoinCondition(
-                                                        rootNode.getOptionalFilterCondition(),
-                                                        ImmutableList.of(rightChildExpression.get())
-                                                ))) :
+                                iqFactory.createLeftJoinNode(termFactory.getConjunction(joinCondition, additionalConditions)) :
                                 rootNode,
                         trimRootFilter(leftChild),
-                        trimRootFilter(rightChild)
-                );
+                        trimRootFilter(rightChild));
+
                 return leftChildChildExpression.isPresent() ?
                         iqFactory.createUnaryIQTree(iqFactory.createFilterNode(leftChildChildExpression.get()), leftJoinTree) :
                         leftJoinTree;
@@ -333,36 +295,31 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<ImmutableExpression> filterChildExpressions = getChildExpressions(children);
+            ImmutableList<ImmutableExpression> filterChildExpressions = children.stream()
+                    .flatMap(c -> getOptionalChildExpression(c).stream())
+                    .collect(ImmutableCollectors.toList());
             if (filterChildExpressions.isEmpty())
                 return tree;
 
+            Optional<ImmutableExpression> joinCondition = rootNode.getOptionalFilterCondition();
             return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(
-                            Optional.of(
-                                    updateJoinCondition(
-                                            rootNode.getOptionalFilterCondition(),
-                                            filterChildExpressions
-                                    ))),
+                    iqFactory.createInnerJoinNode(termFactory.getConjunction(joinCondition, filterChildExpressions.stream())),
                     children.stream()
                             .map(this::trimRootFilter)
-                            .collect(ImmutableCollectors.toList())
-            );
+                            .collect(ImmutableCollectors.toList()));
         }
 
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
-            ImmutableList<ImmutableExpression> filterChildExpressions = getChildExpressions(ImmutableList.of(child));
+            Optional<ImmutableExpression> filterChildExpressions = getOptionalChildExpression(child);
             if (filterChildExpressions.isEmpty())
                 return tree;
+
+            Optional<ImmutableExpression> joinCondition = Optional.of(rootNode.getFilterCondition());
+            Stream<ImmutableExpression> additionalConditions = filterChildExpressions.stream();
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createFilterNode(
-                            updateJoinCondition(
-                                    Optional.of(rootNode.getFilterCondition()),
-                                    filterChildExpressions
-                            )),
-                    trimRootFilter(child)
-            );
+                    iqFactory.createFilterNode(termFactory.getConjunction(joinCondition, additionalConditions).get()),
+                    trimRootFilter(child));
         }
 
 
@@ -389,31 +346,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 //        }
 //    }
 
-        private ImmutableList<ImmutableExpression> getChildExpressions(ImmutableList<IQTree> children) {
-            return children.stream()
-                    .filter(t -> t.getRootNode() instanceof FilterNode)
-                    .map(t -> ((FilterNode) t.getRootNode()).getFilterCondition())
-                    .collect(ImmutableCollectors.toList());
-        }
-
         private Optional<ImmutableExpression> getOptionalChildExpression(IQTree child) {
-            QueryNode root = child.getRootNode();
-            return root instanceof FilterNode?
-                    Optional.of(((FilterNode) root).getFilterCondition()):
-                    Optional.empty();
-
+            return Optional.of(child)
+                    .map(IQTree::getRootNode)
+                    .filter(n -> n instanceof FilterNode)
+                    .map(n -> (FilterNode)n)
+                    .map(FilterNode::getFilterCondition);
         }
 
         private IQTree trimRootFilter(IQTree tree) {
             return tree.getRootNode() instanceof FilterNode ?
                     ((UnaryIQTree) tree).getChild() :
                     tree;
-        }
-
-        private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> joinCondition, ImmutableList<ImmutableExpression> additionalConditions) {
-            if (additionalConditions.isEmpty())
-                throw new ExplicitEqualityTransformerInternalException("Nonempty list of filters expected");
-            return termFactory.getConjunction(joinCondition, additionalConditions.stream()).get();
         }
 
         protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
@@ -455,8 +399,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             tree.getVariables(),
                             iqFactory.createUnaryIQTree(
                                     rootNode,
-                                    trimIdleCn(child)
-                    ));
+                                    trimIdleCn(child)));
         }
 
         @Override
@@ -470,8 +413,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                     rootNode,
                                     children.stream()
                                             .map(this::trimIdleCn)
-                                            .collect(ImmutableCollectors.toList())
-                            ));
+                                            .collect(ImmutableCollectors.toList())));
         }
 
         @Override
@@ -484,27 +426,21 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             iqFactory.createBinaryNonCommutativeIQTree(
                                     rootNode,
                                     trimIdleCn(leftChild),
-                                    trimIdleCn(rightChild)
-                            ));
+                                    trimIdleCn(rightChild)));
         }
 
         private ImmutableList<ConstructionNode> getIdleCns(Stream<IQTree> trees) {
             return trees
                     .map(this::getIdleCn)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toList());
         }
 
         private Optional<ConstructionNode> getIdleCn(IQTree tree) {
-            QueryNode root = tree.getRootNode();
-            if (root instanceof ConstructionNode) {
-                ConstructionNode cn = ((ConstructionNode) root);
-                if (cn.getSubstitution().isEmpty()) {
-                    return Optional.of(cn);
-                }
-            }
-            return Optional.empty();
+            return Optional.of(tree.getRootNode())
+                    .filter(r -> r instanceof ConstructionNode)
+                    .map(r -> (ConstructionNode) r)
+                    .filter(cn -> cn.getSubstitution().isEmpty());
         }
 
         private IQTree trimIdleCn(IQTree tree) {
@@ -518,13 +454,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (root instanceof ConstructionNode){
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(signature, ((ConstructionNode)root).getSubstitution()),
-                        ((UnaryIQTree)tree).getChild()
-                );
+                        ((UnaryIQTree)tree).getChild());
             }
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(signature),
-                    tree
-            );
+                    tree);
         }
     }
 

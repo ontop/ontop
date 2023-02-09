@@ -339,9 +339,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             Substitution<ImmutableTerm> ascendingSubstitution =
                     naiveAscendingSubstitution.builder()
-                            .transform((v, t) -> !leftVariables.contains(v)
-                                    ? transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable)
-                                    : t)
+                            .transformOrRetain(v -> !leftVariables.contains(v) ? v : null,
+                                    (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
                             .build();
 
             ImmutableSet<Variable> parentVariables = children.stream()
@@ -457,9 +456,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return Optional.of(updateParentConditionRightChild(newParent, ljCondition, rightGrandChild));
             }
 
-            Optional<Variable> provenanceVariable = rightSubstitution.stream()
-                    .filter(e -> e.getValue().equals(specialProvenanceConstant))
-                    .map(Map.Entry::getKey)
+            Optional<Variable> provenanceVariable = rightSubstitution.preImage(t -> t.equals(specialProvenanceConstant))
+                    .stream()
                     .findFirst();
 
             Substitution<ImmutableTerm> selectedSubstitution = provenanceVariable

@@ -6,10 +6,12 @@ import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,4 +41,13 @@ public interface ExtensionalDataNode extends LeafIQTree {
                 .filter(e -> indexes.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
     }
+
+    static ImmutableMap<Integer, ? extends VariableOrGroundTerm> replaceVars(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                                                                             ImmutableMap<Integer, Variable> replacements) {
+        return argumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> Optional.<VariableOrGroundTerm>ofNullable(replacements.get(e.getKey())).orElseGet(e::getValue)));
+    }
+
 }
