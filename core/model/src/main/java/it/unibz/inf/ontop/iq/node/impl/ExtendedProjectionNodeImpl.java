@@ -86,15 +86,15 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         ImmutableSet<Variable> newProjectedVariables = iqTreeTools.computeNewProjectedVariables(tau, getVariables());
 
         try {
-            ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauFPropagationResults = propagateTau(tau, child);
+            ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauPropagationResults = propagateTau(tau, child.getVariables());
 
-            Optional<FilterNode> filterNode = tauFPropagationResults.filter
+            Optional<FilterNode> filterNode = tauPropagationResults.filter
                     .map(iqFactory::createFilterNode);
 
-            IQTree newChild = updateChildFct.apply(child, tauFPropagationResults);
+            IQTree newChild = updateChildFct.apply(child, tauPropagationResults);
 
             Optional<ExtendedProjectionNode> projectionNode = computeNewProjectionNode(newProjectedVariables,
-                    tauFPropagationResults.theta, newChild);
+                    tauPropagationResults.theta, newChild);
 
             IQTree filterTree = filterNode
                     .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newChild))
@@ -112,39 +112,35 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     protected abstract Optional<ExtendedProjectionNode> computeNewProjectionNode(
             ImmutableSet<Variable> newProjectedVariables, Substitution<ImmutableTerm> theta, IQTree newChild);
 
-    private ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> propagateTauC(Substitution<NonFunctionalTerm> tauC, IQTree child)
-            throws EmptyTreeException {
+
+    private ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> propagateTau(Substitution<? extends VariableOrGroundTerm> tau, ImmutableSet<Variable> childVariables) throws EmptyTreeException {
 
         ImmutableSet<Variable> projectedVariables = getVariables();
         Substitution<? extends ImmutableTerm> substitution = getSubstitution();
 
-        /* ---------------
-         * tauC to thetaC
-         * ---------------
-         */
+        // tauC to thetaC
 
+        Substitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
-        // Projected variables after propagating tauC
-        ImmutableSet<Variable> vC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
+        ImmutableSet<Variable> projectedVariablesAfterTauC = iqTreeTools.computeNewProjectedVariables(tauC, projectedVariables);
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
-                .map(eta -> substitutionFactory.onNonFunctionalTerms().compose(substitutionFactory.getPrioritizingRenaming(eta, vC), eta))
+                .map(eta -> substitutionFactory.onNonFunctionalTerms()
+                        .compose(substitutionFactory.getPrioritizingRenaming(eta, projectedVariablesAfterTauC), eta))
                 .orElseThrow(ConstructionNodeImpl.EmptyTreeException::new);
 
-        Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(vC);
+        Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(projectedVariablesAfterTauC);
 
         Substitution<NonFunctionalTerm> deltaC = newEta.builder()
                 .removeFromDomain(thetaC.getDomain())
                 .removeFromDomain(Sets.difference(thetaCBar.getDomain(), projectedVariables))
                 .build();
 
-        /* ---------------
-         * deltaC to thetaF
-         * ---------------
-         */
+        //  deltaC to thetaF
+
         Substitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableMultimap<NonFunctionalTerm, ImmutableFunctionalTerm> m = thetaF.stream()
@@ -152,13 +148,12 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         e -> substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey()),
                         e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
 
-        Substitution<ImmutableFunctionalTerm> thetaFBar =
-                m.asMap().entrySet().stream()
-                        .filter(e -> e.getKey() instanceof Variable)
-                        .filter(e -> !child.getVariables().contains((Variable)e.getKey()))
-                        .collect(substitutionFactory.toSubstitution(
-                                e -> (Variable) e.getKey(),
-                                e -> e.getValue().iterator().next())); // choose some
+        Substitution<ImmutableFunctionalTerm> thetaFBar = m.asMap().entrySet().stream()
+                .filter(e -> e.getKey() instanceof Variable)
+                .filter(e -> !childVariables.contains((Variable)e.getKey()))
+                .collect(substitutionFactory.toSubstitution(
+                        e -> (Variable) e.getKey(),
+                        e -> e.getValue().iterator().next())); // choose some
 
         Substitution<ImmutableTerm> gamma = deltaC.builder()
                 .removeFromDomain(thetaF.getDomain())
@@ -183,24 +178,18 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction);
 
-        return new ConstructionNodeImpl.PropagationResults<>(thetaFBar.compose(thetaCBar), newDeltaC, f);
 
-    }
-
-    private ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> propagateTau(Substitution<? extends VariableOrGroundTerm> tau, IQTree child) throws EmptyTreeException {
-
-        Substitution<NonFunctionalTerm> tauC = tau.restrictRangeTo(NonFunctionalTerm.class);
-        ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
+        // tauF propagation
 
         Substitution<GroundFunctionalTerm> tauF = tau.restrictRangeTo(GroundFunctionalTerm.class);
-        Substitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
+        Substitution<ImmutableTerm> thetaBar = thetaFBar.compose(thetaCBar);
 
         Substitution<VariableOrGroundTerm> delta = substitutionFactory.onVariableOrGroundTerms().compose(
                 tauF.builder()
                         .removeFromDomain(thetaBar.getDomain())
-                        .removeFromDomain(tauCPropagationResults.delta.getDomain())
+                        .removeFromDomain(newDeltaC.getDomain())
                         .build(),
-                tauCPropagationResults.delta);
+                newDeltaC);
 
         Substitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
@@ -209,10 +198,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         .restrictDomainTo(thetaBar.getDomain())
                         .toStream((v, t) -> termFactory.getStrictEquality(thetaBar.apply(v), t)),
                 tauF.builder() // tauF vs newDelta
-                        .restrictDomainTo(tauCPropagationResults.delta.getDomain())
-                        .toStream((v, t) -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(v), t)));
+                        .restrictDomainTo(newDeltaC.getDomain())
+                        .toStream((v, t) -> termFactory.getStrictEquality(newDeltaC.apply(v), t)));
 
-        Optional<ImmutableExpression> newF = termFactory.getConjunction(tauCPropagationResults.filter, newConditionStream);
+        Optional<ImmutableExpression> newF = termFactory.getConjunction(f, newConditionStream);
 
         return new ConstructionNodeImpl.PropagationResults<>(newTheta, delta, newF);
     }
