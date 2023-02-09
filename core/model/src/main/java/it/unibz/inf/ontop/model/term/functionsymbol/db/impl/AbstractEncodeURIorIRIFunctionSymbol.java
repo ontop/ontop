@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRISafenessDeclarationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
@@ -32,16 +33,35 @@ public abstract class AbstractEncodeURIorIRIFunctionSymbol extends AbstractTyped
             return encodeConstant((DBConstant) newTerm, termFactory);
 
         /*
-         * Looks for DB type conversions (e.g. casts) from a DBTermType that is known to be safe (e.g. decimals)
+         * Looks for DB type conversions (e.g. casts)
+         *  - from a DBTermType that is known to be safe (e.g. decimals)
+         *  - from an argument that is declared as safe
          */
         if (newTerm instanceof ImmutableFunctionalTerm) {
             FunctionSymbol functionSymbol = ((ImmutableFunctionalTerm) newTerm).getFunctionSymbol();
 
-            if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
-                    && ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
-                    .filter(t -> !t.isNeedingIRISafeEncoding())
-                    .isPresent())
-                return newTerm;
+            if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+                DBTypeConversionFunctionSymbol conversionFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
+                if (conversionFunctionSymbol.getInputType()
+                        .filter(t -> !t.isNeedingIRISafeEncoding())
+                        .isPresent())
+                    return newTerm;
+
+                if (conversionFunctionSymbol.isSimple()) {
+                    ImmutableTerm grandChildTerm = ((ImmutableFunctionalTerm) newTerm).getTerm(0);
+                    if (grandChildTerm instanceof ImmutableFunctionalTerm) {
+                        ImmutableFunctionalTerm grandChildFunctionalTerm = (ImmutableFunctionalTerm) grandChildTerm;
+                        if (grandChildFunctionalTerm.getFunctionSymbol() instanceof IRISafenessDeclarationFunctionSymbol)
+                            return termFactory.getImmutableFunctionalTerm(
+                                    conversionFunctionSymbol,
+                                    ((ImmutableFunctionalTerm) grandChildTerm).getTerm(0));
+                    }
+                }
+            }
+
+            if (functionSymbol instanceof IRISafenessDeclarationFunctionSymbol) {
+                return ((ImmutableFunctionalTerm) newTerm).getTerm(0);
+            }
         }
 
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);

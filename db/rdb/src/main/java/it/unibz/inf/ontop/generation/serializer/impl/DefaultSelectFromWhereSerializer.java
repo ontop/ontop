@@ -54,7 +54,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected final QuotedIDFactory idFactory;
 
-        private final AtomicInteger viewCounter;
+        protected final AtomicInteger viewCounter;
 
         protected DefaultRelationVisitingSerializer(QuotedIDFactory idFactory) {
             this.idFactory = idFactory;

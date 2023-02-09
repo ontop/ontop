@@ -51,8 +51,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
                                   @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  @Nullable IRISafeConstraints iriSafeConstraints,
                                   @Nonnull Columns columns, @Nonnull String filterExpression) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns;
         this.filterExpression = filterExpression;
     }
@@ -171,7 +172,9 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
                 .orElse(normalization.updateChild(parentTree, variableGenerator));
 
-        IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+
+        IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);

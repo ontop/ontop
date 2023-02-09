@@ -49,8 +49,9 @@ public class JsonSQLLens extends JsonLens {
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                        @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
-                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints,
+                       @JsonProperty("iriSafeConstraints") IRISafeConstraints iriSafeConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.query = query;
     }
 
@@ -150,10 +151,12 @@ public class JsonSQLLens extends JsonLens {
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);
 
+        IQTree finalTree = addIRISafeConstraints(transformedTree, dbParameters);
+
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
 
-        return iqFactory.createIQ(projectionAtom, transformedTree)
+        return iqFactory.createIQ(projectionAtom, finalTree)
                 .normalizeForOptimization();
     }
 

@@ -6,7 +6,8 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-mapping</artifactId>
-        <version>5.0.2-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT
+</version>
     </parent>
 
     <artifactId>ontop-mapping-owlapi</artifactId>

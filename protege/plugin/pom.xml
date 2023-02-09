@@ -6,7 +6,8 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-protege</artifactId>
-        <version>5.0.2-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT
+</version>
     </parent>
 
     <artifactId>ontop-protege-plugin</artifactId>
@@ -20,7 +21,7 @@
 
     <properties>
         <guava.version>18.0</guava.version> <!-- Protégé version -->
-        <owlapi.version>4.5.20</owlapi.version> <!-- Protégé version -->
+        <owlapi.version>4.5.24</owlapi.version> <!-- Protégé version -->
         <h2.version>2.1.214</h2.version> <!-- testing -->
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <finalName>${symbolic.name}-${project.version}</finalName>
@@ -191,6 +192,8 @@
 
                                 <Import-Package>
                                 	!javax.servlet.*,
+                                    !javax.jms.*,
+                                    !javax.mail.*,
                                     javax.*,
                                     com.google.common.*;version="[18.0,19)",
                                     org.osgi.framework;version="[1.8,2)",

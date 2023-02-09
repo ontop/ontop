@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -65,9 +66,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
             @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
             @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
-            @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints
+            @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints,
+            @JsonProperty("iriSafeConstraints") IRISafeConstraints iriSafeConstraints
     ) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns;
         this.baseRelation = baseRelation;
         this.flattenedColumn = flattenedColumn;
@@ -179,17 +181,19 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                         cs
                 ));
 
-        return iqFactory.createIQ(projectionAtom,
+
+        IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(
+                extractionConstructionNode,
                 iqFactory.createUnaryIQTree(
-                        extractionConstructionNode,
+                        filterNode,
                         iqFactory.createUnaryIQTree(
-                                filterNode,
+                                flattennode,
                                 iqFactory.createUnaryIQTree(
-                                        flattennode,
-                                        iqFactory.createUnaryIQTree(
-                                                checkArrayConstructionNode,
-                                                dataNode
-                                        )))));
+                                        checkArrayConstructionNode,
+                                        dataNode
+                                ))));
+
+        return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
     }
 
     private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {
