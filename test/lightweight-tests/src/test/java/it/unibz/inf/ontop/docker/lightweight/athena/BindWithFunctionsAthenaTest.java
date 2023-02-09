@@ -46,8 +46,8 @@ public class BindWithFunctionsAthenaTest extends AbstractBindTestWithFunctions {
 
     @Override
     protected ImmutableList<String> getStrExpectedValues() {
-        return ImmutableList.of("\"1970-11-05 07:50:00.000000\"^^xsd:string", "\"2011-12-08 11:30:00.000000\"^^xsd:string",
-                "\"2014-06-05 16:47:52.000000\"^^xsd:string", "\"2015-09-21 09:23:06.000000\"^^xsd:string");
+        return ImmutableList.of("\"1970-11-05 07:50:00.000\"^^xsd:string", "\"2011-12-08 11:30:00.000\"^^xsd:string",
+                "\"2014-06-05 16:47:52.000\"^^xsd:string", "\"2015-09-21 09:23:06.000\"^^xsd:string");
     }
 
     @Override
