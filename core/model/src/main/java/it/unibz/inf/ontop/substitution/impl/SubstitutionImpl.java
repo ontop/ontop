@@ -276,8 +276,8 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
         @Override
         public <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, B, Optional<S>> transformer) {
             return stream
-                    .flatMap(e -> transformer.apply(e.getKey(), e.getValue())
-                            .map(v -> Maps.immutableEntry(e.getKey(), v)).stream())
+                    .flatMap(e -> transformer.apply(e.getKey(), e.getValue()).stream()
+                            .map(v -> Maps.immutableEntry(e.getKey(), v)))
                     .collect(ImmutableCollectors.toMap());
         }
     }

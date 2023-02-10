@@ -163,6 +163,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
 
+        // compare with AbstractJoinTransferLJTransformer.extractEqualities
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
                 .filter(e -> !(e.getKey() instanceof Variable)
                         || !thetaFBar.isDefining((Variable) e.getKey())

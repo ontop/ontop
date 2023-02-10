@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ArgumentSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -491,7 +492,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                             Map.Entry::getKey,
                             e -> generateFreshVariable(e.getValue(), variableGenerator)));
 
-            return new DataNodeAndReplacement(extensionalDataNode, replacement);
+            return new DataNodeAndReplacement(extensionalDataNode, new ArgumentSubstitution<>(replacement, Optional::ofNullable));
         }
 
         // TODO: compare with ExplicitEqualityTransformerImpl - why no "accumulator" sets of variables here?
@@ -507,24 +508,21 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     protected static class DataNodeAndReplacement {
         private final ExtensionalDataNode extensionalDataNode;
-        private final ImmutableMap<Integer, Variable> replacement;
+        private final ArgumentSubstitution<VariableOrGroundTerm> replacement;
 
-        public DataNodeAndReplacement(ExtensionalDataNode extensionalDataNode, ImmutableMap<Integer, Variable> replacement) {
+        public DataNodeAndReplacement(ExtensionalDataNode extensionalDataNode, ArgumentSubstitution<VariableOrGroundTerm> replacement) {
             this.extensionalDataNode = extensionalDataNode;
             this.replacement = replacement;
         }
 
         public Substitution<VariableOrGroundTerm> getSubstitution(SubstitutionFactory substitutionFactory) {
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = extensionalDataNode.getArgumentMap();
-            return replacement.entrySet().stream()
-                    .collect(substitutionFactory.toSubstitution(Map.Entry::getValue, e -> argumentMap.get(e.getKey())));
+            return replacement.getSubstitution(substitutionFactory, extensionalDataNode.getArgumentMap());
         }
 
         public ExtensionalDataNode getExtensionalDataNode(IntermediateQueryFactory iqFactory) {
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap =
-                    ExtensionalDataNode.replaceVars(extensionalDataNode.getArgumentMap(), replacement);
-
-            return iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap);
+            return iqFactory.createExtensionalDataNode(
+                    extensionalDataNode.getRelationDefinition(),
+                    replacement.replaceTerms(extensionalDataNode.getArgumentMap()));
         }
     }
 

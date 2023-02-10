@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ArgumentSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -25,6 +26,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -165,19 +167,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom().getArguments());
-
-            if (replacementVars.stream().noneMatch(Optional::isPresent))
+            ImmutableList<? extends VariableOrGroundTerm> list = dn.getProjectionAtom().getArguments();
+            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(list);
+            if (replacementVars.isEmpty())
                 return dn;
 
-            DataAtom<AtomPredicate> da = dn.getProjectionAtom();
-            Iterator<Optional<Variable>> it = replacementVars.iterator();
-            FilterNode filter = iqFactory.createFilterNode(
-                    termFactory.getConjunction(da.getArguments().stream()
-                            .flatMap(a -> it.next().map(v -> termFactory.getStrictEquality(a, v)).stream())
-                            .collect(ImmutableCollectors.toList())));
-            
-            DataAtom<AtomPredicate> atom = replaceVars(dn.getProjectionAtom(), replacementVars);
+            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, list));
+
+            DataAtom<AtomPredicate> projectionAtom = dn.getProjectionAtom();
+            DataAtom<AtomPredicate> atom = atomFactory.getDataAtom(
+                    projectionAtom.getPredicate(),
+                    replacementVars.replaceTerms(projectionAtom.getArguments()));
+
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
@@ -187,17 +188,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap = dn.getArgumentMap();
-            ImmutableMap<Integer, Variable> replacementVars = getArgumentReplacement(initialArgumentMap);
-
+            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(initialArgumentMap);
             if (replacementVars.isEmpty())
                 return dn;
 
-            FilterNode filter = iqFactory.createFilterNode(
-                    termFactory.getConjunction(replacementVars.entrySet().stream()
-                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))
-                            .collect(ImmutableCollectors.toList())));
+            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, initialArgumentMap));
 
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = ExtensionalDataNode.replaceVars(initialArgumentMap, replacementVars);
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = replacementVars.replaceTerms(initialArgumentMap);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
@@ -205,35 +202,26 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap)));
         }
 
-        private <P extends AtomPredicate> DataAtom<P> replaceVars(DataAtom<P> projectionAtom, ImmutableList<Optional<Variable>> replacements) {
-            Iterator<Optional<Variable>> it = replacements.iterator();
-            return atomFactory.getDataAtom(
-                    projectionAtom.getPredicate(),
-                    projectionAtom.getArguments().stream()
-                            .map(a -> {
-                                Optional<Variable> r = it.next();
-                                return r.isPresent() ?
-                                        r.get() :
-                                        a;
-                            })
-                            .collect(ImmutableCollectors.toList()));
-        }
 
-
-        private ImmutableList<Optional<Variable>> getArgumentReplacement(ImmutableList<? extends VariableOrGroundTerm> argumentList) {
+        private ArgumentSubstitution<VariableOrGroundTerm> getArgumentReplacement(ImmutableList<? extends VariableOrGroundTerm> argumentList) {
             Set<Variable> vars = new HashSet<>(); // mutable!
-            return argumentList.stream()
-                    .map(t -> getReplacement(t, vars))
-                    .collect(ImmutableCollectors.toList());
+            ImmutableMap<Integer, Variable> m = IntStream.range(0, argumentList.size())
+                    .mapToObj(i -> getReplacement(argumentList.get(i), vars).stream()
+                            .map(v -> Maps.immutableEntry(i, v)))
+                    .flatMap(e -> e)
+                    .collect(ImmutableCollectors.toMap());
+
+            return new ArgumentSubstitution<>(m, Optional::ofNullable);
         }
 
-        private ImmutableMap<Integer, Variable> getArgumentReplacement(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
+        private ArgumentSubstitution<VariableOrGroundTerm> getArgumentReplacement(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
             Set<Variable> vars = new HashSet<>(); // mutable
-            return argumentMap.entrySet().stream()
-                    .flatMap(e -> getReplacement(e.getValue(), vars)
-                            .map(v -> Maps.immutableEntry(e.getKey(), v))
-                            .stream())
+            ImmutableMap<Integer, Variable> m = argumentMap.entrySet().stream()
+                    .flatMap(e -> getReplacement(e.getValue(), vars).stream()
+                            .map(v -> Maps.immutableEntry(e.getKey(), v)))
                     .collect(ImmutableCollectors.toMap());
+
+            return new ArgumentSubstitution<>(m, Optional::ofNullable);
         }
 
         private Optional<Variable> getReplacement(VariableOrGroundTerm term, Set<Variable> vars) { // vars is mutable

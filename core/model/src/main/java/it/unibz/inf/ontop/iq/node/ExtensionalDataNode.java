@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -36,18 +37,10 @@ public interface ExtensionalDataNode extends LeafIQTree {
                         i -> Optional.<T>ofNullable(argumentMap1.get(i)).orElseGet(() -> argumentMap2.get(i))));
     }
 
-    static ImmutableMap<Integer, ? extends VariableOrGroundTerm> restrictTo(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap, Collection<Integer> indexes) {
+    static ImmutableMap<Integer, ? extends VariableOrGroundTerm> restrictTo(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap, java.util.function.Predicate<Integer> indexes) {
         return argumentMap.entrySet().stream()
-                .filter(e -> indexes.contains(e.getKey()))
+                .filter(e -> indexes.test(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
-    }
-
-    static ImmutableMap<Integer, ? extends VariableOrGroundTerm> replaceVars(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
-                                                                             ImmutableMap<Integer, Variable> replacements) {
-        return argumentMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> Optional.<VariableOrGroundTerm>ofNullable(replacements.get(e.getKey())).orElseGet(e::getValue)));
     }
 
 }

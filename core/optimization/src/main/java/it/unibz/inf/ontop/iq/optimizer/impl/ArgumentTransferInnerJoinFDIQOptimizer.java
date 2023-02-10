@@ -49,8 +49,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
         IQTree newTree = transformer.transform(initialTree);
         return (newTree == initialTree)
                 ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+                : iqFactory.createIQ(query.getProjectionAtom(), newTree).normalizeForOptimization();
     }
 
     protected static class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -111,7 +110,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
             ImmutableSet<ImmutableExpression> expressions = extractExpressions(dataNodes, normalization.equalities, dependentIndexes);
 
-            return normalization.dataNodes.stream().map(n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), dependentIndexes))
+            return normalization.dataNodes.stream().map(n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), dependentIndexes::contains))
                     .collect(substitutionFactory.onVariableOrGroundTerms().toArgumentMapUnifier())
                     .map(u -> convertIntoDeterminantGroupEvaluation(u, targetDataNode,
                             ImmutableList.copyOf(normalization.dataNodes),
@@ -141,7 +140,7 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
                             .distinct()
                             .collect(ImmutableCollectors.toMap(
                                     n -> n,
-                                    n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), externalArgumentIndexes)));
+                                    n -> ExtensionalDataNode.restrictTo(n.getArgumentMap(), externalArgumentIndexes::contains)));
 
             return dataNodes.stream()
                     .max(Comparator.comparingInt(n -> nodeExternalArgumentMap.get(n).values().size()))
@@ -153,28 +152,18 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
                 SubstitutionOperations.ArgumentMapUnifier<VariableOrGroundTerm> argumentMapUnification, ExtensionalDataNode targetDataNode,
                 ImmutableList<ExtensionalDataNode> dataNodes, ImmutableSet<ImmutableExpression> expressions, ImmutableSet<Integer> dependentIndexes) {
 
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newTargetArgumentMap = ExtensionalDataNode.union(
-                    argumentMapUnification.getArgumentMap(), targetDataNode.getArgumentMap());
-
             // Here we only consider the first occurrence of the node! Important for not wrongly introducing implicit equalities
             int targetIndex = dataNodes.indexOf(targetDataNode);
 
             ImmutableList<ExtensionalDataNode> newNodes = IntStream.range(0, dataNodes.size())
-                    .mapToObj(i -> i == targetIndex
-                            ? iqFactory.createExtensionalDataNode(targetDataNode.getRelationDefinition(), newTargetArgumentMap)
-                            : removeDependentArguments(dataNodes.get(i), dependentIndexes))
+                    .mapToObj(i -> (i == targetIndex)
+                        ? iqFactory.createExtensionalDataNode(targetDataNode.getRelationDefinition(),
+                            ExtensionalDataNode.union(argumentMapUnification.getArgumentMap(), targetDataNode.getArgumentMap()))
+                        : iqFactory.createExtensionalDataNode(dataNodes.get(i).getRelationDefinition(),
+                            ExtensionalDataNode.restrictTo(dataNodes.get(i).getArgumentMap(), idx -> !dependentIndexes.contains(idx))))
                     .collect(ImmutableCollectors.toList());
 
             return new DeterminantGroupEvaluation(expressions, newNodes, argumentMapUnification.getSubstitution());
-        }
-
-        private ExtensionalDataNode removeDependentArguments(ExtensionalDataNode extensionalDataNode,
-                                                             ImmutableSet<Integer> dependentIndexes) {
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = extensionalDataNode.getArgumentMap().entrySet().stream()
-                    .filter(e -> !dependentIndexes.contains(e.getKey()))
-                    .collect(ImmutableCollectors.toMap());
-
-            return iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap);
         }
 
         private ImmutableSet<ImmutableExpression> extractExpressions(Collection<ExtensionalDataNode> dataNodes,
