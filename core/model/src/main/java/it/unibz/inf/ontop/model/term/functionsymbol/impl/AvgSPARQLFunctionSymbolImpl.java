@@ -215,8 +215,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         return termFactory.getSubstitution(Stream.concat(
                 floatDoubleCountStream,
                 Stream.of(avgEntryStream, incompatibleEntry)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get))
+                        .flatMap(Optional::stream))
                 .collect(ImmutableCollectors.toMap()));
     }
 

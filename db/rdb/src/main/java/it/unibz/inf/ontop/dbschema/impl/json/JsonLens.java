@@ -151,8 +151,7 @@ public abstract class JsonLens extends JsonOpenObject {
 
 
         InjectiveSubstitution<Variable> renaming = iriSafeVariables.stream()
-                .collect(substitutionFactory.toSubstitution(
-                        variableGenerator::generateNewVariableFromVar)).injective();
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         IRISafenessDeclarationFunctionSymbol iriSafenessDeclarationFunctionSymbol = coreSingletons.getDBFunctionsymbolFactory()
                 .getIRISafenessDeclaration();

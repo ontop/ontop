@@ -195,7 +195,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
     }
 
-    private VariableNullability update(Substitution<? extends ImmutableTerm> substitution,
+    private VariableNullability update(Substitution<?> substitution,
                                        ImmutableSet<Variable> newScope,
                                        VariableGenerator variableGenerator) {
         /*
@@ -344,7 +344,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                         getNullableVariables().stream())
                         .collect(ImmutableCollectors.toSet()));
 
-        Substitution<? extends ImmutableTerm> substitution = terms.stream()
+        Substitution<?> substitution = terms.stream()
                 .filter(t -> t instanceof NonVariableTerm)
                 .collect(substitutionFactory.toSubstitution(
                         t -> variableGenerator.generateNewVariable(),

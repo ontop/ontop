@@ -140,6 +140,12 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return toSubstitution(v -> v, termMapper);
     }
 
+    @Override
+    public Collector<Variable, ?, InjectiveSubstitution<Variable>> toFreshRenamingSubstitution(VariableGenerator variableGenerator) {
+        return SubstitutionFactoryImpl.getCollector(
+                v -> v, variableGenerator::generateNewVariableFromVar, ImmutableMap.Builder::put, m -> createSubstitution(m).injective());
+    }
+
 
     @FunctionalInterface
     private interface TriConsumer<B, V, T> {

@@ -20,6 +20,8 @@ public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> Collector<Variable, ?, Substitution<T>> toSubstitution(Function<Variable, ? extends T> termMapper);
 
+    Collector<Variable, ?, InjectiveSubstitution<Variable>> toFreshRenamingSubstitution(VariableGenerator variableGenerator);
+
     <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper);
 
     <T extends ImmutableTerm> Collector<Map.Entry<Variable, ? extends T>, ?, Substitution<T>> toSubstitutionSkippingIdentityEntries();
