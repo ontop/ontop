@@ -23,6 +23,10 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
         this.termFactory = termFactory;
     }
 
+    static <T extends ImmutableTerm> Substitution<T> covariantCast(Substitution<? extends T> substitution) {
+        return (Substitution<T>)substitution;
+    }
+
     @Override
     public ImmutableList<T> applyToTerms(Substitution<? extends T> substitution, ImmutableList<? extends T> terms) {
         return terms.stream()
@@ -39,10 +43,10 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
     @Override
     public Substitution<T> compose(Substitution<? extends T> g, Substitution<? extends T> f) {
         if (g.isEmpty())
-            return SubstitutionImpl.covariantCast(f);
+            return covariantCast(f);
 
         if (f.isEmpty())
-            return SubstitutionImpl.covariantCast(g);
+            return covariantCast(g);
 
         ImmutableMap<Variable, T> map = Stream.concat(
                         f.stream().map(e -> Maps.immutableEntry(e.getKey(), applyToTerm(g, e.getValue()))),
@@ -50,7 +54,7 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (fValue, gValue) -> fValue));
 
-        return new SubstitutionImpl<>(map, termFactory);
+        return termFactory.getSubstitution(map);
     }
 
     /**
@@ -72,7 +76,7 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
     @Override
     public Substitution<T> rename(InjectiveSubstitution<Variable> renaming, Substitution<? extends T> substitution) {
         if (renaming.isEmpty())
-            return SubstitutionImpl.covariantCast(substitution);
+            return covariantCast(substitution);
 
         ImmutableMap<Variable, T> map = substitution.stream()
                 // no clashes in new keys because the substitution is injective
@@ -80,6 +84,6 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new SubstitutionImpl<>(map, termFactory);
+        return termFactory.getSubstitution(map);
     }
 }

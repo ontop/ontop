@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * An injective substitution
@@ -16,4 +17,10 @@ public interface InjectiveSubstitution<T extends ImmutableTerm> extends Substitu
 
     @Override
     InjectiveSubstitution<T> removeFromDomain(Set<Variable> set);
+
+    @Override
+    <S extends ImmutableTerm> InjectiveSubstitution<S> restrictRangeTo(Class<? extends S> type);
+
+    @Override
+    <S extends ImmutableTerm> InjectiveSubstitution<S> transform(Function<T, S> function);
 }

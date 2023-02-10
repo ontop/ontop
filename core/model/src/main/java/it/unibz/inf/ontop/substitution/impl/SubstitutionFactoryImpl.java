@@ -28,8 +28,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         this.immutableTermsSubstitutionOperations = new ImmutableTermsSubstitutionOperations(termFactory);
     }
 
-    private <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> substitutionMap) {
-        return new SubstitutionImpl<>(substitutionMap, termFactory);
+    <T extends ImmutableTerm> Substitution<T> createSubstitution(ImmutableMap<Variable, T> map) {
+        return termFactory.getSubstitution(map);
     }
 
     @Override
@@ -40,32 +40,32 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             T t = termProvider.apply(u);
             substitutionMapBuilder.put(v, t);
         }
-        return getSubstitution(substitutionMapBuilder.build());
+        return createSubstitution(substitutionMapBuilder.build());
     }
 
     @Override
     public <T extends ImmutableTerm> Substitution<T> getSubstitution() {
-        return getSubstitution(ImmutableMap.of());
+        return createSubstitution(ImmutableMap.of());
     }
 
     @Override
     public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1) {
-        return getSubstitution(ImmutableMap.of(k1, v1));
+        return createSubstitution(ImmutableMap.of(k1, v1));
     }
 
     @Override
     public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2) {
-        return getSubstitution(ImmutableMap.of(k1, v1, k2, v2));
+        return createSubstitution(ImmutableMap.of(k1, v1, k2, v2));
     }
 
     @Override
     public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3) {
-        return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3));
+        return createSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3));
     }
 
     @Override
     public <T extends ImmutableTerm> Substitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3, Variable k4, T v4) {
-        return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
+        return createSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
     }
 
     @Override
@@ -79,18 +79,15 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
 
-    private <T extends ImmutableTerm> InjectiveSubstitution<T> getInjectiveVar2VarSubstitution(ImmutableMap<Variable, T> substitutionMap) {
-        return new InjectiveSubstitutionImpl<>(substitutionMap, termFactory);
-    }
 
 
     @Override
     public InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution) {
-        return getInjectiveVar2VarSubstitution(
-                substitution.inverseMap().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> e.getValue().iterator().next())));
+        return createSubstitution(substitution.inverseMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next())))
+                .injective();
     }
 
 
@@ -98,10 +95,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     public <T extends ImmutableTerm> Substitution<T> union(Substitution<? extends T> substitution1, Substitution<? extends T> substitution2) {
 
         if (substitution1.isEmpty())
-            return SubstitutionImpl.covariantCast(substitution2);
+            return covariantCast(substitution2);
 
         if (substitution2.isEmpty())
-            return SubstitutionImpl.covariantCast(substitution1);
+            return covariantCast(substitution1);
 
         return Stream.of(substitution1, substitution2)
                 .flatMap(Substitution::stream)
@@ -109,9 +106,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .collect(toSubstitution());
     }
 
+
     @Override
     public <T extends ImmutableTerm> Substitution<T> covariantCast(Substitution<? extends T> substitution) {
-        return  new SubstitutionImpl<>(((SubstitutionImpl<T>)substitution).map, termFactory);
+        return AbstractSubstitutionOperations.covariantCast(substitution);
     }
 
 
@@ -123,7 +121,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitution(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
         return SubstitutionFactoryImpl.<T, U, Substitution<T>>getCollector(
-                variableMapper, termMapper, ImmutableMap.Builder::put, this::getSubstitution);
+                variableMapper, termMapper, ImmutableMap.Builder::put, this::createSubstitution);
     }
 
     @Override
@@ -134,7 +132,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public <T extends ImmutableTerm, U> Collector<U, ?, Substitution<T>> toSubstitutionSkippingIdentityEntries(Function<U, Variable> variableMapper, Function<U, ? extends T> termMapper) {
         return SubstitutionFactoryImpl.<T, U, Substitution<T>>getCollector(
-                variableMapper, termMapper, SubstitutionFactoryImpl::putSkippingIdentityEntries, this::getSubstitution);
+                variableMapper, termMapper, (b, v, t) -> { if (!v.equals(t)) b.put(v, t); }, this::createSubstitution);
     }
 
     @Override
@@ -146,11 +144,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @FunctionalInterface
     private interface TriConsumer<B, V, T> {
         void put(B b, V v, T t);
-    }
-
-    private static <T> void putSkippingIdentityEntries(ImmutableMap.Builder<Variable, T> builder, Variable v, T t) {
-        if (!v.equals(t))
-            builder.put(v, t);
     }
 
     private static <T extends ImmutableTerm, U, R> Collector<U, ImmutableMap.Builder<Variable, T>, R> getCollector(
