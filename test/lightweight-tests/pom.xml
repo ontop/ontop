@@ -516,7 +516,7 @@
     <repositories>
         <repository>
             <id>ontop-3rd-party-maven-repo</id>
-            <url>https://raw.githubusercontent.com/DRovara/ontop-3rd-party-maven-repo/simba-athena/repository/</url>
+            <url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</url>
         </repository>
     </repositories>
 </project>
