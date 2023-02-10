@@ -12,8 +12,8 @@ import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.function.Function;
 
 public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTerm> implements SubstitutionBasicOperations<T> {
 
@@ -53,8 +53,20 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
         return new SubstitutionImpl<>(map, termFactory);
     }
 
-    private static Variable applyToVariable(Substitution<Variable> substitution, Variable v) {
-        return Optional.ofNullable(substitution.get(v)).orElse(v);
+    /**
+     *  Applies the substitution to the variable.
+     *
+     * @param substitution the substitution
+     * @param v the variable
+     * @param typeCast effectively ensures that Variable is a subtype of T (normally, is simply v -> v)
+     */
+
+    protected static <T extends ImmutableTerm> T applyToVariable(Substitution<? extends T> substitution, Variable v, Function<Variable, T> typeCast) {
+        T t = substitution.get(v);
+        if (t != null)
+            return t;
+
+        return typeCast.apply(v);
     }
 
     @Override
@@ -64,7 +76,7 @@ public abstract class AbstractSubstitutionBasicOperations<T extends ImmutableTer
 
         ImmutableMap<Variable, T> map = substitution.stream()
                 // no clashes in new keys because the substitution is injective
-                .map(e -> Maps.immutableEntry(applyToVariable(renaming, e.getKey()), rename(renaming, e.getValue())))
+                .map(e -> Maps.immutableEntry(applyToVariable(renaming, e.getKey(), v -> v), rename(renaming, e.getValue())))
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 

@@ -167,14 +167,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
-            ImmutableList<? extends VariableOrGroundTerm> list = dn.getProjectionAtom().getArguments();
-            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(list);
+            DataAtom<AtomPredicate> projectionAtom = dn.getProjectionAtom();
+            ArgumentSubstitution<VariableOrGroundTerm> replacementVars = getArgumentReplacement(projectionAtom.getArguments());
             if (replacementVars.isEmpty())
                 return dn;
 
-            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, list));
+            FilterNode filter = iqFactory.createFilterNode(replacementVars.getConjunction(termFactory, projectionAtom.getArguments()));
 
-            DataAtom<AtomPredicate> projectionAtom = dn.getProjectionAtom();
             DataAtom<AtomPredicate> atom = atomFactory.getDataAtom(
                     projectionAtom.getPredicate(),
                     replacementVars.replaceTerms(projectionAtom.getArguments()));

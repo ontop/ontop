@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
@@ -216,20 +215,10 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {
-        return new AbstractSubstitutionOperations<>(termFactory) {
-            @Override
-            public NonFunctionalTerm apply(Substitution<? extends NonFunctionalTerm> substitution, Variable variable) {
-                return Optional.<NonFunctionalTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
+        return new AbstractSubstitutionOperations<>(termFactory, v -> v, s -> s) {
             @Override
             public NonFunctionalTerm applyToTerm(Substitution<? extends NonFunctionalTerm> substitution, NonFunctionalTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
-            }
-
-            @Override
-            public NonFunctionalTerm rename(Substitution<Variable> renaming, NonFunctionalTerm t) {
-                return applyToTerm(renaming, t);
             }
 
             @Override
@@ -243,29 +232,15 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                     }
                 };
             }
-
-            @Override
-            protected NonFunctionalTerm keyMapper(Map.Entry<Variable, NonFunctionalTerm> e) {
-                return e.getKey();
-            }
         };
     }
 
     @Override
     public SubstitutionOperations<VariableOrGroundTerm> onVariableOrGroundTerms() {
-        return new AbstractSubstitutionOperations<>(termFactory) {
-            @Override
-            public VariableOrGroundTerm apply(Substitution<? extends VariableOrGroundTerm> substitution, Variable variable) {
-                return Optional.<VariableOrGroundTerm>ofNullable(substitution.get(variable)).orElse(variable);
-            }
+        return new AbstractSubstitutionOperations<>(termFactory, v -> v, s -> s) {
             @Override
             public VariableOrGroundTerm applyToTerm(Substitution<? extends VariableOrGroundTerm> substitution, VariableOrGroundTerm t) {
                 return (t instanceof Variable) ? apply(substitution, (Variable) t) : t;
-            }
-
-            @Override
-            public VariableOrGroundTerm rename(Substitution<Variable> renaming, VariableOrGroundTerm t) {
-                return applyToTerm(renaming, t);
             }
 
             @Override
@@ -279,29 +254,15 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                     }
                 };
             }
-            @Override
-            protected VariableOrGroundTerm keyMapper(Map.Entry<Variable, VariableOrGroundTerm> e) {
-                return e.getKey();
-            }
         };
     }
 
     @Override
     public SubstitutionOperations<Variable> onVariables() {
-        return new AbstractSubstitutionOperations<>(termFactory) {
-            @Override
-            public Variable apply(Substitution<? extends Variable> substitution, Variable variable) {
-                return Optional.<Variable>ofNullable(substitution.get(variable)).orElse(variable);
-            }
-
+        return new AbstractSubstitutionOperations<>(termFactory, v -> v, s -> s) {
             @Override
             public Variable applyToTerm(Substitution<? extends Variable> substitution, Variable t) {
                 return apply(substitution, t);
-            }
-
-            @Override
-            public Variable rename(Substitution<Variable> renaming, Variable variable) {
-                return apply(renaming, variable);
             }
 
             @Override
@@ -314,10 +275,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                     }
                 };
             }
-            @Override
-            protected Variable keyMapper(Map.Entry<Variable, Variable> e) {
-                return e.getKey();
-            }
         };
     }
 
@@ -327,10 +284,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
             @Override
             public NonGroundTerm applyToTerm(Substitution<? extends NonGroundTerm> substitution, NonGroundTerm t) {
-                if (t instanceof Variable) {
-                    Variable v = (Variable) t;
-                    return Optional.<NonGroundTerm>ofNullable(substitution.get(v)).orElse(v);
-                }
+                if (t instanceof Variable)
+                    return applyToVariable(substitution, (Variable) t, v -> v);
 
                 if (t instanceof NonGroundFunctionalTerm)
                     return (NonGroundFunctionalTerm)immutableTermsSubstitutionOperations.apply(substitution, (NonGroundFunctionalTerm) t);
@@ -351,10 +306,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
             @Override
             public NonConstantTerm applyToTerm(Substitution<? extends NonConstantTerm> substitution, NonConstantTerm t) {
-                if (t instanceof Variable) {
-                    Variable v = (Variable) t;
-                    return Optional.<NonConstantTerm>ofNullable(substitution.get(v)).orElse(v);
-                }
+                if (t instanceof Variable)
+                    return applyToVariable(substitution, (Variable) t, v -> v);
 
                 if (t instanceof ImmutableFunctionalTerm)
                     return immutableTermsSubstitutionOperations.apply(substitution, (ImmutableFunctionalTerm) t);

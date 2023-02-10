@@ -31,7 +31,7 @@ public class ArgumentSubstitution<T extends ImmutableTerm> {
 
     public ImmutableMap<Integer, ? extends T> replaceTerms(ImmutableMap<Integer, ? extends T> terms) {
         return terms.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> optionalProvider.apply(map.get(e.getKey())).orElse(e.getValue())));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> optionalProvider.apply(map.get(e.getKey())).orElseGet(e::getValue)));
     }
 
     public Substitution<T> getSubstitution(SubstitutionFactory substitutionFactory, ImmutableList<? extends T> terms) {

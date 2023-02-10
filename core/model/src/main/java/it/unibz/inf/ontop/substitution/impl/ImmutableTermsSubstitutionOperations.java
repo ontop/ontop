@@ -4,18 +4,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
-import java.util.Map;
-import java.util.Optional;
-
 public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOperations<ImmutableTerm> {
 
     ImmutableTermsSubstitutionOperations(TermFactory termFactory) {
-        super(termFactory);
-    }
-
-    @Override
-    public ImmutableTerm apply(Substitution<? extends ImmutableTerm> substitution, Variable variable) {
-        return Optional.<ImmutableTerm>ofNullable(substitution.get(variable)).orElse(variable);
+        super(termFactory, v -> v, s -> s);
     }
 
     @Override
@@ -30,11 +22,6 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
             return apply(substitution, (ImmutableFunctionalTerm) t);
         }
         throw new IllegalArgumentException("Unexpected kind of term: " + t.getClass());
-    }
-
-    @Override
-    public ImmutableTerm rename(Substitution<Variable> renaming, ImmutableTerm t) {
-        return applyToTerm(renaming, t);
     }
 
     @Override
@@ -63,11 +50,6 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
                 return term.getVariableStream().noneMatch(variable::equals);
             }
         };
-    }
-
-    @Override
-    protected ImmutableTerm keyMapper(Map.Entry<Variable, ImmutableTerm> e) {
-        return e.getKey();
     }
 }
 

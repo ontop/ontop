@@ -15,12 +15,31 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collector;
 
 public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> extends AbstractSubstitutionBasicOperations<T> implements SubstitutionOperations<T> {
 
-    AbstractSubstitutionOperations(TermFactory termFactory) {
+    private final Function<Variable, T> typeCast;
+    private final Function<Substitution<Variable>, Substitution<? extends T>> substitutionTypeCast;
+    private final Function<Map.Entry<Variable, T>, T> keyMapper;
+
+    /**
+     * @param typeCast             effectively ensures that Variable is a subtype of T (normally, it's simply v -> v)
+     * @param substitutionTypeCast effectively ensures that Variable is a subtype of T (normally, it's simply s -> s)
+     */
+    AbstractSubstitutionOperations(TermFactory termFactory,
+                                   Function<Variable, T> typeCast,
+                                   Function<Substitution<Variable>, Substitution<? extends T>> substitutionTypeCast) {
         super(termFactory);
+        this.typeCast = typeCast;
+        this.substitutionTypeCast = substitutionTypeCast;
+        this.keyMapper = e -> typeCast.apply(e.getKey());
+    }
+
+    @Override
+    public T apply(Substitution<? extends T> substitution, Variable variable) {
+        return applyToVariable(substitution, variable, typeCast);
     }
 
     @Override
@@ -56,6 +75,12 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
                 .collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public T rename(Substitution<Variable> renaming, T t) {
+        return applyToTerm(substitutionTypeCast.apply(renaming), t);
+    }
+
+
     protected Substitution<T> emptySubstitution() {
         return termFactory.getSubstitution(ImmutableMap.of());
     }
@@ -72,17 +97,10 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     public Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier() {
         return Collector.of(
                 this::unifierBuilder,
-                (a, s) -> a.unify(s.stream(), this::keyMapper, Map.Entry::getValue),
+                (a, s) -> a.unify(s.stream(), keyMapper, Map.Entry::getValue),
                 AbstractUnifierBuilder::merge,
                 UnifierBuilder::build);
     }
-
-    /**
-     * Effectively ensures that Variable is a subtype of T.
-     * @param e a map entry
-     * @return the Variable key of the map entry as T
-     */
-    protected abstract T keyMapper(Map.Entry<Variable, T> e);
 
 
     private static final class ArgumentMapUnifierImpl<T extends ImmutableTerm> implements ArgumentMapUnifier<T> {
@@ -134,7 +152,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
 
             optional = optionalUpdatedSubstitution
                     .flatMap(u -> unifierBuilder(unifier.getSubstitution())
-                            .unify(u.stream(), AbstractSubstitutionOperations.this::keyMapper, Map.Entry::getValue)
+                            .unify(u.stream(), keyMapper, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnifierImpl<>(
                                     applyToTerms(u, ExtensionalDataNode.union(unifier.getArgumentMap(), updatedArgumentMap)),
