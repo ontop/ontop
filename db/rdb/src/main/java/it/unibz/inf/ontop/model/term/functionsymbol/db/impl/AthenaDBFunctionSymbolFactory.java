@@ -15,7 +15,7 @@ public class AthenaDBFunctionSymbolFactory extends PrestoDBFunctionSymbolFactory
     }
 
     /**
-     * Athena uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to prase these results.
+     * Athena uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to parse these results.
      */
     @Override
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
@@ -23,7 +23,7 @@ public class AthenaDBFunctionSymbolFactory extends PrestoDBFunctionSymbolFactory
     }
 
     /**
-     * Athena uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to prase these results.
+     * Athena uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to parse these results.
      */
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
