@@ -10,4 +10,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS books (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
-LOCATION '${athena.bucket}/data/books';
+LOCATION 's3://${athena.bucket}/data/books';

@@ -297,11 +297,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.simba</groupId>
-            <artifactId>athena-jdbc</artifactId>
-            <version>4.2.0.35</version>
-            <scope>system</scope>
-            <systemPath>/home/damian/Downloads/AthenaJDBC42-2.0.35.1000.jar</systemPath>
+            <groupId>com.syncron.amazonaws</groupId>
+            <artifactId>simba-athena-jdbc-driver</artifactId>
+            <version>2.0.35.1000</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.facebook.presto</groupId>
@@ -513,4 +512,11 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>ontop-3rd-party-maven-repo</id>
+            <url>https://raw.githubusercontent.com/DRovara/ontop-3rd-party-maven-repo/simba-athena/repository/</url>
+        </repository>
+    </repositories>
 </project>

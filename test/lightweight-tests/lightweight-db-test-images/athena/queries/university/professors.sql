@@ -7,4 +7,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS professors (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
-LOCATION '${athena.bucket}/data/university/professors';
+LOCATION 's3://${athena.bucket}/data/university/professors';

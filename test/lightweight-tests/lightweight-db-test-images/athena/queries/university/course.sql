@@ -6,4 +6,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS course (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
-LOCATION '${athena.bucket}/data/university/course';
+LOCATION 's3://${athena.bucket}/data/university/course';
