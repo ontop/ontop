@@ -20,15 +20,12 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
@@ -39,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
@@ -86,9 +82,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
     public Lens createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {
 
-        ViewDefinitionCreator creator = new ViewDefinitionCreator(dbParameters);
-
-        NamedRelationDefinition parentDefinition = creator.extractParentDefinition(parentCacheMetadataLookup);
+        NamedRelationDefinition parentDefinition = extractParentDefinition(dbParameters, parentCacheMetadataLookup);
 
         int parentLevel = (parentDefinition instanceof Lens)?
                 ((Lens) parentDefinition).getLevel():
@@ -96,7 +90,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         RelationID relationId = dbParameters.getQuotedIDFactory().createRelationID(name.toArray(new String[0]));
 
-        IQ iq = creator.createIQ(relationId, parentDefinition);
+        IQ iq = createIQ(relationId, parentDefinition, dbParameters);
 
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
@@ -108,204 +102,247 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 dbParameters.getCoreSingletons());
     }
 
-    private class ViewDefinitionCreator {
-        final DBParameters dbParameters;
-        final CoreSingletons coreSingletons;
-        final QuotedIDFactory quotedIDFactory;
-        final IntermediateQueryFactory iqFactory;
-        final CoreUtilsFactory coreUtilsFactory;
-        final SubstitutionFactory substitutionFactory;
-        final AtomFactory atomFactory;
-        final TermFactory termFactory;
-        final DBTypeFactory dbTypeFactory;
+    private NamedRelationDefinition extractParentDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
+        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
+        return parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
+                baseRelation.toArray(new String[0])));
+    }
 
-        ViewDefinitionCreator(DBParameters dbParameters) {
-            this.dbParameters = dbParameters;
-            quotedIDFactory = dbParameters.getQuotedIDFactory();
-            coreSingletons = dbParameters.getCoreSingletons();
-            iqFactory = coreSingletons.getIQFactory();
-            coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
-            substitutionFactory = coreSingletons.getSubstitutionFactory();
-            atomFactory = coreSingletons.getAtomFactory();
-            termFactory = coreSingletons.getTermFactory();
-            dbTypeFactory =  dbParameters.getDBTypeFactory();
+    protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition, DBParameters dbParameters) throws MetadataExtractionException {
+
+        CoreSingletons cs = dbParameters.getCoreSingletons();
+        IntermediateQueryFactory iqFactory = cs.getIQFactory();
+        VariableGenerator variableGenerator = cs.getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+
+        ImmutableMap<Integer, String> parentAttributeMap = buildParentIndex2AttributeMap(parentDefinition);
+        ImmutableMap<String, Variable> parentVariableMap = buildParentAttribute2VariableMap(parentAttributeMap, variableGenerator);
+
+        Optional<Variable> indexVariable = (columns.position == null)?
+                Optional.empty():
+                Optional.ofNullable(variableGenerator.generateNewVariable(normalizeAttributeName(
+                        columns.position,
+                        idFactory
+                )));
+
+        ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable, idFactory);
+
+        Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, idFactory));
+        DBTermType flattenedDBType = dbParameters.getDBTypeFactory().getDBTermType(flattenedColumn.datatype);
+
+        if (flattenedVariable == null) {
+            throw new MetadataExtractionException("The flattened column "+ flattenedColumn.name + " is not present in the base relation");
         }
 
-        NamedRelationDefinition extractParentDefinition(MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
-            return parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(baseRelation.toArray(new String[0])));
+        Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
+        Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
+
+        Substitution<ImmutableTerm> extractionSubstitution = cs.getSubstitutionFactory().getSubstitutionThrowsExceptions(
+                columns.extracted,
+                c -> variableGenerator.generateNewVariable(normalizeAttributeName(c.name, idFactory)),
+                c -> getCheckDatatypeExtractAndCastFromJson(
+                        flattenOutputVariable,
+                        flattenedDBType,
+                        getPath(c),
+                        c.datatype,
+                        c.name,
+                        dbParameters));
+
+        ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(Sets.union(retainedVariables, extractionSubstitution.getDomain()));
+
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), cs);
+
+        DistinctVariableOnlyDataAtom projectionAtom = cs.getAtomFactory().getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+
+        ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(
+                Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy(),
+                extractionSubstitution);
+
+        FilterNode filterNode = iqFactory.createFilterNode(
+                cs.getTermFactory().getDBIsNotNull(flattenOutputVariable));
+
+        FlattenNode flattennode = iqFactory.createFlattenNode(
+                flattenOutputVariable,
+                flattenedIfArrayVariable,
+                indexVariable,
+                flattenedDBType);
+
+        ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
+
+        ImmutableSet<Variable> subtreeVars = dataNode.getVariables();
+        ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
+                Sets.union(subtreeVars, ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
+                getCheckIfArraySubstitution(
+                        flattenedVariable,
+                        flattenedDBType,
+                        flattenedIfArrayVariable,
+                        cs));
+
+
+        IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(
+                extractionConstructionNode,
+                iqFactory.createUnaryIQTree(
+                        filterNode,
+                        iqFactory.createUnaryIQTree(
+                                flattennode,
+                                iqFactory.createUnaryIQTree(
+                                        checkArrayConstructionNode,
+                                        dataNode
+                                ))));
+
+        return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+    }
+
+    private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable,
+                                                            QuotedIDFactory quotedIDFactory) throws MetadataExtractionException {
+
+        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+        for(String keptColumn : columns.kept) {
+            builder.add(getVarForAttribute(keptColumn, parentVariableMap, quotedIDFactory));
         }
+        positionVariable.ifPresent(builder::add);
+        return builder.build();
+    }
 
-        IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition) throws MetadataExtractionException {
-
-            VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-
-            ImmutableList<Attribute> attributes = parentDefinition.getAttributes();
-            ImmutableMap<Integer, QuotedID> parentAttributeMap = IntStream.range(0, attributes.size()).boxed()
-                    .collect(ImmutableCollectors.toMap(i -> i, i -> attributes.get(i).getID()));
-
-            ImmutableMap<String, Variable> parentVariableMap = parentAttributeMap.values().stream()
-                    .map(QuotedID::getName)
-                    .collect(ImmutableCollectors.toMap(s -> s, variableGenerator::generateNewVariable));
-
-            Optional<Variable> indexVariable = Optional.ofNullable(columns.position)
-                    .map(p -> normalizeAttributeName(p, quotedIDFactory))
-                    .map(p -> variableGenerator.generateNewVariable());
-
-            ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable);
-
-            Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, quotedIDFactory));
-            if (flattenedVariable == null) {
-                throw new MetadataExtractionException("The flattened column " + flattenedColumn.name + " is not present in the base relation");
-            }
-
-            DBTermType flattenedDBType = dbTypeFactory.getDBTermType(flattenedColumn.datatype);
-
-            Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
-            Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
-
-            Substitution<ImmutableTerm> extractionSubstitution = substitutionFactory.getSubstitutionThrowsExceptions(
-                    columns.extracted,
-                    c -> variableGenerator.generateNewVariable(normalizeAttributeName(c.name, quotedIDFactory)),
-                    c -> getCheckDatatypeExtractAndCastFromJson(
-                            flattenOutputVariable, flattenedDBType, getPath(c), c.datatype, c.name));
-
-            ImmutableSet<Variable> projectedVariables = Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy();
-
-            AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-
-            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
-
-            ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(projectedVariables, extractionSubstitution);
-
-            FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
-
-            FlattenNode flattennode = iqFactory.createFlattenNode(
-                    flattenOutputVariable,
-                    flattenedIfArrayVariable,
-                    indexVariable,
-                    flattenedDBType);
-
-            ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
-
-            ImmutableSet<Variable> subtreeVars = dataNode.getVariables();
-
-            ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                    Sets.union(subtreeVars, ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
-                    substitutionFactory.<ImmutableTerm>getSubstitution(
-                            flattenedIfArrayVariable,
-                            termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
-
-
-            IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(extractionConstructionNode,
-                    iqFactory.createUnaryIQTree(filterNode,
-                            iqFactory.createUnaryIQTree(flattennode,
-                                    iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
-
-            return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+    private Variable getVarForAttribute(String name, ImmutableMap<String, Variable> parentVariableMap, QuotedIDFactory idFactory) throws MetadataExtractionException {
+        String normalizedName = normalizeAttributeName(name, idFactory);
+        Variable var = parentVariableMap.get(normalizedName);
+        if (var == null){
+            throw new MetadataExtractionException("Kept column "+normalizedName+" not found in base view definition");
         }
-
-        ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable) throws MetadataExtractionException {
-
-            ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-            for(String keptColumn : columns.kept) {
-                String normalizedName = normalizeAttributeName(keptColumn, quotedIDFactory);
-                Variable var = parentVariableMap.get(normalizedName);
-                if (var == null) {
-                    throw new MetadataExtractionException("Kept column " + normalizedName + " not found in base view definition");
-                }
-                builder.add(var);
-            }
-            positionVariable.ifPresent(builder::add);
-            return builder.build();
-        }
-
-        ImmutableMap<Integer,? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, QuotedID> map1, ImmutableMap<String, Variable> map2) {
-            return map1.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> map2.get(e.getValue().getName())));
-        }
-
-        ImmutableList<String> getPath(ExtractedColumn col) {
-            return col.key == null ?
-                    ImmutableList.of():
-                    ImmutableList.copyOf(col.key);
-        }
-
-        /**
-         * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
-         */
-        private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, DBTermType flattenedDBType,
-                                                                               ImmutableList<String> path,
-                                                                               String datatypeString, String columnName)
-                throws MetadataExtractionException {
-
-            DBTermType termType = dbTypeFactory.getDBTermType(datatypeString);
-
-            ImmutableFunctionalTerm cast = getCast(termType, sourceVar, path);
-
-            if (termType.getCategory() == JSON) {
-                return cast;
-            }
-            return termFactory.getIfElseNull(
-                    getDatatypeCondition(flattenedDBType, termFactory.getDBJsonElement(sourceVar, path), termType, columnName),
-                    cast);
-        }
-
-
-        ImmutableFunctionalTerm getCast(DBTermType columnTermType, Variable sourceVar, ImmutableList<String> path) {
-
-            ImmutableFunctionalTerm retrieveEltAsText = termFactory.getDBJsonElementAsText(sourceVar, path);
-
-            // TODO: consider the input type as well (could enable more simplification, e.g. no cast when same datatype)
-            return termFactory.getDBCastFunctionalTerm(columnTermType, retrieveEltAsText);
-        }
-
-
-
-        ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType, ImmutableFunctionalTerm arg,
-                                                         DBTermType columnTermType, String columnName) throws MetadataExtractionException {
-
-            switch (columnTermType.getCategory()) {
-                case BOOLEAN:
-                    return termFactory.getDBJsonIsBoolean(flattenedDBType, arg);
-                case INTEGER:
-                case FLOAT_DOUBLE:
-                case DECIMAL:
-                    return termFactory.getDBJsonIsNumber(flattenedDBType, arg);
-                case ARRAY:
-                    // TODO: remove this restriction
-                    throw new MetadataExtractionException(
-                            "Array datatypes are currently not supported for extracted column from a flatten lens. Column: "
-                                    + columnName);
-                case STRING:
-                    // By default, treat it as a string
-                default:
-                    return termFactory.getDBJsonIsScalar(flattenedDBType, arg);
-            }
-        }
+        return var;
     }
 
 
+    private ImmutableMap<Integer,? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, String> map1, ImmutableMap<String, Variable> map2) {
+        return map1.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> map2.get(e.getValue())
+                ));
+    }
+
+    private ImmutableMap<String, Variable> buildParentAttribute2VariableMap(ImmutableMap<Integer, String> parentAttributeMap,
+                                                                            VariableGenerator variableGenerator) {
+        return parentAttributeMap.values().stream()
+                .collect(ImmutableCollectors.toMap(
+                        s -> s,
+                        variableGenerator::generateNewVariable));
+    }
+
+    private ImmutableMap<Integer, String> buildParentIndex2AttributeMap(NamedRelationDefinition parentRelation) {
+        ImmutableList<Attribute> attributes = parentRelation.getAttributes();
+        return IntStream.range(0, attributes.size()).boxed()
+                .collect(ImmutableCollectors.toMap(
+                        i -> i,
+                        i -> attributes.get(i).getID().getName()));
+    }
+
+    private ImmutableList<String> getPath(ExtractedColumn col) {
+        return col.key == null ?
+                ImmutableList.of():
+                ImmutableList.copyOf(col.key);
+    }
 
 
+    private Substitution<ImmutableTerm> getCheckIfArraySubstitution(Variable flattenedVar, DBTermType dbType,
+                                                                    Variable flattenedIfArrayVar, CoreSingletons cs){
+
+        TermFactory termFactory = cs.getTermFactory();
+        return cs.getSubstitutionFactory().getSubstitution(
+                flattenedIfArrayVar,
+                termFactory.getIfElseNull(
+                        termFactory.getDBIsArray(dbType, flattenedVar),
+                        flattenedVar));
+    }
+
+
+    /**
+     * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
+     */
+    private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, DBTermType flattenedDBType,
+                                                                           ImmutableList<String> path,
+                                                                           String datatypeString, String columnName,
+                                                                           DBParameters dbParameters)
+            throws MetadataExtractionException {
+        CoreSingletons cs = dbParameters.getCoreSingletons();
+        TermFactory termFactory = cs.getTermFactory();
+
+        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
+        DBTermType termType = dbTypeFactory.getDBTermType(datatypeString);
+
+        ImmutableFunctionalTerm cast = getCast(termType, sourceVar, path, termFactory);
+
+        if (termType.getCategory() == JSON) {
+            return cast;
+        }
+        return termFactory.getIfElseNull(
+                getDatatypeCondition(
+                        flattenedDBType,
+                        termFactory.getDBJsonElement(
+                                sourceVar,
+                                path
+                        ),
+                        termType,
+                        columnName,
+                        cs
+                ),
+                cast
+        );
+    }
+
+    private ImmutableFunctionalTerm getCast(DBTermType columnTermType, Variable sourceVar, ImmutableList<String> path, TermFactory termFactory) {
+
+        ImmutableFunctionalTerm retrieveEltAsText = termFactory.getDBJsonElementAsText(sourceVar, path);
+
+        // TODO: consider the input type as well (could enable more simplification, e.g. no cast when same datatype)
+        return termFactory.getDBCastFunctionalTerm(
+                columnTermType,
+                retrieveEltAsText
+        );
+    }
+
+    private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType, ImmutableFunctionalTerm arg,
+                                                     DBTermType columnTermType, String columnName, CoreSingletons cs)
+            throws MetadataExtractionException {
+        TermFactory termFactory = cs.getTermFactory();
+
+        switch (columnTermType.getCategory()){
+            case BOOLEAN:
+                return termFactory.getDBJsonIsBoolean(flattenedDBType, arg);
+            case INTEGER:
+            case FLOAT_DOUBLE:
+            case DECIMAL:
+                return termFactory.getDBJsonIsNumber(flattenedDBType, arg);
+            case ARRAY:
+                // TODO: remove this restriction
+                throw new MetadataExtractionException(
+                        "Array datatypes are currently not supported for extracted column from a flatten lens. Column: "
+                                + columnName);
+            case STRING:
+                // By default, treat it as a string
+            default:
+                return termFactory.getDBJsonIsScalar(flattenedDBType, arg);
+        }
+    }
 
     @Override
     public void insertIntegrityConstraints(Lens relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
 
-        QuotedIDFactory quotedIDFactory = metadataLookupForFK.getQuotedIDFactory();
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
+
         CoreSingletons cs = dbParameters.getCoreSingletons();
 
-        if (baseRelations.size() != 1) {
+        if(baseRelations.size() != 1){
             throw new MetadataExtractionException("A nested view should have exactly one base relation");
         }
         NamedRelationDefinition baseRelation = baseRelations.get(0);
 
         insertUniqueConstraints(
                 relation,
-                quotedIDFactory,
+                idFactory,
                 (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
                 /*
                  * No UC can be inherited as such from the parent.
@@ -314,20 +351,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 cs
         );
 
-        ImmutableSet<QuotedID> addedColumns = Stream.concat(
-                        Stream.of(columns.position),
-                        columns.extracted.stream().map(a -> a.name))
-                .map(quotedIDFactory::createAttributeID)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<QuotedID> keptColumns = columns.kept.stream()
-                .map(quotedIDFactory::createAttributeID)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<QuotedID> hiddenColumns = baseRelation.getAttributes().stream()
-                .map(Attribute::getID)
-                .filter(d -> !keptColumns.contains(d))
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<QuotedID> addedColumns = getAddedColumns(idFactory);
+        ImmutableSet<QuotedID> keptColumns = getKeptColumns(idFactory);
+        ImmutableSet<QuotedID> hiddenColumns = getHiddenColumns(baseRelation, keptColumns);
 
         /*
          * FDs declared as such in the parent relation are inherited similarly to Join views.
@@ -335,7 +361,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
          */
         insertFunctionalDependencies(
                 relation,
-                quotedIDFactory,
+                idFactory,
                 hiddenColumns,
                 addedColumns,
                 (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
@@ -350,25 +376,57 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
     private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
 
+
         return baseRelation.getUniqueConstraints().stream()
-                        .map(UniqueConstraint::getAttributes)
-                        .map(attributes -> attributes.stream()
-                                .map(Attribute::getID)
-                                .collect(ImmutableCollectors.toSet()))
-                        .map(attributes -> getInferredFD(attributes, keptColumns))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(ImmutableCollectors.toList());
+                .map(UniqueConstraint::getAttributes)
+                .map(this::toQuotedIDs)
+                .map(attributes -> getInferredFD(attributes, keptColumns))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
     }
 
     private Optional<FunctionalDependencyConstruct> getInferredFD(ImmutableSet<QuotedID> determinants, ImmutableSet<QuotedID> keptColumns) {
-        if (keptColumns.containsAll(determinants)) {
+        if(keptColumns.containsAll(determinants)){
             ImmutableSet<QuotedID> difference = Sets.difference(keptColumns, determinants).immutableCopy();
-            if(!difference.isEmpty()) {
+            if(!difference.isEmpty()){
                 return Optional.of(new FunctionalDependencyConstruct(determinants, difference));
             }
         }
         return Optional.empty();
+    }
+
+    private ImmutableSet<QuotedID> toQuotedIDs(ImmutableList<Attribute> attributes) {
+        return attributes.stream()
+                .map(Attribute::getID)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
+        ImmutableSet.Builder<QuotedID> builder = ImmutableSet.builder();
+        if(columns.position != null) {
+            builder.add(idFactory.createAttributeID(columns.position));
+        }
+        builder.addAll(
+                columns.extracted.stream()
+                        .map(a -> a.name)
+                        .map(idFactory::createAttributeID)
+                        .iterator()
+        );
+        return builder.build();
+    }
+
+    private ImmutableSet<QuotedID> getHiddenColumns(NamedRelationDefinition baseRelation, ImmutableSet<QuotedID> keptColumns) {
+        return baseRelation.getAttributes().stream()
+                .map(Attribute::getID)
+                .filter(d -> !keptColumns.contains(d))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<QuotedID> getKeptColumns(QuotedIDFactory idFactory) {
+        return columns.kept.stream()
+                .map(idFactory::createAttributeID)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
