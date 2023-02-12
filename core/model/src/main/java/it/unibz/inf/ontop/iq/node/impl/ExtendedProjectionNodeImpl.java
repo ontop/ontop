@@ -227,7 +227,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                                  VariableNullability variableNullabilityForConstraint)
             throws EmptyTreeException {
 
-        ImmutableExpression.Evaluation descendingConstraintResults = substitutionFactory.onImmutableTerms().apply(theta, initialConstraint)
+        ImmutableExpression.Evaluation descendingConstraintResults = theta.apply(initialConstraint)
                 .evaluate2VL(variableNullabilityForConstraint);
 
         if (descendingConstraintResults.isEffectiveFalse())

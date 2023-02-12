@@ -473,7 +473,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
 
-        UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.onVariables().apply(renamingSubstitution, getVariables()));
+        UnionNode newUnionNode = iqFactory.createUnionNode(substitutionFactory.apply(renamingSubstitution, getVariables()));
 
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
 

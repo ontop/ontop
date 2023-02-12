@@ -256,7 +256,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
-                substitutionFactory.onVariables().apply(renaming, valuesNode.getOrderedVariables()),
+                substitutionFactory.apply(renaming, valuesNode.getOrderedVariables()),
                 valuesNode.getValues().stream()
                         .map(tuple -> tuple.stream()
                                 .map(this::replaceTypeTermConstantWithFunctionalTerm)

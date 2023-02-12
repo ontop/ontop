@@ -84,7 +84,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = substitutionFactory.onVariables().apply(freshRenamingSubstitution, projectedVariables);
+        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
 
         return newVariables.equals(projectedVariables)
                 ? this

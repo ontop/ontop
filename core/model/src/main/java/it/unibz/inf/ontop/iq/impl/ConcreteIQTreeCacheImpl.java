@@ -210,11 +210,11 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
         ImmutableSet<Variable> newVariables = variables == null
                 ? null
-                : substitutionFactory.onVariables().apply(renamingSubstitution, variables);
+                : substitutionFactory.apply(renamingSubstitution, variables);
 
         ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
                 ? null
-                : substitutionFactory.onVariables().apply(renamingSubstitution, notInternallyRequiredVariables);
+                : substitutionFactory.apply(renamingSubstitution, notInternallyRequiredVariables);
 
         ImmutableSet<Substitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
@@ -225,7 +225,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         ImmutableSet<ImmutableSet<Variable>> newUniqueConstraints = uniqueConstraints == null
                 ? null
                 : uniqueConstraints.stream()
-                    .map(s -> substitutionFactory.onVariables().apply(renamingSubstitution, s))
+                    .map(s -> substitutionFactory.apply(renamingSubstitution, s))
                     .collect(ImmutableCollectors.toSet());
 
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,

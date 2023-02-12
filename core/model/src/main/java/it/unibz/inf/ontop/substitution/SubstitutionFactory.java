@@ -59,6 +59,11 @@ public interface SubstitutionFactory {
      */
     default Substitution<ImmutableTerm> rename(InjectiveSubstitution<Variable> renaming, Substitution<?> substitution) { return onImmutableTerms().rename(renaming, substitution); }
 
+    default Variable apply(Substitution<Variable> substitution, Variable var) { return onVariables().apply(substitution, var); }
+    default ImmutableList<Variable> apply(Substitution<Variable> substitution, ImmutableList<Variable> list) { return onVariables().apply(substitution, list); }
+    default ImmutableSet<Variable> apply(Substitution<Variable> substitution, ImmutableSet<Variable> set) { return onVariables().apply(substitution, set); }
+
+
     /**
      *
      * @param substitution1

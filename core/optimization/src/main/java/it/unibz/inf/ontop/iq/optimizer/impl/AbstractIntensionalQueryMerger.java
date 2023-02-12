@@ -90,7 +90,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
                     atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),
-                            substitutionFactory.onVariables().apply(renamingSubstitution, renamedIQ.getProjectionAtom().getArguments())),
+                            substitutionFactory.apply(renamingSubstitution, renamedIQ.getProjectionAtom().getArguments())),
                     dataNode.getProjectionAtom());
 
             return renamedIQ.getTree()

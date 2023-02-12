@@ -436,8 +436,8 @@ public class RDF4JTupleExprTranslator {
                                                              InjectiveSubstitution<Variable> leftChildSubstitution,
                                                              InjectiveSubstitution<Variable> rightChildSubstitution) {
 
-        Variable leftVariable = substitutionFactory.onVariables().apply(leftChildSubstitution, outputVariable);
-        Variable rightVariable = substitutionFactory.onVariables().apply(rightChildSubstitution, outputVariable);
+        Variable leftVariable = substitutionFactory.apply(leftChildSubstitution, outputVariable);
+        Variable rightVariable = substitutionFactory.apply(rightChildSubstitution, outputVariable);
 
         ImmutableExpression equalityCondition = termFactory.getStrictEquality(leftVariable, rightVariable);
         ImmutableExpression isNullExpression = termFactory.getDisjunction(
@@ -475,7 +475,7 @@ public class RDF4JTupleExprTranslator {
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
 
-        ImmutableSet<Variable> nullableVariables = substitutionFactory.onVariables().apply(substitution, child.nullableVariables);
+        ImmutableSet<Variable> nullableVariables = substitutionFactory.apply(substitution, child.nullableVariables);
 
         IQTree iqTree = applyExternalBindingFilter(constructTree, projectNode.getSubstitution().getDomain());
         return createTranslationResult(iqTree, nullableVariables);
