@@ -88,14 +88,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         ViewDefinitionCreator creator = new ViewDefinitionCreator(dbParameters);
 
-        NamedRelationDefinition parentDefinition = creator.extractParentDefinition(parentCacheMetadataLookup);
+        NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(creator.getRelationID(baseRelation));
 
         int parentLevel = (parentDefinition instanceof Lens)
                 ? ((Lens) parentDefinition).getLevel()
                 : 0;
 
-        RelationID relationId = dbParameters.getQuotedIDFactory().createRelationID(name.toArray(new String[0]));
-
+        RelationID relationId = creator.getRelationID(name);
         IQ iq = creator.createIQ(relationId, parentDefinition);
 
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
@@ -132,12 +131,11 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             dbTypeFactory = dbParameters.getDBTypeFactory();
         }
 
-        private NamedRelationDefinition extractParentDefinition(MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
-            return parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
-                    baseRelation.toArray(new String[0])));
+        RelationID getRelationID(List<String> components) {
+            return quotedIDFactory.createRelationID(components.toArray(new String[0]));
         }
 
-        protected IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition) throws MetadataExtractionException {
+        IQ createIQ(RelationID relationId, NamedRelationDefinition parentDefinition) throws MetadataExtractionException {
 
             VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
 
@@ -170,15 +168,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                             c.datatype,
                             c.name));
 
-            ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(Sets.union(retainedVariables, extractionSubstitution.getDomain()));
+            ImmutableSet<Variable> projectedVariables = Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy();
 
             AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
 
-            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
 
-            ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(
-                    Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy(),
-                    extractionSubstitution);
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, extractionSubstitution);
 
             FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
 
@@ -186,26 +182,17 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
             ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
-            ImmutableSet<Variable> subtreeVars = dataNode.getVariables();
-
             ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                    Sets.union(subtreeVars, ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
+                    Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
                     substitutionFactory.<ImmutableTerm>getSubstitution(
                             flattenedIfArrayVariable,
-                            termFactory.getIfElseNull(
-                                    termFactory.getDBIsArray(flattenedDBType, flattenedVariable),
-                                    flattenedVariable)));
+                            termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
 
-            IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(
-                    extractionConstructionNode,
-                    iqFactory.createUnaryIQTree(
-                            filterNode,
-                            iqFactory.createUnaryIQTree(
-                                    flattennode,
-                                    iqFactory.createUnaryIQTree(
-                                            checkArrayConstructionNode,
-                                            dataNode))));
+            IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
+                    iqFactory.createUnaryIQTree(filterNode,
+                            iqFactory.createUnaryIQTree(flattennode,
+                                    iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
 
             return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
         }
@@ -226,9 +213,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         private ImmutableMap<Integer, ? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, String> map1, ImmutableMap<String, Variable> map2) {
             return map1.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> map2.get(e.getValue())));
+                    .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> map2.get(e.getValue())));
         }
 
 
@@ -304,10 +289,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         insertUniqueConstraints(
                 relation,
                 idFactory,
-                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
-                /*
-                 * No UC can be inherited as such from the parent.
-                 */
+                Optional.ofNullable(uniqueConstraints).map(u -> u.added).orElseGet(ImmutableList::of),
+                // No UC can be inherited as such from the parent.
                 ImmutableList.of(),
                 cs);
 
@@ -389,8 +372,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         @JsonCreator
         public Columns(@JsonProperty("kept") List<String> kept,
                        @JsonProperty("extracted") List<ExtractedColumn> extracted,
-                       @JsonProperty("position") String position
-        ) {
+                       @JsonProperty("position") String position) {
             this.kept = kept;
             this.extracted = extracted;
             this.position = position;
