@@ -90,9 +90,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         NamedRelationDefinition parentDefinition = creator.extractParentDefinition(parentCacheMetadataLookup);
 
-        int parentLevel = (parentDefinition instanceof Lens)?
-                ((Lens) parentDefinition).getLevel():
-                0;
+        int parentLevel = (parentDefinition instanceof Lens)
+                ? ((Lens) parentDefinition).getLevel()
+                : 0;
 
         RelationID relationId = dbParameters.getQuotedIDFactory().createRelationID(name.toArray(new String[0]));
 
@@ -143,29 +143,20 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
             ImmutableList<Attribute> attributes = parentDefinition.getAttributes();
             ImmutableMap<Integer, String> parentAttributeMap = IntStream.range(0, attributes.size()).boxed()
-                    .collect(ImmutableCollectors.toMap(
-                            i -> i,
-                            i -> attributes.get(i).getID().getName()));
-            ImmutableMap<String, Variable> parentVariableMap = parentAttributeMap.values().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            s -> s,
-                            variableGenerator::generateNewVariable));
+                    .collect(ImmutableCollectors.toMap(i -> i, i -> attributes.get(i).getID().getName()));
 
-            Optional<Variable> indexVariable = (columns.position == null) ?
-                    Optional.empty() :
-                    Optional.ofNullable(variableGenerator.generateNewVariable(normalizeAttributeName(
-                            columns.position,
-                            quotedIDFactory)));
+            ImmutableMap<String, Variable> parentVariableMap = parentAttributeMap.values().stream()
+                    .collect(ImmutableCollectors.toMap(s -> s, variableGenerator::generateNewVariable));
+
+            Optional<Variable> indexVariable = Optional.ofNullable(columns.position)
+                    .map(p -> variableGenerator.generateNewVariable(normalizeAttributeName(columns.position, quotedIDFactory)));
 
             ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable);
 
-            Variable flattenedVariable = parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, quotedIDFactory));
+            Variable flattenedVariable = Optional.ofNullable(parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, quotedIDFactory)))
+                    .orElseThrow(() -> new MetadataExtractionException("The flattened column " + flattenedColumn.name + " is not present in the base relation"));
+
             DBTermType flattenedDBType = dbTypeFactory.getDBTermType(flattenedColumn.datatype);
-
-            if (flattenedVariable == null) {
-                throw new MetadataExtractionException("The flattened column " + flattenedColumn.name + " is not present in the base relation");
-            }
-
             Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
             Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
 
@@ -175,7 +166,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                     c -> getCheckDatatypeExtractAndCastFromJson(
                             flattenOutputVariable,
                             flattenedDBType,
-                            getPath(c),
+                            Optional.ofNullable(c.key).map(ImmutableList::copyOf).orElseGet(ImmutableList::of),
                             c.datatype,
                             c.name));
 
@@ -189,14 +180,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                     Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy(),
                     extractionSubstitution);
 
-            FilterNode filterNode = iqFactory.createFilterNode(
-                    termFactory.getDBIsNotNull(flattenOutputVariable));
+            FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
 
-            FlattenNode flattennode = iqFactory.createFlattenNode(
-                    flattenOutputVariable,
-                    flattenedIfArrayVariable,
-                    indexVariable,
-                    flattenedDBType);
+            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable, flattenedIfArrayVariable, indexVariable, flattenedDBType);
 
             ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
@@ -229,10 +215,8 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
             for (String keptColumn : columns.kept) {
                 String normalizedName = normalizeAttributeName(keptColumn, quotedIDFactory);
-                Variable var = parentVariableMap.get(normalizedName);
-                if (var == null) {
-                    throw new MetadataExtractionException("Kept column " + normalizedName + " not found in base view definition");
-                }
+                Variable var = Optional.ofNullable(parentVariableMap.get(normalizedName))
+                        .orElseThrow(() -> new MetadataExtractionException("Kept column " + normalizedName + " not found in base view definition"));
                 builder.add(var);
             }
             positionVariable.ifPresent(builder::add);
@@ -247,19 +231,15 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                             e -> map2.get(e.getValue())));
         }
 
-        private ImmutableList<String> getPath(ExtractedColumn col) {
-            return col.key == null ?
-                    ImmutableList.of() :
-                    ImmutableList.copyOf(col.key);
-        }
-
 
         /**
          * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
          */
-        private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar, DBTermType flattenedDBType,
+        private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar,
+                                                                               DBTermType flattenedDBType,
                                                                                ImmutableList<String> path,
-                                                                               String datatypeString, String columnName)
+                                                                               String datatypeString,
+                                                                               String columnName)
                 throws MetadataExtractionException {
 
             DBTermType termType = dbTypeFactory.getDBTermType(datatypeString);
@@ -281,8 +261,10 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                     cast);
         }
 
-        private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType, ImmutableFunctionalTerm arg,
-                                                         DBTermType columnTermType, String columnName)
+        private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType,
+                                                         ImmutableFunctionalTerm arg,
+                                                         DBTermType columnTermType,
+                                                         String columnName)
                 throws MetadataExtractionException {
 
             switch (columnTermType.getCategory()) {
@@ -314,7 +296,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         CoreSingletons cs = dbParameters.getCoreSingletons();
 
-        if(baseRelations.size() != 1){
+        if (baseRelations.size() != 1) {
             throw new MetadataExtractionException("A nested view should have exactly one base relation");
         }
         NamedRelationDefinition baseRelation = baseRelations.get(0);
@@ -354,26 +336,24 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 idFactory,
                 hiddenColumns,
                 addedColumns,
-                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
+                Optional.ofNullable(otherFunctionalDependencies).map(d -> d.added).orElseGet(ImmutableList::of),
                 inferFDsFromParentUCs(keptColumns, baseRelation),
                 baseRelations);
 
         insertForeignKeys(relation, metadataLookupForFK,
-                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
+                Optional.ofNullable(foreignKeys).map(f -> f.added).orElseGet(ImmutableList::of),
                 baseRelations);
     }
 
     private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
 
-
         return baseRelation.getUniqueConstraints().stream()
                 .map(UniqueConstraint::getAttributes)
-                .map(attributes1 -> attributes1.stream()
+                .map(attributes -> attributes.stream()
                         .map(Attribute::getID)
                         .collect(ImmutableCollectors.toSet()))
                 .map(attributes -> getInferredFD(attributes, keptColumns))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toList());
     }
 
