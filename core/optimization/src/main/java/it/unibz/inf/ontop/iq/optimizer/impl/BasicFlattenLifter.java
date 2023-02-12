@@ -35,8 +35,7 @@ public class BasicFlattenLifter implements FlattenLifter {
         TreeTransformer treeTransformer = new TreeTransformer(iqFactory);
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                query.getTree().acceptTransformer(treeTransformer)
-        );
+                query.getTree().acceptTransformer(treeTransformer));
     }
 
     private static class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -218,10 +217,10 @@ public class BasicFlattenLifter implements FlattenLifter {
                 if (flattenNode.getLocallyDefinedVariables().stream()
                         .anyMatch(blockingVars::contains)) {
                     splitFlattenSequence.appendNonLiftable(flattenNode);
-                    blockingVars = ImmutableSet.<Variable>builder()
-                            .add(flattenNode.getFlattenedVariable())
-                            .addAll(blockingVars)
-                            .build();
+                    blockingVars = Sets.union(
+                                    ImmutableSet.of(flattenNode.getFlattenedVariable()),
+                                    blockingVars)
+                            .immutableCopy();
                 } else {
                     splitFlattenSequence.appendLiftable(flattenNode);
                 }
@@ -234,8 +233,7 @@ public class BasicFlattenLifter implements FlattenLifter {
             if (it.hasNext()) {
                 return iqFactory.createUnaryIQTree(
                         it.next(),
-                        buildUnaryTree(it, subtree)
-                );
+                        buildUnaryTree(it, subtree));
             }
             return subtree;
         }
@@ -256,8 +254,7 @@ public class BasicFlattenLifter implements FlattenLifter {
                 if (tree.getRootNode().equals(node)) {
                     return discardRootFlattenNodes(
                             ((UnaryIQTree) tree).getChild(),
-                            it
-                    );
+                            it);
                 }
                 throw new FlattenLifterException("Node " + node + " is expected top be the root of " + tree);
             }

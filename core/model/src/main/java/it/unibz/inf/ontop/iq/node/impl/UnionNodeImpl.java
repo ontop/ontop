@@ -694,7 +694,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + mergedSubstitution
                         + " is incompatible with " + tmpNormalizedSubstitution));
 
-        Substitution<ImmutableTerm> newTheta = normalizedEta.restrictDomainTo(projectedVariables);
+        Substitution<ImmutableTerm> newTheta = normalizedEta.builder()
+                .restrictDomainTo(projectedVariables)
+                // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
+                .transform(ImmutableTerm::simplify)
+                .build();
 
         Substitution<VariableOrGroundTerm> descendingSubstitution = normalizedEta.builder()
                 .removeFromDomain(tmpNormalizedSubstitution.getDomain())
@@ -706,13 +710,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
 
-        return newTheta.isEmpty()
-                ? newChild
-                : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectedVariables,
-                                // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
-                                    newTheta.transform(ImmutableTerm::simplify)),
-                            newChild);
+        return iqTreeTools.createConstructionNodeTreeIfNontrivial(newChild, newTheta, () -> projectedVariables);
     }
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {

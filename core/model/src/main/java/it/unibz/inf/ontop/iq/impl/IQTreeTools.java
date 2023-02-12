@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -58,8 +60,21 @@ public class IQTreeTools {
     public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, Substitution<?> substitution, Supplier<ImmutableSet<Variable>> projectedVariables) {
         return substitution.isEmpty()
                 ? child
-                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution),
-                child);
+                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution), child);
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
+         return children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(IQTree leftChild, IQTree rightChild) {
+        return Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
+    }
+
+    public ImmutableSet<Variable> getChildrenVariables(IQTree child, Variable newVariable) {
+        return Sets.union(child.getVariables(), ImmutableSet.of(newVariable)).immutableCopy();
     }
 
     /**

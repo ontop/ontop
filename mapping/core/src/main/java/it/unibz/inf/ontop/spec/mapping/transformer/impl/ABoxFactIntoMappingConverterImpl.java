@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -147,9 +148,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
             subject = getTerm(facts.get(0).getSubject(), valuesNode.getOrderedVariables().get(0));
         }
 
-        ConstructionNode topConstructionNode = createConstructionNode(subject, RDF_TYPE, key.classOrProperty, key.graphOptional);
-        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
-        return iqFactory.createIQ(tripleAtom, iqTree);
+        return createConstructionIQ(subject, RDF_TYPE, key.classOrProperty, key.graphOptional, valuesNode);
     }
 
     private IQ createPropertyIQ(CustomKey key, ImmutableList<RDFFact> facts) {
@@ -170,9 +169,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
             object = getTerm(facts.get(0).getObject(), valuesNode.getOrderedVariables().get(1));
         }
 
-        ConstructionNode topConstructionNode = createConstructionNode(subject, key.classOrProperty, object, key.graphOptional);
-        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
-        return iqFactory.createIQ(tripleAtom, iqTree);
+        return createConstructionIQ(subject, key.classOrProperty, object, key.graphOptional, valuesNode);
     }
 
     private ImmutableFunctionalTerm getTerm(RDFConstant constant, Variable variable) {
@@ -202,15 +199,16 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private ConstructionNode createConstructionNode(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, Optional<ObjectConstant> graph) {
-        return graph.map(g -> iqFactory.createConstructionNode(
-                        quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                                quadAtom.getArguments(),
-                                ImmutableList.of(subject, predicate, object, g))))
-                .orElseGet(() -> iqFactory.createConstructionNode(
-                        tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                                tripleAtom.getArguments(),
-                                ImmutableList.of(subject, predicate, object))));
+    private IQ createConstructionIQ(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, Optional<ObjectConstant> graph, ValuesNode valuesNode) {
+        Substitution<?> substitution = graph.map(g -> substitutionFactory.getSubstitution(
+                        quadAtom.getArguments(),  ImmutableList.of(subject, predicate, object, g)))
+                .orElseGet(() -> substitutionFactory.getSubstitution(
+                        tripleAtom.getArguments(), ImmutableList.of(subject, predicate, object)));
+
+        ConstructionNode cn = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
+        IQTree iqTree = iqFactory.createUnaryIQTree(cn, valuesNode);
+
+        return iqFactory.createIQ(tripleAtom, iqTree);
     }
 
     private ValuesNode createSingleTypeDBValuesNode(CustomKey key, ImmutableList<RDFFact> facts) {

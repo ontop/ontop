@@ -403,7 +403,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     .normalizeForOptimization(variableGenerator);
 
             return newTopConstructionNode
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, newChild,
                             treeCache.declareAsNormalizedForOptimizationWithEffect()))
                     .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
                             ? newChild

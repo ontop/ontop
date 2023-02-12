@@ -252,8 +252,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                                         ImmutableSet<Variable> metaTermTypeVariables,
                                         ImmutableSet<RDFTermTypeConstant> possibleConstants) {
 
-        ImmutableSet<Variable> variables = ImmutableSet.copyOf(valuesNode.getOrderedVariables());
-
         InjectiveSubstitution<Variable> renaming = metaTermTypeVariables.stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
@@ -266,7 +264,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                         .collect(ImmutableCollectors.toList()));
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                variables,
+                ImmutableSet.copyOf(valuesNode.getOrderedVariables()),
                 renaming.transform(t -> termFactory.getRDFTermTypeFunctionalTerm(t, dictionary, possibleConstants, false)));
 
         return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);

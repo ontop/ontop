@@ -129,8 +129,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         iqFactory.createInnerJoinNode(),
                         ImmutableList.of(
                                 assertion.getTree(),
-                                intensionalDataNode
-                        )));
+                                intensionalDataNode)));
     }
 
     private Variable createFreshVariable(IQ iq, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {

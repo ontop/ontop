@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
@@ -30,26 +31,28 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
+    private final IQTreeTools iqTreeTools;
+
     @AssistedInject
     protected DefinitionPushDownTransformerImpl(@Assisted DefinitionPushDownRequest request,
                                                 IntermediateQueryFactory iqFactory,
                                                 OptimizerFactory optimizerFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                TermFactory termFactory) {
+                                                TermFactory termFactory,
+                                                IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.request = request;
         this.optimizerFactory = optimizerFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-        ImmutableSet<Variable> newProjectedVariables = Sets.union(
-                tree.getVariables(),
-                ImmutableSet.of(request.getNewVariable())).immutableCopy();
+        ImmutableSet<Variable> newProjectedVariables = iqTreeTools.getChildrenVariables(tree,  request.getNewVariable());
 
         DefinitionPushDownRequest newRequest = request.newRequest(rootNode.getSubstitution());
         if (newRequest.equals(request))
@@ -180,7 +183,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
         Variable newVariable = request.getNewVariable();
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(
-                Sets.union(tree.getVariables(), ImmutableSet.of(newVariable)).immutableCopy(),
+                iqTreeTools.getChildrenVariables(tree, newVariable),
                 substitutionFactory.getSubstitution(newVariable,
                         termFactory.getIfElseNull(
                                 request.getCondition(),

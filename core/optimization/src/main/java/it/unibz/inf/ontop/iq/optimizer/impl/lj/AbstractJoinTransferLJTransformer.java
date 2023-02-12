@@ -310,8 +310,18 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 iqFactory.createLeftJoinNode(newLeftJoinCondition),
                 newLeftChild, rightProvenance.getRightTree());
 
-        ConstructionNode constructionNode = createConstructionNode(leftChild.getVariables(), initialRightVariables,
-                renamingSubstitution, rightProvenance.getProvenanceVariable());
+        Variable provenanceVariable = rightProvenance.getProvenanceVariable();
+        ImmutableSet<Variable> projectedVariables = Sets.union(leftChild.getVariables(), initialRightVariables)
+                .immutableCopy();
+
+        ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
+
+        Substitution<ImmutableTerm> substitution = renamingSubstitution.builder()
+                .restrictDomainTo(projectedVariables)
+                .<ImmutableTerm>transform(t -> termFactory.getIfElseNull(condition, t))
+                .build();
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
         return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
     }
@@ -363,23 +373,6 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         return rightChild.acceptTransformer(transformer)
                 .applyFreshRenaming(renamingSubstitution);
-    }
-
-    private ConstructionNode createConstructionNode(ImmutableSet<Variable> initialLeftVariables,
-                                                    ImmutableSet<Variable> initialRightVariables,
-                                                    InjectiveSubstitution<Variable> renamingSubstitution,
-                                                    Variable provenanceVariable) {
-        ImmutableSet<Variable> projectedVariables = Sets.union(initialLeftVariables, initialRightVariables)
-                .immutableCopy();
-
-        ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
-
-        Substitution<ImmutableTerm> substitution = renamingSubstitution.builder()
-                .restrictDomainTo(projectedVariables)
-                .<ImmutableTerm>transform(t -> termFactory.getIfElseNull(condition, t))
-                .build();
-
-        return iqFactory.createConstructionNode(projectedVariables, substitution);
     }
 
 

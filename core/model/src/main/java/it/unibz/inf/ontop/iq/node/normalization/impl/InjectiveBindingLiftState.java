@@ -119,7 +119,7 @@ public class InjectiveBindingLiftState {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
         Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitution)
-                .filter(m -> !m.isEmpty())
+                .filter(s -> !s.isEmpty())
                 .map(s -> iqFactory.createConstructionNode(childConstructionNode.getVariables(), s));
 
         ImmutableSet<Variable> newChildVariables = liftedConstructionNode
@@ -132,7 +132,7 @@ public class InjectiveBindingLiftState {
                 .build();
 
         Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitution)
-                .filter(m -> !m.isEmpty())
+                .filter(s -> !s.isEmpty())
                 .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
                 .or(() -> newChildVariables.equals(grandChildTree.getVariables())
                         ? Optional.empty()

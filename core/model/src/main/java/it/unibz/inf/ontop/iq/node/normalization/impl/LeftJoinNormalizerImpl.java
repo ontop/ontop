@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -36,12 +37,15 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
 
+    private final IQTreeTools iqTreeTools;
+
 
     @Inject
     private LeftJoinNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, ConditionSimplifier conditionSimplifier,
                                    JoinLikeChildBindingLifter bindingLifter,
-                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, RightProvenanceNormalizer rightProvenanceNormalizer) {
+                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, RightProvenanceNormalizer rightProvenanceNormalizer,
+                                   IQTreeTools iqTreeTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
@@ -49,6 +53,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         this.bindingLifter = bindingLifter;
         this.variableNullabilityTools = variableNullabilityTools;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
+        this.iqTreeTools = iqTreeTools;
 
         specialProvenanceConstant = termFactory.getProvenanceSpecialConstant();
     }
@@ -210,7 +215,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 EmptyNode newRightChild = iqFactory.createEmptyNode(rightChild.getVariables());
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(leftConstructionNode.getVariables(), newRightChild.getVariables()).immutableCopy(),
+                        iqTreeTools.getChildrenVariables(liftedLeftChild, rightChild),
                         leftConstructionNode.getSubstitution());
 
                 // Stops the liftLeftChild() recursion
@@ -320,12 +325,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 throw new MinorOntopInternalBugException("Two children were expected, not " + children);
 
             IQTree initialRightChild = children.get(1);
-
-            ImmutableSet<Variable> leftVariables = Sets.union(
-                    children.get(0).getVariables(),
-                    leftGrandChild.getVariables()).immutableCopy();
-
             IQTree rightSubTree = initialRightChild.applyDescendingSubstitution(descendingSubstitution, ljCondition, variableGenerator);
+
+            ImmutableSet<Variable> leftVariables = iqTreeTools.getChildrenVariables(children.get(0), leftGrandChild);
 
             // Creates a right provenance if needed for lifting the substitution
             Optional<RightProvenance> rightProvenance = createProvenanceElements(rightSubTree,
@@ -342,11 +344,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                     (t, v) -> transformRightSubstitutionValue(t, leftVariables, defaultProvenanceVariable))
                             .build();
 
-            ImmutableSet<Variable> parentVariables = children.stream()
-                    .flatMap(c -> c.getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
-
-            ConstructionNode parentConstructionNode = iqFactory.createConstructionNode(parentVariables, ascendingSubstitution);
+            ConstructionNode parentConstructionNode = iqFactory.createConstructionNode(
+                    iqTreeTools.getChildrenVariables(children), ascendingSubstitution);
 
             return updateParentConditionChildren(parentConstructionNode, ljCondition, leftGrandChild, newRightChild);
         }
@@ -394,7 +393,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         downSubstitution, rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(leftVariables, rightVariables).immutableCopy(),
+                        iqTreeTools.getChildrenVariables(leftChild, rightChild),
                         newAscendingSubstitution);
 
                 return updateParentConditionChildren(newParentConstructionNode,
@@ -450,8 +449,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             // Empty substitution -> replace the construction node by its child
             if (rightSubstitution.isEmpty()) {
-                ConstructionNode newParent = iqFactory.createConstructionNode(
-                        Sets.union(leftVariables, rightChild.getVariables()).immutableCopy());
+                ConstructionNode newParent = iqFactory.createConstructionNode(iqTreeTools.getChildrenVariables(leftChild, rightChild));
                 return Optional.of(updateParentConditionRightChild(newParent, ljCondition, rightGrandChild));
             }
 
@@ -492,7 +490,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     selectedSubstitution, rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(
-                    Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
+                    iqTreeTools.getChildrenVariables(leftChild, rightChild),
                     liftableSubstitution);
 
             return Optional.of(updateParentConditionRightChild(newParentNode, notOptimizedLJCondition, newRightChild));
@@ -501,15 +499,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         /**
          * Right child: a ConstructionNode followed by a TrueNode
          */
-        private Optional<LJNormalizationState> liftRightConstructionWithTrueNode(
-                Substitution<ImmutableTerm> rightSubstitution) {
+        private Optional<LJNormalizationState> liftRightConstructionWithTrueNode(Substitution<ImmutableTerm> rightSubstitution) {
 
             Substitution<ImmutableTerm> liftableSubstitution = ljCondition
                     .map(c -> rightSubstitution.<ImmutableTerm>transform(t -> termFactory.getIfElseNull(c, t)))
                     .orElse(rightSubstitution);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(
-                    Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
+                    iqTreeTools.getChildrenVariables(leftChild, rightChild),
                     liftableSubstitution);
 
             return Optional.of(updateParentConditionRightChild(newParentNode, ljCondition, iqFactory.createTrueNode()));
@@ -621,7 +618,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(leftChild.getVariables(), rightSpecificVariables).immutableCopy(),
+                        iqTreeTools.getChildrenVariables(leftChild, rightChild),
                         rightSpecificVariables.stream()
                                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())));
 
@@ -687,7 +684,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private RightProvenance createProvenanceElements(Variable rightProvenanceVariable,
                                                                                IQTree rightTree, ImmutableSet<Variable> rightRequiredVariables) {
 
-            ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(rightProvenanceVariable),rightRequiredVariables)
+            ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(rightProvenanceVariable), rightRequiredVariables)
                     .immutableCopy();
 
             ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(

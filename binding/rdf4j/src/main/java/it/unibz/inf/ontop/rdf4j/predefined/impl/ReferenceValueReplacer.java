@@ -66,10 +66,19 @@ public class ReferenceValueReplacer {
         QueryNode rootNode = tree.getRootNode();
 
         if (rootNode instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode)rootNode;
+            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+
+            ConstructionNode newConstructionNode = substitution.isEmpty()
+                ? constructionNode
+                : iqFactory.createConstructionNode(
+                        constructionNode.getVariables(),
+                        substitution.transform(t -> transformTerm(t, referenceToInputMap)));
+
             return iqFactory.createUnaryIQTree(
-                    transformConstructionNode((ConstructionNode) rootNode, referenceToInputMap),
-                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap)
-            );
+                    newConstructionNode,
+                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap));
+
         }
         else if (rootNode instanceof NativeNode) {
             return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
@@ -79,17 +88,6 @@ public class ReferenceValueReplacer {
         }
         else
             throw new IllegalArgumentException("Was only expecting construction nodes and native nodes");
-    }
-
-    private ConstructionNode transformConstructionNode(ConstructionNode constructionNode,
-                                                       ImmutableMap<String, String> referenceToInputMap) {
-        Substitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
-        if (substitution.isEmpty())
-            return constructionNode;
-
-        Substitution<ImmutableTerm> newSubstitution = substitution.transform(t -> transformTerm(t, referenceToInputMap));
-
-        return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }
 
     private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {
