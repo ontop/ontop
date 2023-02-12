@@ -32,11 +32,9 @@ import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**

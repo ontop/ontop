@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -36,12 +37,14 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
     protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons,
-                                                IntermediateQueryFactory iqFactory) {
+                                                IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
      * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
      */
     protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons);
+        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
     }
 
 
@@ -64,13 +67,15 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected final VariableGenerator variableGenerator;
         protected final OptimizationSingletons optimizationSingletons;
         private final int maxNbChildrenForLiftingDBFunctionSymbol;
+        private final IQTreeTools iqTreeTools;
 
-        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons) {
+        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
             super(optimizationSingletons.getCoreSingletons().getIQFactory());
             this.variableGenerator = variableGenerator;
             this.optimizationSingletons = optimizationSingletons;
             this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
                     .getMaxNbChildrenForLiftingDBFunctionSymbol();
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -102,7 +107,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
-                        optimizationSingletons.getCoreSingletons()))
+                        optimizationSingletons.getCoreSingletons(), iqTreeTools))
                     .generateTree(iqFactory)
                     .normalizeForOptimization(variableGenerator);
         }
@@ -177,18 +182,19 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final TermFactory termFactory;
         private final SingleTermTypeExtractor typeExtractor;
         private final CoreSingletons coreSingletons;
+        private final IQTreeTools iqTreeTools;
 
         /**
          * Initial constructor
          */
         public LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                         VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons);
+                         VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons, iqTreeTools);
         }
 
         protected LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
                             ImmutableList<ConstructionNode> ancestors, @Nullable Variable childIdVariable,
-                            VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                            VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
             this.children = children;
             this.unionVariables = unionVariables;
             this.ancestors = ancestors;
@@ -199,6 +205,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.termFactory = coreSingletons.getTermFactory();
             this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
             this.coreSingletons = coreSingletons;
+            this.iqTreeTools = iqTreeTools;
         }
 
         public IQTree generateTree(IntermediateQueryFactory iqFactory) {
@@ -259,7 +266,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .collect(ImmutableCollectors.toList());
 
             return new LiftState(newChildren, newUnionVariables, newAncestors, idVariable, variableGenerator,
-                    coreSingletons);
+                    coreSingletons, iqTreeTools);
         }
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
@@ -341,11 +348,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                                     .map(t -> termFactory.getTypedNull(t).simplify())
                                     .orElseGet(termFactory::getNullConstant)));
 
-            return paddingSubstitution.isEmpty()
-                    ? partiallyPaddedChild
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newVarTypeMap.keySet(), paddingSubstitution),
-                            partiallyPaddedChild);
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(partiallyPaddedChild, paddingSubstitution, newVarTypeMap::keySet);
         }
     }
 

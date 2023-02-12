@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
@@ -33,10 +34,13 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
 
+    private final IQTreeTools iqTreeTools;
+
     @Inject
-    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons) {
+    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.optimizationSingletons = optimizationSingletons;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -49,7 +53,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons);
+        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
     }
 
     /**
@@ -59,13 +63,15 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
 
         private final VariableGenerator variableGenerator;
         private final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
 
         protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
-                                                    OptimizationSingletons optimizationSingletons) {
+                                                    OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             this.termFactory = coreSingletons.getTermFactory();
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -106,11 +112,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                     .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
                     .build();
 
-            return parentSubstitution.isEmpty()
-                    ? newAggregationTree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(rootNode.getVariables(), parentSubstitution),
-                            newAggregationTree);
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(newAggregationTree, parentSubstitution, rootNode::getVariables);
         }
 
         protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,

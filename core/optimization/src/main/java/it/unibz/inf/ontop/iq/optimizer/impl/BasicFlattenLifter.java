@@ -194,14 +194,10 @@ public class BasicFlattenLifter implements FlattenLifter {
         private ConstructionNode updateConstructionNode(ConstructionNode cn, Iterator<FlattenNode> it) {
             if (it.hasNext()) {
                 FlattenNode fn = it.next();
-                ImmutableSet<Variable> definedVars = fn.getLocallyDefinedVariables();
-                // among variables projected by the cn, delete the ones defined by the fn, and add the flattened variable
-                ImmutableSet<Variable> projectedVars =
-                        Stream.concat(
-                                cn.getVariables().stream()
-                                        .filter(v -> !definedVars.contains(v)),
-                                Stream.of(fn.getFlattenedVariable())
-                        ).collect(ImmutableCollectors.toSet());
+                ImmutableSet<Variable> projectedVars = Sets.union(
+                                Sets.difference(cn.getVariables(), fn.getLocallyDefinedVariables()),
+                                ImmutableSet.of(fn.getFlattenedVariable()))
+                        .immutableCopy();
 
                 ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
                 return updateConstructionNode(updatedCn, it);

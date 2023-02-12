@@ -52,13 +52,10 @@ public class ConvertValuesToUnionNormalizer extends DefaultRecursiveIQTreeVisiti
                 iqFactory.createUnionNode(
                         valuesNode.getVariables()),
                 substitutionList.stream()
-                        .map(this::createConstructionTrueTree)
+                        .map(s -> iqFactory.createUnaryIQTree(
+                                iqFactory.createConstructionNode(s.getDomain(), s),
+                                iqFactory.createTrueNode()))
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private IQTree createConstructionTrueTree(Substitution<ImmutableTerm> substitution) {
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(substitution.getDomain(), substitution),
-                iqFactory.createTrueNode());
-    }
 }

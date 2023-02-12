@@ -63,7 +63,7 @@ public class TermTypeTermLifterImpl implements TermTypeTermLifter {
                 .map(ConstructionNode::getSubstitution)
                 .map(s -> s.transform(this::makeRDFTermTypeFunctionSymbolsSimplifiable))
                 .map(s -> iqFactory.createConstructionNode(tree.getVariables(), s))
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree) tree).getChild()))
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, ((UnaryIQTree) tree).getChild()))
                 .orElse(tree);
     }
 

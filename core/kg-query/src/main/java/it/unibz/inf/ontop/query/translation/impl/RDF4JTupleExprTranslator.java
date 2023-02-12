@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
@@ -54,7 +55,20 @@ public class RDF4JTupleExprTranslator {
     private final RDF rdfFactory;
     private final TypeFactory typeFactory;
 
-    public RDF4JTupleExprTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, FunctionSymbolFactory functionSymbolFactory, RDF rdfFactory, TypeFactory typeFactory) {
+    private final IQTreeTools iqTreeTools;
+
+    public RDF4JTupleExprTranslator(ImmutableMap<Variable, GroundTerm> externalBindings,
+                                    @Nullable Dataset dataset,
+                                    boolean treatBNodeAsVariable,
+                                    CoreUtilsFactory coreUtilsFactory,
+                                    SubstitutionFactory substitutionFactory,
+                                    IntermediateQueryFactory iqFactory,
+                                    AtomFactory atomFactory,
+                                    TermFactory termFactory,
+                                    FunctionSymbolFactory functionSymbolFactory,
+                                    RDF rdfFactory,
+                                    TypeFactory typeFactory,
+                                    IQTreeTools iqTreeTools) {
         this.externalBindings = externalBindings;
         this.dataset = dataset;
         this.treatBNodeAsVariable = treatBNodeAsVariable;
@@ -66,6 +80,7 @@ public class RDF4JTupleExprTranslator {
         this.functionSymbolFactory = functionSymbolFactory;
         this.rdfFactory = rdfFactory;
         this.typeFactory = typeFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     public IQTree getTree(TupleExpr node) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
@@ -412,11 +427,7 @@ public class RDF4JTupleExprTranslator {
             throw new Sparql2IqConversionException("A left or inner join is expected");
         }
 
-        IQTree joinQuery = topSubstitution.isEmpty()
-                ? joinTree
-                : iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(projectedVariables, topSubstitution),
-                    joinTree);
+        IQTree joinQuery = iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, topSubstitution, () -> projectedVariables);
 
         return createTranslationResult(joinQuery, nullableVariables.immutableCopy());
     }

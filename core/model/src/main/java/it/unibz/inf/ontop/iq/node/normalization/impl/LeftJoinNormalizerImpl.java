@@ -687,10 +687,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private RightProvenance createProvenanceElements(Variable rightProvenanceVariable,
                                                                                IQTree rightTree, ImmutableSet<Variable> rightRequiredVariables) {
 
-            ImmutableSet<Variable> newRightProjectedVariables =
-                    Stream.concat(Stream.of(rightProvenanceVariable),
-                            rightRequiredVariables.stream())
-                            .collect(ImmutableCollectors.toSet());
+            ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(rightProvenanceVariable),rightRequiredVariables)
+                    .immutableCopy();
 
             ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
                     newRightProjectedVariables,

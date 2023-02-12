@@ -189,7 +189,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     newAggregationSubstitution);
 
             // Nullable
-            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().builder().restrictDomainTo(groupingVariables).build())
+            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().restrictDomainTo(groupingVariables))
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s))
                     .orElse(null);

@@ -156,30 +156,27 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         ConstructionNode extractionConstructionNode = iqFactory.createConstructionNode(
                 Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy(),
-                extractionSubstitution
-        );
+                extractionSubstitution);
 
         FilterNode filterNode = iqFactory.createFilterNode(
-                cs.getTermFactory().getDBIsNotNull(flattenOutputVariable)
-        );
+                cs.getTermFactory().getDBIsNotNull(flattenOutputVariable));
 
         FlattenNode flattennode = iqFactory.createFlattenNode(
                 flattenOutputVariable,
                 flattenedIfArrayVariable,
                 indexVariable,
-                flattenedDBType
-        );
+                flattenedDBType);
 
         ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
+        ImmutableSet<Variable> subtreeVars = dataNode.getVariables();
         ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                getProjectedVars(dataNode.getVariables(), flattenedIfArrayVariable),
+                Sets.union(subtreeVars, ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
                 getCheckIfArraySubstitution(
                         flattenedVariable,
                         flattenedDBType,
                         flattenedIfArrayVariable,
-                        cs
-                ));
+                        cs));
 
 
         IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(
@@ -196,15 +193,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
     }
 
-    private ImmutableSet<Variable> getProjectedVars(ImmutableSet<Variable> subtreeVars, Variable freshVar) {
-        return ImmutableSet.<Variable>builder()
-                .addAll(subtreeVars)
-                .add(freshVar)
-                .build();
-    }
-
     private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable,
                                                             QuotedIDFactory quotedIDFactory) throws MetadataExtractionException {
+
         ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
         for(String keptColumn : columns.kept) {
             builder.add(getVarForAttribute(keptColumn, parentVariableMap, quotedIDFactory));
@@ -244,8 +235,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         return IntStream.range(0, attributes.size()).boxed()
                 .collect(ImmutableCollectors.toMap(
                         i -> i,
-                        i -> attributes.get(i).getID().getName()
-                ));
+                        i -> attributes.get(i).getID().getName()));
     }
 
     private ImmutableList<String> getPath(ExtractedColumn col) {
@@ -263,8 +253,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                         flattenedIfArrayVar,
                         termFactory.getIfElseNull(
                                 termFactory.getDBIsArray(dbType, flattenedVar),
-                                flattenedVar
-                        ));
+                                flattenedVar));
     }
 
 

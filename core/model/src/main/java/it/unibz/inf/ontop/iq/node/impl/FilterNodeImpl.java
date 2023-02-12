@@ -122,17 +122,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
             IQTree filterLevelTree = conditionSimplificationResults.getOptionalExpression()
                     .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e))
-                    .map(filterNode -> (IQTree) iqFactory.createUnaryIQTree(filterNode, newChild))
+                    .<IQTree>map(filterNode -> iqFactory.createUnaryIQTree(filterNode, newChild))
                     .orElse(newChild);
 
-            return Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, filterLevelTree))
-                    .orElse(filterLevelTree);
-
-
-        } catch (UnsatisfiableConditionException e) {
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
+                    filterLevelTree, conditionSimplificationResults.getSubstitution(), child::getVariables);
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
         }
 
@@ -249,14 +245,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator);
             IQTree filterLevelTree = expressionAndSubstitution.getOptionalExpression()
                     .map(iqFactory::createFilterNode)
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
+                    .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, newChild))
                     .orElse(newChild);
-            return expressionAndSubstitution.getSubstitution().isEmpty()
-                    ? filterLevelTree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newlyProjectedVariables, expressionAndSubstitution.getSubstitution()),
-                            filterLevelTree);
-        } catch (UnsatisfiableConditionException e) {
+
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(
+                    filterLevelTree, expressionAndSubstitution.getSubstitution(), () -> newlyProjectedVariables);
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);
         }
     }

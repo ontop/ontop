@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.query.translation.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -49,6 +50,8 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     private final FunctionSymbolFactory functionSymbolFactory;
     private final InsertClauseNormalizer insertClauseNormalizer;
 
+    private final IQTreeTools iqTreeTools;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RDF4JQueryTranslatorImpl.class);
     private static final boolean IS_DEBUG_ENABLED = LOGGER.isDebugEnabled();
 
@@ -56,7 +59,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     public RDF4JQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                     TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
                                     FunctionSymbolFactory functionSymbolFactory,
-                                    InsertClauseNormalizer insertClauseNormalizer) {
+                                    InsertClauseNormalizer insertClauseNormalizer, IQTreeTools iqTreeTools) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -66,6 +69,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.rdfFactory = rdfFactory;
         this.functionSymbolFactory = functionSymbolFactory;
         this.insertClauseNormalizer = insertClauseNormalizer;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -249,7 +253,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {
-        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreUtilsFactory, substitutionFactory, iqFactory, atomFactory, termFactory, functionSymbolFactory, rdfFactory, typeFactory);
+        return new RDF4JTupleExprTranslator(externalBindings, dataset, treatBNodeAsVariable, coreUtilsFactory, substitutionFactory, iqFactory, atomFactory, termFactory, functionSymbolFactory, rdfFactory, typeFactory, iqTreeTools);
     }
 
     private RDF4JValueTranslator getValueTranslator() {

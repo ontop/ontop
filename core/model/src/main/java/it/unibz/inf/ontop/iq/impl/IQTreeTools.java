@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -11,17 +12,16 @@ import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Singleton
 public class IQTreeTools {
 
-    private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private IQTreeTools(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
+    private IQTreeTools(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     /**
@@ -53,6 +53,13 @@ public class IQTreeTools {
         ImmutableSet<Variable> newVariables = descendingSubstitution.restrictDomainTo(projectedVariables).getRangeVariables();
 
         return Sets.union(newVariables, Sets.difference(projectedVariables, descendingSubstitution.getDomain())).immutableCopy();
+    }
+
+    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, Substitution<?> substitution, Supplier<ImmutableSet<Variable>> projectedVariables) {
+        return substitution.isEmpty()
+                ? child
+                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution),
+                child);
     }
 
     /**

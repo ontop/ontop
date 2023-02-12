@@ -174,13 +174,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             IQTree joinTree = iqFactory.createNaryIQTree(
                     iqFactory.createInnerJoinNode(expressionAndSubstitution.getOptionalExpression()),
                     newChildren);
-            return expressionAndSubstitution.getSubstitution().isEmpty()
-                    ? joinTree
-                    : iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)),
-                            expressionAndSubstitution.getSubstitution()),
-                    joinTree);
+
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
+                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
         }
         catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(
@@ -417,16 +413,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 
-            return Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> iqFactory.createConstructionNode(children.stream()
-                                    .flatMap(c -> c.getVariables().stream())
-                                    .collect(ImmutableCollectors.toSet()),
-                            s))
-                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, joinTree))
-                    .orElse(joinTree);
-
-        } catch (UnsatisfiableConditionException e) {
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
+                    () -> children.stream()
+                            .flatMap(c -> c.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet()));
+        }
+        catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(getProjectedVariables(children));
         }
     }

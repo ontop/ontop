@@ -78,13 +78,13 @@ public class SQLServerLimitOffsetOldVersionNormalizer extends DefaultRecursiveIQ
 
         // Drop ORDER BY node since it will now be part of the orderBy subTerm
         IQTree newChild;
-                if (child.getRootNode() instanceof OrderByNode) {
-                    newChild = child.getChildren().get(0);
-                } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                    newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
-                } else {
-                    newChild = child;
-                }
+        if (child.getRootNode() instanceof OrderByNode) {
+            newChild = child.getChildren().get(0);
+        } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
+            newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
+        } else {
+            newChild = child;
+        }
 
         IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
                 iqFactory.createUnaryIQTree(newConstruction, newChild));

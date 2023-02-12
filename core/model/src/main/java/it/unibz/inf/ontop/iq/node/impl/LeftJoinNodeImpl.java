@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
@@ -39,16 +40,19 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private final LeftJoinNormalizer ljNormalizer;
     private final CoreUtilsFactory coreUtilsFactory;
 
+    private final IQTreeTools iqTreeTools;
+
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
-                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
+                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, variableNullabilityTools, conditionSimplifier);
         this.ljNormalizer = ljNormalizer;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @AssistedInject
@@ -57,9 +61,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              TermFactory termFactory, TypeFactory typeFactory,
                              IntermediateQueryFactory iqFactory,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
-                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
+                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         this(Optional.of(joiningCondition), nullabilityEvaluator, substitutionFactory,
-                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory, iqTreeTools);
     }
 
     @AssistedInject
@@ -67,9 +71,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              TermFactory termFactory, TypeFactory typeFactory,
                              IntermediateQueryFactory iqFactory,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
-                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
+                             JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
         this(Optional.empty(), nullabilityEvaluator, substitutionFactory,
-                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                termFactory, typeFactory, iqFactory, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory, iqTreeTools);
     }
 
     @Override
@@ -86,7 +90,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, nullabilityEvaluator, substitutionFactory,
                 termFactory, typeFactory, iqFactory,
-                conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
+                conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory, iqTreeTools);
     }
 
     @Override
@@ -278,15 +282,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
                         updatedRightChild.getVariables()).immutableCopy();
 
-                Optional<ConstructionNode> constructionNode = Optional.of(projectedVariables)
-                        .filter(vars -> !leftVariables.containsAll(vars))
-                        .map(vars -> Sets.difference(projectedVariables, leftVariables).stream()
-                                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant())))
-                        .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
+                Substitution<?> substitution = Sets.difference(projectedVariables, leftVariables).stream()
+                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
-                return constructionNode
-                        .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedLeftChild))
-                        .orElse(updatedLeftChild);
+                return iqTreeTools.createConstructionNodeTreeIfNontrivial(updatedLeftChild, substitution, () -> projectedVariables);
             }
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
