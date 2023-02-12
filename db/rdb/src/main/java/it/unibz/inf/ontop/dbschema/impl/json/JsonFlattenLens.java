@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
@@ -328,7 +329,12 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 ImmutableList.of(),
                 cs);
 
-        ImmutableSet<QuotedID> addedColumns = getAddedColumns(idFactory);
+        ImmutableSet<QuotedID> addedColumns = Stream.concat(
+                        Optional.ofNullable(columns.position).stream(),
+                        columns.extracted.stream()
+                                .map(a -> a.name))
+                .map(idFactory::createAttributeID)
+                .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<QuotedID> keptColumns = columns.kept.stream()
                 .map(idFactory::createAttributeID)
@@ -372,26 +378,13 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
     }
 
     private Optional<FunctionalDependencyConstruct> getInferredFD(ImmutableSet<QuotedID> determinants, ImmutableSet<QuotedID> keptColumns) {
-        if(keptColumns.containsAll(determinants)){
+        if (keptColumns.containsAll(determinants)) {
             ImmutableSet<QuotedID> difference = Sets.difference(keptColumns, determinants).immutableCopy();
-            if(!difference.isEmpty()){
+            if (!difference.isEmpty()) {
                 return Optional.of(new FunctionalDependencyConstruct(determinants, difference));
             }
         }
         return Optional.empty();
-    }
-
-    private ImmutableSet<QuotedID> getAddedColumns(QuotedIDFactory idFactory) {
-        ImmutableSet.Builder<QuotedID> builder = ImmutableSet.builder();
-        if (columns.position != null) {
-            builder.add(idFactory.createAttributeID(columns.position));
-        }
-        builder.addAll(
-                columns.extracted.stream()
-                        .map(a -> a.name)
-                        .map(idFactory::createAttributeID)
-                        .iterator());
-        return builder.build();
     }
 
     @Override
