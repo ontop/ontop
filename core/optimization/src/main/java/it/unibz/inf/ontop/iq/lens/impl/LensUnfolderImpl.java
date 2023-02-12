@@ -101,9 +101,7 @@ public class LensUnfolderImpl implements LensUnfolder {
             InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
-            IQ renamedDefinition = renamingSubstitution.isEmpty()
-                    ? definition
-                    : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+            IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
             ImmutableList<Variable> sourceAtomArguments = substitutionFactory.onVariables().apply(
                     renamingSubstitution,

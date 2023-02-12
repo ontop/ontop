@@ -86,13 +86,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
             InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
-            IQ renamedIQ;
-            if (renamingSubstitution.isEmpty()) {
-                renamedIQ = definition;
-            } else {
-                QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
-                renamedIQ = queryRenamer.transform(definition);
-            }
+            IQ renamedIQ = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
             Substitution<? extends VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
                     atomFactory.getDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom().getPredicate(),

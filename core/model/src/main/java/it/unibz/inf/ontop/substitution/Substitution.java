@@ -29,7 +29,7 @@ public interface Substitution<T extends ImmutableTerm>  {
      * Returns true if the variable is in the domain of the substitution.
      *
      * @param variable a variable
-     * @return true if the variable is in the domain, and false otherwise.
+     * @return true if the variable is in the domain, and false otherwise
      */
     boolean isDefining(Variable variable);
 
@@ -37,6 +37,7 @@ public interface Substitution<T extends ImmutableTerm>  {
      * Returns the domain of the substitution.
      * The domain consists of all variables on which applying the substitution
      * gives a non-identity result.
+     *
      * @return the domain
      */
     ImmutableSet<Variable> getDomain();
@@ -50,16 +51,51 @@ public interface Substitution<T extends ImmutableTerm>  {
      */
     ImmutableSet<Variable> getPreImage(Predicate<T> predicate);
 
+    /**
+     * Returns the set of terms that forms range of the substitution.
+     *
+     * @return the range of the substitution
+     */
     ImmutableSet<T> getRangeSet();
 
+    /**
+     * Returns the set of variables occurring in the range of the substitution.
+     *
+     * @return the set of variables in the range
+     */
     ImmutableSet<Variable> getRangeVariables();
 
+    /**
+     * Checks whether all terms in the range satisfy a given predicate.
+     *
+     * @param predicate a predicate
+     * @return true if all terms in the range satisfy the predicate, and false otherwise
+     */
     boolean rangeAllMatch(Predicate<T> predicate);
 
+    /**
+     * Checks whether at least one term in the range satisfies the given predicate.
+     *
+     * @param predicate a predicate
+     * @return true if at least one term in the range satisfies the predicate, and false otherwise
+     */
     boolean rangeAnyMatch(Predicate<T> predicate);
 
+    /**
+     * Returns the term associated by the substitution with a given variable,
+     * or null if the variable is not in the domain.
+     *
+     * @param variable a variable
+     * @return the term associated with the variable,
+     *          or null if the variable is not in the domain
+     */
     T get(Variable variable);
 
+    /**
+     * Returns true if the substitution is empty (when its domain is empty).
+     *
+     * @return true if the substitution is empty, and false otherwise
+     */
     boolean isEmpty();
 
     <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function);

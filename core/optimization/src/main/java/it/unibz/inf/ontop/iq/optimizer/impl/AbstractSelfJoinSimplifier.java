@@ -127,8 +127,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         ImmutableList<IQTree> newChildren = unifier.isEmpty()
                 ? children
                 : children.stream()
-                .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
-                .collect(ImmutableCollectors.toList());
+                    .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty(), variableGenerator))
+                    .collect(ImmutableCollectors.toList());
 
         Optional<ImmutableExpression> newExpression = expression.map(unifier::apply);
 

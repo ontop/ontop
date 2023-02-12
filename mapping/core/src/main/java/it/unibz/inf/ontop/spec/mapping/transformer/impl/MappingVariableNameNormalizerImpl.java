@@ -46,7 +46,6 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getVariable(v.getName() + "m" + suffix)))
                 .injective();
 
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(substitution);
-        return queryRenamer.transform(query);
+        return transformerFactory.createRenamer(substitution).transform(query);
     }
 }

@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -59,6 +60,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
         private final AtomFactory atomFactory;
+        private final QueryTransformerFactory queryTransformerFactory;
 
         protected AggregationUnionLifterTransformer(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
             super(coreSingletons);
@@ -66,6 +68,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
             this.atomFactory = coreSingletons.getAtomFactory();
+            this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
         }
 
         @Override
@@ -281,13 +284,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             InjectiveSubstitution<Variable> renaming = nonGroupingVariables.stream()
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            if (!renaming.isEmpty()) {
-                QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory, substitutionFactory);
-                HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
-                return iqTransformer.transform(tree);
-            }
-            else
-                return tree;
+            return queryTransformerFactory.createRenamer(renaming).transform(tree);
         }
     }
 

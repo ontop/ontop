@@ -212,9 +212,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             if (substitution.isEmpty())
                 return this;
-            if (!groupingVariables.containsAll(substitution.getDomain())) {
+
+            if (!groupingVariables.containsAll(substitution.getDomain()))
                 throw new MinorOntopInternalBugException("Was expecting all the non-grouping bindings to be lifted");
-            }
+
 
             // Only projecting grouping variables
             // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)

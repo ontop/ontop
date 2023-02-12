@@ -397,8 +397,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .filter(s -> !s.isEmpty())
                     .map(s -> children.stream()
                             .map(child -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                            .collect(ImmutableCollectors.toList())
-                    )
+                            .collect(ImmutableCollectors.toList()))
                     .orElseGet(() -> downConstraint
                             .map(s -> children.stream()
                                     .map(child -> child.propagateDownConstraint(s, variableGenerator))
@@ -408,8 +407,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
                     ? this
                     : conditionSimplificationResults.getOptionalExpression()
-                    .map(iqFactory::createInnerJoinNode)
-                    .orElseGet(iqFactory::createInnerJoinNode);
+                        .map(iqFactory::createInnerJoinNode)
+                        .orElseGet(iqFactory::createInnerJoinNode);
 
             NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
 

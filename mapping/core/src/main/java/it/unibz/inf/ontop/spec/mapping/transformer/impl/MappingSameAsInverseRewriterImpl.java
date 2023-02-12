@@ -76,9 +76,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
         InjectiveSubstitution<Variable> renamingSubstitution =
                 substitutionFactory.getSubstitution(originalSubject, newObject, originalObject, newSubject).injective();
 
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
-
         return assertion.copyOf(iqFactory.createIQ(newProjectionAtom,
-                queryRenamer.transform(assertion.getQuery()).getTree()));
+                transformerFactory.createRenamer(renamingSubstitution).transform(assertion.getQuery()).getTree()));
     }
 }

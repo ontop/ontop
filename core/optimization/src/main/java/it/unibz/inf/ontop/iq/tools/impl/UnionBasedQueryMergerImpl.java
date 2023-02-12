@@ -85,8 +85,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                                     .removeFromDomain(disjointVariableSetRenaming.getRangeSet())
                                     .injective();
 
-                    QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
-                    return queryRenamer.transform(def).getTree();
+                    return transformerFactory.createRenamer(renamingSubstitution).transform(def.getTree());
                 });
 
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();

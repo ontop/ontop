@@ -35,23 +35,32 @@ public class QueryRenamerImpl implements QueryRenamer {
         this.substitutionFactory = substitutionFactory;
     }
 
-    /**
-     * Renames the projected variables
-     */
-    private DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList<Variable> newArguments = substitutionFactory.onVariables().apply(renamingSubstitution, atom.getArguments());
+    @Override
+    public IQ transform(IQ originalQuery) {
+        if (renamingSubstitution.isEmpty())
+            return originalQuery;
 
-        return atomFactory.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
+        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransfiormer();
+        IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);
+
+        DistinctVariableOnlyDataAtom atom = originalQuery.getProjectionAtom();
+        ImmutableList<Variable> newArguments = substitutionFactory.onVariables().apply(renamingSubstitution, atom.getArguments());
+        DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
+
+        return iqFactory.createIQ(newProjectionAtom, newIQTree);
     }
 
     @Override
-    public IQ transform(IQ originalQuery) {
+    public IQTree transform(IQTree originalTree) {
+        if (renamingSubstitution.isEmpty())
+            return originalTree;
+
+        HomogeneousIQTreeVisitingTransformer iqTransformer = getIQTransfiormer();
+        return originalTree.acceptTransformer(iqTransformer);
+    }
+
+    private HomogeneousIQTreeVisitingTransformer getIQTransfiormer() {
         QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory, substitutionFactory);
-        HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
-
-        IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);
-        DistinctVariableOnlyDataAtom newProjectionAtom = transformProjectionAtom(originalQuery.getProjectionAtom());
-
-        return iqFactory.createIQ(newProjectionAtom, newIQTree);
+        return new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
     }
 }

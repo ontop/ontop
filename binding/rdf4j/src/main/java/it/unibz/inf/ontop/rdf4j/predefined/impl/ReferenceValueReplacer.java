@@ -67,13 +67,12 @@ public class ReferenceValueReplacer {
 
         if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode)rootNode;
-            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
 
-            ConstructionNode newConstructionNode = substitution.isEmpty()
+            ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
                 ? constructionNode
                 : iqFactory.createConstructionNode(
                         constructionNode.getVariables(),
-                        substitution.transform(t -> transformTerm(t, referenceToInputMap)));
+                        constructionNode.getSubstitution().transform(t -> transformTerm(t, referenceToInputMap)));
 
             return iqFactory.createUnaryIQTree(
                     newConstructionNode,
