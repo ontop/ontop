@@ -82,29 +82,29 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
-        Substitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.builder()
+        Substitution<GroundTerm> blockedGroundTermSubstitution = descendingSubstitution.builder()
                 .restrictDomainTo(aggregationVariables)
                 .restrictRangeTo(GroundTerm.class)
                 .build();
 
-        Substitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
+        Substitution<Variable> blockedVariableSubstitution = extractBlockedVar2VarSubstitutionMap(
                 descendingSubstitution.restrictRangeTo(Variable.class),
                 aggregationVariables);
 
-        Sets.SetView<Variable> domain = Sets.difference(descendingSubstitution.getDomain(),
-                        Sets.union(blockedSubstitutionToGroundTerm.getDomain(), blockedVar2VarSubstitution.getDomain()));
+        Sets.SetView<Variable> blockedDomain =
+                Sets.union(blockedGroundTermSubstitution.getDomain(), blockedVariableSubstitution.getDomain());
 
-        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.restrictDomainTo(domain);
+        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedDomain);
 
         IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
 
-        if (blockedSubstitutionToGroundTerm.isEmpty() && blockedVar2VarSubstitution.isEmpty())
+        if (blockedDomain.isEmpty())
             return newSubTree;
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                Stream.concat(blockedSubstitutionToGroundTerm.builder().toStrictEqualities(),
-                                blockedVar2VarSubstitution.builder().toStrictEqualities())
+                Stream.concat(blockedGroundTermSubstitution.builder().toStrictEqualities(),
+                                blockedVariableSubstitution.builder().toStrictEqualities())
                         .collect(ImmutableCollectors.toList()));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
@@ -126,36 +126,33 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
      */
     private Substitution<Variable> extractBlockedVar2VarSubstitutionMap(Substitution<Variable> descendingVar2Var,
                                                                         ImmutableSet<Variable> aggregationVariables) {
-        // Substitution value -> substitution keys
-        ImmutableMap<Variable, Collection<Variable>> inverse = descendingVar2Var.inverseMap();
-
         // Variables whose entries are blocked
-        ImmutableSet<Variable> blockedVariables = inverse.entrySet().stream()
-                .flatMap(e -> extractBlockedDomainVars(e.getKey(), e.getValue(), aggregationVariables))
+        ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
+                .flatMap(var -> extractBlockedDomainVars(var, descendingVar2Var.getPreImage(t -> t.equals(var)), aggregationVariables).stream())
                 .collect(ImmutableCollectors.toSet());
 
          return descendingVar2Var.restrictDomainTo(blockedVariables);
     }
 
-    private Stream<Variable> extractBlockedDomainVars(Variable rangeVariable, Collection<Variable> domainVariables,
+    private Set<Variable> extractBlockedDomainVars(Variable rangeVariable, ImmutableSet<Variable> domainVariables,
                                                       ImmutableSet<Variable> aggregationVariables) {
         // Equalities to aggregation variable are blocked
         if (aggregationVariables.contains(rangeVariable))
-            return domainVariables.stream();
+            return domainVariables;
+
+        Sets.SetView<Variable> aggregationDomainVariables = Sets.intersection(domainVariables, aggregationVariables);
 
         // Equalities from an aggregation variable to a grouping variable are blocked
         if (groupingVariables.contains(rangeVariable))
-            return domainVariables.stream()
-                    .filter(aggregationVariables::contains);
+            return aggregationDomainVariables;
 
         // Fresh variables: need at least one variable to become projected
         // the latter may be an aggregation variable if there is no grouping variable
-        Variable dominantVariable = domainVariables.stream()
-                .filter(groupingVariables::contains)
+        Variable dominantVariable = aggregationDomainVariables.stream()
                 .findAny()
                 .orElseGet(() -> domainVariables.iterator().next());
-        return domainVariables.stream()
-                .filter(v -> aggregationVariables.contains(v) && (!dominantVariable.equals(v)));
+
+        return Sets.difference(aggregationDomainVariables, ImmutableSet.of(dominantVariable));
     }
 
     @Override

@@ -16,13 +16,19 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
- * Declaration that the substitution is immutable and only refer to ImmutableTerms.
- *
- * See SubstitutionFactory for creating new instances
- *
+ * A substitution is a map from variables to a subclass of ImmutableTerm.
+ * The map cannot contain entries of the form v -> v, as the apply operation
+ * handles this case apply(v) = v, for any v not in the substitution domain.
+ * <p>
+ * The domain of a substitution consists of variables, and its range of terms.
  */
 public interface Substitution<T extends ImmutableTerm>  {
 
+    /**
+     * Returns the stream of substitution entries.
+     *
+     * @return the stream of entries
+     */
     Stream<Map.Entry<Variable, T>> stream();
 
     /**
@@ -98,11 +104,29 @@ public interface Substitution<T extends ImmutableTerm>  {
      */
     boolean isEmpty();
 
+    /**
+     * Creates a new substitution obtained by applying a given function to the
+     * substitution range.
+     *
+     * @param function the function that transforms the terms in the range
+     * @return a new substitution
+     * @param <S> the type of terms of the new substitution
+     */
     <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function);
 
-
+    /**
+     * Checks whether the substitution is injective, that is, whether no two variables
+     * are mapped to the same term.
+     * @return true if the substitution is injective, and false ohterwise
+     */
     boolean isInjective();
 
+    /**
+     * Creates an injective substitution that consists of the same entries as the substitution.
+     *
+     * @return an injective substitution
+     * @throws IllegalArgumentException if the substitution is not injective
+     */
     InjectiveSubstitution<T> injective();
 
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();

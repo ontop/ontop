@@ -38,16 +38,15 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
      *
      */
     @Override
-    public ConstructionSubstitutionNormalization normalizeSubstitution(
-            Substitution<? extends ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+    public ConstructionSubstitutionNormalization normalizeSubstitution(Substitution<?> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
         InjectiveSubstitution<Variable> downRenamingSubstitution = substitutionFactory.getPrioritizingRenaming(ascendingSubstitution, projectedVariables);
 
-        Substitution<? extends ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
+        Substitution<?> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
 
         Substitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution.compose(reducedAscendingSubstitution).builder()
                 .restrictDomainTo(projectedVariables)
-                .transform(t -> t.simplify())
+                .transform(ImmutableTerm::simplify)
                 .build();
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,

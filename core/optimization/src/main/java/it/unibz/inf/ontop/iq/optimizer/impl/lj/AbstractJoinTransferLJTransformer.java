@@ -346,6 +346,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .map(variables -> termFactory.getStrictEquality(ImmutableList.copyOf(variables)));
 
         Stream<ImmutableExpression> equalitiesWithLeftVariable = replacement.entrySet().stream()
+                .filter(e -> e.getKey() instanceof Variable)
                 .filter(e -> leftVariables.contains(e.getKey()))
                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
 

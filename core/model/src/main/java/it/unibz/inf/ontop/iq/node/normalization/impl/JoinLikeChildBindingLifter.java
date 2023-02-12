@@ -62,9 +62,13 @@ public class JoinLikeChildBindingLifter {
         InjectiveSubstitution<Variable> freshRenaming = Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
+        Stream<ImmutableExpression> equalities = freshRenaming.builder()
+                .toStream((v, t) -> termFactory.getStrictEquality(selectedChildSubstitution.apply(v), t));
+
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
-                computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
+                termFactory.getConjunction(initialJoiningCondition.map(selectedChildSubstitution::apply), equalities),
                 nonLiftableVariables, children, variableNullability);
+
         Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied
@@ -79,17 +83,6 @@ public class JoinLikeChildBindingLifter {
 
         return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
                 naiveAscendingSubstitution, descendingSubstitution);
-    }
-
-    private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
-                                                                       Substitution<ImmutableTerm> substitution,
-                                                                       InjectiveSubstitution<Variable> freshRenaming) {
-
-        Stream<ImmutableExpression> expressions2 = freshRenaming.builder()
-                .toStream((v, t) -> termFactory.getStrictEquality(substitution.apply(v), t));
-
-        return termFactory.getConjunction(
-                initialJoiningCondition.map(substitution::apply), expressions2);
     }
 
     @FunctionalInterface
