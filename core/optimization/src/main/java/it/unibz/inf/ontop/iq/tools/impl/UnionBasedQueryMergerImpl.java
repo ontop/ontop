@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -28,17 +29,17 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final AtomFactory atomFactory;
     private final QueryTransformerFactory transformerFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                      CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, QueryTransformerFactory transformerFactory) {
+                                      CoreUtilsFactory coreUtilsFactory, QueryTransformerFactory transformerFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.atomFactory = atomFactory;
         this.transformerFactory = transformerFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -91,9 +92,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
 
         ImmutableList<IQTree> unionChildren = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions)
-                .map(c -> c.getVariables().equals(unionVariables)
-                        ? c
-                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
+                .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
                 .collect(ImmutableCollectors.toList());
 
         IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(unionVariables),

@@ -425,9 +425,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
                                   VariableGenerator variableGenerator) {
-        UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet()));
+
+        UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(initialChildren));
 
         return iqFactory.createNaryIQTree(newUnionNode,
                 newUnionChild.getChildren().stream()

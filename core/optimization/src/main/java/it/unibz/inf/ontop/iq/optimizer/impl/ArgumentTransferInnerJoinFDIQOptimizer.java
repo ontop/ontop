@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
@@ -35,8 +36,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
     private final SelfJoinFDSimplifier simplifier;
 
     @Inject
-    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        simplifier = new SelfJoinFDSimplifier(coreSingletons);
+    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+        simplifier = new SelfJoinFDSimplifier(coreSingletons, iqTreeTools);
         this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
     }
@@ -73,8 +74,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
     protected static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
 
-        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
-            super(coreSingletons);
+        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+            super(coreSingletons, iqTreeTools);
         }
 
         @Override

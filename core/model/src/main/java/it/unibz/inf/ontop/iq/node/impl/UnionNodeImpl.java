@@ -525,9 +525,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .mapToObj(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables, variableGenerator))
                         .flatMap(this::flattenChild)
-                        .map(c -> c.getVariables().equals(unionVariables)
-                                ? c
-                                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
+                        .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, unionVariables))
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ)

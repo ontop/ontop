@@ -229,11 +229,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             ImmutableSet<Variable> requiredGrandChildVariables = selectedChildConstructionNode.getChildVariables();
 
-            IQTree selectedGrandChildWithLimitedProjection = selectedGrandChild.getVariables().equals(requiredGrandChildVariables)
-                    ? selectedGrandChild
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(requiredGrandChildVariables),
-                            selectedGrandChild);
+            IQTree selectedGrandChildWithLimitedProjection =
+                    iqTreeTools.createConstructionNodeTreeIfNontrivial(selectedGrandChild, requiredGrandChildVariables);
 
             VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                     IntStream.range(0, liftedChildren.size())
@@ -246,7 +243,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         selectedGrandChildWithLimitedProjection,
                         liftedChildren, ImmutableSet.of(), joiningCondition, variableGenerator,
                         newChildrenVariableNullability, this::convertIntoState);
-            } catch (UnsatisfiableConditionException e) {
+            }
+            catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
             }
         }
@@ -291,9 +289,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                 throw new MinorOntopInternalBugException("The order must be respected");
                             });
 
-            IQTree nonNormalizedTree = ancestorTree.getVariables().equals(projectedVariables)
-                    ? ancestorTree
-                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), ancestorTree);
+            IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
             // Normalizes the ancestors (recursive)
             return nonNormalizedTree.normalizeForOptimization(variableGenerator);

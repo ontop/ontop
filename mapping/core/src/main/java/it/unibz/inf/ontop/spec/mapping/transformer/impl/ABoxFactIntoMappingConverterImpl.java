@@ -208,7 +208,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
         ConstructionNode cn = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
         IQTree iqTree = iqFactory.createUnaryIQTree(cn, valuesNode);
 
-        return iqFactory.createIQ(tripleAtom, iqTree);
+        return iqFactory.createIQ(graph.map(g -> quadAtom).orElse(tripleAtom), iqTree);
     }
 
     private ValuesNode createSingleTypeDBValuesNode(CustomKey key, ImmutableList<RDFFact> facts) {

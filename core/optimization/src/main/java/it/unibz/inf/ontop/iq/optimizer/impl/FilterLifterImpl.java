@@ -107,7 +107,7 @@ public class FilterLifterImpl implements FilterLifter {
             Optional<ImmutableExpression> childrenExpression = getChildrenExpression(children);
 
             if (childrenExpression.isPresent()) {
-                children = discardOptionalRootFilter1(children);
+                children = discardOptionalRootFilterForList(children);
             }
 
             NaryIQTree unionSubtree = iqFactory.createNaryIQTree(
@@ -131,7 +131,7 @@ public class FilterLifterImpl implements FilterLifter {
             Optional<ImmutableExpression> explicitJoinCondition = joinNode.getOptionalFilterCondition();
 
             if (childrenExpression.isPresent()) {
-                children = discardOptionalRootFilter1(children);
+                children = discardOptionalRootFilterForList(children);
             }
 
             NaryIQTree joinSubtree = iqFactory.createNaryIQTree(
@@ -196,7 +196,7 @@ public class FilterLifterImpl implements FilterLifter {
                         .map(FilterNode::getFilterCondition));
     }
 
-    private ImmutableList<IQTree> discardOptionalRootFilter1(ImmutableList<IQTree> children) {
+    private ImmutableList<IQTree> discardOptionalRootFilterForList(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(t -> discardOptionalRootFilter(t))
                 .collect(ImmutableCollectors.toList());

@@ -63,6 +63,12 @@ public class IQTreeTools {
                 : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables.get(), substitution), child);
     }
 
+    public IQTree createConstructionNodeTreeIfNontrivial(IQTree child, ImmutableSet<Variable> variables) {
+        return child.getVariables().equals(variables)
+                ? child
+                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(variables), child);
+    }
+
     public ImmutableSet<Variable> getChildrenVariables(ImmutableList<IQTree> children) {
          return children.stream()
                 .flatMap(c -> c.getVariables().stream())

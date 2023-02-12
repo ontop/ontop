@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
@@ -28,12 +29,14 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
     protected final TermFactory termFactory;
     protected final SubstitutionFactory substitutionFactory;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
+    protected final IQTreeTools iqTreeTools;
 
-    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons) {
+    public AbstractSelfJoinSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
+        this.iqTreeTools = iqTreeTools;
         this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
     }
 
@@ -150,13 +153,10 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         Substitution<ImmutableTerm> normalizedTopSubstitution = normalization.getNormalizedSubstitution();
 
         return normalizedTopSubstitution.isEmpty()
-                ? normalizedNewTree.getVariables().size() == projectedVariables.size()
-                    ? normalizedNewTree
-                    // Makes sure no additional variables is projected
-                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), normalizedNewTree)
+                ? iqTreeTools.createConstructionNodeTreeIfNontrivial(normalizedNewTree, projectedVariables)
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(projectedVariables, normalizedTopSubstitution),
-                normalizedNewTree);
+                        iqFactory.createConstructionNode(projectedVariables, normalizedTopSubstitution),
+                        normalizedNewTree);
     }
 
 

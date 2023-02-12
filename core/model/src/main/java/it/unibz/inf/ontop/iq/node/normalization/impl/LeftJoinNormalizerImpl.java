@@ -639,9 +639,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 throw new MinorOntopInternalBugException("The order must be respected");
                             });
 
-            IQTree nonNormalizedTree = ancestorTree.getVariables().equals(projectedVariables)
-                    ? ancestorTree
-                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), ancestorTree);
+            IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
             // Normalizes the ancestors (recursive)
             return nonNormalizedTree.normalizeForOptimization(variableGenerator);

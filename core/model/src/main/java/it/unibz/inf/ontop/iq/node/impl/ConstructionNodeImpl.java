@@ -169,10 +169,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
          */
         if ((newChildRoot instanceof UnionNode)
                 && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-            ImmutableList<IQTree> grandChildren = newChild.getChildren();
 
-            ImmutableList<IQTree> newChildren = grandChildren.stream()
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+            ImmutableList<IQTree> newChildren = newChild.getChildren().stream()
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(this, c))
                     .collect(ImmutableCollectors.toList());
 
             UnionNode newUnionNode = iqFactory.createUnionNode(getVariables());
@@ -405,11 +404,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return newTopConstructionNode
                     .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, newChild,
                             treeCache.declareAsNormalizedForOptimizationWithEffect()))
-                    .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
-                            ? newChild
-                            : iqFactory.createUnaryIQTree(
-                                    iqFactory.createConstructionNode(projectedVariables),
-                                    newChild));
+                    .orElseGet(() ->
+                            iqTreeTools.createConstructionNodeTreeIfNontrivial(newChild, projectedVariables));
         }
     }
 

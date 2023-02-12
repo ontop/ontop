@@ -101,7 +101,11 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         Variable replacedVar = componentGetter.get(variables);
 
         IQ iq = assertion.getQuery();
-        Variable newVariable = createFreshVariable(iq, intensionalQueryMerger, replacedVar);
+
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(iq.getTree().getKnownVariables(), intensionalQueryMerger.getKnownVariables()).immutableCopy());
+        Variable newVariable = variableGenerator.generateNewVariableFromVar(replacedVar);
+
         IntensionalDataNode idn = iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalTripleAtom(newVariable, Ontop.CANONICAL_IRI, replacedVar));
 
@@ -130,15 +134,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         ImmutableList.of(
                                 assertion.getTree(),
                                 intensionalDataNode)));
-    }
-
-    private Variable createFreshVariable(IQ iq, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        iq.getTree().getKnownVariables(),
-                        intensionalQueryMerger.getKnownVariables()).immutableCopy());
-
-        return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
 
     private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {

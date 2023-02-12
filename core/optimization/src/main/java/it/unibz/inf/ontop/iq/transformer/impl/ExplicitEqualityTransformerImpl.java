@@ -99,7 +99,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             iqFactory.createInnerJoinNode(
                                     Optional.of(updateJoinCondition(
                                             rootNode.getOptionalFilterCondition(),
-                                            substitutions ))),
+                                            substitutions))),
                             updatedChildren));
         }
 
@@ -179,9 +179,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
-                    iqFactory.createUnaryIQTree(
-                            filter,
-                            dn.newAtom(atom)));
+                    iqFactory.createUnaryIQTree(filter, dn.newAtom(atom)));
         }
 
         private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {

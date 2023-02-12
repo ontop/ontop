@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -63,16 +64,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory,
 								TermFactory termFactory,
                                 IntermediateQueryFactory iqFactory,
 								CoreUtilsFactory coreUtilsFactory,
-                                SubstitutionFactory substitutionFactory) {
+                                SubstitutionFactory substitutionFactory,
+                                IQTreeTools iqTreeTools) {
         super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
 
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
 	@Override
@@ -420,9 +424,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<IQTree> unionChildren = joined.stream()
-                .map(c -> c.getVariables().equals(vars)
-                        ? c
-                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(vars), c))
+                .map(c -> iqTreeTools.createConstructionNodeTreeIfNontrivial(c, vars))
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), unionChildren));

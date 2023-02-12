@@ -131,7 +131,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
             return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, leftChild, rightChild, variableGenerator))
                     .orElse(this);
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+        }
+        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }
     }

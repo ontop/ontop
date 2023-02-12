@@ -114,8 +114,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
             return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChildren(), variableGenerator))
                     .orElse(this);
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+        }
+        catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }
     }
