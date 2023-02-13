@@ -4,13 +4,12 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
@@ -23,16 +22,32 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Inject
     protected DuckDBDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createTrinoRegularFunctionTable(typeFactory), typeFactory);
+        super(createDuckDBRegularFunctionTable(typeFactory), typeFactory);
     }
 
-    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createTrinoRegularFunctionTable(
+    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDuckDBRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
+        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+
+
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+
+        //CHAR_LENGTH(...) ==> LENGTH(...)
+        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol("LENGTH", 1, dbIntType,
+                false, abstractRootDBType);
+        table.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
+
+        //REGEXP_LIKE(...) ==> REGEXP_MATCHES(...)
+        // Common for many dialects
+        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol("REGEXP_MATCHES", 2, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
+
 
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
@@ -80,7 +95,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("SUBSTRING(%s, IF(POSITION(%s IN %s) != 0, POSITION(%s IN %s) + LENGTH(%s), 0))", str, after, str, after, str, after);
+        return String.format("IF(POSITION(%s IN %s) != 0, SUBSTRING(%s, POSITION(%s IN %s) + LENGTH(%s)), '')", after, str, str, after, str, after);
 
     }
 
@@ -91,22 +106,22 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA1(%s)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException("DuckDB only supports the md5 hashing function.");
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA2(%s,256)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException("DuckDB only supports the md5 hashing function.");
     }
 
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA2(%s,384)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException("DuckDB only supports the md5 hashing function.");
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA2(%s,512)", termConverter.apply(terms.get(0)));
+        throw new UnsupportedOperationException("DuckDB only supports the md5 hashing function.");
     }
 
     @Override
@@ -140,7 +155,21 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TO_ISO8601(%s)", termConverter.apply(terms.get(0)));
+        /* DuckDB STRFTIME formats a timestamp:
+            %x: ISO date representation
+            %X: ISO time representation
+            %z: UTC offset in the form +HHMM or -HHMM
+
+           We can combine this as %xT%X%z to get a string in the form 'YYYY-MM-DDTHH:MM:SS+HHMM.
+           However, we want the string to end with +HH:MM instead. So we split it before the last
+           two characters and add a ':' in-between.
+         */
+        return String.format("CONCAT(" +
+                        "LEFT(STRFTIME(CAST(%s as TIMESTAMP WITH TIME ZONE), '%%xT%%X%%z'), -2), " +
+                        "':', " +
+                        "RIGHT(STRFTIME(CAST(%s as TIMESTAMP WITH TIME ZONE), '%%xT%%X%%z'), -2))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
     }
 
 
@@ -148,5 +177,59 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String getUUIDNameInDialect() {
         return UUID_STRING_STR;
     }
+
+
+
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("week", terms, termConverter, termFactory);
+    }
+
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("day", terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("hour", terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("minute", terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("second", terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeTimeBetween("millisecond", terms, termConverter, termFactory);
+    }
+
+    private String serializeTimeBetween(String timeUnit, ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("date_diff('%s', %s, %s)",
+                timeUnit,
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String getRandNameInDialect() {
+        return "RANDOM";
+    }
+
 
 }
