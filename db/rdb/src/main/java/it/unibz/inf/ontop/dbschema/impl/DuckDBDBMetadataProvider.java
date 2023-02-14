@@ -27,7 +27,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     @Override
     public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         /* DuckDB does not support access to integrity constraints through the JDBC Metadata.
-           However, we can run queries on the database to get that information.
+           However, we can run queries on the metadata table `duckdb_constraints` to get that information.
         */
         insertPrimaryKey(relation);
         insertUniqueAttributes(relation);
@@ -153,6 +153,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @Override
     protected ResultSet getRelationIDsResultSet() throws SQLException {
+        // In duckdb, the type "TABLE" is called "BASE TABLE" instead, so we have to change this method.
         return metadata.getTables(null, null, null, new String[] { "BASE TABLE", "VIEW" });
     }
 }

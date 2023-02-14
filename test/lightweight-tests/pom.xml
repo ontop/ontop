@@ -312,6 +312,7 @@
             <groupId>org.duckdb</groupId>
             <artifactId>duckdb_jdbc</artifactId>
             <version>0.6.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>

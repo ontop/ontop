@@ -19,10 +19,21 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private static final String UUID_STRING_STR = "UUID";
 
+    private DBFunctionSymbol charLengthFunctionSymbol;
+    private DBFunctionSymbol regexpLikeFunctionSymbol;
+
 
     @Inject
     protected DuckDBDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDuckDBRegularFunctionTable(typeFactory), typeFactory);
+
+        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+
+        this.charLengthFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol("LENGTH", 1, dbIntType,
+                false, abstractRootDBType);
+        this.regexpLikeFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol("REGEXP_MATCHES", 2, dbBooleanType,
+                abstractRootDBType);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDuckDBRegularFunctionTable(
@@ -30,25 +41,12 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
-        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
-
-
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
         table.remove(CHAR_LENGTH_STR, 1);
-        //CHAR_LENGTH(...) ==> LENGTH(...)
-        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol("LENGTH", 1, dbIntType,
-                false, abstractRootDBType);
-        table.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
-
-        //REGEXP_LIKE(...) ==> REGEXP_MATCHES(...)
-        // Common for many dialects
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol("REGEXP_MATCHES", 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
+        table.remove(REGEXP_LIKE_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 3);
 
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
@@ -152,6 +150,16 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
         return createNullRejectingDBConcat(arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return (DBBooleanFunctionSymbol) this.regexpLikeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCharLength() {
+        return this.charLengthFunctionSymbol;
     }
 
     @Override

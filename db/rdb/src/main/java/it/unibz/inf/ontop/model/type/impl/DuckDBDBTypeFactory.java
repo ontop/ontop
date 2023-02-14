@@ -150,17 +150,17 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @Override
     public boolean supportsDBGeometryType() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean supportsDBGeographyType() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean supportsDBDistanceSphere() {
-        return true;
+        return false;
     }
 
     @Override
@@ -169,9 +169,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     }
 
     @Override
-    public String getDBTrueLexicalValue() {
-        return "true";
-    }
+    public String getDBTrueLexicalValue() { return "true"; }
 
     @Override
     public String getDBFalseLexicalValue() { return "false"; }

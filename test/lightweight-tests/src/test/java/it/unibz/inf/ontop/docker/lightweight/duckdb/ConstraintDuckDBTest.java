@@ -18,9 +18,4 @@ public class ConstraintDuckDBTest extends AbstractConstraintTest {
         super(method, PROPERTIES_FILE);
     }
 
-    @Override
-    public void setUp() throws IOException, SQLException, MetadataExtractionException {
-        super.setUp();
-    }
-
 }
