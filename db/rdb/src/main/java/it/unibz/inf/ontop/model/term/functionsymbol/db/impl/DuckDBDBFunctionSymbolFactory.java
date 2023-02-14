@@ -37,6 +37,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
+        table.remove(CHAR_LENGTH_STR, 1);
         //CHAR_LENGTH(...) ==> LENGTH(...)
         DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol("LENGTH", 1, dbIntType,
                 false, abstractRootDBType);
@@ -178,6 +179,19 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return UUID_STRING_STR;
     }
 
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(getUUIDNameInDialect(), uuid, dbStringType) {
+
+            @Override
+            public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory) {
+                return "CAST(UUID() as TEXT)";
+            }
+
+        };
+    }
+
 
 
 
@@ -231,5 +245,15 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return "RANDOM";
     }
 
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "GROUP_CONCAT(%s%s, %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
+                ));
+    }
 
 }

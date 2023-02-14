@@ -1,3 +1,4 @@
+CREATE SCHEMA IF NOT EXISTS books;
 CREATE TABLE books.books (
   id int NOT NULL,
   title varchar(100) DEFAULT NULL,

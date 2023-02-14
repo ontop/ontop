@@ -1,3 +1,5 @@
+
+CREATE SCHEMA IF NOT EXISTS university;
 CREATE TABLE university.professors (
 	prof_id int PRIMARY KEY,
 	first_name varchar(100) NOT NULL,

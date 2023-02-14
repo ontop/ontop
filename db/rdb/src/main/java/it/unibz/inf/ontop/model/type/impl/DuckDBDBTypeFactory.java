@@ -18,6 +18,8 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String INT2_STR = "INT2";
     protected static final String INT4_STR = "INT4";
     protected static final String INT8_STR = "INT8";
+
+    protected static final String HUGEINT_STR = "HUGEINT";
     protected static final String FLOAT4_STR = "FLOAT4";
     protected static final String FLOAT8_STR = "FLOAT8";
     protected static final String SMALLSERIAL_STR = "SMALLSERIAL";
@@ -92,6 +94,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(FLOAT4_STR, map.get(REAL_STR));
         map.put(FLOAT8_STR, map.get(DOUBLE_PREC_STR));
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
+        map.put(HUGEINT_STR, map.get(BIGINT_STR));
         /*
          * <a href='https://www.postgresql.org/docs/current/datatype-numeric.html'>8.1. Numeric Types</a>
          * The data types smallserial, serial and bigserial are not true types, but merely a notational convenience for

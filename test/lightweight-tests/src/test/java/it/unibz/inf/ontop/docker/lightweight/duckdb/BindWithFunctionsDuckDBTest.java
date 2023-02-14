@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.docker.lightweight.duckdb;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.docker.lightweight.AthenaLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.DuckDBLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,13 +20,13 @@ import java.sql.SQLException;
 public class BindWithFunctionsDuckDBTest extends AbstractBindTestWithFunctions {
 
     private static final String PROPERTIES_FILE = "/books/duckdb/books-duckdb.properties";
-    private static final String OBDA_FILE_ATHENA = "/books/duckdb/books-duckdb.obda"; //Athena does not support default
+    private static final String OBDA_FILE_DUCKDB = "/books/duckdb/books-duckdb.obda"; //DuckDB's JDBC does not support default
                                                                                 //schemas, so we need to provide an
                                                                                 //obda file with fully qualified names.
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE_ATHENA, OWL_FILE, PROPERTIES_FILE);
+        initOBDA(OBDA_FILE_DUCKDB, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
@@ -58,11 +57,40 @@ public class BindWithFunctionsDuckDBTest extends AbstractBindTestWithFunctions {
         return ImmutableList.of("\"0.5\"^^xsd:decimal");
     }
 
-    @Disabled("Athena counts one hour less on two results")
+    @Disabled("DuckDB counts one hour less on two results")
     @Test
     @Override
     public void testSecondsBetweenMappingInput() {
         super.testSecondsBetweenMappingInput();
+    }
+
+    @Disabled("DuckDB's week count is off by one")
+    @Test
+    @Override
+    public void testWeeksBetweenDate() {
+        super.testWeeksBetweenDate();
+    }
+
+    @Disabled("DuckDB's week count is off by one'")
+    @Test
+    @Override
+    public void testWeeksBetweenDateTime() {
+        super.testWeeksBetweenDateTime();
+    }
+
+    @Disabled("DuckDB's day count is off by one'")
+    @Test
+    @Override
+    public void testDaysBetweenDateTime() {
+        super.testDaysBetweenDateTime();
+    }
+
+    @Disabled("DuckDB doesn't support the DATE_DIFF function on mixed date times. However, the time literal is parsed" +
+            "as `TIMESTAMP` while the table date attribute is parsed as `TIMESTAMP WITH TIME ZONE`")
+    @Test
+    @Override
+    public void testDaysBetweenDateTimeMappingInput() {
+        super.testDaysBetweenDateTimeMappingInput();
     }
 
     @Disabled("DuckDB does not support SHA hashing")

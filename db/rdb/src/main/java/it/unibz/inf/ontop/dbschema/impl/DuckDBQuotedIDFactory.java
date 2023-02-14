@@ -12,8 +12,8 @@ public class DuckDBQuotedIDFactory extends SQLStandardQuotedIDFactory {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
 
-		return new QuotedIDImpl(s, QUOTATION_STRING);
+		return new QuotedIDImpl(s.toLowerCase(), QUOTATION_STRING, false);
 	}
 }
