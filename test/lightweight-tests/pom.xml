@@ -297,9 +297,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.syncron.amazonaws</groupId>
+            <artifactId>simba-athena-jdbc-driver</artifactId>
+            <version>2.0.35.1000</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-jdbc</artifactId>
             <version>0.279</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>0.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -506,4 +518,11 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>ontop-3rd-party-maven-repo</id>
+            <url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</url>
+        </repository>
+    </repositories>
 </project>
