@@ -61,7 +61,6 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
         if (!primaryKeys.isEmpty()) {
             try {
-                // use the KEY_SEQ values to restore the correct order of attributes in the PK
                 UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, UUID.randomUUID().toString());
                 for (String key : primaryKeys) {
                     QuotedID attrId = rawIdFactory.createAttributeID(key);

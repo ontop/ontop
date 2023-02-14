@@ -370,7 +370,7 @@ jobs:
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="prestolighttests" -DskipTests=false --fail-at-end
 
   run-duckdb:
-    needs: run-db2
+    needs: run-trino
     runs-on: ubuntu-latest
     strategy:
       matrix:
