@@ -15,14 +15,14 @@ import java.sql.SQLException;
 public class LeftJoinProfDuckDBTest extends AbstractLeftJoinProfTest {
 
     private static final String PROPERTIES_FILE = "/prof/duckdb/prof-duckdb.properties";
-    private static final String OBDA_FILE_ATHENA = "/prof/duckdb/prof-duckdb.obda"; //Athena does not support default
+    private static final String OBDA_FILE = "/prof/duckdb/prof-duckdb.obda"; //duckdb does not support default
                                                                                     //schemas, so we need to provide an
                                                                                     //obda file with fully qualified names.
 
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        initOBDA(OBDA_FILE_ATHENA, OWL_FILE, PROPERTIES_FILE);
+        initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
