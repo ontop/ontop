@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.UUID;
 
 public class H2RDF4JTestTools {
@@ -75,15 +76,24 @@ public class H2RDF4JTestTools {
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractRDF4JTest.class.getResource(obdaRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
-                .jdbcUser(USER)
-                .jdbcPassword(PASSWORD)
                 .enableTestMode();
 
         if (ontologyRelativePath != null)
             builder.ontologyFile(AbstractRDF4JTest.class.getResource(ontologyRelativePath).getPath());
 
-        if (propertyFile != null)
-            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+        if (propertyFile != null) {
+            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath())
+                    .jdbcUser(USER)
+                    .jdbcPassword(PASSWORD);
+        }
+        else {
+            // Test for supporting arbitrary JDBC properties.
+            // FOR TEST PURPOSES ONLY! Use the regular methods in your code.
+            Properties properties = new Properties();
+            properties.put("jdbc.property.user", USER);
+            properties.put("jdbc.property.password", PASSWORD);
+            builder.properties(properties);
+        }
 
         if (lensesFile != null)
             builder.lensesFile(AbstractRDF4JTest.class.getResource(lensesFile).getPath());
