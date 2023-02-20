@@ -296,7 +296,12 @@
             <version>406</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.syncron.amazonaws</groupId>
+            <artifactId>simba-athena-jdbc-driver</artifactId>
+            <version>2.0.35.1001</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-jdbc</artifactId>
