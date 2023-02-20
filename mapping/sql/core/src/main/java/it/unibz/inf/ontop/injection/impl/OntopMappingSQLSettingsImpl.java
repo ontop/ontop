@@ -46,6 +46,11 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     @Override
+    public Properties getAdditionalJDBCProperties() {
+        return sqlSettings.getAdditionalJDBCProperties();
+    }
+
+    @Override
     public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
