@@ -27,4 +27,21 @@ public class DistinctInAggregateRedshiftTest extends AbstractDistinctInAggregate
         release();
     }
 
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "ad", "\"10.500000000000000000\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("3"),
+                        "ad", "\"12.000000000000000000\"^^xsd:decimal"
+                ),
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("8"),
+                        "ad", "\"13.000000000000000000\"^^xsd:decimal"
+                )
+        );
+    }
+
 }

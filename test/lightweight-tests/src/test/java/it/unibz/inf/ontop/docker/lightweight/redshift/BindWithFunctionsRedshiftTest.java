@@ -32,4 +32,70 @@ public class BindWithFunctionsRedshiftTest extends AbstractBindTestWithFunctions
         release();
     }
 
+    @Disabled("Redshift is off by one on the hour count")
+    @Override
+    @Test
+    public void testHoursBetween() {
+        super.testHoursBetween();
+    }
+
+    @Override
+    protected ImmutableSet<String> getAbsExpectedValues() {
+        return ImmutableSet.of("\"8.600000000000000000000000000000000000\"^^xsd:decimal", "\"5.750000000000000000000000000000000000\"^^xsd:decimal", "\"6.800000000000000000000000000000000000\"^^xsd:decimal",
+                "\"1.500000000000000000000000000000000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.5000000000000000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableSet<String> getDivideExpectedValues() {
+        return ImmutableSet.of("\"21.5000\"^^xsd:decimal", "\"11.5000\"^^xsd:decimal",
+                "\"17.0000\"^^xsd:decimal", "\"5.0000\"^^xsd:decimal");
+    }
+
+    @Override
+    protected ImmutableList<String> getStrExpectedValues() {
+        return ImmutableList.of("\"1970-11-05T07:50:00+00\"^^xsd:string",
+                "\"2011-12-08T11:30:00+00\"^^xsd:string",
+                "\"2014-06-05T16:47:52+00\"^^xsd:string",
+                "\"2015-09-21T09:23:06+00\"^^xsd:string");
+    }
+
+    protected ImmutableSet<String> getRoundExpectedValues() {
+        //Round leaves entries in same data type, so discount of type DECIMAL remains decimal with 18 digits in the
+        //fractional part
+        return ImmutableSet.of("\"0E-18, 43\"^^xsd:string", "\"0E-18, 23\"^^xsd:string", "\"0E-18, 34\"^^xsd:string",
+                "\"0E-18, 10\"^^xsd:string");
+    }
+
+    @Disabled("Redshift is off by one in some results.")
+    @Test
+    @Override
+    public void testDaysBetweenDateTimeMappingInput() {
+        super.testDaysBetweenDateTimeMappingInput();
+    }
+
+    @Disabled("Redshift is off by one in some results.")
+    @Test
+    @Override
+    public void testDaysBetweenDateTime() {
+        super.testDaysBetweenDateTime();
+    }
+
+    @Disabled("Redshift does not support UUIDs.")
+    @Test
+    @Override
+    public void testUuid() {
+        super.testUuid();
+    }
+
+    @Disabled("Redshift does not support UUIDs.")
+    @Test
+    @Override
+    public void testStrUuid() {
+        super.testStrUuid();
+    }
 }
