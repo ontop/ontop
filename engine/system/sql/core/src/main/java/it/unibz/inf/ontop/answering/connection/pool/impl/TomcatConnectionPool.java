@@ -24,6 +24,7 @@ public class TomcatConnectionPool implements JDBCConnectionPool {
     @Inject
     private TomcatConnectionPool(OntopSystemSQLSettings settings) {
         PoolProperties poolProperties = new PoolProperties();
+        poolProperties.setDbProperties(settings.getAdditionalJDBCProperties());
         poolProperties.setUrl(settings.getJdbcUrl());
         poolProperties.setDriverClassName(settings.getJdbcDriver());
         settings.getJdbcUser()
