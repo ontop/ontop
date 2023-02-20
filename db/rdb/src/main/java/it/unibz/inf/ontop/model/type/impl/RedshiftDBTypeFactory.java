@@ -125,6 +125,8 @@ public class RedshiftDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createRedshiftCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
+        //Redshift does not support some functions to have inputs of type TIMESTAMP WITH TIME ZONE, so we
+        //change the default type for TIMESTAMPS to TIMESTAMP (without time zone)
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.DECIMAL, DEFAULT_DECIMAL_STR);
