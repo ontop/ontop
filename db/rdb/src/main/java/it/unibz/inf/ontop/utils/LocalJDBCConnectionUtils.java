@@ -15,6 +15,7 @@ public class LocalJDBCConnectionUtils {
     public static Connection createConnection(OntopSQLCredentialSettings settings) throws SQLException {
 
         Properties jdbcInfo = new Properties();
+        jdbcInfo.putAll(settings.getAdditionalJDBCProperties());
         settings.getJdbcUser()
                 .ifPresent(u -> jdbcInfo.put("user", u));
         settings.getJdbcPassword()
