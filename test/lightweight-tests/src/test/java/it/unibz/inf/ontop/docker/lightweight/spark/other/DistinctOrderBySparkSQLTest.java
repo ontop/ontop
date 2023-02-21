@@ -1,14 +1,19 @@
-package it.unibz.inf.ontop.docker.lightweight.spark;
+package it.unibz.inf.ontop.docker.lightweight.spark.other;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SparkSQLLightweightTest
 public class DistinctOrderBySparkSQLTest extends AbstractDockerRDF4JTest {
@@ -57,14 +62,12 @@ public class DistinctOrderBySparkSQLTest extends AbstractDockerRDF4JTest {
                 "   ?v :firstName ?n .\n" +
                 "} ORDER BY DESC(?n)";
 
-        executeAndCompareValues(query, ImmutableSet.of("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/8>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/7>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/6>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/5>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/4>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/3>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/2>",
-                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>"));
+        QueryEvaluationException thrown = assertThrows(QueryEvaluationException.class, () -> runQuery(query));
+        assertTrue(Optional.ofNullable(thrown.getCause())
+                .flatMap(e -> Optional.ofNullable(e.getCause()))
+                .filter(e -> e.getMessage() != null
+                        && e.getMessage().contains("The dialect requires ORDER BY conditions to be projected but a DISTINCT prevents some of them"))
+                .isPresent());
     }
 
     @Test
@@ -77,9 +80,12 @@ public class DistinctOrderBySparkSQLTest extends AbstractDockerRDF4JTest {
                 "   ?s :firstName ?v .\n" +
                 "} ORDER BY DESC(?s)";
 
-        executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Michael\"^^xsd:string",
-                "\"Mary\"^^xsd:string", "\"John\"^^xsd:string", "\"Johann\"^^xsd:string", "\"Frank\"^^xsd:string",
-                "\"Diego\"^^xsd:string", "\"Barbara\"^^xsd:string"));
+        QueryEvaluationException thrown = assertThrows(QueryEvaluationException.class, () -> runQuery(query));
+        assertTrue(Optional.ofNullable(thrown.getCause())
+                .flatMap(e -> Optional.ofNullable(e.getCause()))
+                .filter(e -> e.getMessage() != null
+                        && e.getMessage().contains("The dialect requires ORDER BY conditions to be projected but a DISTINCT prevents some of them"))
+                .isPresent());
     }
 
     @Test
