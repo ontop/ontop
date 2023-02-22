@@ -34,7 +34,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private static final String TB_BOOKWRITER = "BOOKWRITER";
 
 	private final String PROPERTIES_FILE;
-	private Properties properties;
+	protected Properties properties;
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
 	
@@ -50,7 +50,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		properties.load(pStream);
 
 		log.info(getConnectionString() + "\n");
-		Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
+		Connection conn = createConnection();
 
 		OntopSQLCoreConfiguration defaultConfiguration = OntopSQLCoreConfiguration.defaultBuilder()
 				.properties(properties)
@@ -80,6 +80,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 		tWriter = Optional.ofNullable(map.get(TB_WRITER));
 
 		System.out.println(metadata);
+	}
+
+	protected Connection createConnection() throws SQLException {
+		return DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 	}
 
 	public void testPrimaryKey1() {
