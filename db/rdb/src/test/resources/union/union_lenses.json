@@ -1,0 +1,135 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "unionRelations": [
+        ["\"table1\""],
+        ["\"table2\""]
+      ],
+      "makeDistinct": true,
+      "provenanceColumn": "\"prov\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l2\""],
+      "unionRelations": [
+        ["\"table1\""],
+        ["\"table2\""]
+      ],
+      "makeDistinct": false,
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l3\""],
+      "unionRelations": [
+        ["\"table1\""],
+        ["\"table3\""]
+      ],
+      "provenanceColumn": "\"prov\"",
+      "makeDistinct": false,
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"differentOrder\""],
+      "unionRelations": [
+        ["\"table1\""],
+        ["\"tableDifferentOrder\""]
+      ],
+      "provenanceColumn": "\"prov\"",
+      "makeDistinct": false,
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"extras\""],
+      "unionRelations": [
+        ["\"extra1\""],
+        ["\"extra2\""]
+      ],
+      "makeDistinct": true,
+      "provenanceColumn": "\"provenance\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"sA\""],
+      "baseRelation": ["\"specializedA\""],
+      "columns": {
+        "added": [],
+        "hidden": ["\"a\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"sB\""],
+      "baseRelation": ["\"specializedB\""],
+      "columns": {
+        "added": [],
+        "hidden": ["\"b\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"specialized\""],
+      "unionRelations": [
+        ["\"lenses\"", "\"sA\""],
+        ["\"lenses\"", "\"sB\""]
+      ],
+      "makeDistinct": false,
+      "provenanceColumn": "\"provenance\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    }
+  ]
+}

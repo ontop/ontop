@@ -1,0 +1,23 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "unionRelations": [
+        ["\"specializedA\""],
+        ["\"specializedB\""]
+      ],
+      "makeDistinct": true,
+      "provenanceColumn": "\"prov\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    }
+  ]
+}
