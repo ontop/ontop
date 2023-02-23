@@ -182,7 +182,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             Substitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                             nonGroupingSubstitution.compose(aggregationSubstitution).builder()
                                     .restrictDomainTo(aggregationSubstitution.getDomain())
-                                    .build(ImmutableFunctionalTerm.class);
+                                    .transform(t -> (ImmutableFunctionalTerm)t)
+                                    .build();
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
                     groupingVariables,
@@ -259,7 +260,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .reduce(aggregationSubstitution,
                             (s, a) -> a.getSubstitution().compose(s).builder()
                                             .restrictDomainTo(aggregationSubstitution.getDomain())
-                                            .build(ImmutableFunctionalTerm.class),
+                                            .transform(t -> (ImmutableFunctionalTerm)t)
+                                            .build(),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });
@@ -310,7 +312,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> decompositionMap =
                     simplifiedSubstitution.builder()
                             .restrictRangeTo(ImmutableFunctionalTerm.class)
-                            .toMapWithoutOptional((v, t) -> decomposeFunctionalTerm(t));
+                            .toMapIgnoreOptional((v, t) -> decomposeFunctionalTerm(t));
 
             Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants

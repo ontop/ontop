@@ -6,9 +6,12 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends SubstitutionImpl<T> implements InjectiveSubstitution<T> {
 
@@ -54,4 +57,28 @@ public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends Substitu
         ImmutableCollection<T> values = map.values();
         return values.size() == ImmutableSet.copyOf(values).size();
     }
+
+
+    @Override
+    public InjectiveSubstitution.Builder<T, ? extends InjectiveSubstitution.Builder<T, ?>> builder() {
+        return new BuilderImpl<>(map.entrySet().stream());
+    }
+
+    protected class BuilderImpl<BT extends ImmutableTerm, B extends InjectiveSubstitution.Builder<BT, ? extends B>>
+            extends SubstitutionImpl<T>.AbstractBuilderImpl<BT,  BuilderImpl<BT, B>>
+            implements InjectiveSubstitution.Builder<BT, BuilderImpl<BT, B>> {
+
+        BuilderImpl(Stream<Map.Entry<Variable, BT>> stream) {
+            super(stream);
+        }
+
+        @Override
+        protected BuilderImpl<BT, B> createBuilder(Stream<Map.Entry<Variable, BT>> stream) {
+            return new BuilderImpl<>(stream);
+        }
+
+        @Override
+        public InjectiveSubstitution<BT> build() { return createSubstitution(stream.collect(ImmutableCollectors.toMap())); }
+    }
+
 }

@@ -160,7 +160,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveSubstitution<Variable>> substitutions) {
             Stream<ImmutableExpression> varEqualities = substitutions.stream()
                     .map(Substitution::builder)
-                    .flatMap(Substitution.Builder::toStrictEqualities);
+                    .flatMap(b -> b.toStream(termFactory::getStrictEquality));
             
             return termFactory.getConjunction(optionalFilterCondition, varEqualities).get();
         }

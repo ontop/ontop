@@ -152,9 +152,6 @@ public interface Substitution<T extends ImmutableTerm>  {
 
 
 
-
-    <S extends ImmutableTerm> Substitution<S> castTo(Class<S> type);
-
     Substitution<T> restrictDomainTo(Set<Variable> set);
 
     Substitution<T> removeFromDomain(Set<Variable> set);
@@ -164,39 +161,35 @@ public interface Substitution<T extends ImmutableTerm>  {
 
     ImmutableMap<T, Collection<Variable>> inverseMap();
 
-    Builder<T> builder();
+    Builder<T, ? extends Builder<T, ?>> builder();
 
-    interface Builder<T extends ImmutableTerm> {
+    interface Builder<T extends ImmutableTerm, B extends Builder<T, ? extends B>> {
         Substitution<T> build();
 
-        <S extends ImmutableTerm> Substitution<S> build(Class<S> type);
+        B restrictDomainTo(Set<Variable> set);
 
-        Builder<T> restrictDomainTo(Set<Variable> set);
+        B removeFromDomain(Set<Variable> set);
 
-        Builder<T> removeFromDomain(Set<Variable> set);
+        B restrict(BiPredicate<Variable, T> predicate);
 
-        Builder<T> restrict(BiPredicate<Variable, T> predicate);
+        B restrictRange(Predicate<T> predicate);
 
-        Builder<T> restrictRange(Predicate<T> predicate);
+        <S extends ImmutableTerm> Builder<S, ?> restrictRangeTo(Class<? extends S> type);
 
-        <S extends ImmutableTerm> Builder<S> restrictRangeTo(Class<? extends S> type);
+        <U, S extends ImmutableTerm> Builder<S, ?> transform(Function<Variable, U> lookup, BiFunction<T, U, S> function);
 
-        <U, S extends ImmutableTerm> Builder<S> transform(Function<Variable, U> lookup, BiFunction<T, U, S> function);
+        <S extends ImmutableTerm> Builder<S, ?> transform(Function<T, S> function);
 
-        <S extends ImmutableTerm> Builder<S> transform(Function<T, S> function);
+        <U> Builder<T, ?> transformOrRetain(Function<Variable, U> lookup, BiFunction<T, U, T> function);
 
-        <U> Builder<T> transformOrRetain(Function<Variable, U> lookup, BiFunction<T, U, T> function);
+        <U, S extends ImmutableTerm> Builder<S, ?> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
 
-        <U, S extends ImmutableTerm> Builder<S> transformOrRemove(Function<Variable, U> lookup, Function<U, S> function);
-
-        <U> Builder<T> flatTransform(Function<Variable, U> lookup, Function<U, Substitution<T>> function);
-
-        Stream<ImmutableExpression> toStrictEqualities();
+        <U> Builder<T, ?> flatTransform(Function<Variable, U> lookup, Function<U, Substitution<T>> function);
 
         <S> Stream<S> toStream(BiFunction<Variable, T, S> transformer);
 
         <S> ImmutableMap<Variable, S> toMap(BiFunction<Variable, T, S> transformer);
 
-        <S> ImmutableMap<Variable, S> toMapWithoutOptional(BiFunction<Variable, T, Optional<S>> transformer);
+        <S> ImmutableMap<Variable, S> toMapIgnoreOptional(BiFunction<Variable, T, Optional<S>> transformer);
     }
 }

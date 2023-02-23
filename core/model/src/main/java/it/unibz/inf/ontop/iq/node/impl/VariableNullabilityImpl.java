@@ -285,7 +285,7 @@ public class VariableNullabilityImpl implements VariableNullability {
 
         // TODO: find a better name
         ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.builder()
-                .toMapWithoutOptional((v, t) -> evaluateTermNullability(t, childNullability, v));
+                .toMapIgnoreOptional((v, t) -> evaluateTermNullability(t, childNullability, v));
 
         ImmutableSet<Variable> newScope = Sets.union(childNullability.scope, nonNestedSubstitution.getDomain()).immutableCopy();
 

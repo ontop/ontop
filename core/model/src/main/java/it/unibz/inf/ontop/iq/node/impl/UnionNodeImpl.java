@@ -703,7 +703,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV))
                 // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
                 // this construction node
-                .build(VariableOrGroundTerm.class);
+                .transform(t -> (VariableOrGroundTerm)t)
+                .build();
+
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);

@@ -103,8 +103,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                Stream.concat(blockedGroundTermSubstitution.builder().toStrictEqualities(),
-                                blockedVariableSubstitution.builder().toStrictEqualities())
+                Stream.concat(blockedGroundTermSubstitution.builder().toStream(termFactory::getStrictEquality),
+                                blockedVariableSubstitution.builder().toStream(termFactory::getStrictEquality))
                         .collect(ImmutableCollectors.toList()));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
@@ -160,7 +160,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                                                         Substitution<ImmutableTerm> theta, IQTree newChild) {
         return Optional.of(iqFactory.createAggregationNode(
                 Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
-                theta.castTo(ImmutableFunctionalTerm.class)));
+                theta.transform(t -> (ImmutableFunctionalTerm)t)));
     }
 
     @Override

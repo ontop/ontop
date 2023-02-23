@@ -119,7 +119,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Equalities that must remain
                         normalizedUnifier.builder()
                                 .restrictDomainTo(variablesToRemainInEqualities)
-                                .toStrictEqualities()
+                                .toStream(termFactory::getStrictEquality)
                                 .sorted(Comparator.comparing(eq -> (Variable) eq.getTerm(0)))));
 
         Optional<Substitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression

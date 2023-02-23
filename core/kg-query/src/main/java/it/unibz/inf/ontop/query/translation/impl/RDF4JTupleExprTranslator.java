@@ -168,7 +168,7 @@ public class RDF4JTupleExprTranslator {
                                 .toStream((v, t) -> termFactory.getDisjunction(
                                         getEqOrNullable(v, t, leftTranslation.nullableVariables, rightTranslation.nullableVariables))),
                         Stream.of(termFactory.getDisjunction(sharedVarsRenaming.builder()
-                                .toStrictEqualities().collect(ImmutableCollectors.toList()))))
+                                .toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()))))
                 .collect(ImmutableCollectors.toList()));
 
         ImmutableExpression filter = termFactory.getConjunction(sharedVarsRenaming.getRangeSet().stream()
@@ -231,7 +231,7 @@ public class RDF4JTupleExprTranslator {
                 group.getGroupBindingNames().stream()
                         .map(termFactory::getVariable)
                         .collect(ImmutableCollectors.toSet()),
-                mergedVarDefs.get(0).castTo(ImmutableFunctionalTerm.class)); // only one substitution guaranteed by the if
+                mergedVarDefs.get(0).transform(t -> (ImmutableFunctionalTerm)t)); // only one substitution guaranteed by the if
 
         UnaryIQTree aggregationTree = iqFactory.createUnaryIQTree(an, child.iqTree);
 

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.substitution;
 
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -23,4 +24,12 @@ public interface InjectiveSubstitution<T extends ImmutableTerm> extends Substitu
 
     @Override
     <S extends ImmutableTerm> InjectiveSubstitution<S> transform(Function<T, S> function);
+
+    @Override
+    Builder<T, ? extends Builder<T, ?>> builder();
+
+    interface Builder<T extends ImmutableTerm, B extends Substitution.Builder<T, ? extends B>> extends Substitution.Builder<T, B> {
+        @Override
+        InjectiveSubstitution<T> build();
+    }
 }

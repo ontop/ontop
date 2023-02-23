@@ -172,7 +172,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Stream<ImmutableExpression> blockedExpressions = gamma.builder()
                 .restrictRangeTo(ImmutableFunctionalTerm.class)
-                .toStrictEqualities();
+                .toStream(termFactory::getStrictEquality);
 
         Optional<ImmutableExpression> f = Optional.of(
                         Stream.concat(thetaFRelatedExpressions, blockedExpressions).collect(ImmutableCollectors.toList()))

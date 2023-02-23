@@ -93,7 +93,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             boolean hasGroupBy = !rootNode.getGroupingVariables().isEmpty();
 
             ImmutableMap<Variable, AggregationSimplification> simplificationMap = initialSubstitution.builder()
-                            .toMapWithoutOptional((v, t) -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
+                            .toMapIgnoreOptional((v, t) -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
             Substitution<ImmutableFunctionalTerm> newAggregationSubstitution = initialSubstitution.builder()
                             .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubstitution())

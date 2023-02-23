@@ -474,7 +474,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     ljCondition.map(selectedSubstitution::apply),
                     selectedSubstitution.builder()
                             .restrictDomainTo(leftVariables)
-                            .toStrictEqualities());
+                            .toStream(termFactory::getStrictEquality));
 
             // TODO: only create a right provenance when really needed
             Optional<RightProvenance> rightProvenance = provenanceVariable
