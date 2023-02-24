@@ -103,4 +103,9 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     public Optional<String> getJdbcPassword() {
         return sqlCredentialSettings.getJdbcPassword();
     }
+
+    @Override
+    public Properties getAdditionalJDBCProperties() {
+        return sqlCredentialSettings.getAdditionalJDBCProperties();
+    }
 }
