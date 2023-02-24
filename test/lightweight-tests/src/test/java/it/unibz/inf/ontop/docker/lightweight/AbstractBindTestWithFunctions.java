@@ -1283,7 +1283,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17742\"^^xsd:long",
+        executeAndCompareValues(query, ImmutableSet.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17742\"^^xsd:long",
                 "\"1351\"^^xsd:long"));
     }
 
@@ -1299,7 +1299,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:daysBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17743\"^^xsd:long",
+        executeAndCompareValues(query, ImmutableSet.of("\"17270\"^^xsd:long", "\"16360\"^^xsd:long", "\"17743\"^^xsd:long",
                 "\"1352\"^^xsd:long"));
     }
 
