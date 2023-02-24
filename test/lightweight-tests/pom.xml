@@ -297,9 +297,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.syncron.amazonaws</groupId>
+            <artifactId>simba-athena-jdbc-driver</artifactId>
+            <version>2.0.35.1001</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-jdbc</artifactId>
             <version>0.279</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>0.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -505,5 +517,42 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.amazon.redshift</groupId>
+            <artifactId>redshift-jdbc42</artifactId>
+            <version>2.1.0.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.12.251</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-redshift</artifactId>
+            <version>1.12.251</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-redshiftserverless</artifactId>
+            <version>1.12.251</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sts</artifactId>
+            <version>1.12.251</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>ontop-3rd-party-maven-repo</id>
+            <url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</url>
+        </repository>
+    </repositories>
 </project>

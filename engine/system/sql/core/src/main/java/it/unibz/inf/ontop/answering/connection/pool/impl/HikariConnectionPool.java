@@ -20,6 +20,7 @@ public class HikariConnectionPool implements JDBCConnectionPool {
     @Inject
     private HikariConnectionPool(OntopSystemSQLSettings settings) {
         HikariConfig config = new HikariConfig();
+        config.setDataSourceProperties(settings.getAdditionalJDBCProperties());
         config.setJdbcUrl(settings.getJdbcUrl());
         settings.getJdbcUser()
                 .ifPresent(config::setUsername);
