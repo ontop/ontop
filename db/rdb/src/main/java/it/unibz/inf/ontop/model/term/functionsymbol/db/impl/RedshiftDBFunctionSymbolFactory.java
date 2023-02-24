@@ -28,20 +28,9 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        /*  TODO-SCAFFOLD: Remove function symbols that are not supported, if any:
-         *-------------------------------------------------------------------
-         *      table.remove("UNSUPPORTED_FUNCTION", arity);
-         */
         table.remove(REGEXP_LIKE_STR, 2);
         table.remove(REGEXP_LIKE_STR, 3);
 
-        /*  TODO-SCAFFOLD: Change signature of basic functions, if necessary:
-         *-------------------------------------------------------------------
-         *      DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
-         *              CURRENT_TIMESTAMP_STR,
-         *              dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
-         *      table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
-         */
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
@@ -52,7 +41,6 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
 
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(POSITION(%s IN %s) > 0)",
@@ -60,7 +48,6 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
                 termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
@@ -69,7 +56,6 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return String.format("CASE POSITION(%s IN %s) WHEN 0 THEN '' ELSE SUBSTRING(%s,1,POSITION(%s IN %s)-1) END", before, str, str, before, str);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
@@ -77,37 +63,31 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return String.format("CASE POSITION(%s IN %s) WHEN 0 THEN '' ELSE SUBSTRING(%s, POSITION(%s IN %s) + LENGTH(%s)) END", after, str, str, after, str, after);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("SHA1(%s)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("SHA2(%s, 256)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("SHA2(%s, 384)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("SHA2(%s, 512)", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
@@ -117,32 +97,28 @@ public class RedshiftDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
 
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return createDBConcatOperator(arity);
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType,
                 Serializers.getOperatorSerializer(CONCAT_OP_STR));
     }
 
-    // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return createNullRejectingDBConcat(arity);
+        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
-    // TODO-SCAFFOLD: Implement DateTimeNorm serialization in ISO 8601 Format 'YYYY-MM-DDTHH:MM:SS+HH:MM'
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSOF')", termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default name, if necessary
+    //Care: Redshift does not support the UUID function
     @Override
     protected String getUUIDNameInDialect() {
         return "UUID";
