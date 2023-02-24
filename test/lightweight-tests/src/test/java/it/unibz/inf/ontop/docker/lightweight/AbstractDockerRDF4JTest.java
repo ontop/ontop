@@ -46,34 +46,9 @@ public class AbstractDockerRDF4JTest {
 
         String propertyFilePath = AbstractDockerRDF4JTest.class.getResource(propertyFile).getPath();
 
-        // The properties required
-        String jdbcUrl = null;
-        String username = null;
-        String password = null;
-        String jdbcDriver = null;
-
-        try (InputStream input = Files.newInputStream(Paths.get(propertyFilePath))) {
-            Properties prop = new Properties();
-
-            // load a properties file
-            prop.load(input);
-
-            // get the property values
-            jdbcUrl = prop.getProperty("jdbc.url");
-            username = prop.getProperty("jdbc.user");
-            password = prop.getProperty("jdbc.password");
-            jdbcDriver = prop.getProperty("jdbc.driver");
-
-        } catch (IOException e) {
-            System.out.println("- ERROR loading '" + propertyFile + "'");
-        }
-
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractDockerRDF4JTest.class.getResource(obdaRelativePath).getPath())
-                .jdbcUrl(jdbcUrl)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .jdbcDriver(jdbcDriver)
+                .propertyFile(propertyFilePath)
                 .enableTestMode();
 
         if (ontologyRelativePath != null)
