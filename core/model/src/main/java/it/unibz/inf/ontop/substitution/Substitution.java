@@ -129,6 +129,14 @@ public interface Substitution<T extends ImmutableTerm>  {
      */
     InjectiveSubstitution<T> injective();
 
+
+    /**
+     * Returns the operations object that contains methods for dealing with
+     * substitutions of the ImmutableTerm range.
+     * 
+     * @return operations object
+     */
+
     SubstitutionOperations<ImmutableTerm> onImmutableTerms();
 
 

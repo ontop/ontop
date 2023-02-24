@@ -15,10 +15,10 @@ import java.util.stream.Stream;
 
 public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends SubstitutionImpl<T> implements InjectiveSubstitution<T> {
 
-    InjectiveSubstitutionImpl(ImmutableMap<Variable, T> map, TermFactory termFactory) {
-        super(map, termFactory);
+    InjectiveSubstitutionImpl(ImmutableMap<Variable, T> map, TermFactory termFactory, boolean checkEntries) {
+        super(map, termFactory, checkEntries);
 
-        if (!isInjective(this.map))
+        if (checkEntries && !isInjective(this.map))
             throw new IllegalArgumentException("Non-injective map given: " + map);
     }
 
@@ -28,28 +28,28 @@ public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends Substitu
     }
 
     @Override
-    protected  <S extends ImmutableTerm> InjectiveSubstitution<S> createSubstitution(ImmutableMap<Variable, S> newMap) {
-        return new InjectiveSubstitutionImpl<>(newMap, termFactory);
+    protected  <T extends ImmutableTerm, S extends ImmutableTerm> InjectiveSubstitution<S> createSubstitution(Stream<Map.Entry<Variable, T>> stream, Function<Map.Entry<Variable, T>, S> mapper, boolean checkEntries) {
+        return new InjectiveSubstitutionImpl<>(stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, mapper)), termFactory, checkEntries);
     }
 
     @Override
     public InjectiveSubstitution<T> restrictDomainTo(Set<Variable> set) {
-        return (InjectiveSubstitution<T>)super.restrictDomainTo(set);
+        return createSubstitution(stream().filter(e -> set.contains(e.getKey())), Map.Entry::getValue, false);
     }
 
     @Override
     public InjectiveSubstitution<T> removeFromDomain(Set<Variable> set) {
-        return (InjectiveSubstitution<T>)super.removeFromDomain(set);
+        return createSubstitution(stream().filter(e -> !set.contains(e.getKey())), Map.Entry::getValue, false);
     }
 
     @Override
     public <S extends ImmutableTerm> InjectiveSubstitution<S> restrictRangeTo(Class<? extends S> type) {
-        return (InjectiveSubstitution<S>)super.<S>restrictRangeTo(type);
+        return createSubstitution(stream().filter(e -> type.isInstance(e.getValue())), e -> type.cast(e.getValue()), false);
     }
 
     @Override
     public <S extends ImmutableTerm> InjectiveSubstitution<S> transform(Function<T, S> function) {
-        return (InjectiveSubstitution<S>)super.transform(function);
+        return createSubstitution(stream(), e -> function.apply(e.getValue()), true);
     }
 
 
@@ -61,24 +61,24 @@ public class InjectiveSubstitutionImpl<T extends ImmutableTerm> extends Substitu
 
     @Override
     public InjectiveSubstitution.Builder<T, ? extends InjectiveSubstitution.Builder<T, ?>> builder() {
-        return new BuilderImpl<>(map.entrySet().stream());
+        return new BuilderImpl<>(map.entrySet().stream(), false);
     }
 
     protected class BuilderImpl<BT extends ImmutableTerm, B extends InjectiveSubstitution.Builder<BT, ? extends B>>
             extends SubstitutionImpl<T>.AbstractBuilderImpl<BT,  BuilderImpl<BT, B>>
             implements InjectiveSubstitution.Builder<BT, BuilderImpl<BT, B>> {
 
-        BuilderImpl(Stream<Map.Entry<Variable, BT>> stream) {
-            super(stream);
+        BuilderImpl(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries) {
+            super(stream, checkEntries);
         }
 
         @Override
-        protected BuilderImpl<BT, B> createBuilder(Stream<Map.Entry<Variable, BT>> stream) {
-            return new BuilderImpl<>(stream);
+        protected BuilderImpl<BT, B> createBuilder(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries) {
+            return new BuilderImpl<>(stream, checkEntries);
         }
 
         @Override
-        public InjectiveSubstitution<BT> build() { return createSubstitution(stream.collect(ImmutableCollectors.toMap())); }
+        public InjectiveSubstitution<BT> build() { return createSubstitution(stream, Map.Entry::getValue, checkEntries); }
     }
 
 }

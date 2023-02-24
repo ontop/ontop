@@ -449,7 +449,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map) {
-		return new SubstitutionImpl<>(map, this);
+		return new SubstitutionImpl<>(map, this, true);
 	}
 
 	@Override

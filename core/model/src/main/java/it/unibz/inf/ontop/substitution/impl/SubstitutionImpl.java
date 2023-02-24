@@ -28,19 +28,19 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     protected final SubstitutionOperations<ImmutableTerm> defaultOperations;
     protected final ImmutableMap<Variable, T> map;
 
-    public SubstitutionImpl(ImmutableMap<Variable, ? extends T> map,  TermFactory termFactory) {
+    public SubstitutionImpl(ImmutableMap<Variable, ? extends T> map,  TermFactory termFactory, boolean checkEntries) {
         this.termFactory = termFactory;
         this.defaultOperations = new ImmutableTermsSubstitutionOperations(termFactory);
         //noinspection unchecked
         this.map = (ImmutableMap<Variable, T>) map;
 
-        if (this.map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
+        if (checkEntries && this.map.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
             throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
                     "(for efficiency reasons)\n. Substitution: " + this.map);
     }
 
-    protected  <S extends ImmutableTerm> Substitution<S> createSubstitution(ImmutableMap<Variable, S> newMap) {
-        return termFactory.getSubstitution(newMap);
+    protected  <T extends ImmutableTerm, S extends ImmutableTerm> Substitution<S> createSubstitution(Stream<Map.Entry<Variable, T>> stream, Function<Map.Entry<Variable, T>, S> mapper, boolean checkEntries) {
+        return new SubstitutionImpl(stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, mapper)), termFactory, checkEntries);
     }
 
     @Override
@@ -104,119 +104,116 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
 
     @Override
     public ImmutableMap<T, Collection<Variable>> inverseMap() {
-       return map.entrySet().stream()
+       return stream()
                .collect(ImmutableCollectors.toMultimap(Map.Entry::getValue, Map.Entry::getKey))
                .asMap();
     }
 
     @Override
-    public Substitution<T> restrictDomainTo(Set<Variable> set) {
-        return createSubstitution(map.entrySet().stream()
-                .filter(e -> set.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    @Override
-    public Substitution<T> removeFromDomain(Set<Variable> set) {
-        return createSubstitution(map.entrySet().stream()
-                .filter(e -> !set.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    @Override
-    public <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type) {
-        return createSubstitution(map.entrySet().stream()
-                .filter(e -> type.isInstance(e.getValue()))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> type.cast(e.getValue()))));
-    }
-
-    @Override
     public ImmutableSet<Variable> getPreImage(Predicate<T> predicate) {
-        return map.entrySet().stream()
+        return stream()
                 .filter(e -> predicate.test(e.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
+    public Substitution<T> restrictDomainTo(Set<Variable> set) {
+        return createSubstitution(stream().filter(e -> set.contains(e.getKey())), Map.Entry::getValue, false);
+    }
+
+    @Override
+    public Substitution<T> removeFromDomain(Set<Variable> set) {
+        return createSubstitution(stream().filter(e -> !set.contains(e.getKey())), Map.Entry::getValue, false);
+    }
+
+    @Override
+    public <S extends ImmutableTerm> Substitution<S> restrictRangeTo(Class<? extends S> type) {
+        return createSubstitution(stream().filter(e -> type.isInstance(e.getValue())), e -> type.cast(e.getValue()), false);
+    }
+
+    @Override
     public <S extends ImmutableTerm> Substitution<S> transform(Function<T, S> function) {
-        return createSubstitution(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> function.apply(e.getValue()))));
+        return createSubstitution(stream(), e -> function.apply(e.getValue()), true);
     }
 
     @Override
     public InjectiveSubstitution<T> injective() {
-        return new InjectiveSubstitutionImpl<>(map, termFactory);
+        return new InjectiveSubstitutionImpl<>(map, termFactory, true);
     }
 
     @Override
     public Builder<T, ? extends Builder<T, ?>> builder() {
-        return new BuilderImpl<>(map.entrySet().stream());
+        return new BuilderImpl<>(stream(), false);
     }
 
 
     protected class BuilderImpl<BT extends ImmutableTerm> extends AbstractBuilderImpl<BT, BuilderImpl<BT>> {
-        BuilderImpl(Stream<Map.Entry<Variable, BT>> stream) {
-            super(stream);
+        BuilderImpl(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries) {
+            super(stream, checkEntries);
         }
         @Override
-        protected BuilderImpl<BT> createBuilder(Stream<Map.Entry<Variable, BT>> stream) {
-            return new BuilderImpl<>(stream);
+        protected BuilderImpl<BT> createBuilder(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries) {
+            return new BuilderImpl<>(stream, checkEntries);
         }
         @Override
         public Substitution<BT> build() {
-            return createSubstitution(stream.collect(ImmutableCollectors.toMap()));
+            return createSubstitution(stream, Map.Entry::getValue, checkEntries);
         }
     }
 
     protected abstract class AbstractBuilderImpl<BT extends ImmutableTerm, B extends Builder<BT, ? extends B>> implements Builder<BT, B> {
         protected final Stream<Map.Entry<Variable, BT>> stream;
+        protected final boolean checkEntries;
 
-        AbstractBuilderImpl(Stream<Map.Entry<Variable, BT>> stream) {
+        AbstractBuilderImpl(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries) {
             this.stream = stream;
+            this.checkEntries = checkEntries;
         }
 
-        private  <S extends ImmutableTerm> BuilderImpl<S> createBasicBuilder(Stream<Map.Entry<Variable, S>> stream) {
-            return new BuilderImpl<>(stream);
+        private  <S extends ImmutableTerm> BuilderImpl<S> createBasicBuilder(Stream<Map.Entry<Variable, S>> stream, boolean checkEntries) {
+            return new BuilderImpl<>(stream, checkEntries);
         }
 
-        protected abstract B createBuilder(Stream<Map.Entry<Variable, BT>> stream);
+        protected abstract B createBuilder(Stream<Map.Entry<Variable, BT>> stream, boolean checkEntries);
 
         @Override
         public B restrictDomainTo(Set<Variable> set) {
-            return createBuilder(stream.filter(e -> set.contains(e.getKey())));
+            return createBuilder(stream.filter(e -> set.contains(e.getKey())), checkEntries);
         }
 
         @Override
         public B removeFromDomain(Set<Variable> set) {
-            return createBuilder(stream.filter(e -> !set.contains(e.getKey())));
+            return createBuilder(stream.filter(e -> !set.contains(e.getKey())), checkEntries);
         }
 
         @Override
         public B restrict(BiPredicate<Variable, BT> predicate) {
-            return createBuilder(stream.filter(e -> predicate.test(e.getKey(), e.getValue())));
+            return createBuilder(stream.filter(e -> predicate.test(e.getKey(), e.getValue())), checkEntries);
         }
 
         @Override
         public B restrictRange(Predicate<BT> predicate) {
-            return createBuilder(stream.filter(e -> predicate.test(e.getValue())));
+            return createBuilder(stream.filter(e -> predicate.test(e.getValue())), checkEntries);
         }
 
         @Override
         public <S extends ImmutableTerm> Builder<S, ?> restrictRangeTo(Class<? extends S> type) {
             return createBasicBuilder(stream
                     .filter(e -> type.isInstance(e.getValue()))
-                    .map(e -> Maps.immutableEntry(e.getKey(), type.cast(e.getValue()))));
+                    .map(e -> Maps.immutableEntry(e.getKey(), type.cast(e.getValue()))), checkEntries);
         }
 
         @Override
         public <U, S extends ImmutableTerm> Builder<S, ?> transform(Function<Variable, U> lookup, BiFunction<BT, U, S> function) {
-            return createBasicBuilder(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue(), lookup.apply(e.getKey())))));
+            return createBasicBuilder(stream.map(e -> Maps.immutableEntry(
+                    e.getKey(),
+                    function.apply(e.getValue(), lookup.apply(e.getKey())))), true);
         }
 
         @Override
         public <S extends ImmutableTerm> Builder<S, ?> transform(Function<BT, S> function) {
-            return createBasicBuilder(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue()))));
+            return createBasicBuilder(stream.map(e -> Maps.immutableEntry(e.getKey(), function.apply(e.getValue()))), true);
         }
 
         @Override
@@ -225,7 +222,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
                     e.getKey(),
                     Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(u -> function.apply(e.getValue(), u))
-                            .orElse(e.getValue()))));
+                            .orElse(e.getValue()))), true);
         }
 
         @Override
@@ -233,7 +230,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
             return createBasicBuilder(stream
                     .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
-                            .map(r -> Maps.immutableEntry(e.getKey(), r)).stream()));
+                            .map(r -> Maps.immutableEntry(e.getKey(), r)).stream()), true);
         }
 
         @Override
@@ -242,7 +239,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
                     .flatMap(e -> Optional.ofNullable(lookup.apply(e.getKey()))
                             .map(function)
                             .map(Substitution::stream)
-                            .orElseGet(() -> Stream.of(e))));
+                            .orElseGet(() -> Stream.of(e))), true);
         }
 
         @Override
