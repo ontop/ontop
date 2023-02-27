@@ -1,22 +1,23 @@
 {
   "relations": [
     {
-      "name": ["\"lenses\"", "\"first\""],
-      "baseRelation": ["\"table\""],
+      "name": ["\"lenses\"", "\"sA\""],
+      "baseRelation": ["\"specializedA\""],
       "columns": {
         "added": [],
-        "hidden": ["\"z\""]
+        "hidden": ["\"a\""]
       },
       "type": "BasicLens"
     },
     {
-      "name": ["\"lenses\"", "\"second\""],
-      "baseRelation": ["\"lenses\"", "\"first\""],
+      "name": ["\"lenses\"", "\"sX\""],
+      "baseRelation": ["\"lenses\"", "\"sA\""],
       "columns": {
         "added": [],
         "hidden": []
       },
       "type": "BasicLens"
     }
+
   ]
 }

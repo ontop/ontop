@@ -5,7 +5,7 @@
         {
           "name": "CONSTRAINT_A",
           "determinants": [
-            "\"x\""
+            "\"id\""
           ],
           "isPrimaryKey": true
         }
@@ -14,23 +14,23 @@
       "foreignKeys": [],
       "columns": [
         {
-          "name": "\"x\"",
+          "name": "\"id\"",
           "datatype": "INTEGER",
           "isNullable": false
         },
         {
-          "name": "\"y\"",
+          "name": "\"value\"",
           "datatype": "INTEGER",
           "isNullable": false
         },
         {
-          "name": "\"z\"",
+          "name": "\"a\"",
           "datatype": "INTEGER",
           "isNullable": false
         }
       ],
       "name": [
-        "\"table\""
+        "\"specializedA\""
       ]
     }
   ],
