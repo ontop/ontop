@@ -3,7 +3,7 @@
     {
       "uniqueConstraints": [
         {
-          "name": "CONSTRAINT",
+          "name": "CONSTRAINT_A",
           "determinants": [
             "\"x\""
           ],

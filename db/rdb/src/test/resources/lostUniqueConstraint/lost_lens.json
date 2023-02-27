@@ -5,33 +5,18 @@
       "baseRelation": ["\"table\""],
       "columns": {
         "added": [],
-        "hidden": ["\"y\""]
+        "hidden": ["\"z\""]
       },
       "type": "BasicLens"
     },
     {
       "name": ["\"lenses\"", "\"second\""],
-      "join": {
-        "relations": [
-          [
-            "\"lenses\"",
-            "\"first\""
-          ],
-          [
-            "\"lenses\"",
-            "\"first\""
-          ]
-        ],
-        "columnPrefixes": [
-          "",
-          "c_"
-        ]
-      },
+      "baseRelation": ["\"lenses\"", "\"first\""],
       "columns": {
         "added": [],
         "hidden": []
       },
-      "type": "JoinLens"
+      "type": "BasicLens"
     }
   ]
 }
