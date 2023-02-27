@@ -1,0 +1,37 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"first\""],
+      "baseRelation": ["\"table\""],
+      "columns": {
+        "added": [],
+        "hidden": ["\"y\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"second\""],
+      "join": {
+        "relations": [
+          [
+            "\"lenses\"",
+            "\"first\""
+          ],
+          [
+            "\"lenses\"",
+            "\"first\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "JoinLens"
+    }
+  ]
+}

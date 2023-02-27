@@ -1,0 +1,45 @@
+{
+  "relations": [
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT",
+          "determinants": [
+            "\"x\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"x\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"y\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"z\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"table\""
+      ]
+    }
+  ],
+  "metadata": {
+    "dbmsProductName": "H2",
+    "dbmsVersion": "1.4.199 (2019-03-13)",
+    "driverName": "H2 JDBC Driver",
+    "driverVersion": "1.4.199 (2019-03-13)",
+    "quotationString": "\"",
+    "extractionTime": "2020-11-12T17:24:30"
+  }
+}
