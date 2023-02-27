@@ -1,28 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	
+
     <modelVersion>4.0.0</modelVersion>
-	
+
     <parent>
         <artifactId>ontop-protege</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>5.0.2-SNAPSHOT
-</version>
+        <version>5.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-protege-dependencies</artifactId>
-	<description>Ontop OBDA plugin for protégé - shaded dependencies</description>
-    <url>https://ontop-vkg.org/</url>
-	
-    <properties>
-        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
-        <bundle.protege.phase>package</bundle.protege.phase>
-    </properties>
-    
-    <organization>
-        <name>KRDB Research Centre for Knowledge and Data, Free University of Bozen-Bolzano</name>
-        <url>http://www.inf.unibz.it/krdb/</url>
-    </organization>
+    <description>Ontop OBDA plugin for protégé - shaded dependencies</description>
 
     <dependencies>
         <dependency>
@@ -208,16 +196,17 @@
             </exclusions>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
+            <!-- Generate shaded Ontop artifact with relocations if enabled -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>shaded</shadedClassifierName>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <artifactSet>
                         <excludes>
                             <exclude>org.slf4j:slf4j-api</exclude>
@@ -229,7 +218,11 @@
                         <filter>
                             <artifact>*:*</artifact>
                             <excludes>
+                                <exclude>module-info.class</exclude>
                                 <exclude>META-INF/MANIFEST.MF</exclude>
+                                <exclude>META-INF/LICENSE.md</exclude>
+                                <exclude>META-INF/NOTICE.md</exclude>
+                                <exclude>META-INF/versions/9/module-info.class</exclude>
                             </excludes>
                         </filter>
                     </filters>
@@ -262,21 +255,22 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>${bundle.protege.phase}</phase>
+                        <phase>${plugin.phase-prefix}package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Attach shaded artifact to installable/deployable artifacts (redundant for Maven CLI, required by IntelliJ) -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>compile</id>
-                        <phase>package</phase>
+                        <id>attach-shaded-dependencies-for-intellij</id>
+                        <phase>${plugin.phase-prefix}package</phase>
                         <goals>
                             <goal>attach-artifact</goal>
                         </goals>
@@ -285,7 +279,7 @@
                                 <artifact>
                                     <file>${basedir}/target/${project.artifactId}-${project.version}-shaded.jar</file>
                                     <type>jar</type>
-                                    <classifier>optional</classifier>
+                                    <classifier>shaded</classifier> <!-- reusing same classifier as above, otherwise duplicate jars are deployed/installed -->
                                 </artifact>
                             </artifacts>
                         </configuration>

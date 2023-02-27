@@ -66,7 +66,7 @@ FROM --platform=${BUILDPLATFORM} maven:3-eclipse-temurin-11 AS ontop-builder
 WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -Pcli -Dassembly.cli.format=dir && \
+    mvn clean package -Passet-cli -Dmaven.test.skip -Dassembly.cli.format=dir && \
     mv build/distribution/target/ontop-cli-*/ ontop-docker && \
     cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop-docker && \
     cd ontop-docker && \
