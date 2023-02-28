@@ -35,7 +35,7 @@ RUN ${JAVA_HOME}/bin/jlink \
 # - may switch to Alpine Linux once supported: https://github.com/adoptium/containers/issues/158
 FROM ubuntu:jammy AS ontop-base-image
 ENV JAVA_HOME="/opt/java/openjdk"
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
+ENV PATH="${JAVA_HOME}/bin:/opt/ontop:${PATH}"
 COPY --from=jre-builder /jre ${JAVA_HOME}
 WORKDIR /opt/ontop
 RUN apt-get update && \
@@ -70,7 +70,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     mv build/distribution/target/ontop-cli-*/ ontop-docker && \
     cp client/docker/entrypoint.sh client/docker/healthcheck.sh ontop-docker && \
     cd ontop-docker && \
-    rm -rf ontop.bat ontop ontop-completion.sh jdbc logback.xml log/logback-debug.xml
+    rm -rf ontop.bat ontop-completion.sh jdbc logback.xml log/logback-debug.xml
 
 # ALTERNATIVE FINAL STAGE that uses pre-built binaries from ${ONTOP_CLI_BINDIR}
 # - stage used by build-image.sh and more convenient for developers, as it integrates with regular
