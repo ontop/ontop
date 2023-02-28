@@ -25,11 +25,45 @@
         <icu4j.version>58.2</icu4j.version>
         <javax-json.version>1.0.4</javax-json.version>
         <osgi.version>6.0.0</osgi.version>
-        <protege.version>5.5.0</protege.version>
         <thrift.version>[0.12.0,)</thrift.version>
         <treelayout.version>1.0.3</treelayout.version>
         <xerces.version>2.12.2</xerces.version>
         <xml-apis.version>1.4.01</xml-apis.version>
+
+        <!-- Protégé dependency version, type, and repository URL to be used when compiling -->
+        <protege.version>5.6.1</protege.version>
+        <protege.type>bundle</protege.type>
+        <protege.repo-id>ontop-3rd-party-maven-repo</protege.repo-id>
+        <protege.repo-url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</protege.repo-url>
+
+        <!-- Protégé bundles main properties for mvn -Passet-protege (ideally, the ones to change for a new Protégé release)
+             - protege.bnd.version = Protégé version used for bundles (may be more recent that one used for compiling)
+             - protege.bnd.source = 'repository' downloads from Maven repo, 'url' downloads from URL built with next properties -->
+        <protege.bnd.version>5.6.1</protege.bnd.version>
+        <protege.bnd.source>repository</protege.bnd.source>
+
+        <!-- Protégé bundles fine tuning properties for mvn -Passet-protege (override these to match different paths/urls in Protégé release)
+             - protege.bnd.dir = root directory to look for inside downloaded/resolved Protégé bundles
+             - protege.bnd.dir-plugins-<platform> = plugins directory (under root) where to put the Ontop Protégé plugin jar file
+             - protege.bnd.release = release ID on GitHub, e.g., protege-5.6.1, v5.5.0 (release page, left column)
+             - protege.bnd.asset-<platform> = asset filename (release page, under 'Assets')
+             - protege.bnd.base = base GitHub URL for resolving release assets (no need to change)
+             - protege.bnd.url-<platform> = resulting asset URL (override this for fine-grained tuning) -->
+        <protege.bnd.dir>Protege-${protege.version}</protege.bnd.dir>
+        <protege.bnd.dir-plugins-plat-ind>plugins</protege.bnd.dir-plugins-plat-ind>
+        <protege.bnd.dir-plugins-macos>Protégé.app/Contents/plugins</protege.bnd.dir-plugins-macos>
+        <protege.bnd.dir-plugins-win>plugins</protege.bnd.dir-plugins-win>
+        <protege.bnd.dir-plugins-linux>plugins</protege.bnd.dir-plugins-linux>
+        <protege.bnd.release>protege-${protege.bnd.version}</protege.bnd.release>
+        <protege.bnd.asset-plat-ind>Protege-${protege.bnd.version}-platform-independent.zip</protege.bnd.asset-plat-ind>
+        <protege.bnd.asset-macos>Protege-${protege.bnd.version}-os-x.zip</protege.bnd.asset-macos>
+        <protege.bnd.asset-win>Protege-${protege.bnd.version}-win.zip</protege.bnd.asset-win>
+        <protege.bnd.asset-linux>Protege-${protege.bnd.version}-linux.tar.gz</protege.bnd.asset-linux>
+        <protege.bnd.base>https://github.com/protegeproject/protege-distribution/releases/download/</protege.bnd.base>
+        <protege.bnd.url-plat-ind>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-plat-ind}</protege.bnd.url-plat-ind>
+        <protege.bnd.url-macos>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-macos}</protege.bnd.url-macos>
+        <protege.bnd.url-win>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-win}</protege.bnd.url-win>
+        <protege.bnd.url-linux>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-linux}</protege.bnd.url-linux>
     </properties>
 
     <dependencyManagement>
@@ -64,11 +98,13 @@
                 <groupId>edu.stanford.protege</groupId>
                 <artifactId>protege-editor-core</artifactId>
                 <version>${protege.version}</version>
+                <type>${protege.type}</type>
             </dependency>
             <dependency>
                 <groupId>edu.stanford.protege</groupId>
                 <artifactId>protege-editor-owl</artifactId>
                 <version>${protege.version}</version>
+                <type>${protege.type}</type>
             </dependency>
 
             <!-- Guava failureaccess -->
@@ -206,5 +242,19 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <!-- For Protégé artifacts not available yet on Maven Central -->
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>${protege.repo-id}</id>
+            <url>${protege.repo-url}</url>
+        </repository>
+    </repositories>
 
 </project>

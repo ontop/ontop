@@ -96,6 +96,7 @@
         <!-- Plugin versions -->
         <antlr4-maven-plugin.version>4.12.0</antlr4-maven-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <download-maven-plugin.version>1.6.8</download-maven-plugin.version>
         <formatter-maven-plugin.version>2.22.0</formatter-maven-plugin.version>
         <git-commit-id-maven-plugin-version>5.0.0</git-commit-id-maven-plugin-version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
@@ -1121,6 +1122,14 @@
         <finalName>${finalName}</finalName>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.googlecode.maven-download-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>${download-maven-plugin.version}</version>
+                    <configuration>
+                        <followRedirects>true</followRedirects>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>

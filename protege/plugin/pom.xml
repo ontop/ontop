@@ -123,6 +123,7 @@
         <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-core</artifactId>
+            <type>bundle</type>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -134,6 +135,7 @@
         <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-owl</artifactId>
+            <type>bundle</type>
             <scope>provided</scope>
         </dependency>
 
