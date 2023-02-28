@@ -283,7 +283,7 @@
                                 <Bundle-Description>${project.description}</Bundle-Description>
                                 <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                                 <Implementation-Version>${project.version}</Implementation-Version>
-                                <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
+                                <Update-Url>https://raw.githubusercontent.com/ontop/ontop/HEAD/protege/plugin/update.properties</Update-Url>
 
                                 <Export-Package>
                                     <!-- No need to export any package -->

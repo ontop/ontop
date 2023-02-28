@@ -131,7 +131,7 @@ if [ "${TARGET}" = "ontop-image-from-binaries" ] || [ "${JDEPS}" ]; then
     log "Assembling content of image ${NAMETAGS}"
     rm -rf ${BINDIR}
     mv build/distribution/target/ontop-cli-*/ ${BINDIR}
-    rm -rf ${BINDIR}/{ontop.bat,ontop,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
+    rm -rf ${BINDIR}/{ontop.bat,ontop-completion.sh,jdbc,logback.xml,log/logback-debug.xml}
     cp client/docker/{entrypoint.sh,healthcheck.sh} ${BINDIR}
 fi
 
