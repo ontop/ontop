@@ -31,6 +31,10 @@
     "type": "String",
     "description": "Password for connecting to the database."
   },
+  "jdbc.property.<KEY>": {
+    "type": "Any",
+    "description": "Since 5.0.2. Passes the property `<KEY>` and its value to the JDBC driver. Useful for passing secrets to the JDBC driver with other keys than `user` and `password`."
+  },
   "jdbc.name": {
     "type": "String",
     "description": "DEPRECATED. This value is ignored."

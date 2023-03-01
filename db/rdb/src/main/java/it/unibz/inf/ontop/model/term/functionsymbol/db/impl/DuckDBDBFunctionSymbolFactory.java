@@ -149,7 +149,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return createNullRejectingDBConcat(arity);
+        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
