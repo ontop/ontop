@@ -130,7 +130,6 @@ public class JsonUnionLens extends JsonLens {
 
     protected ImmutableMap<String, Variable> extractProjectedVariables(
             DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
-        QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
         VariableGenerator variableGenerator = dbParameters.getCoreSingletons().getCoreUtilsFactory().createVariableGenerator(ImmutableList.of());
 
         if (unionRelations.size() < 2)
