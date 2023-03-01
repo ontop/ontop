@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -113,15 +114,9 @@ public class JsonUnionLens extends JsonLens {
                                            MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        if (uniqueConstraints != null)
-            insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
-        else
-            insertUniqueConstraints(relation, idFactory, List.of(), baseRelations, dbParameters.getCoreSingletons());
+        insertUniqueConstraints(relation, idFactory, uniqueConstraints == null ? List.of() : uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
 
-        if (otherFunctionalDependencies != null)
-            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
-        else
-            insertFunctionalDependencies(relation, idFactory, List.of());
+        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies == null ? List.of() : otherFunctionalDependencies.added);
 
         if (foreignKeys != null)
             insertForeignKeys(relation, metadataLookupForFK, idFactory, foreignKeys.added);
@@ -136,21 +131,20 @@ public class JsonUnionLens extends JsonLens {
     protected ImmutableMap<String, Variable> extractProjectedVariables(
             DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
         QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
-        var variableGenerator = dbParameters.getCoreSingletons().getCoreUtilsFactory().createVariableGenerator(ImmutableList.of());
+        VariableGenerator variableGenerator = dbParameters.getCoreSingletons().getCoreUtilsFactory().createVariableGenerator(ImmutableList.of());
 
         if (unionRelations.size() < 2)
             throw new MetadataExtractionException("At least two relations are expected");
 
-        var firstParent = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
-                unionRelations.get(0).toArray(new String[0])));
+        ImmutableList<NamedRelationDefinition> parents = getParentRelations(dbParameters, parentCacheMetadataLookup);
+        NamedRelationDefinition firstParent = parents.get(0);
 
-        var parents = getParentRelations(dbParameters, parentCacheMetadataLookup);
         if(parents.stream().skip(1).anyMatch(
                 parent -> !areAllAttributesEqual(firstParent, parent))
         )
             throw new MetadataExtractionException("The relations provided to the union do not have equal attributes");
 
-        var projectedVariables = firstParent.getAttributes().stream().collect(ImmutableCollectors.toMap(
+        ImmutableMap<String, Variable> projectedVariables = firstParent.getAttributes().stream().collect(ImmutableCollectors.toMap(
                 attribute -> attribute.getID().getName(),
                 attribute -> variableGenerator.generateNewVariable(attribute.getID().getName())
         ));
@@ -172,9 +166,12 @@ public class JsonUnionLens extends JsonLens {
     }
 
     private boolean areAttributesEqual(Attribute a, Attribute b) {
+        //Performs equality check on attributes based on their name and their data type.
+        //Currently, data types must be exactly equal. Could be extended by allowing related types.
         return a.getID().getName().equals(b.getID().getName()) && a.getTermType().equals(b.getTermType());
     }
 
+    //Translates the union relation names into their actual relation definitions
     private ImmutableList<NamedRelationDefinition> getParentRelations(
             DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup) throws MetadataExtractionException {
         QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
@@ -199,10 +196,11 @@ public class JsonUnionLens extends JsonLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
 
+        //Get list of all projected variables (including provenance column, if applicable)
         ImmutableMap<String, Variable> projectedVariables = this.extractProjectedVariables(dbParameters, parentCacheMetadataLookup);
         ImmutableSet<Variable> allProjectedVariables;
         if(includesProvenanceColumn()) {
-            var provenanceVariable = termFactory.getVariable(getProvenanceColumn(quotedIDFactory));
+            Variable provenanceVariable = termFactory.getVariable(getProvenanceColumn(quotedIDFactory));
             if(projectedVariables.values().stream().anyMatch(v -> v.getName().equals(provenanceVariable.getName())))
                 throw new MetadataExtractionException("The provenance column with the name " + provenanceVariable.getName()
                     + " cannot be added, because a column with this name already exists.");
@@ -260,15 +258,15 @@ public class JsonUnionLens extends JsonLens {
     }
 
     private IQTree addConstantColumn(Variable variable, String value, IQTree child, CoreSingletons coreSingletons) {
-        var substitutionFactory = coreSingletons.getSubstitutionFactory();
-        var iqFactory = coreSingletons.getIQFactory();
-        var substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
-        var termFactory = coreSingletons.getTermFactory();
+        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+        ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
+        TermFactory termFactory = coreSingletons.getTermFactory();
 
-        var provenanceValue = termFactory.getDBStringConstant(value);
+        DBConstant provenanceValue = termFactory.getDBStringConstant(value);
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = ImmutableMap.of(variable, provenanceValue);
         ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMap);
-        var allProjectedVariables = ImmutableSet.<Variable>builder()
+        ImmutableSet<Variable> allProjectedVariables = ImmutableSet.<Variable>builder()
                 .addAll(child.getKnownVariables())
                 .add(variable)
                 .build();
@@ -296,7 +294,7 @@ public class JsonUnionLens extends JsonLens {
                                            CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
-        var allAddUniqueConstraints = Stream.concat(
+        List<AddUniqueConstraints> allAddUniqueConstraints = Stream.concat(
                     addUniqueConstraints.stream(),
                     inferUniqueConstraints(relation, idFactory).stream()
                 ).collect(Collectors.toList());
@@ -312,8 +310,8 @@ public class JsonUnionLens extends JsonLens {
 
     private ImmutableList<AddUniqueConstraints> inferUniqueConstraints(Lens relation, QuotedIDFactory quotedIDFactory) {
 
-        var iqTree = relation.getIQ().normalizeForOptimization().getTree();
-        var constraints = iqTree.inferUniqueConstraints();
+        IQTree iqTree = relation.getIQ().normalizeForOptimization().getTree();
+        ImmutableSet<ImmutableSet<Variable>> constraints = iqTree.inferUniqueConstraints();
 
         DistinctVariableOnlyDataAtom projectedAtom = relation.getIQ().getProjectionAtom();
 
@@ -335,16 +333,6 @@ public class JsonUnionLens extends JsonLens {
                         false
                 ))
                 .collect(ImmutableCollectors.toList());
-    }
-
-    private boolean uniqueConstraintEqualOrMoreLenientThan(UniqueConstraint a, UniqueConstraint b) {
-        for(var attribute : a.getDeterminants()) {
-            if(!b.getDeterminants().stream().anyMatch(
-                    attr -> attr.getID().getName().equals(attribute.getID().getName())
-            ))
-                return false;
-        }
-        return true;
     }
 
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
@@ -417,6 +405,7 @@ public class JsonUnionLens extends JsonLens {
         return provenanceColumn != null && provenanceColumn.length() > 0;
     }
 
+    //Gets the name of the provenance column, either in sqlRendering or just the normal name string.
     private String getProvenanceColumn(QuotedIDFactory quotedIDFactory, boolean sqlRendering) {
         if(sqlRendering)
             return quotedIDFactory.createAttributeID(this.provenanceColumn).getSQLRendering();
