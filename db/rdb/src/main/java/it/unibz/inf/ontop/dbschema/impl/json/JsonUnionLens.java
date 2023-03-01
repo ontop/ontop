@@ -123,6 +123,9 @@ public class JsonUnionLens extends JsonLens {
         else
             insertFunctionalDependencies(relation, idFactory, List.of());
 
+        if (foreignKeys != null)
+            insertForeignKeys(relation, metadataLookupForFK, idFactory, foreignKeys.added);
+
     }
 
     @Override
@@ -161,9 +164,9 @@ public class JsonUnionLens extends JsonLens {
                 )
         ))
             return false;
-        return !(a.getAttributes().stream().anyMatch(
-                attributeA -> b.getAttributes().stream().allMatch(
-                        attributeB -> !areAttributesEqual(attributeA, attributeB)
+        return !(b.getAttributes().stream().anyMatch(
+                attributeB -> a.getAttributes().stream().allMatch(
+                        attributeA -> !areAttributesEqual(attributeA, attributeB)
                 )
         ));
     }
@@ -227,7 +230,7 @@ public class JsonUnionLens extends JsonLens {
                     child -> addConstantColumn(
                             termFactory.getVariable(getProvenanceColumn(quotedIDFactory)),
                             String.join(".", quotedIDFactory.createRelationID(unionRelations.get(children.indexOf(child)).toArray(new String[0]))
-                                    .getComponents().stream().map(c -> c.getName()).collect(Collectors.toList())),
+                                    .getComponents().reverse().stream().map(c -> c.getName()).collect(Collectors.toList())),
                             child,
                             coreSingletons
                     )
@@ -363,6 +366,51 @@ public class JsonUnionLens extends JsonLens {
             }
         }
 
+    }
+
+    private void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup,
+                                              QuotedIDFactory idFactory,
+                                              List<AddForeignKey> addForeignKeys)
+            throws MetadataExtractionException {
+
+        for (AddForeignKey fk : addForeignKeys) {
+            insertForeignKey(relation, lookup, fk);
+        }
+
+    }
+
+    protected void insertForeignKey(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
+
+        QuotedIDFactory idFactory = lookup.getQuotedIDFactory();
+
+        RelationID targetRelationId = JsonMetadata.deserializeRelationID(idFactory, addForeignKey.to.relation);
+        NamedRelationDefinition targetRelation;
+        try {
+            targetRelation = lookup.getRelation(targetRelationId);
+        }
+        catch (MetadataExtractionException e) {
+            LOGGER.info("Cannot find relation {} for FK {}", targetRelationId, addForeignKey.name);
+            return;
+        }
+
+
+        int columnCount = addForeignKey.to.columns.size();
+        if (addForeignKey.from.size() != columnCount)
+            throw new MetadataExtractionException("Not the same number of from and to columns in FK definition");
+
+        try {
+            ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
+            for (int i = 0; i < columnCount; i++) {
+                builder.add(
+                        idFactory.createAttributeID(addForeignKey.from.get(i)),
+                        idFactory.createAttributeID(addForeignKey.to.columns.get(i)));
+            }
+
+            builder.build();
+        }
+        catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
     private boolean includesProvenanceColumn() {
