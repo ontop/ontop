@@ -144,7 +144,7 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return createNullRejectingDBConcat(arity);
+        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
