@@ -362,27 +362,21 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .skip(1)
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
                 .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
-        if (ucsPartitionedByDisjointness.isEmpty())
-            return ImmutableSet.of();
-        // Not disjoint
-        if (ucsPartitionedByDisjointness.containsKey(false)) {
-            // By definition not parts of the non-disjoint UCs
-            var disjointVariables = firstChild.getVariables().stream()
-                    .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
-                    .filter(v -> !ucsPartitionedByDisjointness.get(true).stream().anyMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
-                    .collect(ImmutableCollectors.toSet());
-            if (disjointVariables.isEmpty())
-                return ImmutableSet.copyOf(ucsPartitionedByDisjointness.getOrDefault(true, ImmutableList.of()));
 
-            return Stream.concat(
-                    ucsPartitionedByDisjointness.getOrDefault(true, ImmutableList.of()).stream(),
-                    ucsPartitionedByDisjointness.get(false).stream()
-                            .flatMap(uc -> disjointVariables.stream()
-                                            .map(v -> appendVariable(uc, v)))
-                    ).collect(ImmutableCollectors.toSet());
-        }
-        else
-            return ImmutableSet.copyOf(ucsPartitionedByDisjointness.get(true));
+        // By definition not parts of the non-disjoint UCs
+        var disjointVariables = firstChild.getVariables().stream()
+                .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
+                .filter(v -> ucsPartitionedByDisjointness.get(true).stream().noneMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
+                .collect(ImmutableCollectors.toSet());
+
+        // If disjointVariables is empty, the flatMap will result in an empty list
+        // If any of the partition parts are empty, they will also result in an empty list
+        return Stream.concat(
+                ucsPartitionedByDisjointness.get(true).stream(),
+                ucsPartitionedByDisjointness.get(false).stream()
+                        .flatMap(uc -> disjointVariables.stream()
+                                        .map(v -> appendVariable(uc, v)))
+                ).collect(ImmutableCollectors.toSet());
     }
 
     private ImmutableSet<Variable> appendVariable(ImmutableSet<Variable> uc, Variable v) {
