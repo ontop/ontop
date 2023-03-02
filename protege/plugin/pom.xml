@@ -220,7 +220,8 @@
 #  - if compiling ontop-protege-plugin separately, ensure that artifact ${project.groupId}:ontop-protege-dependencies:jar:${project.version}:shaded
 #    (beware of 'shaded' classifier) is either installed in your local '~/.m2/repository' or is available in Maven Central with that version
 #
-#  (*) To enable compiling the ontop-protege-plugin, profile 'plugin' (plugin only) or 'protege' (plugin and protégé bundles) must be enabled.
+#  (*) To enable compiling the ontop-protege-plugin, profile 'plugin' must be enabled (directly via '-Pplugin', or indirectly using a profile
+#  depending on it: 'asset-plugin' building the OSGI plugin bundle; 'asset-protege' building the ZIP/tar.gz Protégé bundles; or `release`).
 #  In a multi-module build, ontop-protege-dependencies-${project.version}-shaded.jar is only generated when running 'mvn package ...' or a
 #  later target lifecycle phase (maven-shade-plugin can run only in that phase), therefore earlier phases will not have access to this JAR.
 #  This issue cannot be solved while keeping at the same time the ontop-protege-plugin part of the ontop multi-module project hierarchy,
