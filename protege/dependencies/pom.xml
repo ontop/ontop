@@ -255,7 +255,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>${plugin.phase-prefix}package</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
@@ -270,7 +270,7 @@
                 <executions>
                     <execution>
                         <id>attach-shaded-dependencies-for-intellij</id>
-                        <phase>${plugin.phase-prefix}package</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>attach-artifact</goal>
                         </goals>

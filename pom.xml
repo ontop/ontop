@@ -70,7 +70,6 @@
         <module>mapping</module>
         <module>ontology</module>
         <module>test</module>
-        <module>protege</module>
     </modules>
 
     <scm>
@@ -88,7 +87,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ignoreNonCompile>true</ignoreNonCompile>
         <license.skipAddThirdParty>true</license.skipAddThirdParty> <!-- default disable CLI execution of license:add-third-party (except for selected modules) -->
-        <plugin.phase-prefix>disabled-</plugin.phase-prefix>
         <asset-cli.phase-prefix>disabled-</asset-cli.phase-prefix>
         <asset-plugin.phase-prefix>disabled-</asset-plugin.phase-prefix>
         <asset-protege.phase-prefix>disabled-</asset-protege.phase-prefix>
@@ -1435,9 +1433,9 @@
              - release        generates all artifacts above, with testing, javadoc and jar metadata -->
         <profile>
             <id>plugin</id>
-            <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
-            </properties>
+            <modules>
+                <module>protege</module>
+            </modules>
         </profile>
         <profile>
             <id>asset-cli</id>
@@ -1451,9 +1449,11 @@
         <profile>
             <id>asset-plugin</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
                 <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
             </properties>
+            <modules>
+                <module>protege</module>
+            </modules>
             <build>
                 <defaultGoal>package</defaultGoal>
             </build>
@@ -1461,10 +1461,12 @@
         <profile>
             <id>asset-protege</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
                 <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
                 <asset-protege.phase-prefix></asset-protege.phase-prefix>
             </properties>
+            <modules>
+                <module>protege</module>
+            </modules>
             <build>
                 <defaultGoal>package</defaultGoal>
             </build>
@@ -1472,11 +1474,13 @@
         <profile>
             <id>release</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
                 <asset-cli.phase-prefix></asset-cli.phase-prefix>
                 <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
                 <asset-protege.phase-prefix></asset-protege.phase-prefix>
             </properties>
+            <modules>
+                <module>protege</module>
+            </modules>
             <build>
                 <defaultGoal>package</defaultGoal>
                 <plugins>

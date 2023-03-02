@@ -190,7 +190,7 @@
                         <goals>
                             <goal>properties</goal>
                         </goals>
-                        <phase>${plugin.phase-prefix}process-resources</phase> <!-- right before compile phase -->
+                        <phase>process-resources</phase> <!-- right before compile phase -->
                     </execution>
                 </executions>
             </plugin>
@@ -204,7 +204,7 @@
                         <goals>
                             <goal>enforce</goal>
                         </goals>
-                        <phase>${plugin.phase-prefix}process-resources</phase> <!-- right before compile phase -->
+                        <phase>process-resources</phase> <!-- right before compile phase -->
                         <configuration>
                             <rules>
                                 <requireProperty>
