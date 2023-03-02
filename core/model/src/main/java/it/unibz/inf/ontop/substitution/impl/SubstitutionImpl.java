@@ -40,7 +40,7 @@ public class SubstitutionImpl<T extends ImmutableTerm> implements Substitution<T
     }
 
     protected  <T extends ImmutableTerm, S extends ImmutableTerm> Substitution<S> createSubstitution(Stream<Map.Entry<Variable, T>> stream, Function<Map.Entry<Variable, T>, S> mapper, boolean checkEntries) {
-        return new SubstitutionImpl(stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, mapper)), termFactory, checkEntries);
+        return new SubstitutionImpl<>(stream.collect(ImmutableCollectors.toMap(Map.Entry::getKey, mapper)), termFactory, checkEntries);
     }
 
     @Override
