@@ -38,7 +38,8 @@
 
         <!-- Protégé bundles main properties for mvn -Passet-protege (ideally, the ones to change for a new Protégé release)
              - protege.bnd.version = Protégé version used for bundles (may be more recent that one used for compiling)
-             - protege.bnd.source = 'repository' downloads from Maven repo, 'url' downloads from URL built with next properties -->
+             - protege.bnd.source = 'repository' downloads from Maven repo, 'url' downloads from URL built with next properties
+                                    (current default is 'url' that works with latest Protégé bundles not yet on Maven) -->
         <protege.bnd.version>5.6.1</protege.bnd.version>
         <protege.bnd.source>repository</protege.bnd.source>
 

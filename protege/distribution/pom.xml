@@ -49,7 +49,7 @@
             <activation>
                 <property>
                     <name>protege.bnd.source</name>
-                    <value>url</value>
+                    <value>!repository</value>
                 </property>
             </activation>
             <build>
@@ -116,7 +116,7 @@
             <activation>
                 <property>
                     <name>protege.bnd.source</name>
-                    <value>!url</value>
+                    <value>repository</value>
                 </property>
             </activation>
             <build>
@@ -183,7 +183,10 @@
                 <executions>
                     <execution>
                         <id>copy-protege-plugin</id>
-                        <phase>${asset-protege.phase-prefix}prepare-package</phase>
+                        <!-- We enable this plugin only when just -Passet-plugin is enabled, as this step is fast and ensures
+                             that plugin and Protégé bundles are placed in the same 'protege/distribution' directory and that
+                             the plugin file there has the correct name without the '-bundle' classifier in it -->
+                        <phase>${asset-plugin.phase-prefix}prepare-package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
