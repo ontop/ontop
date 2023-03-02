@@ -29,52 +29,13 @@
         <skipTests>true</skipTests> <!-- TODO: re-enable -->
     </properties>
 
-    <profiles>
-        <!-- ontop-protege-dependencies only added as dependency if ontop-protege-plugin is going to be generated
-             (have to replicate for each profile enabling the plugin, might fix by not requiring the 'shaded' classifier) -->
-        <profile>
-            <id>plugin</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-dependencies</artifactId>
-                    <classifier>shaded</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>asset-plugin</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-dependencies</artifactId>
-                    <classifier>shaded</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>asset-protege</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-dependencies</artifactId>
-                    <classifier>shaded</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>release</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>ontop-protege-dependencies</artifactId>
-                    <classifier>shaded</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-protege-dependencies</artifactId>
+            <classifier>shaded</classifier>
+        </dependency>
+
         <!-- owlapi used in Protege -->
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
