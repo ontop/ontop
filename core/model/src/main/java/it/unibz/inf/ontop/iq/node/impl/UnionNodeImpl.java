@@ -369,6 +369,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             // By definition not parts of the non-disjoint UCs
             var disjointVariables = firstChild.getVariables().stream()
                     .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
+                    .filter(v -> !ucsPartitionedByDisjointness.get(true).stream().anyMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
                     .collect(ImmutableCollectors.toSet());
             if (disjointVariables.isEmpty())
                 return ImmutableSet.copyOf(ucsPartitionedByDisjointness.getOrDefault(true, ImmutableList.of()));
