@@ -357,6 +357,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
 
         IQTree firstChild = children.get(0);
+        // Partitions the unique constraints based on if they are fully disjoint or not. Guaranteed to have two entries: true and false (but they may be empty)
         ImmutableMap<Boolean, ImmutableList<ImmutableSet<Variable>>> ucsPartitionedByDisjointness = firstChild.inferUniqueConstraints().stream()
                 .filter(uc -> children.stream()
                         .skip(1)
@@ -369,8 +370,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .filter(v -> ucsPartitionedByDisjointness.get(true).stream().noneMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
                 .collect(ImmutableCollectors.toSet());
 
-        // If disjointVariables is empty, the flatMap will result in an empty list
-        // If any of the partition parts are empty, they will also result in an empty list
         return Stream.concat(
                 ucsPartitionedByDisjointness.get(true).stream(),
                 ucsPartitionedByDisjointness.get(false).stream()
