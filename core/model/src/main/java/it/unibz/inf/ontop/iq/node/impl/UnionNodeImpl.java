@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -24,6 +25,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -343,6 +345,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     /**
      * TODO: generalize it and merge it with the isDistinct() method implementation
+     *
+     * We could infer more constraints by not only checking for equal unique constraints, but also checking if
+     * some unique constraint is a superset of all unique constraints.
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
@@ -351,14 +356,41 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             throw new InvalidIntermediateQueryException("At least 2 children are expected for a union");
 
         IQTree firstChild = children.get(0);
-        return firstChild.inferUniqueConstraints().stream()
+        // Partitions the unique constraints based on if they are fully disjoint or not. Guaranteed to have two entries: true and false (but they may be empty)
+        ImmutableMap<Boolean, ImmutableList<ImmutableSet<Variable>>> ucsPartitionedByDisjointness = firstChild.inferUniqueConstraints().stream()
                 .filter(uc -> children.stream()
                         .skip(1)
                         .allMatch(c -> c.inferUniqueConstraints().contains(uc)))
-                .filter(uc -> IntStream.range(0, childrenCount)
-                        .allMatch(i -> IntStream.range(i+1, childrenCount)
-                                .allMatch(j -> areDisjoint(children.get(i), children.get(j), uc))))
+                .collect(ImmutableCollectors.partitioningBy(uc -> areDisjoint(children, uc)));
+
+        if(ucsPartitionedByDisjointness.get(false).isEmpty())
+            return ImmutableSet.copyOf(ucsPartitionedByDisjointness.get(true));
+
+        // By definition not parts of the non-disjoint UCs
+        var disjointVariables = firstChild.getVariables().stream()
+                .filter(v -> areDisjoint(children, ImmutableSet.of(v)))
+                .filter(v -> ucsPartitionedByDisjointness.get(true).stream().noneMatch(set -> set.size() == 1 && set.stream().findFirst().get().equals(v)))
                 .collect(ImmutableCollectors.toSet());
+
+        return Stream.concat(
+                ucsPartitionedByDisjointness.get(true).stream(),
+                ucsPartitionedByDisjointness.get(false).stream()
+                        .flatMap(uc -> disjointVariables.stream()
+                                        .map(v -> appendVariable(uc, v)))
+                ).collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<Variable> appendVariable(ImmutableSet<Variable> uc, Variable v) {
+        return Stream.concat(
+                uc.stream(),
+                Stream.of(v)).collect(ImmutableCollectors.toSet());
+    }
+
+    private boolean areDisjoint(ImmutableList<IQTree> children, ImmutableSet<Variable> uc) {
+        int childrenCount = children.size();
+        return IntStream.range(0, childrenCount)
+                .allMatch(i -> IntStream.range(i + 1, childrenCount)
+                        .allMatch(j -> areDisjoint(children.get(i), children.get(j), uc)));
     }
 
     /**

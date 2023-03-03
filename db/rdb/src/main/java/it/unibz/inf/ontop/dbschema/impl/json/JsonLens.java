@@ -370,6 +370,9 @@ public abstract class JsonLens extends JsonOpenObject {
                 case "FlattenedViewDefinition":
                     instanceClass = JsonFlattenLens.class;
                     break;
+                case "UnionLens":
+                    instanceClass = JsonUnionLens.class;
+                    break;
                 default:
                     // TODO: throw proper exception
                     throw new RuntimeException("Unsupported type of lens: " + type);

@@ -1,0 +1,324 @@
+{
+  "relations": [
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_1",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"table1\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_2",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"table2\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"table3\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_4",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        },
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"tableDifferentOrder\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_5",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": false
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": true
+        },
+        {
+          "name": "\"name\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"tableNullable\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"id\""
+            ],
+            "relation": [
+              "\"table1\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"id\""
+            ],
+            "relation": [
+              "\"extra1\""
+            ]
+          },
+          "name": "extra1_id_fkey"
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"info\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"extra1\""
+      ]
+    },
+    {
+      "uniqueConstraints": [],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"id\""
+            ],
+            "relation": [
+              "\"table1\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"id\""
+            ],
+            "relation": [
+              "\"extra2\""
+            ]
+          },
+          "name": "extra2_id_fkey"
+        }
+      ],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"info\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"extra2\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_A",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"value\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"specializedA\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_Ax",
+          "determinants": [
+            "\"id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"value\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"a\"",
+          "datatype": "VARCHAR",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"specializedAx\""
+      ]
+    },
+    {
+      "uniqueConstraints": [
+        {
+          "name": "CONSTRAINT_B",
+          "determinants": [
+            "\"id\"",
+            "\"b\""
+          ],
+          "isPrimaryKey": true
+        }
+      ],
+      "otherFunctionalDependencies": [],
+      "foreignKeys": [],
+      "columns": [
+        {
+          "name": "\"id\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"value\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        },
+        {
+          "name": "\"b\"",
+          "datatype": "INTEGER",
+          "isNullable": false
+        }
+      ],
+      "name": [
+        "\"specializedB\""
+      ]
+    }
+  ],
+  "metadata": {
+    "dbmsProductName": "H2",
+    "dbmsVersion": "1.4.199 (2019-03-13)",
+    "driverName": "H2 JDBC Driver",
+    "driverVersion": "1.4.199 (2019-03-13)",
+    "quotationString": "\"",
+    "extractionTime": "2020-11-12T17:24:30"
+  }
+}
