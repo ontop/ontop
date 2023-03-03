@@ -14,7 +14,6 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
     protected static final String OWL_FILE = "/prof/prof.owl";
     protected static final String OBDA_FILE = "/prof/prof.obda";
 
-
     @Test
     public void testMinusNickname() {
 
@@ -31,7 +30,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
         executeAndCompareValues(query, ImmutableList.of("\"Barbara\"^^xsd:string", "\"Diego\"^^xsd:string",
                 "\"Johann\"^^xsd:string", "\"Mary\"^^xsd:string"));
     }
@@ -54,7 +53,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
         executeAndCompareValues(query, ImmutableList.of("\"Barbara\"^^xsd:string", "\"Johann\"^^xsd:string",
                 "\"Mary\"^^xsd:string"));
     }
@@ -92,9 +91,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
@@ -119,7 +118,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"), LEFT_JOIN_NOT_OPTIMIZED_MSG);
         executeAndCompareValues(query, ImmutableList.of("\"Johnny\"^^xsd:string", "\"Rog\"^^xsd:string"));
     }
 
@@ -139,9 +138,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
@@ -166,9 +165,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation, "\"PROFESSORS\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string", "\"Diego\"^^xsd:string", "\"Johann\"^^xsd:string",
@@ -191,7 +190,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableSet.of("\"Roger\"^^xsd:string", "\"Frank\"^^xsd:string",
                 "\"John\"^^xsd:string", "\"Michael\"^^xsd:string"));
     }
@@ -211,7 +210,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         executeAndCompareValues(query, ImmutableSet.of("\"Rog\"^^xsd:string", "\"Frankie\"^^xsd:string",
                 "\"Johnny\"^^xsd:string", "\"King of Pop\"^^xsd:string"));
@@ -235,7 +234,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
+        Assertions.assertFalse(supportsIntegrityConstraints() && containsMoreThanOneOccurrence(ontopSQLtranslation.toLowerCase(), "\"professors\""),
                 NO_SELF_LJ_OPTIMIZATION_MSG);
         executeAndCompareValues(query, getExpectedValuesNicknameAndCourse());
     }
@@ -261,7 +260,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Smith\"^^xsd:string", "\"Poppins\"^^xsd:string",
                 "\"Depp\"^^xsd:string"));
     }
@@ -284,7 +283,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Smith\"^^xsd:string", "\"Poppins\"^^xsd:string",
                 "\"Depp\"^^xsd:string"));
     }
@@ -306,7 +305,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"John\"^^xsd:string", "\"Mary\"^^xsd:string",
                 "\"Roger\"^^xsd:string"));
     }
@@ -349,7 +348,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Dodero\"^^xsd:string", "\"Frankie\"^^xsd:string",
                 "\"Gamper\"^^xsd:string", "\"Helmer\"^^xsd:string", "\"Johnny\"^^xsd:string",
                 "\"King of Pop\"^^xsd:string", "\"Poppins\"^^xsd:string", "\"Rog\"^^xsd:string"));
@@ -374,7 +373,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Dodero\"^^xsd:string",
                 "\"Gamper\"^^xsd:string", "\"Helmer\"^^xsd:string", "\"Jackson\"^^xsd:string", "\"Pitt\"^^xsd:string",
                 "\"Poppins\"^^xsd:string", "\"Smith\"^^xsd:string"));
@@ -398,7 +397,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string",
                 "\"Smith\"^^xsd:string"));
     }
@@ -421,7 +420,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertFalse(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertFalse(supportsIntegrityConstraints() && ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, ImmutableList.of("\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string",
                 "\"Smith\"^^xsd:string"));
     }
@@ -1106,7 +1105,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
 
         String ontopSQLtranslation = reformulate(query);
 
-        Assertions.assertTrue(ontopSQLtranslation.toUpperCase().contains("LEFT"));
+        Assertions.assertTrue(!supportsIntegrityConstraints() || ontopSQLtranslation.toUpperCase().contains("LEFT"));
         executeAndCompareValues(query, getExpectedValuesNonOptimizableLJAndJoinMix());
     }
 
@@ -1155,6 +1154,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
             return query.substring(firstOccurrenceIndex + 1).contains(pattern);
         }
         return false;
+    }
+
+    protected boolean supportsIntegrityConstraints() {
+        return true;
     }
 
 }
