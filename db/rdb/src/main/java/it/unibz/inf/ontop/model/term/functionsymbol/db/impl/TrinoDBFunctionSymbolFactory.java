@@ -24,7 +24,7 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     private static final String RANDOM_STR = "RANDOM";
     private static final String UUID_STRING_STR = "UUID";
-    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Denodo";
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Trino";
 
     private DBFunctionSymbol dbRight;
 
