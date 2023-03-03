@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://www.ontop-vkg.com/union-test#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-year
+target		:budget-year/{year_name} a :BudgetYear; :name {year_name}^^xsd:string .
+source		SELECT "year_name" FROM "lenses"."all_years";
+
+mappingId	MAPID-day
+target		:day-records/{year_name}/{dayofyear} a :DayRecord; :spendings {spendings}^^xsd:integer; :earnings {earnings}^^xsd:integer; :day {dayofyear}^^xsd:integer; :year :budget-year/{year_name} .
+source		SELECT dayofyear, spendings, earnings, "year_name" FROM "lenses"."all_years";
+]]
+

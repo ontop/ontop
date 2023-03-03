@@ -1,0 +1,42 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"sX\""],
+      "baseRelation": ["\"specializedAx\""],
+      "columns": {
+        "added": [],
+        "hidden": ["\"a\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"sB\""],
+      "baseRelation": ["\"specializedB\""],
+      "columns": {
+        "added": [],
+        "hidden": ["\"b\""]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "unionRelations": [
+        ["\"lenses\"", "\"sB\""],
+        ["\"lenses\"", "\"sX\""],
+        ["\"specializedA\""]
+      ],
+      "makeDistinct": true,
+      "provenanceColumn": "\"prov\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    }
+  ]
+}
