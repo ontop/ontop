@@ -228,7 +228,7 @@ public class UniqueConstraintInferenceTest {
         IQTree tree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createUnionNode(ImmutableSet.of(X, A, B)),
                 ImmutableList.of(child1, child2));
-        assertEquals(ImmutableSet.of(), tree.inferUniqueConstraints());
+        assertEquals(ImmutableSet.of(ImmutableSet.of(X, A)), tree.inferUniqueConstraints());
     }
 
     @Test

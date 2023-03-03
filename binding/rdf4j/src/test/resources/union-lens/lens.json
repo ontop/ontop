@@ -1,0 +1,33 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"Year2022\""],
+      "baseRelation": ["BudgetYear2022"],
+      "columns": {
+        "added": [],
+        "hidden": ["managerName"]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"all_years\""],
+      "unionRelations": [
+        ["BudgetYear2020"],
+        ["BudgetYear2021"],
+        ["\"lenses\"", "\"Year2022\""]
+      ],
+      "makeDistinct": false,
+      "provenanceColumn": "\"year_name\"",
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "nonNullConstraints": {
+        "added": []
+      },
+      "type": "UnionLens"
+    }
+  ]
+}
