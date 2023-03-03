@@ -52,11 +52,6 @@ public class BigQueryDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         NonStringNonNumberNonBooleanNonDatetimeDBTermType bytesType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BYTES_STR, rootAncestry, hexBinary);
                 
-        /*  TODO-SCAFFOLD: Add to or modify the type map:
-         *-------------------------------------------------------------------
-         *      map.put("TYPE_NAME", DBTermType);
-         */
-
         map.put(DATE_STR, dateType);
         map.put(INT64_STR, int64Type);
         map.put(FLOAT64_STR, float64Type);
