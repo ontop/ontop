@@ -8,12 +8,15 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public class BigQueryExtraNormalizer implements DialectExtraNormalizer {
 
+    private final AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer;
     private final PushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer;
     private final ConvertValuesToUnionNormalizer convertValuesToUnionNormalizer;
 
     @Inject
-    protected BigQueryExtraNormalizer(PushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
+    protected BigQueryExtraNormalizer(AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer,
+                                      PushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
                                       ConvertValuesToUnionNormalizer convertValuesToUnionNormalizer) {
+        this.alwaysProjectOrderByTermsNormalizer = alwaysProjectOrderByTermsNormalizer;
         this.pushProjectedOrderByTermsNormalizer = pushProjectedOrderByTermsNormalizer;
         this.convertValuesToUnionNormalizer = convertValuesToUnionNormalizer;
     }
@@ -21,7 +24,9 @@ public class BigQueryExtraNormalizer implements DialectExtraNormalizer {
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
               return pushProjectedOrderByTermsNormalizer.transform(
-                      convertValuesToUnionNormalizer.transform(tree, variableGenerator),
+                      alwaysProjectOrderByTermsNormalizer.transform(
+                              convertValuesToUnionNormalizer.transform(tree, variableGenerator),
+                              variableGenerator),
                       variableGenerator);
     }
 }
