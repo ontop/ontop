@@ -21,43 +21,39 @@ import java.util.stream.Collectors;
 /*
 Used when an ORDER BY node accesses variables that are defined in a CONSTRUCT above it. Some dialects (like GoogleSQL) do
 not support that, so instead we push the CONSTRUCT down into the ORDER BY.
+Generally, a `AlwaysProjectOrderByTerms` normalizer is expected to be run before calling this normalizer.
  */
 public class PushProjectedOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> implements DialectExtraNormalizer {
 
-    private AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer;
     private IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected PushProjectedOrderByTermsNormalizer(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                                  AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer, CoreSingletons coreSingletons) {
+                                                  CoreSingletons coreSingletons) {
         super(coreSingletons);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
-        this.alwaysProjectOrderByTermsNormalizer = alwaysProjectOrderByTermsNormalizer;
     }
 
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator context) {
 
-        //Run `AlwaysProjectOrderByTermsNormalizer` to prepare transformation.
-        IQTree projectedOrderByTerms = alwaysProjectOrderByTermsNormalizer.transform(tree, context);
-
         //We only change trees of the form DISTINCT -> CONSTRUCT -> ORDER BY. Make sure our tree has that exact form,
         //else we return the results of the `AlwaysProjectOrderByTermsNormalizer`
-        if(!(projectedOrderByTerms.getRootNode() instanceof DistinctNode) || projectedOrderByTerms.getChildren().size() == 0)
-            return projectedOrderByTerms;
-        DistinctNode distinct = (DistinctNode) projectedOrderByTerms.getRootNode();
-        var distinctSubtree = projectedOrderByTerms.getChildren().get(0);
+        if(!(tree.getRootNode() instanceof DistinctNode) || tree.getChildren().size() == 0)
+            return tree;
+        DistinctNode distinct = (DistinctNode) tree.getRootNode();
+        var distinctSubtree = tree.getChildren().get(0);
 
         if(!(distinctSubtree.getRootNode() instanceof ConstructionNode) || distinctSubtree.getChildren().size() == 0)
-            return projectedOrderByTerms;
+            return tree;
         ConstructionNode construct = (ConstructionNode) distinctSubtree.getRootNode();
         var constructSubtree = distinctSubtree.getChildren().get(0);
 
         if(!(constructSubtree.getRootNode() instanceof OrderByNode) || constructSubtree.getChildren().size() == 0)
-            return projectedOrderByTerms;
+            return tree;
         OrderByNode orderBy = (OrderByNode) constructSubtree.getRootNode();
         var orderBySubtree = constructSubtree.getChildren().get(0);
 
