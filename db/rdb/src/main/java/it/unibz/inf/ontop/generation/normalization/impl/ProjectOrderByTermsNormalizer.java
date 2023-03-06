@@ -248,7 +248,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
      * Some nodes may be missing but the order must be respected. There are no multiple instances of the same kind of node.
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class Decomposition {
+    protected static class Decomposition {
         final Optional<SliceNode> sliceNode;
         final Optional<DistinctNode> distinctNode;
         final Optional<ConstructionNode> constructionNode;
