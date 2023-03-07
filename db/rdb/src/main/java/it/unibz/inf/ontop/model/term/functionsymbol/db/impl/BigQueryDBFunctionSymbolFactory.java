@@ -7,75 +7,51 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
-import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_NO_TZ_STR;
+public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for BigQuery";
 
-    private static final String RANDOM_STR = "RANDOM";
-    private static final String UUID_STRING_STR = "UUID";
-    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Trino";
-
-    private DBFunctionSymbol dbRight;
-
+    private static final String REGEXP_CONTAINS_STR = "REGEXP_CONTAINS";
+    private DBBooleanFunctionSymbol regexpContains;
 
     @Inject
-    protected TrinoDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createTrinoRegularFunctionTable(typeFactory), typeFactory);
-        dbRight = new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2,
-                dbTypeFactory.getDBStringType(), false, abstractRootDBType, this::serializeRight);
+    protected BigQueryDBFunctionSymbolFactory(TypeFactory typeFactory) {
+        super(createBigQueryRegularFunctionTable(typeFactory), typeFactory);
+
+        regexpContains = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_CONTAINS_STR, 2, dbBooleanType,
+                abstractRootDBType);
     }
 
-    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createTrinoRegularFunctionTable(
+    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createBigQueryRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
-                CURRENT_TIMESTAMP_STR,
-                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
-        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+        table.remove(REGEXP_LIKE_STR, 2);
+        table.remove(REGEXP_LIKE_STR, 3);
+        DBBooleanFunctionSymbol regexpContains = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_CONTAINS_STR, 2, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_CONTAINS_STR, 2, regexpContains);
 
         return ImmutableTable.copyOf(table);
     }
 
-    @Override
-    protected ImmutableMap<DBTermType, DBTypeConversionFunctionSymbol> createNormalizationMap() {
-        ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
-        builder.putAll(super.createNormalizationMap());
-
-
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        // NB: TIMESTAMP_TZ_STR is the default, already done.
-        for (String timestampTypeString : ImmutableList.of(TIMESTAMP_LOCAL_TZ_STR, TIMESTAMP_NO_TZ_STR)) {
-            DBTermType timestampType = dbTypeFactory.getDBTermType(timestampTypeString);
-
-            DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);
-            builder.put(timestampType, datetimeNormFunctionSymbol);
-        }
-
-        return builder.build();
-    }
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("(POSITION(%s IN %s) > 0)",
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+        return String.format("(STRPOS(%s, %s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
@@ -83,15 +59,14 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("SUBSTRING(%s,1,POSITION(%s IN %s)-1)", str, before, str);
+        return String.format("CASE STRPOS(%s, %s) WHEN 0 THEN '' ELSE SUBSTRING(%s,1,STRPOS(%s, %s)-1) END", str, before, str, str, before);
     }
 
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("SUBSTRING(%s, IF(POSITION(%s IN %s) != 0, POSITION(%s IN %s) + LENGTH(%s), 0))", str, after, str, after, str, after);
-
+        return String.format("CASE STRPOS(%s, %s) WHEN 0 THEN '' ELSE SUBSTRING(%s, STRPOS(%s, %s) + LENGTH(%s)) END", str, after, str, str, after, after);
     }
 
     @Override
@@ -121,7 +96,7 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     private String serializeHashingFunction(String functionName, ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("LOWER(TO_HEX(%s(CAST(%s as VARBINARY))))", functionName, termConverter.apply(terms.get(0)));
+        return String.format("TO_HEX(%s(%s))", functionName, termConverter.apply(terms.get(0)));
 
     }
 
@@ -130,6 +105,9 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         String str = termConverter.apply(terms.get(0));
         return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
     }
+
+
+
 
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
@@ -149,29 +127,37 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TO_ISO8601(%s)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    public DBFunctionSymbol getDBCharLength() {
-        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
-    }
-
-    @Override
-    protected String getRandNameInDialect() {
-        return RANDOM_STR;
+        return String.format("FORMAT_TIMESTAMP(\"%%Y-%%m-%%dT%%X%%Ez\", %s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String getUUIDNameInDialect() {
-        return UUID_STRING_STR;
+        return "GENERATE_UUID";
     }
 
 
+    /**
+     * BigQuery uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to parse these results.
+     */
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneDigitDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+    /**
+     * BigQuery uses 'True/False' for SQL queries, but '1/0' for results, so we need a way to parse these results.
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
+    }
+
+
+    //BigQuery does not support week as a unit for timestamp_diff
     @Override
     protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return serializeTimeBetween("week", terms, termConverter, termFactory);
+        throw new UnsupportedOperationException("TIMESTAMP_DIFF(week): " + NOT_YET_SUPPORTED_MSG);
     }
 
 
@@ -207,22 +193,56 @@ public class TrinoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     private String serializeTimeBetween(String timeUnit, ImmutableList<? extends ImmutableTerm> terms,
                                         Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("date_diff('%s', %s, %s)",
-                timeUnit,
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
-    }
-
-    protected String serializeRight(ImmutableList<? extends ImmutableTerm> terms,
-                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SUBSTRING(%s, -%s)",
+        return String.format("TIMESTAMP_DIFF(%s, %s, %s)",
                 termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)));
+                termConverter.apply(terms.get(1)),
+                timeUnit);
     }
 
     @Override
-    public DBFunctionSymbol getDBRight() {
-        return dbRight;
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return this.regexpContains;
+    }
+
+    @Override
+    protected Optional<DBFunctionSymbol> createRoundFunctionSymbol(DBTermType dbTermType) {
+        // TODO: taken from H2SQLDBFunctionSymbolFactory, so same TODO applies
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(ROUND_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(ROUND(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
+    }
+
+    @Override
+    protected Optional<DBFunctionSymbol> createFloorFunctionSymbol(DBTermType dbTermType) {
+        // TODO: taken from H2SQLDBFunctionSymbolFactory, so same TODO applies
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(FLOOR_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(FLOOR(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
+    }
+
+    @Override
+    protected Optional<DBFunctionSymbol> createCeilFunctionSymbol(DBTermType dbTermType) {
+        // TODO: taken from H2SQLDBFunctionSymbolFactory, so same TODO applies
+        return Optional.of(new UnaryDBFunctionSymbolWithSerializerImpl(CEIL_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(CEIL(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName())));
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "STRING_AGG(%s%s,%s ORDER BY %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
+    @Override
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new BigQuerySQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
     }
 
 }

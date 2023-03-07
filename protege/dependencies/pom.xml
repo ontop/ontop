@@ -223,6 +223,8 @@
                                 <exclude>META-INF/LICENSE.md</exclude>
                                 <exclude>META-INF/NOTICE.md</exclude>
                                 <exclude>META-INF/versions/9/module-info.class</exclude>
+                                <exclude>META-INF/build-info.properties</exclude>
+                                <exclude>git.properties</exclude>
                             </excludes>
                         </filter>
                     </filters>
