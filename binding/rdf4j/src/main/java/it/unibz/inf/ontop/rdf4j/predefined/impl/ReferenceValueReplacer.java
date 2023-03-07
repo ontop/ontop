@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -28,14 +28,12 @@ public class ReferenceValueReplacer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceValueReplacer.class);
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     /**
@@ -68,10 +66,18 @@ public class ReferenceValueReplacer {
         QueryNode rootNode = tree.getRootNode();
 
         if (rootNode instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode)rootNode;
+
+            ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
+                ? constructionNode
+                : iqFactory.createConstructionNode(
+                        constructionNode.getVariables(),
+                        constructionNode.getSubstitution().transform(t -> transformTerm(t, referenceToInputMap)));
+
             return iqFactory.createUnaryIQTree(
-                    transformConstructionNode((ConstructionNode) rootNode, referenceToInputMap),
-                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap)
-            );
+                    newConstructionNode,
+                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap));
+
         }
         else if (rootNode instanceof NativeNode) {
             return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
@@ -81,17 +87,6 @@ public class ReferenceValueReplacer {
         }
         else
             throw new IllegalArgumentException("Was only expecting construction nodes and native nodes");
-    }
-
-    private ConstructionNode transformConstructionNode(ConstructionNode constructionNode,
-                                                       ImmutableMap<String, String> referenceToInputMap) {
-        ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
-        if (substitution.isEmpty())
-            return constructionNode;
-
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.transform(v -> transformTerm(v, referenceToInputMap));
-
-        return iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution);
     }
 
     private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {

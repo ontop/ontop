@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import org.junit.Test;
 
@@ -41,8 +41,8 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testUnionRemoval1NoTopSubstitution() {
-        ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
+        Substitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution();
+        Substitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 X, generateURI1(A, false), Y, generateURI1(B, false));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(PROJECTION_ATOM.getVariables());
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
@@ -59,9 +59,9 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testUnionRemoval2() {
-        ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
+        Substitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 X, generateURI1(A, false));
-        ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
+        Substitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 Y, generateURI1(B, false));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(Y, A));
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
@@ -82,9 +82,9 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testUnionRemoval3() {
-        ImmutableSubstitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
+        Substitution<ImmutableTerm> topBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 X, generateURI1(A, false), Y, generateURI1(B, false));
-        ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution();
+        Substitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution();
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B));
         IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
@@ -128,9 +128,9 @@ public class EmptyNodeRemovalTest {
 
 
 
-    private static IQ generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
-                                                            ImmutableSubstitution<ImmutableTerm> leftBindings,
-                                                            EmptyNode emptyNode) {
+    private static IQ generateQueryWithUnion(Substitution<ImmutableTerm> topBindings,
+                                             Substitution<ImmutableTerm> leftBindings,
+                                             EmptyNode emptyNode) {
         ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
 
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();

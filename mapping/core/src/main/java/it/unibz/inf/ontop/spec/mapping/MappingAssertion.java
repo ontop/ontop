@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -71,7 +71,7 @@ public class MappingAssertion {
         return getTopSubstitution().apply(getProjectionAtom().getArguments());
     }
 
-    public ImmutableSubstitution<ImmutableTerm> getTopSubstitution() {
+    public Substitution<ImmutableTerm> getTopSubstitution() {
        return Optional.of(query.getTree())
                 .filter(t -> t.getRootNode() instanceof ConstructionNode)
                 .map(IQTree::getRootNode)

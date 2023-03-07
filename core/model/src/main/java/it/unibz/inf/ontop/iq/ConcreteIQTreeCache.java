@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +27,7 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     VariableNullability getVariableNullability();
 
     @Nullable
-    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
+    ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions();
 
     @Nullable
     ImmutableSet<ImmutableSet<Variable>> getUniqueConstraints();
@@ -53,7 +53,7 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     /**
      * Can only be set ONCE!
      */
-    void setPossibleVariableDefinitions(@Nonnull ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions);
+    void setPossibleVariableDefinitions(@Nonnull ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions);
 
     /**
      * Can only be set ONCE!

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface SQLAlgebraFactory {
 
     SelectFromWhereWithModifiers createSelectFromWhere(ImmutableSortedSet<Variable> projectedVariables,
-                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                                       Substitution<? extends ImmutableTerm> substitution,
                                                        @Assisted("fromExpression") SQLExpression fromExpression,
                                                        @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
                                                        @Assisted("groupBy") ImmutableSet<Variable> groupByVariables,

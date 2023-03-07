@@ -69,11 +69,6 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	}
 
 	@Override
-	public boolean isGround() {
-		return true;
-	}
-
-	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
 	}

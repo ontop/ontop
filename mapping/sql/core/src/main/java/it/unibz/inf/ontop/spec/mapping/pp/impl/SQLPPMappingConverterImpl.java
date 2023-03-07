@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -20,9 +18,8 @@ import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,41 +85,38 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
-        ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().applyToVariable(v))
-                    .flatMap(ImmutableTerm::getVariableStream)
-                    .distinct()
-                    .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
+        Substitution<ImmutableTerm> targetSubstitution = target.getSubstitution();
 
-        if (targetPreMap.values().stream().anyMatch(t -> !t.isPresent()))
-            throw new InvalidMappingSourceQueriesException(targetPreMap.entrySet().stream()
-                    .filter(e -> !e.getValue().isPresent())
-                    .map(Map.Entry::getKey)
-                    .map(Variable::getName)
+        ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap =
+                targetSubstitution.apply(target.getProjectionAtom().getArguments()).stream()
+                        .flatMap(ImmutableTerm::getVariableStream)
+                        .distinct()
+                        .collect(ImmutableCollectors.toMap(v -> v, lookup));
+
+        ImmutableList<String> missingPlaceholders = targetPreMap.entrySet().stream()
+                .filter(e -> e.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .map(Variable::getName)
+                .collect(ImmutableCollectors.toList());
+
+        if (!missingPlaceholders.isEmpty())
+            throw new InvalidMappingSourceQueriesException(missingPlaceholders.stream()
                     .collect(Collectors.joining(", ",
                             "The placeholder(s) ",
                             " in the target do(es) not occur in source query of the mapping assertion\n["
                                     + provenance.getProvenanceInfo() + "]")));
 
-        ImmutableMap<Variable, ImmutableTerm> targetMap = targetPreMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
+        //noinspection OptionalGetWithoutIsPresent
+        Substitution<ImmutableTerm> substitution = targetPreMap.entrySet().stream()
+                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(Map.Entry::getKey, e -> e.getValue().get()));
 
-        Var2VarSubstitution targetRenamingPart = substitutionFactory.getVar2VarSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable) // (NON-INJECTIVE)
-                .filter(e -> !e.getValue().equals(e.getKey()))
-                .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
-                .collect(ImmutableCollectors.toMap()));
+        Substitution<Variable> targetRenamingPart = substitution.restrictRangeTo(Variable.class);
+        Substitution<ImmutableTerm> spoSubstitution = targetSubstitution.transform(targetRenamingPart::applyToTerm);
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = target.getSubstitution().transform(targetRenamingPart::apply);
-
-        ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
-                targetMap.entrySet().stream() // getNonVariableFragment
-                        .filter(e -> !(e.getValue() instanceof Variable))
-                        .collect(ImmutableCollectors.toMap()));
+        Substitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 
         IQTree selectTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(spoSubstitution.getImmutableMap().values().stream()
-                        .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet()), selectSubstitution),
+                iqFactory.createConstructionNode(spoSubstitution.getRangeVariables(), selectSubstitution),
                 tree);
 
         IQTree mappingTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(

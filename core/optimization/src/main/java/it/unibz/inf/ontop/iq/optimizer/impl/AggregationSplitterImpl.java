@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -18,7 +19,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -59,6 +60,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
         private final AtomFactory atomFactory;
+        private final QueryTransformerFactory queryTransformerFactory;
 
         protected AggregationUnionLifterTransformer(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
             super(coreSingletons);
@@ -66,6 +68,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
             this.atomFactory = coreSingletons.getAtomFactory();
+            this.queryTransformerFactory = coreSingletons.getQueryTransformerFactory();
         }
 
         @Override
@@ -186,7 +189,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private Optional<ImmutableSet<NonVariableTerm>> getDefinitions(IQTree tree, Variable variable) {
             ImmutableSet<ImmutableTerm> possibleValues = tree.getPossibleVariableDefinitions().stream()
-                    .map(s -> s.applyToVariable(variable))
+                    .map(s -> s.apply(variable))
                     .collect(ImmutableCollectors.toSet());
 
             // If a definition is not available (e.g. the possible value is a variable), everything is possible
@@ -194,6 +197,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
             if (possibleValues.isEmpty() || possibleValues.stream().anyMatch(t -> t instanceof Variable))
                 return Optional.empty();
             else
+                // correctness of the cast is ensured above
                 return Optional.of((ImmutableSet<NonVariableTerm>)(ImmutableSet<?>)possibleValues);
         }
 
@@ -277,16 +281,10 @@ public class AggregationSplitterImpl implements AggregationSplitter {
         }
 
         private IQTree renameSomeUnprojectedVariables(IQTree tree, Set<Variable> nonGroupingVariables) {
-            InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    nonGroupingVariables.stream(), variableGenerator::generateNewVariableFromVar);
+            InjectiveSubstitution<Variable> renaming = nonGroupingVariables.stream()
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-            if (!renaming.isEmpty()) {
-                QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renaming, atomFactory);
-                HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
-                return iqTransformer.transform(tree);
-            }
-            else
-                return tree;
+            return queryTransformerFactory.createRenamer(renaming).transform(tree);
         }
     }
 

@@ -29,7 +29,7 @@ public class IfSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         if (newTerms.stream()
                 .skip(1)
-                .allMatch(t -> (t instanceof Constant) && t.isNull()))
+                .allMatch(ImmutableTerm::isNull))
             return termFactory.getNullConstant();
 
         if (newTerms.stream()

@@ -30,13 +30,11 @@ import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.translation.KGQueryTranslator;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -83,7 +81,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         DistinctVariableOnlyDataAtom initialProjectionAtom = iq.getProjectionAtom();
         IQTree initialTree = iq.getTree();
 
-        ImmutableMap<Variable, ImmutableTerm> definitions = extractDefinitions(initialTree);
+        Substitution<ImmutableTerm> definitions = extractDefinitions(initialTree);
         ImmutableMap<Variable, RDFTermType> rdfTypes = extractRDFTypes(definitions);
 
         IQTree dbTree = replaceRDFByDBTerms(initialTree, rdfTypes);
@@ -111,18 +109,16 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
          */
         ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNode(
                 nativeTree.getVariables(),
-                substitutionFactory.getSubstitution(
-                        nativeTree.getVariables().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        v -> v,
-                                        v -> termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversion2RDFLexical(
-                                                        Optional.ofNullable(dbTypeMap.get(v))
-                                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting a type from the native node")),
-                                                        v,
-                                                        Optional.ofNullable(rdfTypes.get(v))
-                                                                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
-                                                termFactory.getRDFTermTypeConstant(rdfTypes.get(v)))))));
+                nativeTree.getVariables().stream()
+                        .collect(substitutionFactory.toSubstitution(
+                                v -> termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                                Optional.ofNullable(dbTypeMap.get(v))
+                                                        .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting a type from the native node")),
+                                                v,
+                                                Optional.ofNullable(rdfTypes.get(v))
+                                                        .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
+                                        termFactory.getRDFTermTypeConstant(rdfTypes.get(v))))));
 
         IQTree executableTree = iqFactory.createUnaryIQTree(
                 postProcessingToRDFNode,
@@ -140,30 +136,32 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return tree;
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof SliceNode) {
+            // recursive
             return iqFactory.createUnaryIQTree((SliceNode) rootNode, replaceRDFByDBTerms(tree, rdfTypes));
         }
         else if (rootNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) rootNode;
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = replaceRDFByDBTermsInSubstitution(
-                    constructionNode.getSubstitution(), rdfTypes);
+            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+                    .transform(rdfTypes::get, this::replaceRDFByDBTerm)
+                    .build();
+
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution),
-                    ((UnaryIQTree)tree).getChild()
-            );
+                    ((UnaryIQTree)tree).getChild());
         }
         else
             throw new MinorOntopInternalBugException("Unexpected tree shape " +
                     "(proper exception should have already been thrown)");
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
+    private Substitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
         QueryNode rootNode = rdfTree.getRootNode();
         if (rootNode instanceof ConstructionNode) {
             // NB: should not include any non-projected variable (illegal IQ)
-            ImmutableMap<Variable, ImmutableTerm> substitutionMap = ((ConstructionNode) rootNode).getSubstitution().getImmutableMap();
-            Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitutionMap.keySet());
+            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+            Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
             if (missingVariables.isEmpty())
-                return substitutionMap;
+                return substitution;
             throw new NotFullyTranslatableToNativeQueryException(String.format(
                     "its variables %s are missing an independent definition",
                     missingVariables));
@@ -173,21 +171,11 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
             return extractDefinitions(((UnaryIQTree)rootNode).getChild());
         }
         else if (rdfTree.getVariables().isEmpty()) {
-            return ImmutableMap.of();
+            return substitutionFactory.getSubstitution();
         }
         else {
             throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
         }
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> replaceRDFByDBTermsInSubstitution(
-            ImmutableSubstitution<ImmutableTerm> substitution, ImmutableMap<Variable, RDFTermType> rdfTypes) {
-        ImmutableMap<Variable, ImmutableTerm> newMap = substitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> replaceRDFByDBTerm(e.getValue(), rdfTypes.get(e.getKey()))));
-
-        return substitutionFactory.getSubstitution(newMap);
     }
 
     private ImmutableTerm replaceRDFByDBTerm(ImmutableTerm definition,
@@ -206,24 +194,27 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                 "(proper exception should have already been thrown)");
     }
 
-    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(ImmutableMap<Variable, ImmutableTerm> definitions)
+    private ImmutableMap<Variable, RDFTermType> extractRDFTypes(Substitution<ImmutableTerm> definitions)
             throws NotFullyTranslatableToNativeQueryException {
-        ImmutableMap.Builder<Variable, RDFTermType> mapBuilder = ImmutableMap.builder();
 
-        for (Map.Entry<Variable, ImmutableTerm> entry : definitions.entrySet()) {
-            mapBuilder.put(entry.getKey(), extractRDFType(entry.getKey(), entry.getValue(), definitions));
+        try {
+            return definitions.builder()
+                    .toMap((v, t) -> extractRDFType(v, t, definitions));
         }
-        return mapBuilder.build();
+        catch (NotFullyTranslatableToNativeQueryRuntimeException e) {
+            throw new NotFullyTranslatableToNativeQueryException(e.getMessage());
+        }
     }
 
-    private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition,
-                                         ImmutableMap<Variable, ImmutableTerm> definitions) throws NotFullyTranslatableToNativeQueryException {
+    private RDFTermType extractRDFType(Variable variable, ImmutableTerm definition, Substitution<ImmutableTerm> definitions)  {
         if (definition instanceof Variable) {
             Variable otherVariable = (Variable) definition;
+            // recursively unravel definitions
             return extractRDFType(otherVariable, definitions.get(otherVariable), definitions);
         }
-        else if (definition instanceof RDFConstant)
+        else if (definition instanceof RDFConstant) {
             return ((RDFConstant) definition).getType();
+        }
         else if ((definition instanceof ImmutableFunctionalTerm) &&
                 ((ImmutableFunctionalTerm) definition).getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
             ImmutableTerm termTypeTerm = ((ImmutableFunctionalTerm) definition).getTerms().get(1);
@@ -236,10 +227,10 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                         && (termTypeFunctionalTerm.getTerm(1) instanceof RDFTermTypeConstant))
                     return ((RDFTermTypeConstant) termTypeFunctionalTerm.getTerm(1)).getRDFTermType();
             }
-            throw new NotFullyTranslatableToNativeQueryException(String.format(
+            throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
                             "its variable %s may not be uniquely typed", variable));
         }
-        throw new NotFullyTranslatableToNativeQueryException(String.format(
+        throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
                 "could not infer the unique type of its variable %s", variable));
     }
 
@@ -247,7 +238,15 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
         protected NotFullyTranslatableToNativeQueryException(String message) {
             super("Not fully translatable to a native query: " + message);
         }
+    }
 
+    /**
+     *  Exception required only for handling streams
+     */
+    private static class NotFullyTranslatableToNativeQueryRuntimeException extends RuntimeException {
+        private NotFullyTranslatableToNativeQueryRuntimeException(String message) {
+            super(message);
+        }
     }
 
 }

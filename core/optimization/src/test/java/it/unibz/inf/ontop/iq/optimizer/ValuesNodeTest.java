@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -88,7 +88,7 @@ public class ValuesNodeTest {
     public void test6substitutionNoChange() {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(Y, ONE_STR);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(Y, ONE_STR);
         IQTree expectedTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
 
@@ -102,7 +102,7 @@ public class ValuesNodeTest {
                         ImmutableList.of(ONE_STR, TWO_STR),
                         ImmutableList.of(ONE_STR, THREE_STR),
                         ImmutableList.of(FOUR_STR, FIVE_STR)));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR);
         IQTree expectedTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(Y), ImmutableList.of(
                         ImmutableList.of(TWO_STR),
@@ -117,7 +117,7 @@ public class ValuesNodeTest {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
         GroundFunctionalTerm groundFunctionalTerm = (GroundFunctionalTerm) TERM_FACTORY.getDBContains(ImmutableList.of(THREE_STR, FOUR_STR));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, groundFunctionalTerm);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, groundFunctionalTerm);
 
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
                 .createConstructionNode(ImmutableSet.of()),IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
@@ -134,7 +134,7 @@ public class ValuesNodeTest {
                 .createValuesNode(ImmutableList.of(X, Y, Z), ImmutableList.of(
                         ImmutableList.of(ONE_STR, TWO_STR, THREE_STR),
                         ImmutableList.of(TWO_STR, TWO_STR, FOUR_STR)));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y, Z, W);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y, Z, W);
 
         IQTree expectedTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(Y, W), ImmutableList.of(ImmutableList.of(TWO_STR, FOUR_STR)));
@@ -148,7 +148,7 @@ public class ValuesNodeTest {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(
                         ImmutableList.of(ONE_STR)));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y);
 
         IQTree expectedTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(Y), ImmutableList.of(
@@ -166,7 +166,7 @@ public class ValuesNodeTest {
                         ImmutableList.of(TWO_STR, TWO_STR, TWO_STR, ONE_STR),
                         ImmutableList.of(ONE_STR, TWO_STR, THREE_STR, FOUR_STR)));
         GroundFunctionalTerm groundFunctionalTerm = (GroundFunctionalTerm) TERM_FACTORY.getDBContains(ImmutableList.of(THREE_STR, FOUR_STR));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, groundFunctionalTerm, Y, Z, W, ONE_STR);
+        Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, groundFunctionalTerm, Y, Z, W, ONE_STR);
 
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
                 .createConstructionNode(ImmutableSet.of(Z)),IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
@@ -203,7 +203,7 @@ public class ValuesNodeTest {
     }
 
     private Boolean baseTestApplyDescSubstitution(IQTree initialTree,
-                                                  ImmutableSubstitution<VariableOrGroundTerm> substitution,
+                                                  Substitution<VariableOrGroundTerm> substitution,
                                                   IQTree expectedTree) {
         System.out.println('\n' + "Tree before applying descending substitution without optimizing:");
         System.out.println(initialTree);

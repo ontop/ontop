@@ -18,7 +18,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -168,9 +169,9 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
-													  ImmutableList<? extends ImmutableTerm> arguments) {
-		if (GroundTermTools.areGroundTerms(arguments)) {
+	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> arguments) {
+
+		if (arguments.stream().allMatch(t -> t instanceof GroundTerm)) {
 			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments, this);
 		}
 		else {
@@ -308,17 +309,15 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
     		ImmutableTerm liftableTerm) {
-		return new FunctionalTermDecompositionImpl(liftableTerm);
+		return new FunctionalTermDecompositionImpl(liftableTerm, getSubstitution(ImmutableMap.of()));
     }
 
 	@Override
 	public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
 			ImmutableTerm liftableTerm,
-			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
+			Substitution<ImmutableFunctionalTerm> subTermSubstitution) {
 
-		return (subTermSubstitutionMap.isEmpty())
-				? getFunctionalTermDecomposition(liftableTerm)
-				: new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitutionMap);
+		return new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitution);
 	}
 
 	@Override
@@ -327,8 +326,8 @@ public class TermFactoryImpl implements TermFactory {
 			return getImmutableExpression((BooleanFunctionSymbol) functor, terms);
 		}
 
-		if (GroundTermTools.areGroundTerms(terms)) {
-			return new GroundFunctionalTermImpl((ImmutableList<? extends GroundTerm>)terms, functor, this);
+		if (terms.stream().allMatch(t -> t instanceof GroundTerm)) {
+			return new GroundFunctionalTermImpl((ImmutableList<GroundTerm>)terms, functor, this);
 		}
 		else {
 			// Default constructor
@@ -449,8 +448,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public <T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map) {
-		return new SimpleProtoSubstitutionImpl<>(map, this);
+	public <T extends ImmutableTerm> Substitution<T> getSubstitution(ImmutableMap<Variable, T> map) {
+		return new SubstitutionImpl<>(map, this, true);
 	}
 
 	@Override

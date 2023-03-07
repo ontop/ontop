@@ -95,7 +95,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         if(terms.stream()
-                .filter(t -> t instanceof Constant)
                 .anyMatch(ImmutableTerm::isNull)) {
             return Optional.empty();
         }

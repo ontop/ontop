@@ -7,10 +7,9 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
@@ -35,8 +34,7 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     protected AbstractDataAtomImpl(P predicate, VariableOrGroundTerm... variableOrGroundTerms) {
-        this.predicate = predicate;
-        this.arguments = ImmutableList.copyOf(variableOrGroundTerms);
+        this(predicate, ImmutableList.copyOf(variableOrGroundTerms));
     }
 
     @Override
@@ -57,16 +55,6 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     @Override
     public ImmutableList<? extends VariableOrGroundTerm> getArguments() {
         return arguments;
-    }
-
-    @Override
-    public boolean containsGroundTerms() {
-        for (ImmutableTerm term : getArguments()) {
-            if (term.isGround()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -109,11 +97,10 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
             sb.append(predicate.toString());
             sb.append("(");
 
-            List<String> argumentStrings = arguments.stream()
-                    .map(VariableOrGroundTerm::toString)
-                    .collect(Collectors.toList());
+            Stream<String> argumentStrings = arguments.stream()
+                    .map(VariableOrGroundTerm::toString);
 
-            sb.append(String.join(",", argumentStrings));
+            sb.append(argumentStrings.collect(Collectors.joining(", ")));
             sb.append(")");
             string = sb.toString();
         }

@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -139,14 +139,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RAExpressionAttributes parentAttributeMap = extractParentAttributeMap(parentDefinitions, idFactory);
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (AddColumns a : columns.added) {
-            Variable v = getVariable(a.name, idFactory, termFactory);
-            ImmutableTerm value = extractExpression(a, parentAttributeMap, idFactory, coreSingletons);
-            substitutionMapBuilder.put(v, value);
-        }
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitutionMapBuilder.build();
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(substitutionMap);
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitutionThrowsExceptions(
+                columns.added,
+                a -> getVariable(a.name, idFactory, termFactory),
+                a -> extractExpression(a, parentAttributeMap, idFactory, coreSingletons));
 
         ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
                 .getConstructionSubstitutionNormalizer();

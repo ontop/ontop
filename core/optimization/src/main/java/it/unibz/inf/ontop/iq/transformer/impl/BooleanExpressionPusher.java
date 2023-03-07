@@ -13,7 +13,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
     private final CoreSingletons coreSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     protected BooleanExpressionPusher(ImmutableExpression expressionToPushDown,
                                       CoreSingletons coreSingletons) {
@@ -38,13 +40,14 @@ public class BooleanExpressionPusher implements IQVisitor<Optional<IQTree>> {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
     public Optional<IQTree> visitConstruction(ConstructionNode rootNode, IQTree child) {
-        ImmutableSubstitution<ImmutableTerm> substitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> substitution = rootNode.getSubstitution();
 
-        ImmutableExpression newExpression = substitution.applyToBooleanExpression(expressionToPushDown);
+        ImmutableExpression newExpression = substitution.apply(expressionToPushDown);
 
         BooleanExpressionPusher newPusher = new BooleanExpressionPusher(newExpression, coreSingletons);
         IQTree newChild = child.acceptVisitor(newPusher)

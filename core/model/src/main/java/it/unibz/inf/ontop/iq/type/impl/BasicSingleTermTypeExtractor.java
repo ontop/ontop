@@ -23,7 +23,6 @@ import java.util.Optional;
 public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
     private final TermFactory termFactory;
-
     @Inject
     private BasicSingleTermTypeExtractor(TermFactory termFactory) {
         this.termFactory = termFactory;
@@ -142,7 +141,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().applyToVariable(variable), child);
+            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
@@ -156,10 +155,9 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
                 return flattenNode.inferOutputType(
                         typeExtractor.extractSingleTermType(
                                 flattenNode.getFlattenedVariable(),
-                                child
-                        ));
+                                child));
             }
-            if(flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
+            if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
             }
             return child.acceptVisitor(this);
@@ -225,8 +223,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         public Optional<TermType> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableSet<TermType> termTypes = children.stream()
                     .map(c -> c.acceptVisitor(this))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(ImmutableCollectors.toSet());
 
             // Picks arbitrarily one of them

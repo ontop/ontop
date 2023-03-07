@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -10,9 +11,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -48,12 +47,11 @@ public class JoinLikeChildBindingLifter {
                                          VariableNullability variableNullability,
                                          BindingLiftConverter<R> bindingLiftConverter) throws UnsatisfiableConditionException {
 
-        ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
+        Substitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
-        ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
-                .getFragment(VariableOrGroundTerm.class);
+        Substitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution.restrictRangeTo(VariableOrGroundTerm.class);
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFragment(ImmutableFunctionalTerm.class);
+        Substitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
@@ -61,37 +59,30 @@ public class JoinLikeChildBindingLifter {
                 .flatMap(iq -> iq.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
-        InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                nonDownPropagableFragment.getImmutableMap().keySet().stream()
-                        .filter(otherChildrenVariables::contains),
-                variableGenerator::generateNewVariableFromVar);
+        InjectiveSubstitution<Variable> freshRenaming = Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        Stream<ImmutableExpression> equalities = freshRenaming.builder()
+                .toStream((v, t) -> termFactory.getStrictEquality(selectedChildSubstitution.apply(v), t));
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
-                computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
+                termFactory.getConjunction(initialJoiningCondition.map(selectedChildSubstitution::apply), equalities),
                 nonLiftableVariables, children, variableNullability);
+
         Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
-        ImmutableSubstitution<ImmutableTerm> naiveAscendingSubstitution = expressionResults.getSubstitution().composeWith(
-                selectedChildSubstitution);
-        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
-                expressionResults.getSubstitution().composeWith2(freshRenaming)
-                        .composeWith2(downPropagableFragment);
+        Substitution<ImmutableTerm> naiveAscendingSubstitution =
+                expressionResults.getSubstitution().compose(selectedChildSubstitution);
+
+        Substitution<VariableOrGroundTerm> descendingSubstitution =
+                substitutionFactory.onVariableOrGroundTerms().compose(
+                        expressionResults.getSubstitution(),
+                        substitutionFactory.union(freshRenaming, downPropagableFragment));
 
         return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
                 naiveAscendingSubstitution, descendingSubstitution);
-    }
-
-    private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
-                                                                       ImmutableSubstitution<ImmutableTerm> substitution,
-                                                                       InjectiveVar2VarSubstitution freshRenaming) {
-
-        Stream<ImmutableExpression> expressions2 = freshRenaming.getImmutableMap().entrySet().stream()
-                        .map(r -> termFactory.getStrictEquality(substitution.applyToVariable(r.getKey()), r.getValue()));
-
-        return termFactory.getConjunction(
-                initialJoiningCondition.map(substitution::applyToBooleanExpression), expressions2);
     }
 
     @FunctionalInterface
@@ -99,7 +90,7 @@ public class JoinLikeChildBindingLifter {
 
         R convert(ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
                   Optional<ImmutableExpression> newCondition,
-                  ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-                  ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
+                  Substitution<ImmutableTerm> ascendingSubstitution,
+                  Substitution<? extends VariableOrGroundTerm> descendingSubstitution);
     }
 }

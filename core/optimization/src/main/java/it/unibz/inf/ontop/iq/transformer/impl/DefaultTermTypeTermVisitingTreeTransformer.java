@@ -17,8 +17,7 @@ import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -40,7 +39,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     private final VariableGenerator variableGenerator;
     private final TypeConstantDictionary dictionary;
     private final TermFactory termFactory;
-    private final Constant nullValue;
     private final SubstitutionFactory substitutionFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
 
@@ -55,7 +53,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         this.variableGenerator = variableGenerator;
         this.dictionary = typeConstantDictionary;
         this.termFactory = termFactory;
-        this.nullValue = termFactory.getNullConstant();
         this.substitutionFactory = substitutionFactory;
         this.functionSymbolFactory = functionSymbolFactory;
     }
@@ -123,7 +120,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .map(s -> s.transform(this::replaceTypeTermConstants))
                 .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
                 .filter(n -> !n.equals(child.getRootNode()))
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
+                .<IQTree>map(n -> iqFactory.createUnaryIQTree(n, ((UnaryIQTree)child).getChild()))
                 .orElse(child);
     }
 
@@ -166,7 +163,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() ->  new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to define the blocked definition of the RDF term type variable"));
 
-        if (definition.equals(nullValue))
+        if (definition.isNull())
             return Stream.of();
         else if (definition instanceof ImmutableFunctionalTerm)
             return extractPossibleTermTypeConstants((ImmutableFunctionalTerm) definition);
@@ -195,12 +192,9 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().transform(
-                (k, v) -> Optional.ofNullable(typeFunctionSymbolMap.get(k))
-                        // RDF type definition
-                        .map(functionSymbol -> enforceUsageOfCommonTypeFunctionSymbol(v, functionSymbol))
-                        // Regular definition
-                        .orElse(v));
+        Substitution<ImmutableTerm> newSubstitution = initialConstructionNode.getSubstitution().builder()
+                .transformOrRetain(typeFunctionSymbolMap::get, this::enforceUsageOfCommonTypeFunctionSymbol)
+                .build();
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(tree.getVariables(),newSubstitution);
 
@@ -258,36 +252,20 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                                         ImmutableSet<Variable> metaTermTypeVariables,
                                         ImmutableSet<RDFTermTypeConstant> possibleConstants) {
 
-        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
-        ImmutableList<ImmutableList<Constant>> values = valuesNode.getValues();
-
-        ImmutableMap<Variable, Variable> generatedVariableNamesMap = orderedVariables.stream().collect(ImmutableCollectors.toMap(
-                key -> key,
-                key -> variableGenerator.generateNewVariable()));
+        InjectiveSubstitution<Variable> renaming = metaTermTypeVariables.stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
         ValuesNode newValuesNode = iqFactory.createValuesNode(
-                orderedVariables.stream()
-                        .map(variable -> metaTermTypeVariables.contains(variable)
-                                            ? generatedVariableNamesMap.get(variable)
-                                            : variable)
-                        .collect(ImmutableCollectors.toList()),
-                values.stream()
+                substitutionFactory.apply(renaming, valuesNode.getOrderedVariables()),
+                valuesNode.getValues().stream()
                         .map(tuple -> tuple.stream()
                                 .map(this::replaceTypeTermConstantWithFunctionalTerm)
                                 .collect(ImmutableCollectors.toList()))
                         .collect(ImmutableCollectors.toList()));
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(orderedVariables),
-                substitutionFactory.getSubstitution(
-                        metaTermTypeVariables.stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        variable -> variable,
-                                        variable -> termFactory.getRDFTermTypeFunctionalTerm(
-                                                        generatedVariableNamesMap.get(variable),
-                                                        dictionary,
-                                                        possibleConstants,
-                                                        false)))));
+                ImmutableSet.copyOf(valuesNode.getOrderedVariables()),
+                renaming.transform(t -> termFactory.getRDFTermTypeFunctionalTerm(t, dictionary, possibleConstants, false)));
 
         return iqFactory.createUnaryIQTree(newConstructionNode, newValuesNode);
     }
@@ -301,9 +279,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         else
             return constant;
     }
-
-
-
 
 
 

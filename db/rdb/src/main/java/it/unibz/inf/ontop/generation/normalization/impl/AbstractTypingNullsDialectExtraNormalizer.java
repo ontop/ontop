@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -12,13 +12,9 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
@@ -38,10 +34,8 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         return transform(tree);
     }
 
-    protected Stream<Variable> extractNullVariables(ConstructionNode constructionNode) {
-        return constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().isNull())
-                .map(Map.Entry::getKey);
+    protected ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {
+        return constructionNode.getSubstitution().getPreImage(ImmutableTerm::isNull);
     }
 
     /**
@@ -51,16 +45,12 @@ public abstract class AbstractTypingNullsDialectExtraNormalizer extends DefaultR
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
-            ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = constructionNode.getSubstitution().getImmutableMap().entrySet().stream()
-                    .map(e -> Optional.ofNullable(typedNullMap.get(e.getKey()))
-                            .filter(n -> e.getValue().isNull())
-                            .map(n -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) n))
-                            .orElse(e))
-                    .collect(ImmutableCollectors.toMap());
+            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
+                    .transformOrRetain(typedNullMap::get, (t, n) -> t.isNull() ? n : t)
+                    .build();
 
             ConstructionNode newConstructionNode = iqFactory.createConstructionNode(
-                    constructionNode.getVariables(),
-                    substitutionFactory.getSubstitution(newSubstitutionMap));
+                    constructionNode.getVariables(), newSubstitution);
 
             return iqFactory.createUnaryIQTree(newConstructionNode, ((UnaryIQTree) child).getChild());
         }

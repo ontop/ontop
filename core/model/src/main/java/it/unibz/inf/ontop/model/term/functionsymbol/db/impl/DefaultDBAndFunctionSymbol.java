@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
             return falseValue;
 
         Optional<ImmutableTerm> optionalNull = simplifiedTerms.stream()
-                .filter(t -> (t instanceof Constant) && t.isNull())
+                .filter(ImmutableTerm::isNull)
                 .findFirst();
 
         ImmutableList<ImmutableExpression> others = simplifiedTerms.stream()
@@ -105,7 +105,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
      */
     private ImmutableList<ImmutableTerm> simplifyStrictEqConstant(ImmutableList<ImmutableTerm> terms, int i,
                                                                   TermFactory termFactory, VariableNullability variableNullability) {
-        Optional<ProtoSubstitution<NonNullConstant>> substitution = Optional.of(terms.get(i))
+        Optional<Substitution<NonNullConstant>> substitution = Optional.of(terms.get(i))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .filter(t -> t.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
@@ -123,13 +123,13 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                                 .map(t -> (NonNullConstant) t)
                                 .findAny()
                                 .get()))
-                .map(termFactory::getProtoSubstitution);
+                .map(termFactory::getSubstitution);
 
         return substitution
                 .map(s -> IntStream.range(0, terms.size())
                         .mapToObj(j -> i == j
                                 ? terms.get(i)
-                                : s.apply(terms.get(j)).simplify(variableNullability))
+                                : s.applyToTerm(terms.get(j)).simplify(variableNullability))
                         .collect(ImmutableCollectors.toList()))
                 .orElse(terms);
     }

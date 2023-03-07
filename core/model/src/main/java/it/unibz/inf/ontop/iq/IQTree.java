@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -56,7 +56,7 @@ public interface IQTree {
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint,
             VariableGenerator variableGenerator);
 
@@ -67,14 +67,14 @@ public interface IQTree {
      * (e.g. it remains normalized if it was already)
      *
      */
-    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
     /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
      *
      * Designed to be called AFTER the "structural/semantic optimization" phase.
      */
-    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         VariableGenerator variableGenerator);
 
     /**
@@ -137,7 +137,7 @@ public interface IQTree {
      * then x/URI("http://myURI{}", x4) will be the only output substitution for that branch.
      *
      */
-    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
+    ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions();
 
     /**
      * NOT guaranteed to return all the unique constraints (MAY BE INCOMPLETE)

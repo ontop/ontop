@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -10,13 +9,11 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -41,26 +38,16 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
      *
      */
     @Override
-    public ConstructionSubstitutionNormalization normalizeSubstitution(
-            ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+    public ConstructionSubstitutionNormalization normalizeSubstitution(Substitution<?> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.filter(projectedVariables::contains);
+        InjectiveSubstitution<Variable> downRenamingSubstitution = substitutionFactory.getPrioritizingRenaming(ascendingSubstitution, projectedVariables);
 
-        Var2VarSubstitution downRenamingSubstitution = substitutionFactory.getVar2VarSubstitution(
-                reducedAscendingSubstitution.getImmutableMap().entrySet().stream()
-                        .filter(e -> e.getValue() instanceof Variable)
-                        .map(e -> Maps.immutableEntry(e.getKey(), (Variable) e.getValue()))
-                        .filter(e -> !projectedVariables.contains(e.getValue()))
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getValue,
-                                Map.Entry::getKey,
-                                // In case of key conflict, choose anyone of them
-                                (v1, v2) -> v1)));
+        Substitution<?> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
-                .composeWith(reducedAscendingSubstitution)
-                .filter(projectedVariables::contains)
-                .transform(v -> v.simplify());
+        Substitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution.compose(reducedAscendingSubstitution).builder()
+                .restrictDomainTo(projectedVariables)
+                .transform(ImmutableTerm::simplify)
+                .build();
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);
@@ -69,12 +56,12 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
     public class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
-        private final ImmutableSubstitution<ImmutableTerm> normalizedSubstitution;
-        private final Var2VarSubstitution downRenamingSubstitution;
+        private final Substitution<ImmutableTerm> normalizedSubstitution;
+        private final InjectiveSubstitution<Variable> downRenamingSubstitution;
         private final ImmutableSet<Variable> projectedVariables;
 
-        private ConstructionSubstitutionNormalizationImpl(ImmutableSubstitution<ImmutableTerm> normalizedSubstitution,
-                                                          Var2VarSubstitution downRenamingSubstitution,
+        private ConstructionSubstitutionNormalizationImpl(Substitution<ImmutableTerm> normalizedSubstitution,
+                                                          InjectiveSubstitution<Variable> downRenamingSubstitution,
                                                           ImmutableSet<Variable> projectedVariables) {
             this.normalizedSubstitution = normalizedSubstitution;
             this.downRenamingSubstitution = downRenamingSubstitution;
@@ -98,13 +85,11 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
 
         @Override
         public ImmutableExpression updateExpression(ImmutableExpression expression) {
-            return downRenamingSubstitution.isEmpty()
-                    ? expression
-                    : downRenamingSubstitution.applyToBooleanExpression(expression);
+            return downRenamingSubstitution.apply(expression);
         }
 
         @Override
-        public ImmutableSubstitution<ImmutableTerm> getNormalizedSubstitution() {
+        public Substitution<ImmutableTerm> getNormalizedSubstitution() {
             return normalizedSubstitution;
         }
     }

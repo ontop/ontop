@@ -19,9 +19,7 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -144,7 +142,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child,
                                               VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(
@@ -156,19 +154,16 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 ));
     }
 
-    protected Variable applySubstitution(Variable var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
-        ImmutableTerm newVar = sub.apply(var);
+    protected Variable applySubstitution(Variable var, Substitution<? extends VariableOrGroundTerm> sub) {
+        VariableOrGroundTerm newVar = substitutionFactory.onVariableOrGroundTerms().apply(sub, var);
         if (!(newVar instanceof Variable))
             throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
+
         return (Variable) newVar;
     }
 
-    protected Optional<Variable> applySubstitution(Optional<Variable> var, ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
-        return var.map(variable -> applySubstitution(variable, sub));
-    }
-
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                IQTree child, VariableGenerator variableGenerator) {
 
         return iqFactory.createUnaryIQTree(
@@ -182,7 +177,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return ImmutableSet.of();
     }
 
@@ -281,7 +276,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
         IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
         return iqFactory.createUnaryIQTree(applySubstitution(renamingSubstitution), newChild, newTreeCache);
@@ -334,10 +329,10 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     /**
      * Avoids creating an instance if unnecessary (a similar optimization is implemented for Filter Nodes)
      */
-    private FlattenNode applySubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
+    private FlattenNode applySubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
-        Optional<Variable> sIndexVar = applySubstitution(indexVariable, sub);
+        Optional<Variable> sIndexVar = indexVariable.map(variable -> applySubstitution(variable, sub));
         return sFlattenedVar.equals(flattenedVariable) &&
                 sOutputVar.equals(outputVariable) &&
                 sIndexVar.equals(indexVariable) ?

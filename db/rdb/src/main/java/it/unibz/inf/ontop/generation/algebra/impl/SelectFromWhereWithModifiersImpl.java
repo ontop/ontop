@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
 
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModifiers {
 
     private final ImmutableSortedSet<Variable> projectedVariables;
-    private final ImmutableSubstitution<? extends ImmutableTerm> substitution;
+    private final Substitution<? extends ImmutableTerm> substitution;
     private final SQLExpression fromExpression;
     private final Optional<ImmutableExpression> whereExpression;
     private final ImmutableSet<Variable> groupByVariables;
@@ -34,7 +34,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
 
     @AssistedInject
     private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSortedSet<Variable> projectedVariables,
-                                             @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                             @Assisted Substitution<? extends ImmutableTerm> substitution,
                                              @Assisted("fromExpression") SQLExpression fromExpression,
                                              @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
                                              @Assisted("groupBy") ImmutableSet<Variable> groupByVariables,
@@ -60,7 +60,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     }
 
     @Override
-    public ImmutableSubstitution<? extends ImmutableTerm> getSubstitution() {
+    public Substitution<? extends ImmutableTerm> getSubstitution() {
         return substitution;
     }
 

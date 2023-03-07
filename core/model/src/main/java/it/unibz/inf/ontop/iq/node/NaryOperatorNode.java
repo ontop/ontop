@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -25,16 +25,16 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
                                     IQTreeCache treeCache);
 
-    IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
                                        VariableGenerator variableGenerator);
 
     IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
-    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
-                             IQTreeCache treeCache);
+    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
+                              IQTreeCache treeCache);
 
     VariableNullability getVariableNullability(ImmutableList<IQTree> children);
 
@@ -62,7 +62,7 @@ public interface NaryOperatorNode extends QueryNode {
     NaryOperatorNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 
-    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
+    ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
 
     IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache);
 

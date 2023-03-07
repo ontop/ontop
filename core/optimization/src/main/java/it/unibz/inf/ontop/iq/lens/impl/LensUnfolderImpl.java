@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.lens.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.dbschema.Lens;
@@ -15,10 +14,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
@@ -102,16 +98,19 @@ public class LensUnfolderImpl implements LensUnfolder {
         }
 
         protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
+            InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
                     variableGenerator, definition.getTree().getKnownVariables());
 
-            IQ renamedDefinition = renamingSubstitution.isEmpty()
-                    ? definition
-                    : transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+            IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
 
-            ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
-                    renamingSubstitution.applyToVariableArguments(renamedDefinition.getProjectionAtom().getArguments()),
-                    dataNode.getArgumentMap());
+            ImmutableList<Variable> sourceAtomArguments = substitutionFactory.apply(
+                    renamingSubstitution,
+                    renamedDefinition.getProjectionAtom().getArguments());
+
+            Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            e -> sourceAtomArguments.get(e.getKey()),
+                            Map.Entry::getValue));
 
             IQTree substitutedDefinition = renamedDefinition.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
@@ -122,18 +121,6 @@ public class LensUnfolderImpl implements LensUnfolder {
                     .normalizeForOptimization(variableGenerator);
         }
 
-        protected ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(
-                ImmutableList<Variable> sourceAtomArguments,
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap) {
-
-            ImmutableMap<Variable, VariableOrGroundTerm> newMap = targetArgumentMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            e -> sourceAtomArguments.get(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-
-            return substitutionFactory.getSubstitution(newMap);
-        }
     }
 
 

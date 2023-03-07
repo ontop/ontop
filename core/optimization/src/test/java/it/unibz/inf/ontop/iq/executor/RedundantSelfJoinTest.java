@@ -667,12 +667,12 @@ public class RedundantSelfJoinTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), N)));
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(M, N));
+                        TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(F0), M)));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
         ConstructionNode rightConstruction = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(F0, N),
+                ImmutableSet.of(F0, M),
                 SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
-        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(N, N, N));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, M, M));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newConstructionNode,

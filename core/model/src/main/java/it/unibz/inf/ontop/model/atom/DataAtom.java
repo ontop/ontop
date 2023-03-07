@@ -27,7 +27,4 @@ public interface DataAtom<P extends AtomPredicate> {
     ImmutableList<? extends VariableOrGroundTerm> getArguments();
 
     ImmutableSet<Variable> getVariables();
-
-    boolean containsGroundTerms();
-
 }

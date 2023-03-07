@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -30,28 +30,28 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = initialSubstitution.transform(v -> transformTerm(v, child));
+        Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> newSubstitution = initialSubstitution.transform(t -> transformTerm(t, child));
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
-                newChild);
+                        iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
+                        newChild);
     }
 
     @Override
     public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.transform(v -> transformFunctionalTerm(v, child));
+        Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableFunctionalTerm> newSubstitution = initialSubstitution.transform(t -> transformFunctionalTerm(t, child));
 
         return (newChild.equals(child) && newSubstitution.equals(initialSubstitution))
                 ? tree
                 : iqFactory.createUnaryIQTree(
-                iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution),
-                newChild);
+                        iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newSubstitution),
+                        newChild);
     }
 
     @Override
@@ -146,10 +146,8 @@ public abstract class AbstractExpressionTransformer extends DefaultRecursiveIQTr
     protected ImmutableFunctionalTerm transformFunctionalTerm(ImmutableFunctionalTerm functionalTerm, IQTree tree) {
         ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
         ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        // Recursive
-                        ? transformFunctionalTerm((ImmutableFunctionalTerm) t, tree)
-                        : t)
+                // Recursive
+                .map(t -> transformTerm(t, tree))
                 .collect(ImmutableCollectors.toList());
 
         FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();

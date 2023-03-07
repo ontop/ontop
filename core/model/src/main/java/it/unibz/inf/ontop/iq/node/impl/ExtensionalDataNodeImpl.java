@@ -16,8 +16,9 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -61,6 +62,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private Boolean isDistinct;
 
     private final CoreUtilsFactory coreUtilsFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
@@ -70,8 +72,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
-        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory);
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory);
     }
 
     /**
@@ -82,12 +84,13 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -114,8 +117,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArguments = descendingSubstitution.applyToArgumentMap(argumentMap);
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 
@@ -163,8 +166,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      * Useful the data node has a lot of columns.
      */
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = freshRenamingSubstitution.applyToArgumentMap(argumentMap);
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(freshRenamingSubstitution, argumentMap);
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
