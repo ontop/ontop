@@ -54,18 +54,4 @@ public class LeftJoinProfBigQueryTest extends AbstractLeftJoinProfTest {
     protected boolean supportsIntegrityConstraints() {
         return false;
     }
-
-    @Disabled("Currently disabled because this test causes an issue in the translation of the query (Only DBFunctionSymbols must be provided to a SQLTermSerializer)")
-    @Test
-    @Override
-    public void testMinusMultitypedSum() {
-        super.testMinusMultitypedSum();
-    }
-
-    @Disabled("Currently disabled because this test causes an issue in the translation of the query (Only DBFunctionSymbols must be provided to a SQLTermSerializer)")
-    @Test
-    @Override
-    public void testMinusMultitypedAvg() {
-        super.testMinusMultitypedAvg();
-    }
 }
