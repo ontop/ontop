@@ -64,6 +64,7 @@ public class BindWithFunctionsRedshiftTest extends AbstractBindTestWithFunctions
                 "\"2015-09-21T09:23:06+00\"^^xsd:string");
     }
 
+    @Override
     protected ImmutableSet<String> getRoundExpectedValues() {
         //Round leaves entries in same data type, so discount of type DECIMAL remains decimal with 18 digits in the
         //fractional part
