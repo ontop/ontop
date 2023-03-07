@@ -1354,7 +1354,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:secondsBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
+        executeAndCompareValues(query, ImmutableSet.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
                 "\"1532994786\"^^xsd:long", "\"116806800\"^^xsd:long"));
     }
 
