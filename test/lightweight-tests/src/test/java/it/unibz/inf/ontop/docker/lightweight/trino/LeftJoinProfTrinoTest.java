@@ -113,11 +113,9 @@ public class LeftJoinProfTrinoTest extends AbstractLeftJoinProfTest {
     @Test
     public void testUselessRightPart2() { super.testUselessRightPart2(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
     @Test
     public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }
 
-    @Disabled("This test requires integrity constraints that are not currently supported by trino.")
     @Test
     public void testMinusMultitypedSum() { super.testMinusMultitypedSum(); }
 }
