@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -15,7 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -36,17 +37,21 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final TermFactory termFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
+    private final IQTreeTools iqTreeTools;
+
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
                                     ConstructionSubstitutionNormalizer substitutionNormalizer,
                                     ConditionSimplifier conditionSimplifier, TermFactory termFactory,
-                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
+                                    IQTreeTools iqTreeTools) {
         this.bindingLift = bindingLift;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.conditionSimplifier = conditionSimplifier;
         this.termFactory = termFactory;
         this.variableNullabilityTools = variableNullabilityTools;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -94,12 +99,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
     }
 
-    private static ImmutableSet<Variable> extractProjectedVariables(ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private class State {
@@ -128,7 +127,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          */
         public State(ImmutableList<IQTree> children, Optional<ImmutableExpression> joiningCondition,
                      VariableGenerator variableGenerator) {
-            this(extractProjectedVariables(children), ImmutableList.of(), children,
+            this(iqTreeTools.getChildrenVariables(children), ImmutableList.of(), children,
                     joiningCondition, variableGenerator,
                     variableNullabilityTools.getChildrenVariableNullability(children));
         }
@@ -230,11 +229,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             ImmutableSet<Variable> requiredGrandChildVariables = selectedChildConstructionNode.getChildVariables();
 
-            IQTree selectedGrandChildWithLimitedProjection = selectedGrandChild.getVariables().equals(requiredGrandChildVariables)
-                    ? selectedGrandChild
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(requiredGrandChildVariables),
-                            selectedGrandChild);
+            IQTree selectedGrandChildWithLimitedProjection =
+                    iqTreeTools.createConstructionNodeTreeIfNontrivial(selectedGrandChild, requiredGrandChildVariables);
 
             VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
                     IntStream.range(0, liftedChildren.size())
@@ -247,18 +243,19 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         selectedGrandChildWithLimitedProjection,
                         liftedChildren, ImmutableSet.of(), joiningCondition, variableGenerator,
                         newChildrenVariableNullability, this::convertIntoState);
-            } catch (UnsatisfiableConditionException e) {
+            }
+            catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
             }
         }
 
         private State convertIntoState(
                 ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
-                Optional<ImmutableExpression> notNormalizedCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-                ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+                Optional<ImmutableExpression> notNormalizedCondition, Substitution<ImmutableTerm> ascendingSubstitution,
+                Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer
-                    .normalizeSubstitution(ascendingSubstitution, extractProjectedVariables(liftedChildren));
+                    .normalizeSubstitution(ascendingSubstitution, iqTreeTools.getChildrenVariables(liftedChildren));
 
             Optional<ImmutableExpression> newCondition = notNormalizedCondition
                     .map(normalization::updateExpression);
@@ -292,9 +289,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                                 throw new MinorOntopInternalBugException("The order must be respected");
                             });
 
-            IQTree nonNormalizedTree = ancestorTree.getVariables().equals(projectedVariables)
-                    ? ancestorTree
-                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), ancestorTree);
+            IQTree nonNormalizedTree = iqTreeTools.createConstructionNodeTreeIfNontrivial(ancestorTree, projectedVariables);
 
             // Normalizes the ancestors (recursive)
             return nonNormalizedTree.normalizeForOptimization(variableGenerator);
@@ -401,8 +396,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 Optional<ConstructionNode> newParent = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> iqFactory.createConstructionNode(extractProjectedVariables(children),
-                                (ImmutableSubstitution<ImmutableTerm>) (ImmutableSubstitution<?>) s));
+                        .map(s -> iqFactory.createConstructionNode(iqTreeTools.getChildrenVariables(children), s));
 
                 return newParent
                         .map(p -> updateParentConditionAndChildren(p, newJoiningCondition, newChildren))
@@ -498,9 +492,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             if (newChildren.equals(children))
                 return this;
 
-            ImmutableSet<Variable> childrenVariables = children.stream()
-                    .flatMap(c -> c.getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
+            ImmutableSet<Variable> childrenVariables = iqTreeTools.getChildrenVariables(children);
 
             ConstructionNode newParent = iqFactory.createConstructionNode(childrenVariables);
 

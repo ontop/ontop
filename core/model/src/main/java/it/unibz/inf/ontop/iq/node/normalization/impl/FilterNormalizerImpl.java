@@ -15,10 +15,10 @@ import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionOperations;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -29,13 +29,15 @@ public class FilterNormalizerImpl implements FilterNormalizer {
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
     private final ConditionSimplifier conditionSimplifier;
 
     @Inject
-    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+    private FilterNormalizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                  ConditionSimplifier conditionSimplifier) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         this.conditionSimplifier = conditionSimplifier;
     }
 
@@ -191,7 +193,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
         private State liftBindings(ConstructionNode childConstructionNode, UnaryIQTree child) {
             return condition
-                    .map(e -> childConstructionNode.getSubstitution().applyToBooleanExpression(e))
+                    .map(e -> childConstructionNode.getSubstitution().apply(e))
                     .map(e -> updateParentChildAndCondition(childConstructionNode, e, child.getChild()))
                     .orElseGet(() -> liftChildAsParent(child));
         }
@@ -257,7 +259,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 Optional<ConstructionNode> parentConstructionNode = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())
-                        .map(s -> (ImmutableSubstitution<ImmutableTerm>) (ImmutableSubstitution<?>) s)
                         .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
 
                 return conditionSimplificationResults.getOptionalExpression()

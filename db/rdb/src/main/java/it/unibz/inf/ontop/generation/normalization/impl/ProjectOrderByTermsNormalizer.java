@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -17,12 +15,11 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -94,71 +91,42 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
 
-        ImmutableSet<? extends ImmutableTerm> alreadyDefinedTerms = analysis.constructionNode.isPresent()
-                ? Stream.concat(
-                        projectedVariables.stream(),
-                        analysis.constructionNode.get().getSubstitution().getImmutableMap().values().stream())
-                    .collect(ImmutableCollectors.toSet())
-                : projectedVariables;
+        ImmutableSet<ImmutableTerm> alreadyDefinedTerms = Sets.union(
+                        projectedVariables,
+                        analysis.getSubstitution().getRangeSet())
+                .immutableCopy();
 
-        ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings = analysis.sortConditions.stream()
+        ImmutableMap<Variable, NonGroundTerm> newBindings = analysis.sortConditions.stream()
                 .map(OrderByNode.OrderComparator::getTerm)
                 .filter(t -> !alreadyDefinedTerms.contains(t))
+                .distinct() // keep only the first occurrence of the sorting term
                 .map(t -> Maps.immutableEntry(
                         (t instanceof Variable)
                                 ? (Variable) t
                                 : variableGenerator.generateNewVariable(),
                         t))
-                .collect(ImmutableCollectors.toSet());
+                .collect(ImmutableCollectors.toMap());
 
         if (newBindings.isEmpty())
             return tree;
 
-        if (!isSupported(projectedVariables, analysis, newBindings)) {
+        // decides whether the new bindings can be added
+        if (analysis.hasDistinct && newBindings.values().stream()
+                .anyMatch(t -> mayImpactDistinct(t, alreadyDefinedTerms))) {
             throw new DistinctOrderByDialectLimitationException();
         }
 
-        ImmutableSet<Variable> newProjectedVariables = Stream.concat(
-                projectedVariables.stream(),
-                newBindings.stream()
-                        .map(Map.Entry::getKey))
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newProjectedVariables = Sets.union(projectedVariables, newBindings.keySet()).immutableCopy();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                Stream.concat(
-                        newBindings.stream()
-                                .filter(e -> !e.getKey().equals(e.getValue())),
-                        analysis.constructionNode
-                                .map(c -> c.getSubstitution().getImmutableMap().entrySet().stream())
-                                .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        Substitution<ImmutableTerm> newSubstitution = substitutionFactory.union(
+                        newBindings.entrySet().stream().collect(substitutionFactory.toSubstitutionSkippingIdentityEntries()),
+                        analysis.getSubstitution());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newProjectedVariables, newSubstitution);
 
         return analysis.constructionNode
                 .map(n -> updateTopConstructionNode(tree, newConstructionNode))
                 .orElseGet(() -> insertConstructionNode(tree, newConstructionNode));
-    }
-
-    /**
-     * Decides whether or not new bindings can be added
-     *
-     */
-    protected boolean isSupported(ImmutableSet<Variable> projectedVariables, Analysis analysis,
-                                ImmutableSet<Map.Entry<Variable, NonGroundTerm>> newBindings) {
-        if (!analysis.hasDistinct)
-            return true;
-
-        ImmutableSet<ImmutableTerm> alreadyProjectedTerms = Stream.concat(
-                projectedVariables.stream(),
-                analysis.constructionNode
-                        .map(c -> c.getSubstitution().getImmutableMap().values().stream())
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toSet());
-
-        return newBindings.stream()
-                .map(Map.Entry::getValue)
-                .noneMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms));
     }
 
     /**
@@ -177,7 +145,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
                         .anyMatch(t -> mayImpactDistinct(t, alreadyProjectedTerms));
         }
         else if (term instanceof Variable) {
-            return !(alreadyProjectedTerms.contains(term));
+            return !alreadyProjectedTerms.contains(term);
         }
         // Constant
         else
@@ -218,7 +186,7 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class Analysis {
+    private final class Analysis {
         final boolean hasDistinct;
         final Optional<ConstructionNode> constructionNode;
         final ImmutableList<OrderByNode.OrderComparator> sortConditions;
@@ -228,6 +196,10 @@ public class ProjectOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtende
             this.hasDistinct = hasDistinct;
             this.constructionNode = constructionNode;
             this.sortConditions = sortConditions;
+        }
+
+        Substitution<ImmutableTerm> getSubstitution() {
+            return constructionNode.map(ConstructionNode::getSubstitution).orElseGet(substitutionFactory::getSubstitution);
         }
     }
 

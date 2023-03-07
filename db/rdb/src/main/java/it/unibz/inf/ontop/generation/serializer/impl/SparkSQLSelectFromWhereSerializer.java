@@ -13,10 +13,9 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.StringUtils;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -87,7 +86,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                             ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                             ImmutableMap<Variable, QuotedID> variableAliases,
-                                            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+                                            Substitution<? extends ImmutableTerm> substitution) {
                 if (sortConditions.isEmpty())
                     return "";
 
@@ -107,7 +106,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             private String serializeOrderByTerm(ImmutableTerm term,
                                                 ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
                                                 ImmutableMap<Variable, QuotedID> variableAliases,
-                                                ImmutableSubstitution<? extends ImmutableTerm> substitution)
+                                                Substitution<? extends ImmutableTerm> substitution)
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {
@@ -121,12 +120,12 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
                 else {
                     // use the project expression alias instead of processing the expression itself
-                    for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-                        if (entry.getValue().equals(term)) {
-                            return variableAliases.get(entry.getKey()).getSQLRendering();
-                        }
-                    }
-                    throw new SQLSerializationException(String.format("Term %s does not occur in the substitution %s", term, substitution));
+                    return substitution.getPreImage(t -> t.equals(term))
+                            .stream()
+                            .findFirst()
+                            .map(v -> variableAliases.get(v).getSQLRendering())
+                            .orElseThrow(() -> new SQLSerializationException(
+                                    String.format("Term %s does not occur in the substitution %s", term, substitution)));
                 }
             }
 

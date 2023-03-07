@@ -121,11 +121,8 @@ public class RightProvenanceNormalizer {
          */
         Variable provenanceVariable = variableGenerator.generateNewVariable();
 
-        ImmutableSet<Variable> newRightProjectedVariables =
-                Stream.concat(
-                        Stream.of(provenanceVariable),
-                        rightRequiredVariables.stream())
-                        .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), rightRequiredVariables)
+                .immutableCopy();
 
         ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
                 newRightProjectedVariables,

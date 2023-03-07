@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -49,8 +49,7 @@ public class IQ2CQ {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = node.getArgumentMap();
         RelationPredicate predicate = node.getRelationDefinition().getAtomPredicate();
         ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
-                .mapToObj(i -> Optional.ofNullable(argumentMap.get(i))
-                        .map(t -> (VariableOrGroundTerm) t)
+                .mapToObj(i -> Optional.<VariableOrGroundTerm>ofNullable(argumentMap.get(i))
                         .orElseGet(variableGenerator::generateNewVariable))
                 .collect(ImmutableCollectors.toList());
 
@@ -93,19 +92,16 @@ public class IQ2CQ {
 
             SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
-            InjectiveVar2VarSubstitution freshRenaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    originalValuesNode.getOrderedVariables().stream(),
-                    v -> variableGenerator.generateNewVariable(v.getName()));
+            InjectiveSubstitution<Variable> freshRenaming = originalValuesNode.getOrderedVariables().stream()
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
             ValuesNode freshValuesNode = originalValuesNode.applyFreshRenaming(freshRenaming);
             ImmutableList<Variable> freshVariables = freshValuesNode.getOrderedVariables();
 
-
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution = substitutionFactory.getSubstitution(
-                    dataNode.getArgumentMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    e -> freshVariables.get(e.getKey()),
-                                    Map.Entry::getValue)));
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            e -> freshVariables.get(e.getKey()),
+                            Map.Entry::getValue));
 
             IQTree newValuesNode = freshValuesNode.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
 

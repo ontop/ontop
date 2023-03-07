@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -19,6 +18,7 @@ import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
@@ -90,7 +90,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
+        if ((!tolerateNulls()) && newTerms.stream().anyMatch(ImmutableTerm::isNull))
             return termFactory.getNullConstant();
 
         return simplifyIfElseNullOrCoalesce(newTerms, termFactory, variableNullability)
@@ -196,11 +196,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if ((otherTerm instanceof ImmutableFunctionalTerm))
             return evaluateStrictEqWithFunctionalTerm(terms, (ImmutableFunctionalTerm) otherTerm, termFactory,
                     variableNullability);
-        else if ((otherTerm instanceof Constant) && otherTerm.isNull())
-            return IncrementalEvaluation.declareIsNull();
         else if (otherTerm instanceof NonNullConstant) {
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
+        else if (otherTerm.isNull())
+            return IncrementalEvaluation.declareIsNull();
+
         return IncrementalEvaluation.declareSameExpression();
     }
 
@@ -450,55 +451,76 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
             return Optional.empty();
 
-        return Optional.of(decomposeInjectiveTopFunctionalTerm(arguments, nonFreeVariables, variableNullability,
-                variableGenerator, termFactory));
+        return Optional.of(decomposeInjectiveTopFunctionalTerm(arguments, nonFreeVariables, variableNullability, variableGenerator, termFactory));
     }
 
-    /**
-     * Only when injectivity of the top function symbol is proved!
-     */
     protected FunctionalTermDecomposition decomposeInjectiveTopFunctionalTerm(ImmutableList<? extends ImmutableTerm> arguments,
                                                                               ImmutableSet<Variable> nonFreeVariables,
                                                                               VariableNullability variableNullability,
                                                                               VariableGenerator variableGenerator,
                                                                               TermFactory termFactory) {
-        ImmutableMap<Integer, Optional<FunctionalTermDecomposition>> subTermDecompositions = IntStream.range(0, getArity())
-                .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
-                .boxed()
-                .collect(ImmutableCollectors.toMap(
-                        i -> i,
-                        i -> ((ImmutableFunctionalTerm) arguments.get(i))
-                                // Recursive
-                                .analyzeInjectivity(nonFreeVariables, variableNullability, variableGenerator)));
 
-        ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, getArity())
-                .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
-                        .map(optionalDecomposition -> optionalDecomposition
-                                // Injective functional sub-term
-                                .map(FunctionalTermDecomposition::getLiftableTerm)
-                                // Otherwise a fresh variable
-                                .orElseGet(variableGenerator::generateNewVariable))
-                        // Previous argument when non-functional
-                        .orElseGet(() -> arguments.get(i)))
-                .collect(ImmutableCollectors.toList());
+        InjectivityAnalyzer analyzer = new InjectivityAnalyzer(nonFreeVariables, variableNullability, variableGenerator, termFactory);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
-                .flatMap(e -> e.getValue()
-                        // Decomposition case
-                        .map(d -> d.getSubTermSubstitutionMap().stream()
-                                .flatMap(s -> s.entrySet().stream()))
-                        // Not decomposed: new entry (new variable -> functional term)
-                        .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                (Variable) newArguments.get(e.getKey()),
-                                (ImmutableFunctionalTerm) arguments.get(e.getKey())))))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(this, newArguments);
-
-        return subTermSubstitutionMap.isEmpty()
-                ? termFactory.getFunctionalTermDecomposition(newFunctionalTerm)
-                : termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap);
+        return analyzer.decomposeInjectiveTopFunctionalTerm(arguments);
     }
+
+    protected class InjectivityAnalyzer {
+        private final ImmutableSet<Variable> nonFreeVariables;
+        private final VariableNullability variableNullability;
+        private final VariableGenerator variableGenerator;
+        private final TermFactory termFactory;
+        protected InjectivityAnalyzer(ImmutableSet<Variable> nonFreeVariables, VariableNullability variableNullability,
+                            VariableGenerator variableGenerator, TermFactory termFactory) {
+            this.nonFreeVariables = nonFreeVariables;
+            this.variableNullability = variableNullability;
+            this.variableGenerator = variableGenerator;
+            this.termFactory = termFactory;
+        }
+
+        /**
+         * Only when injectivity of the top function symbol is proved!
+         */
+        protected FunctionalTermDecomposition decomposeInjectiveTopFunctionalTerm(ImmutableList<? extends ImmutableTerm> arguments) {
+
+            ImmutableMap<Integer, FunctionalTermDecomposition> subTermDecompositions = IntStream.range(0, getArity())
+                    .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
+                    .boxed()
+                    .collect(ImmutableCollectors.toMap(
+                            i -> i,
+                            // Recursive
+                            i -> getFunctionalTermDecomposition((ImmutableFunctionalTerm) arguments.get(i))));
+
+            ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, getArity())
+                    .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
+                            .map(FunctionalTermDecomposition::getLiftableTerm)
+                            // Previous argument when non-functional
+                            .orElseGet(() -> arguments.get(i)))
+                    .collect(ImmutableCollectors.toList());
+
+            Substitution<ImmutableFunctionalTerm> subTermSubstitution = termFactory.getSubstitution(subTermDecompositions.values().stream()
+                    .map(FunctionalTermDecomposition::getSubstitution)
+                    .flatMap(Substitution::stream)
+                    .collect(ImmutableCollectors.toMap()));
+
+            ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(FunctionSymbolImpl.this, newArguments);
+
+            return termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution);
+        }
+
+        private FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
+
+            Optional<FunctionalTermDecomposition> optional = arg.analyzeInjectivity(nonFreeVariables, variableNullability, variableGenerator);
+            // Injective functional sub-term
+            if (optional.isPresent())
+                return optional.get();
+
+            // Otherwise a fresh variable
+            Variable var = variableGenerator.generateNewVariable();
+            return termFactory.getFunctionalTermDecomposition(var, termFactory.getSubstitution(ImmutableMap.of(var, arg)));
+        }
+    }
+
 
     protected final boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
                                         VariableNullability variableNullability, TermFactory termFactory) {
@@ -509,7 +531,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         .collect(ImmutableCollectors.toSet()), termFactory);
 
         return analyzeInjectivity(arguments, ImmutableSet.of(), variableNullability, testVariableGenerator, termFactory)
-                .filter(d -> !d.getSubTermSubstitutionMap().isPresent())
+                .filter(d -> d.getSubstitution().isEmpty())
                 .isPresent();
     }
 

@@ -3,18 +3,17 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
-import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -23,25 +22,25 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol.AggregationSimplification;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class AggregationSimplifierImpl implements AggregationSimplifier {
 
     private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
 
+    private final IQTreeTools iqTreeTools;
+
     @Inject
-    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons) {
+    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.optimizationSingletons = optimizationSingletons;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons);
+        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
     }
 
     /**
@@ -63,16 +62,16 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
     protected static class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         private final VariableGenerator variableGenerator;
-        private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
 
         protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
-                                                    OptimizationSingletons optimizationSingletons) {
+                                                    OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
             super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
             this.termFactory = coreSingletons.getTermFactory();
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -88,50 +87,32 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                 return transform(
                         iqFactory.createUnaryIQTree(rootNode, normalizedChild).normalizeForOptimization(variableGenerator));
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
+            Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
 
             // With the GROUP BY clause, groups are never empty
             boolean hasGroupBy = !rootNode.getGroupingVariables().isEmpty();
 
-            ImmutableMap<Variable, Optional<AggregationSimplification>> simplificationMap =
-                    initialSubstitution.getImmutableMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> simplifyAggregationFunctionalTerm(e.getValue(), normalizedChild, hasGroupBy)));
+            ImmutableMap<Variable, AggregationSimplification> simplificationMap = initialSubstitution.builder()
+                            .toMapIgnoreOptional((v, t) -> simplifyAggregationFunctionalTerm(t, normalizedChild, hasGroupBy));
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                    substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
-                            .flatMap(e -> e.getValue()
-                                    // Takes the entries in the SubTermSubstitutionMap
-                                    .map(s -> s.getDecomposition().getSubTermSubstitutionMap().stream().
-                                            flatMap(sub -> sub.entrySet().stream()))
-                                    // Otherwise (if no simplification), keeps the former definition
-                                    .orElseGet(() -> Stream.of(Maps.immutableEntry(e.getKey(), initialSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap()));
+            Substitution<ImmutableFunctionalTerm> newAggregationSubstitution = initialSubstitution.builder()
+                            .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubstitution())
+                            .build();
 
             AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
 
-            Stream<DefinitionPushDownRequest> definitionsToPushDown = simplificationMap.values().stream()
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .flatMap(s -> s.getPushDownRequests().stream());
-
-            IQTree pushDownChildTree = pushDownDefinitions(normalizedChild, definitionsToPushDown);
+            IQTree pushDownChildTree = pushDownDefinitions(
+                    normalizedChild,
+                    simplificationMap.values().stream()
+                            .flatMap(s -> s.getPushDownRequests().stream()));
             UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
-            ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = simplificationMap.entrySet().stream()
-                    .filter(e -> e.getValue().isPresent())
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> e.getValue().get().getDecomposition().getLiftableTerm()));
+            Substitution<ImmutableTerm> parentSubstitution = initialSubstitution.builder()
+                    .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
+                    .build();
 
-            return parentSubstitutionMap.isEmpty()
-                    ? newAggregationTree
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(rootNode.getVariables(),
-                                    substitutionFactory.getSubstitution(parentSubstitutionMap)),
-                            newAggregationTree);
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(newAggregationTree, parentSubstitution, rootNode::getVariables);
         }
 
         protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
@@ -190,8 +171,9 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                 return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
             else if (rdfTerm instanceof RDFConstant)
                 return termFactory.getRDFTermTypeConstant(((RDFConstant) rdfTerm).getType());
-            else if ((rdfTerm instanceof Constant) && rdfTerm.isNull())
+            else if (rdfTerm.isNull())
                 return termFactory.getNullConstant();
+
             throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant or NULL");
         }
     }

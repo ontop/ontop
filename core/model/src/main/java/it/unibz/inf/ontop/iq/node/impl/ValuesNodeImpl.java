@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -18,10 +18,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -53,7 +50,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private Boolean isDistinct;
 
     // LAZY
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
+    private ImmutableSet<Substitution<NonVariableTerm>> possibleVariableDefinitions;
 
 
     @AssistedInject
@@ -102,11 +99,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         if (!singleValueVariableIndices.isEmpty()) {
             // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
-            ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
-                    singleValueVariableIndices.stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    orderedVariables::get,
-                                    i -> values.get(0).get(i))));
+            Substitution<ImmutableTerm> substitutions = singleValueVariableIndices.stream()
+                    .collect(substitutionFactory.toSubstitution(
+                            orderedVariables::get,
+                            i -> values.get(0).get(i)));
+
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
             // Create the ValueNode
@@ -216,10 +213,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        ImmutableList<Variable> newVariables = orderedVariables.stream()
-                .map(freshRenamingSubstitution::applyToVariable)
-                .collect(ImmutableCollectors.toList());
+    public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
+        ImmutableList<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, orderedVariables);
 
         return newVariables.equals(orderedVariables)
                 ? this
@@ -227,43 +222,39 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                VariableGenerator variableGenerator) {
         if (descendingSubstitution.isEmpty())
             return this;
         ConstructionAndFilterAndValues constructionAndFilterAndValues =
                 new ConstructionAndFilterAndValues(null, null, this);
-        // Split up the substitution in three groups
-        ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.getFragment(GroundFunctionalTerm.class);
-        ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.getFragment(Constant.class);
-        ImmutableSubstitution<Variable> variableSubstitutionFragment = descendingSubstitution.getFragment(Variable.class);
-        Var2VarSubstitution var2varSubstitutionFragment = substitutionFactory.getVar2VarSubstitution(
-                variableSubstitutionFragment.getImmutableMap());
 
+        Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
         if (!functionalSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = addProjectedVariablesToConstruction(descendingSubstitution, constructionAndFilterAndValues);
             constructionAndFilterAndValues = substituteGroundFunctionalTerms(functionalSubstitutionFragment, constructionAndFilterAndValues, variableGenerator);
         }
+
+        Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
         if (!constantSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
+
+        Substitution<Variable> variableSubstitutionFragment = descendingSubstitution.restrictRangeTo(Variable.class);
         if (!variableSubstitutionFragment.isEmpty()) {
-            constructionAndFilterAndValues = substituteVariables(var2varSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
+            constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }
         return buildTreeFromCFV(constructionAndFilterAndValues);
     }
 
-    private ConstructionAndFilterAndValues substituteGroundFunctionalTerms(ImmutableSubstitution<? extends GroundFunctionalTerm> substitution,
+    private ConstructionAndFilterAndValues substituteGroundFunctionalTerms(Substitution<? extends GroundFunctionalTerm> substitution,
                                                                            ConstructionAndFilterAndValues constructionAndFilterAndValues,
                                                                            VariableGenerator variableGenerator) {
         ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
-        InjectiveVar2VarSubstitution renaming = substitutionFactory.getInjectiveVar2VarSubstitution(
-                        valuesNode.getVariables().stream(),
-                        variableGenerator::generateNewVariableFromVar)
-                .filter(substitution.getDomain()::contains);
+        InjectiveSubstitution<Variable> renaming = Sets.intersection(valuesNode.getVariables(), substitution.getDomain()).stream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-        return termFactory.getConjunction(renaming.applyRenaming(substitution).getImmutableMap().entrySet().stream()
-                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
+        return termFactory.getConjunction(substitutionFactory.rename(renaming, substitution).builder().toStream(termFactory::getStrictEquality))
                 .map(filterCondition ->
                         new ConstructionAndFilterAndValues(
                                 constructionAndFilterAndValues.constructionNode,
@@ -272,36 +263,30 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .orElseGet(() -> new ConstructionAndFilterAndValues(null, null, valuesNode));
     }
 
-    private ConstructionAndFilterAndValues addProjectedVariablesToConstruction(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
-                                                ConstructionAndFilterAndValues constructionAndFilterAndValues) {
+    private ConstructionAndFilterAndValues addProjectedVariablesToConstruction(Substitution<? extends VariableOrGroundTerm> substitution,
+                                                                               ConstructionAndFilterAndValues constructionAndFilterAndValues) {
         return new ConstructionAndFilterAndValues(
-                iqFactory.createConstructionNode(constructionAndFilterAndValues.valuesNode.getVariables().stream()
-                        .filter(variable -> !substitution.getDomain().contains(variable))
-                        .collect(ImmutableCollectors.toSet())),
+                iqFactory.createConstructionNode(
+                        Sets.difference(constructionAndFilterAndValues.valuesNode.getVariables(), substitution.getDomain()).immutableCopy()),
                 constructionAndFilterAndValues.filterNode,
                 constructionAndFilterAndValues.valuesNode);
     }
 
-    private ConstructionAndFilterAndValues substituteConstants(ImmutableSubstitution<? extends Constant> substitution,
-                                           ConstructionAndFilterAndValues constructionAndFilterAndValues) {
+    private ConstructionAndFilterAndValues substituteConstants(Substitution<Constant> substitution,
+                                                               ConstructionAndFilterAndValues constructionAndFilterAndValues) {
         ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
         ImmutableList<Variable> formerOrderedVariables = formerValuesNode.getOrderedVariables();
         ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
         int formerArity = formerOrderedVariables.size();
 
         ImmutableSet<Integer> substitutionVariableIndices = IntStream.range(0, formerArity)
-                .filter(i -> substitution.getImmutableMap().containsKey(formerOrderedVariables.get(i)))
+                .filter(i -> substitution.isDefining(formerOrderedVariables.get(i)))
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<Variable> newOrderedVariables = IntStream.range(0, formerArity)
                 .filter(i -> !substitutionVariableIndices.contains(i))
                 .mapToObj(formerOrderedVariables::get)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<ImmutableList<Constant>> filteredValues = formerValues.stream()
-                .filter(tuple -> substitutionVariableIndices.stream()
-                        .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<ImmutableList<Constant>> newValues = formerValues.stream()
@@ -318,17 +303,15 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 iqFactory.createValuesNode(newOrderedVariables, newValues));
     }
 
-    private static ConstructionAndFilterAndValues substituteVariables(Var2VarSubstitution variableSubstitutionFragment,
-                                                                      ConstructionAndFilterAndValues constructionAndFilterAndValues,
-                                                                      IntermediateQueryFactory iqFactory) {
+    private ConstructionAndFilterAndValues substituteVariables(Substitution<Variable> variableSubstitutionFragment,
+                                                               ConstructionAndFilterAndValues constructionAndFilterAndValues,
+                                                               IntermediateQueryFactory iqFactory) {
         ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
         ImmutableList<Variable> formerOrderedVariables = formerValuesNode.getOrderedVariables();
         ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
         int formerArity = formerOrderedVariables.size();
 
-        ImmutableList<Variable> substitutedOrderedVariables = formerOrderedVariables.stream()
-                .map(variableSubstitutionFragment::applyToVariable)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<Variable> substitutedOrderedVariables = substitutionFactory.apply(variableSubstitutionFragment, formerOrderedVariables);
 
         if (substitutedOrderedVariables.equals(formerOrderedVariables))
             return constructionAndFilterAndValues;
@@ -383,7 +366,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             return this;
         getVariableNullability();
         ImmutableList<ImmutableList<Constant>> newValues = values.stream()
-                .filter(constants -> !((ImmutableExpression) substitutionFactory.getSubstitution(orderedVariables, constants)
+                .filter(constants -> !(substitutionFactory.getSubstitution(orderedVariables, constants)
                         .apply(constraint))
                         .evaluate(variableNullability)
                         .isEffectiveFalse())
@@ -392,18 +375,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+    public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions() {
         if (possibleVariableDefinitions == null) {
             Stream<ImmutableList<Constant>> distinctValuesStream = ((isDistinct != null) && isDistinct)
                     ? values.stream()
                     : values.stream().distinct();
 
-
             possibleVariableDefinitions = distinctValuesStream
-                    .map(row -> IntStream.range(0, getVariables().size())
-                            .mapToObj(i -> Maps.immutableEntry(orderedVariables.get(i), (NonVariableTerm) row.get(i)))
-                            .collect(ImmutableCollectors.toMap()))
-                    .map(substitutionFactory::getSubstitution)
+                    .map(row -> substitutionFactory.<NonVariableTerm>getSubstitution(orderedVariables, row))
                     .collect(ImmutableCollectors.toSet());
         }
         return possibleVariableDefinitions;

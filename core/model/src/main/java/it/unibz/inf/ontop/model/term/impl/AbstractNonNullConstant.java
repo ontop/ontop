@@ -16,4 +16,9 @@ public abstract class AbstractNonNullConstant extends AbstractNonFunctionalTerm 
     public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
         return false;
     }
+
+    @Override
+    public boolean isGround() {
+        return true;
+    }
 }

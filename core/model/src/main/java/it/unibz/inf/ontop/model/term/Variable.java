@@ -29,7 +29,7 @@ import java.util.Optional;
  * that during a calculation is assumed to vary or be capable of varying in
  * value.
  */
-public interface Variable extends NonFunctionalTerm, NonConstantTerm, NonGroundTerm, Comparable<Variable> {
+public interface Variable extends NonFunctionalTerm, NonGroundTerm, Comparable<Variable> {
 
 	String getName();
 

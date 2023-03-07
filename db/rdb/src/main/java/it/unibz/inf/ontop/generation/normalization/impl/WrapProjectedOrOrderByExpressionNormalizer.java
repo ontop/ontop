@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -25,14 +25,12 @@ import java.util.stream.Stream;
 public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(IntermediateQueryFactory iqFactory,
                                                          SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         super(iqFactory);
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
 
@@ -45,11 +43,11 @@ public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultRecursive
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
         IQTree newChild = transform(child);
 
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = rootNode.getSubstitution().transform(
-                definition -> (definition instanceof ImmutableExpression)
-                        ? transformExpression((ImmutableExpression) definition)
-                        : definition);
+        Substitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
+        Substitution<ImmutableTerm> newSubstitution = initialSubstitution
+                .transform(t -> (t instanceof ImmutableExpression)
+                        ? transformExpression((ImmutableExpression) t)
+                        : t);
 
         ConstructionNode newRootNode = newSubstitution.equals(initialSubstitution)
                 ? rootNode

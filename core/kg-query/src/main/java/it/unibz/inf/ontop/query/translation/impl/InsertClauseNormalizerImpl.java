@@ -11,10 +11,12 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.query.translation.InsertClauseNormalizer;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -22,6 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,7 +53,9 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
     @Override
     public Result normalize(ImmutableSet<IntensionalDataNode> dataNodes, IQTree whereTree) {
         ImmutableSet<BNode> bNodes = dataNodes.stream()
-                .flatMap(n -> n.getProjectionAtom().getArguments().stream())
+                .map(IntensionalDataNode::getProjectionAtom)
+                .map(DataAtom::getArguments)
+                .flatMap(Collection::stream)
                 .filter(a -> a instanceof BNode)
                 .map(a -> (BNode) a)
                 .collect(ImmutableCollectors.toSet());
@@ -76,9 +81,12 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
                 .filter(vs -> vs.stream().noneMatch(variableNullability::isPossiblyNullable))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = nonNullableUniqueConstraints.isEmpty()
-                ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(bNodeMap, whereTree.getVariables())
-                : createBNodeDefinitionsFromNonNullableUniqueConstraint(bNodeMap, nonNullableUniqueConstraints.iterator().next());
+        ImmutableTerm term = nonNullableUniqueConstraints.isEmpty()
+                ? createBNodeDefinitionsWithoutNonNullableUniqueConstraint(whereTree.getVariables())
+                : createBNodeDefinitionsFromNonNullableUniqueConstraint(nonNullableUniqueConstraints.iterator().next());
+
+        Substitution<ImmutableTerm> substitution = bNodeMap.entrySet().stream()
+                .collect(substitutionFactory.toSubstitution(Map.Entry::getValue, e -> term));
 
         ImmutableSet<Variable> newProjectedVariables = Sets.union(whereTree.getKnownVariables(), ImmutableSet.copyOf(bNodeMap.values()))
                 .immutableCopy();
@@ -86,33 +94,22 @@ public class InsertClauseNormalizerImpl implements InsertClauseNormalizer {
         return new ResultImpl(bNodeMap,
                 iqFactory.createConstructionNode(
                         newProjectedVariables,
-                        substitutionFactory.getSubstitution(substitutionMap)));
+                        substitution));
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableMap<BNode, Variable> bNodeMap,
-                                                                                                        ImmutableSet<Variable> uniqueConstraint) {
-        return bNodeMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getValue,
-                        e -> generateBNodeTemplateFunctionalTerm(uniqueConstraint)));
+    private ImmutableTerm createBNodeDefinitionsFromNonNullableUniqueConstraint(ImmutableSet<Variable> uniqueConstraint) {
+        return generateBNodeTemplateFunctionalTerm(uniqueConstraint);
     }
 
     /**
      * This implementation does not preserve duplicated rows, as foreseen by R2RML for the virtual setting
      * (see https://www.w3.org/TR/r2rml/#default-mappings)
      */
-    private ImmutableMap<Variable, ImmutableTerm> createBNodeDefinitionsWithoutNonNullableUniqueConstraint(
-            ImmutableMap<BNode, Variable> bNodeMap, ImmutableSet<Variable> whereVariables) {
+    private ImmutableTerm createBNodeDefinitionsWithoutNonNullableUniqueConstraint(ImmutableSet<Variable> whereVariables) {
         if (whereVariables.isEmpty())
-            return bNodeMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getValue,
-                            e -> termFactory.getConstantBNode(UUID.randomUUID().toString())));
+            return termFactory.getConstantBNode(UUID.randomUUID().toString());
 
-        return bNodeMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getValue,
-                        e -> generateBNodeTemplateFunctionalTerm(whereVariables)));
+        return generateBNodeTemplateFunctionalTerm(whereVariables);
     }
 
     private ImmutableFunctionalTerm generateBNodeTemplateFunctionalTerm(ImmutableSet<Variable> variables) {

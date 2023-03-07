@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -12,21 +12,18 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.FlattenNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.stream.Stream;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private FlattenNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -58,89 +55,48 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
              * where
              *   V' = (V minus {f}) union {o,i}
              */
-            ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSub = splitSubstitution(
-                    cn,
-                    flattenNode.getFlattenedVariable()
-            );
+            Variable flattenedVar = flattenNode.getFlattenedVariable();
+
+            Substitution<ImmutableTerm> flattenedVarSubstitution = cn.getSubstitution().builder()
+                    .restrict((v, t) -> v.equals(flattenedVar) || t.getVariableStream().anyMatch(tv -> tv.equals(flattenedVar)))
+                    .build();
+
+            Substitution<ImmutableTerm> primeSubstitution = cn.getSubstitution()
+                    .removeFromDomain(flattenedVarSubstitution.getDomain());
 
             // Nothing can be lifted, declare the new tree normalized
-            if(splitSub.get(false).isEmpty()){
-                return iqFactory.createUnaryIQTree(
-                        flattenNode,
-                        normalizedChild,
-                        outputTreeCache
-                );
+            if (primeSubstitution.isEmpty()) {
+                return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, outputTreeCache);
             }
 
-            ConstructionNode newParentCn = getParent(flattenNode, cn, splitSub.get(false));
+            ConstructionNode newParentCn = iqFactory.createConstructionNode(
+                    Sets.union(
+                            flattenNode.getLocallyDefinedVariables(),
+                            Sets.difference(cn.getVariables(), ImmutableSet.of(flattenedVar))
+                    ).immutableCopy(),
+                    primeSubstitution);
 
-            IQTree updatedChild = getChild(flattenNode, splitSub.get(true), newParentCn, normalizedChild.getChildren().get(0), variableGenerator);
+            IQTree grandChild = normalizedChild.getChildren().get(0);
+            IQTree updatedChild = flattenedVarSubstitution.isEmpty()
+                ? grandChild
+                : iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(
+                                Sets.union(
+                                        ImmutableSet.of(flattenedVar),
+                                        Sets.difference(newParentCn.getLocallyRequiredVariables(), flattenNode.getLocallyDefinedVariables())
+                                ).immutableCopy(),
+                                flattenedVarSubstitution),
+                        grandChild
+                ).normalizeForOptimization(variableGenerator);
 
             return iqFactory.createUnaryIQTree(
                     newParentCn,
-                    iqFactory.createUnaryIQTree(
-                            flattenNode,
-                            updatedChild
-                    ).normalizeForOptimization(variableGenerator),
-                    outputTreeCache
-            );
+                    iqFactory.createUnaryIQTree(flattenNode, updatedChild).normalizeForOptimization(variableGenerator),
+                    outputTreeCache);
         }
 
         // Nothing can be lifted, declare the new tree normalized
-        return iqFactory.createUnaryIQTree(
-                flattenNode,
-                normalizedChild,
-                outputTreeCache
-        );
-    }
-
-    private IQTree getChild(FlattenNode fn, ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn, IQTree grandChild, VariableGenerator variableGenerator) {
-            return flattenedVarDef.isEmpty() ?
-                    grandChild:
-                    iqFactory.createUnaryIQTree(
-                            getChildCn(
-                                    flattenedVarDef,
-                                    parentCn,
-                                    fn
-                            ),
-                            grandChild
-                    ).normalizeForOptimization(variableGenerator);
-    }
-
-    private ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> splitSubstitution(ConstructionNode cn, Variable flattenedVar) {
-        return cn.getSubstitution().getImmutableMap().entrySet().stream().collect(
-                ImmutableCollectors.partitioningBy(
-                        e -> (e.getKey().equals(flattenedVar) ||
-                                e.getValue().getVariableStream().anyMatch(v -> v.equals(flattenedVar))),
-                        ImmutableCollectors.toMap(
-                                ImmutableMap.Entry::getKey,
-                                ImmutableMap.Entry::getValue
-                        )));
-    }
-
-    private ConstructionNode getParent(FlattenNode fn, ConstructionNode cn, ImmutableMap<Variable, ImmutableTerm> filteredSub) {
-
-        return iqFactory.createConstructionNode(
-                Stream.concat(
-                        fn.getLocallyDefinedVariables().stream(),
-                        cn.getVariables().stream()
-                                .filter(v -> !v.equals(fn.getFlattenedVariable()))
-                ).collect(ImmutableCollectors.toSet()),
-                substitutionFactory.getSubstitution(filteredSub)
-        );
-    }
-
-    private ConstructionNode getChildCn(ImmutableMap<Variable, ImmutableTerm> flattenedVarDef, ConstructionNode parentCn,
-                                        FlattenNode fn) {
-        ImmutableSet<Variable> fnDefinedVars = fn.getLocallyDefinedVariables();
-        return iqFactory.createConstructionNode(
-                Stream.concat(
-                        Stream.of(fn.getFlattenedVariable()),
-                        parentCn.getLocallyRequiredVariables().stream()
-                                .filter(v -> !fnDefinedVars.contains(v))
-                ).collect(ImmutableCollectors.toSet()),
-                substitutionFactory.getSubstitution(flattenedVarDef)
-        );
+        return iqFactory.createUnaryIQTree(flattenNode, normalizedChild, outputTreeCache);
     }
 
 }

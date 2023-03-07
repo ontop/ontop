@@ -16,8 +16,9 @@ import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -27,8 +28,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
+        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory, substitutionFactory);
 
         if (settings.isTestModeEnabled())
             validate();
@@ -37,9 +38,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings,
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings, SubstitutionFactory substitutionFactory,
                             IQTreeCache freshTreeCache) {
-        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings);
+        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings, substitutionFactory);
     }
 
     @Override
@@ -56,10 +57,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
-        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+    protected IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveSubstitution<Variable> selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
-                : renamingSubstitution.filter(getVariables()::contains);
+                : renamingSubstitution.restrictDomainTo(getVariables());
 
         return selectedSubstitution.isEmpty()
                 ? this
@@ -67,14 +68,14 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    protected IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                         Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
         return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild(), variableGenerator);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
         try {
             return normalizeDescendingSubstitution(descendingSubstitution)
                     .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChild(), variableGenerator))
@@ -117,7 +118,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+    protected ImmutableSet<Substitution<NonVariableTerm>> computePossibleVariableDefinitions() {
             return getRootNode().getPossibleVariableDefinitions(getChild());
     }
 

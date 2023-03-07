@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 @Singleton
@@ -32,7 +31,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final CoreUtilsFactory coreUtilsFactory;
     private final SingleTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
-    private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
@@ -46,7 +44,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
                                SingleTermTypeExtractor uniqueTermTypeExtractor,
-                               IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                               IntermediateQueryFactory iqFactory,
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
                                QueryTransformerFactory queryTransformerFactory,
@@ -62,7 +60,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.coreUtilsFactory = coreUtilsFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
-        this.unificationTools = unificationTools;
         this.settings = settings;
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
@@ -124,11 +121,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public OntopModelSettings getSettings() {
         return settings;
-    }
-
-    @Override
-    public ImmutableUnificationTools getUnificationTools() {
-        return unificationTools;
     }
 
     @Override

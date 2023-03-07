@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -2173,7 +2173,7 @@ public class NormalizationTest {
                 INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(1, B));
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightTopConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -2228,7 +2228,7 @@ public class NormalizationTest {
                 INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(1, B));
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightTopConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -2275,7 +2275,7 @@ public class NormalizationTest {
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
         ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(D, B));
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightTopConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -2329,7 +2329,7 @@ public class NormalizationTest {
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3,
                 ImmutableMap.of(0, D, 1,B));
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBNumericInequality(LT, D, ONE));
@@ -2378,7 +2378,7 @@ public class NormalizationTest {
         ImmutableExpression ljExpression = TERM_FACTORY.getDBNumericInequality(GT, B, ONE);
         ImmutableExpression filterExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(filterExpression);
@@ -2427,7 +2427,7 @@ public class NormalizationTest {
 
         ImmutableExpression joinExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joinExpression);
@@ -2479,7 +2479,7 @@ public class NormalizationTest {
         ImmutableExpression joinExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
         ImmutableExpression ljExpression = TERM_FACTORY.getDBNumericInequality(GT, B, ONE);
 
-        ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
+        Substitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B, E), provenanceSubstitution);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joinExpression);

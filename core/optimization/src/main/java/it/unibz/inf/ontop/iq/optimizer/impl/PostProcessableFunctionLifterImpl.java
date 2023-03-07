@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -21,9 +22,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -38,12 +37,14 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
     protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons,
-                                                IntermediateQueryFactory iqFactory) {
+                                                IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
         this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
      * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
      */
     protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons);
+        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
     }
 
 
@@ -66,13 +67,15 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected final VariableGenerator variableGenerator;
         protected final OptimizationSingletons optimizationSingletons;
         private final int maxNbChildrenForLiftingDBFunctionSymbol;
+        private final IQTreeTools iqTreeTools;
 
-        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons) {
+        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
             super(optimizationSingletons.getCoreSingletons().getIQFactory());
             this.variableGenerator = variableGenerator;
             this.optimizationSingletons = optimizationSingletons;
             this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
                     .getMaxNbChildrenForLiftingDBFunctionSymbol();
+            this.iqTreeTools = iqTreeTools;
         }
 
         @Override
@@ -104,7 +107,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
-                        optimizationSingletons.getCoreSingletons()))
+                        optimizationSingletons.getCoreSingletons(), iqTreeTools))
                     .generateTree(iqFactory)
                     .normalizeForOptimization(variableGenerator);
         }
@@ -179,18 +182,19 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final TermFactory termFactory;
         private final SingleTermTypeExtractor typeExtractor;
         private final CoreSingletons coreSingletons;
+        private final IQTreeTools iqTreeTools;
 
         /**
          * Initial constructor
          */
         public LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
-                         VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons);
+                         VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
+            this(children, unionVariables, ImmutableList.of(), null, variableGenerator, coreSingletons, iqTreeTools);
         }
 
         protected LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
                             ImmutableList<ConstructionNode> ancestors, @Nullable Variable childIdVariable,
-                            VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                            VariableGenerator variableGenerator, CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
             this.children = children;
             this.unionVariables = unionVariables;
             this.ancestors = ancestors;
@@ -201,6 +205,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.termFactory = coreSingletons.getTermFactory();
             this.typeExtractor = coreSingletons.getUniqueTermTypeExtractor();
             this.coreSingletons = coreSingletons;
+            this.iqTreeTools = iqTreeTools;
         }
 
         public IQTree generateTree(IntermediateQueryFactory iqFactory) {
@@ -261,26 +266,24 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .collect(ImmutableCollectors.toList());
 
             return new LiftState(newChildren, newUnionVariables, newAncestors, idVariable, variableGenerator,
-                    coreSingletons);
+                    coreSingletons, iqTreeTools);
         }
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
                                                      ImmutableSet<Variable> unionVariables, Variable idVariable) {
-            Optional<ImmutableSubstitution<ImmutableTerm>> originalSubstitution = Optional.of(childTree.getRootNode())
+            Optional<Substitution<ImmutableTerm>> originalSubstitution = Optional.of(childTree.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map(n -> (ConstructionNode) n)
                     .map(ConstructionNode::getSubstitution);
 
             ImmutableTerm originalDefinition = originalSubstitution
-                    .filter(s -> s.isDefining(variable))
-                    .map(s -> s.get(variable))
+                    .map(s -> s.apply(variable))
                     .orElse(variable);
 
-            InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
-                    originalDefinition.getVariableStream()
-                            .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
-                            .distinct(),
-                    variableGenerator::generateNewVariableFromVar);
+            InjectiveSubstitution<Variable> renamingSubstitution = originalDefinition.getVariableStream()
+                    .filter(v -> v.equals(variable) || (!unionVariables.contains(v)))
+                    .distinct()
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
             boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
 
@@ -292,14 +295,13 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .filter(v -> isVariableNotDefinedInSubstitution || !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
-            ImmutableSubstitution<ImmutableTerm> positionSubstitution =
+            Substitution<ImmutableTerm> positionSubstitution =
                     substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
-            ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
-                    .flatMap(s -> s.union(positionSubstitution))
-                    .map(s -> s.filter(projectedVariablesBeforeRenaming::contains))
+            Substitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
+                    .map(s -> substitutionFactory.union(s, positionSubstitution))
+                    .map(s -> s.restrictDomainTo(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
-
 
             IQTree childOfConstruction = Optional.of(childTree)
                     .filter(t -> t.getRootNode() instanceof ConstructionNode)
@@ -311,10 +313,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     childOfConstruction);
 
             IQTree partiallyPaddedChild = childBeforeRenaming.applyDescendingSubstitution(renamingSubstitution, Optional.empty(), variableGenerator);
-            ImmutableTerm liftedDefinition = renamingSubstitution.apply(originalDefinition);
-            ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(renamingSubstitution.getImmutableMap().values());
+            ImmutableTerm liftedDefinition = renamingSubstitution.applyToTerm(originalDefinition);
 
-            return new ChildDefinitionLift(partiallyPaddedChild, freshVariables, liftedDefinition);
+            return new ChildDefinitionLift(partiallyPaddedChild, renamingSubstitution.getRangeSet(), liftedDefinition);
         }
 
         protected ImmutableFunctionalTerm mergeDefinitions(Variable idVariable,
@@ -339,20 +340,15 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
             ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
 
-            ImmutableSubstitution<ImmutableTerm> paddingSubstitution = substitutionFactory.getSubstitution(
-                    newVarTypeMap.entrySet().stream()
-                            .filter(v -> !childVariables.contains(v.getKey()))
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> e.getValue()
-                                            .map(t -> termFactory.getTypedNull(t).simplify())
-                                            .orElseGet(termFactory::getNullConstant))));
+            Substitution<ImmutableTerm> paddingSubstitution = newVarTypeMap.entrySet().stream()
+                    .filter(v -> !childVariables.contains(v.getKey()))
+                    .collect(substitutionFactory.toSubstitution(
+                            Map.Entry::getKey,
+                            e -> e.getValue()
+                                    .map(t -> termFactory.getTypedNull(t).simplify())
+                                    .orElseGet(termFactory::getNullConstant)));
 
-            return paddingSubstitution.isEmpty()
-                    ? partiallyPaddedChild
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newVarTypeMap.keySet(), paddingSubstitution),
-                            partiallyPaddedChild);
+            return iqTreeTools.createConstructionNodeTreeIfNontrivial(partiallyPaddedChild, paddingSubstitution, newVarTypeMap::keySet);
         }
     }
 

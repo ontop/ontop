@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -130,19 +130,17 @@ public class JsonSQLLens extends JsonLens {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
-        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
-                raExpression.getUnqualifiedAttributes().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> termFactory.getVariable(e.getKey().getName()),
-                                Map.Entry::getValue)));
+        Substitution<ImmutableTerm> ascendingSubstitution = raExpression.getUnqualifiedAttributes().entrySet().stream()
+                .collect(substitutionFactory.toSubstitution(
+                        e -> termFactory.getVariable(e.getKey().getName()),
+                        Map.Entry::getValue));
 
         ImmutableSet<Variable> projectedVariables = ascendingSubstitution.getDomain();
 
         VariableGenerator variableGenerator = coreSingletons.getCoreUtilsFactory().createVariableGenerator(
                 Sets.union(initialChild.getKnownVariables(), projectedVariables));
 
-                ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
-
+        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(ascendingSubstitution, projectedVariables);
 
         IQTree updatedChild = normalization.updateChild(initialChild, variableGenerator);
 

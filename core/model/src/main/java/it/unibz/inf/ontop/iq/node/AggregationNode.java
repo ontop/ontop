@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 
 /**
@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 public interface AggregationNode extends ExtendedProjectionNode {
 
     @Override
-    ImmutableSubstitution<ImmutableFunctionalTerm> getSubstitution();
+    Substitution<ImmutableFunctionalTerm> getSubstitution();
 
     ImmutableSet<Variable> getGroupingVariables();
 

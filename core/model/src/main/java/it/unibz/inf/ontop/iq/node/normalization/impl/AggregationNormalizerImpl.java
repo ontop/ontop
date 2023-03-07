@@ -17,14 +17,13 @@ import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -97,8 +96,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         if (!aggregationNode.getGroupingVariables().isEmpty())
             return iqFactory.createEmptyNode(projectedVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution().transform(
-                this::simplifyEmptyAggregate);
+        Substitution<ImmutableTerm> newSubstitution = aggregationNode.getSubstitution()
+                .transform(this::simplifyEmptyAggregate);
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
@@ -129,7 +128,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         private static final int MAX_ITERATIONS = 1000;
         private final ImmutableSet<Variable> groupingVariables;
         // NB: may not be always normalized (e.g. not starting with aggregation functional terms)
-        private final ImmutableSubstitution<ImmutableFunctionalTerm> aggregationSubstitution;
+        private final Substitution<ImmutableFunctionalTerm> aggregationSubstitution;
         @Nullable
         private final ConstructionNode childConstructionNode;
         private final IQTree grandChild;
@@ -153,7 +152,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
         private AggregationNormalizationState(ImmutableList<ConstructionNode> ancestors,
                                               ImmutableSet<Variable> groupingVariables,
-                                              ImmutableSubstitution<ImmutableFunctionalTerm> aggregationSubstitution,
+                                              Substitution<ImmutableFunctionalTerm> aggregationSubstitution,
                                               @Nullable ConstructionNode childConstructionNode,
                                               IQTree grandChild, VariableGenerator variableGenerator) {
             this.ancestors = ancestors;
@@ -173,24 +172,25 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return this;
 
             // NB: non grouping variables that are USED by the aggregation node (we can safely ignore the non-used ones)
-            ImmutableSet<Variable> nonGroupingVariables = Sets.difference(
+            Sets.SetView<Variable> nonGroupingVariables = Sets.difference(
                     extractChildVariables(groupingVariables, aggregationSubstitution),
-                    groupingVariables).immutableCopy();
+                    groupingVariables);
 
-            ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
-                    .filter(nonGroupingVariables::contains);
+            Substitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
+                    .restrictDomainTo(nonGroupingVariables);
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
-                    (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                            nonGroupingSubstitution.composeWith(aggregationSubstitution)
-                                    .filter(aggregationSubstitution.getDomain()::contains);
+            Substitution<ImmutableFunctionalTerm> newAggregationSubstitution =
+                            nonGroupingSubstitution.compose(aggregationSubstitution).builder()
+                                    .restrictDomainTo(aggregationSubstitution.getDomain())
+                                    .transform(t -> (ImmutableFunctionalTerm)t)
+                                    .build();
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
                     groupingVariables,
                     newAggregationSubstitution);
 
             // Nullable
-            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().filter(groupingVariables::contains))
+            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution().restrictDomainTo(groupingVariables))
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s))
                     .orElse(null);
@@ -209,13 +209,14 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             if (childConstructionNode == null)
                 return this;
 
-            ImmutableSubstitution<ImmutableTerm> substitution = childConstructionNode.getSubstitution();
+            Substitution<ImmutableTerm> substitution = childConstructionNode.getSubstitution();
 
             if (substitution.isEmpty())
                 return this;
-            if (!groupingVariables.containsAll(substitution.getDomain())) {
+
+            if (!groupingVariables.containsAll(substitution.getDomain()))
                 throw new MinorOntopInternalBugException("Was expecting all the non-grouping bindings to be lifted");
-            }
+
 
             // Only projecting grouping variables
             // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)
@@ -240,7 +241,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         }
 
         private AggregationNormalizationState convertIntoState(InjectiveBindingLiftState subState) {
-            ImmutableSet<Variable> aggregateVariables = aggregationSubstitution.getDomain();
 
             ImmutableList<ConstructionNode> subStateAncestors = subState.getAncestors();
 
@@ -250,15 +250,18 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     // Ancestors of the sub-state modified so as to project the aggregation variables
                     subStateAncestors.stream()
                             .map(a -> iqFactory.createConstructionNode(
-                                    Sets.union(a.getVariables(), aggregateVariables).immutableCopy(), a.getSubstitution())))
+                                    Sets.union(a.getVariables(), aggregationSubstitution.getDomain()).immutableCopy(),
+                                    a.getSubstitution())))
                     .collect(ImmutableCollectors.toList());
 
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
             // Needed when some grouping variables are also used in the aggregates
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
+            Substitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
-                            (s, a) -> (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                                    a.getSubstitution().composeWith(s).filter(aggregateVariables::contains),
+                            (s, a) -> a.getSubstitution().compose(s).builder()
+                                            .restrictDomainTo(aggregationSubstitution.getDomain())
+                                            .transform(t -> (ImmutableFunctionalTerm)t)
+                                            .build(),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });
@@ -280,7 +283,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             n.getSubstitution()))
                     .orElse(null);
 
-
             return new AggregationNormalizationState(newAncestors, newGroupingVariables, newAggregationSubstitution,
                     newChildConstructionNode,
                     subState.getGrandChildTree(), variableGenerator);
@@ -297,50 +299,36 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // Taken from the child sub-tree
             VariableNullability variableNullability = Optional.ofNullable(childConstructionNode)
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
+                    .<IQTree>map(c -> iqFactory.createUnaryIQTree(c, grandChild,
                             iqFactory.createIQTreeCache(true)))
                     .orElse(grandChild)
                     .getVariableNullability();
 
             // The simplification may do the "lifting" inside the functional term (having a non-aggregation
             // functional term above the aggregation one)
-            ImmutableSubstitution<ImmutableTerm> simplifiedSubstitution = aggregationSubstitution
-                    .transform(v -> v.simplify(variableNullability));
+            Substitution<ImmutableTerm> simplifiedSubstitution = aggregationSubstitution
+                    .transform(t -> t.simplify(variableNullability));
 
-            ImmutableMap<Variable, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> decompositionMap =
-                    simplifiedSubstitution.getImmutableMap().entrySet().stream()
-                            .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> decomposeFunctionalTerm((ImmutableFunctionalTerm) e.getValue())));
+            ImmutableMap<Variable, ImmutableFunctionalTerm.FunctionalTermDecomposition> decompositionMap =
+                    simplifiedSubstitution.builder()
+                            .restrictRangeTo(ImmutableFunctionalTerm.class)
+                            .toMapIgnoreOptional((v, t) -> decomposeFunctionalTerm(t));
 
-            ImmutableMap<Variable, ImmutableTerm> liftedSubstitutionMap = Stream.concat(
+            Substitution<ImmutableTerm> liftedSubstitution = substitutionFactory.union(
                     // All variables and constants
-                    simplifiedSubstitution.getImmutableMap().entrySet().stream()
-                            .filter(e -> e.getValue() instanceof NonFunctionalTerm),
+                    simplifiedSubstitution.<ImmutableTerm>restrictRangeTo(NonFunctionalTerm.class),
                     // (Possibly decomposed) functional terms
-                    decompositionMap.entrySet().stream()
-                            .filter(e -> e.getValue().isPresent())
-                            .map(e -> Maps.immutableEntry(e.getKey(),
-                                    e.getValue().get().getLiftableTerm())))
-                    .collect(ImmutableCollectors.toMap());
+                    simplifiedSubstitution.builder()
+                            .<ImmutableTerm>restrictRangeTo(ImmutableFunctionalTerm.class)
+                            .transformOrRemove(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
+                            .build());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> newAggregationSubstitutionMap =
-                    decompositionMap.entrySet().stream()
-                            .flatMap(e -> e.getValue()
-                                    // Sub-term substitution entries from decompositions
-                                    .map(d -> d.getSubTermSubstitutionMap().stream()
-                                            .flatMap(s -> s.entrySet().stream()))
-                                    // Non-decomposable entries
-                                    .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                            e.getKey(),
-                                            (ImmutableFunctionalTerm) simplifiedSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap());
+            Substitution<ImmutableFunctionalTerm> newAggregationSubstitution = simplifiedSubstitution.builder()
+                    .restrictRangeTo(ImmutableFunctionalTerm.class)
+                    .flatTransform(decompositionMap::get, ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
+                    .build();
 
-            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = substitutionFactory.getSubstitution(
-                    newAggregationSubstitutionMap);
-
-            if (liftedSubstitutionMap.isEmpty())
+            if (liftedSubstitution.isEmpty())
                 return new AggregationNormalizationState(
                         ancestors,
                         groupingVariables, newAggregationSubstitution,
@@ -348,7 +336,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
                     Sets.union(groupingVariables, aggregationSubstitution.getDomain()).immutableCopy(),
-                    substitutionFactory.getSubstitution(liftedSubstitutionMap));
+                   liftedSubstitution);
 
             ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
                     newAggregationSubstitution.getDomain()).immutableCopy();
@@ -375,43 +363,41 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableList<? extends ImmutableTerm> arguments = functionalTerm.getTerms();
 
             // One entry per functional sub-term
-            ImmutableMap<Integer, Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition>> subTermDecompositions =
+            ImmutableMap<Integer, ImmutableFunctionalTerm.FunctionalTermDecomposition> subTermDecompositions =
                     IntStream.range(0, arguments.size())
                     .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
                     .boxed()
                     .collect(ImmutableCollectors.toMap(
                             i -> i,
                             // Recursive
-                            i -> decomposeFunctionalTerm((ImmutableFunctionalTerm) arguments.get(i))));
+                            i -> getFunctionalTermDecomposition((ImmutableFunctionalTerm) arguments.get(i))));
 
             ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, arguments.size())
                     .mapToObj(i -> Optional.ofNullable(subTermDecompositions.get(i))
-                            // Functional term
-                            .map(optionalDecomposition -> optionalDecomposition
-                                    // Injective functional sub-term
-                                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
-                                    // Otherwise a fresh variable
-                                    .orElseGet(variableGenerator::generateNewVariable))
+                            .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
                             // Previous argument when non-functional
                             .orElseGet(() -> arguments.get(i)))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
-                    .flatMap(e -> e.getValue()
-                            // Decomposition case
-                            .map(d -> d.getSubTermSubstitutionMap().stream()
-                                    .flatMap(s -> s.entrySet().stream()))
-                            // Not decomposed: new entry (new variable -> functional term)
-                            .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                    (Variable) newArguments.get(e.getKey()),
-                                    (ImmutableFunctionalTerm) arguments.get(e.getKey())))))
-                    .collect(ImmutableCollectors.toMap());
-
             ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, newArguments);
 
-            return subTermSubstitutionMap.isEmpty()
-                    ? Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm))
-                    : Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+            Substitution<ImmutableFunctionalTerm> subTermSubstitution = subTermDecompositions.values().stream()
+                    .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getSubstitution)
+                    .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
+
+            return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitution));
+        }
+
+        private ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm arg)  {
+
+            Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> optional = decomposeFunctionalTerm(arg);
+            // Injective functional sub-term
+            if (optional.isPresent())
+                return optional.get();
+
+            // Otherwise a fresh variable
+            Variable var = variableGenerator.generateNewVariable();
+            return termFactory.getFunctionalTermDecomposition(var, substitutionFactory.getSubstitution(var, arg));
         }
 
 

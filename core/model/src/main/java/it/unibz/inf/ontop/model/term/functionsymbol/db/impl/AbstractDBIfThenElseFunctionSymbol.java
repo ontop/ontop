@@ -27,7 +27,7 @@ public abstract class AbstractDBIfThenElseFunctionSymbol extends AbstractDBIfThe
                                   TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm defaultValue = extractDefaultValue(terms, termFactory);
 
-        if (defaultValue.equals(termFactory.getNullConstant()))
+        if (defaultValue.isNull())
             return termFactory.getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1))
                     .simplify(variableNullability);
 

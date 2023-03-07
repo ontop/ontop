@@ -203,11 +203,11 @@ public class IsDistinctTest {
                 ImmutableList.of(
                         IQ_FACTORY.createUnaryIQTree(
                                 IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                                        SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, ONE))),
+                                        SUBSTITUTION_FACTORY.getSubstitution(X, ONE)),
                                 IQ_FACTORY.createTrueNode()),
                         IQ_FACTORY.createUnaryIQTree(
                                 IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                                        SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, TWO))),
+                                        SUBSTITUTION_FACTORY.getSubstitution(X, TWO)),
                                 IQ_FACTORY.createTrueNode())));
 
         assertTrue(tree.isDistinct());

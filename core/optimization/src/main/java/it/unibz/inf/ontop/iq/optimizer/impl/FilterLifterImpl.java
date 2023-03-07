@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
@@ -35,8 +36,7 @@ public class FilterLifterImpl implements FilterLifter {
         TreeTransformer treeTransformer = new TreeTransformer(iqFactory);
         return iqFactory.createIQ(
                 query.getProjectionAtom(),
-                query.getTree().acceptTransformer(treeTransformer)
-        );
+                query.getTree().acceptTransformer(treeTransformer));
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -57,21 +57,14 @@ public class FilterLifterImpl implements FilterLifter {
             Optional<FilterNode> rootFilter = getOptionalRootFilter(child);
             if (rootFilter.isPresent()) {
                 FilterNode filter = rootFilter.get();
-                ConstructionNode updatedCn = updateConstructionNode(
-                        cn,
-                        filter.getFilterCondition()
-                );
+                ImmutableSet<Variable> projectedVars = Sets.union(filter.getFilterCondition().getVariables(), cn.getVariables()).immutableCopy();
+
+                ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
                 return iqFactory.createUnaryIQTree(
                         filter,
-                        iqFactory.createUnaryIQTree(
-                                updatedCn,
-                                discardOptionalRootFilter(child)
-                        ));
+                        iqFactory.createUnaryIQTree(updatedCn, discardOptionalRootFilter(child)));
             }
-            return iqFactory.createUnaryIQTree(
-                    cn,
-                    child
-            );
+            return iqFactory.createUnaryIQTree(cn, child);
         }
 
         @Override
@@ -83,13 +76,11 @@ public class FilterLifterImpl implements FilterLifter {
             if (rootFilter.isPresent()) {
                 filter = iqFactory.createFilterNode(termFactory.getConjunction(
                         filter.getFilterCondition(),
-                        rootFilter.get().getFilterCondition()
-                ));
+                        rootFilter.get().getFilterCondition()));
             }
             return iqFactory.createUnaryIQTree(
                     filter,
-                    discardOptionalRootFilter(child)
-            );
+                    discardOptionalRootFilter(child));
         }
 
         @Override
@@ -102,15 +93,9 @@ public class FilterLifterImpl implements FilterLifter {
                 FilterNode filter = rootFilter.get();
                 return iqFactory.createUnaryIQTree(
                         filter,
-                        iqFactory.createUnaryIQTree(
-                                fn,
-                                discardOptionalRootFilter(child)
-                        ));
+                        iqFactory.createUnaryIQTree(fn, discardOptionalRootFilter(child)));
             }
-            return iqFactory.createUnaryIQTree(
-                    fn,
-                    child
-            );
+            return iqFactory.createUnaryIQTree(fn, child);
         }
 
         @Override
@@ -119,31 +104,19 @@ public class FilterLifterImpl implements FilterLifter {
                     .map(c -> c.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            Optional<ImmutableExpression> childrenExpression =
-                    termFactory.getConjunction(
-                            children.stream()
-                                    .map(t -> getOptionalRootFilter(t))
-                                    .filter(o -> o.isPresent())
-                                    .map(o -> o.get().getFilterCondition())
-                    );
+            Optional<ImmutableExpression> childrenExpression = getChildrenExpression(children);
 
             if (childrenExpression.isPresent()) {
-                children = children.stream()
-                        .map(t -> discardOptionalRootFilter(t))
-                        .collect(ImmutableCollectors.toList());
+                children = discardOptionalRootFilterForList(children);
             }
 
             NaryIQTree unionSubtree = iqFactory.createNaryIQTree(
                     iqFactory.createUnionNode(children.get(0).getVariables()),
-                    children
-            );
+                    children);
 
-            return childrenExpression.isPresent() ?
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(childrenExpression.get()),
-                            unionSubtree
-                    ) :
-                    unionSubtree;
+            return childrenExpression
+                    .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), unionSubtree))
+                    .orElse(unionSubtree);
         }
 
         @Override
@@ -153,39 +126,27 @@ public class FilterLifterImpl implements FilterLifter {
                     .map(c -> c.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            Optional<ImmutableExpression> childrenExpression =
-                    termFactory.getConjunction(
-                            children.stream()
-                                    .map(t -> getOptionalRootFilter(t))
-                                    .filter(o -> o.isPresent())
-                                    .map(o -> o.get().getFilterCondition())
-                    );
+            Optional<ImmutableExpression> childrenExpression = getChildrenExpression(children);
 
             Optional<ImmutableExpression> explicitJoinCondition = joinNode.getOptionalFilterCondition();
 
             if (childrenExpression.isPresent()) {
-                children = children.stream()
-                        .map(t -> discardOptionalRootFilter(t))
-                        .collect(ImmutableCollectors.toList());
+                children = discardOptionalRootFilterForList(children);
             }
 
             NaryIQTree joinSubtree = iqFactory.createNaryIQTree(
                     iqFactory.createInnerJoinNode(),
-                    children
-            );
+                    children);
 
-            ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
-            childrenExpression.ifPresent(e -> builder.add(e));
-            explicitJoinCondition.ifPresent(e -> builder.add(e));
-
-            ImmutableList<ImmutableExpression> conjuncts = builder.build();
+            ImmutableList<ImmutableExpression> conjuncts = Stream.of(childrenExpression, explicitJoinCondition)
+                    .flatMap(Optional::stream)
+                    .collect(ImmutableList.toImmutableList());
 
             return conjuncts.isEmpty() ?
                     joinSubtree :
                     iqFactory.createUnaryIQTree(
                             iqFactory.createFilterNode(termFactory.getConjunction(conjuncts)),
-                            joinSubtree
-                    );
+                            joinSubtree);
         }
 
         @Override
@@ -199,23 +160,19 @@ public class FilterLifterImpl implements FilterLifter {
             rightChild = discardOptionalRootFilter(rightChild);
             leftChild = discardOptionalRootFilter(leftChild);
 
-            LeftJoinNode updatedLJ = (optionalRightFilter.isPresent()) ?
-                    iqFactory.createLeftJoinNode(termFactory.getConjunction(
-                            rootNode.getOptionalFilterCondition(),
-                            Stream.of(optionalRightFilter.get().getFilterCondition()))
-                    ) :
-                    rootNode;
+            LeftJoinNode updatedLJ = optionalRightFilter
+                    .map(f -> termFactory.getConjunction(rootNode.getOptionalFilterCondition(), Stream.of(f.getFilterCondition())))
+                    .map(iqFactory::createLeftJoinNode)
+                    .orElse(rootNode);
+
             BinaryNonCommutativeIQTree lJSubtree = iqFactory.createBinaryNonCommutativeIQTree(
                     updatedLJ,
                     leftChild,
-                    rightChild
-            );
-            return (optionalLeftFilter.isPresent()) ?
-                    iqFactory.createUnaryIQTree(
-                            optionalLeftFilter.get(),
-                            lJSubtree
-                    ) :
-                    lJSubtree;
+                    rightChild);
+
+            return optionalLeftFilter
+                    .<IQTree>map(f -> iqFactory.createUnaryIQTree(f, lJSubtree))
+                    .orElse(lJSubtree);
         }
     }
 
@@ -226,20 +183,26 @@ public class FilterLifterImpl implements FilterLifter {
     }
 
     private IQTree discardOptionalRootFilter(IQTree tree) {
-        return tree.getRootNode() instanceof FilterNode ?
-                tree.getChildren().get(0) :
-                tree;
+        return tree.getRootNode() instanceof FilterNode
+                ? tree.getChildren().get(0)
+                : tree;
     }
 
-    private ConstructionNode updateConstructionNode(ConstructionNode cn, ImmutableExpression filteringCondition) {
-
-        // add the variable that appear in the expression to ones projected by the cn
-        ImmutableSet<Variable> projectedVars = ImmutableSet.<Variable>builder()
-                .addAll(filteringCondition.getVariables())
-                .addAll(cn.getVariables())
-                .build();
-
-        return iqFactory.createConstructionNode(projectedVars, cn.getSubstitution());
+    private Optional<ImmutableExpression> getChildrenExpression(ImmutableList<IQTree> children) {
+        return termFactory.getConjunction(
+                children.stream()
+                        .map(t -> getOptionalRootFilter(t))
+                        .flatMap(Optional::stream)
+                        .map(FilterNode::getFilterCondition));
     }
+
+    private ImmutableList<IQTree> discardOptionalRootFilterForList(ImmutableList<IQTree> children) {
+        return children.stream()
+                .map(t -> discardOptionalRootFilter(t))
+                .collect(ImmutableCollectors.toList());
+    }
+
+
+
 }
 

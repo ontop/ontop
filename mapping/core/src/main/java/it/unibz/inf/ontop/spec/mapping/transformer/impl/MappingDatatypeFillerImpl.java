@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -15,8 +16,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionS
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -25,7 +25,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
     private final SingleTermTypeExtractor typeExtractor;
@@ -36,7 +35,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                                       SingleTermTypeExtractor typeExtractor) {
         this.settings = settings;
         this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.typeExtractor = typeExtractor;
@@ -97,34 +95,35 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     }
 
     private IQTree fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopSubstitution();
 
-        ImmutableTerm objectLexicalTerm = Optional.ofNullable(topSubstitution.get(objectVariable))
-                .filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
-                .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? ((ImmutableFunctionalTerm) t).getTerm(0)
-                        : termFactory.getRDFTermTypeConstant(((RDFConstant) t).getType()))
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "The root construction node is not defining the object variable with a functional term " +
-                                "or a RDF constant\n" + assertion));
-
-        IQTree childTree = assertion.getTopChild();
+        ImmutableTerm objectLexicalTerm = getObjectLexicalTerm(objectVariable, assertion);
 
         // May throw an UnknownDatatypeException
-        RDFDatatype datatype = extractObjectType(objectLexicalTerm, childTree);
+        RDFDatatype datatype = extractObjectType(objectLexicalTerm, assertion.getTopChild());
 
-        ImmutableTerm objectDefinition = termFactory.getRDFLiteralFunctionalTerm(objectLexicalTerm, datatype);
+        ImmutableFunctionalTerm objectTermDefinition = termFactory.getRDFLiteralFunctionalTerm(objectLexicalTerm, datatype);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = topSubstitution
-                .filter(v -> !v.equals(objectVariable))
-                .union(substitutionFactory.getSubstitution(objectVariable, objectDefinition))
-                .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen"));
+        Substitution<ImmutableTerm> newSubstitution = assertion.getTopSubstitution().builder()
+                        .transformOrRetain(ImmutableMap.of(objectVariable, objectTermDefinition)::get, (t, u) -> u)
+                        .build();
 
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        assertion.getProjectedVariables(),
-                        newSubstitution),
-                childTree);
+                iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution),
+                assertion.getTopChild());
+    }
+
+    private ImmutableTerm getObjectLexicalTerm(Variable objectVariable, MappingAssertion assertion) {
+
+        ImmutableTerm objectTerm = assertion.getTopSubstitution().get(objectVariable);
+        if (objectTerm instanceof ImmutableFunctionalTerm) {
+            return ((ImmutableFunctionalTerm) objectTerm).getTerm(0);
+        }
+        else if (objectTerm instanceof RDFConstant) {
+            return termFactory.getRDFTermTypeConstant(((RDFConstant) objectTerm).getType());
+        }
+        else
+            throw new MinorOntopInternalBugException("The root construction node is not defining the object variable with a functional term " +
+                            "or a RDF constant\n" + assertion);
     }
 
     private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree) throws UnknownDatatypeException {

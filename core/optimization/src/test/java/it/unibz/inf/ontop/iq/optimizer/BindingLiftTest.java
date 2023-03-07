@@ -607,7 +607,7 @@ public class BindingLiftTest {
         //----------------------------------------------------------------------
         // Construct expected query
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         W, generateInt(H),
                         X, TERM_FACTORY.getIRIFunctionalTerm(F0),
                         Y, generateInt(BF1),
@@ -615,7 +615,7 @@ public class BindingLiftTest {
                                 F,
                                 TERM_FACTORY.getIfElseNull(
                                         TERM_FACTORY.getDBIsNotNull(F),
-                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getDatatype(XSD.INTEGER)))))));
+                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getDatatype(XSD.INTEGER))))));
         UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, BF1, F, H));
 
         ConstructionNode expectedNodeOnLeft = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
