@@ -52,8 +52,6 @@
 			<outputDirectory>/lib</outputDirectory>
 			<excludes>
 				<exclude>com.h2database:h2*</exclude>
-				<exclude>*:war</exclude>
-				<exclude>*:ontop-protege:*</exclude>
 				<exclude>*:ontop-distribution:*</exclude>
 			</excludes>
 		</dependencySet>
