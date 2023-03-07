@@ -7,14 +7,14 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.build.directory}/unpack/protege-desktop-macos/Protege-${protege.version}</directory>
-			<outputDirectory>/Protege-${protege.version}/</outputDirectory>
+			<directory>${project.build.directory}/unpack/protege-desktop-macos/${protege.bnd.dir}</directory>
+			<outputDirectory>/${protege.bnd.dir}/</outputDirectory>
 		</fileSet>
 	</fileSets>
 	<files>
 		<file>
 			<source>${project.build.directory}/it.unibz.inf.ontop.protege-${project.version}.jar</source>
-			<outputDirectory>/Protege-${protege.version}/Protégé.app/Contents/Java/plugins/</outputDirectory>
+			<outputDirectory>/${protege.bnd.dir}/${protege.bnd.dir-plugins-macos}/</outputDirectory>
 		</file>
 	</files>
 </assembly>

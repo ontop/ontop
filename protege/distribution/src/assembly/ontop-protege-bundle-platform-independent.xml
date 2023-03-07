@@ -7,14 +7,14 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.build.directory}/unpack/protege-desktop-platform-independent/Protege-${protege.version}</directory>
-			<outputDirectory>/Protege-${protege.version}/</outputDirectory>
+			<directory>${project.build.directory}/unpack/protege-desktop-platform-independent/${protege.bnd.dir}</directory>
+			<outputDirectory>/${protege.bnd.dir}/</outputDirectory>
 		</fileSet>
 	</fileSets>
 	<files>
 		<file>
 			<source>${project.build.directory}/it.unibz.inf.ontop.protege-${project.version}.jar</source>
-			<outputDirectory>/Protege-${protege.version}/plugins/</outputDirectory>
+			<outputDirectory>/${protege.bnd.dir}/${protege.bnd.dir-plugins-plat-ind}/</outputDirectory>
 		</file>
 	</files>
 </assembly>
