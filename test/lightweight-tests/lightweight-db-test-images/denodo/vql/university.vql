@@ -1,0 +1,220 @@
+﻿# Generated with Denodo Platform 8.0 update 20220815.
+
+ENTER SINGLE USER MODE;
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+# 0 ====================================================================
+
+# #######################################
+# DATABASE
+# #######################################
+CREATE OR REPLACE DATABASE university '';
+
+CONNECT DATABASE university;
+
+# #######################################
+# LISTENERS JMS
+# #######################################
+# No listeners jms
+# #######################################
+# LISTENERS KAFKA
+# #######################################
+# No listeners kafka
+# #######################################
+# DATASOURCES
+# #######################################
+CREATE OR REPLACE DATASOURCE JDBC university
+    DRIVERCLASSNAME = 'org.postgresql.Driver'
+    DATABASEURI = 'jdbc:postgresql://localhost:7777/university'
+    USERNAME = 'postgres'
+    USERPASSWORD = '50i/iSxxUTr+hstnmnqOm8RwBZLfb8JzjN3jSsYKpGt3C+G2HwUEwAPMJMwiV6FsXELzcM//KYhOjHShqcO2S3HrWBlpGHp8VKbyizyGZKFBdnVpCp0D4hadKe+eYsbh' ENCRYPTED
+    CLASSPATH = 'postgresql-8'
+    DATABASENAME = 'postgresql'
+    DATABASEVERSION = '8'
+    FETCHSIZE = 1000
+    VALIDATIONQUERY = 'Select 1'
+    INITIALSIZE = 4
+    MAXIDLE = -1
+    MINIDLE = 0
+    MAXACTIVE = 20
+    EXHAUSTEDACTION = 1
+    TESTONBORROW = true
+    TESTONRETURN = false
+    TESTWHILEIDLE = false
+    TIMEBETWEENEVICTION = -1
+    NUMTESTPEREVICTION = 3
+    MINEVICTABLETIME = 1800000
+    POOLPREPAREDSTATEMENTS = false
+    MAXOPENPREPAREDSTATEMENTS = -1
+    DATA_LOAD_CONFIGURATION (
+        BATCHINSERTSIZE = 200
+    );
+
+# #######################################
+# DATABASE CONFIGURATION
+# #######################################
+ALTER DATABASE university
+  CHARSET DEFAULT;
+
+# #######################################
+# WRAPPERS
+# #######################################
+CREATE OR REPLACE WRAPPER JDBC course
+    DATASOURCENAME=university
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='course' 
+    OUTPUTSCHEMA (
+        course_id = 'course_id' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  NOT NULL SORTABLE,
+        nb_students = 'nb_students' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE,
+        duration = 'duration' :'java.math.BigDecimal' (OPT) (sourcetypedecimals='4', sourcetyperadix='10', sourcetypesize='38', sourcetypeid='2', sourcetypename='numeric')  NOT NULL SORTABLE
+    )
+    CONSTRAINT 'course_pkey' PRIMARY KEY ( 'course_id' )
+    INDEX 'course_pkey' OTHER UNIQUE PRIMARY ( 'course_id' );
+
+CREATE OR REPLACE WRAPPER JDBC professors
+    DATASOURCENAME=university
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='professors' 
+    OUTPUTSCHEMA (
+        prof_id = 'prof_id' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE,
+        first_name = 'first_name' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  NOT NULL SORTABLE,
+        last_name = 'last_name' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  NOT NULL SORTABLE,
+        nickname = 'nickname' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  SORTABLE
+    )
+    CONSTRAINT 'professors_pkey' PRIMARY KEY ( 'prof_id' )
+    INDEX 'professors_pkey' OTHER UNIQUE PRIMARY ( 'prof_id' );
+
+CREATE OR REPLACE WRAPPER JDBC teaching
+    DATASOURCENAME=university
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='teaching' 
+    OUTPUTSCHEMA (
+        course_id = 'course_id' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  NOT NULL SORTABLE,
+        prof_id = 'prof_id' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE
+    )
+    CONSTRAINT 'teaching_pkey' PRIMARY KEY ( 'course_id' , 'prof_id' )
+    CONSTRAINT 'teaching_course_id_fkey' FOREIGN KEY ( 'course_id' ) 
+    REFERENCES 'public'.'course'( 'course_id' )  ON UPDATE NO ACTION  ON DELETE NO ACTION NOT DEFERRABLE 
+    CONSTRAINT 'teaching_prof_id_fkey' FOREIGN KEY ( 'prof_id' ) 
+    REFERENCES 'public'.'professors'( 'prof_id' )  ON UPDATE NO ACTION  ON DELETE NO ACTION NOT DEFERRABLE 
+    INDEX 'teaching_pkey' OTHER UNIQUE PRIMARY ( 'course_id' , 'prof_id' );
+
+# #######################################
+# STORED PROCEDURES
+# #######################################
+# No stored procedures
+# #######################################
+# TYPES
+# #######################################
+# No types
+# #######################################
+# MAPS
+# #######################################
+# No maps
+# #######################################
+# BASE VIEWS
+# #######################################
+CREATE OR REPLACE TABLE course I18N us_pst (
+        course_id:text (notnull, sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100'),
+        nb_students:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        duration:decimal (notnull, sourcetypeid = '2', sourcetyperadix = '10', sourcetypedecimals = '4', sourcetypesize = '38')
+    )
+    CONSTRAINT 'course_pkey' PRIMARY KEY ( 'course_id' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD course(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD course_id (any) OPT ANY
+             ADD nb_students (any) OPT ANY
+             ADD duration (any) OPT ANY
+        )
+        OUTPUTLIST (course_id, duration, nb_students
+        )
+        WRAPPER (jdbc course)
+    );
+
+CREATE OR REPLACE TABLE professors I18N us_pst (
+        prof_id:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        first_name:text (notnull, sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100'),
+        last_name:text (notnull, sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100'),
+        nickname:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100')
+    )
+    CONSTRAINT 'professors_pkey' PRIMARY KEY ( 'prof_id' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD professors(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD prof_id (any) OPT ANY
+             ADD first_name (any) OPT ANY
+             ADD last_name (any) OPT ANY
+             ADD nickname (any) OPT ANY
+        )
+        OUTPUTLIST (first_name, last_name, nickname, prof_id
+        )
+        WRAPPER (jdbc professors)
+    );
+
+CREATE OR REPLACE TABLE teaching I18N us_pst (
+        course_id:text (notnull, sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100'),
+        prof_id:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10')
+    )
+    CONSTRAINT 'teaching_pkey' PRIMARY KEY ( 'course_id' , 'prof_id' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD teaching(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD course_id (any) OPT ANY
+             ADD prof_id (any) OPT ANY
+        )
+        OUTPUTLIST (course_id, prof_id
+        )
+        WRAPPER (jdbc teaching)
+    );
+
+# #######################################
+# VIEWS
+# #######################################
+# No views
+# #######################################
+# ASSOCIATIONS
+# #######################################
+CREATE OR REPLACE ASSOCIATION course_teaching REFERENTIAL CONSTRAINT 
+    ENDPOINT teaching course PRINCIPAL (0,1)
+    ENDPOINT course teaching (0,*)
+    ADD MAPPING course_id=course_id;
+
+CREATE OR REPLACE ASSOCIATION professors_teaching REFERENTIAL CONSTRAINT 
+    ENDPOINT teaching professors PRINCIPAL (0,1)
+    ENDPOINT professors teaching (0,*)
+    ADD MAPPING prof_id=prof_id;
+
+# #######################################
+# WEBSERVICES
+# #######################################
+# No web services
+# #######################################
+# WIDGETS
+# #######################################
+# No widgets
+# #######################################
+# WEBCONTAINER WEB SERVICE DEPLOYMENTS
+# #######################################
+# No deployed web services
+# #######################################
+# WEBCONTAINER WIDGET DEPLOYMENTS
+# #######################################
+# No deployed widgets
+# #######################################
+# Closing connection with database university
+# #######################################
+CLOSE;
+
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+EXIT SINGLE USER MODE;

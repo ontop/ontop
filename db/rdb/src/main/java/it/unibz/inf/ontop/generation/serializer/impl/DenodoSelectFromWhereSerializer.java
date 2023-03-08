@@ -9,8 +9,10 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Collectors;
 
@@ -19,7 +21,25 @@ public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
     @Inject
     private DenodoSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+        super(new DefaultSQLTermSerializer(termFactory) {
+            @Override
+            protected String serializeDBConstant(DBConstant constant) {
+                DBTermType dbType = constant.getType();
+                if(dbType.getCategory() == DBTermType.Category.INTEGER ||
+                        dbType.getCategory() == DBTermType.Category.DECIMAL ||
+                        dbType.getCategory() == DBTermType.Category.FLOAT_DOUBLE) {
+                    //Denodo does not support numbers to start with '+', so it has to be removed.
+                    String value = constant.getValue();
+                    if(!value.startsWith("+"))
+                        return super.serializeDBConstant(constant);
+                    if(dbType.getCategory() == DBTermType.Category.INTEGER)
+                        return value.substring(1);
+                    return castFloatingConstant(value.substring(1), dbType);
+                }
+
+                return super.serializeDBConstant(constant);
+            }
+        });
     }
 
     @Override
