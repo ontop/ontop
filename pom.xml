@@ -5,7 +5,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>5.0.2</version>
+    <version>5.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -73,7 +73,7 @@
     <scm>
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-        <tag>ontop-5.0.2</tag>
+        <tag>ontop-5.0.1</tag>
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 
