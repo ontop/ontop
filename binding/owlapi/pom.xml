@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-binding</artifactId>
-        <version>5.0.2-SNAPSHOT
+        <version>5.0.2
 </version>
     </parent>
 
