@@ -5,7 +5,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>5.0.2-SNAPSHOT</version>
+    <version>5.0.2</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -73,7 +73,7 @@
     <scm>
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-        <tag>ontop-5.0.1</tag>
+        <tag>ontop-5.0.2</tag>
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 
@@ -1429,7 +1429,7 @@
                                         <exclude>org.apache.logging.log4j:log4j-core:(,2.17.0)</exclude>
                                     </excludes>
                                 </bannedDependencies>
-                                <dependencyConvergence/>
+                                <dependencyConvergence />
                             </rules>
                         </configuration>
                     </execution>
@@ -1470,13 +1470,13 @@
         <profile>
             <id>plugin</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
+                <plugin.phase-prefix />
             </properties>
         </profile>
         <profile>
             <id>asset-cli</id>
             <properties>
-                <asset-cli.phase-prefix></asset-cli.phase-prefix>
+                <asset-cli.phase-prefix />
             </properties>
             <build>
                 <defaultGoal>package</defaultGoal>
@@ -1485,8 +1485,8 @@
         <profile>
             <id>asset-plugin</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
-                <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
+                <plugin.phase-prefix />
+                <asset-plugin.phase-prefix />
             </properties>
             <build>
                 <defaultGoal>package</defaultGoal>
@@ -1495,9 +1495,9 @@
         <profile>
             <id>asset-protege</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
-                <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
-                <asset-protege.phase-prefix></asset-protege.phase-prefix>
+                <plugin.phase-prefix />
+                <asset-plugin.phase-prefix />
+                <asset-protege.phase-prefix />
             </properties>
             <build>
                 <defaultGoal>package</defaultGoal>
@@ -1506,10 +1506,10 @@
         <profile>
             <id>release</id>
             <properties>
-                <plugin.phase-prefix></plugin.phase-prefix>
-                <asset-cli.phase-prefix></asset-cli.phase-prefix>
-                <asset-plugin.phase-prefix></asset-plugin.phase-prefix>
-                <asset-protege.phase-prefix></asset-protege.phase-prefix>
+                <plugin.phase-prefix />
+                <asset-cli.phase-prefix />
+                <asset-plugin.phase-prefix />
+                <asset-protege.phase-prefix />
             </properties>
             <build>
                 <defaultGoal>package</defaultGoal>
