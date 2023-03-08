@@ -77,9 +77,13 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultRecu
             FunctionSymbol subTermFunctionSymbol = subTermNonGroundExpression.getFunctionSymbol();
             if(subTermFunctionSymbol == null || !(subTermFunctionSymbol instanceof DBOrFunctionSymbol || subTermFunctionSymbol instanceof DBAndFunctionSymbol))
                 return termFactory.getImmutableFunctionalTerm(functionSymbol, newTerms);
-            var trueTerm = termFactory.getDBBooleanConstant(!isNullOrNotFunctionSymbol.isTrueWhenNull());
-            var falseTerm = termFactory.getDBBooleanConstant(isNullOrNotFunctionSymbol.isTrueWhenNull());
-            var newFunctionSymbol = termFactory.getDBCase(Stream.of(Maps.immutableEntry(subTermNonGroundExpression, trueTerm), Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), trueTerm)), falseTerm, false);
+            var whenNotNullTerm = termFactory.getDBBooleanConstant(!isNullOrNotFunctionSymbol.isTrueWhenNull());
+            var whenNullTerm = termFactory.getDBBooleanConstant(isNullOrNotFunctionSymbol.isTrueWhenNull());
+            var newFunctionSymbol = termFactory.getDBCase(
+                    Stream.of(
+                            Maps.immutableEntry(subTermNonGroundExpression, whenNotNullTerm),
+                            Maps.immutableEntry(termFactory.getDBNot(subTermNonGroundExpression), whenNotNullTerm)
+                    ), whenNullTerm, false);
             return newFunctionSymbol;
         }
     }
