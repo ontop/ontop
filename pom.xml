@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-        <relativePath>
-        </relativePath>
-    </parent>
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
@@ -80,8 +73,36 @@
         <url>git@github.com:ontop/ontop.git</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <!-- Build-related properties (overridden in child modules) -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <finalName>${project.artifactId}-${project.version}</finalName>
         <filter.main.resources>false</filter.main.resources>
         <filter.test.resources>false</filter.test.resources>
@@ -1281,6 +1302,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>${maven-release-plugin.version}</version>
+                    <configuration>
+                        <mavenExecutorId>forked-path</mavenExecutorId>
+                        <!-- Note: some modules/assemblies are going to be built with -Prelease but they are not going to be deployed
+                             (maven.deploy.skip=true property in their pom.xml). Here we still use the -Prelease profile for consistency
+                             with non-release builds (mvn -Prelease), and also to have the release build fail in case some of these
+                             modules/assemblies could not be built (as they need to be generated anyway after the maven release process) -->
+                        <arguments>-Prelease -Psign-artifacts</arguments>
+                        <releaseProfiles>release,sign-artifacts</releaseProfiles>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1534,15 +1564,9 @@
             </build>
         </profile>
 
-        <!-- Manually activated profile to sign (GPG) artifacts to be deployed -->
+        <!-- Profile to sign (GPG) generated artifacts (e.g., JARs), activated manually or automatically by the maven release plugin -->
         <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
+            <id>sign-artifacts</id>
             <build>
                 <plugins>
                     <plugin>
