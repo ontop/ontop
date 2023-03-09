@@ -78,14 +78,22 @@ public class PushProjectedOrderByTermsNormalizer extends DefaultRecursiveIQTreeE
         var orderBy = decomposition.orderByNode.get();
         var remainingSubtree = transform(decomposition.descendantTree, context);
 
+        var substitution = construct.getSubstitution();
+
         //Get map of terms used in ORDER BY that are defined in CONSTRUCT
-        var orderByTerms = orderBy.getComparators().stream().map(comp -> comp.getTerm()).collect(ImmutableCollectors.toSet());
+        var orderByTerms = orderBy.getComparators().stream()
+                .map(OrderByNode.OrderComparator::getTerm)
+                .collect(ImmutableCollectors.toSet());
+
         var definedInConstruct = orderByTerms.stream().filter(
-                term -> construct.getSubstitution().getImmutableMap().values().stream().anyMatch(t -> t.equals(term))
+                term -> substitution.getRangeSet().contains(term)
         ).collect(ImmutableCollectors.toMap(
                 term -> term,
-                term -> (NonGroundTerm) construct.getSubstitution().getImmutableMap().keySet().stream().filter(t -> construct.getSubstitution().get(t).equals(term)).findFirst().get()
-        ));
+                term -> (NonGroundTerm) substitution.getDomain().stream()
+                        .filter(t -> substitution.get(t).equals(term))
+                        .findFirst()
+                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                "Was expecting a definition with value " + term))));
 
         //Define new ORDER BY node that uses variables from CONSTRUCT instead, where possible
         var newOrderBy = iqFactory.createOrderByNode(orderBy.getComparators().stream().map(
