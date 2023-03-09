@@ -8,7 +8,7 @@
 | Branch    | build status  |
 |-----------|---------------|
 | [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=master)](https://github.com/ontop/ontop/actions/)|
-| [version5](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://github.com/ontop/ontop/actions/)|
+| [version5](https://github.com/ontop/ontop/tree/version5) |[![Build Status](https://github.com/ontop/ontop/actions/workflows/.github/workflows/main.yml/badge.svg?branch=version5)](https://github.com/ontop/ontop/actions/)|
 
 
 Ontop
@@ -24,7 +24,7 @@ Compiling, packing, testing, etc.
 
 The project is a [Maven](http://maven.apache.org/) project. Compiling,
 running the unit tests, building the release binaries all can be done
-using maven.  Currently, we use Maven 3 and Java 8 to build the
+using Maven.  Currently, we use Maven 3.6+ and Java 11 to build the
 project.
 
 

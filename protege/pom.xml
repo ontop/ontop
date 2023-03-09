@@ -4,23 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-        <relativePath>
-        </relativePath>
+        <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop</artifactId>
+        <version>5.0.3-SNAPSHOT</version>
     </parent>
-    
-    <!-- important: no parent declaration to Ontop-->
 
-    <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop-protege</artifactId>
-    <version>5.0.2-SNAPSHOT
-</version>
     <packaging>pom</packaging>
-
     <description>Ontop OBDA plugin for protégé</description>
-    <url>https://ontop-vkg.org/</url>
 
     <modules>
         <module>dependencies</module>
@@ -29,173 +20,99 @@
     </modules>
 
     <properties>
-        <protege.version>5.5.0</protege.version>
-        <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
+        <!-- Dependency versions: additional dependencies (not in root pom.xml) related to protégé modules -->
         <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
-        <logback.version>1.2.9</logback.version>
+        <icu4j.version>58.2</icu4j.version>
+        <javax-json.version>1.0.4</javax-json.version>
+        <osgi.version>6.0.0</osgi.version>
+        <thrift.version>[0.12.0,)</thrift.version>
         <treelayout.version>1.0.3</treelayout.version>
-        <urlbuilder.version>2.0.9</urlbuilder.version>
         <xerces.version>2.12.2</xerces.version>
         <xml-apis.version>1.4.01</xml-apis.version>
-        <javax-json.version>1.0.4</javax-json.version>
-        <junit.version>4.13.2</junit.version>
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <thrift.version>[0.12.0,)</thrift.version>
-        <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
-        <slf4j.version>1.7.13</slf4j.version>
-        <icu4j.version>58.2</icu4j.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven-bundle-plugin.version>5.1.2</maven-bundle-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
-        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
-        <jdk.version>11</jdk.version>
+
+        <!-- Protégé dependency version, type, and repository URL to be used when compiling -->
+        <protege.version>5.6.1</protege.version>
+        <protege.type>bundle</protege.type>
+        <protege.repo-id>ontop-3rd-party-maven-repo</protege.repo-id>
+        <protege.repo-url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</protege.repo-url>
+
+        <!-- Protégé bundles main properties for mvn -Passet-protege (ideally, the ones to change for a new Protégé release)
+             - protege.bnd.version = Protégé version used for bundles (may be more recent that one used for compiling)
+             - protege.bnd.source = 'repository' downloads from Maven repo, 'url' downloads from URL built with next properties
+                                    (current default is 'url' that works with latest Protégé bundles not yet on Maven) -->
+        <protege.bnd.version>5.6.1</protege.bnd.version>
+        <protege.bnd.source>repository</protege.bnd.source>
+
+        <!-- Protégé bundles fine tuning properties for mvn -Passet-protege (override these to match different paths/urls in Protégé release)
+             - protege.bnd.dir = root directory to look for inside downloaded/resolved Protégé bundles
+             - protege.bnd.dir-plugins-<platform> = plugins directory (under root) where to put the Ontop Protégé plugin jar file
+             - protege.bnd.release = release ID on GitHub, e.g., protege-5.6.1, v5.5.0 (release page, left column)
+             - protege.bnd.asset-<platform> = asset filename (release page, under 'Assets')
+             - protege.bnd.base = base GitHub URL for resolving release assets (no need to change)
+             - protege.bnd.url-<platform> = resulting asset URL (override this for fine-grained tuning) -->
+        <protege.bnd.dir>Protege-${protege.version}</protege.bnd.dir>
+        <protege.bnd.dir-plugins-plat-ind>plugins</protege.bnd.dir-plugins-plat-ind>
+        <protege.bnd.dir-plugins-macos>Protégé.app/Contents/plugins</protege.bnd.dir-plugins-macos>
+        <protege.bnd.dir-plugins-win>plugins</protege.bnd.dir-plugins-win>
+        <protege.bnd.dir-plugins-linux>plugins</protege.bnd.dir-plugins-linux>
+        <protege.bnd.release>protege-${protege.bnd.version}</protege.bnd.release>
+        <protege.bnd.asset-plat-ind>Protege-${protege.bnd.version}-platform-independent.zip</protege.bnd.asset-plat-ind>
+        <protege.bnd.asset-macos>Protege-${protege.bnd.version}-os-x.zip</protege.bnd.asset-macos>
+        <protege.bnd.asset-win>Protege-${protege.bnd.version}-win.zip</protege.bnd.asset-win>
+        <protege.bnd.asset-linux>Protege-${protege.bnd.version}-linux.tar.gz</protege.bnd.asset-linux>
+        <protege.bnd.base>https://github.com/protegeproject/protege-distribution/releases/download/</protege.bnd.base>
+        <protege.bnd.url-plat-ind>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-plat-ind}</protege.bnd.url-plat-ind>
+        <protege.bnd.url-macos>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-macos}</protege.bnd.url-macos>
+        <protege.bnd.url-win>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-win}</protege.bnd.url-win>
+        <protege.bnd.url-linux>${protege.bnd.base}/${protege.bnd.release}/${protege.bnd.asset-linux}</protege.bnd.url-linux>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Ontop Protégé Plugin modules -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege-dependencies</artifactId>
+                <version>${project.version}</version>
+                <classifier>shaded</classifier>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId> <!-- required, otherwise transitive unshaded dependencies will be included -->
+                        <groupId>*</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege-plugin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege-plugin</artifactId>
+                <version>${project.version}</version>
+                <classifier>bundle</classifier>
+            </dependency>
+
             <!-- Protégé -->
             <dependency>
                 <groupId>edu.stanford.protege</groupId>
                 <artifactId>protege-editor-core</artifactId>
                 <version>${protege.version}</version>
+                <type>${protege.type}</type>
             </dependency>
             <dependency>
                 <groupId>edu.stanford.protege</groupId>
                 <artifactId>protege-editor-owl</artifactId>
                 <version>${protege.version}</version>
+                <type>${protege.type}</type>
             </dependency>
 
-            <!-- Protégé XML Catalog -->
-            <dependency>
-                <groupId>edu.stanford.protege</groupId>
-                <artifactId>org.protege.xmlcatalog</artifactId>
-                <version>${protege-xmlcatalog.version}</version>
-            </dependency>
-            
-            <!-- Ontop -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-model</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-optimization</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-obda-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdb</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-sql-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-native</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-r2rml</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-sql-all</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-ontology-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-mapping-sql-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-reformulation-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-reformulation-sql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-system-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-system-sql-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-system-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-system-sql-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-owlapi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-rdf4j</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ontop-semantic-index</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
+            <!-- Guava failureaccess -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>failureaccess</artifactId>
                 <version>${guava-failureaccess.version}</version>
-            </dependency>
-
-            <!-- Logback -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${logback.version}</version>
             </dependency>
 
             <!-- abego TreeLayout -->
@@ -226,39 +143,6 @@
                 <version>${thrift.version}</version>
             </dependency>
 
-            <!-- OpenCSV -->
-            <dependency>
-                <groupId>com.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>${opencsv.version}</version>
-            </dependency>
-
-            <!-- SLF4J -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>${slf4j-jcl.version}</version>
-            </dependency>
-
-            <!-- JUnit -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-
-            <!-- URL builder -->
-            <dependency>
-                <groupId>io.mikael</groupId>
-                <artifactId>urlbuilder</artifactId>
-                <version>${urlbuilder.version}</version>
-            </dependency>
-
             <!-- ICU4J -->
             <dependency>
                 <groupId>com.ibm.icu</groupId>
@@ -272,35 +156,106 @@
                 <artifactId>javax.json</artifactId>
                 <version>${javax-json.version}</version>
             </dependency>
+
+            <!-- OSGI Specification -->
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                    <doclint>none</doclint>
-                </configuration>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <!-- Skip following plugin/goal execution if Ontop protégé plugin modules are not enabled (default):
+                 'resources', 'compile', 'test-resources', 'test-compile', 'test', 'jar', 'install', 'deploy' -->
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-resources</id>
+                            <phase>${plugin.phase-prefix}process-resources</phase>
+                        </execution>
+                        <execution>
+                            <id>default-testResources</id>
+                            <phase>${plugin.phase-prefix}process-test-resources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>${plugin.phase-prefix}compile</phase>
+                        </execution>
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>${plugin.phase-prefix}test-compile</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-test</id>
+                            <phase>${plugin.phase-prefix}test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>default-jar</id>
+                            <phase>${plugin.phase-prefix}package</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-install</id>
+                            <phase>${plugin.phase-prefix}install</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-deploy</id>
+                            <phase>${plugin.phase-prefix}deploy</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
-  <scm>
-    <tag>ontop-5.0.1</tag>
-    <connection>scm:git:git@github.com:ontop/ontop.git</connection>
-    <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-    <url>git@github.com:ontop/ontop.git</url>
-  </scm>
+    <repositories>
+        <repository>
+            <!-- For Protégé artifacts not available yet on Maven Central -->
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>${protege.repo-id}</id>
+            <url>${protege.repo-url}</url>
+        </repository>
+    </repositories>
+
 </project>

@@ -6,8 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-test</artifactId>
-        <version>5.0.2-SNAPSHOT
-</version>
+        <version>5.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-lightweight-tests</artifactId>
@@ -29,6 +28,7 @@
         <snowflake.user>fake</snowflake.user>
         <snowflake.password>fake</snowflake.password>
         <snowflake.warehouse>ontop</snowflake.warehouse>
+        <denodo.password>admin</denodo.password>
 <!--        <junit.version></junit.version>-->
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>

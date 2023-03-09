@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
+import static org.junit.Assert.assertEquals;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -1354,7 +1355,7 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND (ofn:secondsBetween(?start, ?year) AS ?v)\n"
                 + "}";
 
-        executeAndCompareValues(query, ImmutableList.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
+        executeAndCompareValues(query, ImmutableSet.of("\"1492154272\"^^xsd:long", "\"1413511200\"^^xsd:long",
                 "\"1532994786\"^^xsd:long", "\"116806800\"^^xsd:long"));
     }
 
@@ -1371,6 +1372,12 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "}";
 
         executeAndCompareValues(query, ImmutableList.of("\"84600000\"^^xsd:long"));
+    }
+
+    @Test
+    public void testSPO() {
+        String query = "SELECT * WHERE { ?s ?p ?o } LIMIT 10";
+        assertEquals(10, runQueryAndCount(query));
     }
 
 }

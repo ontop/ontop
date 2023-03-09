@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class DenodoDBTypeFactory extends DefaultSQLDBTypeFactory {
 
-    public static final String TIMESTAMPTZ_STR = "TIMESTAMP_WITH_TIMEZONE";
+    public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
 
     @AssistedInject
     protected DenodoDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -34,5 +34,15 @@ public class DenodoDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
         return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "true";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "false";
     }
 }

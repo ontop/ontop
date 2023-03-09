@@ -76,6 +76,11 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
 
         List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs = new ArrayList<>();
 
+        // Wrap into IF-ELSE-NULL
+        if (doOrderingMatter && terms.size() > 2 && terms.get(1).isNull()) {
+            return wrapIntoIfElseNull(terms, termFactory, variableNullability, arity);
+        }
+
         /*
          * When conditions
          */
@@ -132,6 +137,44 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         return (shrunkWhenPairs.size() < terms.size() % 2)
                 ? newTerm.simplify(variableNullability)
                 : newTerm;
+    }
+
+    /**
+     * When the first thenValue is null, order matters and there is more than 2 arguments
+     */
+    private ImmutableTerm wrapIntoIfElseNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                             VariableNullability variableNullability, int arity) {
+        ImmutableExpression firstCondition = Optional.of(terms.get(0))
+                .filter(t -> t instanceof ImmutableExpression)
+                .map(t -> (ImmutableExpression) t)
+                .orElseThrow(() -> new MinorOntopInternalBugException(terms.get(0) + " was expected to be " +
+                        "an ImmutableExpression due to its first position in " + this));
+
+        ImmutableExpression topCondition = termFactory.getDisjunction(
+                termFactory.getDBIsNull(firstCondition),
+                termFactory.getDBNot(firstCondition));
+
+        ImmutableFunctionalTerm newCase = buildCase(IntStream.range(1, (arity - (arity % 2)) / 2)
+                .mapToObj(i -> Maps.immutableEntry(
+                        Optional.of(terms.get(2*i))
+                                .filter(t -> t instanceof ImmutableExpression)
+                                .map(t -> (ImmutableExpression)t)
+                                .orElseThrow(() -> new MinorOntopInternalBugException(terms.get(2*i) + " was expected to be " +
+                                        "an ImmutableExpression due to its position in " + this)),
+                        terms.get(2*i+1))),
+                extractDefaultValue(terms, termFactory),
+                termFactory);
+
+        ImmutableTerm newTerm = (newCase instanceof ImmutableExpression)
+                ? termFactory.getBooleanIfElseNull(
+                        topCondition,
+                        (ImmutableExpression) newCase)
+                .simplify(variableNullability)
+                : termFactory.getIfElseNull(
+                topCondition,
+                newCase);
+
+        return newTerm.simplify(variableNullability);
     }
 
     /**
