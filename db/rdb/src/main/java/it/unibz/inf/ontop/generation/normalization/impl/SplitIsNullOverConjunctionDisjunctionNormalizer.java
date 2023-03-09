@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-/*
+/**
 Translates expressions of the form `(<expr1> OR|AND <expr2>) IS [NOT] NULL` into the expression
 CASE WHEN <expr1> OR|AND <expr2> THEN FALSE[TRUE] WHEN NOT <expr1> OR|AND <expr2> THEN FALSE[TRUE] ELSE FALSE END
 for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on conjunctions/disjunctions.

@@ -16,17 +16,17 @@ import javax.inject.Inject;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/*
+/**
 Used to get rid of limits in sub-queries that are not necessary, for dialects like Denodo, that don't allow limits in sub-queries.
  */
 public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> implements DialectExtraNormalizer {
 
+    private CoreSingletons coreSingletons;
 
-    private SubLimitTransformer subLimitTransformer;
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(CoreSingletons coreSingletons) {
         super(coreSingletons);
-        subLimitTransformer = new SubLimitTransformer(this, coreSingletons);
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -40,26 +40,24 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
         if(sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
             return super.transformSlice(tree, sliceNode, child, context);
 
-        return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child, context, sliceNode.getLimit().get()));
+        var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this, coreSingletons);
+
+        return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child, context));
     }
 
-    private class SubLimitTransformer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> {
+    /**
+     * Calling super.transform[...] continues in this transformer, normal transform calls are redirected to the parent transformer.
+     */
+    private static class SubLimitTransformer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> {
 
-        private EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer;
-        private long currentBounds = 0;
+        private final EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer;
+        private final long currentBounds;
 
-        protected SubLimitTransformer(EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer,
+        protected SubLimitTransformer(long currentBounds, EliminateLimitsFromSubQueriesNormalizer eliminateLimitsFromSubQueriesNormalizer,
                                       CoreSingletons coreSingletons) {
             super(coreSingletons);
             this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
-        }
-
-        public IQTree transform(IQTree tree, VariableGenerator variableGenerator, long limitBounds) {
-            long rememberOldBounds = currentBounds;
-            currentBounds = limitBounds;
-            IQTree result = transform(tree, variableGenerator);
-            currentBounds = rememberOldBounds;
-            return result;
+            this.currentBounds = currentBounds;
         }
 
         @Override
@@ -67,8 +65,9 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
             return tree.acceptTransformer(this, variableGenerator);
         }
 
-        //If the child slice has a lower limit than the parent, we cannot drop it
-        //We once again only perform this normalization if there is no OFFSET
+        /**If the child slice has a lower limit than the parent, we cannot drop it
+        *We once again only perform this normalization if there is no OFFSET
+         * */
         @Override
         public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child, VariableGenerator context) {
             if(sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().get() < currentBounds)
@@ -76,7 +75,9 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
             return transform(tree.getChildren().get(0), context);
         }
 
-        //On left joins, we only apply the transformation to the left child
+        /**
+         * On left joins, we only apply the transformation to the left child
+        */
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild, VariableGenerator context) {
             var leftSubTree = transform(tree.getChildren().get(0), context);
@@ -86,7 +87,9 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
             return iqFactory.createBinaryNonCommutativeIQTree((LeftJoinNode)tree.getRootNode(), leftSubTree, rightSubTree);
         }
 
-        //On inner joins, unions and constructions, we keep going inside this normalizer.
+        /**
+         * On inner joins, unions and constructions, we keep going inside this normalizer.
+        */
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children, VariableGenerator context) {
             return super.transformNaryCommutativeNode(tree, rootNode, children, context);
@@ -102,8 +105,10 @@ public class EliminateLimitsFromSubQueriesNormalizer extends DefaultRecursiveIQT
             return super.transformUnaryNode(tree, rootNode, child, context);
         }
 
-        //All other nodes are not modified and passed back to the original normalizer to continue.
-        //This includes ORDER BY, DISTINCT, FILTER and more
+        /**
+         * All other nodes are not modified and passed back to the original normalizer to continue.
+         * This includes ORDER BY, DISTINCT, FILTER and more
+        */
         @Override
         protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child, VariableGenerator context) {
             return eliminateLimitsFromSubQueriesNormalizer.transform(tree, context);
