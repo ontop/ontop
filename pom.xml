@@ -7,8 +7,10 @@
     <artifactId>ontop</artifactId>
     <version>5.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <url>http://ontop-vkg.org/</url>
 
+    <name>Ontop</name>
+    <description>Ontop is a Virtual Knowledge Graph system</description>
+    <url>https://ontop-vkg.org/</url>
     <inceptionYear>2009</inceptionYear>
     <organization>
         <name>Free University of Bozen-Bolzano</name>
