@@ -31,6 +31,7 @@
         <snowflake.warehouse>ontop</snowflake.warehouse>
 <!--        <junit.version></junit.version>-->
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
+        <dremio.password>dremio1234</dremio.password>
     </properties>
 
 
@@ -547,9 +548,19 @@
             <version>1.12.251</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.dremio.distribution</groupId>
+            <artifactId>dremio-jdbc-driver</artifactId>
+            <version>22.0.0-202206221430090603-1fa4049f</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>dremio-free</id>
+            <url>https://maven.dremio.com/free/</url>
+        </repository>
         <repository>
             <id>ontop-3rd-party-maven-repo</id>
             <url>https://raw.githubusercontent.com/ontop/ontop-3rd-party-maven-repo/master/repository/</url>
