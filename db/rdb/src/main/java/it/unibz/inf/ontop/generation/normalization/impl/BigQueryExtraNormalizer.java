@@ -9,12 +9,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class BigQueryExtraNormalizer implements DialectExtraNormalizer {
 
     private final AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer;
-    private final PushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer;
+    private final OnlyInPresenceOfDistinctPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer;
     private final ConvertValuesToUnionNormalizer convertValuesToUnionNormalizer;
 
     @Inject
     protected BigQueryExtraNormalizer(AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer,
-                                      PushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
+                                      OnlyInPresenceOfDistinctPushProjectedOrderByTermsNormalizer pushProjectedOrderByTermsNormalizer,
                                       ConvertValuesToUnionNormalizer convertValuesToUnionNormalizer) {
         this.alwaysProjectOrderByTermsNormalizer = alwaysProjectOrderByTermsNormalizer;
         this.pushProjectedOrderByTermsNormalizer = pushProjectedOrderByTermsNormalizer;

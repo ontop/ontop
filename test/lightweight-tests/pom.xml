@@ -28,6 +28,7 @@
         <snowflake.user>fake</snowflake.user>
         <snowflake.password>fake</snowflake.password>
         <snowflake.warehouse>ontop</snowflake.warehouse>
+        <denodo.password>admin</denodo.password>
 <!--        <junit.version></junit.version>-->
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>

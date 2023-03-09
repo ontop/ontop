@@ -1,0 +1,247 @@
+﻿# Generated with Denodo Platform 8.0 update 20220815.
+
+ENTER SINGLE USER MODE;
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+# 0 ====================================================================
+
+# #######################################
+# DATABASE
+# #######################################
+CREATE OR REPLACE DATABASE dbconstr '';
+
+CONNECT DATABASE dbconstr;
+
+# #######################################
+# LISTENERS JMS
+# #######################################
+# No listeners jms
+# #######################################
+# LISTENERS KAFKA
+# #######################################
+# No listeners kafka
+# #######################################
+# DATASOURCES
+# #######################################
+CREATE OR REPLACE DATASOURCE JDBC book
+    DRIVERCLASSNAME = 'org.postgresql.Driver'
+    DATABASEURI = 'jdbc:postgresql://localhost:7777/dbconstraints'
+    USERNAME = 'postgres'
+    USERPASSWORD = '5oaeH7v/+JL2X5263sRQJE/RmrAkA58cC6XdioyvcDMKIlrPc2EQQ0CazII4spvj3hAzqBpoHpKIij2Xc9LG0ClQLy9fl2m9YVMzRPHMs2at55Wm1wqxMKQpPu2Pyms0' ENCRYPTED
+    CLASSPATH = 'postgresql-8'
+    DATABASENAME = 'postgresql'
+    DATABASEVERSION = '8'
+    FETCHSIZE = 1000
+    VALIDATIONQUERY = 'Select 1'
+    INITIALSIZE = 4
+    MAXIDLE = -1
+    MINIDLE = 0
+    MAXACTIVE = 20
+    EXHAUSTEDACTION = 1
+    TESTONBORROW = true
+    TESTONRETURN = false
+    TESTWHILEIDLE = false
+    TIMEBETWEENEVICTION = -1
+    NUMTESTPEREVICTION = 3
+    MINEVICTABLETIME = 1800000
+    POOLPREPAREDSTATEMENTS = false
+    MAXOPENPREPAREDSTATEMENTS = -1
+    DATA_LOAD_CONFIGURATION (
+        BATCHINSERTSIZE = 200
+    );
+
+# #######################################
+# DATABASE CONFIGURATION
+# #######################################
+ALTER DATABASE dbconstr
+  CHARSET DEFAULT;
+
+# #######################################
+# WRAPPERS
+# #######################################
+CREATE OR REPLACE WRAPPER JDBC book
+    DATASOURCENAME=book
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='Book' ESCAPE
+    OUTPUTSCHEMA (
+        bk_code = 'bk_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE,
+        bk_title = 'bk_title' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  SORTABLE
+    )
+    CONSTRAINT 'pk_book' PRIMARY KEY ( 'bk_code' )
+    INDEX 'pk_book' OTHER UNIQUE PRIMARY ( 'bk_code' );
+
+CREATE OR REPLACE WRAPPER JDBC bookwriter
+    DATASOURCENAME=book
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='BookWriter' ESCAPE
+    OUTPUTSCHEMA (
+        bk_code = 'bk_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  SORTABLE,
+        wr_code = 'wr_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  SORTABLE
+    )
+    CONSTRAINT 'fk_book_writer' FOREIGN KEY ( 'bk_code' ) 
+    REFERENCES 'public'.'Book'( 'bk_code' )  ON UPDATE NO ACTION  ON DELETE NO ACTION NOT DEFERRABLE 
+    CONSTRAINT 'fk_writer_book' FOREIGN KEY ( 'wr_code' ) 
+    REFERENCES 'public'.'Writer'( 'wr_code' )  ON UPDATE NO ACTION  ON DELETE NO ACTION NOT DEFERRABLE ;
+
+CREATE OR REPLACE WRAPPER JDBC edition
+    DATASOURCENAME=book
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='Edition' ESCAPE
+    OUTPUTSCHEMA (
+        ed_code = 'ed_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE,
+        ed_year = 'ed_year' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  SORTABLE,
+        bk_code = 'bk_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  SORTABLE
+    )
+    CONSTRAINT 'pk_edition' PRIMARY KEY ( 'ed_code' )
+    CONSTRAINT 'fk_book_edition' FOREIGN KEY ( 'bk_code' ) 
+    REFERENCES 'public'.'Book'( 'bk_code' )  ON UPDATE NO ACTION  ON DELETE NO ACTION NOT DEFERRABLE 
+    INDEX 'pk_edition' OTHER UNIQUE PRIMARY ( 'ed_code' );
+
+CREATE OR REPLACE WRAPPER JDBC writer
+    DATASOURCENAME=book
+    SCHEMANAME='public' ESCAPE
+    RELATIONNAME='Writer' ESCAPE
+    OUTPUTSCHEMA (
+        wr_code = 'wr_code' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='int4')  NOT NULL SORTABLE,
+        wr_name = 'wr_name' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='100', sourcetypeid='12', sourcetypename='varchar')  SORTABLE
+    )
+    CONSTRAINT 'pk_writer' PRIMARY KEY ( 'wr_code' )
+    INDEX 'pk_writer' OTHER UNIQUE PRIMARY ( 'wr_code' );
+
+# #######################################
+# STORED PROCEDURES
+# #######################################
+# No stored procedures
+# #######################################
+# TYPES
+# #######################################
+# No types
+# #######################################
+# MAPS
+# #######################################
+# No maps
+# #######################################
+# BASE VIEWS
+# #######################################
+CREATE OR REPLACE TABLE book I18N us_pst (
+        bk_code:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        bk_title:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100')
+    )
+    CONSTRAINT 'pk_book' PRIMARY KEY ( 'bk_code' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD book(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD bk_code (any) OPT ANY
+             ADD bk_title (any) OPT ANY
+        )
+        OUTPUTLIST (bk_code, bk_title
+        )
+        WRAPPER (jdbc book)
+    );
+
+CREATE OR REPLACE TABLE bookwriter I18N us_pst (
+        bk_code:int (sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        wr_code:int (sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10')
+    )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD bookwriter(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD bk_code (any) OPT ANY
+             ADD wr_code (any) OPT ANY
+        )
+        OUTPUTLIST (bk_code, wr_code
+        )
+        WRAPPER (jdbc bookwriter)
+    );
+
+CREATE OR REPLACE TABLE edition I18N us_pst (
+        ed_code:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        ed_year:int (sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        bk_code:int (sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10')
+    )
+    CONSTRAINT 'pk_edition' PRIMARY KEY ( 'ed_code' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD edition(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD ed_code (any) OPT ANY
+             ADD ed_year (any) OPT ANY
+             ADD bk_code (any) OPT ANY
+        )
+        OUTPUTLIST (bk_code, ed_code, ed_year
+        )
+        WRAPPER (jdbc edition)
+    );
+
+CREATE OR REPLACE TABLE writer I18N us_pst (
+        wr_code:int (notnull, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        wr_name:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '100')
+    )
+    CONSTRAINT 'pk_writer' PRIMARY KEY ( 'wr_code' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD writer(
+        I18N us_pst
+        CONSTRAINTS (
+             ADD wr_code (any) OPT ANY
+             ADD wr_name (any) OPT ANY
+        )
+        OUTPUTLIST (wr_code, wr_name
+        )
+        WRAPPER (jdbc writer)
+    );
+
+# #######################################
+# VIEWS
+# #######################################
+# No views
+# #######################################
+# ASSOCIATIONS
+# #######################################
+CREATE OR REPLACE ASSOCIATION book_bookwriter REFERENTIAL CONSTRAINT 
+    ENDPOINT bookwriter book PRINCIPAL (0,1)
+    ENDPOINT book bookwriter (0,*)
+    ADD MAPPING bk_code=bk_code;
+
+CREATE OR REPLACE ASSOCIATION book_edition REFERENTIAL CONSTRAINT 
+    ENDPOINT edition book PRINCIPAL (0,1)
+    ENDPOINT book edition (0,*)
+    ADD MAPPING bk_code=bk_code;
+
+CREATE OR REPLACE ASSOCIATION writer_bookwriter REFERENTIAL CONSTRAINT 
+    ENDPOINT bookwriter writer PRINCIPAL (0,1)
+    ENDPOINT writer bookwriter (0,*)
+    ADD MAPPING wr_code=wr_code;
+
+# #######################################
+# WEBSERVICES
+# #######################################
+# No web services
+# #######################################
+# WIDGETS
+# #######################################
+# No widgets
+# #######################################
+# WEBCONTAINER WEB SERVICE DEPLOYMENTS
+# #######################################
+# No deployed web services
+# #######################################
+# WEBCONTAINER WIDGET DEPLOYMENTS
+# #######################################
+# No deployed widgets
+# #######################################
+# Closing connection with database dbconstr
+# #######################################
+CLOSE;
+
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+EXIT SINGLE USER MODE;
