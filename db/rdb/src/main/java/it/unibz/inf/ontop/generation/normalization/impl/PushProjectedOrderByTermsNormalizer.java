@@ -25,12 +25,13 @@ Generally, an `AlwaysProjectOrderByTerms` normalizer is expected to be run befor
 public class PushProjectedOrderByTermsNormalizer extends DefaultRecursiveIQTreeExtendedTransformer<VariableGenerator> implements DialectExtraNormalizer {
 
     private IntermediateQueryFactory iqFactory;
+    private boolean onlyDistinct;
 
-    @Inject
-    protected PushProjectedOrderByTermsNormalizer(IntermediateQueryFactory iqFactory,
+    protected PushProjectedOrderByTermsNormalizer(boolean onlyDistinct, IntermediateQueryFactory iqFactory,
                                                   CoreSingletons coreSingletons) {
         super(coreSingletons);
         this.iqFactory = iqFactory;
+        this.onlyDistinct = onlyDistinct;
     }
 
     @Override
@@ -47,11 +48,32 @@ public class PushProjectedOrderByTermsNormalizer extends DefaultRecursiveIQTreeE
                     ? tree
                     : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
         }
+        return normalizeWithDistinct(decomposition, variableGenerator);
+    }
+
+    @Override
+    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child, VariableGenerator variableGenerator) {
+        if(this.onlyDistinct)
+            return super.transformConstruction(tree, rootNode, child, variableGenerator);
+
+        var decomposition = ProjectOrderByTermsNormalizer.Decomposition.decomposeTree(tree);
+        if(decomposition.constructionNode.isEmpty() || decomposition.orderByNode.isEmpty()) {
+            var newDescendantTree = transform(decomposition.descendantTree, variableGenerator);
+            return decomposition.descendantTree.equals(newDescendantTree)
+                    ? tree
+                    : decomposition.rebuildWithNewDescendantTree(newDescendantTree, iqFactory);
+        }
         return normalize(decomposition, variableGenerator);
     }
 
-    protected IQTree normalize(ProjectOrderByTermsNormalizer.Decomposition decomposition, VariableGenerator context) {
+    protected IQTree normalizeWithDistinct(ProjectOrderByTermsNormalizer.Decomposition decomposition, VariableGenerator context) {
         var distinct = decomposition.distinctNode.get();
+
+        var newFullTree = iqFactory.createUnaryIQTree(distinct, normalize(decomposition, context));
+        return newFullTree;
+    }
+
+    protected IQTree normalize(ProjectOrderByTermsNormalizer.Decomposition decomposition, VariableGenerator context) {
         var construct = decomposition.constructionNode.get();
         var orderBy = decomposition.orderByNode.get();
         var remainingSubtree = transform(decomposition.descendantTree, context);
@@ -72,8 +94,7 @@ public class PushProjectedOrderByTermsNormalizer extends DefaultRecursiveIQTreeE
 
         //Change order from DISTINCT -> CONSTRUCT -> ORDER BY to DISTINCT -> ORDER BY -> CONSTRUCT
         var newOrderBySubtree = iqFactory.createUnaryIQTree(construct, remainingSubtree);
-        var newDistinctSubtree = iqFactory.createUnaryIQTree(newOrderBy, newOrderBySubtree);
-        var newFullTree = iqFactory.createUnaryIQTree(distinct, newDistinctSubtree);
+        var newFullTree = iqFactory.createUnaryIQTree(newOrderBy, newOrderBySubtree);
         return newFullTree;
     }
 }
