@@ -5,12 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -291,5 +289,27 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return String.format("TRUNC(GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)) - GETTIMEINMILLIS(CAST(%s AS TIMESTAMP)))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
+    }
+
+    //Denodo does not support 'distinct' GroupConcat
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "GROUP_CONCAT(true, %s, '', %s)",
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBRowNumber() {
+        return new DBFunctionSymbolWithSerializerImpl("ROWNUM", ImmutableList.of(), dbIntegerType, true,
+                (t, c, f) -> serializeDBRowNumber(c, f));
+    }
+
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROWNUM()";
     }
 }
