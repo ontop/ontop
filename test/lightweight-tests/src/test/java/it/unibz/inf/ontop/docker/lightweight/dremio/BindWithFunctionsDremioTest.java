@@ -58,10 +58,4 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     public void testHashSHA384() {
         super.testHashSHA384();
     }
-
-    @Test
-    public void testSPO() {
-        String query = "SELECT * WHERE { ?s ?p ?o } LIMIT 10";
-        assertEquals(10, runQueryAndCount(query));
-    }
 }
