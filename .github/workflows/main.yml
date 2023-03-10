@@ -228,8 +228,8 @@ jobs:
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker-compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
       # Runs all tests specific to a db engine
-      - name: Run CI for SQLServer docker tests
-        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="dremiolighttests" -DskipTests=false --fail-at-end
+      - name: Run CI for Dremio docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="dremiolighttests" -DskipTests=false --fail-at-end -Dcdjd.io.netty.tryReflectionSetAccessible=true
 
   run-mssql:
     needs: run-dremio
