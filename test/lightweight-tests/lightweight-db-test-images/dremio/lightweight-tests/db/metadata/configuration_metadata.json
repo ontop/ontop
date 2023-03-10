@@ -1,1 +1,0 @@
-{"tablename":"configuration","keyFormat":{"type":3},"valueFormat":{"type":5,"classNameParam":"com.dremio.services.configuration.proto.ConfigurationEntry"},"versionExtractorClassName":""}

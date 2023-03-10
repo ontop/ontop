@@ -1,1 +1,0 @@
-{"tablename":"provisioning","keyFormat":{"type":5,"classNameParam":"com.dremio.provision.ClusterId"},"valueFormat":{"type":5,"classNameParam":"com.dremio.provision.Cluster"},"versionExtractorClassName":""}

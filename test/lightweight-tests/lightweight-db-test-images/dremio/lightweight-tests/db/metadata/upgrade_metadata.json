@@ -1,1 +1,0 @@
-{"tablename":"upgrade","keyFormat":{"type":5,"classNameParam":"com.dremio.dac.proto.model.source.UpgradeTaskId"},"valueFormat":{"type":5,"classNameParam":"com.dremio.dac.proto.model.source.UpgradeTaskStore"},"versionExtractorClassName":""}
