@@ -227,9 +227,12 @@ jobs:
       - name: Set up docker
         run: cd test/lightweight-tests/lightweight-db-test-images &&
           docker-compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
       # Runs all tests specific to a db engine
       - name: Run CI for Dremio docker tests
-        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="dremiolighttests" -DskipTests=false --fail-at-end -Dcdjd.io.netty.tryReflectionSetAccessible=true
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="dremiolighttests" -DskipTests=false --fail-at-end
 
   run-mssql:
     needs: run-dremio
