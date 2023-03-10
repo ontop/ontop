@@ -207,6 +207,7 @@ jobs:
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="pgsqllighttests" -DskipTests=false --fail-at-end
 
   run-dremio:
+    needs: run-postgresql
     runs-on: ubuntu-latest
     strategy:
       matrix:
