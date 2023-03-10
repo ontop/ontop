@@ -1,0 +1,1 @@
+{"tablename":"metadata-multi-splits","keyFormat":{"type":3},"valueFormat":{"type":4,"classNameParam":"com.dremio.service.namespace.dataset.proto.PartitionProtobuf$MultiSplit"},"versionExtractorClassName":""}
