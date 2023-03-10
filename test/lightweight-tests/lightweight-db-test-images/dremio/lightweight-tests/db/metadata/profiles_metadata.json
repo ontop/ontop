@@ -1,0 +1,1 @@
+{"tablename":"profiles","keyFormat":{"type":3},"valueFormat":{"type":4,"classNameParam":"com.dremio.exec.proto.UserBitShared$QueryProfile"},"versionExtractorClassName":""}

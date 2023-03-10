@@ -1,0 +1,1 @@
+{"tablename":"collaboration_tags","keyFormat":{"type":3},"valueFormat":{"type":5,"classNameParam":"com.dremio.dac.proto.model.collaboration.CollaborationTag"},"versionExtractorClassName":""}

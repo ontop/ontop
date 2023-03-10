@@ -1,0 +1,1 @@
+{"tablename":"datasetVersions","keyFormat":{"type":3},"valueFormat":{"type":5,"classNameParam":"com.dremio.dac.proto.model.dataset.VirtualDatasetVersion"},"versionExtractorClassName":""}

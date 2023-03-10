@@ -159,7 +159,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-            return new NonSimplifiableTypedNullFunctionSymbol(termType);
+            return new DremioNonSimplifiableTypedNullFunctionSymbol(termType);
     }
 
     @Override

@@ -1,0 +1,1 @@
+{"tablename":"orphan_store","keyFormat":{"type":4,"classNameParam":"com.dremio.service.orphanage.proto.OrphanEntry$OrphanId"},"valueFormat":{"type":4,"classNameParam":"com.dremio.service.orphanage.proto.OrphanEntry$Orphan"},"versionExtractorClassName":""}

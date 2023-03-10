@@ -1,0 +1,1 @@
+{"tablename":"dependencies","keyFormat":{"type":5,"classNameParam":"com.dremio.service.reflection.proto.ReflectionId"},"valueFormat":{"type":5,"classNameParam":"com.dremio.service.reflection.proto.ReflectionDependencies"},"versionExtractorClassName":""}
