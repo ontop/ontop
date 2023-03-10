@@ -1,1 +1,0 @@
-{"tablename":"external_reflection_store","keyFormat":{"type":5,"classNameParam":"com.dremio.service.reflection.proto.ReflectionId"},"valueFormat":{"type":5,"classNameParam":"com.dremio.service.reflection.proto.ExternalReflection"},"versionExtractorClassName":""}
