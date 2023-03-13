@@ -27,11 +27,12 @@ public class DremioNonSimplifiableTypedNullFunctionSymbol extends NonSimplifiabl
         var comparison = termFactory.getDBNumericInequality(
                 InequalityLabel.GT,
                 termFactory.getDBRand(UUID.randomUUID()),
-                termFactory.getDBConstant("1", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType()));
+                termFactory.getDBIntegerConstant(1));
 
-        var caseTerm = termFactory.getDBCase(
-                Stream.of(Maps.immutableEntry(comparison, termFactory.getDBConstant("0", castingType))),
-                termFactory.getNullConstant(),
+        var constant = castingType.getCategory() == DBTermType.Category.BOOLEAN ? termFactory.getDBBooleanConstant(false) : termFactory.getDBConstant("0", castingType);
+
+        var caseTerm = termFactory.getDBCaseElseNull(
+                Stream.of(Maps.immutableEntry(comparison, constant)),
                 false
         );
         return termConverter.apply(
