@@ -9,6 +9,12 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
+  dremio:
+    build: ./dremio
+    ports:
+      - "31010:31010"
+      - "9047:9047"
+
   trino:
     build: ./trino
     env_file: .env
