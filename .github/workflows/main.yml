@@ -206,8 +206,37 @@ jobs:
       - name: Run CI for PostgreSQL docker tests
         run: cd test/lightweight-tests && ../../mvnw install -Dgroups="pgsqllighttests" -DskipTests=false --fail-at-end
 
-  run-mssql:
+  run-dremio:
     needs: run-postgresql
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 11 ]
+
+    steps:
+      # Checks-out ontop repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+      # Set up the java versions
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+      - name: Set maven opts
+        run: set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - name: Set up docker
+        run: cd test/lightweight-tests/lightweight-db-test-images &&
+          docker-compose -f "docker-compose.lightweight.yml" up -d pgsql dremio
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
+      # Runs all tests specific to a db engine
+      - name: Run CI for Dremio docker tests
+        run: cd test/lightweight-tests && ../../mvnw install -Dgroups="dremiolighttests" -DskipTests=false --fail-at-end
+
+  run-mssql:
+    needs: run-dremio
     runs-on: ubuntu-latest
     strategy:
       matrix:
