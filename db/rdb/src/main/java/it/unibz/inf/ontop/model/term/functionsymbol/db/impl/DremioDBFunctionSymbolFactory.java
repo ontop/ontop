@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -26,9 +27,12 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     private static final String NOT_YET_SUPPORTED_MSG = "Not supported by Dremio yet";
     private static final String POSITION_STR = "POSITION";
 
+    private DatabaseInfoSupplier databaseInfoSupplier;
+
     @Inject
-    protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory) {
+    protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory, DatabaseInfoSupplier databaseInfoSupplier) {
         super(createDremioRegularFunctionTable(typeFactory), typeFactory);
+        this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDremioRegularFunctionTable(
@@ -159,7 +163,12 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-            return new DremioNonSimplifiableTypedNullFunctionSymbol(termType);
+        try {
+            if (databaseInfoSupplier.getDatabaseVersion().map(s -> s.split("\\.")).filter(e -> e.length > 0 && Integer.parseInt(e[0]) < 21)
+                    .isPresent())
+                return new NonSimplifiableTypedNullFunctionSymbol(termType);
+        } catch (NumberFormatException ignored) {}
+        return new DremioNonSimplifiableTypedNullFunctionSymbol(termType);
     }
 
     @Override
