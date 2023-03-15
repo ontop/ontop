@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -22,9 +23,12 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     private static final String NOT_YET_SUPPORTED_MSG = "Not supported by Dremio yet";
     private static final String POSITION_STR = "POSITION";
 
+    private DatabaseInfoSupplier databaseInfoSupplier;
+
     @Inject
-    protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory) {
+    protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory, DatabaseInfoSupplier databaseInfoSupplier) {
         super(createDremioRegularFunctionTable(typeFactory), typeFactory);
+        this.databaseInfoSupplier = databaseInfoSupplier;
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDremioRegularFunctionTable(
@@ -100,13 +104,13 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH:MI:SSTZO'), 'UTCO', '+00:00')",
+        return String.format("REPLACE(REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH24:MI:SSTZO'), 'UTC', '+00:00'), 'O', '')",
                 termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String getUUIDNameInDialect() {
-        throw new UnsupportedOperationException("Do not call getUUIDNameInDialect for Dremio");
+        return "UUID";
     }
 
     @Override
@@ -116,34 +120,37 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("HASH(%s)", termConverter.apply(terms.get(0)));
+        return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("SHA1: " + NOT_YET_SUPPORTED_MSG);
+        return String.format("SHA1(%s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("SHA256: " + NOT_YET_SUPPORTED_MSG);
+        return String.format("SHA256(%s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("SHA384: " + NOT_YET_SUPPORTED_MSG);
+        throw new UnsupportedOperationException("SHA384 is not supported for Dremio");
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("SHA512: " + NOT_YET_SUPPORTED_MSG);
+        return String.format("SHA512(%s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                (a,b,c) -> String.format(
-                        "GROUP_CONCAT or LIST_AGG "+ NOT_YET_SUPPORTED_MSG
+                (terms, termConverter, termFactory) -> String.format(
+                        "LISTAGG(%s%s, %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
                 ));
     }
 
@@ -152,7 +159,12 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-            return new NonSimplifiableTypedNullFunctionSymbol(termType);
+        try {
+            if (databaseInfoSupplier.getDatabaseVersion().map(s -> s.split("\\.")).filter(e -> e.length > 0 && Integer.parseInt(e[0]) < 21)
+                    .isPresent())
+                return new NonSimplifiableTypedNullFunctionSymbol(termType);
+        } catch (NumberFormatException ignored) {}
+        return new DremioNonSimplifiableTypedNullFunctionSymbol(termType);
     }
 
     @Override
