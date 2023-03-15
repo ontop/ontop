@@ -19,10 +19,6 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             public String serialize(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
-                if(term instanceof ImmutableFunctionalTerm &&
-                        ((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof NullIgnoringDBGroupConcatFunctionSymbol){
-                    throw new UnsupportedOperationException("GROUP_CONCAT or LIST_AGG not yet supported by Dremio");
-                }
                 return super.serialize(term,columnIDs);
             }
 
@@ -37,7 +33,12 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
                 new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
-//                    @Override
+                    @Override
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
+                        return String.format("LIMIT %d OFFSET %d", limit, offset);
+                    }
+
+                    //                    @Override
 //                    protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables,
 //                                                         ImmutableMap<Variable, QuotedID> variableAliases,
 //                                                         ImmutableSubstitution<? extends ImmutableTerm> substitution,
