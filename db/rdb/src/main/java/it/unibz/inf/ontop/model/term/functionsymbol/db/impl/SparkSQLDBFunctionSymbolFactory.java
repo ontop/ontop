@@ -7,15 +7,13 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *  SPARK-SQL 3.0.1 functions description available at : https://spark.apache.org/docs/3.0.1/api/sql/
@@ -212,6 +210,150 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
         return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
+    }
+
+
+
+    /**
+        Create a JSON path supported by SPARK (of the form '$.x.y.z').
+     */
+    private String serializePath(ImmutableList<String> path) {
+        return "\'$."+
+                path.stream()
+                        .collect(Collectors.joining("."))
+                +"\'";
+    }
+
+    /**
+     Create a JSON path in human-readable format.
+     */
+    private String printPath(ImmutableList<String> path) {
+        return path.stream()
+                .collect(Collectors.joining("."));
+    }
+
+    /**
+     Access JSON object through a given path using the GET_JSON_OBJECT function and then cast it to STRING.
+     If no path is given, we just return the entire JSON object as a string.
+     */
+    @Override
+    public DBFunctionSymbol getDBJsonEltAsText(ImmutableList<String> path) {
+        if(path.size() == 0) {
+            return new DBFunctionSymbolWithSerializerImpl(
+                    "GET_JSON_OBJECT_TEXT",
+                    ImmutableList.of(dbStringType),
+                    dbStringType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "CAST(%s AS STRING)",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+        return new DBFunctionSymbolWithSerializerImpl(
+                "GET_JSON_OBJECT_TEXT:" + printPath(path),
+                ImmutableList.of(dbStringType),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(GET_JSON_OBJECT(%s, %s) AS STRING)",
+                        termConverter.apply(terms.get(0)),
+                        serializePath(path)
+                ));
+    }
+
+    /**
+     Access JSON object through a given path using the GET_JSON_OBJECT function and return it.
+     If no path is given, we just return the entire JSON object as a string.
+     */
+    @Override
+    public DBFunctionSymbol getDBJsonElt(ImmutableList<String> path) {
+        if(path.size() == 0) {
+            return new DBFunctionSymbolWithSerializerImpl(
+                    "GET_JSON_OBJECT_TEXT",
+                    ImmutableList.of(dbStringType),
+                    dbStringType,
+                    false,
+                    (terms, termConverter, termFactory) -> String.format(
+                            "CAST(%s AS STRING)",
+                            termConverter.apply(terms.get(0))
+                    ));
+        }
+        return new DBFunctionSymbolWithSerializerImpl(
+                "GET_JSON_OBJECT:" + printPath(path),
+                ImmutableList.of(dbStringType),
+                dbStringType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "GET_JSON_OBJECT(%s, %s)",
+                        termConverter.apply(terms.get(0)),
+                        serializePath(path)
+                ));
+    }
+
+    /**
+     The JSON_TYPEOF function is not supported by SPARK. For now, we use a work-around instead, where we just try
+     to cast the element to the given name.
+     This is not perfectly robust, though. E.g. the string "4" would be interpreted as an integer this way.
+     */
+    private DBBooleanFunctionSymbol createJsonHasType(String functionName, String typeName) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                functionName,
+                ImmutableList.of(dbStringType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) ->
+                        String.format(
+                                "%s(%s) IS NOT NULL",
+                                typeName,
+                                termConverter.apply(terms.get(0))
+                        ));
+    }
+
+    /**
+     The JSON_TYPEOF function is not supported by SPARK. For now, we use a work-around instead, where we check if an
+     element can be expressed as a JSON-array or JSON-object.
+     This is not perfectly robust, though. E.g. the string "[1, 2, 3]" would be interpreted as a non-scalar.
+     */
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsScalar(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_SCALAR",
+                ImmutableList.of(dbType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "(JSON_ARRAY_LENGTH(%s) IS NULL AND JSON_OBJECT_KEYS(%s) IS NULL)",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsBoolean(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_BOOLEAN", "BOOLEAN");
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createJsonIsNumber(DBTermType dbType) {
+        return createJsonHasType("JSON_IS_NUMBER", "DOUBLE");
+    }
+
+    /**
+     The JSON_TYPEOF function is not supported by SPARK. For now, we use a work-around instead, where we check if the
+     JSON_ARRAY_LENGTH function can be called on the element.
+     This is not perfectly robust, though. E.g. the string "[1, 2, 3]" would be interpreted as an array.
+     */
+    @Override
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(dbType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "(JSON_ARRAY_LENGTH(%s) IS NOT NULL)",
+                        termConverter.apply(terms.get(0))
+                ));
     }
 }
 
