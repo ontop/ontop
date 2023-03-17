@@ -1,7 +1,7 @@
 {
   "relations": [
     {
-      "name": ["\"pub\"","\"author-pub\""],
+      "name": ["\"pub\"","\"author-pub-flattened\""],
       "baseRelation": ["\"pub\"","\"person\""],
       "flattenedColumn": {
         "name": "\"publication\"",
@@ -22,11 +22,6 @@
       },
       "uniqueConstraints": {
         "added": [
-          {
-            "name": "\"author_pub_pk\"",
-            "determinants" : [ "\"id\"", "\"id_pub\""],
-            "isPrimaryKey" : true
-          }
         ]
       },
       "otherFunctionalDependencies": {
@@ -41,7 +36,37 @@
               "columns": ["\"id\""],
               "relation": ["\"person\""]
             }
-          },
+          }
+      ]
+    },
+    "type": "FlattenLens"
+    },
+    {
+      "name": ["\"pub\"","\"author-pub\""],
+      "baseRelation": ["\"pub\"","\"author-pub-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"id_pub\"",
+            "expression": "CASE WHEN json_typeof(json_extract_path(\"publ\", 'id')) = 'number' THEN json_extract_path_text(\"publ\", 'id')::integer ELSE NULL END"
+          }
+        ],
+        "hidden": ["\"publ\""]
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"author_pub_pk\"",
+            "determinants" : [ "\"id\"", "\"id_pub\""],
+            "isPrimaryKey" : true
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": [
           {
             "name": "author_pub_fk_pub",
             "from": "\"id_pub\"",
@@ -50,9 +75,9 @@
               "relation": ["\"publication\""]
             }
           }
-      ]
-    },
-    "type": "FlattenLens"
+        ]
+      },
+      "type": "BasicLens"
     }
   ]
 }
