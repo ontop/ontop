@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -41,7 +40,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.JSON;
 
 @JsonDeserialize(as = JsonFlattenLens.class)
 public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
@@ -149,32 +147,20 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             Optional<Variable> indexVariable = Optional.ofNullable(columns.position)
                     .map(p -> variableGenerator.generateNewVariable(normalizeAttributeName(columns.position, quotedIDFactory)));
 
-            ImmutableSet<Variable> retainedVariables = computeRetainedVariables(parentVariableMap, indexVariable);
-
             Variable flattenedVariable = Optional.ofNullable(parentVariableMap.get(normalizeAttributeName(flattenedColumn.name, quotedIDFactory)))
                     .orElseThrow(() -> new MetadataExtractionException("The flattened column " + flattenedColumn.name + " is not present in the base relation"));
 
             DBTermType flattenedDBType = dbTypeFactory.getDBTermType(flattenedColumn.datatype);
             Variable flattenedIfArrayVariable = variableGenerator.generateNewVariableFromVar(flattenedVariable);
-            Variable flattenOutputVariable = variableGenerator.generateNewVariable("O");
+            Variable flattenOutputVariable = variableGenerator.generateNewVariable(normalizeAttributeName(columns.newColumn, quotedIDFactory));
 
-            Substitution<ImmutableTerm> extractionSubstitution = substitutionFactory.getSubstitutionThrowsExceptions(
-                    columns.extracted,
-                    c -> variableGenerator.generateNewVariable(normalizeAttributeName(c.name, quotedIDFactory)),
-                    c -> getCheckDatatypeExtractAndCastFromJson(
-                            flattenOutputVariable,
-                            flattenedDBType,
-                            Optional.ofNullable(c.key).map(ImmutableList::copyOf).orElseGet(ImmutableList::of),
-                            c.datatype,
-                            c.name));
-
-            ImmutableSet<Variable> projectedVariables = Sets.union(retainedVariables, extractionSubstitution.getDomain()).immutableCopy();
+            ImmutableSet<Variable> projectedVariables = computeRetainedVariables(parentVariableMap, indexVariable, flattenOutputVariable);
 
             AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
 
             DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
 
-            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, extractionSubstitution);
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables);
 
             FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
 
@@ -197,7 +183,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
         }
 
-        private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable) throws MetadataExtractionException {
+        private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable, Variable outputVariable) throws MetadataExtractionException {
 
             ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
             for (String keptColumn : columns.kept) {
@@ -207,6 +193,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 builder.add(var);
             }
             positionVariable.ifPresent(builder::add);
+            builder.add(outputVariable);
             return builder.build();
         }
 
@@ -214,61 +201,6 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         private ImmutableMap<Integer, ? extends VariableOrGroundTerm> compose(ImmutableMap<Integer, String> map1, ImmutableMap<String, Variable> map2) {
             return map1.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> map2.get(e.getValue())));
-        }
-
-
-        /**
-         * If no expected DB type is specified, then do not cast the value (leave it as a JSON value)
-         */
-        private ImmutableFunctionalTerm getCheckDatatypeExtractAndCastFromJson(Variable sourceVar,
-                                                                               DBTermType flattenedDBType,
-                                                                               ImmutableList<String> path,
-                                                                               String datatypeString,
-                                                                               String columnName)
-                throws MetadataExtractionException {
-
-            DBTermType termType = dbTypeFactory.getDBTermType(datatypeString);
-
-            ImmutableFunctionalTerm retrieveEltAsText = termFactory.getDBJsonElementAsText(sourceVar, path);
-
-            // TODO: consider the input type as well (could enable more simplification, e.g. no cast when same datatype)
-            ImmutableFunctionalTerm cast = termFactory.getDBCastFunctionalTerm(termType, retrieveEltAsText);
-
-            if (termType.getCategory() == JSON) {
-                return cast;
-            }
-            return termFactory.getIfElseNull(
-                    getDatatypeCondition(
-                            flattenedDBType,
-                            termFactory.getDBJsonElement(sourceVar, path),
-                            termType,
-                            columnName),
-                    cast);
-        }
-
-        private ImmutableExpression getDatatypeCondition(DBTermType flattenedDBType,
-                                                         ImmutableFunctionalTerm arg,
-                                                         DBTermType columnTermType,
-                                                         String columnName)
-                throws MetadataExtractionException {
-
-            switch (columnTermType.getCategory()) {
-                case BOOLEAN:
-                    return termFactory.getDBJsonIsBoolean(flattenedDBType, arg);
-                case INTEGER:
-                case FLOAT_DOUBLE:
-                case DECIMAL:
-                    return termFactory.getDBJsonIsNumber(flattenedDBType, arg);
-                case ARRAY:
-                    // TODO: remove this restriction
-                    throw new MetadataExtractionException(
-                            "Array datatypes are currently not supported for extracted column from a flatten lens. Column: "
-                                    + columnName);
-                case STRING:
-                    // By default, treat it as a string
-                default:
-                    return termFactory.getDBJsonIsScalar(flattenedDBType, arg);
-            }
         }
 
     }
@@ -296,8 +228,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
         ImmutableSet<QuotedID> addedColumns = Stream.concat(
                         Optional.ofNullable(columns.position).stream(),
-                        columns.extracted.stream()
-                                .map(a -> a.name))
+                        Stream.of(columns.newColumn))
                 .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toSet());
 
@@ -358,47 +289,24 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
     @JsonPropertyOrder({
             "kept",
-            "extracted",
+            "new",
             "position",
     })
     private static class Columns extends JsonOpenObject {
         @Nonnull
         public final List<String> kept;
         @Nonnull
-        public final List<ExtractedColumn> extracted;
+        public final String newColumn;
 
         public final String position;
 
         @JsonCreator
         public Columns(@JsonProperty("kept") List<String> kept,
-                       @JsonProperty("extracted") List<ExtractedColumn> extracted,
+                       @JsonProperty("new") String newColumn,
                        @JsonProperty("position") String position) {
             this.kept = kept;
-            this.extracted = extracted;
+            this.newColumn = newColumn;
             this.position = position;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "name",
-            "datatype",
-            "key",
-    })
-    private static class ExtractedColumn extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final String datatype;
-
-        public final List<String> key;
-
-        @JsonCreator
-        public ExtractedColumn(@JsonProperty("name") String name,
-                               @JsonProperty("datatype") String datatype,
-                               @JsonProperty("key") List<String> key) {
-            this.name = name;
-            this.datatype = datatype;
-            this.key = key;
         }
     }
 
