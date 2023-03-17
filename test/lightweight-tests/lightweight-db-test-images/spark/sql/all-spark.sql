@@ -57,3 +57,62 @@ INSERT INTO teaching VALUES ('DiscreteMathematics', 1);
 INSERT INTO teaching VALUES ('AdvancedDatabases', 3);
 INSERT INTO teaching VALUES ('ScientificWriting', 8);
 INSERT INTO teaching VALUES ('OperatingSystems', 1);
+
+CREATE TABLE IF NOT EXISTS personxt (
+                                    id integer NOT NULL,
+                                    ssn integer,
+                                    fullname varchar(100),
+                                    tags varchar(6000),
+                                    friends varchar(6000)
+);
+
+INSERT INTO personxt VALUES (1,
+                            123,
+                            'Mary Poppins',
+                            '[111, 222, 333]',
+                            '[{ "fname": "Alice", "nickname": "Al", "address": { "city": "Bolzano", "street": "via Roma", "number": "33" }}, { "fname": "Robert", "nickname": "Bob", "address": {"city": "Merano", "street": "via Dante", "number": "23" }}]'
+                            );
+
+INSERT INTO personxt VALUES (2,
+                            1234,
+                            'Roger Rabbit',
+                            '[111, 222]',
+                            '{ "fname": "Mickey", "lname": "Mouse"}'
+                            );
+
+INSERT INTO personxt VALUES (3,
+                            23,
+                            'Bob Loblaw',
+                            NULL,
+                            '[]'
+                            );
+
+INSERT INTO personxt VALUES (4,
+                            24,
+                            'Kenny McCormick',
+                            '[]',
+                            NULL
+                            );
+
+
+
+CREATE TABLE IF NOT EXISTS person (
+                                    id integer NOT NULL,
+                                    name varchar(100),
+                                    publication varchar(6000),
+                                    contribs varchar(6000)
+);
+
+INSERT INTO person VALUES (
+                          	1,
+                          	'Sanjay Ghemawat',
+                          	'[ { "title": "The Google file system", "id": 1, "year": 2003, "venue":"SOSP", "editor": [ {"name": "M. Scott"}, {"name": "L. Peterson"} ] }, { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS" , "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] } ]',
+                          	'[ {"value": "Google File System"}, {"value": "MapReduce "}, {"value": "Bigtable "}, {"value": "Spanner "} ]'
+                          );
+
+INSERT INTO person VALUES (2,
+                            'Jeffrey Dean',
+                            '[ { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }, { "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] } ]',
+                            '[ {"value": "MapReduce "}, {"value": "Bigtable "}, {"value": "Spanner "}, {"value": "TensorFlow "} ]'
+                            );
+

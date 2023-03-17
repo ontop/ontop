@@ -23,6 +23,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
     private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
+    private static final String ARRAY_STR = "ARRAY";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -48,6 +49,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType decimal3810Type = new NumberDBTermType(DECIMAL_38_10_STR, rootAncestry, xsdDecimal, DECIMAL);
         DBTermType floatType = new NumberDBTermType(FLOAT_STR, rootAncestry, xsdFloat, FLOAT_DOUBLE);
         DBTermType stringType = new StringDBTermType(STRING_STR, rootAncestry, typeFactory.getXsdStringDatatype());
+        DBTermType arrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(STRING_STR, stringType);
@@ -62,6 +64,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(FLOAT_STR,floatType);
         map.put(REAL_STR,floatType);
         map.put(DECIMAL_38_10_STR, decimal3810Type);
+        map.put(ARRAY_STR, arrayType);
         return map;
     }
 
@@ -70,6 +73,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.STRING, STRING_STR);
         map.put(DefaultTypeCode.HEXBINARY,BINARY_STR);
         map.put(DefaultTypeCode.DECIMAL, DECIMAL_38_10_STR);
+        map.put(DefaultTypeCode.ARRAY, ARRAY_STR);
         return ImmutableMap.copyOf(map);
     }
 
@@ -81,4 +85,8 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     @Override
     public String getDBFalseLexicalValue() { return "false"; }
 
+    @Override
+    public boolean supportsArrayType() {
+        return true;
+    }
 }
