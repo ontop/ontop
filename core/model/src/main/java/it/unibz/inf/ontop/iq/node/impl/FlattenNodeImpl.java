@@ -83,6 +83,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
             DBTermType type = optTermType.get();
             switch (type.getCategory()){
                 case JSON:
+                case STRING:
                     return flattenedVarType;
                 case ARRAY:
                     throw new FlattenedVariableTypeException("Array DBType not yet implemented");

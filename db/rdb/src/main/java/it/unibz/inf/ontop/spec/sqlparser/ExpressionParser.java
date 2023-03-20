@@ -87,7 +87,6 @@ public class ExpressionParser {
             .put("UNNEST", this::reject)
             .put("JSON_EACH", this::reject)
             .put("JSON_EACH_TEXT", this::reject)
-            .put("JSON_OBJECT_KEYS", this::reject)
             .put("JSON_POPULATE_RECORDSET", this::reject)
             .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
