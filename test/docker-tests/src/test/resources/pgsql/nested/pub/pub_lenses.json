@@ -1,7 +1,7 @@
 {
   "relations": [
     {
-      "name": ["\"pub\"","\"publication\""],
+      "name": ["\"pub\"","\"publication-flattened\""],
       "baseRelation": ["\"pub\"","\"person\""],
       "flattenedColumn": {
         "name": "\"publication\"",
@@ -11,32 +11,58 @@
         "kept": [
           "\"id\""
         ],
-        "extracted": [
+        "new": "\"publ\""
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "pub_fk_author",
+            "from": "\"id\"",
+            "to": {
+              "columns": ["\"id\""],
+              "relation": ["\"person\""]
+            }
+          }
+      ]
+    },
+    "type": "FlattenLens"
+    },
+    {
+      "name": ["\"pub\"","\"publication\""],
+      "baseRelation": ["\"pub\"","\"publication-flattened\""],
+      "columns": {
+        "added": [
           {
             "name": "\"id_pub\"",
-            "key": ["id"],
-            "datatype": "integer"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'id')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'id')::integer ELSE NULL END"
           },
           {
             "name": "\"title\"",
-            "key": ["title"],
-            "datatype": "text"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'title')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'title')::text ELSE NULL END"
           },
           {
             "name": "\"year\"",
-            "key": ["year"],
-            "datatype": "integer"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'year')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'year')::integer ELSE NULL END"
           },
           {
             "name": "\"venue\"",
-            "key": ["venue"],
-            "datatype": "text"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'venue')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'venue')::text ELSE NULL END"
           },
           {
             "name": "\"editor\"",
-            "key": ["editor"],
-            "datatype": "jsonb"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'editor')) = 'object' THEN jsonb_extract_path(\"publ\", 'editor')::jsonb ELSE NULL END"
           }
+        ],
+        "hidden": [
+          "\"publ\""
         ]
       },
       "uniqueConstraints": {
@@ -54,17 +80,9 @@
       },
       "foreignKeys": {
         "added": [
-          {
-            "name": "pub_fk_author",
-            "from": "\"id\"",
-            "to": {
-              "columns": ["\"id\""],
-              "relation": ["\"person\""]
-            }
-          }
-      ]
-    },
-    "type": "FlattenLens"
+        ]
+      },
+      "type": "BasicLens"
     }
   ]
 }
