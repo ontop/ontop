@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.generation.algebra.impl.SelectFromWhereWithModifiersIm
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
@@ -171,13 +172,16 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
                 Variable outputVar = sqlFlattenExpression.getOutputVar();
+                DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
                 Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
                 StringBuilder builder = new StringBuilder();
 
                 //We express the flatten call as a `SELECT *, EXPLODE_OUTER({array}) FROM child.
 
-                //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING>
-                var expression = String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
+                //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
+                var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
+                        ? allColumnIDs.get(flattenedVar).getSQLRendering()
+                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
 
                 //We compute an alias for the sub-query, and new aliases for each projected variable.
                 var alias = this.generateFreshViewAlias().getSQLRendering();

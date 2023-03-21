@@ -10,7 +10,7 @@ import java.util.Optional;
 public class ArrayDBTermType extends DBTermTypeImpl implements DBTermType {
 
     public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry) {
-        super(arrayStr, ancestry, false, DBTermType.Category.OTHER);
+        super(arrayStr, ancestry, false, DBTermType.Category.ARRAY);
     }
 
     @Override

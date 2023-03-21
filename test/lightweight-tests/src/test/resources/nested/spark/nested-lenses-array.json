@@ -2,10 +2,10 @@
   "relations": [
     {
       "name": ["hr","person-tags-flattened"],
-      "baseRelation": ["personxt"],
+      "baseRelation": ["personxt_array"],
       "flattenedColumn": {
         "name": "tags",
-        "datatype": "varchar"
+        "datatype": "array<string>"
       },
       "columns": {
         "kept": [
@@ -39,10 +39,10 @@
     },
     {
       "name": ["hr","persons-friends-flattened"],
-      "baseRelation": ["personxt"],
+      "baseRelation": ["personxt_array"],
       "flattenedColumn": {
         "name": "friends",
-        "datatype": "varchar"
+        "datatype": "array<string>"
       },
       "columns": {
         "kept": [
@@ -81,10 +81,10 @@
     },
     {
       "name": ["pub","publication-flattened"],
-      "baseRelation": ["person"],
+      "baseRelation": ["person_array"],
       "flattenedColumn": {
         "name": "publication",
-        "datatype": "varchar"
+        "datatype": "array<string>"
       },
       "columns": {
         "kept": [

@@ -86,7 +86,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 case STRING:
                     return flattenedVarType;
                 case ARRAY:
-                    throw new FlattenedVariableTypeException("Array DBType not yet implemented");
+                    return Optional.of(termFactory.getTypeFactory().getDBTypeFactory().getDBStringType()); //TODO temporary
                 default:
                     throw new FlattenedVariableTypeException(
                             String.format(

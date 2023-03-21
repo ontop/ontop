@@ -172,7 +172,9 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                     Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
                     substitutionFactory.<ImmutableTerm>getSubstitution(
                             flattenedIfArrayVariable,
-                            termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
+                            flattenedDBType.getCategory() == DBTermType.Category.ARRAY
+                                    ? flattenedVariable
+                                    : termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
 
             IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
