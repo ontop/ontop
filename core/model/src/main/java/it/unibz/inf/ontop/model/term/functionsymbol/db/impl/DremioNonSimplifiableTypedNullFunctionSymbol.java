@@ -31,7 +31,7 @@ public class DremioNonSimplifiableTypedNullFunctionSymbol extends NonSimplifiabl
 
 
         var constant = castingType.getCategory() == DBTermType.Category.BOOLEAN ? termFactory.getDBBooleanConstant(false) :
-                termFactory.getDBCastFunctionalTerm(castingType, termFactory.getDBUUID(UUID.randomUUID()));
+                termFactory.getDBCastFunctionalTerm(castingType, termFactory.getDBRand(UUID.randomUUID()));
 
         var caseTerm = termFactory.getDBCaseElseNull(
                 Stream.of(Maps.immutableEntry(comparison, constant)),
