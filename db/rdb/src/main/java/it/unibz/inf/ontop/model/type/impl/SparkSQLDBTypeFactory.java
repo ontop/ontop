@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
@@ -23,11 +24,12 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
     private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
-    private static final String ARRAY_STR = "ARRAY<STRING>"; //TODO temporary
+    private static final String ARRAY_STR = "ARRAY";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap());
+        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap(),
+                createGenericAbstractTypeMap(rootTermType, typeFactory));
     }
 
     private static Map<String, DBTermType> createSparkSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
@@ -49,7 +51,6 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType decimal3810Type = new NumberDBTermType(DECIMAL_38_10_STR, rootAncestry, xsdDecimal, DECIMAL);
         DBTermType floatType = new NumberDBTermType(FLOAT_STR, rootAncestry, xsdFloat, FLOAT_DOUBLE);
         DBTermType stringType = new StringDBTermType(STRING_STR, rootAncestry, typeFactory.getXsdStringDatatype());
-        DBTermType arrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(STRING_STR, stringType);
@@ -64,7 +65,6 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(FLOAT_STR,floatType);
         map.put(REAL_STR,floatType);
         map.put(DECIMAL_38_10_STR, decimal3810Type);
-        map.put(ARRAY_STR, arrayType);
         return map;
     }
 
@@ -74,6 +74,16 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.HEXBINARY,BINARY_STR);
         map.put(DefaultTypeCode.DECIMAL, DECIMAL_38_10_STR);
         map.put(DefaultTypeCode.ARRAY, ARRAY_STR);
+        return ImmutableMap.copyOf(map);
+    }
+
+    private static ImmutableMap<String, DBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        DBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry);
+
+        Map<String, DBTermType> map = new HashMap<>();
+        map.put(ARRAY_STR, abstractArrayType);
         return ImmutableMap.copyOf(map);
     }
 
