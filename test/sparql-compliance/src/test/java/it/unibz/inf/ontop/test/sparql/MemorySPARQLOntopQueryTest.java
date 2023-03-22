@@ -70,9 +70,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data ONLY)
 			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
 			openWorldManifest +"open-eq-11", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
-			openWorldManifest +"open-eq-12", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
-
-			sortManifest + "dawg-sort-function" // SPARQL cast with function call on the datatype is not supported, e.g., ORDER BY xsd:integer(?o)
+			openWorldManifest +"open-eq-12" // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
 	);
 
 	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,
