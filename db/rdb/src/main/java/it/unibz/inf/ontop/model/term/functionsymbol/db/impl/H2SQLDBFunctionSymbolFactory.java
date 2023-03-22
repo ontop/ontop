@@ -18,6 +18,7 @@ import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.BINARY_VAR_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.VARBINARY_STR;
+import static it.unibz.inf.ontop.model.type.impl.H2SQLDBTypeFactory.DEFAULT_DECIMAL_STR;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -280,4 +281,68 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                 termConverter.apply(terms.get(1)));
     }
 
+    /**
+     * CAST functions
+     */
+    // H2 cannot detect NaN. A different error will be thrown by H2 and the boolean cast will fail.
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS " + DEFAULT_DECIMAL_STR +") = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s ~ '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS " + DEFAULT_DECIMAL_STR + "))) * SIGN(CAST(%1$s AS " + DEFAULT_DECIMAL_STR + ")) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    // H2 MOD function does not work with DECIMAL scale in practice. Less efficient vs. MOD solution.
+    @Override
+    protected String serializeCheckAndConvertStringFromDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN FLOOR(%1$s) = %s THEN CAST((%1$s) AS INTEGER) " +
+                        "ELSE %1$s " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        //return String.format("CAST(PARSEDATETIME(formatdatetime(timestamp %s, 'yyyy-MM-dd hh:mm:ss'), 'yyyy-MM-dd') AS DATE)", termConverter.apply(terms.get(0)));
+        return String.format("CAST(TIMESTAMP %s AS DATE)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String decimalPattern1 = "\'^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$\'";
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s !~ " + decimalPattern1 + " THEN NULL " +
+                        "ELSE CAST(%1$s AS "+ DEFAULT_DECIMAL_STR +") END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloatFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1.0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0.0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
 }

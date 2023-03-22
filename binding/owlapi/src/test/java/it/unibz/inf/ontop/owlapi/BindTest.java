@@ -336,27 +336,23 @@ public class BindTest extends AbstractOWLAPITest {
     }
 
 
-    //CAST function not supported
-    //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
-    @Test(expected = OntopReformulationException.class)
+    // NOTE: In H2 v2, we are forced to use DECIMAL(20, 6) because DECIMAL implies DECIMAL(*,0)
+    // Hence the result looks quite unusual having several 0-s before the concatenated string
+    @Test
     public void testBindWithCast() throws Throwable {
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-                + "SELECT  ?title ?price WHERE \n"
+                + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
-                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
+                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?w)\n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
-        try {
-            checkReturnedValues(queryBind, "w", ImmutableList.of());
-        }
-        catch (OntopOWLException e) {
-            throw e.getCause();
-        }
+        checkReturnedValues(queryBind, "w", ImmutableList.of(
+                "\"33.60000000000042\"^^xsd:string", "\"17.25000000000023\"^^xsd:string"));
     }
 
     @Test

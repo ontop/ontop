@@ -311,4 +311,85 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
+
+    /**
+     * CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertFloatFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CASE WHEN %s THEN 1 ELSE 0 END",
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$') THEN " +
+                        "CAST(%1$s AS DECIMAL(20, 6)) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$') THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS DECIMAL(20,6)))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS DECIMAL(20, 6)) = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATE(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    //TODO: Solution for DB2 is imperfect. Not possible to include all scenarios!
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN TRANSLATE(%1$s, ' ', '0123456789,. ' ) != '' " +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN TRANSLATE(%1$s, ' ', '0123456789,. ' ) != '' " + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (TRANSLATE(%1$s, ' ', '0123456789- ' ) != '' AND " +
+                        "TRANSLATE(%1$s, ' ', '0123456789/ ' ) != '' ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
+    }
+
 }
