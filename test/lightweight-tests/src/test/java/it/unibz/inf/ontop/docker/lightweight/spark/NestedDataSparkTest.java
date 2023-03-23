@@ -38,4 +38,10 @@ public class NestedDataSparkTest extends AbstractNestedDataTest {
     protected ImmutableSet<String> getTagIdsExpectedValues() {
         return ImmutableSet.of( "\"[111, 222, 333]\"^^xsd:string", "\"[111, 222]\"^^xsd:string");
     }
+
+    //Because of the reasons above, there are fewer triples in SPARK.
+    @Override
+    protected int getSPOExpectedCount() {
+        return 56;
+    }
 }

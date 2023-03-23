@@ -155,7 +155,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         if (dbTypeFactory.getDBTermType(JSONB_STR).equals(dbType)) {
                             return "jsonb_array_elements";
                         }
-                        if (dbTypeFactory.getDBTermType(ARRAY_STR).equals(dbType)) {
+                        if (dbType.getCategory() == DBTermType.Category.ARRAY) {
                             return "unnest";
                         }
 

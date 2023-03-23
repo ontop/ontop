@@ -86,7 +86,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
     }
 
     protected ImmutableSet<String> getTagIdsExpectedValues() {
-        return ImmutableSet.of( "[111, 222, 333]", "[111, 222]", "[]");
+        return ImmutableSet.of( "\"[111, 222, 333]\"^^xsd:string", "\"[111, 222]\"^^xsd:string", "\"[]\"^^xsd:string");
     }
 
     @Test
@@ -183,7 +183,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
     }
 
     protected int getSPOExpectedCount() {
-        return 56;
+        return 63;
     }
 
 }
