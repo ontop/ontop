@@ -83,7 +83,7 @@
           },
           {
             "name": "\"nickNames\"",
-            "expression": "CASE WHEN json_typeof(json_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN json_extract_path(\"friend\", 'nickname') ELSE NULL END"
+            "expression": "CASE WHEN json_typeof(json_extract_path(\"friend\", 'nickname')) = 'array' THEN json_extract_path(\"friend\", 'nickname') ELSE NULL END"
           },
           {
             "name": "\"nickName_str\"",
