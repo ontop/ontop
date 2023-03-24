@@ -185,12 +185,15 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         return map;
     }
 
+    /**
+     * Search the first generic datatype that can be parsed from this type signature.
+     * This way, generic types can be implemented differently for different data-types.
+     */
     private Optional<DBTermType> createNewGenericType(String typeString) {
         return genericAbstractTypes.stream()
-                .map(type -> type.createFromSignature(typeString))
-                .filter(type -> type.isPresent())
-                .findFirst()
-                .map(type -> (DBTermType)type.get());
+                .flatMap(type -> type.createFromSignature(typeString).stream()
+                        .map(t -> (DBTermType)t))
+                .findFirst();
     }
 
     private DBTermType createNewTermType(String typeString) {

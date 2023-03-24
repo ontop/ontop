@@ -141,11 +141,3 @@ INSERT INTO "person-array" VALUES (
   'Jeffrey Dean',
   ARRAY['{ "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }'::jsonb, '{ "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }'::jsonb, '{ "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] }'::jsonb ],
   ARRAY['{"value": "MapReduce "}'::jsonb, '{"value": "Bigtable "}'::jsonb, '{"value": "Spanner "}'::jsonb, '{"value": "TensorFlow "}'::jsonb]);
-
-CREATE TABLE "test"(
-    id integer,
-    value integer ARRAY[3]
-);
-
-INSERT INTO "test" VALUES (0, ARRAY[1, 3, 5]);
-INSERT INTO "test" VALUES (1, ARRAY[[1, 2], [3, 4], [5, 6]]);

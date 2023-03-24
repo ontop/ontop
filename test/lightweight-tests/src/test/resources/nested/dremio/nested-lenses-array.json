@@ -1,0 +1,168 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"","\"person-tags-flattened\""],
+      "baseRelation": ["\"person-xt-array\""],
+      "flattenedColumn": {
+        "name": "\"tags\"",
+        "datatype": "LIST"
+      },
+      "columns": {
+        "kept": [
+          "\"id\"",
+          "\"ssn\"",
+          "\"fullname\"",
+          "\"tags\""
+        ],
+        "new": "\"tag\"",
+        "position": "\"pos\""
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"person-tags\""],
+      "baseRelation": ["\"lenses\"","\"person-tags-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"tag_str\"",
+            "expression": "\"tag\""
+          },
+          {
+            "name": "\"tag_int\"",
+            "expression": "\"tag\"::integer"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"","\"persons-friends-flattened\""],
+      "baseRelation": ["\"person-xt-array\""],
+      "flattenedColumn": {
+        "name": "\"friends\"",
+        "datatype": "LIST"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "new": "\"friend\"",
+        "position": "\"pos\""
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"persons-friends\""],
+      "baseRelation": ["\"lenses\"","\"persons-friends-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"firstName\"",
+            "expression": "CAST(CONVERT_FROM(friend, 'json')['fname'] AS varchar)"
+          },
+          {
+            "name": "\"nickNames\"",
+            "expression": "CASE WHEN typeof(CONVERT_FROM(\"friend\", 'json')['nickname']) = 'LIST' THEN CONVERT_FROM(\"friend\", 'json')['nickname'] ELSE NULL END"
+          },
+          {
+            "name": "\"nickName_str\"",
+            "expression": "CASE WHEN typeof(CONVERT_FROM(\"friend\", 'json')['nickname']) != 'LIST' THEN CAST(CONVERT_FROM(friend, 'json')['nickname'] AS varchar) ELSE NULL END"
+          },
+          {
+            "name": "\"city\"",
+            "expression": "CAST(CONVERT_FROM(CONVERT_FROM(\"friend\", 'json')['address'], 'json')['city'] AS varchar)"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"","\"publication-flattened\""],
+      "baseRelation": ["\"person-array\""],
+      "flattenedColumn": {
+        "name": "\"publication\"",
+        "datatype": "LIST"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "new": "\"publ\""
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "pub_fk_author",
+            "from": "\"id\"",
+            "to": {
+              "columns": ["\"id\""],
+              "relation": ["\"person\""]
+            }
+          }
+        ]
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"publication\""],
+      "baseRelation": ["\"lenses\"","\"publication-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"id_pub\"",
+            "expression": "CASE WHEN typeof(CONVERT_FROM(\"publ\", 'json')['id']) = 'number' THEN CAST(CONVERT_FROM(publ, 'json')['id'] AS integer) ELSE NULL END"
+          },
+          {
+            "name": "\"title\"",
+            "expression": "CAST(CONVERT_FROM(publ, 'json')['title'] AS varchar)"
+          },
+          {
+            "name": "\"year\"",
+            "expression": "CAST(CONVERT_FROM(publ, 'json')['year'] AS integer)"
+          },
+          {
+            "name": "\"venue\"",
+            "expression": "CAST(CONVERT_FROM(publ, 'json')['venue'] AS varchar)"
+          },
+          {
+            "name": "\"editor\"",
+            "expression": "CASE WHEN typeof(CONVERT_FROM(\"publ\", 'json')['editor']) = 'object' THEN CAST(CONVERT_FROM(\"publ\", 'json')['editor'] AS varchar) ELSE NULL END"
+          }
+        ],
+        "hidden": [
+          "\"publ\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "name": "\"pub_fd\"",
+            "determinants" : ["\"id_pub\""],
+            "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

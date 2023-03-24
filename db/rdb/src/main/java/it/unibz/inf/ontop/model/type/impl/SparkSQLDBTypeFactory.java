@@ -84,6 +84,8 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         TermTypeAncestry rootAncestry = rootTermType.getAncestry();
 
         GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.equals("ARRAY"))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
             if(!s.startsWith("ARRAY<") || !s.endsWith(">")) {
                 return Optional.empty();
             }
