@@ -1,0 +1,168 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"","\"person-tags-flattened\""],
+      "baseRelation": ["\"person-xt\""],
+      "flattenedColumn": {
+        "name": "\"tags\"",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "\"id\"",
+          "\"ssn\"",
+          "\"fullname\"",
+          "\"tags\""
+        ],
+        "new": "\"tag\"",
+        "position": "\"pos\""
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"person-tags\""],
+      "baseRelation": ["\"lenses\"","\"person-tags-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"tag_str\"",
+            "expression": "CASE WHEN jsonb_typeof(\"tag\") in ('boolean', 'string', 'number') THEN \"tag\"::text ELSE NULL END"
+          },
+          {
+            "name": "\"tag_int\"",
+            "expression": "CASE WHEN jsonb_typeof(\"tag\") = 'number' THEN \"tag\"::integer ELSE NULL END"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"","\"persons-friends-flattened\""],
+      "baseRelation": ["\"person-xt\""],
+      "flattenedColumn": {
+        "name": "\"friends\"",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "new": "\"friend\"",
+        "position": "\"pos\""
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"persons-friends\""],
+      "baseRelation": ["\"lenses\"","\"persons-friends-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"firstName\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'fname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'fname')::text ELSE NULL END"
+          },
+          {
+            "name": "\"nickNames\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) = 'array' THEN jsonb_extract_path(\"friend\", 'nickname') ELSE NULL END"
+          },
+          {
+            "name": "\"nickName_str\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'nickname')::text ELSE NULL END"
+          },
+          {
+            "name": "\"city\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'address', 'city')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'address', 'city')::text ELSE NULL END"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"","\"publication-flattened\""],
+      "baseRelation": ["\"person\""],
+      "flattenedColumn": {
+        "name": "\"publication\"",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "\"id\""
+        ],
+        "new": "\"publ\""
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "pub_fk_author",
+            "from": "\"id\"",
+            "to": {
+              "columns": ["\"id\""],
+              "relation": ["\"person\""]
+            }
+          }
+        ]
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["\"lenses\"","\"publication\""],
+      "baseRelation": ["\"lenses\"","\"publication-flattened\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"id_pub\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'id')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'id')::integer ELSE NULL END"
+          },
+          {
+            "name": "\"title\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'title')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'title')::text ELSE NULL END"
+          },
+          {
+            "name": "\"year\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'year')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'year')::integer ELSE NULL END"
+          },
+          {
+            "name": "\"venue\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'venue')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'venue')::text ELSE NULL END"
+          },
+          {
+            "name": "\"editor\"",
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'editor')) = 'object' THEN jsonb_extract_path(\"publ\", 'editor')::jsonb ELSE NULL END"
+          }
+        ],
+        "hidden": [
+          "\"publ\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "name": "\"pub_fd\"",
+            "determinants" : ["\"id_pub\""],
+            "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+
