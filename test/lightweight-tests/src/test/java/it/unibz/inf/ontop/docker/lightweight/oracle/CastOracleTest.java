@@ -26,11 +26,6 @@ public class CastOracleTest extends AbstractCastFunctionsTest {
     }
 
     @Override
-    protected ImmutableSet<String> getCastFloatFromDoubleExpectedValues() {
-        return ImmutableSet.of("\"0\"^^xsd:float");
-    }
-
-    @Override
     protected ImmutableMultiset<String> getCastFloatFromDecimal1ExpectedValues() {
         return ImmutableMultiset.of("\"0.2\"^^xsd:float", "\"0.25\"^^xsd:float", "\"0.2\"^^xsd:float",
                 "\"0.15\"^^xsd:float");

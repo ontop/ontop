@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.docker.lightweight.AbstractCastFunctionsTest;
 import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 @PostgreSQLLightweightTest
 public class CastPostgreSQLTest extends AbstractCastFunctionsTest {
@@ -20,6 +22,30 @@ public class CastPostgreSQLTest extends AbstractCastFunctionsTest {
     @AfterAll
     public static void after() {
         release();
+    }
+
+    @Disabled("PostgresSQL adds different TZ to result depending on local time")
+    @Test
+    public void testCastDateTimeFromDate1() {
+        super.testCastDateTimeFromDate1();
+    }
+
+    @Disabled("PostgresSQL adds different TZ to result depending on local time")
+    @Test
+    public void testCastDateTimeFromDate2() {
+        super.testCastDateTimeFromDate2();
+    }
+
+    @Disabled("PostgresSQL adds different TZ to result depending on local time")
+    @Test
+    public void testCastDateTimeFromDate3() {
+        super.testCastDateTimeFromDate3();
+    }
+
+    @Disabled("PostgresSQL adds different TZ to result depending on local time")
+    @Test
+    public void testCastDateTimeFromString() {
+        super.testCastDateTimeFromString();
     }
 
     @Override
