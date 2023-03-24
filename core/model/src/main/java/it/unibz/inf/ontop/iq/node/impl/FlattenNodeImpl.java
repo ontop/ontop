@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -83,9 +84,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
             DBTermType type = optTermType.get();
             switch (type.getCategory()){
                 case JSON:
+                //e.g. STRING is used by SparkSQL instead of JSON.
+                case STRING:
                     return flattenedVarType;
                 case ARRAY:
-                    throw new FlattenedVariableTypeException("Array DBType not yet implemented");
+                    return Optional.of(((GenericDBTermType)type).getGenericArguments().get(0));
                 default:
                     throw new FlattenedVariableTypeException(
                             String.format(

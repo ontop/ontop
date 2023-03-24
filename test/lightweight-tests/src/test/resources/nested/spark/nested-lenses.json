@@ -1,0 +1,168 @@
+{
+  "relations": [
+    {
+      "name": ["hr","person-tags-flattened"],
+      "baseRelation": ["personxt"],
+      "flattenedColumn": {
+        "name": "tags",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "ssn",
+          "fullname",
+          "tags"
+        ],
+        "new": "tag",
+        "position": "pos"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["hr","person-tags"],
+      "baseRelation": ["hr","person-tags-flattened"],
+      "columns": {
+        "added": [
+          {
+            "name": "tag_str",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(tag) IS NULL AND JSON_OBJECT_KEYS(tag) IS NULL) THEN tag ELSE NULL END"
+          },
+          {
+            "name": "tag_int",
+            "expression": "int(tag)::int"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["hr","persons-friends-flattened"],
+      "baseRelation": ["personxt"],
+      "flattenedColumn": {
+        "name": "friends",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "friend",
+        "position": "pos"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["hr","persons-friends"],
+      "baseRelation": ["hr","persons-friends-flattened"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstName",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(GET_JSON_OBJECT(friend, '$.fname')) IS NULL AND JSON_OBJECT_KEYS(GET_JSON_OBJECT(friend, '$.fname')) IS NULL) THEN GET_JSON_OBJECT(friend, '$.fname')::string ELSE NULL END"
+          },
+          {
+            "name": "nickNames",
+            "expression": "CASE WHEN JSON_ARRAY_LENGTH(GET_JSON_OBJECT(friend, '$.nickname')) IS NOT NULL THEN GET_JSON_OBJECT(friend, '$.nickname') ELSE NULL END"
+          },
+          {
+            "name": "nickName_str",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(GET_JSON_OBJECT(friend, '$.nickname')) IS NULL AND JSON_OBJECT_KEYS(GET_JSON_OBJECT(friend, '$.nickname')) IS NULL) THEN GET_JSON_OBJECT(friend, '$.nickname')::string ELSE NULL END"
+          },
+          {
+            "name": "city",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(GET_JSON_OBJECT(friend, '$.address.city')) IS NULL AND JSON_OBJECT_KEYS(GET_JSON_OBJECT(friend, '$.address.city')) IS NULL) THEN GET_JSON_OBJECT(friend, '$.address.city')::string ELSE NULL END"
+          }
+        ],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["pub","publication-flattened"],
+      "baseRelation": ["person"],
+      "flattenedColumn": {
+        "name": "publication",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "publ"
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "pub_fk_author",
+            "from": "id",
+            "to": {
+              "columns": ["id"],
+              "relation": ["person"]
+            }
+          }
+        ]
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["pub","publication"],
+      "baseRelation": ["pub","publication-flattened"],
+      "columns": {
+        "added": [
+          {
+            "name": "id_pub",
+            "expression": "int(GET_JSON_OBJECT(publ, '$.id'))::int"
+          },
+          {
+            "name": "title",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(GET_JSON_OBJECT(publ, '$.title')) IS NULL AND JSON_OBJECT_KEYS(GET_JSON_OBJECT(publ, '$.title')) IS NULL) THEN GET_JSON_OBJECT(publ, '$.title')::string ELSE NULL END"
+          },
+          {
+            "name": "year",
+            "expression": "int(GET_JSON_OBJECT(publ, '$.year'))::int"
+          },
+          {
+            "name": "venue",
+            "expression": "CASE WHEN (JSON_ARRAY_LENGTH(GET_JSON_OBJECT(publ, '$.venue')) IS NULL AND JSON_OBJECT_KEYS(GET_JSON_OBJECT(publ, '$.venue')) IS NULL) THEN GET_JSON_OBJECT(publ, '$.venue')::string ELSE NULL END"
+          },
+          {
+            "name": "editor",
+            "expression": "CASE WHEN JSON_OBJECT_KEYS(GET_JSON_OBJECT(publ, '$.editor')) IS NOT NULL THEN GET_JSON_OBJECT(publ, '$.editor') ELSE NULL END"
+          }
+        ],
+        "hidden": [
+          "publ"
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "name": "pub_fd",
+            "determinants" : ["id_pub"],
+            "dependents" : [ "title", "year", "venue", "editor"]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+
