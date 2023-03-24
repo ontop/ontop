@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
@@ -23,10 +24,12 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
     private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
+    private static final String ARRAY_STR = "ARRAY";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap());
+        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap(),
+                createGenericAbstractTypeMap(rootTermType, typeFactory));
     }
 
     private static Map<String, DBTermType> createSparkSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
@@ -70,6 +73,17 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.STRING, STRING_STR);
         map.put(DefaultTypeCode.HEXBINARY,BINARY_STR);
         map.put(DefaultTypeCode.DECIMAL, DECIMAL_38_10_STR);
+        map.put(DefaultTypeCode.ARRAY, ARRAY_STR);
+        return ImmutableMap.copyOf(map);
+    }
+
+    private static ImmutableMap<String, DBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        DBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry);
+
+        Map<String, DBTermType> map = new HashMap<>();
+        map.put(ARRAY_STR, abstractArrayType);
         return ImmutableMap.copyOf(map);
     }
 
@@ -81,4 +95,8 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     @Override
     public String getDBFalseLexicalValue() { return "false"; }
 
+    @Override
+    public boolean supportsArrayType() {
+        return true;
+    }
 }

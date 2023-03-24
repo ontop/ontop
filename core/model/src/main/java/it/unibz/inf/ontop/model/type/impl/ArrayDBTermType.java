@@ -1,16 +1,26 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import org.checkerframework.checker.nullness.Opt;
 
 import java.util.Optional;
 
-public class ArrayDBTermType extends DBTermTypeImpl implements DBTermType {
+public class ArrayDBTermType extends DBTermTypeImpl implements GenericDBTermType {
+
+    private final Optional<DBTermType> itemType;
 
     public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry) {
-        super(arrayStr, ancestry, false, DBTermType.Category.OTHER);
+        this(arrayStr, ancestry, Optional.empty());
+    }
+
+    public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry, Optional<DBTermType> itemType) {
+        super(arrayStr, ancestry, itemType.isEmpty(), Category.ARRAY);
+        this.itemType = itemType;
     }
 
     @Override
@@ -20,7 +30,7 @@ public class ArrayDBTermType extends DBTermTypeImpl implements DBTermType {
 
     @Override
     public boolean isNeedingIRISafeEncoding() {
-        return false;
+        return true;
     }
 
     @Override
@@ -36,6 +46,20 @@ public class ArrayDBTermType extends DBTermTypeImpl implements DBTermType {
     @Override
     public boolean areEqualitiesBetweenTwoDBAttributesStrict() {
         throw new IllegalArrayComparisonException("A query should not check equality between two arrays");
+    }
+
+    @Override
+    public GenericDBTermType createOfTypes(ImmutableList<DBTermType> types) {
+        if(types.size() != 1) {
+            throw new GenericDBTermType.GenericArgumentsExceptions(String.format("The %s<T> type takes exactly one argument", getName()));
+        }
+
+        return new ArrayDBTermType(String.format("%s<%s>", getName(), types.get(0).getName()), getAncestry(), Optional.of(types.get(0)));
+    }
+
+    @Override
+    public ImmutableList<DBTermType> getGenericArguments() {
+        return ImmutableList.of(this.itemType.get());
     }
 
 

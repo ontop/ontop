@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +83,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     // MUTABLE
     private final Map<String, DBTermType> sqlTypeMap;
     private final ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap;
+    private final ImmutableMap<String, DBTermType> genericAbstractTypeMap;
 
     @AssistedInject
     private DefaultSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -89,10 +92,17 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     protected DefaultSQLDBTypeFactory(Map<String, DBTermType> typeMap,
                                       ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
+        this(typeMap, defaultTypeCodeMap, ImmutableMap.of());
+    }
+
+    protected DefaultSQLDBTypeFactory(Map<String, DBTermType> typeMap,
+                                      ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap,
+                                      ImmutableMap<String, DBTermType> genericAbstractTypeMap) {
         sqlTypeMap = typeMap;
         this.defaultTypeCodeMap = defaultTypeCodeMap;
         // TODO: get it from the settings
         this.defaultStrictEqSupport = SAME_TYPE_NO_CONSTANT;
+        this.genericAbstractTypeMap = genericAbstractTypeMap;
     }
 
     /**
@@ -175,6 +185,58 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         return map;
     }
 
+    private ImmutableList<DBTermType> getGenericArguments(String typeString) {
+        //First we retrieve the substring contained within the outermost diamond tags.
+        int startIndex = typeString.indexOf('<');
+        int endIndex = typeString.lastIndexOf('>');
+        if(startIndex == -1 || endIndex == -1)
+            return ImmutableList.of();
+
+        String argumentsParts = typeString.substring(startIndex + 1, endIndex);
+
+        //Now we parse the substring as a comma-separated list of types (that may, in turn, also be generic types again).
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
+        int depth = 0;
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < argumentsParts.length(); i++) {
+            char c = argumentsParts.charAt(i);
+            if(c == ',' && depth == 0) {
+                builder.add(sb.toString());
+                sb.setLength(0);
+                continue;
+            }
+            if(c == '<')
+                depth += 1;
+            if(c == '>')
+                depth -= 1;
+            sb.append(c);
+        }
+        if(sb.length() > 0)
+            builder.add(sb.toString());
+
+        //Finally, we gather the DBTypes from these type names and return them.
+        return builder.build().stream()
+                .map(this::getDBTermType)
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private DBTermType createNewTermType(String typeString) {
+        ImmutableList<DBTermType> genericArguments = getGenericArguments(typeString);
+        //If the type is not generic (i.e. TYPE<SUBTYPE>), we return a new NonStringNonNumberNonBooleanNonDatetimeDBTermType,
+        if(genericArguments.size() == 0)
+            return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeString, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
+                    defaultStrictEqSupport);
+        else {
+            //Else, we create a new concrete type with the correct generic arguments.
+            DBTermType baseType = genericAbstractTypeMap.getOrDefault(typeString.split("<", 2)[0], null);
+            if (!(baseType instanceof GenericDBTermType))
+                return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeString, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
+                        defaultStrictEqSupport);
+            GenericDBTermType genericBaseType = (GenericDBTermType) baseType;
+            return genericBaseType.createOfTypes(genericArguments);
+        }
+    }
+
     @Override
     public DBTermType getDBTermType(String typeName) {
         String typeString = preprocessTypeName(typeName);
@@ -182,21 +244,16 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         /*
          * Creates a new term type if not known
          */
-        return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
-                        defaultStrictEqSupport));
+        return sqlTypeMap.computeIfAbsent(typeString, this::createNewTermType);
     }
 
     @Override
     public DBTermType getDBTermType(String typeName, int columnSize) {
         String typeString = preprocessTypeName(typeName, columnSize);
-
         /*
          * Creates a new term type if not known
          */
-        return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
-                        defaultStrictEqSupport));
+        return sqlTypeMap.computeIfAbsent(typeString, this::createNewTermType);
     }
 
     @Override
