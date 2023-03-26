@@ -48,14 +48,8 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			basicManifest + "term-6",  // missing result
 			basicManifest + "term-7", // org.eclipse.rdf4j.query.MalformedQueryException: Encountered "."
 
-			// SPARQL cast with function call on the datatype is not supported, e.g., FILTER(datatype(xsd:double(?v)) = xsd:double)
-			castManifest + "cast-str",
-			castManifest + "cast-flt",
-			castManifest + "cast-dbl",
-			castManifest + "cast-dec",
-			castManifest + "cast-int",
-			castManifest + "cast-dT",
-			castManifest + "cast-bool",
+			castManifest + "cast-dec", // expected results seem to incorrectly miss one record
+			castManifest + "cast-dT", // cannot exhaustively check for all timestamp patterns
 
 			exprBuiltInManifest + "sameTerm-eq", // JdbcSQLException: Data conversion error converting "zzz"
 			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)

@@ -313,17 +313,16 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String doublePattern1 = "\'^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$\'";
         String term = termConverter.apply(terms.get(0));
         if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
                 databaseInfoSupplier.getDatabaseVersion()
                         .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
                         .filter(s -> s > 7 ).isPresent()) {
-            return String.format("CASE WHEN %1$s NOT REGEXP" + doublePattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP" + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term); }
         else {
-            return String.format("CASE WHEN %1$s NOT REGEXP BINARY" + doublePattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP BINARY" + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term); }
     }
@@ -331,17 +330,16 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String floatPattern1 = "\'^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$\'";
         String term = termConverter.apply(terms.get(0));
         if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
                 databaseInfoSupplier.getDatabaseVersion()
                         .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
                         .filter(s -> s > 7 ).isPresent()) {
-            return String.format("CASE WHEN %1$s NOT REGEXP " + floatPattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term);
         } else {
-            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + floatPattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term);
         }
@@ -360,17 +358,16 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String decimalPattern1 = "\'^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$\'";
         String term = termConverter.apply(terms.get(0));
         if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
                 databaseInfoSupplier.getDatabaseVersion()
                         .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
                         .filter(s -> s > 7 ).isPresent()) {
-            return String.format("CASE WHEN %1$s NOT REGEXP " + decimalPattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
                             " THEN NULL ELSE CAST(%1$s AS DECIMAL(60,30)) END",
                     term);
         } else {
-            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + decimalPattern1 +
+            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericPattern +
                             " THEN NULL ELSE CAST(%1$s AS DECIMAL(60,30)) END",
                     term);
         }
