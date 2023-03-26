@@ -1698,7 +1698,6 @@ public class CastPrimitiveDatatypesTest extends AbstractRDF4JTest {
         runQueryAndCompare(queryBind, ImmutableList.of());
     }
 
-    @Ignore
     @Test
     public void testDatatypeCast() {
 
