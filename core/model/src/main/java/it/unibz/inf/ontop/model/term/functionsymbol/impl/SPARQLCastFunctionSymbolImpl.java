@@ -62,8 +62,9 @@ public class SPARQLCastFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFu
                     ? termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFct.apply(inputDBType).get(), subLexicalTerms.get(0))
                     : termFactory.getNullConstant();
         } else {
-            // CASE 2: Input is not typed, literal
-            return termFactory.getDBCastFunctionalTerm(targetTypeClosestDBType, subLexicalTerms.get(0));
+            // CASE 2: Input is not typed or variable, use STRING as default
+            return termFactory.getImmutableFunctionalTerm(
+                    dbFunctionSymbolFct.apply(dbTypeFactory.getDBStringType()).get(), subLexicalTerms.get(0));
         }
     }
 

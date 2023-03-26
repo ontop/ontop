@@ -485,9 +485,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String doublePattern1 = "\'^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$\'";
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + doublePattern1 + ")" +
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ")" +
                         " THEN NULL ELSE CAST(%1$s AS DOUBLE PRECISION) END",
                 term);
     }
@@ -495,9 +494,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String floatPattern1 = "\'^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$\'";
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + floatPattern1 + ") THEN NULL " +
+        return String.format("CASE WHEN NOT REGEXP_LIKE(%1$s, " + numericPattern + ") THEN NULL " +
                         "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
                         "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
                         "ELSE CAST(%1$s AS FLOAT) END",

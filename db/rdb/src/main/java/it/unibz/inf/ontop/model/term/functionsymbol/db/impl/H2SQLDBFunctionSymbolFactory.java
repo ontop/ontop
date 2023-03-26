@@ -321,16 +321,14 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        //return String.format("CAST(PARSEDATETIME(formatdatetime(timestamp %s, 'yyyy-MM-dd hh:mm:ss'), 'yyyy-MM-dd') AS DATE)", termConverter.apply(terms.get(0)));
         return String.format("CAST(TIMESTAMP %s AS DATE)", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String decimalPattern1 = "\'^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$\'";
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s !~ " + decimalPattern1 + " THEN NULL " +
+        return String.format("CASE WHEN %1$s !~ " + numericPattern + " THEN NULL " +
                         "ELSE CAST(%1$s AS "+ DEFAULT_DECIMAL_STR +") END",
                 term);
     }
