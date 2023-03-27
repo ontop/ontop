@@ -1,164 +1,153 @@
 {
   "relations": [
     {
-      "name": ["\"lenses\"","\"person-tags-flattened\""],
-      "baseRelation": ["\"person-xt\""],
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
-        "name": "\"tags\"",
+        "name": "days",
         "datatype": "jsonb"
       },
       "columns": {
         "kept": [
-          "\"id\"",
-          "\"ssn\"",
-          "\"fullname\"",
-          "\"tags\""
+          "id"
         ],
-        "new": "\"tag\"",
-        "position": "\"pos\""
+        "new": "date",
+        "position": "index"
       },
       "type": "FlattenLens"
     },
     {
-      "name": ["\"lenses\"","\"person-tags\""],
-      "baseRelation": ["\"lenses\"","\"person-tags-flattened\""],
-      "columns": {
-        "added": [
-          {
-            "name": "\"tag_str\"",
-            "expression": "CASE WHEN jsonb_typeof(\"tag\") in ('boolean', 'string', 'number') THEN \"tag\"::text ELSE NULL END"
-          },
-          {
-            "name": "\"tag_int\"",
-            "expression": "CASE WHEN jsonb_typeof(\"tag\") = 'number' THEN \"tag\"::integer ELSE NULL END"
-          }
-        ],
-        "hidden": []
-      },
-      "type": "BasicLens"
-    },
-    {
-      "name": ["\"lenses\"","\"persons-friends-flattened\""],
-      "baseRelation": ["\"person-xt\""],
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
-        "name": "\"friends\"",
+        "name": "income",
         "datatype": "jsonb"
       },
       "columns": {
         "kept": [
-          "\"id\""
+          "id"
         ],
-        "new": "\"friend\"",
-        "position": "\"pos\""
+        "new": "period_income",
+        "position": "index"
       },
       "type": "FlattenLens"
     },
     {
-      "name": ["\"lenses\"","\"persons-friends\""],
-      "baseRelation": ["\"lenses\"","\"persons-friends-flattened\""],
-      "columns": {
-        "added": [
-          {
-            "name": "\"firstName\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'fname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'fname')::text ELSE NULL END"
-          },
-          {
-            "name": "\"nickNames\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) = 'array' THEN jsonb_extract_path(\"friend\", 'nickname') ELSE NULL END"
-          },
-          {
-            "name": "\"nickName_str\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'nickname')::text ELSE NULL END"
-          },
-          {
-            "name": "\"city\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'address', 'city')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"friend\", 'address', 'city')::text ELSE NULL END"
-          }
-        ],
-        "hidden": []
-      },
-      "type": "BasicLens"
-    },
-    {
-      "name": ["\"lenses\"","\"publication-flattened\""],
-      "baseRelation": ["\"person\""],
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
-        "name": "\"publication\"",
+        "name": "workers",
         "datatype": "jsonb"
       },
       "columns": {
         "kept": [
-          "\"id\""
+          "id"
         ],
-        "new": "\"publ\""
-      },
-      "uniqueConstraints": {
-        "added": [
-        ]
-      },
-      "otherFunctionalDependencies": {
-        "added": [
-        ]
-      },
-      "foreignKeys": {
-        "added": [
-          {
-            "name": "pub_fk_author",
-            "from": "\"id\"",
-            "to": {
-              "columns": ["\"id\""],
-              "relation": ["\"person\""]
-            }
-          }
-        ]
+        "new": "worker_list",
+        "position": "index"
       },
       "type": "FlattenLens"
     },
     {
-      "name": ["\"lenses\"","\"publication\""],
-      "baseRelation": ["\"lenses\"","\"publication-flattened\""],
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
       "columns": {
         "added": [
           {
-            "name": "\"id_pub\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'id')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'id')::integer ELSE NULL END"
+            "name": "firstname",
+            "expression": "jsonb_extract_path_text(manager, 'firstName')::text"
           },
           {
-            "name": "\"title\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'title')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'title')::text ELSE NULL END"
+            "name": "lastname",
+            "expression": "jsonb_extract_path_text(manager, 'lastName')::text"
           },
           {
-            "name": "\"year\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'year')) = 'number' THEN jsonb_extract_path_text(\"publ\", 'year')::integer ELSE NULL END"
-          },
-          {
-            "name": "\"venue\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'venue')) in ('boolean', 'string', 'number') THEN jsonb_extract_path_text(\"publ\", 'venue')::text ELSE NULL END"
-          },
-          {
-            "name": "\"editor\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"publ\", 'editor')) = 'object' THEN jsonb_extract_path(\"publ\", 'editor')::jsonb ELSE NULL END"
+            "name": "age",
+            "expression": "jsonb_extract_path_text(manager, 'age')::integer"
           }
         ],
         "hidden": [
-          "\"publ\""
+          "manager"
         ]
       },
-      "uniqueConstraints": {
-        "added": [
-        ]
-      },
-      "otherFunctionalDependencies": {
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
         "added": [
           {
-            "name": "\"pub_fd\"",
-            "determinants" : ["\"id_pub\""],
-            "dependents" : [ "\"title\"", "\"year\"", "\"venue\"", "\"editor\""]
+            "name": "date",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', date), 'x')::timestamp"
           }
+        ],
+        "hidden": [
+          "date"
         ]
       },
-      "foreignKeys": {
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
         "added": [
+          {
+            "name": "period_income",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', period_income), 'x')::integer"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', name), 'x')::text"
+          }
+        ],
+        "hidden": [
+          "name"
         ]
       },
       "type": "BasicLens"
