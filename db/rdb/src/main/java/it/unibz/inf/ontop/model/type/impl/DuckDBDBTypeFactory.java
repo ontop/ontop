@@ -28,7 +28,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String JSON_STR = "JSON";
     public static final String BYTEA_STR = "BYTEA";
 
-    private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
+    public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
 
 
     protected DuckDBDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {

@@ -282,7 +282,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     /**
-     * CAST functions
+     * XSD CAST functions
      */
     // H2 cannot detect NaN. A different error will be thrown by H2 and the boolean cast will fail.
     @Override

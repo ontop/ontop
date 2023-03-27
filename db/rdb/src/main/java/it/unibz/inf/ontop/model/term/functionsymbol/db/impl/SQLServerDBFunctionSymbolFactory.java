@@ -477,7 +477,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
-     * CAST functions
+     * XSD CAST functions
      */
     // NOTE: Not possible to specify NaN or 0/0
     @Override
