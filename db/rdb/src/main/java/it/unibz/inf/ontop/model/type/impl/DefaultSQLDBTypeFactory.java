@@ -7,7 +7,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -205,17 +204,28 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
         /*
          * Creates a new term type if not known
+         * We can't use Map.computeIfAbsent(...) here, because that may cause a ConcurrentModificationException.
          */
-        return sqlTypeMap.computeIfAbsent(typeString, this::createNewTermType);
+        if(sqlTypeMap.containsKey(typeString))
+            return sqlTypeMap.get(typeString);
+        DBTermType newType = this.createNewTermType(typeString);
+        sqlTypeMap.put(typeString, newType);
+        return newType;
     }
 
     @Override
     public DBTermType getDBTermType(String typeName, int columnSize) {
         String typeString = preprocessTypeName(typeName, columnSize);
+
         /*
          * Creates a new term type if not known
+         * We can't use Map.computeIfAbsent(...) here, because that may cause a ConcurrentModificationException.
          */
-        return sqlTypeMap.computeIfAbsent(typeString, this::createNewTermType);
+        if(sqlTypeMap.containsKey(typeString))
+            return sqlTypeMap.get(typeString);
+        DBTermType newType = this.createNewTermType(typeString);
+        sqlTypeMap.put(typeString, newType);
+        return newType;
     }
 
     @Override
