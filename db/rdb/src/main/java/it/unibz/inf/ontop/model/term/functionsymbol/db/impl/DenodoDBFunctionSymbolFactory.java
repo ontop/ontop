@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -311,5 +310,66 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
         return "ROWNUM()";
+    }
+
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT %1$s REGEXP_ILIKE " + numericPattern + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN NOT %1$s REGEXP_ILIKE " + numericPattern +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE PRECISION) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s REGEXP_ILIKE " + numericPattern + " THEN " +
+                        "CAST(%1$s AS DECIMAL) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s REGEXP_ILIKE "+ numericPattern +" THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS DECIMAL))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
+        String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
+        String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
+        String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (NOT %1$s REGEXP_ILIKE " + datePattern1 + " AND " +
+                        "NOT %1$s REGEXP_ILIKE " + datePattern2 +" AND " +
+                        "NOT %1$s REGEXP_ILIKE " + datePattern3 +" AND " +
+                        "NOT %1$s REGEXP_ILIKE " + datePattern4 +" ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
     }
 }

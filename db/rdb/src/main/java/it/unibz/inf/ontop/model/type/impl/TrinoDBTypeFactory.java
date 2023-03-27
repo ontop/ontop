@@ -26,7 +26,7 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
 
-    private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
+    public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
 
 
     protected TrinoDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {

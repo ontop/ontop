@@ -456,7 +456,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     /**
-     * CAST functions
+     * XSD CAST functions
      */
     @Override
     protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
@@ -506,7 +506,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN REGEXP_LIKE(%1$s, '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$') THEN " +
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, " + numericPattern + ") THEN " +
                         "CAST(%1$s AS NUMBER) " +
                         "ELSE NULL " +
                         "END",
@@ -517,7 +517,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN REGEXP_LIKE(%1$s, '^-?([0-9]+[.]?[0-9]*|[.][0-9]+)$') THEN " +
+        return String.format("CASE WHEN REGEXP_LIKE(%1$s, "+ numericPattern +") THEN " +
                         "CAST(FLOOR(ABS(CAST(%1$s AS DECIMAL(30,15)))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
                         "ELSE NULL " +
                         "END",

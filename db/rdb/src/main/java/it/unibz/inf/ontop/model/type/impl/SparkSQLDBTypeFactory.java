@@ -22,7 +22,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String SHORT_STR = "SHORT";
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
-    private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
+    public static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {

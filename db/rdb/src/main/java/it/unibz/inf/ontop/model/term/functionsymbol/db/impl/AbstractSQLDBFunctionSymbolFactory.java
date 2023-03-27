@@ -1243,7 +1243,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     /**
-     * CAST functions
+     * XSD CAST functions
      */
     // https://www.w3.org/TR/xpath-functions/#casting-boolean
     @Override
@@ -1397,10 +1397,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String datePattern1 = "\'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$\'";
-        String datePattern2 = "\'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$\'";
-        String datePattern3 = "\'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$\'";
-        String datePattern4 = "\'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$\'";
+        String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
+        String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
+        String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
+        String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
         String term = termConverter.apply(terms.get(0));
         return String.format("CASE WHEN (%1$s !~ " + datePattern1 + " AND " +
                         "%1$s !~ " + datePattern2 +" AND " +
