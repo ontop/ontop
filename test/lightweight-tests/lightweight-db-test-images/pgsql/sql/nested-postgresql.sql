@@ -3,149 +3,34 @@ CREATE DATABASE nested;
 
 \connect nested
 
-CREATE TABLE "person-xt" (
+CREATE TABLE company_data (
     id integer NOT NULL,
-    ssn integer,
-    fullname character varying,
-    tags jsonb,
-    friends jsonb
+    days jsonb,
+    income jsonb,
+    workers jsonb,
+    managers jsonb
 );
 
-ALTER TABLE ONLY "person-xt"
-    ADD CONSTRAINT "person-xt_pk" PRIMARY KEY (id);
+ALTER TABLE ONLY company_data
+    ADD CONSTRAINT company_data_pk PRIMARY KEY (id);
 
-INSERT INTO "person-xt" VALUES (1,
-123,
-'Mary Poppins',
-'[111, 222, 333]',
-'[{ "fname": "Alice","nickname": "Al","address": {"city": "Bolzano","street": "via Roma","number": "33"}},{ "fname": "Robert","nickname": "Bob","address":{"city": "Merano","street": "via Dante","number": "23"}}]');
+INSERT INTO company_data VALUES (1,  jsonb_build_array('2023-01-01 18:00:00', '2023-01-15 18:00:00', '2023-01-29 12:00:00'), jsonb_build_array(10000, 18000, 13000), jsonb_build_array(jsonb_build_array('Sam', 'Cynthia'), jsonb_build_array('Bob'), jsonb_build_array('Jim')), '[{"firstName": "Mary", "lastName": "Jane", "age": 28}, {"firstName": "Carlos", "lastName": "Carlson", "age": 45}, {"firstName": "John", "lastName": "Moriarty", "age": 60}]'::jsonb);
+INSERT INTO company_data VALUES (2,  jsonb_build_array('2023-02-12 18:00:00', '2023-02-26 18:00:00'), jsonb_build_array(14000, 0), jsonb_build_array(jsonb_build_array('Jim', 'Cynthia'), jsonb_build_array()), '[{"firstName": "Helena", "lastName": "of Troy"}, {"firstName": "Robert", "lastName": "Smith", "age": 48}]'::jsonb);
+INSERT INTO company_data VALUES (3,  jsonb_build_array('2023-03-12 18:00:00', '2023-03-26 18:00:00'), jsonb_build_array(15000, 20000), jsonb_build_array(jsonb_build_array('Carl', 'Bob', 'Cynthia'), jsonb_build_array('Jim', 'Bob')), '[{"firstName": "Joseph", "lastName": "Grey"}, {"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}]'::jsonb);
+INSERT INTO company_data VALUES (4,  '[]', '[]', NULL, '[]');
 
-
-INSERT INTO "person-xt" VALUES
-(2,
-1234,
-'Roger Rabbit',
-'[111, 222]',
-'{ "fname": "Mickey", "lname": "Mouse"}'
-);
-
-
-INSERT INTO "person-xt" VALUES
-(3,
-23,
-'Bob Loblaw',
-NULL,
-'[]'
-);
-
-
-INSERT INTO "person-xt" VALUES
-(4,
-24,
-'Kenny McCormick',
-'[]',
-NULL
-);
-
-
-CREATE TABLE "person" (
+CREATE TABLE company_data_arrays (
     id integer NOT NULL,
-    name character varying,
-    publication jsonb,
-    contribs jsonb
+    days timestamp[],
+    income integer[],
+    workers text[][],
+    managers jsonb[]
 );
 
-ALTER TABLE ONLY "person"
-    ADD CONSTRAINT "person_pk" PRIMARY KEY (id);
+ALTER TABLE ONLY company_data_arrays
+    ADD CONSTRAINT company_data_arrays_pk PRIMARY KEY (id);
 
-INSERT INTO "person" VALUES (
-	1,
-  'Sanjay Ghemawat',
-  '[ { "title": "The Google file system", "id": 1, "year": 2003, "venue":"SOSP", "editor": [ {"name": "M. Scott"}, {"name": "L. Peterson"} ] }, { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS" , "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }]',
-  '[{"value": "Google File System"},{"value": "MapReduce "},{"value": "Bigtable "},{"value": "Spanner "}]'
-);
-
-
-INSERT INTO "person" VALUES (
-	2,
-  'Jeffrey Dean',
-  '[ { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }, { "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] } ]',
-  '[ {"value": "MapReduce "}, {"value": "Bigtable "}, {"value": "Spanner "}, {"value": "TensorFlow "} ]');
-
-
-CREATE TABLE "person-xt-array" (
-    id integer NOT NULL,
-    ssn integer,
-    fullname character varying,
-    tags integer[],
-    friends jsonb[]
-);
-
-ALTER TABLE ONLY "person-xt-array"
-    ADD CONSTRAINT "person-xt-array_pk" PRIMARY KEY (id);
-
-INSERT INTO "person-xt-array" VALUES (1,
-123,
-'Mary Poppins',
-ARRAY[111, 222, 333],
-ARRAY['{ "fname": "Alice","nickname": "Al","address": {"city": "Bolzano","street": "via Roma","number": "33"}}'::jsonb,'{ "fname": "Robert","nickname": "Bob","address":{"city": "Merano","street": "via Dante","number": "23"}}'::jsonb]);
-
-
-INSERT INTO "person-xt-array" VALUES
-(2,
-1234,
-'Roger Rabbit',
-ARRAY[111, 222],
-ARRAY[]::jsonb[]
-);
-
-
-INSERT INTO "person-xt-array" VALUES
-(3,
-23,
-'Bob Loblaw',
-NULL,
-ARRAY[]::jsonb[]
-);
-
-
-INSERT INTO "person-xt-array" VALUES
-(4,
-24,
-'Kenny McCormick',
-ARRAY[]::integer[],
-NULL
-);
-
-
-CREATE TABLE "person-array" (
-    id integer NOT NULL,
-    name character varying,
-    publication jsonb[],
-    contribs jsonb[]
-);
-
-ALTER TABLE ONLY "person-array"
-    ADD CONSTRAINT "person-array_pk" PRIMARY KEY (id);
-
-INSERT INTO "person-array" VALUES (
-	1,
-  'Sanjay Ghemawat',
-  ARRAY['{ "title": "The Google file system", "id": 1, "year": 2003, "venue":"SOSP", "editor": [ {"name": "M. Scott"}, {"name": "L. Peterson"} ] }'::jsonb, '{ "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS" , "editor": [ {"name": "M. Swift"} ] }', '{ "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }'::jsonb],
-  ARRAY['{"value": "Google File System"}'::jsonb,'{"value": "MapReduce "}'::jsonb,'{"value": "Bigtable "}'::jsonb,'{"value": "Spanner "}'::jsonb]
-);
-
-
-INSERT INTO "person-array" VALUES (
-	2,
-  'Jeffrey Dean',
-  ARRAY['{ "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }'::jsonb, '{ "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }'::jsonb, '{ "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] }'::jsonb ],
-  ARRAY['{"value": "MapReduce "}'::jsonb, '{"value": "Bigtable "}'::jsonb, '{"value": "Spanner "}'::jsonb, '{"value": "TensorFlow "}'::jsonb]);
-
-CREATE TABLE "test"(
-    id integer,
-    value integer ARRAY[3]
-);
-
-INSERT INTO "test" VALUES (0, ARRAY[1, 3, 5]);
-INSERT INTO "test" VALUES (1, ARRAY[[1, 2], [3, 4], [5, 6]]);
+INSERT INTO company_data_arrays VALUES (1,  ARRAY['2023-01-01 18:00:00'::TIMESTAMP, '2023-01-15 18:00:00'::TIMESTAMP, '2023-01-29 12:00:00'::TIMESTAMP], ARRAY[10000, 18000, 13000], ARRAY[['Sam', 'Cynthia'], ['Bob', NULL], ['Jim', NULL]], ARRAY['{"firstName": "Mary", "lastName": "Jane", "age": 28}'::jsonb, '{"firstName": "Carlos", "lastName": "Carlson", "age": 45}'::jsonb, '{"firstName": "John", "lastName": "Moriarty", "age": 60}'::jsonb]);
+INSERT INTO company_data_arrays VALUES (2,  ARRAY['2023-02-12 18:00:00'::TIMESTAMP, '2023-02-26 18:00:00'::TIMESTAMP], ARRAY[14000, 0], ARRAY[['Jim', 'Cynthia'], [NULL, NULL]], ARRAY['{"firstName": "Helena", "lastName": "of Troy"}'::jsonb, '{"firstName": "Robert", "lastName": "Smith", "age": 48}'::jsonb]);
+INSERT INTO company_data_arrays VALUES (3,  ARRAY['2023-03-12 18:00:00'::TIMESTAMP, '2023-03-26 18:00:00'::TIMESTAMP], ARRAY[15000, 20000], ARRAY[['Carl', 'Bob', 'Cynthia'], ['Jim', 'Bob', NULL]], ARRAY['{"firstName": "Joseph", "lastName": "Grey"}'::jsonb, '{"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}'::jsonb]);
+INSERT INTO company_data_arrays VALUES (4,  ARRAY[]::TIMESTAMP[], ARRAY[]::integer[], NULL, ARRAY[]::jsonb[]);
