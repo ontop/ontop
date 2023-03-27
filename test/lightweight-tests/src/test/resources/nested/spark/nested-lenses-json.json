@@ -1,11 +1,11 @@
 {
   "relations": [
     {
-      "name": ["lenses","flattened_dates"],
-      "baseRelation": ["company_data_arrays"],
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
         "name": "days",
-        "datatype": "array<timestamp>"
+        "datatype": "string"
       },
       "columns": {
         "kept": [
@@ -17,11 +17,11 @@
       "type": "FlattenLens"
     },
     {
-      "name": ["lenses","flattened_income"],
-      "baseRelation": ["company_data_arrays"],
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
         "name": "income",
-        "datatype": "array<integer>"
+        "datatype": "string"
       },
       "columns": {
         "kept": [
@@ -34,10 +34,10 @@
     },
     {
       "name": ["lenses","flattened_workers_mid"],
-      "baseRelation": ["company_data_arrays"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
         "name": "workers",
-        "datatype": "array<array<string>>"
+        "datatype": "string"
       },
       "columns": {
         "kept": [
@@ -49,11 +49,11 @@
       "type": "FlattenLens"
     },
     {
-      "name": ["lenses","flattened_workers"],
+      "name": ["lenses","flattened_workers_mid2"],
       "baseRelation": ["lenses","flattened_workers_mid"],
       "flattenedColumn": {
         "name": "worker_list",
-        "datatype": "array<string>"
+        "datatype": "string"
       },
       "columns": {
         "kept": [
@@ -66,10 +66,10 @@
     },
     {
       "name": ["lenses","flattened_managers"],
-      "baseRelation": ["company_data_arrays"],
+      "baseRelation": ["company_data"],
       "flattenedColumn": {
         "name": "managers",
-        "datatype": "array<string>"
+        "datatype": "string"
       },
       "columns": {
         "kept": [
@@ -100,6 +100,54 @@
         ],
         "hidden": [
           "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "date",
+            "expression": "date::timestamp"
+          }
+        ],
+        "hidden": [
+          "date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "period_income::integer"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "name::string"
+          }
+        ],
+        "hidden": [
+          "name"
         ]
       },
       "type": "BasicLens"
