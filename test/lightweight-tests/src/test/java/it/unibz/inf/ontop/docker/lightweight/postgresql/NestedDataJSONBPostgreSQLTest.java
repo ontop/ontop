@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@SparkSQLLightweightTest
+@PostgreSQLLightweightTest
 public class NestedDataJSONBPostgreSQLTest extends AbstractNestedDataTest {
 
     private static final String PROPERTIES_FILE = "/nested/postgresql/nested-postgresql.properties";
