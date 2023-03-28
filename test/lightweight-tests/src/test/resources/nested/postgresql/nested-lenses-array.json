@@ -11,7 +11,7 @@
         "kept": [
           "id"
         ],
-        "new": "date",
+        "new": "invoice_date",
         "position": "index"
       },
       "type": "FlattenLens"

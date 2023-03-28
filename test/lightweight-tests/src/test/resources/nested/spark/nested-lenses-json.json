@@ -11,7 +11,7 @@
         "kept": [
           "id"
         ],
-        "new": "date",
+        "new": "invoice_date",
         "position": "index"
       },
       "type": "FlattenLens"
@@ -110,12 +110,12 @@
       "columns": {
         "added": [
           {
-            "name": "date",
-            "expression": "date::timestamp"
+            "name": "invoice_date",
+            "expression": "invoice_date::timestamp"
           }
         ],
         "hidden": [
-          "date"
+          "invoice_date"
         ]
       },
       "type": "BasicLens"
