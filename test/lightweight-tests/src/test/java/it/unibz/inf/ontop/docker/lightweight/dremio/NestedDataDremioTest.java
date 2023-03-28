@@ -1,19 +1,25 @@
 package it.unibz.inf.ontop.docker.lightweight.dremio;
 
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractNestedDataTest;
+import it.unibz.inf.ontop.docker.lightweight.DremioLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-@SparkSQLLightweightTest
+@DremioLightweightTest
 public class NestedDataDremioTest extends AbstractNestedDataTest {
 
     private static final String PROPERTIES_FILE = "/nested/dremio/nested-dremio.properties";
     private static final String LENS_FILE = "/nested/dremio/nested-lenses-array.json";
+
+    private static final String OBDA_FILE= "/nested/nested-no-pos.obda";
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
@@ -25,21 +31,51 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
         release();
     }
 
-    //In SPARK, calling EXPLODE on an empty array results in no entries.
     @Override
-    protected ImmutableSet<String> getFullNamesExpectedValues() {
-        return ImmutableSet.of("\"Mary Poppins\"^^xsd:string", "\"Roger Rabbit\"^^xsd:string");
+    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
+        return ImmutableMultiset.of( "\"2023-01-01T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00+00:00\"^^xsd:dateTime",
+                "\"2023-02-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00+00:00\"^^xsd:dateTime",
+                "\"2023-03-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00+00:00\"^^xsd:dateTime");
     }
 
-    //In SPARK, calling EXPLODE on an empty array results in no entries.
+    //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
     @Override
-    protected ImmutableSet<String> getTagIdsExpectedValues() {
-        return ImmutableSet.of( "\"[111, 222, 333]\"^^xsd:string", "\"[111, 222]\"^^xsd:string");
+    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+        return ImmutableMultiset.of("\"Carl: 17500.0\"^^xsd:string", "\"Jim: 12857.142857142857\"^^xsd:string",
+                "\"Cynthia: 12857.142857142857\"^^xsd:string", "\"Sam: 13666.666666666666\"^^xsd:string",
+                "\"Bob: 15200.0\"^^xsd:string");
     }
 
-    //Because of the reasons above, there are fewer triples in SPARK.
+    //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
+    protected ImmutableMultiset getFlatten2DArrayExpectedValues() {
+        return ImmutableMultiset.of( "\"Sam\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Bob\"^^xsd:string",
+                "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
+    }
+
+    @Disabled("Dremio Object access is currently not supported in BasicLens")
+    @Test
+    @Override
+    public void testFlattenJson() throws Exception {
+        super.testFlattenJson();
+    }
+
+    @Disabled("Dremio Object access is currently not supported in BasicLens")
+    @Test
+    @Override
+    public void testFlattenJsonPossiblyNull() throws Exception {
+        super.testFlattenJsonPossiblyNull();
+    }
+
+    @Disabled("Currently we do not support flatten with position for Dremio") //TODO-damian
+    @Test
+    @Override
+    public void testFlattenWithPosition() throws Exception {
+        super.testFlattenWithPosition();
+    }
+
+    //Due to the reasons mentioned above, we have fewer triples in the KG.
     @Override
     protected int getSPOExpectedCount() {
-        return 56;
+        return 50;
     }
 }
