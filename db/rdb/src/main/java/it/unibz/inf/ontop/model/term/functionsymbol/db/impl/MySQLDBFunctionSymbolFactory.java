@@ -363,11 +363,11 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                 databaseInfoSupplier.getDatabaseVersion()
                         .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
                         .filter(s -> s > 7 ).isPresent()) {
-            return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
+            return String.format("CASE WHEN %1$s NOT REGEXP " + numericNonFPPattern +
                             " THEN NULL ELSE CAST(%1$s AS DECIMAL(60,30)) END",
                     term);
         } else {
-            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericPattern +
+            return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericNonFPPattern +
                             " THEN NULL ELSE CAST(%1$s AS DECIMAL(60,30)) END",
                     term);
         }

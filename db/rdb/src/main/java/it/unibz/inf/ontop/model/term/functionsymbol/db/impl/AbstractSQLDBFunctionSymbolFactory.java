@@ -113,6 +113,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
     protected final String numericPattern = "'^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$'";
+    protected final String numericNonFPPattern = "'^[-+]?[0-9]*\\.?[0-9]*$'";
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
@@ -1324,7 +1325,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s !~ " + numericPattern + " THEN NULL " +
+        return String.format("CASE WHEN %1$s !~ " + numericNonFPPattern + " THEN NULL " +
                         "ELSE CAST(%1$s AS DECIMAL) END",
                 term);
     }

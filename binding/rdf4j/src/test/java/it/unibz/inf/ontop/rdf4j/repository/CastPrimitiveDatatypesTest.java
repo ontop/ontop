@@ -540,7 +540,7 @@ public class CastPrimitiveDatatypesTest extends AbstractRDF4JTest {
                 + "{  BIND(xsd:decimal(\"2E10\"^^xsd:double) AS ?v )\n"
                 + "}";
 
-        runQueryAndCompare(queryBind, ImmutableList.of("20000000000.000000"));
+        runQueryAndCompare(queryBind, ImmutableList.of());
     }
 
     @Test

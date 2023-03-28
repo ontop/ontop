@@ -328,7 +328,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s !~ " + numericPattern + " THEN NULL " +
+        return String.format("CASE WHEN %1$s !~ " + numericNonFPPattern + " THEN NULL " +
                         "ELSE CAST(%1$s AS "+ DEFAULT_DECIMAL_STR +") END",
                 term);
     }
