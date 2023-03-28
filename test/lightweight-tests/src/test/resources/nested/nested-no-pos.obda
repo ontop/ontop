@@ -10,17 +10,17 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 mappingId	MAPID-period-date
 target		:period/{id}/{index} a :Period ; :invoiceDate {invoice_date} ; :id {id} ; :index {index}^^xsd:integer .
-source		SELECT id, index, invoice_date FROM lenses.flattened_dates;
+source		SELECT id, 1 as index, invoice_date FROM lenses.flattened_dates;
 
 mappingId	MAPID-period-income
 target		:period/{id}/{index} a :Period ; :invoiceAmount {period_income} .
-source		SELECT id, index, period_income FROM lenses.flattened_income;
+source		SELECT id, 1 as index, period_income FROM lenses.flattened_income;
 
 mappingId	MAPID-period-worker
 target		:period/{id}/{index} a :Period ; :hasWorker :worker/{name} . :worker/{name} a :Worker ; :name {name} .
-source		SELECT id, index, name FROM lenses.flattened_workers;
+source		SELECT id, 1 as index, name FROM lenses.flattened_workers;
 
 mappingId	MAPID-period-manager
 target		:period/{id}/{index} a :Period ; :hasManager :manager/{firstname}/{lastname} . :manager/{firstname}/{lastname} a :Manager ; :firstName {firstname} ; :lastName {lastname} ; :age {age} .
-source		SELECT id, index, firstname, lastname, age FROM lenses.managers;
+source		SELECT id, 1 as index, firstname, lastname, age FROM lenses.managers;
 ]]

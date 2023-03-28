@@ -11,7 +11,7 @@
         "kept": [
           "id"
         ],
-        "new": "date",
+        "new": "invoice_date",
         "position": "index"
       },
       "type": "FlattenLens"
@@ -110,12 +110,12 @@
       "columns": {
         "added": [
           {
-            "name": "date",
-            "expression": "jsonb_extract_path_text(jsonb_build_object('x', date), 'x')::timestamp"
+            "name": "invoice_date",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', invoice_date), 'x')::timestamp"
           }
         ],
         "hidden": [
-          "date"
+          "invoice_date"
         ]
       },
       "type": "BasicLens"

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullIgnoringDBGroupConcatFunctionSymbol;
@@ -121,6 +122,9 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
                         StringBuilder builder = new StringBuilder();
+                        if(indexVar.isPresent()) {
+                            throw new SQLSerializationException("Dremio does not support FLATTEN with position arguments.");
+                        }
 
                         //We express the flatten call as a `SELECT *, FLATTEN({array}) FROM child.
 
@@ -146,29 +150,16 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         if(subProjection.length() > 0)
                             subProjection += ",";
 
-                        //If an index is required, we use POSEXPLODE instead of EXPLODE
-                        if(indexVar.isPresent()) {
-                            builder.append(String.format(
-                                    "(SELECT %s 0 as %s, FLATTEN(%s) AS %s FROM %s) %s",
-                                    subProjection,
-                                    allColumnIDs.get(indexVar.get()).getSQLRendering(),
-                                    expression,
-                                    allColumnIDs.get(outputVar).getSQLRendering(),
-                                    subQuerySerialization.getString(),
-                                    alias
 
-                            ));
-                        } else {
-                            builder.append(String.format(
-                                    "(SELECT %s FLATTEN(%s) AS %s FROM %s) %s",
-                                    subProjection,
-                                    expression,
-                                    allColumnIDs.get(outputVar).getSQLRendering(),
-                                    subQuerySerialization.getString(),
-                                    alias
+                        builder.append(String.format(
+                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s) %s",
+                                subProjection,
+                                expression,
+                                allColumnIDs.get(outputVar).getSQLRendering(),
+                                subQuerySerialization.getString(),
+                                alias
 
-                            ));
-                        }
+                        ));
                         return new QuerySerializationImpl(
                                 builder.toString(),
                                 variableAliases
