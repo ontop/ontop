@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@DremioLightweightTest
+//@DremioLightweightTest
 public class CastDremioTest extends AbstractCastFunctionsTest {
     private static final String PROPERTIES_FILE = "/books/dremio/books-dremio.properties";
     private static final String OBDA_FILE = "/books/dremio/books-dremio.obda";
