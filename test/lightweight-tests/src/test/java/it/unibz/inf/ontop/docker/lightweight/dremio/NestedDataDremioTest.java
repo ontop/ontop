@@ -66,7 +66,7 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
         super.testFlattenJsonPossiblyNull();
     }
 
-    @Disabled("Currently we do not support flatten with position for Dremio") //TODO-damian
+    @Disabled("Currently we do not support flatten with position for Dremio")
     @Test
     @Override
     public void testFlattenWithPosition() throws Exception {
