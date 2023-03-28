@@ -19,5 +19,5 @@ public interface GenericDBTermType extends DBTermType {
     /**
      * Creates a new concrete type that uses the correct generic types deduced from the type string.
      */
-    Optional<GenericDBTermType> createFromSignature(String signature);
+    Optional<GenericDBTermType> createFromSignature(String signature);//int[] ARRAY<int>
 }

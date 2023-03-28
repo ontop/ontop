@@ -90,12 +90,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 case ARRAY:
                     return Optional.of(((GenericDBTermType)type).getGenericArguments().get(0));
                 default:
-                    throw new FlattenedVariableTypeException(
-                            String.format(
-                                    "Unexpected Datatype %s for flattened variable %s",
-                                    type,
-                                    flattenedVariable
-                            ));
+                    return Optional.empty();
             }
         }
         return Optional.empty();

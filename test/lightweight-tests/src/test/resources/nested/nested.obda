@@ -9,8 +9,8 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-period-date
-target		:period/{id}/{index} a :Period ; :invoiceDate {date} ; :id {id} ; :index {index}^^xsd:integer .
-source		SELECT id, index, date FROM lenses.flattened_dates;
+target		:period/{id}/{index} a :Period ; :invoiceDate {invoice_date} ; :id {id} ; :index {index}^^xsd:integer .
+source		SELECT id, index, invoice_date FROM lenses.flattened_dates;
 
 mappingId	MAPID-period-income
 target		:period/{id}/{index} a :Period ; :invoiceAmount {period_income} .
