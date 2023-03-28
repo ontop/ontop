@@ -64,7 +64,7 @@
           },
           {
             "name": "\"nickNames\"",
-            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) in ('boolean', 'string', 'number') THEN jsonb_extract_path(\"friend\", 'nickname') ELSE NULL END"
+            "expression": "CASE WHEN jsonb_typeof(jsonb_extract_path(\"friend\", 'nickname')) = 'array' THEN jsonb_extract_path(\"friend\", 'nickname') ELSE NULL END"
           },
           {
             "name": "\"nickName_str\"",

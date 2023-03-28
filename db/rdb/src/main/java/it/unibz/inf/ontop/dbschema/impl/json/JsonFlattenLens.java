@@ -164,23 +164,33 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
 
             FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
 
-            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable, flattenedIfArrayVariable, indexVariable, flattenedDBType);
+            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable, flattenedDBType.getCategory() == DBTermType.Category.ARRAY ? flattenedVariable : flattenedIfArrayVariable, indexVariable, flattenedDBType);
 
             ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
-            ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                    Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
-                    substitutionFactory.<ImmutableTerm>getSubstitution(
-                            flattenedIfArrayVariable,
-                            termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
+            if (flattenedDBType.getCategory() == DBTermType.Category.ARRAY) {
+                //If we use an array type, we do not need to add a filter to check if it really is an array.
+                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
+                                iqFactory.createUnaryIQTree(flattennode, dataNode));
+
+                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+            }
+            else {
+                //If we use a json type or similar, we first need to check if the item is a valid array.
+                ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
+                        Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
+                        substitutionFactory.<ImmutableTerm>getSubstitution(
+                                flattenedIfArrayVariable,
+                                termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
 
-            IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
-                    iqFactory.createUnaryIQTree(filterNode,
-                            iqFactory.createUnaryIQTree(flattennode,
-                                    iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
+                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
+                        iqFactory.createUnaryIQTree(filterNode,
+                                iqFactory.createUnaryIQTree(flattennode,
+                                        iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
 
-            return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+            }
         }
 
         private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable, Variable outputVariable) throws MetadataExtractionException {
