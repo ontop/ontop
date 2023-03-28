@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractNestedDataTest;
-import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@SparkSQLLightweightTest
+@PostgreSQLLightweightTest
 public class NestedDataJSONPostgreSQLTest extends AbstractNestedDataTest {
 
     private static final String PROPERTIES_FILE = "/nested/postgresql/nested-postgresql.properties";
