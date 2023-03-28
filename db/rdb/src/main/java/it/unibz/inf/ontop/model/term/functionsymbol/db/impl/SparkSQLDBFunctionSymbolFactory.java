@@ -267,10 +267,6 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
-        String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
-        String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
-        String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
         String term = termConverter.apply(terms.get(0));
         return String.format("CASE WHEN (%1$s NOT RLIKE " + datePattern1 + " AND " +
                         "%1$s NOT RLIKE " + datePattern2 +" AND " +

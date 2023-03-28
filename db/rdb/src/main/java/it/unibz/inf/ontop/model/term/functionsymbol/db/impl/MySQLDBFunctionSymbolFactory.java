@@ -307,17 +307,22 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     /**
-     * CAST functions
+     * XSD CAST functions
      */
+
+    // Cast and regex differ in MySQL version 8 and above vs. previous versions
+    private boolean isMySQLVersion8OrAbove() {
+        return databaseInfoSupplier.getDatabaseVersion().isPresent() &&
+                databaseInfoSupplier.getDatabaseVersion()
+                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
+                        .filter(s -> s > 7 ).isPresent();
+    }
 
     @Override
     protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
-                databaseInfoSupplier.getDatabaseVersion()
-                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
-                        .filter(s -> s > 7 ).isPresent()) {
+        if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN %1$s NOT REGEXP" + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term); }
@@ -331,10 +336,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
-                databaseInfoSupplier.getDatabaseVersion()
-                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
-                        .filter(s -> s > 7 ).isPresent()) {
+        if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
                             " THEN NULL ELSE %1$s + 0.0 END",
                     term);
@@ -359,10 +361,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
-                databaseInfoSupplier.getDatabaseVersion()
-                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
-                        .filter(s -> s > 7 ).isPresent()) {
+        if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN %1$s NOT REGEXP " + numericNonFPPattern +
                             " THEN NULL ELSE CAST(%1$s AS DECIMAL(60,30)) END",
                     term);
@@ -378,10 +377,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
-                databaseInfoSupplier.getDatabaseVersion()
-                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
-                        .filter(s -> s > 7 ).isPresent()) {
+        if (isMySQLVersion8OrAbove()) {
             return String.format("IF(%1$s REGEXP '[^0-9]+$', NULL , " +
                             "FLOOR(ABS(CAST(%1$s AS DECIMAL(60,30))))  * SIGN(CAST(%1$s AS DECIMAL(60,30)))) ",
                     term);
@@ -437,15 +433,8 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
-        String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
-        String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
-        String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
         String term = termConverter.apply(terms.get(0));
-        if (databaseInfoSupplier.getDatabaseVersion().isPresent() &&
-                databaseInfoSupplier.getDatabaseVersion()
-                        .map(s -> Integer.parseInt(s.substring(0, s.indexOf("."))))
-                        .filter(s -> s > 7 ).isPresent()) {
+        if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN (%1$s NOT REGEXP " + datePattern1 + " AND " +
                             "%1$s NOT REGEXP " + datePattern2 +" AND " +
                             "%1$s NOT REGEXP " + datePattern3 +" AND " +
