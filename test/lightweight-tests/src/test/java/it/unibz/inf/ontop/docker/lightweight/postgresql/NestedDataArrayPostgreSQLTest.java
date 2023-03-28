@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker.lightweight.postgresql;
 
 import it.unibz.inf.ontop.docker.lightweight.AbstractNestedDataTest;
-import it.unibz.inf.ontop.docker.lightweight.SparkSQLLightweightTest;
+import it.unibz.inf.ontop.docker.lightweight.PostgreSQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
