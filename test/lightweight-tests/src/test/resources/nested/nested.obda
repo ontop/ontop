@@ -1,6 +1,5 @@
 [PrefixDeclaration]
-:		http://person.example.org/
-p:      http://pub.example.org/
+:		http://nested.example.org/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xml:		http://www.w3.org/XML/1998/namespace
@@ -9,33 +8,19 @@ obda:		https://w3id.org/obda/vocabulary#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
-mappingId	MAPID-person
-target		:person/{"id"} a :Person ; :fullName {"fullname"} ; :ssn {"ssn"}^^xsd:int ; :tag_ids {tag_ids} .
-source		SELECT *, tags::text AS tag_ids FROM "hr"."person-xt";
+mappingId	MAPID-period-date
+target		:period/{id}/{index} a :Period ; :invoiceDate {date} ; :id {id} ; :index {index}^^xsd:integer .
+source		SELECT id, index, date FROM lenses.flattened_dates;
 
-mappingId	MAPID-person-tags
-target		:person/{"id"} :tag_str {"tag_str"} ; :tag_int {"tag_int"}^^xsd:int.
-source		SELECT "id", "tag_str", "tag_int" FROM "hr"."person-tags";
+mappingId	MAPID-period-income
+target		:period/{id}/{index} a :Period ; :invoiceAmount {period_income} .
+source		SELECT id, index, period_income FROM lenses.flattened_income;
 
-mappingId	MAPID-person-friend
-target		:person/{"id"} :hasFriend :person/{"id"}/{"pos"} . :person/{"id"}/{"pos"} a :Friend ; :firstName {"firstName"} ; :nickName {"nickName_str"} ; :city {"city"} .
-source  	SELECT "id", "pos", "firstName", "nickName_str", "city" FROM "hr"."persons-friends";
-]]
+mappingId	MAPID-period-worker
+target		:period/{id}/{index} a :Period ; :hasWorker :worker/{name} . :worker/{name} a :Worker ; :name {name} .
+source		SELECT id, index, name FROM lenses.flattened_workers;
 
-[MappingDeclaration] @collection [[
-mappingId	MAPID-pub-person
-target		p:person/{"id"} a p:Person ; p:name {"name"}.
-source		SELECT "id", "name" FROM "pub"."person";
-]]
-
-[MappingDeclaration] @collection [[
-mappingId	MAPID-pub
-target		p:publication/{"id_pub"} a p:Publication ; p:title {"title"} ; p:year {"year"} ; p:venue {"venue"}.
-source		SELECT "id_pub", "title", "year", "venue" FROM "pub"."publication";
-]]
-
-[MappingDeclaration] @collection [[
-mappingId	MAPID-author
-target		p:person/{"id"} p:author p:publication/{"id_pub"}.
-source		SELECT "id", "id_pub" FROM "pub"."publication";
+mappingId	MAPID-period-manager
+target		:period/{id}/{index} a :Period ; :hasManager :manager/{firstname}/{lastname} . :manager/{firstname}/{lastname} a :Manager ; :firstName {firstname} ; :lastName {lastname} ; :age {age} .
+source		SELECT id, index, firstname, lastname, age FROM lenses.managers;
 ]]

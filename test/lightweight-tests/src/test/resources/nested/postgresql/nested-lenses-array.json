@@ -5,7 +5,7 @@
       "baseRelation": ["company_data_arrays"],
       "flattenedColumn": {
         "name": "days",
-        "datatype": "array<timestamp>"
+        "datatype": "timestamp[]"
       },
       "columns": {
         "kept": [
@@ -21,7 +21,7 @@
       "baseRelation": ["company_data_arrays"],
       "flattenedColumn": {
         "name": "income",
-        "datatype": "array<integer>"
+        "datatype": "integer[]"
       },
       "columns": {
         "kept": [
@@ -37,7 +37,7 @@
       "baseRelation": ["company_data_arrays"],
       "flattenedColumn": {
         "name": "workers",
-        "datatype": "array<array<string>>"
+        "datatype": "text[][]"
       },
       "columns": {
         "kept": [
@@ -53,7 +53,7 @@
       "baseRelation": ["lenses","flattened_workers_mid"],
       "flattenedColumn": {
         "name": "worker_list",
-        "datatype": "array<string>"
+        "datatype": "text[]"
       },
       "columns": {
         "kept": [
@@ -69,7 +69,7 @@
       "baseRelation": ["company_data_arrays"],
       "flattenedColumn": {
         "name": "managers",
-        "datatype": "array<string>"
+        "datatype": "jsonb[]"
       },
       "columns": {
         "kept": [
@@ -87,15 +87,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "GET_JSON_OBJECT(manager, '$.firstName')::string"
+            "expression": "jsonb_extract_path_text(manager, 'firstName')::text"
           },
           {
             "name": "lastname",
-            "expression": "GET_JSON_OBJECT(manager, '$.lastName')::string"
+            "expression": "jsonb_extract_path_text(manager, 'lastName')::text"
           },
           {
             "name": "age",
-            "expression": "GET_JSON_OBJECT(manager, '$.age')::integer"
+            "expression": "jsonb_extract_path_text(manager, 'age')::integer"
           }
         ],
         "hidden": [

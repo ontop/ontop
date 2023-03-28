@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
@@ -15,10 +17,13 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.GenericDBTermType;
+import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
@@ -78,6 +83,21 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         return String.format("LIMIT %d\nOFFSET %d", limit, offset);
                     }
 
+                    /**
+                     * Generate a new variable name as an intermediate term for the Array unnest operation.
+                     */
+                    private QuotedID generateIntermediateVariable(String outputVarName, ImmutableSet<Variable> existingVariables) {
+                        int index = 1;
+                        while (true) {
+                            String newVarName = outputVarName + "_intermediate" + index;
+                            if(existingVariables.stream()
+                                    .noneMatch(v -> v.getName().equals(newVarName))) {
+                                return createAttributeAliasFactory().createAttributeAlias(newVarName);
+                            }
+                            index++;
+                        }
+                    }
+
                     @Override
                     public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
 
@@ -87,23 +107,90 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 subQuerySerialization
                         );
 
+                        //We need special treatment, if we are trying to flatten an array of type T[][], T[][][], etc.
+                        boolean flatteningNDArray = (sqlFlattenExpression.getFlattenedType() instanceof ArrayDBTermType
+                                && ((GenericDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY);
+
                         Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
                         Variable outputVar = sqlFlattenExpression.getOutputVar();
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
+
+                        //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
                         StringBuilder builder = new StringBuilder();
-                        builder.append(String.format(
-                                        "%s JOIN LATERAL %s(%s) ",
-                                        subQuerySerialization.getString(),
-                                        getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()
+
+                        builder.append(
+                                String.format(
+                                    String.format(
+                                        "%%s JOIN LATERAL %s ",
+                                        getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())
+                                    ),
+                                    subQuerySerialization.getString(),
+                                    allColumnIDs.get(flattenedVar).getSQLRendering()
                         ));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
+
+                        /*
+                         * If we are flattening an ND-Array, we need to first transform it into a JSONB array,
+                         * call jsonb_array_elements on it, then transform it back into an Array in a further subquery.
+                         */
+                        if(flatteningNDArray) {
+                            RelationID castAlias = generateFreshViewAlias();
+                            RelationID outerViewAlias = generateFreshViewAlias();
+                            QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
+                            builder.append(
+                                    String.format(
+                                            "AS %s ON TRUE",
+                                            getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)
+                                    )
+                            );
+
+                            //Create new variable aliases for super-query.
+                            var variableAliases = allColumnIDs.entrySet().stream()
+                                    .filter(e -> e.getKey() != flattenedVar)
+                                    .collect(ImmutableCollectors.toMap(
+                                            v -> v.getKey(),
+                                            v -> new QualifiedAttributeID(idFactory.createRelationID(outerViewAlias.getSQLRendering()), v.getValue().getAttribute())
+                                    ));
+
+                            //Explicitly include all variables used in the subQuery in the SELECT part.
+                            var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
+                                    .filter(v -> variableAliases.containsKey(v))
+                                    .map(
+                                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
+                                    )
+                                    .collect(Collectors.joining(", "));
+                            if(subProjection.length() > 0)
+                                subProjection += ",";
+
+                            //Add the index variable to the SELECT of the super-query
+                            var indexProjection = indexVar.isPresent() ?
+                                    String.format("%s AS %s, ",
+                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()),
+                                            indexVar.get().getName()) :
+                                    "";
+
+                            return new QuerySerializationImpl(
+                                    String.format(
+                                            "(SELECT %s %s ARRAY(SELECT jsonb_array_elements_text(%s))::%s AS %s FROM %s) %s",
+                                            subProjection,
+                                            indexProjection,
+                                            intermediateOutputVar.getSQLRendering(),
+                                            ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName(),
+                                            allColumnIDs.get(outputVar).getSQLRendering(),
+                                            builder,
+                                            outerViewAlias
+                                    ),
+                                    variableAliases);
+                        }
+
+
                         builder.append(
                                 String.format(
                                         "AS %s ON TRUE",
                                         getOutputVarsRendering(outputVar, indexVar, allColumnIDs)
                                 )
                         );
+
                         return new QuerySerializationImpl(
                                 builder.toString(),
                                 allColumnIDs.entrySet().stream()
@@ -114,10 +201,14 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                     private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
                         String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
+                        return getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias());
+                    }
+
+                    private Object getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
                         return indexVar.isPresent()?
                                 String.format(
                                         "%s(%s, %s)",
-                                        generateFreshViewAlias(),
+                                        viewAlias.getSQLRendering(),
                                         outputVarString,
                                         allColumnIDs.get(indexVar.get()).getSQLRendering()):
                                 outputVarString;
@@ -150,13 +241,18 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
 
                         if (dbTypeFactory.getDBTermType(JSON_STR).equals(dbType)) {
-                            return "json_array_elements";
+                            return "json_array_elements(%s)";
                         }
                         if (dbTypeFactory.getDBTermType(JSONB_STR).equals(dbType)) {
-                            return "jsonb_array_elements";
+                            return "jsonb_array_elements(%s)";
                         }
-                        if (dbTypeFactory.getDBTermType(ARRAY_STR).equals(dbType)) {
-                            return "unnest";
+                        if (dbType.getCategory() == DBTermType.Category.ARRAY) {
+                            GenericDBTermType genericDbType = (GenericDBTermType) dbType;
+                            //When it is a multi-dimensional array, we cannot use unnest, because it would flatten all levels at once.
+                            if(genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY) {
+                                return "jsonb_array_elements(to_jsonb(%s))";
+                            } else
+                                return "unnest(%s)";
                         }
 
                         throw new SQLSerializationException("Unsupported nested type for flattening: " + dbType.getName());

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,174 +13,161 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
 
     protected static final String OBDA_FILE = "/nested/nested.obda";
-    protected static final String OWL_FILE = "/nested/nested.owl";
+    protected static final String OWL_FILE = null;
 
     Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Test
-    public void testFullNames() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
+    public void testFlattenWithPosition() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
                 "\n" +
                 "SELECT  ?v " +
                 "WHERE {" +
-                "?person  a :Person ; \n" +
-                "         :fullName ?v . " +
+                "?p :index ?v . \n" +
                 "}";
 
-        ImmutableSet<String> expectedValues = getFullNamesExpectedValues();
-        executeAndCompareValues(query, expectedValues);
+        executeAndCompareValues(query, getFlattenWithPositionExpectedValues());
     }
 
-    protected ImmutableSet<String> getFullNamesExpectedValues() {
-        return ImmutableSet.of("\"Bob Loblaw\"^^xsd:string", "\"Kenny McCormick\"^^xsd:string", "\"Mary Poppins\"^^xsd:string", "\"Roger Rabbit\"^^xsd:string");
-    }
-
-    @Test
-    public void testFlattenTags() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
-                "\n" +
-                "SELECT  ?person ?ssn ?v " +
-                "WHERE {" +
-                "?person  :ssn ?ssn . " +
-                "?person  :tag_str ?v . " +
-                "} ORDER BY ?v";
-
-        executeAndCompareValues(query, getFlattenTagsExpectedValues());
-    }
-
-    protected ImmutableMultiset getFlattenTagsExpectedValues() {
-        return ImmutableMultiset.of( "\"111\"^^xsd:string", "\"111\"^^xsd:string", "\"222\"^^xsd:string", "\"222\"^^xsd:string", "\"333\"^^xsd:string");
+    protected ImmutableMultiset getFlattenWithPositionExpectedValues() {
+        return ImmutableMultiset.of( "\"1\"^^xsd:integer", "\"1\"^^xsd:integer", "\"1\"^^xsd:integer",
+                "\"2\"^^xsd:integer", "\"2\"^^xsd:integer", "\"2\"^^xsd:integer", "\"3\"^^xsd:integer");
     }
 
     @Test
-    public void testFlattenTags2() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
-                "\n" +
-                "SELECT  ?person ?tagIds ?v " +
-                "WHERE {" +
-                "?person  :tag_ids ?tagIds . " +
-                "?person  :tag_str ?v . " +
-                "} ORDER BY ?v";
-
-        executeAndCompareValues(query, getFlattenTags2ExpectedValues());
-    }
-
-    protected ImmutableMultiset getFlattenTags2ExpectedValues() {
-        return ImmutableMultiset.of( "\"111\"^^xsd:string", "\"111\"^^xsd:string", "\"222\"^^xsd:string", "\"222\"^^xsd:string", "\"333\"^^xsd:string");
-    }
-
-    @Test
-    public void testTagIds() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
-                "\n" +
-                "SELECT  ?person ?v " +
-                "WHERE {" +
-                "?person  :tag_ids ?v . " +
-                "}";
-
-        ImmutableSet<String> expectedValues = getTagIdsExpectedValues();
-        executeAndCompareValues(query, expectedValues);
-    }
-
-    protected ImmutableSet<String> getTagIdsExpectedValues() {
-        return ImmutableSet.of( "[111, 222, 333]", "[111, 222]", "[]");
-    }
-
-    @Test
-    public void testTagsAndIds() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
-                "\n" +
-                "SELECT  ?person ?v " +
-                "WHERE {" +
-                "?person  :tag_ids ?v . " +
-                "?person  :tag_str ?s . " +
-                "}";
-
-        executeAndCompareValues(query, getTagsAndIdsExpectedValues());
-    }
-
-    protected ImmutableMultiset getTagsAndIdsExpectedValues() {
-        return ImmutableMultiset.of( "\"[111, 222, 333]\"^^xsd:string", "\"[111, 222, 333]\"^^xsd:string",
-                "\"[111, 222, 333]\"^^xsd:string", "\"[111, 222]\"^^xsd:string", "\"[111, 222]\"^^xsd:string");
-    }
-
-    @Test
-    public void testFlattenFriends() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
-                "\n" +
-                "SELECT  ?person ?f ?v " +
-                "WHERE {" +
-                "?person  :hasFriend ?f . " +
-                "?f  :city ?v ." +
-                "}";
-
-        executeAndCompareValues(query, getFlattenFriendsExpectedValues());
-    }
-
-    protected ImmutableMultiset getFlattenFriendsExpectedValues() {
-        return ImmutableMultiset.of( "\"Bolzano\"^^xsd:string", "\"Merano\"^^xsd:string");
-    }
-
-    @Test
-    public void testAllFriends() throws Exception {
-        String query = "PREFIX : <http://person.example.org/>" +
+    public void testFlattenTimestamp() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
                 "\n" +
                 "SELECT  ?v " +
                 "WHERE {" +
-                "?x a :Friend . " +
-                "?x :firstName ?v ." +
+                "?p  :invoiceDate ?v . " +
                 "}";
 
-        executeAndCompareValues(query, getAllFriendsExpectedValues());
-
+        executeAndCompareValues(query, getFlattenTimestampExpectedValues());
     }
 
-    protected ImmutableMultiset getAllFriendsExpectedValues() {
-        return ImmutableMultiset.of( "\"Alice\"^^xsd:string", "\"Robert\"^^xsd:string");
+    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
+        return ImmutableMultiset.of( "\"2023-01-01T18:00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00\"^^xsd:dateTime",
+                "\"2023-02-12T18:00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00\"^^xsd:dateTime",
+                "\"2023-03-12T18:00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00\"^^xsd:dateTime");
     }
 
     @Test
-    public void testSelfJoinElimination() throws Exception {
-        String query = "PREFIX : <http://pub.example.org/>" +
+    public void testFlattenInteger() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
                 "\n" +
-                "SELECT (CONCAT(?name, \": \", ?title) as ?v) " +
+                "SELECT  ?p ?v " +
                 "WHERE {" +
-                "?person :name ?name . " +
-                "?person :author ?pub . " +
-                "?pub :title ?title . " +
+                "?p  :invoiceAmount ?v . " +
                 "}";
 
-        executeAndCompareValues(query, getSelfJoinEliminationExpectedValues());
-
-        /*checkContainsAllSetSemanticsWithErrorMessage(
-                query,
-                ImmutableSet.of(
-                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "The Google file system"),
-                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "MapReduce: Simplified Data Processing on Large Clusters"),
-                        ImmutableMap.of("person", "<http://pub.example.org/person/1>", "name", "Sanjay Ghemawat", "title", "Bigtable: A Distributed Storage System for Structured Data"),
-                        ImmutableMap.of("person", "<http://pub.example.org/person/2>", "name", "Jeffrey Dean", "title", "Bigtable: A Distributed Storage System for Structured Data"),
-                        ImmutableMap.of("person", "<http://pub.example.org/person/2>", "name", "Jeffrey Dean", "title", "MapReduce: Simplified Data Processing on Large Clusters")
-                ));*/
-
+        executeAndCompareValues(query, getFlattenIntegerExpectedValues());
     }
 
-    protected ImmutableMultiset<String> getSelfJoinEliminationExpectedValues() {
-        return ImmutableMultiset.of("\"Sanjay Ghemawat: The Google file system\"^^xsd:string",
-                "\"Sanjay Ghemawat: MapReduce: Simplified Data Processing on Large Clusters\"^^xsd:string",
-                "\"Sanjay Ghemawat: Bigtable: A Distributed Storage System for Structured Data\"^^xsd:string",
-                "\"Jeffrey Dean: Bigtable: A Distributed Storage System for Structured Data\"^^xsd:string",
-                "\"Jeffrey Dean: MapReduce: Simplified Data Processing on Large Clusters\"^^xsd:string",
-                "\"Jeffrey Dean: Large Scale Distributed Deep Networks\"^^xsd:string");
+    protected ImmutableMultiset getFlattenIntegerExpectedValues() {
+        return ImmutableMultiset.of( "\"10000\"^^xsd:integer", "\"13000\"^^xsd:integer", "\"18000\"^^xsd:integer",
+                "\"0\"^^xsd:integer", "\"14000\"^^xsd:integer", "\"15000\"^^xsd:integer", "\"20000\"^^xsd:integer");
+    }
+
+    @Test
+    public void testFlatten2DArray() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  ?v " +
+                "WHERE {" +
+                "?p :hasWorker ?w. " +
+                "?w  :name ?v . " +
+                "}";
+
+        executeAndCompareValues(query, getFlatten2DArrayExpectedValues());
+    }
+
+    protected ImmutableMultiset getFlatten2DArrayExpectedValues() {
+        return ImmutableMultiset.of( "\"Sam\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Bob\"^^xsd:string",
+                "\"Bob\"^^xsd:string", "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
+    }
+
+    @Test
+    public void testFlattenWithEmptyElement() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  ?v " +
+                "WHERE {" +
+                "?p  :id ?id . \n" +
+                "?p :hasWorker ?w . \n" +
+                "?w :name ?v ." +
+                "FILTER(?id = 2)" +
+                "}";
+
+        assertEquals(getFlattenWithEmptyElement(), runQueryAndCount(query));
+    }
+
+    protected int getFlattenWithEmptyElement() {
+        return 2;
+    }
+
+    @Test
+    public void testFlattenJson() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  ?v " +
+                "WHERE {" +
+                "?m :firstName ?v. " +
+                "}";
+
+        executeAndCompareValues(query, getFlattenJsonExpectedValues());
+    }
+
+    protected ImmutableMultiset getFlattenJsonExpectedValues() {
+        return ImmutableMultiset.of( "\"Mary\"^^xsd:string", "\"Carlos\"^^xsd:string", "\"John\"^^xsd:string", "\"Helena\"^^xsd:string", "\"Robert\"^^xsd:string",
+                "\"Joseph\"^^xsd:string", "\"Godfrey\"^^xsd:string");
+    }
+
+    @Test
+    public void testFlattenJsonPossiblyNull() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  ?v " +
+                "WHERE {" +
+                "?m :age ?v. " +
+                "}";
+
+        executeAndCompareValues(query, getFlattenJsonPossiblyNullExpectedValues());
+    }
+
+    protected ImmutableMultiset getFlattenJsonPossiblyNullExpectedValues() {
+        return ImmutableMultiset.of( "\"28\"^^xsd:integer", "\"45\"^^xsd:integer", "\"60\"^^xsd:integer",
+                "\"48\"^^xsd:integer", "\"59\"^^xsd:integer");
+    }
+
+    @Test
+    public void testFlattenWithAggregate() throws Exception {
+        String query = "PREFIX : <http://nested.example.org/>" +
+                "\n" +
+                "SELECT  (CONCAT(?name, ': ', STR(AVG(?value))) as ?v) " +
+                "WHERE {" +
+                "?p :hasWorker ?w. " +
+                "?w :name ?name. " +
+                "?p :invoiceAmount ?value. " +
+                "} GROUP BY ?name ";
+
+        executeAndCompareValues(query, getFlattenWithAggregateExpectedValues());
+    }
+
+    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+        return ImmutableMultiset.of("\"Carl: 15000.0000000000000000\"^^xsd:string", "\"Jim: 15666.666666666667\"^^xsd:string",
+                "\"Cynthia: 13000.0000000000000000\"^^xsd:string", "\"Sam: 10000.0000000000000000\"^^xsd:string",
+                "\"Bob: 17666.666666666667\"^^xsd:string");
     }
 
     @Test
     public void testSPO() {
-        String query = "PREFIX : <http://pub.example.org/>\n" + "SELECT * WHERE { ?s ?p ?o. }";
+        String query = "PREFIX : <http://nested.example.org/>\n" + "SELECT * WHERE { ?s ?p ?o. }";
         assertEquals(getSPOExpectedCount(), runQueryAndCount(query));
     }
 
     protected int getSPOExpectedCount() {
-        return 56;
+        return 89;
     }
 
 }

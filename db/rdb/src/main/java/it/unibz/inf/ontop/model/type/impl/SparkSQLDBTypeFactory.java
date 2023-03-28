@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
 
@@ -24,7 +27,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
     private static final String DECIMAL_38_10_STR = "DECIMAL(38, 10)";
-    private static final String ARRAY_STR = "ARRAY";
+    private static final String ARRAY_STR = "ARRAY<T>";
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -77,14 +80,33 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         return ImmutableMap.copyOf(map);
     }
 
-    private static ImmutableMap<String, DBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
         TermTypeAncestry rootAncestry = rootTermType.getAncestry();
 
-        DBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry);
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(!s.startsWith("ARRAY<") || !s.endsWith(">")) {
+                return Optional.empty();
+            }
+            String contents = s.substring(6, s.length() - 1);
 
-        Map<String, DBTermType> map = new HashMap<>();
-        map.put(ARRAY_STR, abstractArrayType);
-        return ImmutableMap.copyOf(map);
+            int depth = 0;
+            for(int i = 0; i < contents.length(); i++) {
+                if(contents.charAt(i) == '<')
+                    depth += 1;
+                else if(contents.charAt(i) == '>')
+                    depth -= 1;
+                else if(contents.charAt(i) == ',' && depth == 0)
+                    return Optional.empty();
+            }
+            if(depth != 0)
+                return Optional.empty();
+
+            return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(contents));
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     @Override
