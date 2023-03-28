@@ -248,6 +248,7 @@ public class RDB2RDFTest {
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, JDBC_DRIVER);
 		PROPERTIES.setProperty(OntopMappingSettings.BASE_IRI, BASE_IRI);
 		PROPERTIES.setProperty(OntopOBDASettings.ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB, "true");
+		PROPERTIES.setProperty(OntopOBDASettings.IGNORE_INVALID_MAPPING_ENTRIES, "false");
 	}
 
 	@Before
