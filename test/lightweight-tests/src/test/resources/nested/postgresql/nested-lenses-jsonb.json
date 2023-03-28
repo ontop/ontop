@@ -1,0 +1,157 @@
+{
+  "relations": [
+    {
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "date",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "jsonb"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "jsonb_extract_path_text(manager, 'firstName')::text"
+          },
+          {
+            "name": "lastname",
+            "expression": "jsonb_extract_path_text(manager, 'lastName')::text"
+          },
+          {
+            "name": "age",
+            "expression": "jsonb_extract_path_text(manager, 'age')::integer"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "date",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', date), 'x')::timestamp"
+          }
+        ],
+        "hidden": [
+          "date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', period_income), 'x')::integer"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "jsonb_extract_path_text(jsonb_build_object('x', name), 'x')::text"
+          }
+        ],
+        "hidden": [
+          "name"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

@@ -58,118 +58,29 @@ INSERT INTO teaching VALUES ('AdvancedDatabases', 3);
 INSERT INTO teaching VALUES ('ScientificWriting', 8);
 INSERT INTO teaching VALUES ('OperatingSystems', 1);
 
-CREATE TABLE IF NOT EXISTS personxt (
-                                    id integer NOT NULL,
-                                    ssn integer,
-                                    fullname varchar(100),
-                                    tags varchar(6000),
-                                    friends varchar(6000)
+CREATE TABLE IF NOT EXISTS company_data (
+    id integer NOT NULL,
+    days varchar(10000),
+    income varchar(10000),
+    workers varchar(10000),
+    managers varchar(10000)
 );
 
-INSERT INTO personxt VALUES (1,
-                            123,
-                            'Mary Poppins',
-                            '[111, 222, 333]',
-                            '[{ "fname": "Alice", "nickname": "Al", "address": { "city": "Bolzano", "street": "via Roma", "number": "33" }}, { "fname": "Robert", "nickname": "Bob", "address": {"city": "Merano", "street": "via Dante", "number": "23" }}]'
-                            );
+INSERT INTO company_data VALUES (1,  '["2023-01-01 18:00:00", "2023-01-15 18:00:00", "2023-01-29 12:00:00"]', '[10000, 18000, 13000]', '[["Sam", "Cynthia"], ["Bob"], ["Jim"]]', '[{"firstName": "Mary", "lastName": "Jane", "age": 28}, {"firstName": "Carlos", "lastName": "Carlson", "age": 45}, {"firstName": "John", "lastName": "Moriarty", "age": 60}]');
+INSERT INTO company_data VALUES (2,  '["2023-02-12 18:00:00", "2023-02-26 18:00:00"]', '[14000, 0]', '[["Jim", "Cynthia"], []]', '[{"firstName": "Helena", "lastName": "of Troy"}, {"firstName": "Robert", "lastName": "Smith", "age": 48}]');
+INSERT INTO company_data VALUES (3,  '["2023-03-12 18:00:00", "2023-03-26 18:00:00"]', '[15000, 20000]', '[["Carl", "Bob", "Cynthia"], ["Jim", "Bob"]]', '[{"firstName": "Joseph", "lastName": "Grey"}, {"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}]');
+INSERT INTO company_data VALUES (4,  '[]', '[]', NULL, '[]');
 
-INSERT INTO personxt VALUES (2,
-                            1234,
-                            'Roger Rabbit',
-                            '[111, 222]',
-                            '{ "fname": "Mickey", "lname": "Mouse"}'
-                            );
-
-INSERT INTO personxt VALUES (3,
-                            23,
-                            'Bob Loblaw',
-                            NULL,
-                            '[]'
-                            );
-
-INSERT INTO personxt VALUES (4,
-                            24,
-                            'Kenny McCormick',
-                            '[]',
-                            NULL
-                            );
-
-
-
-CREATE TABLE IF NOT EXISTS person (
-                                    id integer NOT NULL,
-                                    name varchar(100),
-                                    publication varchar(6000),
-                                    contribs varchar(6000)
+CREATE TABLE company_data_arrays (
+    id integer NOT NULL,
+    days array<timestamp>,
+    income array<integer>,
+    workers array<array<string>>,
+    managers array<string>
 );
 
-INSERT INTO person VALUES (
-                          	1,
-                          	'Sanjay Ghemawat',
-                          	'[ { "title": "The Google file system", "id": 1, "year": 2003, "venue":"SOSP", "editor": [ {"name": "M. Scott"}, {"name": "L. Peterson"} ] }, { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS" , "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] } ]',
-                          	'[ {"value": "Google File System"}, {"value": "MapReduce "}, {"value": "Bigtable "}, {"value": "Spanner "} ]'
-                          );
+INSERT INTO company_data_arrays VALUES (1,  array(CAST('2023-01-01 18:00:00' AS TIMESTAMP), CAST('2023-01-15 18:00:00' AS TIMESTAMP), CAST('2023-01-29 12:00:00' AS TIMESTAMP)), array(10000, 18000, 13000), array(array('Sam', 'Cynthia'), array('Bob'), array('Jim')), array('{"firstName": "Mary", "lastName": "Jane", "age": 28}', '{"firstName": "Carlos", "lastName": "Carlson", "age": 45}', '{"firstName": "John", "lastName": "Moriarty", "age": 60}'));
+INSERT INTO company_data_arrays VALUES (2,  array(CAST('2023-02-12 18:00:00' AS TIMESTAMP), CAST('2023-02-26 18:00:00' AS TIMESTAMP)), array(14000, 0), array(array('Jim', 'Cynthia'), array()), array('{"firstName": "Helena", "lastName": "of Troy"}', '{"firstName": "Robert", "lastName": "Smith", "age": 48}'));
+INSERT INTO company_data_arrays VALUES (3,  array(CAST('2023-03-12 18:00:00' AS TIMESTAMP), CAST('2023-03-26 18:00:00' AS TIMESTAMP)), array(15000, 20000), array(array('Carl', 'Bob', 'Cynthia'), array('Jim', 'Bob', NULL)), array('{"firstName": "Joseph", "lastName": "Grey"}', '{"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}'));
+INSERT INTO company_data_arrays VALUES (4,  array(), array(), NULL, array());
 
-INSERT INTO person VALUES (2,
-                            'Jeffrey Dean',
-                            '[ { "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }, { "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }, { "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] } ]',
-                            '[ {"value": "MapReduce "}, {"value": "Bigtable "}, {"value": "Spanner "}, {"value": "TensorFlow "} ]'
-                            );
-
-
---For tests that use the ARRAY type instead of JSON strings.
-CREATE TABLE IF NOT EXISTS personxt_array (
-                                    id integer NOT NULL,
-                                    ssn integer,
-                                    fullname varchar(100),
-                                    tags array<string>,
-                                    friends array<string>
-);
-
-INSERT INTO personxt_array VALUES (1,
-                            123,
-                            'Mary Poppins',
-                            array('111', '222', '333'),
-                            array('{ "fname": "Alice", "nickname": "Al", "address": { "city": "Bolzano", "street": "via Roma", "number": "33" }}', '{ "fname": "Robert", "nickname": "Bob", "address": {"city": "Merano", "street": "via Dante", "number": "23" }}')
-                            );
-
-INSERT INTO personxt_array VALUES (2,
-                            1234,
-                            'Roger Rabbit',
-                            array('111', '222'),
-                            array() --Cannot have non-array type here
-                            );
-
-INSERT INTO personxt_array VALUES (3,
-                            23,
-                            'Bob Loblaw',
-                            NULL,
-                            array()
-                            );
-
-INSERT INTO personxt_array VALUES (4,
-                            24,
-                            'Kenny McCormick',
-                            array(),
-                            NULL
-                            );
-
-CREATE TABLE IF NOT EXISTS person_array (
-                                    id integer NOT NULL,
-                                    name varchar(100),
-                                    publication array<string>,
-                                    contribs array<string>
-);
-
-INSERT INTO person_array VALUES (
-                          	1,
-                          	'Sanjay Ghemawat',
-                          	array('{ "title": "The Google file system", "id": 1, "year": 2003, "venue":"SOSP", "editor": [ {"name": "M. Scott"}, {"name": "L. Peterson"} ] }', '{ "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS" , "editor": [ {"name": "M. Swift"} ] }', '{ "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }'),
-                          	array('{"value": "Google File System"}', '{"value": "MapReduce "}', '{"value": "Bigtable "}', '{"value": "Spanner "}')
-                          );
-
-INSERT INTO person_array VALUES (2,
-                            'Jeffrey Dean',
-                            array('{ "title": "Bigtable: A Distributed Storage System for Structured Data", "id": 2, "year": 2008, "venue":"ACM TOCS", "editor": [ {"name": "M. Swift"} ] }', '{ "title": "MapReduce: Simplified Data Processing on Large Clusters", "id": 3, "year": 2004, "venue":"OSDI", "editor": [ {"name": "E. Brewer"}, {"name": "P. Chen"} ] }', '{ "title": "Large Scale Distributed Deep Networks", "id": 4, "year": 2012, "venue":"NeurIPS", "editor": [ {"name": "P. Bartlett"}, {"name": "F. Pereira"}, {"name": "C. Burges"}, {"name": "L. Bottou"}, {"name": "K. Weinberger "} ] }'),
-                            array('{"value": "MapReduce "}', '{"value": "Bigtable "}', '{"value": "Spanner "}', '{"value": "TensorFlow "}')
-                            );

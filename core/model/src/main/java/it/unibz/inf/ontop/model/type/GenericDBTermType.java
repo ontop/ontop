@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 
 import java.util.Optional;
 
@@ -15,16 +14,10 @@ public interface GenericDBTermType extends DBTermType {
      * For instance, for ARRAY<STRING> this returns a DBStringType,
      * for MAP<STRING, INT> it returns a DBStringType and a DBIntType.
      */
-    public ImmutableList<DBTermType> getGenericArguments();
+    ImmutableList<DBTermType> getGenericArguments();
 
     /**
-     * Creates a new concrete type that uses the passed generic types.
+     * Creates a new concrete type that uses the correct generic types deduced from the type string.
      */
-    public GenericDBTermType createOfTypes(ImmutableList<DBTermType> types);
-
-    public static class GenericArgumentsExceptions extends OntopInternalBugException {
-        public GenericArgumentsExceptions (String message) {
-            super(message);
-        }
-    }
+    Optional<GenericDBTermType> createFromSignature(String signature);
 }

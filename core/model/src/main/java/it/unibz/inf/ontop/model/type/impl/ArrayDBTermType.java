@@ -2,25 +2,23 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.GenericDBTermType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import org.checkerframework.checker.nullness.Opt;
+import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Optional;
 
 public class ArrayDBTermType extends DBTermTypeImpl implements GenericDBTermType {
 
     private final Optional<DBTermType> itemType;
+    private final ArrayTypeFromSignature parsingFunction;
 
-    public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry) {
-        this(arrayStr, ancestry, Optional.empty());
+    public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry, ArrayTypeFromSignature parsingFunction) {
+        this(arrayStr, ancestry, Optional.empty(), parsingFunction);
     }
 
-    public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry, Optional<DBTermType> itemType) {
+    public ArrayDBTermType(String arrayStr, TermTypeAncestry ancestry, Optional<DBTermType> itemType, ArrayTypeFromSignature parsingFunction) {
         super(arrayStr, ancestry, itemType.isEmpty(), Category.ARRAY);
         this.itemType = itemType;
+        this.parsingFunction = parsingFunction;
     }
 
     @Override
@@ -49,12 +47,12 @@ public class ArrayDBTermType extends DBTermTypeImpl implements GenericDBTermType
     }
 
     @Override
-    public GenericDBTermType createOfTypes(ImmutableList<DBTermType> types) {
-        if(types.size() != 1) {
-            throw new GenericDBTermType.GenericArgumentsExceptions(String.format("The %s<T> type takes exactly one argument", getName()));
-        }
+    public Optional<GenericDBTermType> createFromSignature(String signature) {
+        Optional<DBTermType> type = parsingFunction.getType(signature);
 
-        return new ArrayDBTermType(String.format("%s<%s>", getName(), types.get(0).getName()), getAncestry(), Optional.of(types.get(0)));
+        return type.stream()
+                .map(tp -> (GenericDBTermType)new ArrayDBTermType(signature, getAncestry(), Optional.of(tp), parsingFunction))
+                .findFirst();
     }
 
     @Override
@@ -67,5 +65,9 @@ public class ArrayDBTermType extends DBTermTypeImpl implements GenericDBTermType
         public IllegalArrayComparisonException (String message) {
             super(message);
         }
+    }
+
+    public interface ArrayTypeFromSignature {
+        public Optional<DBTermType> getType(String signature);
     }
 }
