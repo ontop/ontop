@@ -112,8 +112,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private DBIsNullOrNotFunctionSymbol isNotNull;
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
-    protected final String numericPattern = "'^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$'";
-    protected final String numericNonFPPattern = "'^[-+]?[0-9]*\\.?[0-9]*$'";
+    // XSD cast patterns
+    protected static final String numericPattern = "'^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$'";
+    protected static final String numericNonFPPattern = "'^[-+]?[0-9]*\\.?[0-9]*$'";
+    protected static final String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
+    protected static final String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
+    protected static final String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
+    protected static final String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
@@ -1398,10 +1403,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String datePattern1 = "'^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'";
-        String datePattern2 = "'^[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}$'";
-        String datePattern3 = "'^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$'";
-        String datePattern4 = "'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'";
         String term = termConverter.apply(terms.get(0));
         return String.format("CASE WHEN (%1$s !~ " + datePattern1 + " AND " +
                         "%1$s !~ " + datePattern2 +" AND " +
