@@ -1,0 +1,188 @@
+{
+  "relations": [
+    {
+      "name": ["lenses","company_data_json"],
+      "baseRelation": ["company_data"],
+      "columns": {
+        "added": [
+          {
+            "name": "days",
+            "expression": "days::json"
+          },
+          {
+            "name": "income",
+            "expression": "income::json"
+          },
+          {
+            "name": "workers",
+            "expression": "workers::json"
+          },
+          {
+            "name": "managers",
+            "expression": "managers::json"
+          }
+        ],
+        "hidden": [
+          "name",
+          "income",
+          "workers",
+          "managers"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["lenses","company_data_json"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "invoice_date",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["lenses","company_data_json"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["lenses","company_data_json"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["lenses","company_data_json"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "json"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "json_extract_path_text(manager, 'firstName')::text"
+          },
+          {
+            "name": "lastname",
+            "expression": "json_extract_path_text(manager, 'lastName')::text"
+          },
+          {
+            "name": "age",
+            "expression": "json_extract_path_text(manager, 'age')::integer"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "invoice_date",
+            "expression": "json_extract_path_text(json_build_object('x', invoice_date), 'x')::timestamp"
+          }
+        ],
+        "hidden": [
+          "invoice_date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "json_extract_path_text(json_build_object('x', period_income), 'x')::integer"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "json_extract_path_text(json_build_object('x', name), 'x')::text"
+          }
+        ],
+        "hidden": [
+          "name"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

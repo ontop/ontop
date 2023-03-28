@@ -57,3 +57,30 @@ INSERT INTO teaching VALUES ('DiscreteMathematics', 1);
 INSERT INTO teaching VALUES ('AdvancedDatabases', 3);
 INSERT INTO teaching VALUES ('ScientificWriting', 8);
 INSERT INTO teaching VALUES ('OperatingSystems', 1);
+
+CREATE TABLE IF NOT EXISTS company_data (
+    id integer NOT NULL,
+    days varchar(10000),
+    income varchar(10000),
+    workers varchar(10000),
+    managers varchar(10000)
+);
+
+INSERT INTO company_data VALUES (1,  '["2023-01-01 18:00:00", "2023-01-15 18:00:00", "2023-01-29 12:00:00"]', '[10000, 18000, 13000]', '[["Sam", "Cynthia"], ["Bob"], ["Jim"]]', '[{"firstName": "Mary", "lastName": "Jane", "age": 28}, {"firstName": "Carlos", "lastName": "Carlson", "age": 45}, {"firstName": "John", "lastName": "Moriarty", "age": 60}]');
+INSERT INTO company_data VALUES (2,  '["2023-02-12 18:00:00", "2023-02-26 18:00:00"]', '[14000, 0]', '[["Jim", "Cynthia"], []]', '[{"firstName": "Helena", "lastName": "of Troy"}, {"firstName": "Robert", "lastName": "Smith", "age": 48}]');
+INSERT INTO company_data VALUES (3,  '["2023-03-12 18:00:00", "2023-03-26 18:00:00"]', '[15000, 20000]', '[["Carl", "Bob", "Cynthia"], ["Jim", "Bob"]]', '[{"firstName": "Joseph", "lastName": "Grey"}, {"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}]');
+INSERT INTO company_data VALUES (4,  '[]', '[]', NULL, '[]');
+
+CREATE TABLE company_data_arrays (
+    id integer NOT NULL,
+    days array<timestamp>,
+    income array<integer>,
+    workers array<array<string>>,
+    managers array<string>
+);
+
+INSERT INTO company_data_arrays VALUES (1,  array(CAST('2023-01-01 18:00:00' AS TIMESTAMP), CAST('2023-01-15 18:00:00' AS TIMESTAMP), CAST('2023-01-29 12:00:00' AS TIMESTAMP)), array(10000, 18000, 13000), array(array('Sam', 'Cynthia'), array('Bob'), array('Jim')), array('{"firstName": "Mary", "lastName": "Jane", "age": 28}', '{"firstName": "Carlos", "lastName": "Carlson", "age": 45}', '{"firstName": "John", "lastName": "Moriarty", "age": 60}'));
+INSERT INTO company_data_arrays VALUES (2,  array(CAST('2023-02-12 18:00:00' AS TIMESTAMP), CAST('2023-02-26 18:00:00' AS TIMESTAMP)), array(14000, 0), array(array('Jim', 'Cynthia'), array()), array('{"firstName": "Helena", "lastName": "of Troy"}', '{"firstName": "Robert", "lastName": "Smith", "age": 48}'));
+INSERT INTO company_data_arrays VALUES (3,  array(CAST('2023-03-12 18:00:00' AS TIMESTAMP), CAST('2023-03-26 18:00:00' AS TIMESTAMP)), array(15000, 20000), array(array('Carl', 'Bob', 'Cynthia'), array('Jim', 'Bob', NULL)), array('{"firstName": "Joseph", "lastName": "Grey"}', '{"firstName": "Godfrey", "lastName": "Hamilton", "age": 59}'));
+INSERT INTO company_data_arrays VALUES (4,  array(), array(), NULL, array());
+

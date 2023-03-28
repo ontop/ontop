@@ -7,15 +7,13 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.type.impl.SparkSQLDBTypeFactory.DECIMAL_38_10_STR;
 
@@ -214,6 +212,24 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
         return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
+    }
+
+    /**
+     The JSON_TYPEOF function is not supported by SPARK. For now, we use a work-around instead, where we check if the
+     JSON_ARRAY_LENGTH function can be called on the element.
+     This is not perfectly robust, though. E.g. the string "[1, 2, 3]" would be interpreted as an array.
+     */
+    @Override
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(dbType),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "(JSON_ARRAY_LENGTH(%s) IS NOT NULL)",
+                        termConverter.apply(terms.get(0))
+                ));
     }
 
     /**
