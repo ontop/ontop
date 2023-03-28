@@ -243,7 +243,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN %1$s NOT RLIKE " + numericPattern + " THEN NULL " +
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericNonFPPattern + " THEN NULL " +
                         "ELSE CAST(%1$s AS "+ DECIMAL_38_10_STR +") END",
                 term);
     }

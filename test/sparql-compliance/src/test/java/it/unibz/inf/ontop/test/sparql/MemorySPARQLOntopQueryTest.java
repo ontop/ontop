@@ -48,7 +48,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			basicManifest + "term-6",  // missing result
 			basicManifest + "term-7", // org.eclipse.rdf4j.query.MalformedQueryException: Encountered "."
 
-			castManifest + "cast-dec", // expected results seem to incorrectly miss one record
 			castManifest + "cast-dT", // cannot exhaustively check for all timestamp patterns
 
 			exprBuiltInManifest + "sameTerm-eq", // JdbcSQLException: Data conversion error converting "zzz"

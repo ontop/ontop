@@ -283,7 +283,7 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String term = termConverter.apply(terms.get(0));
-        return String.format("CASE WHEN REGEXP_MATCHES(%1$s, " + numericPattern + ") THEN " +
+        return String.format("CASE WHEN REGEXP_MATCHES(%1$s, " + numericNonFPPattern + ") THEN " +
                         "CAST(%1$s AS " + DEFAULT_DECIMAL_STR + ") " +
                         "ELSE NULL " +
                         "END",
