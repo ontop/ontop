@@ -1,0 +1,5 @@
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix test:   <http://test.example.org/> .
+
+test:someIndividual test:someValue "0"^^xsd:integer .
+test:someIndividual test:someValue "water" .
