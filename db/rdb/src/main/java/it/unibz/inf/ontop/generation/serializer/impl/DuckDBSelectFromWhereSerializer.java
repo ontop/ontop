@@ -79,7 +79,6 @@ public class DuckDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
                         Variable outputVar = sqlFlattenExpression.getOutputVar();
-                        DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
                         Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
                         StringBuilder builder = new StringBuilder();
 
