@@ -641,4 +641,5 @@ public interface TermFactory {
 	ImmutableExpression getDBJsonIsNumber(DBTermType dbType, ImmutableTerm arg);
 	ImmutableExpression getDBJsonIsScalar(DBTermType dbType, ImmutableTerm arg);
 	ImmutableExpression getDBIsArray(DBTermType dbType, ImmutableTerm arg);
+	ImmutableFunctionalTerm getDBArrayAccess(GenericDBTermType arrayType, ImmutableTerm array, ImmutableTerm position);
 }

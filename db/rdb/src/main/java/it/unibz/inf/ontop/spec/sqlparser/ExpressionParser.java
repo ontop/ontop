@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -970,7 +971,10 @@ public class ExpressionParser {
 
         @Override //  expression'[' index-expression ']' or expression'[' index-expression1 : index-expression2 ']'
         public void visit(ArrayExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("Array is not supported yet", expression);
+            ImmutableTerm arrayTerm = getTerm(expression.getObjExpression());
+            ImmutableTerm indexTerm = getTerm(expression.getIndexExpression());
+
+            result = termFactory.getDBArrayAccess(null, arrayTerm, indexTerm);
         }
 
         @Override // ARRAY[]

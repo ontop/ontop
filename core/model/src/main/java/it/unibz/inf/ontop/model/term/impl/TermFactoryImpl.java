@@ -1333,4 +1333,8 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsArray(dbType), arg);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getDBArrayAccess(GenericDBTermType arrayType, ImmutableTerm array, ImmutableTerm position) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBArrayAccess(), array, position);
+	}
 }
