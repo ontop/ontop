@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
@@ -171,5 +172,29 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException(NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBArrayAccess() {
+        return new DBFunctionSymbolWithSerializerImpl(
+                "ARRAY_ACCESS",
+                ImmutableList.of(
+                        dbTypeFactory.getAbstractRootDBType(),
+                        dbTypeFactory.getAbstractRootDBType()
+                ),
+                dbTypeFactory.getAbstractRootDBType(),
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "%s[%s]",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
+                )) {
+
+            //Can return null if element in array is null
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
     }
 }

@@ -151,8 +151,13 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                             subProjection += ",";
 
 
+                        /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
+                        * a different datatype will make the query fail.
+                        * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
+                        * result of flatten with square brackets, the access operation will be ignored.
+                        * */
                         builder.append(String.format(
-                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s) %s",
+                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 99999999) %s",
                                 subProjection,
                                 expression,
                                 allColumnIDs.get(outputVar).getSQLRendering(),

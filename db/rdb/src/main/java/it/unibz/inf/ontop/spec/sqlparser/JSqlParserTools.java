@@ -20,7 +20,7 @@ public class JSqlParserTools {
 
 
     public static Select parse(String sql) throws JSQLParserException, InvalidQueryException {
-        Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
+        Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(false));
         if (!(statement instanceof Select))
             throw new InvalidQueryException("The query is not a SELECT statement", statement);
 

@@ -89,15 +89,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "'NOT SUPPORTED'"
+            "expression": "manager['firstName']::varchar"
           },
           {
             "name": "lastname",
-            "expression": "'NOT SUPPORTED'"
+            "expression": "manager['lastName']::varchar"
           },
           {
             "name": "age",
-            "expression": "'NOT SUPPORTED'"
+            "expression": "manager['age']::integer"
           }
         ],
         "hidden": [

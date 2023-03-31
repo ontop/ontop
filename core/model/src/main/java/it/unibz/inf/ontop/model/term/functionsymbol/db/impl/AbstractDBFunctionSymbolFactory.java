@@ -1112,6 +1112,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return iriSafenessDeclarationFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBArrayAccess() {
+        throw new UnsupportedOperationException("Array support unavailable for this DBMS");
+    }
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
