@@ -42,6 +42,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
+	private final FederationOptimizer federationOptimizer;
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -53,7 +54,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
 								QueryPlanner queryPlanner,
-								QueryLogger.Factory queryLoggerFactory) {
+								QueryLogger.Factory queryLoggerFactory, FederationOptimizer federationOptimizer) {
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
@@ -66,6 +67,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
+		this.federationOptimizer = federationOptimizer;
 
 		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -109,9 +111,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
-				queryLogger.setPlannedQuery(plannedQuery);
+				IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
+				LOGGER.debug("Federation query:\n{}\n", federatedQuery);
 
-				IQ executableQuery = generateExecutableQuery(plannedQuery);
+				queryLogger.setPlannedQuery(federatedQuery);
+
+				IQ executableQuery = generateExecutableQuery(federatedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
