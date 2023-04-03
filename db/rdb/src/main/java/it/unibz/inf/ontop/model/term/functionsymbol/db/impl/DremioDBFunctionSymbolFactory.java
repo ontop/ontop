@@ -13,8 +13,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
+import it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory;
 
 import java.util.function.Function;
 
@@ -176,6 +177,9 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBFunctionSymbol getDBArrayAccess() {
-        return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
+        return new DremioArrayAccessDBFunctionSymbol(
+                (ArrayDBTermType)((DefaultSQLDBTypeFactory)typeFactory.getDBTypeFactory()).getGenericDBTermType("LIST"),
+                dbTypeFactory.getDBLargeIntegerType()
+        );
     }
 }
