@@ -201,6 +201,13 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                 defaultStrictEqSupport));
     }
 
+    public GenericDBTermType getGenericDBTermType(String typeName) {
+        return this.genericAbstractTypes.stream()
+                .filter(t -> t.getName().equals(typeName))
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedDBTypeException(String.format("GenericDBTermType %s does not exist.", typeName)));
+    }
+
     @Override
     public DBTermType getDBTermType(String typeName) {
         String typeString = preprocessTypeName(typeName);
