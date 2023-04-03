@@ -20,8 +20,8 @@ import java.util.function.Function;
  */
 public class DremioArrayAccessDBFunctionSymbol extends FunctionSymbolImpl implements DBArrayObjectAccessFunctionSymbol {
 
-    protected DremioArrayAccessDBFunctionSymbol(ArrayDBTermType dbArrayType, DBTermType dbIntegerType) {
-        super("ARRAY_ACCESS", ImmutableList.of(dbArrayType, dbIntegerType));
+    protected DremioArrayAccessDBFunctionSymbol(DBTermType dbRootType) {
+        super("ARRAY_ACCESS", ImmutableList.of(dbRootType, dbRootType));
     }
 
     @Override
