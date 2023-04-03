@@ -87,15 +87,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "json_extract_scalar(manager, '$.firstName')::varchar"
+            "expression": "CAST(json_extract_scalar(manager, '$.firstName') AS varchar)"
           },
           {
             "name": "lastname",
-            "expression": "json_extract_scalar(manager, '$.lastName')::varchar"
+            "expression": "CAST(json_extract_scalar(manager, '$.lastName') AS varchar)"
           },
           {
             "name": "age",
-            "expression": "json_extract_scalar(manager, '$.age')::integer"
+            "expression": "CAST(json_extract_scalar(manager, '$.age') AS integer)"
           }
         ],
         "hidden": [
