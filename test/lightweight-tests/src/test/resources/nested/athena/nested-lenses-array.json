@@ -1,0 +1,109 @@
+{
+  "relations": [
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["nested","company_data_arrays"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "array<timestamp>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "invoice_date",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "array<integer>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "array<array<varchar>>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "array<varchar>"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "array<varchar>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "json_extract_scalar(manager, '$.firstName')::varchar"
+          },
+          {
+            "name": "lastname",
+            "expression": "json_extract_scalar(manager, '$.lastName')::varchar"
+          },
+          {
+            "name": "age",
+            "expression": "json_extract_scalar(manager, '$.age')::integer"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+
