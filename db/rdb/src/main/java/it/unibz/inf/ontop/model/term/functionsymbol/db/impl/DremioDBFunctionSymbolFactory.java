@@ -177,9 +177,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBFunctionSymbol getDBArrayAccess() {
-        return new DremioArrayAccessDBFunctionSymbol(
-                (ArrayDBTermType)((DefaultSQLDBTypeFactory)typeFactory.getDBTypeFactory()).getGenericDBTermType("LIST"),
-                dbTypeFactory.getDBLargeIntegerType()
-        );
+        return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
     }
 }
