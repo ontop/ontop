@@ -89,15 +89,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "manager['firstName']::varchar"
+            "expression": "CAST(manager['firstName'] AS varchar)"
           },
           {
             "name": "lastname",
-            "expression": "manager['lastName']::varchar"
+            "expression": "CAST(manager['lastName'] AS varchar)"
           },
           {
             "name": "age",
-            "expression": "manager['age']::integer"
+            "expression": "CAST(manager['age'] AS integer)"
           }
         ],
         "hidden": [
@@ -113,7 +113,7 @@
         "added": [
           {
             "name": "invoice_date",
-            "expression": "invoice_date::timestamp"
+            "expression": "CAST(invoice_date AS timestamp)"
           }
         ],
         "hidden": [
@@ -143,7 +143,7 @@
         "added": [
           {
             "name": "period_income",
-            "expression": "period_income::integer"
+            "expression": "CAST(period_income AS integer)"
           }
         ],
         "hidden": [
@@ -159,7 +159,7 @@
         "added": [
           {
             "name": "name",
-            "expression": "name::varchar"
+            "expression": "CAST(name AS varchar)"
           }
         ],
         "hidden": [

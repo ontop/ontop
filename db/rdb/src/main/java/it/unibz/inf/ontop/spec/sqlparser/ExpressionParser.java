@@ -974,7 +974,7 @@ public class ExpressionParser {
             ImmutableTerm arrayTerm = getTerm(expression.getObjExpression());
             ImmutableTerm indexTerm = getTerm(expression.getIndexExpression());
 
-            result = termFactory.getDBArrayAccess(null, arrayTerm, indexTerm);
+            result = termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBArrayAccess(), arrayTerm, indexTerm);
         }
 
         @Override // ARRAY[]
