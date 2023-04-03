@@ -52,13 +52,6 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
                 "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }
 
-    @Disabled("Dremio Object access is currently not supported in BasicLens")
-    @Test
-    @Override
-    public void testFlattenJson() throws Exception {
-        super.testFlattenJson();
-    }
-
     @Disabled("Currently we do not support flatten with position for Dremio") //TODO-damian
     @Test
     @Override

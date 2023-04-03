@@ -176,25 +176,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBFunctionSymbol getDBArrayAccess() {
-        return new DBFunctionSymbolWithSerializerImpl(
-                "ARRAY_ACCESS",
-                ImmutableList.of(
-                        dbTypeFactory.getAbstractRootDBType(),
-                        dbTypeFactory.getAbstractRootDBType()
-                ),
-                dbTypeFactory.getAbstractRootDBType(),
-                false,
-                (terms, termConverter, termFactory) -> String.format(
-                        "%s[%s]",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1))
-                )) {
-
-            //Can return null if element in array is null
-            @Override
-            protected boolean mayReturnNullWithoutNullArguments() {
-                return true;
-            }
-        };
+        return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
     }
 }
