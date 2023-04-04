@@ -35,9 +35,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			/* AGGREGATES */
-			aggregatesManifest + "agg-err-02", // SPARQL cast with function call on the datatype is not supported, e.g., COALESCE(xsd:double(?p),0)))
-
 			/* FUNCTIONS*/
 			functionsManifest + "hours", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)
 			functionsManifest + "day", // TODO: incorrect answers when timezone is present (CAST ... AS TIMESTAMP)

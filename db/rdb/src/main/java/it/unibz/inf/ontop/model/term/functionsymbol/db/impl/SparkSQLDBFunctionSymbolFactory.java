@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.model.type.impl.SparkSQLDBTypeFactory.DECIMAL_38_10_STR;
+
 /**
  *  SPARK-SQL 3.0.1 functions description available at : https://spark.apache.org/docs/3.0.1/api/sql/
  */
@@ -228,6 +230,75 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
                         "(JSON_ARRAY_LENGTH(%s) IS NOT NULL)",
                         termConverter.apply(terms.get(0))
                 ));
+    }
+
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericPattern +
+                        " THEN NULL ELSE CAST(%1$s AS DOUBLE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericPattern + " THEN NULL " +
+                        "WHEN (CAST(%1$s AS FLOAT) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
+                        "CAST(%1$s AS FLOAT) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS FLOAT) != 0) THEN NULL " +
+                        "ELSE CAST(%1$s AS FLOAT) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s NOT RLIKE " + numericNonFPPattern + " THEN NULL " +
+                        "ELSE CAST(%1$s AS "+ DECIMAL_38_10_STR +") END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN (%1$s NOT RLIKE " + datePattern1 + " AND " +
+                        "%1$s NOT RLIKE " + datePattern2 +" AND " +
+                        "%1$s NOT RLIKE " + datePattern3 +" AND " +
+                        "%1$s NOT RLIKE " + datePattern4 +" ) " +
+                        " THEN NULL ELSE CAST(%1$s AS DATE) END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %1$s='0' THEN 0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN CAST(%1$s AS "+ DECIMAL_38_10_STR +") = 0 THEN 'false' " +
+                        "WHEN %1$s = '' THEN 'false' " +
+                        "WHEN %1$s = 'NaN' THEN 'false' " +
+                        "ELSE 'true' " +
+                        "END)",
+                term);
     }
 }
 

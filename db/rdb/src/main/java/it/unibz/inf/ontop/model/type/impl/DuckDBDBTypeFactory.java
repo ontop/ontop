@@ -1,12 +1,17 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
@@ -28,15 +33,30 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String JSON_STR = "JSON";
     public static final String BYTEA_STR = "BYTEA";
 
-    private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
+    public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
+
+    public static final String ARRAY_STR = "T[]";
+    private static final Pattern ARRAY_PATTERN = Pattern.compile("\\[[\\d ]*\\]$");
 
 
-    protected DuckDBDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
-        super(typeMap, defaultTypeCodeMap);
-    }
     @AssistedInject
     protected DuckDBDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createDuckDBTypeMap(rootTermType, typeFactory), createDuckDBCodeMap());
+        super(createDuckDBTypeMap(rootTermType, typeFactory), createDuckDBCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory));
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            var matcher = ARRAY_PATTERN.matcher(s);
+            if(matcher.find())
+                return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(s.substring(0, matcher.start())));
+            return Optional.empty();
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     protected static Map<String, DBTermType> createDuckDBTypeMap(TermType rootTermType, TypeFactory typeFactory) {

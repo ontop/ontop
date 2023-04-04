@@ -372,4 +372,22 @@ public interface DBFunctionSymbolFactory {
 
     IRISafenessDeclarationFunctionSymbol getIRISafenessDeclaration();
 
+    // RDF XSD Cast
+
+    DBFunctionSymbol checkAndConvertBoolean();
+    DBFunctionSymbol checkAndConvertBooleanFromString();
+    DBFunctionSymbol checkAndConvertDouble();
+    DBFunctionSymbol checkAndConvertFloat();
+    DBFunctionSymbol checkAndConvertFloatFromBoolean();
+    DBFunctionSymbol checkAndConvertFloatFromDouble();
+    DBFunctionSymbol checkAndConvertFloatFromNonFPNumeric();
+    DBFunctionSymbol checkAndConvertDecimal();
+    DBFunctionSymbol checkAndConvertDecimalFromBoolean();
+    DBFunctionSymbol checkAndConvertInteger();
+    DBFunctionSymbol checkAndConvertIntegerFromBoolean();
+    DBFunctionSymbol checkAndConvertStringFromDecimal();
+    DBFunctionSymbol checkAndConvertDateTimeFromDate();
+    DBFunctionSymbol checkAndConvertDateTimeFromString();
+    DBFunctionSymbol checkAndConvertDateFromDatetime();
+    DBFunctionSymbol checkAndConvertDateFromString();
 }
