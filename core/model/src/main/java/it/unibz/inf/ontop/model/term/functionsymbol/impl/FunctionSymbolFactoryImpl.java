@@ -121,6 +121,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
         RDFDatatype xsdLong = typeFactory.getXsdLongDatatype();
         RDFDatatype xsdDouble = typeFactory.getXsdDoubleDatatype();
+        RDFDatatype xsdFloat = typeFactory.getXsdFloatDatatype();
         RDFDatatype wktLiteral = typeFactory.getWktLiteralDatatype();
         RDFDatatype xsdAnyUri = typeFactory.getXsdAnyUri();
         RDFDatatype xsdAnySimpleType = typeFactory.getXsdAnyUri();
@@ -129,6 +130,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
         ObjectRDFType iriType = typeFactory.getIRITermType();
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
 
@@ -325,8 +327,101 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_SECONDS_BETWEEN", OFN.SECONDS_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBSecondsBetweenFromDateTime),
                 new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MILLIS_BETWEEN", OFN.MILLIS_BETWEEN, xsdDatetime, xsdLong,
-                        false, TermFactory::getDBMillisBetweenFromDateTime)
-
+                        false, TermFactory::getDBMillisBetweenFromDateTime),
+                /*
+                 * XSD Cast functions
+                 */
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_STRING", XSD.STRING, xsdString, typeFactory,
+                        (DBTermType t) -> Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbStringType))),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_BOOLEAN", XSD.BOOLEAN, xsdBoolean, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTypeFactory.getDBDecimalType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBDoubleType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBLargeIntegerType()))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertBoolean());
+                            else if (t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertBooleanFromString());
+                            else if (t.isA(dbBooleanType))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbBooleanType));
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_INTEGER", XSD.INTEGER, xsdInteger, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTypeFactory.getDBDecimalType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBDoubleType())
+                                    || t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertInteger());
+                            else if (t.isA(dbBooleanType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertIntegerFromBoolean());
+                            else if (t.isA(dbInteger))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbInteger));
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_DECIMAL", XSD.DECIMAL, xsdDecimal, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTypeFactory.getDBDecimalType()))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbTypeFactory.getDBDecimalType()));
+                            else if (t.isA(typeFactory.getDBTypeFactory().getDBLargeIntegerType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBDoubleType())
+                                    || t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDecimal());
+                            else if (t.isA(dbBooleanType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDecimalFromBoolean());
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_DOUBLE", XSD.DOUBLE, xsdDouble, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTypeFactory.getDBDecimalType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBLargeIntegerType())
+                                    || t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDouble());
+                            else if (t.isA(dbBooleanType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertFloatFromBoolean());
+                            else if (t.isA(dbTypeFactory.getDBDoubleType()))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbTypeFactory.getDBDoubleType()));
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_FLOAT", XSD.FLOAT, xsdFloat, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTypeFactory.getDBDecimalType())
+                                    || t.isA(typeFactory.getDBTypeFactory().getDBLargeIntegerType()))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertFloatFromNonFPNumeric());
+                            else if (t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertFloat());
+                            else if (t.isA(dbBooleanType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertFloatFromBoolean());
+                            else if (t.isA(dbTypeFactory.getDBDoubleType()))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertFloatFromDouble());
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_DATE", XSD.DATE, xsdDate, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTimestamp))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDateFromDatetime());
+                            else if (t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDateFromString());
+                            else if (t.isA(dbDate))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(dbDate));
+                            else
+                                return Optional.empty();
+                        }),
+                new SPARQLCastFunctionSymbolImpl("XSD_CAST_DATETIME", XSD.DATETIME, xsdDatetime, typeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbDate))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDateTimeFromDate());
+                            else if (t.isA(dbStringType))
+                                return Optional.of(dbFunctionSymbolFactory.checkAndConvertDateTimeFromString());
+                            else if (t.isA(dbTimestamp))
+                                return Optional.of(dbFunctionSymbolFactory.getDBCastFunctionSymbol(
+                                        typeFactory.getDBTypeFactory().getDBDateTimestampType()));
+                            else
+                                return Optional.empty();
+                        })
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
