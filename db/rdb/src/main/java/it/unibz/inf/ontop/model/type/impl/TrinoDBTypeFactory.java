@@ -1,16 +1,20 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String INT2_STR = "INT2";
@@ -28,13 +32,49 @@ public class TrinoDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
 
+    public static final String ARRAY_STR = "ARRAY(T)";
 
-    protected TrinoDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
-        super(typeMap, defaultTypeCodeMap);
-    }
+
     @AssistedInject
     protected TrinoDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createTrinoTypeMap(rootTermType, typeFactory), createTrinoCodeMap());
+        super(createTrinoTypeMap(rootTermType, typeFactory), createTrinoCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory, "()"));
+    }
+
+    protected TrinoDBTypeFactory(TermType rootTermType, TypeFactory typeFactory, ImmutableList<GenericDBTermType> genericAbstractTypeMap) {
+        super(createTrinoTypeMap(rootTermType, typeFactory), createTrinoCodeMap(), genericAbstractTypeMap);
+    }
+
+    protected static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory, String brackets) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+        final char openingBracket = brackets.charAt(0);
+        final char closingBracket = brackets.charAt(1);
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.equals("ARRAY"))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
+            if(!s.startsWith("ARRAY" + openingBracket) || !s.endsWith(closingBracket + "")) {
+                return Optional.empty();
+            }
+            String contents = s.substring(6, s.length() - 1);
+
+            int depth = 0;
+            for(int i = 0; i < contents.length(); i++) {
+                if(contents.charAt(i) == openingBracket)
+                    depth += 1;
+                else if(contents.charAt(i) == closingBracket)
+                    depth -= 1;
+                else if(contents.charAt(i) == ',' && depth == 0)
+                    return Optional.empty();
+            }
+            if(depth != 0)
+                return Optional.empty();
+
+            return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(contents));
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     protected static Map<String, DBTermType> createTrinoTypeMap(TermType rootTermType, TypeFactory typeFactory) {
