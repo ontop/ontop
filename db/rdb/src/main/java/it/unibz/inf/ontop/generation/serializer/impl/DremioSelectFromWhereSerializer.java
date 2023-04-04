@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullIgnoringDBGroupConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -44,6 +43,16 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                     @Override
                     protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d OFFSET %d", limit, offset);
+                    }
+
+                    //Due to a limitation of dremio, we need to cast integer constants in VALUES terms to integers, as they would be types as int64 otherwise.
+                    @Override
+                    protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
+                        String serialization = sqlTermSerializer.serialize(constant, childColumnIDs);
+                        if(constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
+                            return String.format("CAST(%s as INTEGER)", serialization);
+                        }
+                        return serialization;
                     }
 
                     //                    @Override

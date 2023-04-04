@@ -316,6 +316,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
 
+        protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
+            return sqlTermSerializer.serialize(constant, childColumnIDs);
+        }
+
         @Override
         public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
             ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
@@ -325,7 +329,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String tuplesSerialized = sqlValuesExpression.getValues().stream()
                     .map(tuple -> tuple.stream()
-                            .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
+                            .map(constant -> serializeValuesEntry(constant, childColumnIDs))
                             .collect(Collectors.joining(",", " (", ")")))
                     .collect(Collectors.joining(","));
             RelationID alias = generateFreshViewAlias();
