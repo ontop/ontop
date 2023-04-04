@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
 import static it.unibz.inf.ontop.model.type.impl.SnowflakeDBTypeFactory.TIMESTAMP_NO_TZ_STR;
+import static it.unibz.inf.ontop.model.type.impl.DuckDBDBTypeFactory.DEFAULT_DECIMAL_STR;
 
 public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -264,4 +265,28 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 ));
     }
 
+    /**
+     * XSD CAST functions
+     */
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_MATCHES(%1$s, "+ numericPattern +") THEN " +
+                        "CAST(FLOOR(ABS(CAST(%1$s AS " + DEFAULT_DECIMAL_STR + "))) * SIGN(CAST(%1$s AS DECIMAL)) AS INTEGER) " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN REGEXP_MATCHES(%1$s, " + numericNonFPPattern + ") THEN " +
+                        "CAST(%1$s AS " + DEFAULT_DECIMAL_STR + ") " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
 }

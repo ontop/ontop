@@ -61,6 +61,11 @@ public class RDFDatatypeStringFunctionSymbolImpl extends FunctionSymbolImpl {
     }
 
     @Override
+    protected boolean enableIfElseNullLifting() {
+        return true;
+    }
+
+    @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }

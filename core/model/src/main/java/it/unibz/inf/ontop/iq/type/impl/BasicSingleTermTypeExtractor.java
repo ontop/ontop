@@ -152,10 +152,10 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
             if (variable.equals(flattenNode.getOutputVariable())) {
-                return flattenNode.inferOutputType(
-                        typeExtractor.extractSingleTermType(
-                                flattenNode.getFlattenedVariable(),
-                                child));
+                /* We prefer to rely on the data type provided in the lens rather than the inferred one,
+                   because it is more accurate than what we can obtain from the JDBC.
+                 */
+                return flattenNode.inferOutputType(Optional.of(flattenNode.getFlattenedType()));
             }
             if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
