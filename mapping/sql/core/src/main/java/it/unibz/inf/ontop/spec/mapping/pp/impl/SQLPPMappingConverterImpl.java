@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -40,26 +41,37 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final SubstitutionFactory substitutionFactory;
     private final SQLQueryParser sqlQueryParser;
 
+    private final boolean ignoreInvalidMappingEntries;
+
     @Inject
     private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
+
+        ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
+
     }
 
     @Override
     public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
-
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
-            RAExpression re = getRAExpression(assertion, metadataLookup);
-            IQTree tree = sqlQueryParser.convert(re);
 
-            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
+            try {
+                RAExpression re = getRAExpression(assertion, metadataLookup);
+                IQTree tree = sqlQueryParser.convert(re);
 
-            for (TargetAtom target : assertion.getTargetAtoms()) {
-                PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
-                builder.add(convert(target, lookup, provenance, tree));
+                Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
+
+                for (TargetAtom target : assertion.getTargetAtoms()) {
+                    PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
+                    builder.add(convert(target, lookup, provenance, tree));
+                }
+            } catch(InvalidMappingSourceQueriesException e) {
+                if(!ignoreInvalidMappingEntries)
+                    throw e;
+                LOGGER.warn("Mapping {} was ignored due to an issue in its source query: {}", assertion.getId(), e.getMessage());
             }
         }
 
