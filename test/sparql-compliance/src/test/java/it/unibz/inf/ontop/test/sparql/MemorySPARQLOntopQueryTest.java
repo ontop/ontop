@@ -48,14 +48,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			basicManifest + "term-6",  // missing result
 			basicManifest + "term-7", // org.eclipse.rdf4j.query.MalformedQueryException: Encountered "."
 
-			// SPARQL cast with function call on the datatype is not supported, e.g., FILTER(datatype(xsd:double(?v)) = xsd:double)
-			castManifest + "cast-str",
-			castManifest + "cast-flt",
-			castManifest + "cast-dbl",
-			castManifest + "cast-dec",
-			castManifest + "cast-int",
-			castManifest + "cast-dT",
-			castManifest + "cast-bool",
+			castManifest + "cast-dT", // cannot exhaustively check for all timestamp patterns
 
 			exprBuiltInManifest + "sameTerm-eq", // JdbcSQLException: Data conversion error converting "zzz"
 			exprBuiltInManifest + "sameTerm-not-eq", // JdbcSQLException: Data conversion error converting "1.0e0" (H2 issue: "1.0e0"^^xsd:#double in the data & result)
@@ -70,9 +63,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			openWorldManifest +"open-eq-09", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data ONLY)
 			openWorldManifest +"open-eq-10", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
 			openWorldManifest +"open-eq-11", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
-			openWorldManifest +"open-eq-12", // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
-
-			sortManifest + "dawg-sort-function" // SPARQL cast with function call on the datatype is not supported, e.g., ORDER BY xsd:integer(?o)
+			openWorldManifest +"open-eq-12" // JdbcSQLException: Data conversion error converting "xyz" ("xyz"^^xsd:integer in the data & result)
 	);
 
 	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,

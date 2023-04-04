@@ -153,4 +153,135 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
         return new MySQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
     }
+
+    /**
+     * XSD CAST functions
+     */
+    // NOTE: Not possible to specify NaN or 0/0
+    @Override
+    protected String serializeCheckAndConvertBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(CASE WHEN %s IS NULL THEN NULL " +
+                        "WHEN CAST(%s AS " + NUMBER_38_10_STR + ") = 0 THEN '0' " +
+                        "WHEN %s = '' THEN '0' " +
+                        "ELSE '1' " +
+                        "END)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertBooleanFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CASE WHEN %s='1' THEN 1 " +
+                        "WHEN UPPER(%s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %s='0' THEN 0 " +
+                        "WHEN UPPER(%s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDouble(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRY_CAST(%s AS DOUBLE PRECISION)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloat(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRY_CAST(%s AS FLOAT)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloatFromNonFPNumeric(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeCheckAndConvertFloat(terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRY_CAST(%s AS " + NUMBER_38_10_STR + ")", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertFloatFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1.0 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1.0 " +
+                        "WHEN %1$s='0' THEN 0.0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0.0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDecimalFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1.0 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1.0 " +
+                        "WHEN %1$s='0' THEN 0.0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0.0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertInteger(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CAST(FLOOR(ABS(TRY_CAST(%1$s AS " + NUMBER_38_10_STR + "))) * SIGN(TRY_CAST(%1$s AS DECIMAL)) AS INTEGER)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertIntegerFromBoolean(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN %1$s='1' THEN 1 " +
+                        "WHEN UPPER(%1$s) LIKE 'TRUE' THEN 1 " +
+                        "WHEN %1$s='0' THEN 0 " +
+                        "WHEN UPPER(%1$s) LIKE 'FALSE' THEN 0 " +
+                        "ELSE NULL " +
+                        "END",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertStringFromDecimal(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String term = termConverter.apply(terms.get(0));
+        return String.format("(CASE WHEN %1$s %% 1 = 0 THEN FLOOR(ABS(%1$s)) * SIGN(TRY_CAST (%1$s AS DECIMAL)) " +
+                        "ELSE %1$s " +
+                        "END)",
+                term);
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateTimeFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRY_CAST(%s AS DATETIME)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRY_CAST(%s AS DATE)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCheckAndConvertDateFromString(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return this.serializeCheckAndConvertDateFromDateTime(terms, termConverter, termFactory);
+    }
 }
