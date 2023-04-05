@@ -235,4 +235,10 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     public DBFunctionSymbol getDBArrayAccess() {
         return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
     }
+
+    @Override
+    public boolean usesSquareBracketArrayAccess() {
+        return true;
+    }
+
 }

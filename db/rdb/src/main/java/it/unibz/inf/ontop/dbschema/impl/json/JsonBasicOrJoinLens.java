@@ -283,7 +283,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
             net.sf.jsqlparser.expression.Expression exp;
             String sqlQuery = "SELECT " + column.expression + " FROM fakeTable";
-            Select statement = JSqlParserTools.parse(sqlQuery);
+            Select statement = JSqlParserTools.parse(sqlQuery, coreSingletons.getDBFunctionsymbolFactory().usesSquareBracketArrayAccess());
             SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
             exp = ((SelectExpressionItem) si).getExpression();
             return parser.parseTerm(exp, parentAttributeMap);
@@ -302,7 +302,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         try {
             String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            Select statement = JSqlParserTools.parse(sqlQuery);
+            Select statement = JSqlParserTools.parse(sqlQuery, coreSingletons.getDBFunctionsymbolFactory().usesSquareBracketArrayAccess());
             PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
             return plainSelect.getWhere() == null
                     ? ImmutableList.of()
