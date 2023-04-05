@@ -29,6 +29,10 @@ public class MariaDBSelectFromWhereSerializer extends MySQLSelectFromWhereSerial
 
     @Override
     protected String getFlattenFunctionFormat() {
+        /*
+         *   MariaDB does not require the same workaround as MySQL, so we can just call JSON_TABLE on the
+         *   array directly.
+         */
         return "%s CROSS JOIN JSON_TABLE(%s, '$[*]' columns(%s JSON path '$'";
     }
 }

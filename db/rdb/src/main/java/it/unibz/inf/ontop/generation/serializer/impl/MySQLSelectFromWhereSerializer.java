@@ -96,7 +96,10 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
 
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                        //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
+                        /* We build the query string of the form
+                        /  SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVariable>, '$[*]',
+                        /       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
+                        */
                         StringBuilder builder = new StringBuilder();
 
                         builder.append(
@@ -122,6 +125,11 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     }
 
     protected String getFlattenFunctionFormat() {
+        /*
+        *   By default, running JSON_TABLE on a JSON-array that was created by a different JSON_TABLE call
+        *   will return an empty list. We can circumvent this, by putting another array around it (calling
+        *   `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
+         */
         return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$'";
     }
 }
