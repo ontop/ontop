@@ -1852,8 +1852,4 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
 
-    @Override
-    public boolean usesSquareBracketArrayAccess() {
-        return false;
-    }
 }
