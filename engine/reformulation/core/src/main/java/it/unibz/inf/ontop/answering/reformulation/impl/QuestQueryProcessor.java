@@ -42,7 +42,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
-	private final FederationOptimizer federationOptimizer;
+	//private final FederationOptimizer federationOptimizer;
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -53,8 +53,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 								KGQueryFactory kgQueryFactory,
 								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
-								QueryPlanner queryPlanner,
-								QueryLogger.Factory queryLoggerFactory, FederationOptimizer federationOptimizer) {
+								QueryPlanner queryPlanner, QueryLogger.Factory queryLoggerFactory) {
+								//QueryLogger.Factory queryLoggerFactory, FederationOptimizer federationOptimizer) {
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
@@ -67,7 +67,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-		this.federationOptimizer = federationOptimizer;
+		//this.federationOptimizer = federationOptimizer;
 
 		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -86,7 +86,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		try {
 			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getOriginalString());
-			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
+			IQ convertedIQ = inputQuery.translate(inputQueryTranslator); /**转换为Sparql related IQ*/
 			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
 			queryLogger.setSparqlIQ(convertedIQ);
@@ -94,11 +94,11 @@ public class QuestQueryProcessor implements QueryReformulator {
             try {
                 LOGGER.debug("Start the rewriting process...");
 
-                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
+                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);  /**转换为Sparql related IQ*/
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
 
                 LOGGER.debug("Start the unfolding...");
-                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
+                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);  /**转换为Sparql Related IQ，而不是SQL related IQ*/
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -107,20 +107,24 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
-				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
+                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);  /**进行GeneralStructuralAndSemanticIQOptimization*/
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);  /**AvoidJoinAboveUnionPlanner, 再次进行GeneralStructuralAndSemanticIQOptimization*/
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
-				IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
-				LOGGER.debug("Federation query:\n{}\n", federatedQuery);
+				//IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
+				//LOGGER.debug("Federation query:\n{}\n", federatedQuery);
 
-				queryLogger.setPlannedQuery(federatedQuery);
+				//queryLogger.setPlannedQuery(federatedQuery);
+				queryLogger.setPlannedQuery(plannedQuery);
 
-				IQ executableQuery = generateExecutableQuery(federatedQuery);
+				//IQ executableQuery = generateExecutableQuery(federatedQuery);
+				IQ executableQuery = generateExecutableQuery(plannedQuery);  /**将优化后的IQ转换为可执行的SQL，进行SQL Generator优化*/
 				queryCache.put(inputQuery, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
-				return executableQuery;
+				//return executableQuery; /**原始的，返回可执行的SQL语句*/
+				return plannedQuery;
+
 			}
             catch (OntopReformulationException e) {
             	queryLogger.declareReformulationException(e);
