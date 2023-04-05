@@ -391,6 +391,4 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol checkAndConvertDateFromDatetime();
     DBFunctionSymbol checkAndConvertDateFromString();
 
-
-    boolean usesSquareBracketArrayAccess();
 }
