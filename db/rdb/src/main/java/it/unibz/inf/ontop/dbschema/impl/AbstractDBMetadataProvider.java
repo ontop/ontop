@@ -433,7 +433,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         ImmutableList<QuotedID> attributes;
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
-            Select select = JSqlParserTools.parse(query);
+            Select select = JSqlParserTools.parse(query, coreSingletons.getDBFunctionsymbolFactory().usesSquareBracketArrayAccess());
             ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(select).getUnqualifiedAttributes();
             attributes = ImmutableList.copyOf(attrs.keySet());
         }
