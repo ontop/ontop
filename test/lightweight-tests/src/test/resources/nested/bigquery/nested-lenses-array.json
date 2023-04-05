@@ -1,0 +1,125 @@
+{
+  "relations": [
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["nested","company_data_arrays"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "array<timestamp>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "invoice_date",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "array<integer>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "array<array<string>>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "worker_list",
+            "expression": "JSON_EXTRACT_STRING_ARRAY(TO_JSON(worker_list), '$.names')"
+          }
+        ],
+        "hidden": [
+          "worker_list"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "array<string>"
+      },
+      "columns": {
+        "kept": [
+          "id",
+          "index"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["nested", "company_data_arrays"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "array<string>"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager",
+        "position": "index"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "CAST(json_extract_scalar(manager, '$.firstName') AS string)"
+          },
+          {
+            "name": "lastname",
+            "expression": "CAST(json_extract_scalar(manager, '$.lastName') AS string)"
+          },
+          {
+            "name": "age",
+            "expression": "CAST(json_extract_scalar(manager, '$.age') AS integer)"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+
