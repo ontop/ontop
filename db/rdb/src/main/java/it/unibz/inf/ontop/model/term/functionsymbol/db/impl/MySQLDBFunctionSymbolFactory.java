@@ -450,4 +450,17 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                     term);
         }
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(typeFactory.getDBTypeFactory().getDBJsonType()),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "json_type(%s) = 'ARRAY'",
+                        termConverter.apply(terms.get(0))
+                ));
+    }
 }

@@ -32,6 +32,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String DATETIME_STR = "DATETIME";
 
+    public static final String JSON_STR = "JSON";
     @AssistedInject
     protected MySQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
         super(createMySQLTypeMap(rootTermType, typeFactory), createMySQLCodeMap());
@@ -111,6 +112,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DECIMAL_STR, decimalType);
         map.put(DATETIME_STR, datetimeType);
         map.put(YEAR_STR, yearType);
+        map.put(JSON_STR, new JsonDBTermTypeImpl(JSON_STR, rootAncestry));
         return map;
     }
 
@@ -120,6 +122,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.DOUBLE, DECIMAL_STR);
         // Only CAST to DATETIME is supported by MySQL, not CAST to TIMESTAMP
         map.put(DefaultTypeCode.DATETIMESTAMP, DATETIME_STR);
+        map.put(DefaultTypeCode.JSON, JSON_STR);
         return ImmutableMap.copyOf(map);
     }
 
@@ -180,5 +183,10 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     @Override
     public String getDBFalseLexicalValue() {
         return "0";
+    }
+
+    @Override
+    public boolean supportsJson() {
+        return true;
     }
 }
