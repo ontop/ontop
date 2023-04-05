@@ -346,7 +346,85 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
+            QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
+            ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
+                    sqlFlattenExpression,
+                    subQuerySerialization
+            );
+
+            Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
+            Variable outputVar = sqlFlattenExpression.getOutputVar();
+            DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
+            Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
+
+            return serializeFlatten(sqlFlattenExpression, flattenedVar, outputVar, indexVar, flattenedType, allColumnIDs, subQuerySerialization);
+        }
+
+        protected ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
+                                                                                    QuerySerialization subQuerySerialization) {
+            ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> new QualifiedAttributeID(null, e.getValue())
+                    ));
+            return ImmutableMap.<Variable, QualifiedAttributeID>builder()
+                    .putAll(freshVariableAliases)
+                    .putAll(subQuerySerialization.getColumnIDs())
+                    .build();
+        }
+
+        private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
+            ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
+            builder.add(sqlFlattenExpression.getOutputVar());
+            sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
+            return builder.build();
+        }
+
+        protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
+                                                      Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType,
+                                                      ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
             throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
+        }
+
+        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
+            var alias = this.generateFreshViewAlias().getSQLRendering();
+            var variableAliases = allColumnIDs.entrySet().stream()
+                    .filter(e -> e.getKey() != flattenedVar)
+                    .collect(ImmutableCollectors.toMap(
+                            v -> v.getKey(),
+                            v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
+                    ));
+            var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
+                    .filter(v -> variableAliases.containsKey(v))
+                    .map(
+                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
+                    )
+                    .collect(Collectors.joining(", "));
+            if(subProjection.length() > 0)
+                subProjection += ",";
+
+            StringBuilder builder = new StringBuilder();
+
+            builder.append(String.format(
+                    "(SELECT %s %s FROM %s) %s",
+                    subProjection,
+                    flattenFunctionCallWithAlias,
+                    subQuerySerialization.getString(),
+                    alias
+            ));
+
+            return new QuerySerializationImpl(
+                    builder.toString(),
+                    variableAliases
+            );
+        }
+
+        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                QuerySerialization subQuerySerialization, String flattenFunctionCall, String aliasFormat) {
+            var flattenFunctionCallWithAlias = String.format("%s AS %s",
+                    flattenFunctionCall, aliasFormat);
+            return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
         }
     }
 

@@ -99,34 +99,27 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     }
 
                     @Override
-                    public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
-
-                        QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
-                                sqlFlattenExpression,
-                                subQuerySerialization
-                        );
-
+                    protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression,
+                                                                  Variable flattenedVar, Variable outputVar,
+                                                                  Optional<Variable> indexVar, DBTermType flattenedType,
+                                                                  ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                  QuerySerialization subQuerySerialization) {
                         //We need special treatment, if we are trying to flatten an array of type T[][], T[][][], etc.
                         boolean flatteningNDArray = (sqlFlattenExpression.getFlattenedType() instanceof ArrayDBTermType
                                 && ((GenericDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY);
-
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
-                        Variable outputVar = sqlFlattenExpression.getOutputVar();
-                        Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
 
                         //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
                         StringBuilder builder = new StringBuilder();
 
                         builder.append(
                                 String.format(
-                                    String.format(
-                                        "%%s JOIN LATERAL %s ",
-                                        getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())
-                                    ),
-                                    subQuerySerialization.getString(),
-                                    allColumnIDs.get(flattenedVar).getSQLRendering()
-                        ));
+                                        String.format(
+                                                "%%s JOIN LATERAL %s ",
+                                                getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())
+                                        ),
+                                        subQuerySerialization.getString(),
+                                        allColumnIDs.get(flattenedVar).getSQLRendering()
+                                ));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         /*
@@ -159,7 +152,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                             v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
                                     )
                                     .collect(Collectors.joining(", "));
-                            if(subProjection.length() > 0)
+                            if (subProjection.length() > 0)
                                 subProjection += ",";
 
                             //Add the index variable to the SELECT of the super-query
@@ -182,8 +175,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                     ),
                                     variableAliases);
                         }
-
-
                         builder.append(
                                 String.format(
                                         "AS %s ON TRUE",
@@ -212,29 +203,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                         outputVarString,
                                         allColumnIDs.get(indexVar.get()).getSQLRendering()):
                                 outputVarString;
-                    }
-
-                    private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
-                                                                                                QuerySerialization subQuerySerialization) {
-
-
-                        ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> new QualifiedAttributeID(null, e.getValue())
-                                ));
-
-                        return ImmutableMap.<Variable, QualifiedAttributeID>builder()
-                                .putAll(freshVariableAliases)
-                                .putAll(subQuerySerialization.getColumnIDs())
-                                .build();
-                    }
-
-                    private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
-                        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-                        builder.add(sqlFlattenExpression.getOutputVar());
-                        sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
-                        return builder.build();
                     }
 
                     private String getFlattenFunctionSymbolString(DBTermType dbType) {
