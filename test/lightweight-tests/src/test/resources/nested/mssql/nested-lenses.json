@@ -1,0 +1,152 @@
+{
+  "relations": [
+    {
+      "name": ["lenses","flattened_dates_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "days",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "invoice_date"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_income_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "income",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "period_income"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "workers",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "worker_list"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_workers_mid2"],
+      "baseRelation": ["lenses","flattened_workers_mid"],
+      "flattenedColumn": {
+        "name": "worker_list",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "name"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","flattened_managers"],
+      "baseRelation": ["company_data"],
+      "flattenedColumn": {
+        "name": "managers",
+        "datatype": "varchar"
+      },
+      "columns": {
+        "kept": [
+          "id"
+        ],
+        "new": "manager"
+      },
+      "type": "FlattenLens"
+    },
+    {
+      "name": ["lenses","managers"],
+      "baseRelation": ["lenses","flattened_managers"],
+      "columns": {
+        "added": [
+          {
+            "name": "firstname",
+            "expression": "CAST(json_value(manager, '$.firstName') AS VARCHAR(8000))"
+          },
+          {
+            "name": "lastname",
+            "expression": "CAST(json_value(manager, '$.lastName') AS VARCHAR(8000))"
+          },
+          {
+            "name": "age",
+            "expression": "CAST(json_value(manager, '$.age') AS integer)"
+          }
+        ],
+        "hidden": [
+          "manager"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_dates"],
+      "baseRelation": ["lenses","flattened_dates_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "invoice_date",
+            "expression": "CAST(invoice_date AS datetime)"
+          }
+        ],
+        "hidden": [
+          "invoice_date"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_income"],
+      "baseRelation": ["lenses","flattened_income_mid"],
+      "columns": {
+        "added": [
+          {
+            "name": "period_income",
+            "expression": "CAST(period_income AS integer)"
+          }
+        ],
+        "hidden": [
+          "period_income"
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["lenses","flattened_workers"],
+      "baseRelation": ["lenses","flattened_workers_mid2"],
+      "columns": {
+        "added": [
+          {
+            "name": "name",
+            "expression": "CAST(name AS VARCHAR(8000))"
+          }
+        ],
+        "hidden": [
+          "name"
+        ]
+      },
+      "type": "BasicLens"
+    }
+  ]
+}
+

@@ -610,4 +610,17 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return this.serializeCheckAndConvertDateFromDateTime(terms, termConverter, termFactory);
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsArray(DBTermType dbType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(typeFactory.getDBTypeFactory().getDBStringType()),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "ISJSON(%s, ARRAY) = 1",
+                        termConverter.apply(terms.get(0))
+                ));
+    }
 }
