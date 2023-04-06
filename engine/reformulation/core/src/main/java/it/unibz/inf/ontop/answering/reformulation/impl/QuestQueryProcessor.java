@@ -107,6 +107,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
+
+				//TODO create a new optimizer for data federation
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
 				queryLogger.setPlannedQuery(plannedQuery);
