@@ -82,6 +82,10 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                 if(indexVar.isPresent()) {
+                    /*
+                    * adding `<indexVar> int '$.sql:identity()'` to the `WITH` clause can create a position argument, but
+                    * this feature is only supported in the "serverless SQL pool in Synapse Analytics".
+                    */
                     throw new SQLSerializationException("SQLServer currently does not support FLATTEN with position arguments.");
                 }
 
