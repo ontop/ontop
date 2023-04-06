@@ -87,15 +87,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "GET_JSON_OBJECT(manager, '$.firstName')::string"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.firstName') AS string)"
           },
           {
             "name": "lastname",
-            "expression": "GET_JSON_OBJECT(manager, '$.lastName')::string"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.lastName') AS string)"
           },
           {
             "name": "age",
-            "expression": "GET_JSON_OBJECT(manager, '$.age')::integer"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.age') AS integer)"
           }
         ],
         "hidden": [
