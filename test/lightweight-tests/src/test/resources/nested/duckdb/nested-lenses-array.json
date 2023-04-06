@@ -87,15 +87,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "json_extract_string(manager, 'firstName')::varchar"
+            "expression": "CAST(json_extract_string(manager, 'firstName') AS varchar)"
           },
           {
             "name": "lastname",
-            "expression": "json_extract_string(manager, 'lastName')::varchar"
+            "expression": "CAST(json_extract_string(manager, 'lastName') AS varchar)"
           },
           {
             "name": "age",
-            "expression": "json_extract_string(manager, 'age')::integer"
+            "expression": "CAST(json_extract_string(manager, 'age') AS integer)"
           }
         ],
         "hidden": [
