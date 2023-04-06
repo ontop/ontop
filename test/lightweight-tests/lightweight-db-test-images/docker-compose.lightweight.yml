@@ -13,6 +13,7 @@ services:
     build: ./dremio
     ports:
       - "31010:31010"
+      - "32010:32010"
       - "9047:9047"
 
   trino:

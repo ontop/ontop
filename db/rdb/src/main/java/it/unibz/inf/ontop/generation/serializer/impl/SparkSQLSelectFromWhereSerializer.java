@@ -140,42 +140,8 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 return String.format("(%s\n %s \n%s %s)", left.getString(), operatorString, right.getString(), onString);
             }
 
-            //Taken from postgres implementation
-            private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
-                                                                                        QuerySerialization subQuerySerialization) {
-                ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> new QualifiedAttributeID(null, e.getValue())
-                        ));
-                return ImmutableMap.<Variable, QualifiedAttributeID>builder()
-                        .putAll(freshVariableAliases)
-                        .putAll(subQuerySerialization.getColumnIDs())
-                        .build();
-            }
-
-            //Taken from postgres implementation
-            private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
-                ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-                builder.add(sqlFlattenExpression.getOutputVar());
-                sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
-                return builder.build();
-            }
-
             @Override
-            public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
-                QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
-                        sqlFlattenExpression,
-                        subQuerySerialization
-                );
-
-                Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
-                Variable outputVar = sqlFlattenExpression.getOutputVar();
-                DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
-                Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
-                StringBuilder builder = new StringBuilder();
-
+            protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                 //We express the flatten call as a `SELECT *, EXPLODE_OUTER({array}) FROM child.
 
                 //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
@@ -183,50 +149,20 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         ? allColumnIDs.get(flattenedVar).getSQLRendering()
                         : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
 
-                //We compute an alias for the sub-query, and new aliases for each projected variable.
-                var alias = this.generateFreshViewAlias().getSQLRendering();
-                var variableAliases = allColumnIDs.entrySet().stream()
-                        .filter(e -> e.getKey() != flattenedVar)
-                        .collect(ImmutableCollectors.toMap(
-                                v -> v.getKey(),
-                                v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
-                        ));
-                var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                        .filter(v -> variableAliases.containsKey(v))
-                        .map(
-                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
-                        )
-                        .collect(Collectors.joining(", "));
-                if(subProjection.length() > 0)
-                    subProjection += ",";
-
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
+                String flattenCall;
+                String aliasFormat;
                 if(indexVar.isPresent()) {
-                    builder.append(String.format(
-                            "(SELECT %s (POSEXPLODE_OUTER(%s)) AS (%s, %s) FROM %s) %s",
-                            subProjection,
-                            expression,
+                    flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
+                    aliasFormat = String.format("(%s, %s)",
                             allColumnIDs.get(indexVar.get()).getSQLRendering(),
-                            allColumnIDs.get(outputVar).getSQLRendering(),
-                            subQuerySerialization.getString(),
-                            alias
-
-                    ));
+                            allColumnIDs.get(outputVar).getSQLRendering());
                 } else {
-                    builder.append(String.format(
-                            "(SELECT %s (EXPLODE_OUTER(%s)) AS %s FROM %s) %s",
-                            subProjection,
-                            expression,
-                            allColumnIDs.get(outputVar).getSQLRendering(),
-                            subQuerySerialization.getString(),
-                            alias
-
-                    ));
+                    flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
+                    aliasFormat = String.format("%s",
+                            allColumnIDs.get(outputVar).getSQLRendering());
                 }
-                return new QuerySerializationImpl(
-                        builder.toString(),
-                        variableAliases
-                );
+                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
             }
         });
     }
