@@ -87,15 +87,15 @@
         "added": [
           {
             "name": "firstname",
-            "expression": "GET_JSON_OBJECT(manager, '$.firstName')::string"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.firstName') AS string)"
           },
           {
             "name": "lastname",
-            "expression": "GET_JSON_OBJECT(manager, '$.lastName')::string"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.lastName') AS string)"
           },
           {
             "name": "age",
-            "expression": "GET_JSON_OBJECT(manager, '$.age')::integer"
+            "expression": "CAST(GET_JSON_OBJECT(manager, '$.age') AS integer)"
           }
         ],
         "hidden": [
@@ -111,7 +111,7 @@
         "added": [
           {
             "name": "invoice_date",
-            "expression": "invoice_date::timestamp"
+            "expression": "CAST(invoice_date AS timestamp)"
           }
         ],
         "hidden": [
@@ -127,7 +127,7 @@
         "added": [
           {
             "name": "period_income",
-            "expression": "period_income::integer"
+            "expression": "CAST(period_income AS integer)"
           }
         ],
         "hidden": [
@@ -143,7 +143,7 @@
         "added": [
           {
             "name": "name",
-            "expression": "name::string"
+            "expression": "CAST(name AS string)"
           }
         ],
         "hidden": [

@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullIgnoringDBGroupConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -44,6 +43,16 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                     @Override
                     protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d OFFSET %d", limit, offset);
+                    }
+
+                    //Due to a limitation of dremio, we need to cast integer constants in VALUES terms to integers, as they would be types as int64 otherwise.
+                    @Override
+                    protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
+                        String serialization = sqlTermSerializer.serialize(constant, childColumnIDs);
+                        if(constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
+                            return String.format("CAST(%s as INTEGER)", serialization);
+                        }
+                        return serialization;
                     }
 
                     //                    @Override
@@ -86,88 +95,22 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 //                    }
 
 
-                    //Taken from postgres implementation
-                    private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
-                                                                                                QuerySerialization subQuerySerialization) {
-                        ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> new QualifiedAttributeID(null, e.getValue())
-                                ));
-                        return ImmutableMap.<Variable, QualifiedAttributeID>builder()
-                                .putAll(freshVariableAliases)
-                                .putAll(subQuerySerialization.getColumnIDs())
-                                .build();
-                    }
-
-                    //Taken from postgres implementation
-                    private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
-                        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-                        builder.add(sqlFlattenExpression.getOutputVar());
-                        sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
-                        return builder.build();
-                    }
-
-                    //Taken from spark implementation
                     @Override
-                    public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
-                        QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
-                                sqlFlattenExpression,
-                                subQuerySerialization
-                        );
-
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
-                        Variable outputVar = sqlFlattenExpression.getOutputVar();
-                        DBTermType flattenedType = sqlFlattenExpression.getFlattenedType();
-                        Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
-                        StringBuilder builder = new StringBuilder();
+                    protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                         if(indexVar.isPresent()) {
                             throw new SQLSerializationException("Dremio does not support FLATTEN with position arguments.");
                         }
 
                         //We express the flatten call as a `SELECT *, FLATTEN({array}) FROM child.
 
-                        //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
+                        //FLATTEN only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                         var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
                                 ? allColumnIDs.get(flattenedVar).getSQLRendering()
                                 : String.format("CONVERT_FROM(%s, 'json')", allColumnIDs.get(flattenedVar).getSQLRendering());
 
-                        //We compute an alias for the sub-query, and new aliases for each projected variable.
-                        var alias = this.generateFreshViewAlias().getSQLRendering();
-                        var variableAliases = allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap(
-                                        v -> v.getKey(),
-                                        v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
-                                ));
-                        var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                .filter(v -> variableAliases.containsKey(v))
-                                .map(
-                                        v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
-                                )
-                                .collect(Collectors.joining(", "));
-                        if(subProjection.length() > 0)
-                            subProjection += ",";
-
-
-                        /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
-                        * a different datatype will make the query fail.
-                        * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
-                        * result of flatten with square brackets, the access operation will be ignored.
-                        * */
-                        builder.append(String.format(
-                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 99999999999999) %s",
-                                subProjection,
-                                expression,
-                                allColumnIDs.get(outputVar).getSQLRendering(),
-                                subQuerySerialization.getString(),
-                                alias
-                        ));
-                        return new QuerySerializationImpl(
-                                builder.toString(),
-                                variableAliases
-                        );
+                        var flattenFunctionCall = String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression);
+                        var aliasFormat = allColumnIDs.get(outputVar).getSQLRendering();
+                        return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCall, aliasFormat);
                     }
                 });
 

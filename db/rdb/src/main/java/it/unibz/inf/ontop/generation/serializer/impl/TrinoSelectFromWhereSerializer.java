@@ -64,35 +64,9 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         return idFactory.createRelationID(VIEW_PREFIX + viewCounter.incrementAndGet());
                     }
 
-                    /**
-                     * Generate a new variable name as an intermediate term for the Array unnest operation.
-                     */
-                    private QuotedID generateIntermediateVariable(String outputVarName, ImmutableSet<Variable> existingVariables) {
-                        int index = 1;
-                        while (true) {
-                            String newVarName = outputVarName + "_intermediate" + index;
-                            if(existingVariables.stream()
-                                    .noneMatch(v -> v.getName().equals(newVarName))) {
-                                return createAttributeAliasFactory().createAttributeAlias(newVarName);
-                            }
-                            index++;
-                        }
-                    }
-
                     @Override
-                    public QuerySerialization visit(SQLFlattenExpression sqlFlattenExpression) {
-
-                        QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
-                        ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
-                                sqlFlattenExpression,
-                                subQuerySerialization
-                        );
-
-                        Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
-                        Variable outputVar = sqlFlattenExpression.getOutputVar();
-                        Optional<Variable> indexVar = sqlFlattenExpression.getIndexVar();
-
-                        //We now build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
+                    protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+                        //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
                         StringBuilder builder = new StringBuilder();
 
                         builder.append(
@@ -119,61 +93,15 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         );
                     }
 
-                    private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+                    private String getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
                         String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
-                        return getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias());
-                    }
+                        RelationID viewAlias = generateFreshViewAlias();
 
-                    private Object getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
                         return String.format(
                                         "%s(%s%s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
                                         indexVar.isPresent() ? ", " + allColumnIDs.get(indexVar.get()).getSQLRendering() : "");
-                    }
-
-                    private ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
-                                                                                                QuerySerialization subQuerySerialization) {
-
-
-                        ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
-                                .collect(ImmutableCollectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> new QualifiedAttributeID(null, e.getValue())
-                                ));
-
-                        return ImmutableMap.<Variable, QualifiedAttributeID>builder()
-                                .putAll(freshVariableAliases)
-                                .putAll(subQuerySerialization.getColumnIDs())
-                                .build();
-                    }
-
-                    private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
-                        ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-                        builder.add(sqlFlattenExpression.getOutputVar());
-                        sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
-                        return builder.build();
-                    }
-
-                    private String getFlattenFunctionSymbolString(DBTermType dbType) {
-                        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
-
-                        if (dbTypeFactory.getDBTermType(JSON_STR).equals(dbType)) {
-                            return "json_array_elements(%s)";
-                        }
-                        if (dbTypeFactory.getDBTermType(JSONB_STR).equals(dbType)) {
-                            return "jsonb_array_elements(%s)";
-                        }
-                        if (dbType.getCategory() == DBTermType.Category.ARRAY) {
-                            GenericDBTermType genericDbType = (GenericDBTermType) dbType;
-                            //When it is a multi-dimensional array, we cannot use unnest, because it would flatten all levels at once.
-                            if(genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY) {
-                                return "jsonb_array_elements(to_jsonb(%s))";
-                            } else
-                                return "unnest(%s)";
-                        }
-
-                        throw new SQLSerializationException("Unsupported nested type for flattening: " + dbType.getName());
                     }
                 });
     }
