@@ -68,7 +68,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
                     builder.add(convert(target, lookup, provenance, tree));
                 }
-            } catch(InvalidMappingSourceQueriesException e) {
+            } catch(InvalidMappingSourceQueriesException | MetadataExtractionException e) {
                 if(!ignoreInvalidMappingEntries)
                     throw e;
                 LOGGER.warn("Mapping {} was ignored due to an issue in its source query: {}", assertion.getId(), e.getMessage());
