@@ -1,0 +1,4 @@
+empty_federated_join:"product1"<>"product2"<>0<>0
+empty_federated_join:"productfeatureproduct1"<>"product2"<>0<>0
+empty_federated_join:"productfeatureproduct2"<>"product1"<>0<>0
+equivalent_redundancy:"review"<>"reviewc"

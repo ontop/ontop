@@ -86,7 +86,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		try {
 			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getOriginalString());
-			IQ convertedIQ = inputQuery.translate(inputQueryTranslator); /**转换为Sparql related IQ*/
+			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
 			queryLogger.setSparqlIQ(convertedIQ);
@@ -94,11 +94,11 @@ public class QuestQueryProcessor implements QueryReformulator {
             try {
                 LOGGER.debug("Start the rewriting process...");
 
-                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);  /**转换为Sparql related IQ*/
+                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
 
                 LOGGER.debug("Start the unfolding...");
-                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);  /**转换为Sparql Related IQ，而不是SQL related IQ*/
+                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -107,8 +107,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);  /**进行GeneralStructuralAndSemanticIQOptimization*/
-				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);  /**AvoidJoinAboveUnionPlanner, 再次进行GeneralStructuralAndSemanticIQOptimization*/
+                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
 				//IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
@@ -118,7 +118,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				queryLogger.setPlannedQuery(plannedQuery);
 
 				//IQ executableQuery = generateExecutableQuery(federatedQuery);
-				IQ executableQuery = generateExecutableQuery(plannedQuery);  /**将优化后的IQ转换为可执行的SQL，进行SQL Generator优化*/
+				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);

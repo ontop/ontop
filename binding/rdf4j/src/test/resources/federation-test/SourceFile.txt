@@ -1,0 +1,14 @@
+"product1"-ss1
+"reviewc"-ss1
+"productfeatureproduct1"-ss1
+"producttypeproduct1"-ss1
+"person"-ss2
+"review"-ss2
+"productfeature"-ss3
+"producttype"-ss3
+"offer"-ss4
+"Producer"-ss4
+"vendor"-ss4
+"product2"-ss5
+"productfeatureproduct2"-ss5
+"producttypeproduct2"-ss5
