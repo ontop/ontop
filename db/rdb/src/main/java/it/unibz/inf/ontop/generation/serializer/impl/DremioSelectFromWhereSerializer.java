@@ -108,9 +108,41 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 ? allColumnIDs.get(flattenedVar).getSQLRendering()
                                 : String.format("CONVERT_FROM(%s, 'json')", allColumnIDs.get(flattenedVar).getSQLRendering());
 
-                        var flattenFunctionCall = String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression);
-                        var aliasFormat = allColumnIDs.get(outputVar).getSQLRendering();
-                        return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCall, aliasFormat);
+                        //We compute an alias for the sub-query, and new aliases for each projected variable.
+                        var alias = this.generateFreshViewAlias().getSQLRendering();
+                        var variableAliases = allColumnIDs.entrySet().stream()
+                                .filter(e -> e.getKey() != flattenedVar)
+                                .collect(ImmutableCollectors.toMap(
+                                        v -> v.getKey(),
+                                        v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
+                                ));
+                        var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
+                                .filter(v -> variableAliases.containsKey(v))
+                                .map(
+                                        v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
+                                )
+                                .collect(Collectors.joining(", "));
+                        if(subProjection.length() > 0)
+                            subProjection += ",";
+
+                        var builder = new StringBuilder();
+                        /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
+                         * a different datatype will make the query fail.
+                         * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
+                         * result of flatten with square brackets, the access operation will be ignored.
+                         * */
+                        builder.append(String.format(
+                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 99999999999999) %s",
+                                subProjection,
+                                expression,
+                                allColumnIDs.get(outputVar).getSQLRendering(),
+                                subQuerySerialization.getString(),
+                                alias
+                        ));
+                        return new QuerySerializationImpl(
+                                builder.toString(),
+                                variableAliases
+                        );
                     }
                 });
 

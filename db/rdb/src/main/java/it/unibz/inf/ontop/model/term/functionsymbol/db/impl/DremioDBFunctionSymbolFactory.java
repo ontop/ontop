@@ -230,4 +230,10 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         "END",
                 term);
     }
+
+    @Override
+    public DBFunctionSymbol getDBArrayAccess() {
+        return new DremioArrayAccessDBFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
+    }
+
 }
