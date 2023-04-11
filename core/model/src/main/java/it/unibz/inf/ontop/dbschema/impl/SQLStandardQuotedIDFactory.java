@@ -104,5 +104,9 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public String getIDQuotationString() {
 		return QUOTATION_STRING;
 	}
-	
+
+	@Override
+	public boolean supportsSquareBracketQuotation() {
+		return false;
+	}
 }

@@ -60,4 +60,9 @@ public class SQLServerQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 		return new QuotedIDImpl(s, NO_QUOTATION);
 	}
+
+	@Override
+	public boolean supportsSquareBracketQuotation() {
+		return true;
+	}
 }
