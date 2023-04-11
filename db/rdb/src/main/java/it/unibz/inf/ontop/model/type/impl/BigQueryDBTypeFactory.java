@@ -1,16 +1,18 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.*;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
-import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class BigQueryDBTypeFactory extends DefaultSQLDBTypeFactory {
     private static final String INT64_STR = "INT64";
@@ -21,12 +23,45 @@ public class BigQueryDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String JSON_STR = "JSON";
     protected static final String BYTES_STR = "BYTES";
 
+    protected static final String ARRAY_STR = "ARRAY<T>";
+
     protected BigQueryDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
         super(typeMap, defaultTypeCodeMap);
     }
     @AssistedInject
     protected BigQueryDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createBigQueryTypeMap(rootTermType, typeFactory), createBigQueryCodeMap());
+        super(createBigQueryTypeMap(rootTermType, typeFactory), createBigQueryCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory));
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(ARRAY_STR, rootAncestry, s -> {
+            if(s.equals("ARRAY"))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
+            if(!s.startsWith("ARRAY<") || !s.endsWith(">")) {
+                return Optional.empty();
+            }
+            String contents = s.substring(6, s.length() - 1);
+
+            int depth = 0;
+            for(int i = 0; i < contents.length(); i++) {
+                if(contents.charAt(i) == '<')
+                    depth += 1;
+                else if(contents.charAt(i) == '>')
+                    depth -= 1;
+                else if(contents.charAt(i) == ',' && depth == 0)
+                    return Optional.empty();
+            }
+            if(depth != 0)
+                return Optional.empty();
+
+            return Optional.of(typeFactory.getDBTypeFactory().getDBTermType(contents));
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     protected static Map<String, DBTermType> createBigQueryTypeMap(TermType rootTermType, TypeFactory typeFactory) {
