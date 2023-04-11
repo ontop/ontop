@@ -13,22 +13,27 @@ public class OracleExtraNormalizer implements DialectExtraNormalizer {
     private final DialectExtraNormalizer orderByNormalizer;
     private final DialectExtraNormalizer expressionWrapper;
     private final ConvertValuesToUnionNormalizer toUnionNormalizer;
+    private final UnquoteFlattenResultsNormalizer unquoteFlattenResultsNormalizer;
 
     @Inject
     protected OracleExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
                                     WrapProjectedOrOrderByExpressionNormalizer expressionWrapper,
-                                    ConvertValuesToUnionNormalizer toUnionNormalizer) {
+                                    ConvertValuesToUnionNormalizer toUnionNormalizer,
+                                    UnquoteFlattenResultsNormalizer unquoteFlattenResultsNormalizer) {
         this.orderByNormalizer = orderByNormalizer;
         this.expressionWrapper = expressionWrapper;
         this.toUnionNormalizer = toUnionNormalizer;
+        this.unquoteFlattenResultsNormalizer = unquoteFlattenResultsNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return toUnionNormalizer.transform(
-                orderByNormalizer.transform(
-                        expressionWrapper.transform(tree, variableGenerator),
-                        variableGenerator),
+        return unquoteFlattenResultsNormalizer.transform(
+                toUnionNormalizer.transform(
+                    orderByNormalizer.transform(
+                            expressionWrapper.transform(tree, variableGenerator),
+                            variableGenerator),
+                    variableGenerator),
                 variableGenerator);
     }
 }
