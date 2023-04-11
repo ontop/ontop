@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.MarcoOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -61,13 +62,14 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                                           KGQueryFactory kgQueryFactory,
                                           KGQueryTranslator inputQueryTranslator,
                                           GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
+                                          MarcoOptimizer marcoOptimizer,
                                           QueryPlanner queryPlanner,
                                           QueryLogger.Factory queryLoggerFactory,
                                           IntermediateQueryFactory iqFactory,
                                           TermFactory termFactory,
                                           SubstitutionFactory substitutionFactory) {
         super(obdaSpecification, queryCache, queryUnfolderFactory, translationFactory, queryRewriter, kgQueryFactory,
-                inputQueryTranslator, generalOptimizer, queryPlanner, queryLoggerFactory);
+                inputQueryTranslator, generalOptimizer, marcoOptimizer, queryPlanner, queryLoggerFactory);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;

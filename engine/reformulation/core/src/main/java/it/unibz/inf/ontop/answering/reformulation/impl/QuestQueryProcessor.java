@@ -42,6 +42,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
+	private final MarcoOptimizer marcoOptimizer;
+
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -52,12 +54,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 								KGQueryFactory kgQueryFactory,
 								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
+								MarcoOptimizer marcoOptimizer,
 								QueryPlanner queryPlanner,
 								QueryLogger.Factory queryLoggerFactory) {
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
+		this.marcoOptimizer = marcoOptimizer;
 		this.queryLoggerFactory = queryLoggerFactory;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
@@ -106,7 +110,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
-				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
+				IQ myOptimizedQuery = marcoOptimizer.optimize(optimizedQuery);
+				LOGGER.debug("Marco Optimised query:\n{}\n", myOptimizedQuery);
+
+				IQ plannedQuery = queryPlanner.optimize(myOptimizedQuery);
 
 				//TODO create a new optimizer for data federation
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
