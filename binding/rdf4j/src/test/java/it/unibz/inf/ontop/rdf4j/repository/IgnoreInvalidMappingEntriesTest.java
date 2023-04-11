@@ -55,4 +55,14 @@ public class IgnoreInvalidMappingEntriesTest extends AbstractRDF4JTest {
                 "}";
         assertEquals(0, runQueryAndCount(query));
     }
+
+    @Test
+    public void testAccessNonExistentTable() {
+        String query = "PREFIX : <http://www.ontop-vkg.com/ignore-invalid-test#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?v a :Bird . \n" +
+                "}";
+        assertEquals(0, runQueryAndCount(query));
+    }
 }
