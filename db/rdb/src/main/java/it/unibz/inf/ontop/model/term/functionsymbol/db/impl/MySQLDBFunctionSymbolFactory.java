@@ -324,7 +324,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         String term = termConverter.apply(terms.get(0));
         if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN %1$s NOT REGEXP" + numericPattern +
-                            " THEN NULL ELSE %1$s + 0.0 END",
+                            " THEN NULL ELSE CAST(%1$s + 0.0 AS DOUBLE) END",
                     term); }
         else {
             return String.format("CASE WHEN %1$s NOT REGEXP BINARY" + numericPattern +
@@ -338,7 +338,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         String term = termConverter.apply(terms.get(0));
         if (isMySQLVersion8OrAbove()) {
             return String.format("CASE WHEN %1$s NOT REGEXP " + numericPattern +
-                            " THEN NULL ELSE %1$s + 0.0 END",
+                            " THEN NULL ELSE CAST(%1$s + 0.0 AS FLOAT) END",
                     term);
         } else {
             return String.format("CASE WHEN %1$s NOT REGEXP BINARY " + numericPattern +
@@ -353,7 +353,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         String term = termConverter.apply(terms.get(0));
         return String.format("CASE WHEN (CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN -3.40E38 AND -1.18E-38 AND " +
                         "CAST(%1$s AS DECIMAL(60,30)) NOT BETWEEN 1.18E-38 AND 3.40E38 AND CAST(%1$s AS DECIMAL(60,30)) != 0) THEN NULL " +
-                        "ELSE %1$s + 0.0 END",
+                        "ELSE CAST(%1$s + 0.0 AS FLOAT) END",
                 term);
     }
 
