@@ -52,30 +52,16 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
                 "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }
 
-    @Disabled("Dremio Object access is currently not supported in BasicLens")
-    @Test
-    @Override
-    public void testFlattenJson() throws Exception {
-        super.testFlattenJson();
-    }
-
-    @Disabled("Dremio Object access is currently not supported in BasicLens")
-    @Test
-    @Override
-    public void testFlattenJsonPossiblyNull() throws Exception {
-        super.testFlattenJsonPossiblyNull();
-    }
-
-    @Disabled("Currently we do not support flatten with position for Dremio")
+    @Disabled("Currently we do not support flatten with position for Dremio") //TODO-damian
     @Test
     @Override
     public void testFlattenWithPosition() throws Exception {
         super.testFlattenWithPosition();
     }
 
-    //Due to the reasons mentioned above, we have fewer triples in the KG.
+    //Due to the reason mentioned above, we have fewer triples in the VKG.
     @Override
     protected int getSPOExpectedCount() {
-        return 50;
+        return 76;
     }
 }
