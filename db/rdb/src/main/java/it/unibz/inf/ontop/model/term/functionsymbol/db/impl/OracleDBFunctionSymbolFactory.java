@@ -565,7 +565,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 dbBooleanType,
                 false,
                 (terms, termConverter, termFactory) -> String.format(
-                        "SUBSTR(%s, 0, 1) = '[' AND SUBSTR(%s, LENGTH(%s), 1) = ']'",
+                        "SUBSTR(%s, 1, 1) = '[' AND SUBSTR(%s, LENGTH(%s), 1) = ']'",
                         termConverter.apply(terms.get(0)),
                         termConverter.apply(terms.get(0)),
                         termConverter.apply(terms.get(0))

@@ -73,7 +73,9 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
+                /* We build the query string of the form
+                *  `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
+                */
                 StringBuilder builder = new StringBuilder();
 
                 builder.append(
