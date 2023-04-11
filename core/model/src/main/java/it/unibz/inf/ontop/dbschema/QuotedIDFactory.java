@@ -56,4 +56,6 @@ public interface QuotedIDFactory {
 	 * @return quotation string used in the SQL rendering
 	 */
 	String getIDQuotationString();
+
+	boolean supportsSquareBracketQuotation();
 }
