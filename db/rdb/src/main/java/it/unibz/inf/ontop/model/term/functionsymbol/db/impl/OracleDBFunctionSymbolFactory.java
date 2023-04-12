@@ -556,4 +556,19 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("TO_DATE(%s, 'YYYY-MM-DD')", termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    protected DBBooleanFunctionSymbol createIsArray(DBTermType dbTermType) {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                "JSON_IS_ARRAY",
+                ImmutableList.of(typeFactory.getDBTypeFactory().getDBStringType()),
+                dbBooleanType,
+                false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "SUBSTR(%s, 1, 1) = '[' AND SUBSTR(%s, LENGTH(%s), 1) = ']'",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
 }
