@@ -28,5 +28,9 @@ source		SELECT name, age FROM rabbits;
 mappingId	MAPID-rabbits2
 target		:animals/{name} a :Animal; a :Rabbit; :breed {breed} .
 source		SELECT name, breed FROM rabbits;
+
+mappingId	MAPID-birds
+target		:animals/{name} a :Animal; a :Bird; .
+source		SELECT name FROM birds;
 ]]
 
