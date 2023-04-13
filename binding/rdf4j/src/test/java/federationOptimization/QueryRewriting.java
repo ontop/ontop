@@ -779,42 +779,44 @@ public class QueryRewriting {
                         }
                     }
                 }
-                //the input (left JOIN right) cannot be rewritten by empty federated join and materialized views
-                //create a IQTree for (left JOIN right)
-                Set<Variable> vars_l_r = new HashSet<>();
-                List<IQTree> childern_new = new ArrayList<IQTree>();
-                for(IQTree t : leaf_filter_left.keySet()){
-                    if(!(leaf_filter_left.get(t) == null)){
-                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_left.get(t), t);
-                        childern_new.add(t);
-                    } else {
-                        childern_new.add(t);
-                    }
-                    vars_l_r.addAll(t.getVariables());
-                }
-                for(IQTree t : leaf_filter_right.keySet()){
-                    if(!(leaf_filter_left.get(t) == null)){
-                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_right.get(t), t);
-                        childern_new.add(t);
-                    } else {
-                        childern_new.add(t);
-                    }
-                    vars_l_r.addAll(t.getVariables());
-                }
-                InnerJoinNode root_new = root;
-                ImmutableSet<Variable> vars = root.getLocalVariables();
-                if(vars.size() == 0){
-                    ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
-                } else {
-                    if(vars_l_r.containsAll(vars)){
-                        ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
-                    } else {
-                        //need to creat new Innor Join Node with files operating on the variables of the sub-trees;
-                        //the following condition needs to be changed again
-                        InnerJoinNode IJN = IQ_FACTORY.createInnerJoinNode();
-                        ER.newRewritten = IQ_FACTORY.createNaryIQTree(IJN, ImmutableList.copyOf(childern_new));
-                    }
-                }
+
+            }
+        }
+
+        //the input (left JOIN right) cannot be rewritten by empty federated join and materialized views
+        //create a IQTree for (left JOIN right)
+        Set<Variable> vars_l_r = new HashSet<>();
+        List<IQTree> childern_new = new ArrayList<IQTree>();
+        for(IQTree t : leaf_filter_left.keySet()){
+            if(leaf_filter_left.get(t) != null){
+                IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_left.get(t), t);
+                childern_new.add(t_new);
+            } else {
+                childern_new.add(t);
+            }
+            vars_l_r.addAll(t.getVariables());
+        }
+        for(IQTree t : leaf_filter_right.keySet()){
+            if(leaf_filter_left.get(t) != null){
+                IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_right.get(t), t);
+                childern_new.add(t_new);
+            } else {
+                childern_new.add(t);
+            }
+            vars_l_r.addAll(t.getVariables());
+        }
+        InnerJoinNode root_new = root;
+        ImmutableSet<Variable> vars = root.getLocalVariables();
+        if(vars.size() == 0){
+            ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
+        } else {
+            if(vars_l_r.containsAll(vars)){
+                ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
+            } else {
+                //need to creat new Innor Join Node with files operating on the variables of the sub-trees;
+                //the following condition needs to be changed again
+                InnerJoinNode IJN = IQ_FACTORY.createInnerJoinNode();
+                ER.newRewritten = IQ_FACTORY.createNaryIQTree(IJN, ImmutableList.copyOf(childern_new));
             }
         }
 
