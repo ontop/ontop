@@ -683,20 +683,26 @@ public class QueryRewriting {
 
         QueryNode root_l = left.getRootNode();
         QueryNode root_r = right.getRootNode();
-        Map<ExtensionalDataNode, FilterNode> leaf_filter_left = new HashMap<ExtensionalDataNode, FilterNode>();
-        Map<ExtensionalDataNode, FilterNode> leaf_filter_right = new HashMap<ExtensionalDataNode, FilterNode>();
+        List<ExtensionalDataNode> leaf_left = new ArrayList<ExtensionalDataNode>();
+        List<FilterNode> filter_left = new ArrayList<FilterNode>();
+        List<ExtensionalDataNode> leaf_right = new ArrayList<ExtensionalDataNode>();
+        List<FilterNode> filter_right = new ArrayList<FilterNode>();
+        //keep the order of the leafs
+
         Optional<ImmutableExpression> on_join_left = null;
         Optional<ImmutableExpression> on_join_right = null;
 
         if(left.isLeaf()){
             if(left instanceof ExtensionalDataNode){
-                leaf_filter_left.put((ExtensionalDataNode) left, null);
+                leaf_left.add((ExtensionalDataNode) left);
+                filter_left.add(null);
             }
         } else if (root_l instanceof FilterNode) {
             ImmutableList<IQTree> childern = left.getChildren();
             for(IQTree t: childern){
                 if(t instanceof ExtensionalDataNode){
-                    leaf_filter_left.put((ExtensionalDataNode)t, (FilterNode) root_l);
+                    leaf_left.add((ExtensionalDataNode)t);
+                    filter_left.add((FilterNode) root_l);
                 }
             }
         } else if(root_l instanceof InnerJoinNode){
@@ -706,12 +712,14 @@ public class QueryRewriting {
                 Set<FilterNode> set = new HashSet<FilterNode>();
                 if(t.isLeaf()){
                     if(t instanceof ExtensionalDataNode){
-                        leaf_filter_left.put((ExtensionalDataNode)t, null);
+                        leaf_left.add((ExtensionalDataNode)t);
+                        filter_left.add(null);
                     }
                 } else if(t.getRootNode() instanceof FilterNode){
                     for(IQTree sub_t: t.getChildren()){
                         if(sub_t instanceof ExtensionalDataNode){
-                            leaf_filter_left.put((ExtensionalDataNode)sub_t, (FilterNode) t.getRootNode());
+                            leaf_left.add((ExtensionalDataNode)sub_t);
+                            filter_left.add((FilterNode) t.getRootNode());
                         }
                     }
                 } else {
@@ -725,13 +733,15 @@ public class QueryRewriting {
 
         if(right.isLeaf()){
             if(right instanceof ExtensionalDataNode){
-                leaf_filter_right.put((ExtensionalDataNode)right, null);
+                leaf_right.add((ExtensionalDataNode)right);
+                filter_right.add(null);
             }
         } else if (root_r instanceof FilterNode) {
             ImmutableList<IQTree> childern = right.getChildren();
             for(IQTree t: childern){
                 if(t instanceof ExtensionalDataNode){
-                    leaf_filter_right.put((ExtensionalDataNode)t, (FilterNode) root_r);
+                    leaf_right.add((ExtensionalDataNode)t);
+                    filter_right.add((FilterNode) root_r);
                 }
             }
         } else if(root_r instanceof InnerJoinNode){
@@ -740,12 +750,14 @@ public class QueryRewriting {
             for(IQTree t: childern){
                 if(t.isLeaf()){
                     if(t instanceof ExtensionalDataNode){
-                        leaf_filter_right.put((ExtensionalDataNode)t, null);
+                        leaf_right.add((ExtensionalDataNode)t);
+                        filter_right.add(null);
                     }
                 } else if(t.getRootNode() instanceof FilterNode){
                     for(IQTree sub_t: t.getChildren()){
                         if(sub_t instanceof ExtensionalDataNode){
-                            leaf_filter_right.put((ExtensionalDataNode)sub_t, (FilterNode) t.getRootNode());
+                            leaf_right.add((ExtensionalDataNode)sub_t);
+                            filter_right.add((FilterNode) t.getRootNode());
                         }
                     }
                 } else {
@@ -757,8 +769,8 @@ public class QueryRewriting {
             return ER;
         }
 
-        for(ExtensionalDataNode ele_left: leaf_filter_left.keySet()){
-            for(ExtensionalDataNode ele_right: leaf_filter_right.keySet()){
+        for(ExtensionalDataNode ele_left: leaf_left){
+            for(ExtensionalDataNode ele_right: leaf_right){
 
                 RelationPredicate predict_left = ele_left.getRelationDefinition().getAtomPredicate();
                 RelationPredicate predict_right = ele_right.getRelationDefinition().getAtomPredicate();
@@ -787,24 +799,29 @@ public class QueryRewriting {
         //create a IQTree for (left JOIN right)
         Set<Variable> vars_l_r = new HashSet<>();
         List<IQTree> childern_new = new ArrayList<IQTree>();
-        for(IQTree t : leaf_filter_left.keySet()){
-            if(leaf_filter_left.get(t) != null){
-                IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_left.get(t), t);
+        for(int i=0; i<leaf_left.size(); i++){
+            IQTree t = leaf_left.get(i);
+            FilterNode fn = filter_left.get(i);
+            if(fn != null){
+                IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
                 childern_new.add(t_new);
             } else {
                 childern_new.add(t);
             }
             vars_l_r.addAll(t.getVariables());
         }
-        for(IQTree t : leaf_filter_right.keySet()){
-            if(leaf_filter_left.get(t) != null){
-                IQTree t_new = IQ_FACTORY.createUnaryIQTree(leaf_filter_right.get(t), t);
+        for(int i=0; i<leaf_right.size(); i++){
+            IQTree t = leaf_right.get(i);
+            FilterNode fn = filter_right.get(i);
+            if(fn != null){
+                IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
                 childern_new.add(t_new);
             } else {
                 childern_new.add(t);
             }
             vars_l_r.addAll(t.getVariables());
         }
+
         InnerJoinNode root_new = root;
         ImmutableSet<Variable> vars = root.getLocalVariables();
         if(vars.size() == 0){
