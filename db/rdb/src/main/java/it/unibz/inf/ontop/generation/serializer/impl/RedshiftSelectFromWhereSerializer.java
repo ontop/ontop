@@ -52,7 +52,7 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                                                   Optional<Variable> indexVar, DBTermType flattenedType,
                                                                   ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                   QuerySerialization subQuerySerialization) {
-                        //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
+                        //We build the query string of the form SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
                         StringBuilder builder = new StringBuilder();
 
                         builder.append(
