@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
@@ -27,13 +31,32 @@ public class RedshiftDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String GEOMETRY_STR = "GEOMETRY";
     protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
 
+    protected static final String SUPER_STR = "SUPER";
+
 
     protected RedshiftDBTypeFactory(Map<String, DBTermType> typeMap, ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap) {
         super(typeMap, defaultTypeCodeMap);
     }
     @AssistedInject
     protected RedshiftDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createRedshiftTypeMap(rootTermType, typeFactory), createRedshiftCodeMap());
+        super(createRedshiftTypeMap(rootTermType, typeFactory), createRedshiftCodeMap(), createGenericAbstractTypeMap(rootTermType, typeFactory));
+    }
+
+    private static ImmutableList<GenericDBTermType> createGenericAbstractTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        /* The type `SUPER` can be used for all sorts of nested data structures in Redshift, but currently,
+         * we only use it for arrays, so it is marked as an array here.
+         */
+        GenericDBTermType abstractArrayType = new ArrayDBTermType(SUPER_STR, rootAncestry, s -> {
+            if(s.equals(SUPER_STR))
+                return Optional.of(typeFactory.getDBTypeFactory().getDBStringType());
+            return Optional.empty();
+        });
+
+        List<GenericDBTermType> list = new ArrayList<>();
+        list.add(abstractArrayType);
+        return ImmutableList.copyOf(list);
     }
 
     protected static Map<String, DBTermType> createRedshiftTypeMap(TermType rootTermType, TypeFactory typeFactory) {
