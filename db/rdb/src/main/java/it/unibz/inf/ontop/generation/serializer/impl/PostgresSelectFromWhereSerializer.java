@@ -31,7 +31,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private PostgresSelectFromWhereSerializer(TermFactory termFactory) {
+    protected PostgresSelectFromWhereSerializer(TermFactory termFactory) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String castFloatingConstant(String value, DBTermType dbType) {
