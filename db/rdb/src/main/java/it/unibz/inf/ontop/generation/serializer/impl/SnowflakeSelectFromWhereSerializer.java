@@ -9,12 +9,17 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLValuesExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.AbstractMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -81,6 +86,39 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         return new QuerySerializationImpl(sql, columnIDs);
 
                     }
+
+                    @Override
+                    protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+                        //We build the query string of the form SELECT <variables> FROM <subquery>, LATERAL FLATTEN(<flattenedVariable>) AS <viewName>(dummy, dummy, dummy, {dummy|<indexVar>}, <outputVar>)
+                        StringBuilder builder = new StringBuilder();
+
+                        //Quotation marks are not supported in these aliases, so we use `getName()` instead of `getSQLRendering()`.
+                        builder.append(
+                                String.format(
+                                        "%s, LATERAL FLATTEN(%s) AS %s(dummyVariable, dummyVariable, dummyVariable, %s, %s, dummyVariable)",
+                                        subQuerySerialization.getString(),
+                                        allColumnIDs.get(flattenedVar).getSQLRendering(),
+                                        generateFreshViewAlias().getSQLRendering(),
+                                        indexVar.map(v -> allColumnIDs.get(v).getAttribute().getName())
+                                                .orElse("dummyVariable"),
+                                        allColumnIDs.get(outputVar).getAttribute().getName()
+                                ));
+
+                        //We have to convert the index and output variables to upper case, otherwise dropping the quotation marks will not work.
+                        return new QuerySerializationImpl(
+                                builder.toString(),
+                                allColumnIDs.entrySet().stream()
+                                        .filter(e -> e.getKey() != flattenedVar)
+                                        .map(e -> (e.getKey() != outputVar && e.getKey() != indexVar.orElse(null)) ?
+                                                e :
+                                                new AbstractMap.SimpleEntry<>(
+                                                        e.getKey(),
+                                                        new QualifiedAttributeID(e.getValue().getRelation(), idFactory.createAttributeID(e.getValue().getAttribute().getName().toUpperCase()))
+                                                ))
+                                        .collect(ImmutableCollectors.toMap())
+                        );
+                    }
+
                 });
     }
 }
