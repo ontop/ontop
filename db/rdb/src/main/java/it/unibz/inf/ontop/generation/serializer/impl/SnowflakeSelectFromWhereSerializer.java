@@ -92,16 +92,29 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         //We build the query string of the form SELECT <variables> FROM <subquery>, LATERAL FLATTEN(<flattenedVariable>) AS <viewName>(dummy, dummy, dummy, {dummy|<indexVar>}, <outputVar>)
                         StringBuilder builder = new StringBuilder();
 
+                        //Make sure the dummy variables we use for the remaining FLATTEN outputs are not already in use.
+                        String dummy = "t";
+                        while (true) {
+                            dummy = "_" + dummy;
+                            String dummyTemp = dummy;
+                            if(allColumnIDs.values().stream().noneMatch(a -> a.getAttribute().getName().startsWith(dummyTemp)))
+                                break;
+                        }
+
                         //Quotation marks are not supported in these aliases, so we use `getName()` instead of `getSQLRendering()`.
                         builder.append(
                                 String.format(
-                                        "%s, LATERAL FLATTEN(%s) AS %s(dummyVariable, dummyVariable, dummyVariable, %s, %s, dummyVariable)",
+                                        "%s, LATERAL FLATTEN(%s) AS %s(%s, %s, %s, %s, %s, %s)",
                                         subQuerySerialization.getString(),
                                         allColumnIDs.get(flattenedVar).getSQLRendering(),
                                         generateFreshViewAlias().getSQLRendering(),
+                                        dummy,
+                                        dummy,
+                                        dummy,
                                         indexVar.map(v -> allColumnIDs.get(v).getAttribute().getName())
                                                 .orElse("dummyVariable"),
-                                        allColumnIDs.get(outputVar).getAttribute().getName()
+                                        allColumnIDs.get(outputVar).getAttribute().getName(),
+                                        dummy
                                 ));
 
                         //We have to convert the index and output variables to upper case, otherwise dropping the quotation marks will not work.
