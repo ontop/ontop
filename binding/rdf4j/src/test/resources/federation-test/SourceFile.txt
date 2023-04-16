@@ -7,7 +7,7 @@
 "productfeature"-ss3
 "producttype"-ss3
 "offer"-ss4
-"Producer"-ss4
+"producer"-ss4
 "vendor"-ss4
 "product2"-ss5
 "productfeatureproduct2"-ss5
