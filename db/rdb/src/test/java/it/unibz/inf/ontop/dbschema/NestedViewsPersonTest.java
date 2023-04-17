@@ -28,7 +28,7 @@ public class NestedViewsPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(constraints, ImmutableSet.of());
+        assertEquals(constraints, ImmutableSet.of("id", "pos"));
     }
 
     @Test
