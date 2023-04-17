@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,10 +20,10 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -50,14 +49,14 @@ import java.util.Objects;
  * string literals must be enclosed within single quotation marks.
  *
  * @author Roman Kontchakov
- *
  */
-
+@IDFactoryType("MYSQL")
+@NonNullByDefault
 public abstract class MySQLAbstractQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	private static final String MY_SQL_QUOTATION_STRING = "`";
 
-	protected QuotedID createFromString(@Nonnull String s, boolean caseSensitive) {
+	protected QuotedID createFromString(String s, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
@@ -69,9 +68,9 @@ public abstract class MySQLAbstractQuotedIDFactory extends SQLStandardQuotedIDFa
 		return new QuotedIDImpl(s, NO_QUOTATION, caseSensitive);
 	}
 
-
 	@Override
 	public String getIDQuotationString() {
 		return MY_SQL_QUOTATION_STRING;
 	}	
+
 }

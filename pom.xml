@@ -179,6 +179,7 @@
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <logback.version>1.2.9</logback.version>
+        <nullanno.version>3.0.0</nullanno.version>
         <opencsv.version>5.7.1</opencsv.version>
         <owlapi.version>5.1.20</owlapi.version>
         <proj4j.version>1.1.1</proj4j.version>
@@ -906,11 +907,16 @@
                 <version>${javax-inject.version}</version>
             </dependency>
 
-            <!-- Javax Annotations (JSR 305) -->
+            <!-- Javax Annotations (JSR 305, nullanno) -->
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${jsr305.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.solf</groupId>
+                <artifactId>nullanno</artifactId>
+                <version>${nullanno.version}</version>
             </dependency>
 
             <!-- Guava -->
@@ -1000,6 +1006,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-guava</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jdk8</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 

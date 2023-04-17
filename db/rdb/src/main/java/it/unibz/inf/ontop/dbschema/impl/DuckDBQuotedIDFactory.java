@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
+@IDFactoryType("DUCKDB")
+@NonNullByDefault
 public class DuckDBQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
-	protected QuotedID createFromString(@Nonnull String s) {
+	protected QuotedID createFromString(String s) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
@@ -16,4 +19,5 @@ public class DuckDBQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 		return new QuotedIDImpl(s.toLowerCase(), QUOTATION_STRING, false);
 	}
+
 }

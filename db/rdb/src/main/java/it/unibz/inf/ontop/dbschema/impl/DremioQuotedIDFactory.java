@@ -1,19 +1,22 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@IDFactoryType("DREMIO")
+@NonNullByDefault
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
     @Override
-    protected QuotedID createFromString(@Nonnull String s) {
+    protected QuotedID createFromString(String s) {
         Objects.requireNonNull(s);
 
         if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
@@ -39,4 +42,5 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
                 .collect(ImmutableCollectors.toList())
                 .reverse());
     }
+
 }

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,10 +20,10 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -43,13 +42,13 @@ import java.util.Objects;
  * https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers?view=sql-server-ver15
  *
  * @author Roman Kontchakov
- *
  */
-
+@IDFactoryType("MSSQLSERVER")
+@NonNullByDefault
 public class SQLServerQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
-	protected QuotedID createFromString(@Nonnull String s) {
+	protected QuotedID createFromString(String s) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
@@ -65,4 +64,5 @@ public class SQLServerQuotedIDFactory extends SQLStandardQuotedIDFactory {
 	public boolean supportsSquareBracketQuotation() {
 		return true;
 	}
+
 }

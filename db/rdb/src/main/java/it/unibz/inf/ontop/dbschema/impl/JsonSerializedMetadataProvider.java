@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.Maps;
@@ -38,15 +39,18 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
+                                             QuotedIDFactory.Supplier idFactorySupplier,
                                              CoreSingletons coreSingletons) throws MetadataExtractionException, IOException {
-        this(dbMetadataReader, null, coreSingletons);
+        this(dbMetadataReader, null, idFactorySupplier, coreSingletons);
     }
 
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
                                              @Nullable @Assisted MetadataLookupSupplier parentProviderSupplier,
+                                             QuotedIDFactory.Supplier idFactorySupplier,
                                              CoreSingletons coreSingletons) throws MetadataExtractionException, IOException {
-        JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader);
+
+        JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader, idFactorySupplier);
 
         QuotedIDFactory idFactory = jsonMetadata.metadata.createQuotedIDFactory();
 
@@ -81,19 +85,22 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
      * @param dbMetadataReader JSON file reader
      * @return JSON metadata
      */
-    protected static JsonMetadata loadAndDeserialize(Reader dbMetadataReader) throws MetadataExtractionException, IOException {
+    protected JsonMetadata loadAndDeserialize(Reader dbMetadataReader, QuotedIDFactory.Supplier idFactorySupplier)
+            throws MetadataExtractionException, IOException {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper()
                     .registerModule(new GuavaModule())
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
+                    .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT)
+                    .setInjectableValues(new InjectableValues.Std()
+                            .addValue(QuotedIDFactory.Supplier.class, idFactorySupplier));
 
             // Create POJO object from JSON
             return objectMapper.readValue(dbMetadataReader, JsonMetadata.class);
         }
         catch (JsonProcessingException e) {
-            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
+            throw new MetadataExtractionException("problem with JSON processing.\n" + e, e);
         }
     }
 

@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import java.util.Objects;
 
 /**
@@ -11,22 +13,24 @@ import java.util.Objects;
  *    - double and single quotes are not tolerated for schema and attributes definition
  *    - you need to use backticks
  */
+@IDFactoryType("SPARK")
+@NonNullByDefault
 public class SparkSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
-    private static final String SQL_QUOTATION_STRING = "`";
+    public static final String SQL_QUOTATION_STRING = "`";
 
     @Override
-    public QuotedID createAttributeID(@Nonnull String s) {
+    public QuotedID createAttributeID(String s) {
         return createFromString(s);
     }
 
     @Override
-    public RelationID createRelationID(@Nonnull String tableId) {
+    public RelationID createRelationID(String tableId) {
         return new RelationIDImpl(ImmutableList.of(createFromString(tableId)));
     }
 
     @Override
-    protected QuotedID createFromString(@Nonnull String s) {
+    protected QuotedID createFromString(String s) {
         Objects.requireNonNull(s);
 
         if (s.startsWith(SQL_QUOTATION_STRING) && s.endsWith(SQL_QUOTATION_STRING))
@@ -39,5 +43,5 @@ public class SparkSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
     public String getIDQuotationString() {
         return SQL_QUOTATION_STRING;
     }
-}
 
+}
