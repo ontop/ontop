@@ -1262,8 +1262,6 @@ public class QueryRewriting {
                         }
                         ER.canRewrite = true;
                         ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(subtrees));
-                        System.out.println("<<<<<<new rewritten: ");
-                        System.out.println(ER.newRewritten);
                     }
                 } else {
                     return ER;
