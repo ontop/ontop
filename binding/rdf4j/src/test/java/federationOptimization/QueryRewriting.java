@@ -376,8 +376,6 @@ public class QueryRewriting {
     public IQTree rewriteIQTree(IQTree iqt){
         iqt = removeRedundancy(iqt);
         iqt = rewriteInnerJoin(iqt);
-        System.out.println("new tree after removing redundancy and rewriting inner join");
-        System.out.println(iqt);
 
         iqt = rewriteLeftJoin(iqt);
 
@@ -518,10 +516,10 @@ public class QueryRewriting {
         boolean b = false;
         QueryNode root_1 = union_ele_1.getRootNode();
         QueryNode root_2 = union_ele_2.getRootNode();
-        if((root_1 instanceof InnerJoinNode) || (root_1 instanceof LeftJoinNode)){
+        if(root_1 instanceof LeftJoinNode){
             return false;
         }
-        if((root_2 instanceof InnerJoinNode) || (root_2 instanceof LeftJoinNode)){
+        if(root_2 instanceof LeftJoinNode){
             return false;
         }
         if(union_ele_1.isLeaf() && union_ele_2.isLeaf()){
@@ -549,6 +547,69 @@ public class QueryRewriting {
                 //improve the following compare conditions
                 if(hints.get(1).contains(rel_name_1+"<>"+rel_name_2)|| hints.get(1).contains(rel_name_2+"<>"+rel_name_1)){
                     return true;
+                }
+            }
+        } else if((root_1 instanceof InnerJoinNode) && (root_2 instanceof InnerJoinNode)){
+
+            if(union_ele_1.getChildren().size() == union_ele_2.getChildren().size()){
+                List<ExtensionalDataNode> leafs_left = new ArrayList<ExtensionalDataNode>();
+                List<FilterNode> filter_left = new ArrayList<FilterNode>();
+                List<ExtensionalDataNode> leafs_right = new ArrayList<ExtensionalDataNode>();
+                List<FilterNode> filter_right = new ArrayList<FilterNode>();
+
+                for(IQTree t: union_ele_1.getChildren()){
+                    if(t instanceof ExtensionalDataNode){
+                        leafs_left.add((ExtensionalDataNode)t);
+                        filter_left.add(null);
+                    } else if(t.getRootNode() instanceof FilterNode){
+                        leafs_left.add((ExtensionalDataNode)t.getChildren().get(0));
+                        filter_left.add((FilterNode) t.getRootNode());
+                    } else {
+                        return false;
+                    }
+                }
+                for(IQTree t: union_ele_2.getChildren()){
+                    if(t instanceof ExtensionalDataNode){
+                        leafs_right.add((ExtensionalDataNode)t);
+                        filter_right.add(null);
+                    } else if(t.getRootNode() instanceof FilterNode){
+                        leafs_right.add((ExtensionalDataNode)t.getChildren().get(0));
+                        filter_right.add((FilterNode) t.getRootNode());
+                    } else {
+                        return false;
+                    }
+                }
+
+                int index_left = -1, index_right = -1;
+                for(int i=0; i<leafs_left.size(); i++){
+                    String relation_left = leafs_left.get(i).getRelationDefinition().getAtomPredicate().toString();
+                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = leafs_left.get(i).getArgumentMap();
+
+                    for(int j=0; j<leafs_right.size(); j++){
+                        String relation_right = leafs_right.get(j).getRelationDefinition().getAtomPredicate().toString();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = leafs_right.get(j).getArgumentMap();
+                        if(hints.get(1).contains(relation_left+"<>"+relation_right) || hints.get(1).contains(relation_right+"<>"+relation_left)){
+                            index_left = i;
+                            index_right = j;
+                        }
+                    }
+                }
+
+                if(index_left != -1){
+                    for(int i=0; i<leafs_left.size(); i++){
+                        if(i != index_left){
+                            if(leafs_right.contains( leafs_left.get(i))){
+                                if(filter_right.contains(filter_right.get(i))){
+                                    continue;
+                                } else {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                } else{
+                    return false;
                 }
             }
         }
@@ -874,8 +935,6 @@ public class QueryRewriting {
                 }
             }
         }
-
-
         return iqt;
     }
 
