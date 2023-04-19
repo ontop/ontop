@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -265,9 +266,40 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
                 baseRelations);
 
         insertForeignKeys(relation, metadataLookupForFK,
-                Optional.ofNullable(foreignKeys).map(f -> f.added).orElseGet(ImmutableList::of),
+                Stream.concat(
+                            Optional.ofNullable(foreignKeys).map(f -> f.added).orElseGet(ImmutableList::of).stream(),
+                                inferForeignKeysFromParentUCs(keptColumns, baseRelation).stream()
+                        )
+                        .collect(ImmutableCollectors.toList()),
                 baseRelations);
     }
+
+    private ImmutableList<AddForeignKey> inferForeignKeysFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
+
+        return baseRelation.getUniqueConstraints().stream()
+                .map(UniqueConstraint::getAttributes)
+                .map(attributes -> attributes.stream()
+                        .map(Attribute::getID)
+                        .collect(ImmutableCollectors.toSet()))
+                .map(attributes -> getInferredForeignKey(attributes, keptColumns))
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private Optional<AddForeignKey> getInferredForeignKey(ImmutableSet<QuotedID> ucs, ImmutableSet<QuotedID> keptColumns) {
+        if (keptColumns.containsAll(ucs)) {
+            return Optional.of(new AddForeignKey(
+                    UUID.randomUUID().toString(),
+                    ucs.stream()
+                            .map(QuotedID::getSQLRendering)
+                            .collect(ImmutableCollectors.toList()),
+                    new ForeignKeyPart(baseRelation, ucs.stream()
+                            .map(QuotedID::getSQLRendering)
+                            .collect(ImmutableCollectors.toList()))));
+        }
+        return Optional.empty();
+    }
+
 
     private ImmutableList<FunctionalDependencyConstruct> inferFDsFromParentUCs(ImmutableSet<QuotedID> keptColumns, NamedRelationDefinition baseRelation) {
 

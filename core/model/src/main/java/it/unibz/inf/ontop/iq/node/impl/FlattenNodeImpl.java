@@ -193,7 +193,15 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
      * Unique constraints are lost after flattening
      */
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
-        return ImmutableSet.of();
+        //If there is no index variable, we cannot infer unique constraints.
+        if(indexVariable.isEmpty())
+            return ImmutableSet.of();
+
+        var childConstraints = child.inferUniqueConstraints();
+        return childConstraints.stream()
+                .map(constraint -> Stream.concat(constraint.stream(), Stream.of(indexVariable.get()))
+                            .collect(ImmutableCollectors.toSet()))
+                .collect(ImmutableCollectors.toSet());
     }
 
     /**
