@@ -33,6 +33,8 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String JSON_STR = "JSON";
     public static final String BYTEA_STR = "BYTEA";
 
+    public static final String STRING_STR = "STRING";
+
     public static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
 
     public static final String ARRAY_STR = "T[]";
@@ -80,6 +82,8 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
+        DBTermType stringType = new StringDBTermType(STRING_STR, rootAncestry, xsdString);
+
         // Default decimal (otherwise, the default value of DECIMAL would be DECIMAL(19,0)
         // with 0 digits after the point). Still arbitrary.
         NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
@@ -93,6 +97,7 @@ public class DuckDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(FLOAT8_STR, map.get(DOUBLE_PREC_STR));
         map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
         map.put(HUGEINT_STR, map.get(BIGINT_STR));
+        map.put(STRING_STR, stringType);
 
         map.put(BPCHAR_STR, bpCharType);
         map.put(TIMESTAMPTZ_STR, timestampTz);
