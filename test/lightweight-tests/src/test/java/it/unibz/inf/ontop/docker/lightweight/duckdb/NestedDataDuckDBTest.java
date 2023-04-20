@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.docker.lightweight.duckdb;
 
 import com.google.common.collect.ImmutableMultiset;
 import it.unibz.inf.ontop.docker.lightweight.AbstractNestedDataTest;
-import it.unibz.inf.ontop.docker.lightweight.DremioLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.DuckDBLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
