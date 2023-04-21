@@ -57,31 +57,35 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
+            RAExpression re;
+            IQTree tree;
+            Function<Variable, Optional<ImmutableTerm>> lookup;
 
             try {
-                RAExpression re = getRAExpression(assertion, metadataLookup);
-                IQTree tree = sqlQueryParser.convert(re);
+                re = getRAExpression(assertion, metadataLookup);
+                tree = sqlQueryParser.convert(re);
 
-                Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
-
-                for (TargetAtom target : assertion.getTargetAtoms()) {
-                    try {
-                        PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
-                        builder.add(convert(target, lookup, provenance, tree));
-                    } catch (InvalidMappingSourceQueriesException e) {
-                        if(!ignoreInvalidMappingEntries)
-                            throw e;
-                        LOGGER.warn("Target atom {} was ignored due to an issue: {}", target.toString(), e.getMessage());
-                    }
-                }
+                lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
             }
             /*
              * NB: runtime exceptions are also caught due to some JDBC drivers throwing them instead of SQLException-s
              */
-            catch(InvalidMappingSourceQueriesException | MetadataExtractionException | RuntimeException e) {
+            catch (InvalidMappingSourceQueriesException | MetadataExtractionException | RuntimeException e) {
                 if(!ignoreInvalidMappingEntries)
                     throw e;
                 LOGGER.warn("Mapping entry {} was ignored due to an issue: {}", assertion.getId(), e.getMessage());
+                continue;
+            }
+
+            for (TargetAtom target : assertion.getTargetAtoms()) {
+                try {
+                    PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
+                    builder.add(convert(target, lookup, provenance, tree));
+                } catch (InvalidMappingSourceQueriesException e) {
+                    if (!ignoreInvalidMappingEntries)
+                        throw e;
+                    LOGGER.warn("Target atom {} was ignored due to an issue: {}", target, e.getMessage());
+                }
             }
         }
 
