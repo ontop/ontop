@@ -65,8 +65,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 
                 for (TargetAtom target : assertion.getTargetAtoms()) {
-                    PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
-                    builder.add(convert(target, lookup, provenance, tree));
+                    try {
+                        PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
+                        builder.add(convert(target, lookup, provenance, tree));
+                    } catch (InvalidMappingSourceQueriesException e) {
+                        if(!ignoreInvalidMappingEntries)
+                            throw e;
+                        LOGGER.warn("Target atom {} was ignored due to an issue: {}", target.toString(), e.getMessage());
+                    }
                 }
             }
             /*
