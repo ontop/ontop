@@ -81,9 +81,9 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
                                        TermFactory termFactory) {
-        return String.format("(POSITION(%s IN %s) > 0)",
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
+        return String.format("(INSTR(%s, %s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("LEFT(%s,POSITION(%s,%s)-1)", str, before, str);
+        return String.format("LEFT(%s,INSTR(%s,%s)-1)", str, str, before);
     }
 
     @Override
@@ -103,8 +103,8 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
         // sign return 1 if positive number, 0 if 0, and -1 if negative number
         // it will return everything after the value if it is present or it will return an empty string if it is not present
-        return String.format("SUBSTRING(%s,POSITION(%s,%s) + LENGTH(%s), SIGN(POSITION(%s,%s)) * LENGTH(%s))",
-                str, after, str, after, after, str, str);
+        return String.format("SUBSTRING(%s,INSTR(%s,%s) + LENGTH(%s), SIGN(INSTR(%s,%s)) * LENGTH(%s))",
+                str, str, after, after, str, after, str);
     }
 
     @Override
