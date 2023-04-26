@@ -1,0 +1,14 @@
+"product1"-0
+"reviewc"-0
+"productfeatureproduct1"-0-1
+"producttypeproduct1"-0-1
+"person"-0
+"review"-0
+"productfeature"-0
+"producttype"-0
+"offer"-0
+"producer"-0
+"vendor"-0
+"product2"-0
+"productfeatureproduct2"-0-1
+"producttypeproduct2"-0-1

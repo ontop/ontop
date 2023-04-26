@@ -6,6 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.dbschema.Attribute;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.impl.json.JsonLens;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -18,6 +22,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -90,23 +95,20 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
-                    "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-                    "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
+            query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
                     "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
+                    "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
+                    "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
                     "\n" +
-                    "SELECT ?title ?text ?reviewDate ?reviewer ?reviewerName ?rating1 ?rating2 ?rating3 ?rating4\n" +
+                    "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
                     "WHERE {\n" +
-                    "\t?review bsbm:reviewFor <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product88> .\n" +
-                    "\t?review dc:title ?title .\n" +
-                    "\t?review rev:text ?text .\n" +
-                    "\t?review bsbm:reviewDate ?reviewDate .\n" +
-                    "\t?review rev:reviewer ?reviewer .\n" +
-                    "\t?reviewer foaf:name ?reviewerName .\n" +
-                    "\tOPTIONAL { ?review bsbm:rating1 ?rating1 . }\n" +
-                    "\tOPTIONAL { ?review bsbm:rating2 ?rating2 . }\n" +
-                    "\tOPTIONAL { ?review bsbm:rating3 ?rating3 . }\n" +
-                    "\tOPTIONAL { ?review bsbm:rating4 ?rating4 . }\n" +
+                    "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
+                    "?p foaf:name ?name .\n" +
+                    "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
+                    "?p bsbm:country ?country .\n" +
+                    "?r rev:reviewer ?p .\n" +
+                    "?r bsbm:reviewFor ?product .\n" +
+                    "?r dc:title ?title .\n" +
                     "}";
 
             sourceMap = new HashMap<String, String>();
@@ -375,15 +377,18 @@ public class QueryRewriting {
 
     public IQTree rewriteIQTree(IQTree iqt){
         iqt = removeRedundancy(iqt);
+        //remove redundancy needs self-join optimization
+
         iqt = rewriteInnerJoin(iqt);
 
         iqt = rewriteLeftJoin(iqt);
+        //rewriting by materialized views;
 
         return iqt;
     }
 
     /***-remove redundancy in the unions-************************/
-    public IQTree  removeRedundancy(IQTree iqt){
+    public IQTree removeRedundancy(IQTree iqt){
         boolean change = true;
         while(change){
             change = false;
@@ -594,7 +599,6 @@ public class QueryRewriting {
                         }
                     }
                 }
-
                 if(index_left != -1){
                     for(int i=0; i<leafs_left.size(); i++){
                         if(i != index_left){
@@ -629,38 +633,40 @@ public class QueryRewriting {
                 if((root instanceof InnerJoinNode)){
                     ImmutableList<IQTree> childern = subt.getChildren();
                     for(int i=0; i<childern.size()-1; i++){
-                        IQTree sub1 = childern.get(i);
-                        IQTree sub2 = childern.get(i+1);
-                        InnerJoinNode root_new = (InnerJoinNode) root;
+                        for(int j=i+1; j<childern.size(); j++){
+                            IQTree sub1 = childern.get(i);
+                            IQTree sub2 = childern.get(j);
+                            //InnerJoinNode root_new = (InnerJoinNode) root;
 
-                        IQTree sub_new = rewriteAtomicJoin(root_new, sub1, sub2);
+                            IQTree sub_new = rewriteAtomicJoin((InnerJoinNode)root, sub1, sub2);
 
-                        if(sub_new != null){
-                            IQTree iqt_new = null;
-                            if(childern.size()>2){
-                                List<IQTree> childern_new = new ArrayList<IQTree>();
-                                for(int j=0; j<childern.size(); j++){
-                                    if((j!=i) && (j!=(i+1))){
-                                        childern_new.add(childern.get(j));
-                                    } else if(j == i){
-                                        childern_new.add(sub_new);
-                                    } else if(j == (i+1)){
-                                        continue;
+                            if(sub_new != null){
+                                IQTree iqt_new = null;
+                                if(childern.size()>2){
+                                    List<IQTree> childern_new = new ArrayList<IQTree>();
+                                    for(int k=0; k<childern.size(); k++){
+                                        if((k!=i) && (k!=j)){
+                                            childern_new.add(childern.get(k));
+                                        } else if(k == i){
+                                            childern_new.add(sub_new);
+                                        } else if(k == j){
+                                            continue;
+                                        }
                                     }
+                                    InnerJoinNode root_new_new = (InnerJoinNode) root;
+                                    IQTree subt_new = IQ_FACTORY.createNaryIQTree(root_new_new, ImmutableList.copyOf(childern_new));
+                                    iqt_new = iqt.replaceSubTree(subt, subt_new);
+                                } else {
+                                    iqt_new = iqt.replaceSubTree(subt, sub_new);
                                 }
-                                InnerJoinNode root_new_new = (InnerJoinNode) root;
-                                IQTree subt_new = IQ_FACTORY.createNaryIQTree(root_new_new, ImmutableList.copyOf(childern_new));
-                                iqt_new = iqt.replaceSubTree(subt, subt_new);
-                            } else {
-                                iqt_new = iqt.replaceSubTree(subt, sub_new);
-                            }
-                            List<Integer> cost1 = getCostOfIQTree(iqt);
-                            List<Integer> cost2 = getCostOfIQTree(iqt_new);
+                                List<Integer> cost1 = getCostOfIQTree(iqt);
+                                List<Integer> cost2 = getCostOfIQTree(iqt_new);
 
-                            if((cost1.get(0) >= cost2.get(0))&&((cost1.get(1) >= cost2.get(1)))){
-                                iqt = iqt_new;
-                                update = true;
-                                continue module;
+                                if((cost1.get(0) >= cost2.get(0))&&((cost1.get(1) >= cost2.get(1)))){
+                                    iqt = iqt_new;
+                                    update = true;
+                                    continue module;
+                                }
                             }
                         }
                     }
@@ -675,6 +681,7 @@ public class QueryRewriting {
 
     public IQTree rewriteAtomicJoin(InnerJoinNode root, IQTree left_part, IQTree right_part){
         //format (A1 UNION ... UNION An) JOIN (B1 UNION ... UNION Bm)
+
         IQTree iqt_new = null;
 
         boolean can_rewrite = false;
@@ -682,6 +689,14 @@ public class QueryRewriting {
         InnerJoinNode ij_copy = root;
         QueryNode root_l = left_part.getRootNode();
         QueryNode root_r = right_part.getRootNode();
+        ImmutableSet<Variable> var_l = left_part.getVariables();
+        ImmutableSet<Variable> var_r = right_part.getVariables();
+        Set<Variable> vars_all = new HashSet<Variable>();
+        vars_all.addAll(var_l); vars_all.addAll(var_r);
+        if(vars_all.size() == (var_l.size()+var_r.size())){
+            return null;
+        }
+
         if((root_l instanceof InnerJoinNode) || (root_l instanceof LeftJoinNode) || (root_r instanceof InnerJoinNode) || (root_r instanceof LeftJoinNode)){
             return iqt_new;
         }
@@ -707,13 +722,13 @@ public class QueryRewriting {
                 if(rewrite.newRewritten != null){
                     SubTree_new.add(rewrite.newRewritten);
                 }
-                if(rewrite.canRewrite){
+                if(rewrite.canRewrite || rewrite.sjRewrite){
                     can_rewrite = true;
                 }
             }
         }
 
-        if(can_rewrite){  //some Ai JOIN Bj can rewritten into empty relation or materialized view
+        if(can_rewrite){  //some Ai JOIN Bj can rewritten into empty relation or materialized view or can apply sjr
             if(SubTree_new.size() == 1){
                 iqt_new = SubTree_new.get(0);
             } else if(SubTree_new.size() > 1){
@@ -730,15 +745,14 @@ public class QueryRewriting {
                 EmptyNode en = IQ_FACTORY.createEmptyNode(vars);
                 iqt_new = en;
             }
-        } else {
-            return iqt_new;
         }
-
 
         return iqt_new;
     }
 
     public ExpRewriten rewriteAtomicJoinWithoutUnionInLeftAndRight(InnerJoinNode root, IQTree left, IQTree right){
+        //Rewriting by empty federated joins
+
         ExpRewriten ER = new ExpRewriten();
         //complete the checking conditions
         //Left A, A1 JOIN A2 JOIN ... An
@@ -747,106 +761,24 @@ public class QueryRewriting {
 
         QueryNode root_l = left.getRootNode();
         QueryNode root_r = right.getRootNode();
-        List<ExtensionalDataNode> leaf_left = new ArrayList<ExtensionalDataNode>();
-        List<FilterNode> filter_left = new ArrayList<FilterNode>();
-        List<ExtensionalDataNode> leaf_right = new ArrayList<ExtensionalDataNode>();
-        List<FilterNode> filter_right = new ArrayList<FilterNode>();
+
+        JoinOfLeafs JOL_left = getLeafsOfJoin(left);
+        JoinOfLeafs JOL_right = getLeafsOfJoin(right);
         //keep the order of the leafs
-
-        Optional<ImmutableExpression> on_join_left = null;
-        Optional<ImmutableExpression> on_join_right = null;
-
-        if(left.isLeaf()){
-            if(left instanceof ExtensionalDataNode){
-                leaf_left.add((ExtensionalDataNode) left);
-                filter_left.add(null);
-            }
-        } else if (root_l instanceof FilterNode) {
-            ImmutableList<IQTree> childern = left.getChildren();
-            for(IQTree t: childern){
-                if(t instanceof ExtensionalDataNode){
-                    leaf_left.add((ExtensionalDataNode)t);
-                    filter_left.add((FilterNode) root_l);
-                }
-            }
-        } else if(root_l instanceof InnerJoinNode){
-            on_join_left = ((InnerJoinNode) root_l).getOptionalFilterCondition();
-            ImmutableList<IQTree> childern = left.getChildren();
-            for(IQTree t: childern){
-                Set<FilterNode> set = new HashSet<FilterNode>();
-                if(t.isLeaf()){
-                    if(t instanceof ExtensionalDataNode){
-                        leaf_left.add((ExtensionalDataNode)t);
-                        filter_left.add(null);
-                    }
-                } else if(t.getRootNode() instanceof FilterNode){
-                    for(IQTree sub_t: t.getChildren()){
-                        if(sub_t instanceof ExtensionalDataNode){
-                            leaf_left.add((ExtensionalDataNode)sub_t);
-                            filter_left.add((FilterNode) t.getRootNode());
-                        }
-                    }
-                } else {
-                    return ER;
-                }
-            }
-
-        } else {
+        if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
             return ER;
         }
 
-        if(right.isLeaf()){
-            if(right instanceof ExtensionalDataNode){
-                leaf_right.add((ExtensionalDataNode)right);
-                filter_right.add(null);
-            }
-        } else if (root_r instanceof FilterNode) {
-            ImmutableList<IQTree> childern = right.getChildren();
-            for(IQTree t: childern){
-                if(t instanceof ExtensionalDataNode){
-                    leaf_right.add((ExtensionalDataNode)t);
-                    filter_right.add((FilterNode) root_r);
-                }
-            }
-        } else if(root_r instanceof InnerJoinNode){
-            on_join_right = ((InnerJoinNode) root_r).getOptionalFilterCondition();
-            ImmutableList<IQTree> childern = right.getChildren();
-            for(IQTree t: childern){
-                if(t.isLeaf()){
-                    if(t instanceof ExtensionalDataNode){
-                        leaf_right.add((ExtensionalDataNode)t);
-                        filter_right.add(null);
-                    }
-                } else if(t.getRootNode() instanceof FilterNode){
-                    for(IQTree sub_t: t.getChildren()){
-                        if(sub_t instanceof ExtensionalDataNode){
-                            leaf_right.add((ExtensionalDataNode)sub_t);
-                            filter_right.add((FilterNode) t.getRootNode());
-                        }
-                    }
-                } else {
-                    return ER;
-                }
-            }
 
-        } else {
-            return ER;
-        }
-
-        for(ExtensionalDataNode ele_left: leaf_left){
-            for(ExtensionalDataNode ele_right: leaf_right){
-                RelationPredicate predict_left = ele_left.getRelationDefinition().getAtomPredicate();
-                RelationPredicate predict_right = ele_right.getRelationDefinition().getAtomPredicate();
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = ele_left.getArgumentMap();
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = ele_right.getArgumentMap();
-                for(int i: arg_map_left.keySet()){
-                    for(int j: arg_map_right.keySet()){
-                        if(arg_map_left.get(i).equals(arg_map_right.get(j))){
-                            String rel1 = predict_left.toString();
-                            String rel2 = predict_right.toString();
+        for(int i=0; i<JOL_left.dataNodes.size(); i++){
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataNodes.get(i).getArgumentMap();
+            for(int j=0; j<JOL_right.dataNodes.size(); j++){
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataNodes.get(j).getArgumentMap();
+                for(int k: JOL_left.dataNodes.get(i).getArgumentMap().keySet()){
+                    for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
+                        if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
                             //change the check condition based on different ways of representing hints
-
-                            if(hints.get(2).contains(rel1+"<>"+rel2+"<>"+i+"<>"+j) || hints.get(2).contains(rel2+"<>"+rel1+"<>"+j+"<>"+i)){
+                            if(hints.get(2).contains(JOL_left.relations.get(i).getName()+"<>"+JOL_right.relations.get(j).getName()+"<>"+k+"<>"+l) || hints.get(2).contains(JOL_right.relations.get(j).getName()+"<>"+JOL_left.relations.get(i).getName()+"<>"+l+"<>"+k)){
                                 ER.canRewrite = true;
                                 return ER;
                             }
@@ -858,24 +790,91 @@ public class QueryRewriting {
             }
         }
 
+        ER = createJoinTree(root, JOL_left, JOL_right);
+
         //the input (left JOIN right) cannot be rewritten by empty federated join and materialized views
-        //create a IQTree for (left JOIN right)
+        //create a IQTree for (left JOIN right), by applying self-join optimization
+
+        return ER;
+    }
+
+    //recreate join tree where sfr rule is applied
+    public ExpRewriten createJoinTree(InnerJoinNode root, JoinOfLeafs left, JoinOfLeafs right){
+        ExpRewriten ER = new ExpRewriten();
+
         Set<Variable> vars_l_r = new HashSet<>();
         List<IQTree> childern_new = new ArrayList<IQTree>();
-        for(int i=0; i<leaf_left.size(); i++){
-            IQTree t = leaf_left.get(i);
-            FilterNode fn = filter_left.get(i);
-            if(fn != null){
-                IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
-                childern_new.add(t_new);
-            } else {
-                childern_new.add(t);
+        for(int i=0; i<left.dataNodes.size(); i++){
+            IQTree t = left.dataNodes.get(i);
+            FilterNode fn = left.filters.get(i);
+
+            List<Integer> index_right = new ArrayList<Integer>();
+            Map<Integer, VariableOrGroundTerm> arg_maps = new HashMap<Integer, VariableOrGroundTerm>();
+            if(right.relations.contains(left.relations.get(i))){ // try sjr rewriting
+                for(int j=0; j<right.relations.size(); j++){
+                    if(right.relations.get(j).equals(left.relations.get(i))){
+                        for(int index: getSinglePrimaryKeyIndexOfRelations(left.dataNodes.get(i))){
+                            if(left.dataNodes.get(i).getArgumentMap().containsKey(index) && right.dataNodes.get(j).getArgumentMap().containsKey(index) &&
+                                    left.dataNodes.get(i).getArgumentMap().get(index).equals(right.dataNodes.get(j).getArgumentMap().get(index))){
+                                index_right.add(j);
+                                arg_maps.putAll(right.dataNodes.get(j).getArgumentMap());
+                                ER.sjRewrite = true;
+                            }
+                        }
+                    }
+                }
             }
-            vars_l_r.addAll(t.getVariables());
+
+            if(index_right.size() == 0){
+                if(fn != null){
+                    IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
+                    childern_new.add(t_new);
+                } else {
+                    childern_new.add(t);
+                }
+                vars_l_r.addAll(t.getVariables());
+            } else {
+                arg_maps.putAll(left.dataNodes.get(i).getArgumentMap());
+                ExtensionalDataNode dataNode_new = IQ_FACTORY.createExtensionalDataNode(left.dataNodes.get(i).getRelationDefinition(), ImmutableMap.copyOf(arg_maps));
+                //all the filter conditions are AND
+                List<ImmutableExpression> conditions = new ArrayList<ImmutableExpression>();
+                if(left.filters.get(i) != null){
+                    BooleanFunctionSymbol bfs = left.filters.get(i).getFilterCondition().getFunctionSymbol();
+                    if(bfs.toString().startsWith("AND")){ //change
+                        for(ImmutableTerm it: left.filters.get(i).getFilterCondition().getTerms()){
+                            conditions.add((ImmutableExpression) it);
+                        }
+                    } else {
+                        conditions.add(left.filters.get(i).getFilterCondition());
+                    }
+                }
+                for(int j: index_right){
+                    if(right.filters.get(j) != null){
+                        BooleanFunctionSymbol bfs = right.filters.get(j).getFilterCondition().getFunctionSymbol();
+                        if(bfs.toString().startsWith("AND")){ //change
+                            for(ImmutableTerm it: right.filters.get(j).getFilterCondition().getTerms()){
+                                conditions.add((ImmutableExpression) it);
+                            }
+                        } else {
+                            conditions.add(right.filters.get(j).getFilterCondition());
+                        }
+                    }
+                    vars_l_r.addAll(right.dataNodes.get(j).getVariables());
+                    right.dataNodes.remove(j);
+                    right.filters.remove(j);
+                }
+                if(conditions.size() == 0){
+                    childern_new.add(dataNode_new);
+                } else {
+                    ImmutableExpression exp = TERM_FACTORY.getConjunction(ImmutableList.copyOf(conditions));//null; //null;
+                    FilterNode fn_new = IQ_FACTORY.createFilterNode(exp);
+                    childern_new.add(IQ_FACTORY.createUnaryIQTree(fn_new, dataNode_new));
+                }
+            }
         }
-        for(int i=0; i<leaf_right.size(); i++){
-            IQTree t = leaf_right.get(i);
-            FilterNode fn = filter_right.get(i);
+        for(int i=0; i<right.dataNodes.size(); i++){
+            IQTree t = right.dataNodes.get(i);
+            FilterNode fn = right.filters.get(i);
             if(fn != null){
                 IQTree t_new = IQ_FACTORY.createUnaryIQTree(fn, t);
                 childern_new.add(t_new);
@@ -887,20 +886,108 @@ public class QueryRewriting {
 
         InnerJoinNode root_new = root;
         ImmutableSet<Variable> vars = root.getLocalVariables();
-        if(vars.size() == 0){
-            ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
+        //可能childern_new只有一个孩子, self-join rule的应用;;
+        if(childern_new.size() == 1){
+            if(vars.size() == 0){
+                //没有join condition
+                ER.newRewritten = childern_new.get(0);
+            } else {
+                if(vars_l_r.containsAll(vars)){
+                    FilterNode fn = IQ_FACTORY.createFilterNode(root.getOptionalFilterCondition().get());
+                    ER.newRewritten = IQ_FACTORY.createUnaryIQTree(fn, childern_new.get(0));
+                } else {
+                    //split the join condition
+                    ER.newRewritten = childern_new.get(0);
+                }
+            }
         } else {
-            if(vars_l_r.containsAll(vars)){
+            if(vars.size() == 0){
                 ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
             } else {
-                //need to creat new Innor Join Node with files operating on the variables of the sub-trees;
-                //the following condition needs to be changed again
-                InnerJoinNode IJN = IQ_FACTORY.createInnerJoinNode();
-                ER.newRewritten = IQ_FACTORY.createNaryIQTree(IJN, ImmutableList.copyOf(childern_new));
+                if(vars_l_r.containsAll(vars)){
+                    ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(childern_new));
+                } else {
+                    //need to creat new Innor Join Node with files operating on the variables of the sub-trees;
+                    //the following condition needs to be changed again
+                    InnerJoinNode IJN = IQ_FACTORY.createInnerJoinNode();
+                    ER.newRewritten = IQ_FACTORY.createNaryIQTree(IJN, ImmutableList.copyOf(childern_new));
+                }
             }
         }
 
         return ER;
+    }
+
+    public JoinOfLeafs getLeafsOfJoin(IQTree t){
+        JoinOfLeafs JOL = new JoinOfLeafs();
+
+        if(t.isLeaf()){
+            if(t instanceof ExtensionalDataNode){
+                JOL.dataNodes.add((ExtensionalDataNode) t);
+                JOL.filters.add(null);
+                JOL.relations.add(((ExtensionalDataNode) t).getRelationDefinition().getAtomPredicate());
+            }
+        } else if (t.getRootNode() instanceof FilterNode){
+            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
+                JOL.filters.add((FilterNode)t.getRootNode());
+                JOL.dataNodes.add((ExtensionalDataNode)t.getChildren().get(0));
+                JOL.relations.add(((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+            }
+        } else if(t.getRootNode() instanceof InnerJoinNode){
+            JOL.conditions = ((InnerJoinNode) t.getRootNode()).getOptionalFilterCondition();
+            for(IQTree t_new: t.getChildren()){
+                if(t_new.isLeaf()){
+                    if(t_new instanceof ExtensionalDataNode){
+                        JOL.dataNodes.add((ExtensionalDataNode)t_new);
+                        JOL.filters.add(null);
+                        JOL.relations.add(((ExtensionalDataNode) t_new).getRelationDefinition().getAtomPredicate());
+                    }
+                } else if(t_new.getRootNode() instanceof FilterNode){
+                    if(t_new.getChildren().get(0) instanceof ExtensionalDataNode){
+                        JOL.filters.add((FilterNode) t_new.getRootNode());
+                        JOL.dataNodes.add((ExtensionalDataNode) t_new.getChildren().get(0));
+                        JOL.relations.add(((ExtensionalDataNode) t_new.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                    }
+                }  else if(t_new.getRootNode() instanceof InnerJoinNode){
+                    //lift join condition
+                    for(IQTree sub: t_new.getChildren()){
+                        if(sub instanceof ExtensionalDataNode){
+                            JOL.dataNodes.add((ExtensionalDataNode)sub);
+                            JOL.filters.add(null);
+                            JOL.relations.add(((ExtensionalDataNode)sub).getRelationDefinition().getAtomPredicate());
+                        } else if(sub.getRootNode() instanceof FilterNode){
+                            JOL.filters.add((FilterNode)sub.getRootNode());
+                            JOL.dataNodes.add((ExtensionalDataNode) sub.getChildren().get(0));
+                            JOL.relations.add(((ExtensionalDataNode) sub.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                        }
+                    }
+                }
+                else {
+                    return JOL;
+                }
+            }
+
+        } else {
+            return JOL;
+        }
+        return JOL;
+    }
+
+    public List<Integer> getSinglePrimaryKeyIndexOfRelations(ExtensionalDataNode dataNode){
+        //unique primary key index
+        List<Integer> index = new ArrayList<Integer>();
+
+        ImmutableList<Attribute> attrs = dataNode.getRelationDefinition().getAttributes();
+        for(UniqueConstraint uc: dataNode.getRelationDefinition().getUniqueConstraints()){
+            if(uc.isPrimaryKey()){
+                ImmutableList<Attribute> ats = uc.getAttributes();
+                if(ats.size() == 1){
+                    index.add(attrs.indexOf(ats.get(0)));
+                }
+            }
+        }
+
+        return index;
     }
 
     /***-rewrite the left outer join node-**********************/
@@ -940,221 +1027,73 @@ public class QueryRewriting {
 
     public ExpRewriten rewriteAtomicLeftJoin(LeftJoinNode root, IQTree left, IQTree right){
         //format: (A1 UNION ... UNION Am) LOJ (B1 UNION ... UNION Bn), Ai, Bj leaf or join tree
+
         ExpRewriten ER = new ExpRewriten();
         if((left.getRootNode() instanceof LeftJoinNode) || (right.getRootNode() instanceof LeftJoinNode)){
             return ER;
         }
-        List<List<IQTree>> childern_left = new ArrayList<List<IQTree>>();
-        List<List<FilterNode>> filter_left = new ArrayList<List<FilterNode>>();
-        List<String> join_condition_left = new ArrayList<String>();
 
-        List<List<IQTree>> childern_right = new ArrayList<List<IQTree>>();
-        List<List<FilterNode>> filter_right = new ArrayList<List<FilterNode>>();
-        List<String> join_condition_right = new ArrayList<String>();
+        List<JoinOfLeafs> left_part = new ArrayList<JoinOfLeafs>();
+        List<JoinOfLeafs> right_part = new ArrayList<JoinOfLeafs>();
 
-        QueryNode root_left = left.getRootNode();
-        QueryNode root_right = right.getRootNode();
-
-        if(left instanceof ExtensionalDataNode){
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            List<FilterNode> filter = new ArrayList<FilterNode>();
-            subtree.add(left);
-            filter.add(null);
-            childern_left.add(subtree);
-            filter_left.add(filter);
-        } else if(root_left instanceof FilterNode){
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            ImmutableList<IQTree> childern = left.getChildren();
-            for(IQTree t: childern){
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                } else {
-                    return ER;
-                }
+        if((left instanceof ExtensionalDataNode) || (left.getRootNode() instanceof FilterNode) || (left.getRootNode() instanceof InnerJoinNode) ){
+            if(getLeafsOfJoin(left).dataNodes.size() > 0){
+                left_part.add(getLeafsOfJoin(left));
+            } else {
+                return ER;
             }
-            childern_left.add(subtree);
-            List<FilterNode> filter = new ArrayList<FilterNode>();
-            filter.add((FilterNode)root_left);
-            filter_left.add(filter);
-        } else if(root_left instanceof UnionNode){
-            ImmutableList<IQTree> childern = left.getChildren();
-            for(IQTree t: childern){
-                List<IQTree> subtree = new ArrayList<IQTree>();
-                List<FilterNode> filter = new ArrayList<FilterNode>();
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                    filter.add(null);
-                    childern_left.add(subtree);
-                    filter_left.add(filter);
-                } else if(t.getRootNode() instanceof FilterNode){
-                    filter.add((FilterNode)t.getRootNode());
-                    ImmutableList<IQTree> child = t.getChildren();
-                    for(IQTree t1: child){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                        } else {
-                            return ER;
-                        }
-                    }
-                    childern_left.add(subtree);
-                    filter_left.add(filter);
-                }else if(t.getRootNode() instanceof InnerJoinNode){ //join condition
-                    ImmutableList<IQTree> child = t.getChildren();
-                    for(IQTree t1: child){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                            filter.add(null);
-                        } else if(t1.getRootNode() instanceof FilterNode){
-                            filter.add((FilterNode) t1.getRootNode());
-                            for(IQTree t2: t1.getChildren()){
-                                if(t2 instanceof ExtensionalDataNode){
-                                    subtree.add(t2);
-                                } else {
-                                    return ER;
-                                }
-                            }
-                        } else {
-                            return ER;
-                        }
-                    }
-                    childern_left.add(subtree);
-                    filter_left.add(filter);
-                }
-            }
-
-        } else if(root_left instanceof InnerJoinNode) { // Join condition
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            List<FilterNode> filter = new ArrayList<FilterNode>();
+        } else if(left.getRootNode() instanceof UnionNode){
             for(IQTree t: left.getChildren()){
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                    filter.add(null);
-                } else if(t.getRootNode() instanceof FilterNode){
-                    filter.add((FilterNode) t.getRootNode());
-                    for(IQTree t1: t.getChildren()){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                        } else {
-                            return ER;
-                        }
+                if((t instanceof ExtensionalDataNode) || (t.getRootNode() instanceof FilterNode) || (t.getRootNode() instanceof InnerJoinNode)){
+                    if(getLeafsOfJoin(t).dataNodes.size()>0){
+                        left_part.add(getLeafsOfJoin(t));
+                    } else {
+                        return ER;
                     }
                 }
             }
-            childern_left.add(subtree);
-            filter_left.add(filter);
         } else {
             return ER;
         }
 
-        if(right instanceof ExtensionalDataNode){
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            List<FilterNode> filter = new ArrayList<FilterNode>();
-            subtree.add(right);
-            filter.add(null);
-            childern_right.add(subtree);
-            filter_right.add(filter);
-        } else if(root_right instanceof FilterNode){
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            ImmutableList<IQTree> childern = right.getChildren();
-            for(IQTree t: childern){
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                } else {
-                    return ER;
-                }
+        if((right instanceof ExtensionalDataNode) || (right.getRootNode() instanceof FilterNode) || (right.getRootNode() instanceof InnerJoinNode) ){
+            if(getLeafsOfJoin(right).dataNodes.size() > 0){
+                right_part.add(getLeafsOfJoin(right));
+            } else {
+                return ER;
             }
-            childern_right.add(subtree);
-            List<FilterNode> filter = new ArrayList<FilterNode>();
-            filter.add((FilterNode)root_right);
-            filter_right.add(filter);
-        } else if(root_right instanceof UnionNode){
-            ImmutableList<IQTree> childern = right.getChildren();
-            for(IQTree t: childern){
-                List<IQTree> subtree = new ArrayList<IQTree>();
-                List<FilterNode> filter = new ArrayList<FilterNode>();
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                    filter.add(null);
-                    childern_right.add(subtree);
-                    filter_right.add(filter);
-                } else if(t.getRootNode() instanceof FilterNode){
-                    filter.add((FilterNode)t.getRootNode());
-                    ImmutableList<IQTree> child = t.getChildren();
-                    for(IQTree t1: child){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                        } else {
-                            return ER;
-                        }
-                    }
-                    childern_right.add(subtree);
-                    filter_right.add(filter);
-                } else if(t.getRootNode() instanceof InnerJoinNode){ //join condition
-                    ImmutableList<IQTree> child = t.getChildren();
-                    for(IQTree t1: child){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                            filter.add(null);
-                        } else if(t1.getRootNode() instanceof FilterNode){
-                            filter.add((FilterNode) t1.getRootNode());
-                            for(IQTree t2: t1.getChildren()){
-                                if(t2 instanceof ExtensionalDataNode){
-                                    subtree.add(t2);
-                                } else {
-                                    return ER;
-                                }
-                            }
-                        } else {
-                            return ER;
-                        }
-                    }
-                    childern_right.add(subtree);
-                    filter_right.add(filter);
-                }
-            }
-
-        } else if(root_right instanceof InnerJoinNode) { // Join condition
-            List<IQTree> subtree = new ArrayList<IQTree>();
-            List<FilterNode> filter = new ArrayList<FilterNode>();
+        } else if(right.getRootNode() instanceof UnionNode){
             for(IQTree t: right.getChildren()){
-                if(t instanceof ExtensionalDataNode){
-                    subtree.add(t);
-                    filter.add(null);
-                } else if(t.getRootNode() instanceof FilterNode){
-                    filter.add((FilterNode) t.getRootNode());
-                    for(IQTree t1: t.getChildren()){
-                        if(t1 instanceof ExtensionalDataNode){
-                            subtree.add(t1);
-                        } else {
-                            return ER;
-                        }
+                if((t instanceof ExtensionalDataNode) || (t.getRootNode() instanceof FilterNode) || (t.getRootNode() instanceof InnerJoinNode)){
+                    if(getLeafsOfJoin(t).dataNodes.size()>0){
+                        right_part.add(getLeafsOfJoin(t));
+                    } else {
+                        return ER;
                     }
                 }
             }
-            childern_right.add(subtree);
-            filter_right.add(filter);
         } else {
             return ER;
         }
 
         Map<Integer, Integer> index = new HashMap<Integer, Integer>(); // Ai JOIN Bj no empty
-        for(int i=0; i<childern_left.size(); i++){
-            for(int k=0; k<childern_right.size(); k++){
+        for(int i=0; i<left_part.size(); i++){
+            for(int k=0; k<right_part.size(); k++){
                 boolean label = false;
 
-                for(int j=0; j<childern_left.get(i).size(); j++){
-                    for(int l=0; l<childern_right.get(k).size(); l++){
-                        RelationPredicate relation_left = ((ExtensionalDataNode)childern_left.get(i).get(j)).getRelationDefinition().getAtomPredicate();
+                for(int j=0; j<left_part.get(i).dataNodes.size(); j++){
+                    for(int l=0; l<right_part.get(k).dataNodes.size(); l++){
+                        RelationPredicate relation_left = left_part.get(i).relations.get(j);
                         String name_left = relation_left.toString();
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = ((ExtensionalDataNode)childern_left.get(i).get(j)).getArgumentMap();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = left_part.get(i).dataNodes.get(j).getArgumentMap();
 
-                        RelationPredicate relation_right = ((ExtensionalDataNode)childern_right.get(k).get(l)).getRelationDefinition().getAtomPredicate();
+                        RelationPredicate relation_right = right_part.get(k).relations.get(l);
                         String name_right = relation_right.toString();
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = ((ExtensionalDataNode)childern_left.get(k).get(l)).getArgumentMap();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = right_part.get(k).dataNodes.get(l).getArgumentMap();
 
                         for(int f: arg_left.keySet()){
                             for(int h: arg_right.keySet()){
-                                if(arg_left.get(f).equals(arg_right.get(h))){
+                                if((arg_left.get(f) instanceof Variable)&&(arg_right.get(h) instanceof Variable)&&(arg_left.get(f).equals(arg_right.get(h)))){
                                     if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
                                         label = true;
                                     }
@@ -1164,7 +1103,7 @@ public class QueryRewriting {
                     }
                 }
                 if(!label){
-                    if(childern_left.size() == 1){
+                    if(left_part.size() == 1){
                         index.put(k,i);
                     } else{
                         if(!index.containsKey(i)){
@@ -1178,18 +1117,18 @@ public class QueryRewriting {
         }
 
         //check the pairwise disjoint feature of the elements in the unions in the left hand side.
-        if(childern_left.size()>1 && childern_right.size()>1){
-            for(int i=0; i<childern_left.size(); i++){
-                for(int j=i+1; j<childern_left.size(); j++){
+        if(left_part.size()>1 && right_part.size()>1){
+            for(int i=0; i<left_part.size(); i++){
+                for(int j=i+1; j<left_part.size(); j++){
                     boolean b = false;
-                    for(int k=0; k<childern_left.get(i).size(); k++){
-                        RelationPredicate relation_1 = ((ExtensionalDataNode)childern_left.get(i).get(k)).getRelationDefinition().getAtomPredicate();
+                    for(int k=0; k<left_part.get(i).dataNodes.size(); k++){
+                        RelationPredicate relation_1 = left_part.get(i).relations.get(k);
                         String name_1 = relation_1.toString();
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = ((ExtensionalDataNode)childern_left.get(i).get(k)).getArgumentMap();
-                        for(int l=0; l<childern_left.get(j).size(); l++){
-                            RelationPredicate relation_2 = ((ExtensionalDataNode)childern_left.get(j).get(l)).getRelationDefinition().getAtomPredicate();
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = left_part.get(i).dataNodes.get(k).getArgumentMap();
+                        for(int l=0; l<left_part.get(j).dataNodes.size(); l++){
+                            RelationPredicate relation_2 = left_part.get(j).relations.get(l);
                             String name_2 = relation_2.toString();
-                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = ((ExtensionalDataNode)childern_left.get(j).get(l)).getArgumentMap();
+                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = left_part.get(j).dataNodes.get(l).getArgumentMap();
                             for(int h: arg_1.keySet()){
                                 for(int f: arg_2.keySet()){
                                     if(arg_1.get(h).equals(arg_2.get(f))){
@@ -1208,123 +1147,104 @@ public class QueryRewriting {
             }
         }
 
-        if(childern_left.size()>1){
-            if(childern_right.size()>1){
-                //union of left joins or inner joins
-                if(index.size() == childern_left.size()){
-                    Set<Variable> vars = new HashSet<Variable>();
-                    vars.addAll(left.getVariables());
-                    vars.addAll(right.getVariables());
-                    UnionNode root_new = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars));
-                    List<IQTree> subtrees = new ArrayList<IQTree>();
-                    for(int i: index.keySet()){
-                        int j = index.get(i);
-                        if(childern_right.get(j).size()==1){
-                            boolean b = false;
-                            RelationPredicate relation_j = ((ExtensionalDataNode)childern_right.get(j).get(0)).getRelationDefinition().getAtomPredicate();
-                            String name_j = relation_j.toString();
-                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_j = ((ExtensionalDataNode)childern_left.get(j).get(0)).getArgumentMap();
+        if(index.size() == left_part.size()){
+            List<IQTree> subtrees = new ArrayList<IQTree>();
+            for(int i: index.keySet()){
+                int j = index.get(i);
+                if(right_part.get(j).dataNodes.size()==1){
+                    boolean b = false; //self-left-join check
+                    int ind_i = 0;
+                    RelationPredicate relation_j = right_part.get(j).relations.get(0);
+                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_j = right_part.get(j).dataNodes.get(0).getArgumentMap();
 
-                            for(int k=0; k<childern_left.get(i).size(); k++){
-                                RelationPredicate relation_i = ((ExtensionalDataNode)childern_right.get(i).get(k)).getRelationDefinition().getAtomPredicate();
-                                String name_i = relation_i.toString();
-                                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_i = ((ExtensionalDataNode)childern_left.get(i).get(k)).getArgumentMap();
-                                if(name_j == name_i){
-                                    //add extra check condition
-                                    b = true;
-                                    break;
-                                }
+                    if(left_part.get(i).relations.contains(relation_j)){
+                        int ind = left_part.get(i).relations.indexOf(relation_j);
+                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_i = left_part.get(i).dataNodes.get(ind).getArgumentMap();
+                        List<Integer> pk_index_i = getSinglePrimaryKeyIndexOfRelations(left_part.get(i).dataNodes.get(ind));
+                        for(int pk_ind: pk_index_i){
+                            if(arg_j.containsKey(pk_ind) && arg_i.containsKey(pk_ind) && (arg_j.get(pk_ind).equals(arg_i.get(pk_ind)))){
+                                b=true;
+                                ind_i = ind;
                             }
-                            if(b){
-                                InnerJoinNode IJN = IQ_FACTORY.createInnerJoinNode();
-                                List<IQTree> subsubtrees = new ArrayList<IQTree>();
-                                if(left.getChildren().get(i).isLeaf()){
-                                    subsubtrees.add(left.getChildren().get(i));
-                                } else if(left.getChildren().get(i).getRootNode() instanceof InnerJoinNode){
-                                    subsubtrees.addAll(left.getChildren().get(i).getChildren());
-                                } else if(left.getChildren().get(i).getRootNode() instanceof FilterNode) {
-                                    subsubtrees.add(left.getChildren().get(i));
-                                }
-                                if(right.getChildren().get(j).isLeaf()){
-                                    subsubtrees.add(right.getChildren().get(j));
-                                } else if(right.getChildren().get(j).getRootNode() instanceof InnerJoinNode){
-                                    subsubtrees.addAll(right.getChildren().get(j).getChildren());
-                                } else if(right.getChildren().get(j).getRootNode() instanceof FilterNode) {
-                                    subsubtrees.add(right.getChildren().get(j));
-                                }
-                                IQTree subt = IQ_FACTORY.createNaryIQTree(IJN, ImmutableList.copyOf(subsubtrees));
-                                subtrees.add(subt);
-                            } else {
-                                LeftJoinNode root_subtree = IQ_FACTORY.createLeftJoinNode();
-                                IQTree subt = IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j));
-                                subtrees.add(subt);
-                            }
-                        } else {
-                            LeftJoinNode root_subtree = IQ_FACTORY.createLeftJoinNode();
-                            IQTree subt = IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j));
-                            subtrees.add(subt);
-                        }
-                    }
-                    ER.canRewrite = true;
-                    ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(subtrees));
-                }
-            } else {
-                if(index.size() < childern_left.size()){
-                    //rewritten
-                }
-            }
-        } else {
-            if(childern_right.size()>1){
-                if(index.size() < childern_right.size()){
-                    UnionNode un_new = IQ_FACTORY.createUnionNode(right.getVariables());
-                    List<IQTree> subtrees = new ArrayList<IQTree>();
-                    for(int i: index.keySet()){
-                        subtrees.add(right.getChildren().get(i));
-                    }
-                    IQTree t_new = IQ_FACTORY.createNaryIQTree(un_new, ImmutableList.copyOf(subtrees));
-                    ER.canRewrite = true;
-                    LeftJoinNode lj = IQ_FACTORY.createLeftJoinNode();
-                    ER.newRewritten = IQ_FACTORY.createBinaryNonCommutativeIQTree(lj, left, t_new);
-                }
-            } else {
-                if(childern_right.get(0).size() == 1){
-                    boolean b = false;
-                    RelationPredicate relation_right = ((ExtensionalDataNode)childern_right.get(0).get(0)).getRelationDefinition().getAtomPredicate();
-                    String name_right = relation_right.toString();
-                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = ((ExtensionalDataNode)childern_right.get(0).get(0)).getArgumentMap();
-                    for(int k=0; k<childern_left.get(0).size(); k++){
-                        RelationPredicate relation_left = ((ExtensionalDataNode)childern_left.get(0).get(k)).getRelationDefinition().getAtomPredicate();
-                        String name_left = relation_left.toString();
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = ((ExtensionalDataNode)childern_left.get(0).get(k)).getArgumentMap();
-                        if(name_left == name_right){
-                            //improve the checking condition
-                            b = true;
-                            break;
                         }
                     }
                     if(b){
-                        InnerJoinNode root_new = IQ_FACTORY.createInnerJoinNode();
-                        List<IQTree> subtrees = new ArrayList<IQTree>();
-                        if(left.isLeaf()){
-                            subtrees.add(left);
-                        } else if(left.getRootNode() instanceof FilterNode){
-                            subtrees.add(left);
-                        } else if(left.getRootNode() instanceof InnerJoinNode){
-                            subtrees.addAll(left.getChildren());
+                        //first create a new data node
+                        Map<Integer, VariableOrGroundTerm> args = new HashMap<Integer, VariableOrGroundTerm>();
+                        args.putAll(arg_j);
+                        args.putAll(left_part.get(i).dataNodes.get(ind_i).getArgumentMap());
+                        ExtensionalDataNode data_new = IQ_FACTORY.createExtensionalDataNode(left_part.get(i).dataNodes.get(ind_i).getRelationDefinition(), ImmutableMap.copyOf(args));
+                        List<ImmutableExpression> cond_new = new ArrayList<ImmutableExpression>();
+                        FilterNode fn_new = null;
+                        if(left_part.get(i).filters.get(ind_i) != null){
+                            if(left_part.get(i).filters.get(ind_i).getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
+                                for(ImmutableTerm it : left_part.get(i).filters.get(ind_i).getFilterCondition().getTerms()){
+                                    cond_new.add((ImmutableExpression)it);
+                                }
+                            } else {
+                                cond_new.add(left_part.get(i).filters.get(ind_i).getFilterCondition());
+                            }
                         }
-                        if(right.isLeaf()){
-                            subtrees.add(right);
-                        } else if(right.getRootNode() instanceof FilterNode){
-                            subtrees.add(right);
-                        } else if(right.getRootNode() instanceof InnerJoinNode){
-                            subtrees.addAll(right.getChildren());
+                        if(right_part.get(j).filters.get(0) != null){
+                            if(right_part.get(j).filters.get(0).getFilterCondition().getFunctionSymbol().getName().startsWith("AND")){
+                                for(ImmutableTerm it : right_part.get(j).filters.get(0).getFilterCondition().getTerms()){
+                                    cond_new.add((ImmutableExpression)it);
+                                }
+                            } else {
+                                cond_new.add(right_part.get(j).filters.get(0).getFilterCondition());
+                            }
                         }
-                        ER.canRewrite = true;
-                        ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(subtrees));
+                        if(cond_new.size() == 1){
+                            fn_new = IQ_FACTORY.createFilterNode(cond_new.get(0));
+                        } else if(cond_new.size() > 1){
+                            fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(cond_new)));
+                        }
+
+                        if(left_part.get(i).dataNodes.size() == 1){
+                             if(fn_new == null){
+                                 subtrees.add(data_new);
+                             } else {
+                                 subtrees.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
+                             }
+                        } else {
+                            InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(left_part.get(i).conditions);
+                            List<IQTree> sub_sub_t = new ArrayList<IQTree>();
+                            for(int l=0; l<left_part.get(i).dataNodes.size(); l++){
+                                if(l != ind_i){
+                                    if(left_part.get(i).filters.get(l) == null){
+                                        sub_sub_t.add(left_part.get(i).dataNodes.get(l));
+                                    } else {
+                                        sub_sub_t.add(IQ_FACTORY.createUnaryIQTree(left_part.get(i).filters.get(l), left_part.get(i).dataNodes.get(l)));
+                                    }
+                                } else {
+                                    if(fn_new == null){
+                                        sub_sub_t.add(data_new);
+                                    } else {
+                                        sub_sub_t.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
+                                    }
+                                }
+                            }
+                            subtrees.add(IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(sub_sub_t)));
+                        }
+                    } else {
+                        LeftJoinNode root_subtree = IQ_FACTORY.createLeftJoinNode();
+                        subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j)));
                     }
                 } else {
-                    return ER;
+                    LeftJoinNode root_subtree = IQ_FACTORY.createLeftJoinNode();
+                    subtrees.add(IQ_FACTORY.createBinaryNonCommutativeIQTree(root_subtree, left.getChildren().get(i), right.getChildren().get(j)));
                 }
+            }
+
+            ER.canRewrite = true;
+            if(subtrees.size() == 1){
+                ER.newRewritten = subtrees.get(0);
+            } else {
+                Set<Variable> vars = new HashSet<Variable>();
+                vars.addAll(left.getVariables());
+                vars.addAll(right.getVariables());
+                UnionNode root_new = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars));
+                ER.newRewritten = IQ_FACTORY.createNaryIQTree(root_new, ImmutableList.copyOf(subtrees));
             }
         }
 
@@ -1374,7 +1294,20 @@ public class QueryRewriting {
             IQTree iqt_new = QR.rewriteIQTree(iqt);
             System.out.println("new generated tree");
             System.out.println(iqt_new);
-            System.out.println("computed cost: "+QR.getCostOfInnerJoin(iqt_new));
+            System.out.println("computed cost: "+QR.getCostOfIQTree(iqt_new));
+
+//            List<IQTree> subtrees = getAllSubTree(iqt);
+//            for(IQTree t: subtrees){
+//                if(t.getRootNode() instanceof FilterNode){
+//                    FilterNode fn = (FilterNode) t.getRootNode();
+//                    System.out.println(fn);
+//                    System.out.println(fn.getFilterCondition());
+//                    System.out.println(fn.getFilterCondition().getTerms());
+//                    System.out.println();
+//
+//                }
+//            }
+
 
         }catch(Exception e){
             e.printStackTrace();
@@ -1384,10 +1317,26 @@ public class QueryRewriting {
 
 class ExpRewriten{
     public boolean canRewrite;
+    public boolean sjRewrite;
     public IQTree newRewritten;
 
     public ExpRewriten(){
         canRewrite = false;
+        sjRewrite = false;
         newRewritten = null;
+    }
+}
+
+class JoinOfLeafs{
+    public List<ExtensionalDataNode> dataNodes;
+    public List<FilterNode> filters;
+    public List<RelationPredicate> relations;
+    public Optional<ImmutableExpression> conditions;
+
+    public JoinOfLeafs(){
+        dataNodes = new ArrayList<ExtensionalDataNode>();
+        filters = new ArrayList<FilterNode>();
+        relations = new ArrayList<RelationPredicate>();
+        conditions = null;
     }
 }
