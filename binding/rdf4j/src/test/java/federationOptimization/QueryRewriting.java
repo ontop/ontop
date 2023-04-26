@@ -95,20 +95,23 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
-                    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
-                    "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
+            query = "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
                     "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+                    "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
+                    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
                     "\n" +
-                    "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
+                    "SELECT ?title ?text ?reviewDate ?reviewer ?reviewerName ?rating1 ?rating2 ?rating3 ?rating4\n" +
                     "WHERE {\n" +
-                    "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
-                    "?p foaf:name ?name .\n" +
-                    "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
-                    "?p bsbm:country ?country .\n" +
-                    "?r rev:reviewer ?p .\n" +
-                    "?r bsbm:reviewFor ?product .\n" +
-                    "?r dc:title ?title .\n" +
+                    "\t?review bsbm:reviewFor <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product88> .\n" +
+                    "\t?review dc:title ?title .\n" +
+                    "\t?review rev:text ?text .\n" +
+                    "\t?review bsbm:reviewDate ?reviewDate .\n" +
+                    "\t?review rev:reviewer ?reviewer .\n" +
+                    "\t?reviewer foaf:name ?reviewerName .\n" +
+                    "\tOPTIONAL { ?review bsbm:rating1 ?rating1 . }\n" +
+                    "\tOPTIONAL { ?review bsbm:rating2 ?rating2 . }\n" +
+                    "\tOPTIONAL { ?review bsbm:rating3 ?rating3 . }\n" +
+                    "\tOPTIONAL { ?review bsbm:rating4 ?rating4 . }\n" +
                     "}";
 
             sourceMap = new HashMap<String, String>();
@@ -382,7 +385,8 @@ public class QueryRewriting {
         iqt = rewriteInnerJoin(iqt);
 
         iqt = rewriteLeftJoin(iqt);
-        //rewriting by materialized views;
+
+        //first applying empty federated join optimization, and then applying materialized view based optimization
 
         return iqt;
     }
@@ -691,9 +695,15 @@ public class QueryRewriting {
         QueryNode root_r = right_part.getRootNode();
         ImmutableSet<Variable> var_l = left_part.getVariables();
         ImmutableSet<Variable> var_r = right_part.getVariables();
-        Set<Variable> vars_all = new HashSet<Variable>();
-        vars_all.addAll(var_l); vars_all.addAll(var_r);
-        if(vars_all.size() == (var_l.size()+var_r.size())){
+
+        boolean shareVar = false;
+
+        for(Variable b: var_r){
+            if(var_l.contains(b)){
+                shareVar = true;
+            }
+        }
+        if(!shareVar){
             return null;
         }
 
@@ -703,11 +713,15 @@ public class QueryRewriting {
         List<IQTree> childern_l = new ArrayList<IQTree>();
         List<IQTree> childern_r = new ArrayList<IQTree>();
 
-        if((root_l instanceof UnionNode) || (left_part.isLeaf())){
+        if(root_l instanceof UnionNode){
             childern_l.addAll(left_part.getChildren());
+        } else if((root_l instanceof FilterNode) || (left_part instanceof ExtensionalDataNode)){
+            childern_l.add(left_part);
         }
-        if((root_r instanceof UnionNode) || (right_part.isLeaf())){
+        if(root_r instanceof UnionNode){
             childern_r.addAll(right_part.getChildren());
+        } else if((root_r instanceof FilterNode) || (right_part instanceof ExtensionalDataNode)){
+            childern_r.add(right_part);
         }
         List<IQTree> SubTree_new = new ArrayList<IQTree>();
 
