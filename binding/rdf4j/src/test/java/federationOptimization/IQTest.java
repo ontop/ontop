@@ -276,6 +276,7 @@ public class IQTest {
         LeftJoinNode leftJNode = IQ_FACTORY.createLeftJoinNode();
         BinaryNonCommutativeIQTree leftJTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJNode, joinTree, dataNode5);
 
+
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, A, B, C);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, leftJTree);
         /***the above created the IQ for playing***/
