@@ -96,15 +96,24 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            query = "PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>\n" +
                     "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "\n" +
                     "SELECT ?product ?label\n" +
                     "WHERE {\n" +
-                    "\t?product rdfs:label ?label .\n" +
-                    " ?product rdf:type bsbm:Product .\n" +
-                    "\tFILTER regex(?label, \"%word1%\")\n" +
+                    " ?product rdfs:label ?label .\n" +
+                    " ?product a bsbm:Product .\n" +
+                    " ?product bsbm:productFeature bsbm-inst:ProductFeature89 .\n" +
+                    " ?product bsbm:productPropertyNumeric1 ?p1 .\n" +
+                    " FILTER ( ?p1 > 10 )\n" +
+                    " ?product bsbm:productPropertyNumeric3 ?p3 .\n" +
+                    " FILTER ( ?p3 < 5000 )\n" +
+                    " OPTIONAL {\n" +
+                    " ?product bsbm:productFeature bsbm-inst:ProductFeature91 .\n" +
+                    " ?product rdfs:label ?testVar }\n" +
+                    " FILTER (!bound(?testVar))\n" +
                     "}";
 
             sourceMap = new HashMap<String, String>();
@@ -748,7 +757,13 @@ public class QueryRewriting {
             } else if(SubTree_new.size() > 1){
 
                 //add removing of semantic redundancy, add rolling back
+                List<IQTree> SubTree_new_copy = new ArrayList<IQTree>();
+                SubTree_new_copy.addAll(SubTree_new);
                 SubTree_new = removeSemanticRedundancyAndRollingBack(SubTree_new);
+                if(SubTree_new.size() == 1){
+                    SubTree_new.clear();
+                    SubTree_new.addAll(SubTree_new_copy);
+                }
 
                 ImmutableSet<Variable> variables_l = root_l.getLocalVariables();
                 ImmutableSet<Variable> variables_r = root_r.getLocalVariables();
@@ -1001,10 +1016,6 @@ public class QueryRewriting {
     //remove redundancy in the rewritten elements in the union
     public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
         List<IQTree> results = trees;
-        System.out.println("<<<<<<start removing redundancy:");
-        for(IQTree t: trees){
-            System.out.println(t);
-        }
 
         //check and remove semantic redundancy
         List<Integer> index = new ArrayList<Integer>();
@@ -1023,9 +1034,23 @@ public class QueryRewriting {
                }
                if(subs.get(ind).isLeaf()){
                    subs.remove(ind);
-                   IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
-                   if(trees.contains(t_new)){
-                       index.add(i);
+                   if(subs.size() == 1){
+                       if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
+                           ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
+                           IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
+                           if(trees.contains(t_new)){
+                               index.add(i);
+                           }
+                       } else {
+                           if(trees.contains(subs.get(0))){
+                               index.add(i);
+                           }
+                       }
+                   } else {
+                       IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+                       if(trees.contains(t_new)){
+                           index.add(i);
+                       }
                    }
                } else if(subs.get(ind).getRootNode() instanceof FilterNode){
                    ImmutableExpression cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
@@ -1082,27 +1107,42 @@ public class QueryRewriting {
                             share_sub.add(t);
                         }
                     }
+
                     if(share_sub.size() == 0){
                         continue;
                     }
                     Set<Variable> vars_union = new HashSet<Variable>();
-                    List<IQTree> t_union = new ArrayList<IQTree>();
+                    List<IQTree> t_union_i = new ArrayList<IQTree>();
+                    List<IQTree> t_union_j = new ArrayList<IQTree>();
 
                     for(IQTree t: subs_i){
                         if(!share_sub.contains(t)){
-                            t_union.add(t);
+                            t_union_i.add(t);
                             vars_union.addAll(t.getVariables());
                         }
                     }
                     for(IQTree t: subs_j){
                         if(!share_sub.contains(t)){
-                            t_union.add(t);
+                            t_union_j.add(t);
                             vars_union.addAll(t.getVariables());
                         }
                     }
 
+                    IQTree t1, t2;
+                    if(t_union_i.size() == 1){
+                        t1 = t_union_i.get(0);
+                    } else {
+                        t1 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_i));
+                    }
+                    if(t_union_j.size() == 1){
+                        t2 = t_union_j.get(0);
+                    } else {
+                        t2 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_j));
+                    }
+
                     UnionNode union = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars_union));
-                    IQTree union_tree = IQ_FACTORY.createNaryIQTree(union, ImmutableList.copyOf(t_union));
+
+                    IQTree union_tree = IQ_FACTORY.createNaryIQTree(union, ImmutableList.of(t1, t2));
                     IQTree join_tree = null;
                     if(share_sub.size() == 1){
                         join_tree = share_sub.get(0);
@@ -1449,9 +1489,6 @@ public class QueryRewriting {
             System.out.println("new generated tree");
             System.out.println(iqt_new);
             System.out.println("computed cost: "+QR.getCostOfIQTree(iqt_new));
-
-
-
 
         }catch(Exception e){
             e.printStackTrace();
