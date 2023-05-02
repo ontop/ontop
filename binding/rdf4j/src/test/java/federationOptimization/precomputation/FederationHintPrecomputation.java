@@ -481,7 +481,7 @@ public class FederationHintPrecomputation {
                     EmptyFederatedJoin candidate = new EmptyFederatedJoin(as1.sourceSQL, as2.sourceSQL, as1.attribute+"="+as2.attribute);
                     if(!candidateDuplicationCheck(candidate, candidateHints.emptyFJs)){
                         candidateHints.emptyFJs.add(candidate);
-                        if(!as1.position.equals(as2.position)){
+                        if(as1.position.equals("subject") || as2.position.equals("subject")){
                             candidateHints.FJsForMatV.add(candidate);
                         }
                     }
@@ -618,6 +618,8 @@ public class FederationHintPrecomputation {
                     if(!candidateHints.FJsForMatV.contains(candidate)){
                         continue;
                     }
+                    System.out.println("preparing for creating materialized views: ");
+
                     String viewName = "MatV_"+matv_count;
 
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
@@ -625,7 +627,7 @@ public class FederationHintPrecomputation {
                     List<String> attributes = new ArrayList<String>();
                     for(int i=0; i<attributes_1.size(); i++){
 //                        String a = attributes_1.get(i);
-                        attributes.add("1_"+i);
+                        attributes.add("\"1_"+i+"\"");
 //                        if(a.startsWith("\"")){
 //                            attributes.add("V1_"+a.substring(1, a.length()-1));
 //                        } else {
@@ -633,7 +635,7 @@ public class FederationHintPrecomputation {
 //                        }
                     }
                     for(int i=0; i<attributes_2.size(); i++){
-                        attributes_2.add("2_"+i);
+                        attributes.add("\"2_"+i+"\"");
                     }
 //                    for(String b: attributes_2){
 //                        if(b.startsWith("\"")){
@@ -732,7 +734,12 @@ public class FederationHintPrecomputation {
             candidate.print();
         }
 
-        System.out.println("detected candidate unions for checking: "+sh.redundancy.size());
+        System.out.println("detected candidate federated joins for MatV: "+sh.FJsForMatV.size());
+        for(EmptyFederatedJoin candidate: sh.FJsForMatV){
+            candidate.print();
+        }
+
+        System.out.println("detected candidate pairs of relations for redundancy checking: "+sh.redundancy.size());
         for(Redundancy candidate: sh.redundancy){
             candidate.print();
         }
@@ -749,21 +756,20 @@ public class FederationHintPrecomputation {
         System.out.println("");
 
         System.out.println("finally computed source hints: ");
-        System.out.println("finally obtained empty federated joins:");
+        System.out.println("finally obtained empty federated joins:"+sh_new.emptyFJs.size());
         for(EmptyFederatedJoin efj: sh_new.emptyFJs){
             efj.print();
         }
 
-        System.out.println("finally obtained redundancy relations");
+        System.out.println("finally obtained redundancy relations: "+sh_new.redundancy.spliterator());
         for(Redundancy rd: sh_new.redundancy){
             rd.print();
         }
 
-        System.out.println("finally obtained materialize views:");
+        System.out.println("finally obtained materialize views: "+sh_new.matView.size());
         for(MaterializedView mv: sh_new.matView){
             mv.print();
         }
-
 
    }
 
