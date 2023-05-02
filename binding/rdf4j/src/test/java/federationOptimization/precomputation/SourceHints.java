@@ -5,11 +5,13 @@ import java.util.Set;
 
 public class SourceHints {
     public Set<EmptyFederatedJoin> emptyFJs;
+    public Set<EmptyFederatedJoin> FJsForMatV;
     public Set<Redundancy> redundancy;
     public Set<MaterializedView> matView;
 
     public SourceHints(){
         emptyFJs = new HashSet<EmptyFederatedJoin>();
+        FJsForMatV = new HashSet<EmptyFederatedJoin>();
         redundancy = new HashSet<Redundancy>();
         matView = new HashSet<MaterializedView>();
     }
