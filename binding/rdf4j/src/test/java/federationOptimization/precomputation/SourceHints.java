@@ -1,4 +1,4 @@
-package federationOptimization;
+package federationOptimization.precomputation;
 
 import java.util.HashSet;
 import java.util.Set;

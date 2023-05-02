@@ -1,39 +1,39 @@
-package federationOptimization;
+package federationOptimization.queryRewriting;
 
-import com.fasterxml.jackson.databind.introspect.TypeResolutionContext;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
+import federationOptimization.precomputation.SourceLab;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
 import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
-import it.unibz.inf.ontop.dbschema.impl.json.JsonLens;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -72,6 +72,10 @@ public class QueryRewriting {
     public static DBConstant TRUE, FALSE;
     public static Constant NULL;
 
+//    public static NativeQueryGenerator datasourceQueryGenerator;
+//    public static TranslationFactory translationFactory;
+//    public static OBDASpecification obdaSpecification;
+
     public static RDF RDF_FACTORY;
     public static CoreSingletons CORE_SINGLETONS;
 
@@ -96,24 +100,20 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>\n" +
+            query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
+                    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
                     "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
                     "\n" +
-                    "SELECT ?product ?label\n" +
+                    "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
                     "WHERE {\n" +
-                    " ?product rdfs:label ?label .\n" +
-                    " ?product a bsbm:Product .\n" +
-                    " ?product bsbm:productFeature bsbm-inst:ProductFeature89 .\n" +
-                    " ?product bsbm:productPropertyNumeric1 ?p1 .\n" +
-                    " FILTER ( ?p1 > 10 )\n" +
-                    " ?product bsbm:productPropertyNumeric3 ?p3 .\n" +
-                    " FILTER ( ?p3 < 5000 )\n" +
-                    " OPTIONAL {\n" +
-                    " ?product bsbm:productFeature bsbm-inst:ProductFeature91 .\n" +
-                    " ?product rdfs:label ?testVar }\n" +
-                    " FILTER (!bound(?testVar))\n" +
+                    "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
+                    "?p foaf:name ?name .\n" +
+                    "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
+                    "?p bsbm:country ?country .\n" +
+                    "?r rev:reviewer ?p .\n" +
+                    "?r bsbm:reviewFor ?product .\n" +
+                    "?r dc:title ?title .\n" +
                     "}";
 
             sourceMap = new HashMap<String, String>();
@@ -180,6 +180,9 @@ public class QueryRewriting {
             TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
             OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
             CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+
+            //new added
+
             JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
 
             NULL = TERM_FACTORY.getNullConstant();
@@ -187,6 +190,8 @@ public class QueryRewriting {
             FALSE = TERM_FACTORY.getDBBooleanConstant(false);
             RDF_FACTORY = injector.getInstance(RDF.class);
             //ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
+
+           // datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
 
         } catch (Exception e){
             e.printStackTrace();
@@ -206,7 +211,7 @@ public class QueryRewriting {
      */
     public IQTree getIQTree(String sparql, String owlFile, String obdaFile, String propertyFile) throws OWLException {
         IQ iq = null;
-        OntopOWLEngine res;
+        OntopOWLEngine engine;
         OntopOWLConnection ct;
         OntopOWLStatement st;
         TupleOWLResultSet rs;
@@ -218,8 +223,9 @@ public class QueryRewriting {
                 .propertyFile(propertyFile)
                 .enableTestMode()
                 .build();
-        res = new SimpleOntopOWLEngine(config);
-        ct = res.getConnection();
+
+        engine = new SimpleOntopOWLEngine(config);
+        ct = engine.getConnection();
         st = ct.createStatement();
 
         iq = st.getExecutableQuery(sparql); /**minor revise of QuestQueryprocessor to obtain IQ tree rather than SQL query*/
@@ -798,7 +804,6 @@ public class QueryRewriting {
         if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
             return ER;
         }
-
 
         for(int i=0; i<JOL_left.dataNodes.size(); i++){
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataNodes.get(i).getArgumentMap();
@@ -1447,17 +1452,299 @@ public class QueryRewriting {
 
     /*******************************************************************************************************/
 
+    /*********rewrite based on materialized views***********************************************************/
+    public IQTree rewriteInnerJoinBasedOnMatV(IQTree iqt){
+
+        boolean update = true;
+        int count = 0;
+        module: while(update){
+            update = false;
+            count = count + 1;
+            List<IQTree> subTrees = getAllSubTree(iqt);
+            for(IQTree subt: subTrees){
+                QueryNode root = subt.getRootNode();
+                if((root instanceof InnerJoinNode)){
+                    ImmutableList<IQTree> childern = subt.getChildren();
+                    for(int i=0; i<childern.size()-1; i++){
+                        for(int j=i+1; j<childern.size(); j++){
+                            IQTree sub1 = childern.get(i);
+                            IQTree sub2 = childern.get(j);
+                            //InnerJoinNode root_new = (InnerJoinNode) root;
+
+                            IQTree sub_new = rewriteAtomicJoinBasedOnMatV((InnerJoinNode)root, sub1, sub2);
+
+                            if(sub_new != null){
+                                IQTree iqt_new = null;
+                                if(childern.size()>2){
+                                    List<IQTree> childern_new = new ArrayList<IQTree>();
+                                    for(int k=0; k<childern.size(); k++){
+                                        if((k!=i) && (k!=j)){
+                                            childern_new.add(childern.get(k));
+                                        } else if(k == i){
+                                            childern_new.add(sub_new);
+                                        } else if(k == j){
+                                            continue;
+                                        }
+                                    }
+                                    InnerJoinNode root_new_new = (InnerJoinNode) root;
+                                    IQTree subt_new = IQ_FACTORY.createNaryIQTree(root_new_new, ImmutableList.copyOf(childern_new));
+                                    iqt_new = iqt.replaceSubTree(subt, subt_new);
+                                } else {
+                                    iqt_new = iqt.replaceSubTree(subt, sub_new);
+                                }
+                                List<Integer> cost1 = getCostOfIQTree(iqt);
+                                List<Integer> cost2 = getCostOfIQTree(iqt_new);
+
+                                if((cost1.get(0) >= cost2.get(0))&&((cost1.get(1) >= cost2.get(1)))){
+                                    iqt = iqt_new;
+                                    update = true;
+                                    continue module;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return iqt;
+    }
+
+    public IQTree rewriteAtomicJoinBasedOnMatV(InnerJoinNode root, IQTree left_part, IQTree right_part){
+
+        IQTree iqt_new = null;
+
+        boolean can_rewrite = false;
+
+        InnerJoinNode ij_copy = root;
+        QueryNode root_l = left_part.getRootNode();
+        QueryNode root_r = right_part.getRootNode();
+        ImmutableSet<Variable> var_l = left_part.getVariables();
+        ImmutableSet<Variable> var_r = right_part.getVariables();
+
+        boolean shareVar = false;
+
+        for(Variable b: var_r){
+            if(var_l.contains(b)){
+                shareVar = true;
+            }
+        }
+        if(!shareVar){
+            return null;
+        }
+
+        if((root_l instanceof InnerJoinNode) || (root_l instanceof LeftJoinNode) || (root_r instanceof InnerJoinNode) || (root_r instanceof LeftJoinNode)){
+            return iqt_new;
+        }
+        List<IQTree> childern_l = new ArrayList<IQTree>();
+        List<IQTree> childern_r = new ArrayList<IQTree>();
+
+        if(root_l instanceof UnionNode){
+            childern_l.addAll(left_part.getChildren());
+        } else if((root_l instanceof FilterNode) || (left_part instanceof ExtensionalDataNode)){
+            childern_l.add(left_part);
+        }
+        if(root_r instanceof UnionNode){
+            childern_r.addAll(right_part.getChildren());
+        } else if((root_r instanceof FilterNode) || (right_part instanceof ExtensionalDataNode)){
+            childern_r.add(right_part);
+        }
+        List<IQTree> SubTree_new = new ArrayList<IQTree>();
+
+        for(int i=0; i<childern_l.size(); i++){
+            for(int j=0; j<childern_r.size(); j++){
+                IQTree child_l = childern_l.get(i);
+                IQTree child_r = childern_r.get(j);
+
+                // check whether (child_l JoinNode child_r) can be rewritten into empty join or by materialized view
+                ExpRewriten rewrite = rewriteAtomicJoinWithoutUnionInLeftAndRightBasedOnMatV(root, child_l, child_r);
+
+                if(rewrite.newRewritten != null){
+                    SubTree_new.add(rewrite.newRewritten);
+                }
+                if(rewrite.canRewrite || rewrite.sjRewrite){
+                    can_rewrite = true;
+                }
+            }
+        }
+
+        if(can_rewrite){  //some Ai JOIN Bj can rewritten into empty relation or materialized view or can apply sjr
+            if(SubTree_new.size() == 1){
+                iqt_new = SubTree_new.get(0);
+            } else if(SubTree_new.size() > 1){
+
+                //add removing of semantic redundancy, add rolling back
+                List<IQTree> SubTree_new_copy = new ArrayList<IQTree>();
+                SubTree_new_copy.addAll(SubTree_new);
+                SubTree_new = removeSemanticRedundancyAndRollingBack(SubTree_new);
+                if(SubTree_new.size() == 1){
+                    SubTree_new.clear();
+                    SubTree_new.addAll(SubTree_new_copy);
+                }
+
+                ImmutableSet<Variable> variables_l = root_l.getLocalVariables();
+                ImmutableSet<Variable> variables_r = root_r.getLocalVariables();
+                Set<Variable> vars = new HashSet<Variable>();
+                vars.addAll(variables_l); vars.addAll(variables_r);
+                ImmutableSet<Variable> allVars = ImmutableSet.copyOf(vars);
+                UnionNode root_new = IQ_FACTORY.createUnionNode(allVars);
+                ImmutableList<IQTree> childern_new = ImmutableList.copyOf(SubTree_new);
+                iqt_new = IQ_FACTORY.createNaryIQTree(root_new, childern_new);
+            } else { //(join of unions ) rewritten into empty relation
+                ImmutableSet<Variable> vars = root.getLocalVariables();
+                EmptyNode en = IQ_FACTORY.createEmptyNode(vars);
+                iqt_new = en;
+            }
+        }
+
+        return iqt_new;
+    }
+
+    public ExpRewriten rewriteAtomicJoinWithoutUnionInLeftAndRightBasedOnMatV(InnerJoinNode root, IQTree left, IQTree right){
+        //Rewriting by empty federated joins
+
+        ExpRewriten ER = new ExpRewriten();
+        //complete the checking conditions
+        //Left A, A1 JOIN A2 JOIN ... An
+        //Right B, B1 JOIN B2 JOIN ... JOIN Bm
+        //A, B, Ai, Bi, without UNION
+
+        JoinOfLeafs JOL_left = getLeafsOfJoin(left);
+        JoinOfLeafs JOL_right = getLeafsOfJoin(right);
+        //keep the order of the leafs
+        if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
+            return ER;
+        }
+
+        for(int i=0; i<JOL_left.dataNodes.size(); i++){
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_left = JOL_left.dataNodes.get(i).getArgumentMap();
+            for(int j=0; j<JOL_right.dataNodes.size(); j++){
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_map_right = JOL_right.dataNodes.get(j).getArgumentMap();
+                for(int k: JOL_left.dataNodes.get(i).getArgumentMap().keySet()){
+                    for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
+                        if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
+                            //change the check condition based on different ways of representing hints
+                            //check conditions for rewriting based on materialized views;
+                            String relation1 = JOL_left.relations.get(i).getName();
+                            int ind1 = k;
+                            String relation2 = JOL_right.relations.get(j).getName();
+                            int ind2 = l;
+                            if(hints.get(3).contains(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                //create a new data node for left_i and right_j;
+                                ExtensionalDataNode edn_ij = null;
+                                FilterNode fn_ij = null;
+                                RelationPredicate matv = null; //name of the relations for MatV
+
+//                                RelationPredicate mv = new AbstractRelationDefinition.RelationPredicateImpl("abc");
+
+                                ImmutableList<Attribute> attrs_matv = matv.getRelationDefinition().getAttributes();
+                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
+                                //make sure the relations occurring in the left_part and right_part of the join
+                                boolean b = true;
+                                if(hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                    b = false;
+                                }
+                                if(b){
+                                    for(int k1: arg_map_left.keySet()){
+                                        for(int index=0; index<attrs_matv.size(); index++){
+                                            if(attrs_matv.get(index).getID().equals("1_"+k1)){
+                                                args_new.put(index, arg_map_left.get(k1));
+                                            }
+                                        }
+                                    }
+                                    for(int l1: arg_map_right.keySet()){
+                                        for(int index=0; index<attrs_matv.size(); index++){
+                                            if(attrs_matv.get(index).getID().equals("2_"+l1)){
+                                                args_new.put(index, arg_map_left.get(l1));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    for(int k1: arg_map_left.keySet()){
+                                        for(int index=0; index<attrs_matv.size(); index++){
+                                            if(attrs_matv.get(index).getID().equals("2_"+k1)){
+                                                args_new.put(index, arg_map_left.get(k1));
+                                            }
+                                        }
+                                    }
+                                    for(int l1: arg_map_right.keySet()){
+                                        for(int index=0; index<attrs_matv.size(); index++){
+                                            if(attrs_matv.get(index).getID().equals("1_"+l1)){
+                                                args_new.put(index, arg_map_left.get(l1));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                List<ImmutableExpression> conds = new ArrayList<ImmutableExpression>();
+                                if(JOL_left.filters.get(i) != null){
+                                    ImmutableExpression exp = JOL_left.filters.get(i).getFilterCondition();
+                                    if(exp.getFunctionSymbol().getName().startsWith("AND")){
+                                        for(ImmutableTerm it: exp.getTerms()){
+                                            conds.add((ImmutableExpression) it);
+                                        }
+                                    } else {
+                                        conds.add(exp);
+                                    }
+                                }
+                                if(JOL_right.filters.get(j) != null){
+                                    ImmutableExpression exp = JOL_right.filters.get(j).getFilterCondition();
+                                    if(exp.getFunctionSymbol().getName().startsWith("AND")){
+                                        for(ImmutableTerm it: exp.getTerms()){
+                                            conds.add((ImmutableExpression) it);
+                                        }
+                                    } else {
+                                        conds.add(exp);
+                                    }
+                                }
+
+                                if(conds.size() == 1){
+                                    fn_ij = IQ_FACTORY.createFilterNode(conds.get(0));
+                                } else if(conds.size() >1){
+                                    fn_ij = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(conds)));
+                                }
+                                edn_ij = IQ_FACTORY.createExtensionalDataNode(matv.getRelationDefinition(), ImmutableMap.copyOf(args_new));
+
+                                JOL_left.dataNodes.set(i,edn_ij);
+                                JOL_left.filters.set(i, fn_ij);
+
+                                JOL_right.dataNodes.remove(j);
+                                JOL_right.filters.remove(j);
+                                JOL_right.relations.remove(j);
+
+                                ER = createJoinTree(root, JOL_left, JOL_right);
+                                return ER;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        ER = createJoinTree(root, JOL_left, JOL_right);
+        //the input (left JOIN right) cannot be rewritten by empty federated join and materialized views
+        //create a IQTree for (left JOIN right), by applying self-join optimization
+
+        return ER;
+    }
+
     /***********************************************************************************************
      * translate the rewritten IQ query into SQL query
      * @param iqt
      * @return
      */
-    public String IQTree2SQL(IQTree iqt){
+    protected String IQTree2SQL (IQTree iqt){
         //TODO
-        //later, not hard
         String sql = "";
 
-//        sql = Optional.of(iqt)
+        AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
+        DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
+        IQ iq = IQ_FACTORY.createIQ(projection, iqt);
+       // IQ iq_sql = datasourceQueryGenerator.generateSourceQuery(iq);
+
+        //        sql = Optional.of(iqt)
 //                .filter(t -> t instanceof UnaryIQTree)
 //                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
 //                .filter(n -> n instanceof NativeNode)
@@ -1483,8 +1770,8 @@ public class QueryRewriting {
             System.out.println("generated IQ tree:");
             System.out.println(iqt);
             List<Integer> cost = QR.getCostOfIQTree(iqt);
-
             System.out.println("computed cost: "+cost);
+
             IQTree iqt_new = QR.rewriteIQTree(iqt);
             System.out.println("new generated tree");
             System.out.println(iqt_new);

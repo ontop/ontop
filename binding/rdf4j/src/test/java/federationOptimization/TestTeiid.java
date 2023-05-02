@@ -1,5 +1,6 @@
 package federationOptimization;
 
+import federationOptimization.precomputation.RedundancyRelation;
 import org.junit.Test;
 
 import java.sql.*;

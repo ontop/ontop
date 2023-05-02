@@ -1,4 +1,4 @@
-package federationOptimization;
+package federationOptimization.precomputation;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
