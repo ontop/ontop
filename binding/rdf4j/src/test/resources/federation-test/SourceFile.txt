@@ -12,3 +12,9 @@
 "product2"-ss5
 "productfeatureproduct2"-ss5
 "producttypeproduct2"-ss5
+"of_prod1"-ss0
+"of_prod2"-ss0
+"pf_pfp1"-ss0
+"pf_pfp2"-ss0
+"pro1_prod"-ss0
+"pro2_prod"-ss0

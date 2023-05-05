@@ -7,10 +7,10 @@ import com.google.inject.Injector;
 import federationOptimization.precomputation.SourceLab;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
@@ -33,7 +34,12 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -72,9 +78,9 @@ public class QueryRewriting {
     public static DBConstant TRUE, FALSE;
     public static Constant NULL;
 
-//    public static NativeQueryGenerator datasourceQueryGenerator;
-//    public static TranslationFactory translationFactory;
-//    public static OBDASpecification obdaSpecification;
+    public static NativeQueryGenerator datasourceQueryGenerator;
+    public static TranslationFactory translationFactory;
+    public static OBDASpecification obdaSpecification;
 
     public static RDF RDF_FACTORY;
     public static CoreSingletons CORE_SINGLETONS;
@@ -84,6 +90,12 @@ public class QueryRewriting {
     public static HashMap<String, String> sourceMap;
     public static HashMap<String, String> labMap;
     public static List<Set<String>> hints; // str_redundancy set, equ_redundancy, empty federated join set, materialized views
+    public static Map<String, String> hint_matv; //(definition, v)
+
+    public static QuotedIDFactory idFactory;
+    public static DBTypeFactory dbTypeFactory;
+
+
     /***comment from Zhenzhen
      * several codes (labeled) need to be changed according to the different ways of representing hints
      * it is easy to change
@@ -100,25 +112,33 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
+            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
                     "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
                     "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
+                    "PREFIX bsbm-export: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/>\n" +
                     "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
                     "\n" +
-                    "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
+                    "SELECT ?offer ?productURI ?productlabel ?vendorURI ?vendorname ?offerURL ?price ?deliveryDays ?validTo\n" +
                     "WHERE {\n" +
-                    "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
-                    "?p foaf:name ?name .\n" +
-                    "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
-                    "?p bsbm:country ?country .\n" +
-                    "?r rev:reviewer ?p .\n" +
-                    "?r bsbm:reviewFor ?product .\n" +
-                    "?r dc:title ?title .\n" +
-                    "}";
+                    " ?offer bsbm:offerId ?id .\n" +
+                    " FILTER ( ?id < 1000)\n" +
+                    " ?offer bsbm:product ?productURI .\n" +
+                    " ?productURI rdfs:label ?productlabel .\n" +
+                    " ?offer bsbm:vendor ?vendorURI .\n" +
+                    " ?vendorURI rdfs:label ?vendorname .\n" +
+                    " ?vendorURI foaf:homepage ?vendorhomepage .\n" +
+                    " ?offer bsbm:offerWebpage ?offerURL .\n" +
+                    " ?offer bsbm:price ?price .\n" +
+                    " ?offer bsbm:deliveryDays ?deliveryDays .\n" +
+                    " ?offer bsbm:validTo ?validTo\n" +
+                    " }";
 
             sourceMap = new HashMap<String, String>();
             labMap = new HashMap<String, String>();
             hints = new ArrayList<Set<String>>();
+            hint_matv = new HashMap<String, String>();
+
             Set<String> str_redundancy = new HashSet<String>();
             Set<String> equ_redundancy = new HashSet<String>();
             Set<String> emptyJoin = new HashSet<String>();
@@ -155,7 +175,8 @@ public class QueryRewriting {
                 } else if(arr[0].startsWith("equivalent_redundancy")){
                     hints.get(1).add(arr[1]);
                 } else {
-                    hints.get(3).add(arr[1]);
+                    String[] h_matv = arr[1].split("<-");
+                    hint_matv.put(h_matv[1], h_matv[0]);
                 }
             }
             br_hint.close();
@@ -181,7 +202,11 @@ public class QueryRewriting {
             OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
             CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 
+            dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
+
             //new added
+//            translationFactory = injector.getInstance(TranslationFactory.class);
+//            datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
 
             JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
 
@@ -191,7 +216,7 @@ public class QueryRewriting {
             RDF_FACTORY = injector.getInstance(RDF.class);
             //ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
 
-           // datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
+            idFactory = new SQLStandardQuotedIDFactory();
 
         } catch (Exception e){
             e.printStackTrace();
@@ -209,7 +234,7 @@ public class QueryRewriting {
      * @return
      * @throws OWLException
      */
-    public IQTree getIQTree(String sparql, String owlFile, String obdaFile, String propertyFile) throws OWLException {
+    public IQTree getIQTree(String sparql, String owlFile, String obdaFile, String propertyFile) throws Exception {
         IQ iq = null;
         OntopOWLEngine engine;
         OntopOWLConnection ct;
@@ -398,7 +423,13 @@ public class QueryRewriting {
             iqt = rewriteInnerJoin(iqt);
             iqt = rewriteLeftJoin(iqt);
         }
+        System.out.println("IQ tree obtained by removing redundancy and applying EFJs");
+        System.out.println("strating rewriting based on MatVs");
+        System.out.println(iqt);
 
+        if(hint_matv.size()>0){
+            iqt = rewriteInnerJoinBasedOnMatV(iqt);
+        }
         //first applying empty federated join optimization, and then applying materialized view based optimization
 
         return iqt;
@@ -1602,7 +1633,6 @@ public class QueryRewriting {
     }
 
     public ExpRewriten rewriteAtomicJoinWithoutUnionInLeftAndRightBasedOnMatV(InnerJoinNode root, IQTree left, IQTree right){
-        //Rewriting by empty federated joins
 
         ExpRewriten ER = new ExpRewriten();
         //complete the checking conditions
@@ -1630,48 +1660,55 @@ public class QueryRewriting {
                             int ind1 = k;
                             String relation2 = JOL_right.relations.get(j).getName();
                             int ind2 = l;
-                            if(hints.get(3).contains(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                            if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
                                 //create a new data node for left_i and right_j;
-                                ExtensionalDataNode edn_ij = null;
                                 FilterNode fn_ij = null;
                                 RelationPredicate matv = null; //name of the relations for MatV
-
-//                                RelationPredicate mv = new AbstractRelationDefinition.RelationPredicateImpl("abc");
-
-                                ImmutableList<Attribute> attrs_matv = matv.getRelationDefinition().getAttributes();
-                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
-                                //make sure the relations occurring in the left_part and right_part of the join
+                                NamedRelationDefinition NRD = null;
                                 boolean b = true;
-                                if(hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
+                                } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
                                     b = false;
                                 }
+
+                                ImmutableList<Attribute> attrs_matv = NRD.getAttributes();
+                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
+                                //make sure the relations occurring in the left_part and right_part of the join
                                 if(b){
                                     for(int k1: arg_map_left.keySet()){
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("1_"+k1)){
+                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+k1+"\"")){
                                                 args_new.put(index, arg_map_left.get(k1));
                                             }
                                         }
                                     }
                                     for(int l1: arg_map_right.keySet()){
+                                        if(l1 == l){
+                                            continue;
+                                        }
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("2_"+l1)){
-                                                args_new.put(index, arg_map_left.get(l1));
+                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+l1+"\"")){
+                                                args_new.put(index, arg_map_right.get(l1));
                                             }
                                         }
                                     }
                                 } else {
                                     for(int k1: arg_map_left.keySet()){
+                                        if(k1 == k){
+                                            continue;
+                                        }
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("2_"+k1)){
+                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+k1+"\"")){
                                                 args_new.put(index, arg_map_left.get(k1));
                                             }
                                         }
                                     }
                                     for(int l1: arg_map_right.keySet()){
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("1_"+l1)){
-                                                args_new.put(index, arg_map_left.get(l1));
+                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+l1+"\"")){
+                                                args_new.put(index, arg_map_right.get(l1));
                                             }
                                         }
                                     }
@@ -1704,7 +1741,7 @@ public class QueryRewriting {
                                 } else if(conds.size() >1){
                                     fn_ij = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(conds)));
                                 }
-                                edn_ij = IQ_FACTORY.createExtensionalDataNode(matv.getRelationDefinition(), ImmutableMap.copyOf(args_new));
+                                ExtensionalDataNode edn_ij = IQ_FACTORY.createExtensionalDataNode(NRD, ImmutableMap.copyOf(args_new));
 
                                 JOL_left.dataNodes.set(i,edn_ij);
                                 JOL_left.filters.set(i, fn_ij);
@@ -1714,6 +1751,7 @@ public class QueryRewriting {
                                 JOL_right.relations.remove(j);
 
                                 ER = createJoinTree(root, JOL_left, JOL_right);
+                                ER.canRewrite = true;
                                 return ER;
                             }
                         }
@@ -1730,18 +1768,36 @@ public class QueryRewriting {
         return ER;
     }
 
+
+    public NamedRelationDefinition createDatabaseRelationForMatV(String definition){
+        String relation_name = definition.substring(0, definition.indexOf("("));
+        String[] attributes_list = definition.substring(definition.indexOf("(")+1, definition.indexOf(")")).split(",");
+
+        RelationID id = idFactory.createRelationID(relation_name);
+        //DBTermType stringDBType = dbTypeFactory.getDBStringType();
+        RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
+        for (int i=0; i<attributes_list.length; i++) {
+            String[] attr_name_type = attributes_list[i].split(" ");
+            DBTermType d_type = dbTypeFactory.getDBTermType(attr_name_type[1]);
+            builder.addAttribute(idFactory.createAttributeID(attr_name_type[0]), d_type, true);
+        }
+        NamedRelationDefinition nrd = new DatabaseTableDefinition(ImmutableList.of(id), builder);
+        return nrd;
+    }
+
     /***********************************************************************************************
      * translate the rewritten IQ query into SQL query
      * @param iqt
      * @return
      */
-    protected String IQTree2SQL (IQTree iqt){
+    protected String IQTree2SQL (IQTree iqt)throws Exception {
         //TODO
         String sql = "";
 
         AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
         DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
         IQ iq = IQ_FACTORY.createIQ(projection, iqt);
+
        // IQ iq_sql = datasourceQueryGenerator.generateSourceQuery(iq);
 
         //        sql = Optional.of(iqt)
@@ -1751,10 +1807,15 @@ public class QueryRewriting {
 //                .map(n -> ((NativeNode) n).getNativeQueryString())
 //                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + iqt));
 //
+
+//        OBDASpecification obdaSpecification;
+//        TranslationFactory translationFactory;
+//        NativeQueryGeneraor datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
+//        Iq = datasourceQueryGenerator.generateSourceQuery(iq);
         return sql;
     }
 
-    public String queryRewrite(String sparql, String owlFile, String obdaFile, String propertyFile, String hintFile, String labFile) throws OWLException {
+    public String queryRewrite(String sparql, String owlFile, String obdaFile, String propertyFile, String hintFile, String labFile) throws Exception {
         String SQL = "";
         IQTree iqt = getIQTree(sparql, owlFile, obdaFile, propertyFile);
         iqt = rewriteIQTree(iqt);
@@ -1765,7 +1826,13 @@ public class QueryRewriting {
     @Test
     public void testPart(){
         try{
+            /****
+             * by Zhenzhen
+             * use setting sc2 to simulate federating settings
+             * to run the test, you need first to run CoonectDBTest.java to create materialized views in source-sc2
+             */
             QueryRewriting QR = new QueryRewriting();
+
             IQTree iqt = QR.getIQTree(query, owlFile, obdaFile, propertyFile);
             System.out.println("generated IQ tree:");
             System.out.println(iqt);

@@ -1,5 +1,6 @@
 package federationOptimization.precomputation;
 
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
