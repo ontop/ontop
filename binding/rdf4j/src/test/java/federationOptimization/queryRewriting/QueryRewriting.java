@@ -112,27 +112,32 @@ public class QueryRewriting {
             sourceFile = "src/test/resources/federation-test/SourceFile.txt";
             effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
-                    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
+            query = "PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>\n" +
                     "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
-                    "PREFIX bsbm-export: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                     "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
                     "\n" +
-                    "SELECT ?offer ?productURI ?productlabel ?vendorURI ?vendorname ?offerURL ?price ?deliveryDays ?validTo\n" +
+                    "SELECT ?label ?comment ?producer ?productFeature ?propertyTextual1 ?propertyTextual2 ?propertyTextual3\n" +
+                    " ?propertyNumeric1 ?propertyNumeric2 ?propertyTextual4 ?propertyTextual5 ?propertyNumeric4\n" +
                     "WHERE {\n" +
-                    " ?offer bsbm:offerId ?id .\n" +
-                    " FILTER ( ?id < 1000)\n" +
-                    " ?offer bsbm:product ?productURI .\n" +
-                    " ?productURI rdfs:label ?productlabel .\n" +
-                    " ?offer bsbm:vendor ?vendorURI .\n" +
-                    " ?vendorURI rdfs:label ?vendorname .\n" +
-                    " ?vendorURI foaf:homepage ?vendorhomepage .\n" +
-                    " ?offer bsbm:offerWebpage ?offerURL .\n" +
-                    " ?offer bsbm:price ?price .\n" +
-                    " ?offer bsbm:deliveryDays ?deliveryDays .\n" +
-                    " ?offer bsbm:validTo ?validTo\n" +
-                    " }";
+                    "    ?product bsbm:productId ?id .\n" +
+                    "    FILTER (?id < 1000 )\n" +
+                    "    ?product rdfs:label ?label .\n" +
+                    "\t?product rdfs:comment ?comment .\n" +
+                    "\t?product bsbm:producer ?p .\n" +
+                    "\t?p rdfs:label ?producer .\n" +
+                    "    ?product dc:publisher ?p .\n" +
+                    "\t?product bsbm:productFeature ?f .\n" +
+                    "\t?f rdfs:label ?productFeature .\n" +
+                    "\t?product bsbm:productPropertyTextual1 ?propertyTextual1 .\n" +
+                    "\t?product bsbm:productPropertyTextual2 ?propertyTextual2 .\n" +
+                    "    ?product bsbm:productPropertyTextual3 ?propertyTextual3 .\n" +
+                    "\t?product bsbm:productPropertyNumeric1 ?propertyNumeric1 .\n" +
+                    "\t?product bsbm:productPropertyNumeric2 ?propertyNumeric2 .\n" +
+                    "\tOPTIONAL { ?product bsbm:productPropertyTextual4 ?propertyTextual4 }\n" +
+                    "    OPTIONAL { ?product bsbm:productPropertyTextual5 ?propertyTextual5 }\n" +
+                    "    OPTIONAL { ?product bsbm:productPropertyNumeric4 ?propertyNumeric4 }\n" +
+                    "}";
 
             sourceMap = new HashMap<String, String>();
             labMap = new HashMap<String, String>();
@@ -424,9 +429,9 @@ public class QueryRewriting {
             iqt = rewriteLeftJoin(iqt);
         }
         System.out.println("IQ tree obtained by removing redundancy and applying EFJs");
-        System.out.println("strating rewriting based on MatVs");
         System.out.println(iqt);
 
+        System.out.println("strating rewriting based on MatVs");
         if(hint_matv.size()>0){
             iqt = rewriteInnerJoinBasedOnMatV(iqt);
         }
