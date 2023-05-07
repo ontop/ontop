@@ -55,7 +55,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(FlattenLifter.class);
         bindFromSettings(FilterLifter.class);
         bindFromSettings(BooleanExpressionPushDownOptimizer.class);
-        bindFromSettings(MarcoOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
