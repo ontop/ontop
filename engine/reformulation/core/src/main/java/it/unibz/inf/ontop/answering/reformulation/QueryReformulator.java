@@ -14,6 +14,8 @@ public interface QueryReformulator {
 
     IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryLogger queryLogger) throws OntopReformulationException;
 
+    IQ generateExecutableQuery(IQ iq) throws OntopReformulationException;
+
     /**
      * For analysis purposes
      */

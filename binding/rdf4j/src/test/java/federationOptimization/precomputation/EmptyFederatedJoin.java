@@ -1,4 +1,4 @@
-package federationOptimization;
+package federationOptimization.precomputation;
 
 public class EmptyFederatedJoin {
     String relation1;

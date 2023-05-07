@@ -1,6 +1,7 @@
-package federationOptimization;
+package federationOptimization.precomputation;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -397,6 +398,7 @@ public class FederationHintPrecomputation {
         Map<String, String> labOfSources = getLabsOfSources(labFile);
 
         Map<String, Set<AttributeSQL>> classfication_IRIFunction = new HashMap<String, Set<AttributeSQL>>();
+
         Map<String, Set<ClassMap>> classfication_class = new HashMap<String, Set<ClassMap>>();
         Map<String, Set<PropertyMap>> classfication_property = new HashMap<String, Set<PropertyMap>>();
 
@@ -412,7 +414,7 @@ public class FederationHintPrecomputation {
 
                  String subjectIRIFunction = getIRIFunction(subject);
                  String subjectAttribute = getAttribute(subject);
-                 AttributeSQL attributeSQL = new AttributeSQL(subjectAttribute, sql);
+                 AttributeSQL as = new AttributeSQL(subjectAttribute, "subject", sql);
                  if(classfication_IRIFunction.containsKey(subjectIRIFunction)){
                      classfication_IRIFunction.get(subjectIRIFunction).add(attributeSQL);
                  } else {
@@ -437,7 +439,7 @@ public class FederationHintPrecomputation {
                      String objectIRIFunction = getIRIFunction(object);
                      String objectAttribute = getAttribute(object);
                      if(objectIRIFunction.length() > 0){
-                         AttributeSQL as1 = new AttributeSQL(objectAttribute, sql);
+                         AttributeSQL as1 = new AttributeSQL(objectAttribute, "object",sql);
                          if(classfication_IRIFunction.containsKey(objectIRIFunction)){
                              classfication_IRIFunction.get(objectIRIFunction).add(as1);
                          } else {
@@ -479,12 +481,15 @@ public class FederationHintPrecomputation {
                     EmptyFederatedJoin candidate = new EmptyFederatedJoin(as1.sourceSQL, as2.sourceSQL, as1.attribute+"="+as2.attribute);
                     if(!candidateDuplicationCheck(candidate, candidateHints.emptyFJs)){
                         candidateHints.emptyFJs.add(candidate);
+                        if(as1.position.equals("subject") || as2.position.equals("subject")){
+                            candidateHints.FJsForMatV.add(candidate);
+                        }
                     }
                 }
             }
         }
 
-        //compute candidate unions for redundancy checking
+        //compute candidate pairs of expressions for redundancy checking
         for(String cla: classfication_class.keySet()){
             for(ClassMap cm1: classfication_class.get(cla)){
                 List<String> tables1 = getTableNamesFromSQL(cm1.sourceSQL);
@@ -610,25 +615,35 @@ public class FederationHintPrecomputation {
                     //write into the local sources
                     //import the schema of the local sources into federation system automatically
                     System.out.println("checking result: not empty");
+                    if(!candidateHints.FJsForMatV.contains(candidate)){
+                        continue;
+                    }
+                    System.out.println("preparing for creating materialized views: ");
+
                     String viewName = "MatV_"+matv_count;
 
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
                     List<String> attributes_2 = getSelectItemsFromSQL(candidate.relation2);
                     List<String> attributes = new ArrayList<String>();
-                    for(String a: attributes_1){
-                        if(a.startsWith("\"")){
-                            attributes.add("V1_"+a.substring(1, a.length()-1));
-                        } else {
-                            attributes.add("V1_"+a);
-                        }
+                    for(int i=0; i<attributes_1.size(); i++){
+//                        String a = attributes_1.get(i);
+                        attributes.add("\"1_"+i+"\"");
+//                        if(a.startsWith("\"")){
+//                            attributes.add("V1_"+a.substring(1, a.length()-1));
+//                        } else {
+//                            attributes.add("V1_"+a);
+//                        }
                     }
-                    for(String b: attributes_2){
-                        if(b.startsWith("\"")){
-                            attributes.add("V2_"+b.substring(1, b.length()-1));
-                        } else {
-                            attributes.add("V2_"+b);
-                        }
+                    for(int i=0; i<attributes_2.size(); i++){
+                        attributes.add("\"2_"+i+"\"");
                     }
+//                    for(String b: attributes_2){
+//                        if(b.startsWith("\"")){
+//                            attributes.add("V2_"+b.substring(1, b.length()-1));
+//                        } else {
+//                            attributes.add("V2_"+b);
+//                        }
+//                    }
 
                     //insertData(stmt_matvDB, rs, viewName, attributes);
                     materializeData(conn_matvDB, stmt_matvDB, rs, viewName, attributes);
@@ -809,7 +824,12 @@ public class FederationHintPrecomputation {
             candidate.print();
         }
 
-        System.out.println("detected candidate unions for checking: "+sh.redundancy.size());
+        System.out.println("detected candidate federated joins for MatV: "+sh.FJsForMatV.size());
+        for(EmptyFederatedJoin candidate: sh.FJsForMatV){
+            candidate.print();
+        }
+
+        System.out.println("detected candidate pairs of relations for redundancy checking: "+sh.redundancy.size());
         for(Redundancy candidate: sh.redundancy){
             candidate.print();
         }
@@ -826,17 +846,17 @@ public class FederationHintPrecomputation {
         System.out.println("");
 
         System.out.println("finally computed source hints: ");
-        System.out.println("finally obtained empty federated joins:");
+        System.out.println("finally obtained empty federated joins:"+sh_new.emptyFJs.size());
         for(EmptyFederatedJoin efj: sh_new.emptyFJs){
             efj.print();
         }
 
-        System.out.println("finally obtained redundancy relations");
+        System.out.println("finally obtained redundancy relations: "+sh_new.redundancy.spliterator());
         for(Redundancy rd: sh_new.redundancy){
             rd.print();
         }
 
-        System.out.println("finally obtained materialize views:");
+        System.out.println("finally obtained materialize views: "+sh_new.matView.size());
         for(MaterializedView mv: sh_new.matView){
             mv.print();
         }
@@ -848,15 +868,18 @@ public class FederationHintPrecomputation {
 
 class AttributeSQL{
     public String attribute;
+    public String position;
     public String sourceSQL;
 
     public AttributeSQL(){
         attribute = null;
+        position = null;
         sourceSQL = null;
     }
 
-    public AttributeSQL(String attribute, String sourceSQL){
+    public AttributeSQL(String attribute, String position, String sourceSQL){
         this.attribute = attribute;
+        this.position = position;
         this.sourceSQL = sourceSQL;
     }
 }

@@ -57,7 +57,7 @@ public abstract class AbstractRelationDefinition implements RelationDefinition  
      * @return list of attributes
      */
     @JsonProperty("columns")
-    public ImmutableList<Attribute> getAttributes() { return attributes; }
+    public  ImmutableList<Attribute> getAttributes() { return attributes; }
 
     @JsonIgnore
     public RelationPredicate getAtomPredicate() { return predicate; }

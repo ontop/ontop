@@ -18,18 +18,18 @@ import static java.util.stream.Collectors.joining;
 
 public class LensesTest {
 
-//    private final static String OWL_FILE = "src/test/resources/lenses-test/vkg.owl";
-//    private final static String OBDA_FILE = "src/test/resources/lenses-test/vkg.obda";
-//    private final static String PROPERTY_FILE = "src/test/resources/lenses-test/vkg.properties";
-//    private final static String LENSES_FILE = "src/test/resources/lenses-test/vkg_lenses.json";
-//    private final static String TEST_QUERY="src/test/resources/lenses-test/queries/00.sql";
+    private final static String OWL_FILE = "src/test/resources/lenses-test/vkg.owl";
+    private final static String OBDA_FILE = "src/test/resources/lenses-test/vkg.obda";
+    private final static String PROPERTY_FILE = "src/test/resources/lenses-test/vkg.properties";
+    private final static String LENSES_FILE = "src/test/resources/lenses-test/vkg_lenses.json";
+    private final static String TEST_QUERY="src/test/resources/lenses-test/queries/00.sql";
 
     //BSBM-federation test
-    private final static String OWL_FILE = "src/test/resources/lenses-test/bsbm-ontology.owl";
-    private final static String OBDA_FILE = "src/test/resources/lenses-test/bsbm-mappings-hom-het.obda";
-    private final static String PROPERTY_FILE = "src/test/resources/lenses-test/teiid.properties";
-    private final static String LENSES_FILE = "src/test/resources/lenses-test/bsbm_lenses.json";
-    private final static String TEST_QUERY="src/test/resources/lenses-test/queries/00.sql";
+//    private final static String OWL_FILE = "src/test/resources/lenses-test/bsbm-ontology.owl";
+//    private final static String OBDA_FILE = "src/test/resources/lenses-test/bsbm-mappings-hom-het.obda";
+//    private final static String PROPERTY_FILE = "src/test/resources/lenses-test/teiid.properties";
+//    private final static String LENSES_FILE = "src/test/resources/lenses-test/bsbm_lenses.json";
+//    private final static String TEST_QUERY="src/test/resources/lenses-test/queries/00.sql";
 
     private RepositoryConnection conn;
 

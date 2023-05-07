@@ -70,6 +70,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
+		//this.federationOptimizer = federationOptimizer;
 
 		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -118,13 +119,20 @@ public class QuestQueryProcessor implements QueryReformulator {
 				//TODO create a new optimizer for data federation
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
+				//IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
+				//LOGGER.debug("Federation query:\n{}\n", federatedQuery);
+
+				//queryLogger.setPlannedQuery(federatedQuery);
 				queryLogger.setPlannedQuery(plannedQuery);
 
+				//IQ executableQuery = generateExecutableQuery(federatedQuery);
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
-				queryCache.put(inputQuery, executableQuery);
-				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
-				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
-				return executableQuery;
+//				queryCache.put(inputQuery, executableQuery);
+//				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
+//				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+				//return executableQuery; /**原始的，返回可执行的SQL语句*/
+				return plannedQuery;
+
 			}
             catch (OntopReformulationException e) {
             	queryLogger.declareReformulationException(e);
@@ -153,7 +161,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
+	public IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
