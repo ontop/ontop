@@ -79,7 +79,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
      * Rejects non-strongly typed queries.
      */
     @Override
-    protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
+    public IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
         DistinctVariableOnlyDataAtom initialProjectionAtom = iq.getProjectionAtom();
         IQTree initialTree = iq.getTree();
 

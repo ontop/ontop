@@ -119,9 +119,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				//IQ executableQuery = generateExecutableQuery(federatedQuery);
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
-				queryCache.put(inputQuery, executableQuery);
-				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
-				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+//				queryCache.put(inputQuery, executableQuery);
+//				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
+//				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 				//return executableQuery; /**原始的，返回可执行的SQL语句*/
 				return plannedQuery;
 
@@ -153,7 +153,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
+	public IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);

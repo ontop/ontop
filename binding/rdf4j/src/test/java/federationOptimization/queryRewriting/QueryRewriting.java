@@ -2,9 +2,12 @@ package federationOptimization.queryRewriting;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import federationOptimization.precomputation.SourceLab;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
 import it.unibz.inf.ontop.dbschema.*;
@@ -34,7 +37,9 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.KGQueryFactory;
+import it.unibz.inf.ontop.query.SPARQLQuery;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -253,6 +258,14 @@ public class QueryRewriting {
                 .propertyFile(propertyFile)
                 .enableTestMode()
                 .build();
+
+//        KGQueryFactory kgQueryFactory = config.getKGQueryFactory();
+//        KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparql);
+//        QueryReformulator reformulator = config.loadQueryReformulator();
+//        QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
+//        iq = reformulator.reformulateIntoNativeQuery(query, queryLogger);
+//        // optimize IQ
+//        IQ executableQuery = reformulator.generateExecutableQuery(iq);
 
         engine = new SimpleOntopOWLEngine(config);
         ct = engine.getConnection();
