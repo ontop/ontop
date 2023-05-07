@@ -1,33 +1,8 @@
 package federationOptimization.queryRewriting;
 
-import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 public class QueryRewritingTest {
-
-//    private static final String PROPERTY = "src/test/resources/compareIRI/boot-multiple-inheritance.properties";
-//    private static final String OWL = "src/test/resources/compareIRI/boot-multiple-inheritance.owl";
-//    private static final String OBDA = "src/test/resources/compareIRI/boot-multiple-inheritance.obda";
 
     private static final String owlFile = "src/test/resources/federation-test/bsbm-ontology.owl";
     private static final String obdaFile = "src/test/resources/federation-test/bsbm-mappings-sc2.obda";

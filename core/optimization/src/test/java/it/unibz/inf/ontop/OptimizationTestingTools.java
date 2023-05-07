@@ -45,11 +45,8 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final GeneralStructuralAndSemanticIQOptimizer GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER;
 
-    public static final FederationOptimizer FEDERATION_OPTIMIZER;
-
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final FlattenLifter FLATTEN_LIFTER;
-    public static final MarcoOptimizer MARCO_OPTIMIZER;
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
@@ -119,12 +116,9 @@ public class OptimizationTestingTools {
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
 
-        FEDERATION_OPTIMIZER = injector.getInstance(FederationOptimizer.class);
-
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
-        MARCO_OPTIMIZER = injector.getInstance(MarcoOptimizer.class);
 
         JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
 

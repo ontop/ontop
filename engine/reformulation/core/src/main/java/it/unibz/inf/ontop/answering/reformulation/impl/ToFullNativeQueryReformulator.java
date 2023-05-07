@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.MarcoOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
