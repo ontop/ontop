@@ -1,16 +1,9 @@
 package federationOptimization.precomputation;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.IRIStringTemplateFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.TemporaryDBTypeConversionToStringFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.RDFTermFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.impl.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.impl.TargetAtomImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import net.sf.jsqlparser.JSQLParserException;
@@ -19,8 +12,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -30,7 +21,12 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//import net.sf.jsqlparser.statement.Statement;
+//import net.sf.jsqlparser.statement.Statement;
+
+
 public class FederationHintPrecomputation {
+
 
     public Map<String, String> getLabsOfSources(String labFile) throws Exception {
         Map<String, String> sourceLab = new HashMap<String, String>();
@@ -41,6 +37,11 @@ public class FederationHintPrecomputation {
             sourceLab.put(arr[0], arr[1]);
         }
         return sourceLab;
+    }
+
+    public String getIRIFunction(ImmutableTerm it){
+        String str = it.toString();
+        return str.endsWith("IRI)") ? str.substring(4, str.indexOf("{")): "";
     }
 
     public String getAttribute(ImmutableTerm it){
@@ -80,7 +81,7 @@ public class FederationHintPrecomputation {
     public boolean dynamicSourceCheck(List<String> tables, Map<String, String> sourceLab){
         boolean b = false;
         for(String t: tables){
-            String source;
+            String source = "";
             if(t.startsWith("\"")){
                 source = t.substring(1, t.indexOf("."));
             } else {
@@ -153,7 +154,7 @@ public class FederationHintPrecomputation {
                 return false;
             }
         }
-      return b;
+        return b;
     }
 
     public Connection getConnectionOfDB(String DBPropertyFile) throws Exception{
@@ -174,8 +175,8 @@ public class FederationHintPrecomputation {
         }
 
         Class.forName(driver);
-       Connection conn = DriverManager.getConnection(url, user, password);
-       return conn;
+        Connection conn = DriverManager.getConnection(url, user, password);
+        return conn;
     }
 
     public String checkRedundancy(Statement stmt, String relation1, String relation2) throws Exception{
@@ -364,11 +365,12 @@ public class FederationHintPrecomputation {
                 values = values +"'"+rs.getString(i)+"'"+",";
             }
             values = values.substring(0, values.length()-1);
-           String update = "INSERT INTO "+tableName+" VALUES "+"("+values+")";
-           stmt.execute(update);
+            String update = "INSERT INTO "+tableName+" VALUES "+"("+values+")";
+            stmt.execute(update);
         }
         //bulk insertion
     }
+
 
     /**
      * Zhenzhen
@@ -404,63 +406,62 @@ public class FederationHintPrecomputation {
 
         SQLPPMapping mappings = configure.loadProvidedPPMapping();
         for( SQLPPTriplesMap tripleMap : mappings.getTripleMaps() ){
-             String sql = tripleMap.getSourceQuery().getSQL();
+            String sql = tripleMap.getSourceQuery().getSQL();
             List<TargetAtom> atoms = tripleMap.getTargetAtoms();
-             for(TargetAtom ta: atoms){
-                 ImmutableTerm subject = ta.getSubstitutedTerm(0);
+            for(TargetAtom ta: atoms){
+                ImmutableTerm subject = ta.getSubstitutedTerm(0);
+                ImmutableTerm predicate = ta.getSubstitutedTerm(1);
+                ImmutableTerm object = ta.getSubstitutedTerm(2);
 
-                 ImmutableTerm predicate = ta.getSubstitutedTerm(1);
-                 ImmutableTerm object = ta.getSubstitutedTerm(2);
+                String subjectIRIFunction = getIRIFunction(subject);
+                String subjectAttribute = getAttribute(subject);
+                AttributeSQL as = new AttributeSQL(subjectAttribute, "subject", sql);
+                if(classfication_IRIFunction.containsKey(subjectIRIFunction)){
+                    classfication_IRIFunction.get(subjectIRIFunction).add(as);
+                } else {
+                    Set<AttributeSQL> set = new HashSet<AttributeSQL>();
+                    set.add(as);
+                    classfication_IRIFunction.put(subjectIRIFunction, set);
+                }
 
-                 String subjectIRIFunction = getIRIFunction(subject);
-                 String subjectAttribute = getAttribute(subject);
-                 AttributeSQL as = new AttributeSQL(subjectAttribute, "subject", sql);
-                 if(classfication_IRIFunction.containsKey(subjectIRIFunction)){
-                     classfication_IRIFunction.get(subjectIRIFunction).add(attributeSQL);
-                 } else {
-                     Set<AttributeSQL> set = new HashSet<AttributeSQL>();
-                     set.add(attributeSQL);
-                     classfication_IRIFunction.put(subjectIRIFunction, set);
-                 }
+                if((predicate.toString()).equals("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")){
+                    String Class = object.toString();
+                    ClassMap clamap = new ClassMap(subjectAttribute, subjectIRIFunction, sql);
+                    if(classfication_class.containsKey(Class)){
+                        classfication_class.get(Class).add(clamap);
+                    } else {
+                        Set<ClassMap> clamaps = new HashSet<ClassMap>();
+                        clamaps.add(clamap);
+                        classfication_class.put(Class, clamaps);
+                    }
 
-                 if((predicate.toString()).equals("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")){
-                     String Class = object.toString();
-                     ClassMap clamap = new ClassMap(subjectAttribute, subjectIRIFunction, sql);
-                     if(classfication_class.containsKey(Class)){
-                         classfication_class.get(Class).add(clamap);
-                     } else {
-                         Set<ClassMap> clamaps = new HashSet<ClassMap>();
-                         clamaps.add(clamap);
-                         classfication_class.put(Class, clamaps);
-                     }
+                } else {
+                    String property = predicate.toString();
+                    String objectIRIFunction = getIRIFunction(object);
+                    String objectAttribute = getAttribute(object);
+                    if(objectIRIFunction.length() > 0){
+                        AttributeSQL as1 = new AttributeSQL(objectAttribute, "object",sql);
+                        if(classfication_IRIFunction.containsKey(objectIRIFunction)){
+                            classfication_IRIFunction.get(objectIRIFunction).add(as1);
+                        } else {
+                            Set<AttributeSQL> set = new HashSet<AttributeSQL>();
+                            set.add(as1);
+                            classfication_IRIFunction.put(objectIRIFunction, set);
+                        }
+                    }
 
-                 } else {
-                     String property = predicate.toString();
-                     String objectIRIFunction = getIRIFunction(object);
-                     String objectAttribute = getAttribute(object);
-                     if(objectIRIFunction.length() > 0){
-                         AttributeSQL as1 = new AttributeSQL(objectAttribute, "object",sql);
-                         if(classfication_IRIFunction.containsKey(objectIRIFunction)){
-                             classfication_IRIFunction.get(objectIRIFunction).add(as1);
-                         } else {
-                             Set<AttributeSQL> set = new HashSet<AttributeSQL>();
-                             set.add(as1);
-                             classfication_IRIFunction.put(objectIRIFunction, set);
-                         }
-                     }
+                    String objectDataType = getDataType(object);
+                    PropertyMap promap = new PropertyMap(subjectAttribute, subjectIRIFunction, objectAttribute, objectIRIFunction, objectDataType, sql);
+                    if(classfication_property.containsKey(property)){
+                        classfication_property.get(property).add(promap);
+                    } else {
+                        Set<PropertyMap> set = new HashSet<PropertyMap>();
+                        set.add(promap);
+                        classfication_property.put(property, set);
+                    }
+                }
 
-                     String objectDataType = getDataType(object);
-                     PropertyMap promap = new PropertyMap(subjectAttribute, subjectIRIFunction, objectAttribute, objectIRIFunction, objectDataType, sql);
-                     if(classfication_property.containsKey(property)){
-                         classfication_property.get(property).add(promap);
-                     } else {
-                         Set<PropertyMap> set = new HashSet<PropertyMap>();
-                         set.add(promap);
-                         classfication_property.put(property, set);
-                     }
-                 }
-
-             }
+            }
         }
 
         //compute candidate federated joins for empty checking and materialization
@@ -689,135 +690,45 @@ public class FederationHintPrecomputation {
         return computeSourceHints(candidates, federationSystemPropertyFile, localDBPropertyFile);
     }
 
-    public String getIRIFunction(ImmutableTerm targetAtomSubstitutedTerm_raw) throws Exception {
-        try {
-            if(targetAtomSubstitutedTerm_raw instanceof NonGroundFunctionalTermImpl) {
-                NonGroundFunctionalTermImpl targetAtomSubstitutedTerm = (NonGroundFunctionalTermImpl) targetAtomSubstitutedTerm_raw;
-                ImmutableTerm targetAtomSubstitutedTermTerm0_raw = targetAtomSubstitutedTerm.getTerm(0);
-                NonGroundFunctionalTermImpl targetAtomSubstitutedTermTerm0 = (NonGroundFunctionalTermImpl) targetAtomSubstitutedTermTerm0_raw;
-                FunctionSymbol targetAtomSubstitutedTermTerm0FunctionSymbol_raw = targetAtomSubstitutedTermTerm0.getFunctionSymbol();
-                if (targetAtomSubstitutedTermTerm0FunctionSymbol_raw instanceof IRIStringTemplateFunctionSymbolImpl) {
-                    IRIStringTemplateFunctionSymbolImpl targetAtomSubstitutedTermTerm0FunctionSymbol = (IRIStringTemplateFunctionSymbolImpl) targetAtomSubstitutedTermTerm0FunctionSymbol_raw;
-                    String targetAtomSubstitutedTermTerm0FunctionSymbolTemplate = targetAtomSubstitutedTermTerm0FunctionSymbol.getTemplate();
-                    return targetAtomSubstitutedTermTerm0FunctionSymbolTemplate;
-                } else if (targetAtomSubstitutedTermTerm0FunctionSymbol_raw instanceof TemporaryDBTypeConversionToStringFunctionSymbolImpl) {
-                    TemporaryDBTypeConversionToStringFunctionSymbolImpl targetAtomSubstitutedTermTerm0FunctionSymbol = (TemporaryDBTypeConversionToStringFunctionSymbolImpl) targetAtomSubstitutedTermTerm0FunctionSymbol_raw;
-                    String targetAtomSubstitutedTermTerm0FunctionSymbolName = targetAtomSubstitutedTermTerm0FunctionSymbol.getName();
-                    return targetAtomSubstitutedTermTerm0FunctionSymbolName;
-                }
-            } else if (targetAtomSubstitutedTerm_raw instanceof IRIConstantImpl) {
-                IRIConstantImpl targetAtomSubstitutedTerm = (IRIConstantImpl) targetAtomSubstitutedTerm_raw;
-                String targetAtomSubstitutedTermIRI = targetAtomSubstitutedTerm.getIRI().toString();
-                return targetAtomSubstitutedTermIRI;
-            }
-
-        } catch (Exception e) {
-            throw new Exception("Target atom is not an IRI\n\n" +e.getMessage());
-        }
-        throw new Exception("Target atom is not an IRI");
-    }
-
-    public String getIRIFunctionZhenZhen(ImmutableTerm it) throws Exception {
-//        Version of Zhenzhen
-        // The immutableTerm it has the following form: RDF(http://semanticweb.org/skyserver/d/id={}(TmpToTEXT(id)),IRI)
-        // we are interested in the IRI which starts from index 4 (h) and ends with the first open parenthesis (
-        // this way of identifying IRIS allows to compare also multiple attributes declaratins http://semanticweb.org/skyserver/d/id={}/id2={}
-
-        String str = it.toString();
-        return str.endsWith("IRI)") ? str.substring(4, str.indexOf("{")): "";
-
-    }
-
-    public String getIRIFunctionMarco(ImmutableTerm targetAtomSubstitutedTerm_raw) throws Exception {
-        try {
-            //subjects or objects with one or more attributes are usually NonGroundFunctionalTermImpl and the IRI is the FunctionalSymbol of it
-            //predicates and objects with no attributes are usually IRIConstantImpl and contain only the IRI
-            if(targetAtomSubstitutedTerm_raw instanceof NonGroundFunctionalTermImpl) {
-                NonGroundFunctionalTermImpl targetAtomSubstitutedTerm = (NonGroundFunctionalTermImpl) targetAtomSubstitutedTerm_raw;
-                ImmutableTerm targetAtomSubstitutedTermTerm0_raw = targetAtomSubstitutedTerm.getTerm(0);
-                NonGroundFunctionalTermImpl targetAtomSubstitutedTermTerm0 = (NonGroundFunctionalTermImpl) targetAtomSubstitutedTermTerm0_raw;
-                FunctionSymbol targetAtomSubstitutedTermTerm0FunctionSymbol_raw = targetAtomSubstitutedTermTerm0.getFunctionSymbol();
-                // The FunctionSymbol can be of type IRIStringTemplateFunctionSymbolImpl or TemporaryDBTypeConversionToStringFunctionSymbolImpl
-                // The IRI we are interested in is usually a IRIStringTemplateFunctionSymbolImpl.
-                // TemporaryDBTypeConversionToStringFunctionSymbolImpl is used for the functionalsymbol of the attributes name of the DB (e.g. TmpToTEXT(id))
-                if (targetAtomSubstitutedTermTerm0FunctionSymbol_raw instanceof IRIStringTemplateFunctionSymbolImpl) {
-                    IRIStringTemplateFunctionSymbolImpl targetAtomSubstitutedTermTerm0FunctionSymbol = (IRIStringTemplateFunctionSymbolImpl) targetAtomSubstitutedTermTerm0FunctionSymbol_raw;
-                    String targetAtomSubstitutedTermTerm0FunctionSymbolTemplate = targetAtomSubstitutedTermTerm0FunctionSymbol.getTemplate();
-                    return targetAtomSubstitutedTermTerm0FunctionSymbolTemplate;
-                } else if (targetAtomSubstitutedTermTerm0FunctionSymbol_raw instanceof TemporaryDBTypeConversionToStringFunctionSymbolImpl) {
-                    TemporaryDBTypeConversionToStringFunctionSymbolImpl targetAtomSubstitutedTermTerm0FunctionSymbol = (TemporaryDBTypeConversionToStringFunctionSymbolImpl) targetAtomSubstitutedTermTerm0FunctionSymbol_raw;
-                    String targetAtomSubstitutedTermTerm0FunctionSymbolName = targetAtomSubstitutedTermTerm0FunctionSymbol.getName();
-                    return targetAtomSubstitutedTermTerm0FunctionSymbolName;
-                }
-            } else if (targetAtomSubstitutedTerm_raw instanceof IRIConstantImpl) {
-                IRIConstantImpl targetAtomSubstitutedTerm = (IRIConstantImpl) targetAtomSubstitutedTerm_raw;
-                String targetAtomSubstitutedTermIRI = targetAtomSubstitutedTerm.getIRI().toString();
-                return targetAtomSubstitutedTermIRI;
-            }
-
-        } catch (Exception e) {
-            throw new Exception("Target atom is not an IRI\n\n" +e.getMessage());
-        }
-        throw new Exception("Target atom is not an IRI");
-    }
 
     @Test
-    public void testGetIriFunction() throws Exception {
+    /**Mapping test*********************************/
+    public void testMappings() throws Exception {
         OntopSQLOWLAPIConfiguration configure = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile("src/test/resources/compareIRI/boot-multiple-inheritance.owl")
-                .nativeOntopMappingFile("src/test/resources/compareIRI/boot-multiple-inheritance-v2.obda")
+                .nativeOntopMappingFile("src/test/resources/compareIRI/boot-multiple-inheritance.obda")
                 .propertyFile("src/test/resources/compareIRI/boot-multiple-inheritance.properties")
                 .enableTestMode()
                 .build();
 
-        SQLPPMapping mapping = configure.loadProvidedPPMapping();
-        ImmutableList mappings = mapping.getTripleMaps();
-        System.out.println("*********************************");
-        System.out.println("mappings: " + mappings);
-        System.out.println("*********************************");
-        for(int i = 0; i < mappings.size(); i++) {
-            Object mapping0_raw = mappings.get(i);
-            SQLPPTriplesMap mapping0 = (SQLPPTriplesMap) mapping0_raw;
-            System.out.println("*********************************");
-            System.out.println("mapping0: " + mapping0);
-            System.out.println("*********************************");
-            ImmutableList<TargetAtom> targetAtoms = mapping0.getTargetAtoms();
-            for(int j=0; j < targetAtoms.size(); j++) {
-                TargetAtom targetAtom_raw = targetAtoms.get(j);
-                TargetAtomImpl targetAtom = (TargetAtomImpl) targetAtom_raw;
-                System.out.println("*********************************");
-                System.out.println("targetAtom: " + targetAtom);
-                System.out.println("*********************************");
+        SQLPPMapping mappings = configure.loadProvidedPPMapping();
+        for( SQLPPTriplesMap tripleMap : mappings.getTripleMaps() ) {
+            System.out.println(tripleMap.getSourceQuery());
+            List<TargetAtom> atoms = tripleMap.getTargetAtoms();
+            for(TargetAtom ta: atoms) {
+                ImmutableTerm subject = ta.getSubstitutedTerm(0);
+                ImmutableTerm predicate = ta.getSubstitutedTerm(1);
+                ImmutableTerm object = ta.getSubstitutedTerm(2);
 
-                for(int k=0; k<3; k++) {
-                    if (k==0) {
-                        System.out.println("*************** subject ******************");
-                    } else if (k==1) {
-                        System.out.println("*************** predicate ******************");
-                    } else {
-                        System.out.println("*************** object ******************");
-                    }
-                    ImmutableTerm targetAtomSubstitutedTerm0 = targetAtom.getSubstitutedTerm(k);
-                    System.out.println("*********************************");
-                    System.out.println("iri ZhenZhen: " + getIRIFunctionZhenZhen(targetAtomSubstitutedTerm0));
-                    System.out.println("iri: Marco: " + getIRIFunctionMarco(targetAtomSubstitutedTerm0));
-                    System.out.println("*********************************");
-                }
+                System.out.println(subject);
+                System.out.println(predicate);
+                System.out.println(object);
+                System.out.println(getDataType(object));
+
+                System.out.println("one triple patterns");
             }
         }
-        return;
     }
 
-
-   @Test
+    @Test
     public void myTest() throws Exception {
         long start1 = System.currentTimeMillis();
         SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
-                                                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
-                                                "src/test/resources/federation-test/teiid.properties",
-                                                "src/test/resources/federation-test/SourceLab.txt");
+                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
+                "src/test/resources/federation-test/teiid.properties",
+                "src/test/resources/federation-test/SourceLab.txt");
         long end1 = System.currentTimeMillis();
-        System.out.println("total time used for detection: " + (end1-start1));
+        System.out.println("total time used for detection: "+(end1-start1));
 
         System.out.println("detected candidate federated joins for checking: "+sh.emptyFJs.size());
         for(EmptyFederatedJoin candidate: sh.emptyFJs){
@@ -860,10 +771,10 @@ public class FederationHintPrecomputation {
         for(MaterializedView mv: sh_new.matView){
             mv.print();
         }
-   }
+
+    }
+
 }
-
-
 
 
 class AttributeSQL{
@@ -928,7 +839,3 @@ class PropertyMap{
         this.sourceSQL = sourceSQL;
     }
 }
-
-
-
-
