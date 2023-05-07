@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestQueryProcessor implements QueryReformulator {
 
+	public static boolean returnPlannedQuery = false;
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestQueryProcessor.class);
 
 	private final QueryRewriter rewriter;
@@ -42,26 +43,22 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
-	private final MarcoOptimizer marcoOptimizer;
-
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-								QueryCache queryCache,
-								QueryUnfolder.Factory queryUnfolderFactory,
-								TranslationFactory translationFactory,
-								QueryRewriter queryRewriter,
-								KGQueryFactory kgQueryFactory,
-								KGQueryTranslator inputQueryTranslator,
-								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
-								MarcoOptimizer marcoOptimizer,
-								QueryPlanner queryPlanner,
-								QueryLogger.Factory queryLoggerFactory) {
+								  QueryCache queryCache,
+								  QueryUnfolder.Factory queryUnfolderFactory,
+								  TranslationFactory translationFactory,
+								  QueryRewriter queryRewriter,
+								  KGQueryFactory kgQueryFactory,
+								  KGQueryTranslator inputQueryTranslator,
+								  GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
+								  QueryPlanner queryPlanner,
+								  QueryLogger.Factory queryLoggerFactory) {
 		this.kgQueryFactory = kgQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
-		this.marcoOptimizer = marcoOptimizer;
 		this.queryLoggerFactory = queryLoggerFactory;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
@@ -70,7 +67,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-		//this.federationOptimizer = federationOptimizer;
 
 		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -94,51 +90,43 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			queryLogger.setSparqlIQ(convertedIQ);
 
-            try {
-                LOGGER.debug("Start the rewriting process...");
+			try {
+				LOGGER.debug("Start the rewriting process...");
 
-                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
-                LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
+				IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
+				LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
 
-                LOGGER.debug("Start the unfolding...");
-                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
-                if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
+				LOGGER.debug("Start the unfolding...");
+				IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
+				if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
-                	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+					LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 					return unfoldedIQ;
 				}
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
-				IQ myOptimizedQuery = marcoOptimizer.optimize(optimizedQuery);
-				LOGGER.debug("Marco Optimised query:\n{}\n", myOptimizedQuery);
-
-				IQ plannedQuery = queryPlanner.optimize(myOptimizedQuery);
-
-				//TODO create a new optimizer for data federation
+				IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
-				//IQ federatedQuery = federationOptimizer.optimize(plannedQuery);
-				//LOGGER.debug("Federation query:\n{}\n", federatedQuery);
-
-				//queryLogger.setPlannedQuery(federatedQuery);
 				queryLogger.setPlannedQuery(plannedQuery);
 
-				//IQ executableQuery = generateExecutableQuery(federatedQuery);
-				IQ executableQuery = generateExecutableQuery(plannedQuery);
-//				queryCache.put(inputQuery, executableQuery);
-//				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
-//				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
-				//return executableQuery; /**原始的，返回可执行的SQL语句*/
-				return plannedQuery;
+				if(returnPlannedQuery){
+					return plannedQuery;
+				}
 
+				IQ executableQuery = generateExecutableQuery(plannedQuery);
+				queryCache.put(inputQuery, executableQuery);
+				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
+				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+				return executableQuery;
 			}
-            catch (OntopReformulationException e) {
-            	queryLogger.declareReformulationException(e);
-                throw e;
-            }
-        }
+			catch (OntopReformulationException e) {
+				queryLogger.declareReformulationException(e);
+				throw e;
+			}
+		}
 		catch (OntopInvalidKGQueryException e) {
 			OntopInvalidInputQueryException reformulationException = new OntopInvalidInputQueryException(e.getMessage());
 			queryLogger.declareReformulationException(reformulationException);
@@ -191,9 +179,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		} catch (OntopInvalidKGQueryException e) {
 			throw new OntopInvalidInputQueryException(e.getMessage());
 		}
-		 catch (OntopUnsupportedKGQueryException e) {
+		catch (OntopUnsupportedKGQueryException e) {
 			throw new OntopUnsupportedInputQueryException(e.getMessage());
-		 }
+		}
 	}
 
 	@Override

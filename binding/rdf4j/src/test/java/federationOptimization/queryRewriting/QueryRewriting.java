@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import federationOptimization.precomputation.SourceLab;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
@@ -50,6 +51,7 @@ public class QueryRewriting {
 
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
+
     public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String hintFile, String labFile, String sourceFile, String effLabel) {
         try {
             this.configuration = OntopSQLOWLAPIConfiguration
@@ -119,20 +121,20 @@ public class QueryRewriting {
         return;
     }
 
-//    public QueryRewritingMarco(String owlPath, String obdaPath, String PROPERTY, String hintFile, String labFile, String sourceFile, String effLabel, String query) {
-//        this(owlPath, obdaPath, PROPERTY, hintFile, labFile, sourceFile, effLabel);
-//        this.inputQuery = query;
-//    }
-
     public String getOptimizedSQL(String sparqlQuery) throws Exception {
+
+        QuestQueryProcessor.returnPlannedQuery = true;
+
         KGQueryFactory kgQueryFactory = configuration.getKGQueryFactory();
         KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparqlQuery);
         QueryReformulator reformulator = configuration.loadQueryReformulator();
         QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
         IQ iq = reformulator.reformulateIntoNativeQuery(query, queryLogger);
-        IQTree iqt = iq.getTree();
+        QuestQueryProcessor.returnPlannedQuery = false;
 
+        IQTree iqt = iq.getTree();
         IQTree iqtopt = rewriteIQTree(iqt);
+
         IQ iqopt = IQTreeToIQ(iqtopt);
         IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         return ((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
