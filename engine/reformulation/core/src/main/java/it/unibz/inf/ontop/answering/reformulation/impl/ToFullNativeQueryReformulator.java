@@ -61,14 +61,13 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                                           KGQueryFactory kgQueryFactory,
                                           KGQueryTranslator inputQueryTranslator,
                                           GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
-                                          MarcoOptimizer marcoOptimizer,
                                           QueryPlanner queryPlanner,
                                           QueryLogger.Factory queryLoggerFactory,
                                           IntermediateQueryFactory iqFactory,
                                           TermFactory termFactory,
                                           SubstitutionFactory substitutionFactory) {
         super(obdaSpecification, queryCache, queryUnfolderFactory, translationFactory, queryRewriter, kgQueryFactory,
-                inputQueryTranslator, generalOptimizer, marcoOptimizer, queryPlanner, queryLoggerFactory);
+                inputQueryTranslator, generalOptimizer, queryPlanner, queryLoggerFactory);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
