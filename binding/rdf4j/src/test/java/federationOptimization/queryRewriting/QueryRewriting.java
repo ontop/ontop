@@ -462,9 +462,17 @@ public class QueryRewriting {
                 if(dn instanceof ExtensionalDataNode){
                     RelationPredicate RP = ((ExtensionalDataNode) dn).getRelationDefinition().getAtomPredicate();
                     String relationName = RP.toString();
-                    if(sourceMap.containsKey(relationName)){
-                        sources.add(sourceMap.get(relationName));
+                    //the format of the names in the federation settings: ss5.r
+                    String source = "";
+                    if(relationName.startsWith("\"")){
+                        source = relationName.substring(1, relationName.indexOf("."));
+                    } else {
+                        source = relationName.substring(0, relationName.indexOf("."));
                     }
+                    sources.add(source);
+//                    if(sourceMap.containsKey(relationName)){
+//                        sources.add(sourceMap.get(relationName));
+//                    }
                 }
             }
         }
