@@ -573,7 +573,7 @@
         <dependency>
             <groupId>cdata.amazon</groupId>
             <artifactId>dynamodb-jdbc</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
             <scope>system</scope>
             <systemPath>/home/damian/Downloads/AmazonDynamoDBJDBCDriver/lib/cdata.jdbc.amazondynamodb.jar</systemPath>
         </dependency>

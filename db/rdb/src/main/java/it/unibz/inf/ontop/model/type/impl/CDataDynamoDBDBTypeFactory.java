@@ -124,4 +124,13 @@ public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
         return false;
     }
 
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "1";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "0";
+    }
 }
