@@ -1,47 +1,53 @@
 package it.unibz.inf.ontop.query.resultset.impl;
 
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-
-import it.unibz.inf.ontop.query.resultset.GraphResultSet;
-import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
-import it.unibz.inf.ontop.query.resultset.TupleResultSet;
-import org.apache.commons.rdf.api.RDF;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.query.algebra.BNodeGenerator;
-import org.eclipse.rdf4j.query.algebra.Extension;
-import org.eclipse.rdf4j.query.algebra.ExtensionElem;
-import org.eclipse.rdf4j.query.algebra.ProjectionElem;
-import org.eclipse.rdf4j.query.algebra.ProjectionElemList;
-import org.eclipse.rdf4j.query.algebra.ValueConstant;
-import org.eclipse.rdf4j.query.algebra.ValueExpr;
-
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.query.ConstructTemplate;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.query.ConstructTemplate;
+import it.unibz.inf.ontop.query.resultset.GraphResultSet;
+import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
+import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.*;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 
 public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
-	private final ResultSetIterator iterator;
+	private final TupleResultSet resultSet;
+	private final ConstructTemplate constructTemplate;
+	private final TermFactory termFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
+	private final boolean excludeInvalidTriples;
+
+	private final OntopCloseableIterator<RDFFact, OntopConnectionException> iterator;
 
 	public DefaultSimpleGraphResultSet(
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
 			RDF rdfFactory, boolean excludeInvalidTriples) {
-		iterator = new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, excludeInvalidTriples);
+		this.resultSet = tupleResultSet;
+		this.constructTemplate = constructTemplate;
+		this.termFactory = termFactory;
+		this.rdfFactory = rdfFactory;
+		this.excludeInvalidTriples = excludeInvalidTriples;
+
+		this.iterator = new ResultSetIterator();
 	}
 
 	@Override
@@ -64,32 +70,16 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		iterator.close();
 	}
 
-	private static class ResultSetIterator extends RDFFactCloseableIterator {
-		private final TupleResultSet resultSet;
-		private final ConstructTemplate constructTemplate;
-		private final TermFactory termFactory;
-		private final org.apache.commons.rdf.api.RDF rdfFactory;
-		private final Queue<RDFFact> statementBuffer;
+	private class ResultSetIterator extends RDFFactCloseableIterator {
+		private final Queue<RDFFact> statementBuffer = new LinkedList<>();
 		private final ImmutableMap<String, ValueExpr> extMap;
-		private final boolean excludeInvalidTriples;
 
-		private ResultSetIterator(
-				TupleResultSet resultSet,
-				ConstructTemplate constructTemplate,
-				TermFactory termFactory,
-				RDF rdfFactory, boolean excludeInvalidTriples) {
-			this.resultSet = resultSet;
-			this.constructTemplate = constructTemplate;
-			this.termFactory = termFactory;
-			this.rdfFactory = rdfFactory;
-			this.excludeInvalidTriples = excludeInvalidTriples;
-			Extension ex = this.constructTemplate.getExtension();
+		private ResultSetIterator() {
+			Extension ex = constructTemplate.getExtension();
 			extMap = ex != null
 					? ex.getElements().stream()
 							.collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr))
 					: null;
-
-			this.statementBuffer = new LinkedList<>();
 		}
 
 		@Override
@@ -130,23 +120,29 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				try {
 					OntopBindingSet bindingSet = resultSet.next();
 					for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-						int size = peList.getElements().size();
+						List<ProjectionElem> elements = peList.getElements();
+						int size = elements.size();
 						for (int i = 0; i < size / 3; i++) {
 							try {
-								Constant subjectConstant = getConstant(peList.getElements().get(i * 3), bindingSet);
-								Constant propertyConstant = getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-								Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+								RDFConstant subjectConstant = getConstant(elements.get(i * 3), bindingSet);
+								RDFConstant propertyConstant = getConstant(elements.get(i * 3 + 1), bindingSet);
+								RDFConstant objectConstant = getConstant(elements.get(i * 3 + 2), bindingSet);
 								if (subjectConstant instanceof ObjectConstant
 										&& propertyConstant instanceof IRIConstant
-										&& objectConstant instanceof RDFConstant) {
+										&& objectConstant != null) {
 									statementBuffer.add(
 											RDFFact.createTripleFact(
-													(ObjectConstant) subjectConstant,
+													(ObjectConstant)subjectConstant,
 													(IRIConstant)propertyConstant,
-													(RDFConstant)objectConstant));
+													objectConstant));
+								}
+								else {
+									// TODO: inform the query logger that a triple has been excluded
 								}
 							}
-							catch (OntopResultConversionException e) { // OntopResultConversionException is never thrown by the implementation
+							// OntopResultConversionException is never thrown by the implementation
+							//  of OntopBindingSet.getConstant
+							catch (OntopResultConversionException e) {
 								if (!excludeInvalidTriples)
 									throw e;
 								// TODO: inform the query logger that a triple has been excluded
@@ -155,7 +151,8 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 					}
 				}
 				// OntopResultConversionException is thrown by resultSet.next()
-				// this, however, does not quite agree with the specification as it skips all related triples (not just the one offender)
+				// this, however, does not quite agree with the specification
+				// as it skips all related triples (not just the one offender)
 				catch (OntopResultConversionException e) {
 					if (!excludeInvalidTriples)
 						throw e;
@@ -164,14 +161,14 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 		}
 
-		private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
+		private RDFConstant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
 				throws OntopResultConversionException {
 			String nodeName = node.getName();
 			ValueExpr ve = extMap != null
 					? extMap.get(nodeName)
 					: null;
 
-			Constant constant;
+			RDFConstant constant;
 			if (ve instanceof ValueConstant) {
 				ValueConstant vc = (ValueConstant) ve;
 				if (vc.getValue() instanceof IRI) {
@@ -185,12 +182,13 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				// See https://www.w3.org/TR/sparql11-query/#tempatesWithBNodes
 				String rowId = bindingSet.getRowUUIDStr();
 
-				String label =
-						Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
-								// If defined, we expected the b-node label to be constant (as appearing in the
-								// CONSTRUCT block)
+				String label = Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
+								// If defined, we expected the b-node label to be constant
+								// (as appearing in the CONSTRUCT block)
 								.filter(e -> e instanceof ValueConstant)
-								.map(v -> ((ValueConstant) v).getValue().stringValue())
+								.map(e -> (ValueConstant)e)
+								.map(ValueConstant::getValue)
+								.map(Value::stringValue)
 								.map(s -> s + rowId)
 								.orElseGet(() -> nodeName + rowId);
 
@@ -200,6 +198,5 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 			return constant;
 		}
-
 	}
 }
