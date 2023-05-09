@@ -133,18 +133,20 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 						int size = peList.getElements().size();
 						for (int i = 0; i < size / 3; i++) {
 							try {
-								ObjectConstant subjectConstant =
-										(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-								IRIConstant propertyConstant =
-										(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-								RDFConstant objectConstant =
-										(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-								if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
+								Constant subjectConstant = getConstant(peList.getElements().get(i * 3), bindingSet);
+								Constant propertyConstant = getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+								Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+								if (subjectConstant instanceof ObjectConstant
+										&& propertyConstant instanceof IRIConstant
+										&& objectConstant instanceof RDFConstant) {
 									statementBuffer.add(
-											RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+											RDFFact.createTripleFact(
+													(ObjectConstant) subjectConstant,
+													(IRIConstant)propertyConstant,
+													(RDFConstant)objectConstant));
 								}
-							} catch (
-									OntopResultConversionException e) { // OntopResultConversionException is never thrown by the implementation
+							}
+							catch (OntopResultConversionException e) { // OntopResultConversionException is never thrown by the implementation
 								if (!excludeInvalidTriples)
 									throw e;
 								// TODO: inform the query logger that a triple has been excluded
@@ -154,7 +156,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				}
 				// OntopResultConversionException is thrown by resultSet.next()
 				// this, however, does not quite agree with the specification as it skips all related triples (not just the one offender)
-				catch (OntopResultConversionException e) { 
+				catch (OntopResultConversionException e) {
 					if (!excludeInvalidTriples)
 						throw e;
 					// TODO: inform the query logger that a triple has been excluded
