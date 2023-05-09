@@ -76,7 +76,7 @@ if [ "${ONTOP_DB_USER_FILE+x}" ]; then
   if [ "${ONTOP_DB_USER+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_USER and ONTOP_DB_USER_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-user=$(< "${ONTOP_DB_USER_FILE}")"
+  set -- "$@" "--db-user=$(cat "${ONTOP_DB_USER_FILE}")"
 fi
 
 if [ "${ONTOP_DB_PASSWORD+x}" ]; then
@@ -87,7 +87,7 @@ if [ "${ONTOP_DB_PASSWORD_FILE+x}" ]; then
   if [ "${ONTOP_DB_PASSWORD+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_PASSWORD and ONTOP_DB_PASSWORD_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-password=$(< "${ONTOP_DB_PASSWORD_FILE}")"
+  set -- "$@" "--db-password=$(cat "${ONTOP_DB_PASSWORD_FILE}")"
 fi
 
 if [ "${ONTOP_DB_URL+x}" ]; then
@@ -98,7 +98,7 @@ if [ "${ONTOP_DB_URL_FILE+x}" ]; then
   if [ "${ONTOP_DB_URL+x}" ]; then
     echo "ERROR: environment variables ONTOP_DB_URL and ONTOP_DB_URL_FILE are conflicting. Please choose one of the two." && exit 1
   fi
-  set -- "$@" "--db-url=$(< "${ONTOP_DB_URL_FILE}")"
+  set -- "$@" "--db-url=$(cat "${ONTOP_DB_URL_FILE}")"
 fi
 
 if [ "${ONTOP_DB_DRIVER+x}" ]; then
