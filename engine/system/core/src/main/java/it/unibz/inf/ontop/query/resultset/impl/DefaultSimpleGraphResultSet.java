@@ -70,7 +70,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		private final TermFactory termFactory;
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
 		private final Queue<RDFFact> statementBuffer;
-		private ImmutableMap<String, ValueExpr> extMap;
+		private final ImmutableMap<String, ValueExpr> extMap;
 		private final boolean excludeInvalidTriples;
 
 		private ResultSetIterator(
@@ -83,7 +83,12 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
 			this.excludeInvalidTriples = excludeInvalidTriples;
-			intExtMap();
+			Extension ex = this.constructTemplate.getExtension();
+			extMap = ex != null
+					? ex.getElements().stream()
+							.collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr))
+					: null;
+
 			this.statementBuffer = new LinkedList<>();
 		}
 
@@ -122,28 +127,37 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				if (!resultSet.isConnectionAlive() || !resultSet.hasNext())
 					return;
 
-				OntopBindingSet bindingSet = resultSet.next();
-				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-					int size = peList.getElements().size();
-					for (int i = 0; i < size / 3; i++) {
-						try {
-							ObjectConstant subjectConstant =
-									(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-							IRIConstant propertyConstant =
-									(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-							RDFConstant objectConstant =
-									(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-							if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
-								statementBuffer.add(
-										RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+				try {
+					OntopBindingSet bindingSet = resultSet.next();
+					for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
+						int size = peList.getElements().size();
+						for (int i = 0; i < size / 3; i++) {
+							try {
+								ObjectConstant subjectConstant =
+										(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
+								IRIConstant propertyConstant =
+										(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+								RDFConstant objectConstant =
+										(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+								if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
+									statementBuffer.add(
+											RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+								}
+							} catch (
+									OntopResultConversionException e) { // OntopResultConversionException is never thrown by the implementation
+								if (!excludeInvalidTriples)
+									throw e;
+								// TODO: inform the query logger that a triple has been excluded
 							}
 						}
-						catch (OntopResultConversionException e) {
-							if (!excludeInvalidTriples)
-								throw e;
-							// TODO: inform the query logger that a triple has been excluded
-						}
 					}
+				}
+				// OntopResultConversionException is thrown by resultSet.next()
+				// this, however, does not quite agree with the specification as it skips all related triples (not just the one offender)
+				catch (OntopResultConversionException e) { 
+					if (!excludeInvalidTriples)
+						throw e;
+					// TODO: inform the query logger that a triple has been excluded
 				}
 			}
 		}
@@ -151,11 +165,9 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
 				throws OntopResultConversionException {
 			String nodeName = node.getName();
-			ValueExpr ve = null;
-
-			if (extMap != null) {
-				ve = extMap.get(nodeName);
-			}
+			ValueExpr ve = extMap != null
+					? extMap.get(nodeName)
+					: null;
 
 			Constant constant;
 			if (ve instanceof ValueConstant) {
@@ -182,20 +194,9 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 				constant = termFactory.getConstantBNode(label);
 			} else {
-				constant = bindingSet.getConstant(nodeName);
+				constant = bindingSet.getConstant(nodeName); // the actual implementation never throws OntopResultConversionException
 			}
 			return constant;
-		}
-
-		private void intExtMap() {
-			Extension ex = constructTemplate.getExtension();
-			if (ex != null) {
-				extMap =
-						ex.getElements().stream()
-								.collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr));
-			} else {
-				extMap = null;
-			}
 		}
 
 	}
