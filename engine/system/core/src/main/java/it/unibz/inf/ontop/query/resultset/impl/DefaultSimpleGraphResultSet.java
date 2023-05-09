@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.query.resultset.GraphResultSet;
 import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.query.resultset.TupleResultSet;
-import it.unibz.inf.ontop.query.resultset.impl.RDFFactCloseableIterator;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -90,9 +89,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 		@Override
 		public boolean hasNext() throws OntopConnectionException, OntopResultConversionException {
-			if (statementBuffer.isEmpty() && resultSetHasNext()) {
-				addStatementFromResultSet();
-			}
+			addStatementFromResultSet();
 			boolean hasNext = !statementBuffer.isEmpty();
 			if (!hasNext) {
 				handleClose();
@@ -121,12 +118,15 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		}
 
 		private void addStatementFromResultSet() throws OntopConnectionException, OntopResultConversionException {
-			try {
-                do {
-					OntopBindingSet bindingSet = resultSet.next();
-					for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-						int size = peList.getElements().size();
-						for (int i = 0; i < size / 3; i++) {
+			while (statementBuffer.isEmpty()) {
+				if (!resultSet.isConnectionAlive() || !resultSet.hasNext())
+					return;
+
+				OntopBindingSet bindingSet = resultSet.next();
+				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
+					int size = peList.getElements().size();
+					for (int i = 0; i < size / 3; i++) {
+						try {
 							ObjectConstant subjectConstant =
 									(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
 							IRIConstant propertyConstant =
@@ -138,12 +138,13 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 										RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
 							}
 						}
+						catch (OntopResultConversionException e) {
+							if (!excludeInvalidTriples)
+								throw e;
+							// TODO: inform the query logger that a triple has been excluded
+						}
 					}
-				} while (statementBuffer.isEmpty() && resultSet.hasNext());
-			} catch (OntopResultConversionException e) {
-				if (!excludeInvalidTriples)
-					throw e;
-				// TODO: inform the query logger that a triple has been excluded
+				}
 			}
 		}
 
@@ -197,11 +198,5 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 		}
 
-		private boolean resultSetHasNext() throws OntopConnectionException, OntopResultConversionException {
-			if (!resultSet.isConnectionAlive()) {
-				return false;
-			}
-			return resultSet.hasNext();
-		}
 	}
 }
