@@ -511,8 +511,8 @@ public class RDF4JTupleExprTranslator {
                 iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(rootVariables),
                         iqFactory.createNaryIQTree(iqFactory.createUnionNode(rootVariables),
                                 ImmutableList.of(
-                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(leftCn, leftTranslation.iqTree), leftNonProjVarsRenaming),
-                                        applyInDepthRenaming(iqFactory.createUnaryIQTree(rightCn, rightTranslation.iqTree), rightNonProjVarsRenaming)))),
+                                        iqFactory.createUnaryIQTree(leftCn, applyInDepthRenaming(leftTranslation.iqTree, leftNonProjVarsRenaming)),
+                                        iqFactory.createUnaryIQTree(rightCn, applyInDepthRenaming(rightTranslation.iqTree, rightNonProjVarsRenaming))))),
                 nullableVariables);
     }
 
