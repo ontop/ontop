@@ -122,22 +122,24 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 		private void addStatementFromResultSet() throws OntopConnectionException, OntopResultConversionException {
 			try {
-				OntopBindingSet bindingSet = resultSet.next();
-				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-					int size = peList.getElements().size();
-					for (int i = 0; i < size / 3; i++) {
-						ObjectConstant subjectConstant =
-								(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-						IRIConstant propertyConstant =
-								(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-						RDFConstant objectConstant =
-								(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-						if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
-							statementBuffer.add(
-									RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+                do {
+					OntopBindingSet bindingSet = resultSet.next();
+					for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
+						int size = peList.getElements().size();
+						for (int i = 0; i < size / 3; i++) {
+							ObjectConstant subjectConstant =
+									(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
+							IRIConstant propertyConstant =
+									(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+							RDFConstant objectConstant =
+									(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+							if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
+								statementBuffer.add(
+										RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+							}
 						}
 					}
-				}
+				} while (statementBuffer.isEmpty() && resultSet.hasNext());
 			} catch (OntopResultConversionException e) {
 				if (!excludeInvalidTriples)
 					throw e;
