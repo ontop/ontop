@@ -189,6 +189,26 @@ public class AbstractRDF4JTest {
         assertEquals(expectedGraph, statementBuilder.build());
     }
 
+    protected int runGraphQueryAndCount(String queryString) {
+        return runGraphQueryAndCount(queryString, new MapBindingSet());
+    }
+
+    protected int runGraphQueryAndCount(String queryString,
+                                           BindingSet bindings) {
+        GraphQuery query = REPO_CONNECTION.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+        bindings.getBindingNames()
+                .forEach(n -> query.setBinding(n, bindings.getValue(n)));
+
+        GraphQueryResult result = query.evaluate();
+        int count = 0;
+        while (result.hasNext()) {
+            count++;
+            result.next();
+        }
+        result.close();
+        return count;
+    }
+
     protected TupleQueryResult evaluate(String queryString) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
         return query.evaluate();
