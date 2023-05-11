@@ -18,7 +18,7 @@ public class Ontop {
             command.run();
         } catch (ParseCommandMissingException e) {
             main("help");
-        } catch (ParseArgumentsUnexpectedException | ParseOptionMissingException e) {
+        } catch (ParseArgumentsUnexpectedException | ParseOptionMissingException | ParseArgumentsIllegalValueException e) {
             System.err.println("Error: " + e.getMessage());
             String commandName = args[0];
             System.err.format("Run `ontop help %s` to see the help for the command `%s`\n", commandName, commandName);
