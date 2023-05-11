@@ -5,6 +5,7 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedEnumValues;
+import com.github.rvesse.airline.parser.errors.ParseArgumentsIllegalValueException;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -30,9 +31,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -168,10 +171,31 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
 
     private void runWithSeparateFiles(RDF4JMaterializer materializer) {
         try {
+            validateBaseDirectory();
             materializeClassesByFile(materializer);
             materializePropertiesByFile(materializer);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * If --separate-files is set, this method checks the correctness of the outputFile path,
+     * which has to be a directory. If the directory does not exist, but its parent does,
+     * it is created. Otherwise, a ParseArgumentsIllegalValueException is thrown.
+     * @throws IOException
+     * @throws ParseArgumentsIllegalValueException
+     */
+    private void validateBaseDirectory() throws IOException, ParseArgumentsIllegalValueException {
+        Path outputPath = Paths.get(removeExtension(outputFile));
+        if(!Files.isDirectory(outputPath)) {
+            if(Files.isDirectory(outputPath.getParent()))
+            {
+                Files.createDirectory(outputPath);
+            }
+            else {
+                throw new ParseArgumentsIllegalValueException("output", outputFile, Set.of("output must be an existing directory if '--separate-files' is set."));
+            }
         }
     }
 
