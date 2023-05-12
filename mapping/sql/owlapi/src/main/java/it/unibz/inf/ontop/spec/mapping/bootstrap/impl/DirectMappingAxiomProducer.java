@@ -266,6 +266,7 @@ public class DirectMappingAxiomProducer {
 		else {
 			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+					.map(termFactory::getPartiallyDefinedConversionToString)
 					.collect(ImmutableCollectors.toList());
 
 			/*
