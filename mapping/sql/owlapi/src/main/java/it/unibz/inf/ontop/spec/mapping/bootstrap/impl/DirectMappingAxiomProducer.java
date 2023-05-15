@@ -256,18 +256,12 @@ public class DirectMappingAxiomProducer {
 				builder.addColumn();
 			}
 
-			ImmutableList<ImmutableFunctionalTerm> arguments = pk.getAttributes().stream()
-					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
-					.map(termFactory::getPartiallyDefinedConversionToString)
-					.collect(ImmutableCollectors.toList());
+			ImmutableList<ImmutableFunctionalTerm> arguments = getVariablesWithCast(pk.getAttributes(), varNamePrefix);
 
 			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
 		}
 		else {
-			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()
-					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
-					.map(termFactory::getPartiallyDefinedConversionToString)
-					.collect(ImmutableCollectors.toList());
+			ImmutableList<ImmutableFunctionalTerm> vars = getVariablesWithCast(td.getAttributes(), varNamePrefix);
 
 			/*
 			 * Re-use the blank node template if already existing
@@ -282,5 +276,11 @@ public class DirectMappingAxiomProducer {
 		}
 	}
 
+	private ImmutableList<ImmutableFunctionalTerm> getVariablesWithCast(ImmutableList<Attribute> attributes, String varNamePrefix) {
+		return attributes.stream()
+				.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+				.map(termFactory::getPartiallyDefinedConversionToString)
+				.collect(ImmutableCollectors.toList());
+	}
 
 }
