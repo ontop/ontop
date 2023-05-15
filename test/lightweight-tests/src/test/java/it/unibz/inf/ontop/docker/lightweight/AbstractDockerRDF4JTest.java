@@ -217,4 +217,9 @@ public class AbstractDockerRDF4JTest {
         
         return set.build();
     }
+
+    protected boolean executeAskQuery(String queryString) {
+        BooleanQuery query = REPO_CONNECTION.prepareBooleanQuery(QueryLanguage.SPARQL, queryString);
+        return query.evaluate();
+    }
 }
