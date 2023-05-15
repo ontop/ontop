@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -126,4 +127,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                                                      ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability);
 
+    @Override
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
+        return Optional.empty();
+    }
 }

@@ -46,8 +46,8 @@ public class MarcoTest {
     }
 
     public String getIRIFromSubjectRDF(ImmutableTerm t1) {
-        int indexEqual = t1.toString().indexOf("(", 4);
-        return t1.toString().substring(4, indexEqual);
+        int indexEndIRI = t1.toString().indexOf("(", 4);
+        return t1.toString().substring(4, indexEndIRI);
     }
 
     public String getObjectIRIFromTargetAtom(TargetAtom targetAtom) {

@@ -84,7 +84,7 @@ public class TestTeiid {
     public void myTest(){
         try{
             Class.forName("org.teiid.jdbc.TeiidDriver");
-            Connection conn = DriverManager.getConnection("jdbc:teiid:homogeneous@mm://localhost:11000", "obdf", "obdfPwd0");
+            Connection conn = DriverManager.getConnection("jdbc:teiid:homogeneous@mm://obdalin.inf.unibz.it:40030", "obdf", "obdfPwd0");
             Statement stmt = conn.createStatement();
 
            long start = System.currentTimeMillis();
@@ -92,8 +92,8 @@ public class TestTeiid {
             String relation1 = "select nr, publisher from ss2.review";
             String relation2 = "select nr, publisher from ss1.reviewc";
             String sql = "("+relation2+") except ("+relation1+")";
-            //testQuery(stmt, sql);
-            //checkRedundancy(stmt, relation1, relation2);
+            testQuery(stmt, sql);
+            checkRedundancy(stmt, relation1, relation2);
 
 //            sql = "insert into smatv.MatV_0 ( V1_nr, V1_label, V1_comment, V1_parent, V1_publisher, V1_publishdate, V2_product, V2_producttype) " +
 //                    "SELECT * FROM (select nr, label, comment, parent, publisher, publishdate from ss3.producttype) AS V1, (select product, producttype from ss1.producttypeproduct1) AS V2 WHERE V1.parent=V2.producttype";
@@ -107,12 +107,12 @@ public class TestTeiid {
 //
 //            System.out.println(b1+"--"+b2);
 
-              sql = "select * from smatv.MatV_0";
-              ResultSet rs = stmt.executeQuery(sql);
-              while(rs.next()){
-                  System.out.println("result set does not empty");
-                   break;
-              }
+//              sql = "select * from smatv.MatV_0";
+//              ResultSet rs = stmt.executeQuery(sql);
+//              while(rs.next()){
+//                  System.out.println("result set does not empty");
+//                   break;
+//              }
 
             long end = System.currentTimeMillis();
             System.out.println("time used: "+(end-start));

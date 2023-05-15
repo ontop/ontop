@@ -2,123 +2,71 @@ package federationOptimization.queryRewriting;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import federationOptimization.precomputation.SourceLab;
-import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
+import it.unibz.inf.ontop.iq.node.impl.NativeNodeImpl;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
-import org.apache.commons.rdf.api.RDF;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.query.KGQuery;
+import it.unibz.inf.ontop.query.KGQueryFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class QueryRewriting {
 
-    public static String owlFile;
-    public static String obdaFile;
-    public static String propertyFile;
-    public static String query;
-    public static String hintFile;
-    public static String labFile;
-    public static String sourceFile;
-    public static String effLabel;
+    public OntopSQLOWLAPIConfiguration configuration;
+
+    public ArrayList<Set<String>> hints;
+    public HashMap<String, String> hint_matv;
+    public static HashMap<String, String> labMap;
+    public static HashMap<String, String> sourceMap;
 
     public static IntermediateQueryFactory IQ_FACTORY;
     public static AtomFactory ATOM_FACTORY;
-    public static TypeFactory TYPE_FACTORY;
     public static TermFactory TERM_FACTORY;
-    public static FunctionSymbolFactory FUNCTION_SYMBOL_FACTORY;
-    public static SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static QueryTransformerFactory TRANSFORMER_FACTORY;
-    public static OptimizerFactory OPTIMIZER_FACTORY;
-    public static CoreUtilsFactory CORE_UTILS_FACTORY;
-    public static BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
-    public static DBConstant TRUE, FALSE;
-    public static Constant NULL;
-
-//    public static NativeQueryGenerator datasourceQueryGenerator;
-//    public static TranslationFactory translationFactory;
-//    public static OBDASpecification obdaSpecification;
-
-    public static RDF RDF_FACTORY;
     public static CoreSingletons CORE_SINGLETONS;
 
-    public static DBTermType JSON_TYPE;
+    public static QuotedIDFactory idFactory;
+    public static DBTypeFactory dbTypeFactory;
 
-    public static HashMap<String, String> sourceMap;
-    public static HashMap<String, String> labMap;
-    public static List<Set<String>> hints; // str_redundancy set, equ_redundancy, empty federated join set, materialized views
-    /***comment from Zhenzhen
-     * several codes (labeled) need to be changed according to the different ways of representing hints
-     * it is easy to change
-     * minor change was made in QuestQueryProcessor.java (comment added).
-     * **/
+    public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String hintFile, String labFile, String sourceFile, String effLabel) {
+        try {
+            this.configuration = OntopSQLOWLAPIConfiguration
+                    .defaultBuilder()
+                    .ontologyFile(owlPath)
+                    .nativeOntopMappingFile(obdaPath)
+                    .propertyFile(PROPERTY)
+                    .enableTestMode()
+                    .build();
 
-    public QueryRewriting(){
-        try{
-            owlFile = "src/test/resources/federation-test/bsbm-ontology.owl";
-            obdaFile = "src/test/resources/federation-test/bsbm-mappings-sc2.obda";
-            propertyFile = "src/test/resources/federation-test/sc2.properties";
-            hintFile = "src/test/resources/federation-test/hintFile.txt";
-            labFile = "src/test/resources/federation-test/SourceLab.txt";
-            sourceFile = "src/test/resources/federation-test/SourceFile.txt";
-            effLabel = "src/test/resources/federation-test/effLabel.txt";
-
-            query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
-                    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
-                    "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
-                    "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-                    "\n" +
-                    "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
-                    "WHERE {\n" +
-                    "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
-                    "?p foaf:name ?name .\n" +
-                    "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
-                    "?p bsbm:country ?country .\n" +
-                    "?r rev:reviewer ?p .\n" +
-                    "?r bsbm:reviewFor ?product .\n" +
-                    "?r dc:title ?title .\n" +
-                    "}";
-
-            sourceMap = new HashMap<String, String>();
-            labMap = new HashMap<String, String>();
             hints = new ArrayList<Set<String>>();
+            hint_matv = new HashMap<String, String>();
+            labMap = new HashMap<String, String>();
+            sourceMap = new HashMap<String, String>();
+
             Set<String> str_redundancy = new HashSet<String>();
             Set<String> equ_redundancy = new HashSet<String>();
             Set<String> emptyJoin = new HashSet<String>();
@@ -137,7 +85,6 @@ public class QueryRewriting {
             br.close();
 
             BufferedReader br_new = new BufferedReader(new InputStreamReader(new FileInputStream(effLabel)));
-            line = null;
             while((line=br_new.readLine()) != null ){
                 String[] arr = line.split("-");
                 labMap.put(arr[0], arr[1]);
@@ -145,7 +92,6 @@ public class QueryRewriting {
             br_new.close();
 
             BufferedReader br_hint = new BufferedReader(new InputStreamReader(new FileInputStream(hintFile)));
-            line = null;
             while((line=br_hint.readLine()) != null){
                 String[] arr = line.split(":");
                 if(arr[0].startsWith("empty_federated_join")){
@@ -155,236 +101,44 @@ public class QueryRewriting {
                 } else if(arr[0].startsWith("equivalent_redundancy")){
                     hints.get(1).add(arr[1]);
                 } else {
-                    hints.get(3).add(arr[1]);
+                    String[] h_matv = arr[1].split("<-");
+                    hint_matv.put(h_matv[1], h_matv[0]);
                 }
             }
             br_hint.close();
 
-            Properties tmpProperties = new Properties();
-            tmpProperties.put(VariableGenerator.class.getCanonicalName(), LegacyVariableGenerator.class.getCanonicalName());
-
-            OntopOptimizationConfiguration defaultConfiguration = OntopOptimizationConfiguration.defaultBuilder()
-                    .properties(tmpProperties)
-                    .enableTestMode()
-                    .build();
-
-            Injector injector = defaultConfiguration.getInjector();
+            Injector injector = configuration.getInjector();
             IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
             ATOM_FACTORY = injector.getInstance(AtomFactory.class);
-            TYPE_FACTORY = injector.getInstance(TypeFactory.class);
             TERM_FACTORY = injector.getInstance(TermFactory.class);
-            FUNCTION_SYMBOL_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
-            SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-            CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
-            PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
-            TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
-            OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
             CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
-
-            //new added
-
-            JSON_TYPE = TYPE_FACTORY.getDBTypeFactory().getDBTermType("JSON");
-
-            NULL = TERM_FACTORY.getNullConstant();
-            TRUE = TERM_FACTORY.getDBBooleanConstant(true);
-            FALSE = TERM_FACTORY.getDBBooleanConstant(false);
-            RDF_FACTORY = injector.getInstance(RDF.class);
-            //ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
-
-           // datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
+            dbTypeFactory = CORE_SINGLETONS.getTypeFactory().getDBTypeFactory();
+            idFactory = new SQLStandardQuotedIDFactory();
 
         } catch (Exception e){
             e.printStackTrace();
         }
-
+        return;
     }
 
-    /************************************************************************************************
-     * @Zhenzhen Gu
-     * obtain the IQ tree translated by Ontop when taking query, ontology and mapping set as input
-     * @param sparql
-     * @param owlFile
-     * @param obdaFile
-     * @param propertyFile
-     * @return
-     * @throws OWLException
-     */
-    public IQTree getIQTree(String sparql, String owlFile, String obdaFile, String propertyFile) throws OWLException {
-        IQ iq = null;
-        OntopOWLEngine engine;
-        OntopOWLConnection ct;
-        OntopOWLStatement st;
-        TupleOWLResultSet rs;
-        Logger logger;
+    public String getOptimizedSQL(String sparqlQuery) throws Exception {
 
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertyFile)
-                .enableTestMode()
-                .build();
+        QuestQueryProcessor.returnPlannedQuery = true;
 
-        engine = new SimpleOntopOWLEngine(config);
-        ct = engine.getConnection();
-        st = ct.createStatement();
+        KGQueryFactory kgQueryFactory = configuration.getKGQueryFactory();
+        KGQuery<?> query = kgQueryFactory.createSPARQLQuery(sparqlQuery);
+        QueryReformulator reformulator = configuration.loadQueryReformulator();
+        QueryLogger queryLogger = reformulator.getQueryLoggerFactory().create(ImmutableMultimap.of());
+        IQ iq = reformulator.reformulateIntoNativeQuery(query, queryLogger);
+        QuestQueryProcessor.returnPlannedQuery = false;
 
-        iq = st.getExecutableQuery(sparql); /**minor revise of QuestQueryprocessor to obtain IQ tree rather than SQL query*/
+        IQTree iqt = iq.getTree();
+        IQTree iqtopt = rewriteIQTree(iqt);
 
-        return iq.getTree();
+        IQ iqopt = IQTreeToIQ(iqtopt);
+        IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
+        return ((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
     }
-    /***************************************************************************************************/
-
-
-    /****************************************************************************************************
-     * @Zhenzhen Gu, compute the cost of IQ tree
-     * @param iqTree
-     * @return
-     */
-    public List<Integer> getCostOfIQTree(IQTree iqTree){
-        List<Integer> cost_measure = new ArrayList<Integer>(); // cost(q) = (m,n)
-        int costJ = 0;
-        int ineffSource = 0;
-        ArrayList<IQTree> subTrees = getAllSubTree(iqTree);
-        for(IQTree t : subTrees){
-            if(t.isLeaf() && (t instanceof ExtensionalDataNode)){
-                Set<String> sources = getSources(t);
-                for(String s: sources){
-                    if(labMap.containsKey(s)){
-                        if(labMap.get(s).equals(SourceLab.INEFFICIENT.toString())){
-                            ineffSource = ineffSource + 1;
-                        }
-                    }
-                }
-            } else {
-                QueryNode root = t.getRootNode();
-                if((root instanceof LeftJoinNode)){
-                    costJ = costJ + getCostOfLeftJoin(t);
-                } else if((root instanceof InnerJoinNode)){
-                    costJ = costJ + getCostOfInnerJoin(t);
-                }
-            }
-        }
-
-        cost_measure.add(costJ);
-        cost_measure.add(ineffSource);
-        return cost_measure;
-    }
-
-    public ArrayList<IQTree> getAllSubTree(IQTree iqTree){
-        ArrayList<IQTree> subTrees = new ArrayList<IQTree>();
-        ArrayList<IQTree> newAdded = new ArrayList<IQTree>();
-
-        newAdded.add(iqTree);
-        int label = 0;
-        while(label == 0){
-            if(newAdded.size() == 0){
-                label = 1;
-            } else {
-                subTrees.addAll(newAdded);
-                ArrayList<IQTree> list = new ArrayList<IQTree>();
-                for(IQTree t : newAdded){
-                    if(!t.isLeaf()){
-                        list.addAll(t.getChildren());
-                    }
-                }
-                newAdded.clear();
-                newAdded.addAll(list);
-            }
-        }
-        return subTrees;
-    }
-
-    /****
-     * compute the cost of an atomic join, @Zhenzhen Gu
-     * local join with zero value, federated join with value greater than zero;
-     * */
-    public int getCostOfInnerJoin(IQTree joinTree){
-        int cost = 0;
-        /**local join with value 0, federated join with value greater than 0, considered situation
-         * inner join 和 left outer join
-         * (U Ai) JOIN (U Bj), A JOIN B*/
-        Set<String> sources = getSources(joinTree);
-        if(sources.size() == 1){
-            /**this join is a local join*/
-            return 0;
-        }
-        ImmutableList<IQTree> subTrees = joinTree.getChildren();
-        /**sub trees: subT1, ..., subTn, join patterns: subT1 JOIN subTi, 1<i*/
-        /**确定Join的形式，pairs of Joins, subTi JOIN subT(i+1)*/
-        for(int i=0; i<subTrees.size()-1; i++){
-            cost = cost + getCostOfAtomicInnerJoin(subTrees.get(i), subTrees.get(i+1));
-        }
-        return cost;
-    }
-
-    public int getCostOfLeftJoin(IQTree iqt){
-        int cost = 0;
-        ImmutableList<IQTree> childern = iqt.getChildren(); //只有两个child
-        IQTree left = childern.get(0);
-        IQTree right = childern.get(1);
-        if((left.getRootNode() instanceof UnionNode)){
-            cost = cost + left.getChildren().size();
-        } else {
-            cost = cost + 1;
-        }
-        if((right.getRootNode() instanceof UnionNode)){
-            cost = cost + right.getChildren().size();
-        } else {
-            cost = cost + 1;
-        }
-
-        return cost;
-    }
-
-    public int getCostOfAtomicInnerJoin(IQTree iqt1, IQTree iqt2){
-        int cost = 0;
-        Set<String> source_1 = getSources(iqt1);
-        Set<String> source_2 = getSources(iqt2);
-        if((source_1.size() == 1) && (source_2.size() == 1)){
-            source_1.removeAll(source_2);
-            if(source_1.size() == 0){
-                return 0;
-            }
-        }
-
-        if((iqt1.getRootNode() instanceof UnionNode)){
-            cost = cost + iqt1.getChildren().size();
-        } else {
-            cost = cost + 1;
-        }
-        if((iqt2.getRootNode() instanceof UnionNode)){
-            cost = cost + iqt2.getChildren().size();
-        } else {
-            cost = cost + 1;
-        }
-        return cost;
-    }
-
-    public Set<String> getSources(IQTree iqTree){
-        Set<String> sources = new HashSet<String>();
-        List<IQTree> subTrees = getAllSubTree(iqTree);
-        for(IQTree t : subTrees){
-            if(t.isLeaf()){
-                QueryNode dn = t.getRootNode();
-                if(dn instanceof ExtensionalDataNode){
-                    RelationPredicate RP = ((ExtensionalDataNode) dn).getRelationDefinition().getAtomPredicate();
-                    String relationName = RP.toString();
-                    if(sourceMap.containsKey(relationName)){
-                        sources.add(sourceMap.get(relationName));
-                    }
-                }
-            }
-        }
-        return sources;
-    }
-    /********************************************************************************************/
-
-
-    /*************************************************************************************************
-     * start the query rewriting part
-     * @param iqt
-     * @return
-     */
 
     public IQTree rewriteIQTree(IQTree iqt){
         //check the possibility of applying the hints in advance
@@ -398,13 +152,18 @@ public class QueryRewriting {
             iqt = rewriteInnerJoin(iqt);
             iqt = rewriteLeftJoin(iqt);
         }
+        System.out.println("IQ tree obtained by removing redundancy and applying EFJs");
+        System.out.println(iqt);
 
+        System.out.println("strating rewriting based on MatVs");
+        if(hint_matv.size()>0){
+            iqt = rewriteInnerJoinBasedOnMatV(iqt);
+        }
         //first applying empty federated join optimization, and then applying materialized view based optimization
 
         return iqt;
     }
 
-    /***-remove redundancy in the unions-************************/
     public IQTree removeStrictRedundancy(IQTree iqt){
         boolean change = true;
         while(change){
@@ -457,6 +216,66 @@ public class QueryRewriting {
         return iqt;
     }
 
+    public ArrayList<IQTree> getAllSubTree(IQTree iqTree){
+        ArrayList<IQTree> subTrees = new ArrayList<IQTree>();
+        ArrayList<IQTree> newAdded = new ArrayList<IQTree>();
+
+        newAdded.add(iqTree);
+        int label = 0;
+        while(label == 0){
+            if(newAdded.size() == 0){
+                label = 1;
+            } else {
+                subTrees.addAll(newAdded);
+                ArrayList<IQTree> list = new ArrayList<IQTree>();
+                for(IQTree t : newAdded){
+                    if(!t.isLeaf()){
+                        list.addAll(t.getChildren());
+                    }
+                }
+                newAdded.clear();
+                newAdded.addAll(list);
+            }
+        }
+        return subTrees;
+    }
+
+    public boolean checkStrictRedundancy(IQTree ele_1, IQTree ele_2){
+        //the code needs to be updated according to the different ways of representing hints
+        boolean b = false;
+
+        if((ele_1.getRootNode() instanceof InnerJoinNode) || (ele_1.getRootNode() instanceof LeftJoinNode)){
+            return false;
+        }
+        if((ele_2.getRootNode() instanceof InnerJoinNode) || (ele_2.getRootNode() instanceof LeftJoinNode)){
+            return false;
+        }
+        if(ele_1.isLeaf() && ele_2.isLeaf()){
+            if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
+                //the following code needs to be changed according to the different ways of representing hints
+                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1).getRelationDefinition().getAtomPredicate();
+                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2).getRelationDefinition().getAtomPredicate();
+                String rel_name_1 = predicate1.toString();
+                String rel_name_2 = predicate2.toString();
+                //improve the following compare conditions
+                if(hints.get(0).contains(rel_name_1+"<>"+rel_name_2)|| hints.get(0).contains(rel_name_2+"<>"+rel_name_1)){
+                    return true;
+                }
+            }
+        } else if((ele_1 instanceof FilterNode) && (ele_2 instanceof FilterNode)){
+            //improve the following compare conditions
+
+            if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
+                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
+                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
+                //improve the following compare conditions
+                if(hints.get(0).contains(predicate1.getName()+"<>"+predicate2.getName())|| hints.get(0).contains(predicate2.getName()+"<>"+predicate1.getName())){
+                    return true;
+                }
+            }
+        }
+        return b;
+    }
 
     public IQTree removeEquivalentRedundancy(IQTree iqt){
         boolean change = true;
@@ -508,43 +327,6 @@ public class QueryRewriting {
             }
         }
         return iqt;
-    }
-
-    public boolean checkStrictRedundancy(IQTree ele_1, IQTree ele_2){
-        //the code needs to be updated according to the different ways of representing hints
-        boolean b = false;
-
-        if((ele_1.getRootNode() instanceof InnerJoinNode) || (ele_1.getRootNode() instanceof LeftJoinNode)){
-            return false;
-        }
-        if((ele_2.getRootNode() instanceof InnerJoinNode) || (ele_2.getRootNode() instanceof LeftJoinNode)){
-            return false;
-        }
-        if(ele_1.isLeaf() && ele_2.isLeaf()){
-            if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
-                //the following code needs to be changed according to the different ways of representing hints
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2).getRelationDefinition().getAtomPredicate();
-                String rel_name_1 = predicate1.toString();
-                String rel_name_2 = predicate2.toString();
-                //improve the following compare conditions
-                if(hints.get(0).contains(rel_name_1+"<>"+rel_name_2)|| hints.get(0).contains(rel_name_2+"<>"+rel_name_1)){
-                    return true;
-                }
-            }
-        } else if((ele_1 instanceof FilterNode) && (ele_2 instanceof FilterNode)){
-               //improve the following compare conditions
-
-            if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                //improve the following compare conditions
-                if(hints.get(0).contains(predicate1.getName()+"<>"+predicate2.getName())|| hints.get(0).contains(predicate2.getName()+"<>"+predicate1.getName())){
-                    return true;
-                }
-            }
-        }
-        return b;
     }
 
     public boolean checkEquivalentRedundancy(IQTree ele_1, IQTree ele_2){
@@ -641,7 +423,124 @@ public class QueryRewriting {
         return b;
     }
 
-    /***-rewrite the inner join node-******************************/
+    public List<Integer> getCostOfIQTree(IQTree iqTree){
+        List<Integer> cost_measure = new ArrayList<Integer>(); // cost(q) = (m,n)
+        int costJ = 0;
+        int ineffSource = 0;
+        ArrayList<IQTree> subTrees = getAllSubTree(iqTree);
+        for(IQTree t : subTrees){
+            if(t.isLeaf() && (t instanceof ExtensionalDataNode)){
+                Set<String> sources = getSources(t);
+                for(String s: sources){
+                    if(labMap.containsKey(s)){
+                        if(labMap.get(s).equals(SourceLab.INEFFICIENT.toString())){
+                            ineffSource = ineffSource + 1;
+                        }
+                    }
+                }
+            } else {
+                QueryNode root = t.getRootNode();
+                if((root instanceof LeftJoinNode)){
+                    costJ = costJ + getCostOfLeftJoin(t);
+                } else if((root instanceof InnerJoinNode)){
+                    costJ = costJ + getCostOfInnerJoin(t);
+                }
+            }
+        }
+
+        cost_measure.add(costJ);
+        cost_measure.add(ineffSource);
+        return cost_measure;
+    }
+
+    public Set<String> getSources(IQTree iqTree){
+        Set<String> sources = new HashSet<String>();
+        List<IQTree> subTrees = getAllSubTree(iqTree);
+        for(IQTree t : subTrees){
+            if(t.isLeaf()){
+                QueryNode dn = t.getRootNode();
+                if(dn instanceof ExtensionalDataNode){
+                    RelationPredicate RP = ((ExtensionalDataNode) dn).getRelationDefinition().getAtomPredicate();
+                    String relationName = RP.toString();
+                    //the format of the names in the federation settings: ss5.r
+                    String source = "";
+                    if(relationName.startsWith("\"")){
+                        source = relationName.substring(1, relationName.indexOf("."));
+                    } else {
+                        source = relationName.substring(0, relationName.indexOf("."));
+                    }
+                    sources.add(source);
+//                    if(sourceMap.containsKey(relationName)){
+//                        sources.add(sourceMap.get(relationName));
+//                    }
+                }
+            }
+        }
+        return sources;
+    }
+
+    public int getCostOfLeftJoin(IQTree iqt){
+        int cost = 0;
+        ImmutableList<IQTree> childern = iqt.getChildren(); //只有两个child
+        IQTree left = childern.get(0);
+        IQTree right = childern.get(1);
+        if((left.getRootNode() instanceof UnionNode)){
+            cost = cost + left.getChildren().size();
+        } else {
+            cost = cost + 1;
+        }
+        if((right.getRootNode() instanceof UnionNode)){
+            cost = cost + right.getChildren().size();
+        } else {
+            cost = cost + 1;
+        }
+
+        return cost;
+    }
+
+    public int getCostOfInnerJoin(IQTree joinTree){
+        int cost = 0;
+        /**local join with value 0, federated join with value greater than 0, considered situation
+         * inner join 和 left outer join
+         * (U Ai) JOIN (U Bj), A JOIN B*/
+        Set<String> sources = getSources(joinTree);
+        if(sources.size() == 1){
+            /**this join is a local join*/
+            return 0;
+        }
+        ImmutableList<IQTree> subTrees = joinTree.getChildren();
+        /**sub trees: subT1, ..., subTn, join patterns: subT1 JOIN subTi, 1<i*/
+        /**确定Join的形式，pairs of Joins, subTi JOIN subT(i+1)*/
+        for(int i=0; i<subTrees.size()-1; i++){
+            cost = cost + getCostOfAtomicInnerJoin(subTrees.get(i), subTrees.get(i+1));
+        }
+        return cost;
+    }
+
+    public int getCostOfAtomicInnerJoin(IQTree iqt1, IQTree iqt2){
+        int cost = 0;
+        Set<String> source_1 = getSources(iqt1);
+        Set<String> source_2 = getSources(iqt2);
+        if((source_1.size() == 1) && (source_2.size() == 1)){
+            source_1.removeAll(source_2);
+            if(source_1.size() == 0){
+                return 0;
+            }
+        }
+
+        if((iqt1.getRootNode() instanceof UnionNode)){
+            cost = cost + iqt1.getChildren().size();
+        } else {
+            cost = cost + 1;
+        }
+        if((iqt2.getRootNode() instanceof UnionNode)){
+            cost = cost + iqt2.getChildren().size();
+        } else {
+            cost = cost + 1;
+        }
+        return cost;
+    }
+
     public IQTree rewriteInnerJoin(IQTree iqt){
         boolean update = true;
         int count = 0;
@@ -789,6 +688,154 @@ public class QueryRewriting {
         return iqt_new;
     }
 
+    public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
+        List<IQTree> results = trees;
+
+        //check and remove semantic redundancy
+        List<Integer> index = new ArrayList<Integer>();
+        for(int i=0; i<trees.size(); i++){
+            if(trees.get(i).getChildren().size() > 1){
+                List<IQTree> subs = new ArrayList<IQTree>();
+                subs.addAll(trees.get(i).getChildren());
+                int ind = -1;
+                for(int j=0; j<subs.size(); j++){
+                    if(subs.get(j).getVariables().size() == 1){
+                        ind = j;
+                    }
+                }
+                if(ind == -1){
+                    continue;
+                }
+                if(subs.get(ind).isLeaf()){
+                    subs.remove(ind);
+                    if(subs.size() == 1){
+                        if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
+                            ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
+                            IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
+                            if(trees.contains(t_new)){
+                                index.add(i);
+                            }
+                        } else {
+                            if(trees.contains(subs.get(0))){
+                                index.add(i);
+                            }
+                        }
+                    } else {
+                        IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+                        if(trees.contains(t_new)){
+                            index.add(i);
+                        }
+                    }
+                } else if(subs.get(ind).getRootNode() instanceof FilterNode){
+                    ImmutableExpression cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
+                    Optional<ImmutableExpression> opt_cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition();
+                    subs.remove(ind);
+                    if(subs.size() == 1){
+                        if(subs.get(0).isLeaf()){
+                            IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(opt_cond.get()), subs.get(0));
+                            IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.of(opt_cond.get(), cond))), subs.get(0));
+                            if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
+                                index.add(i);
+                            }
+                        } else if(subs.get(0).getRootNode() instanceof FilterNode){
+                            IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition())), subs.get(0).getChildren().get(0));
+                            IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), cond)), subs.get(0).getChildren().get(0));
+                            if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
+                                index.add(i);
+                            }
+                        }
+                    } else {
+                        InnerJoinNode ijn1 = IQ_FACTORY.createInnerJoinNode();
+                        InnerJoinNode ijn2 = IQ_FACTORY.createInnerJoinNode();
+                        IQTree t1 = IQ_FACTORY.createNaryIQTree(ijn1, ImmutableList.copyOf(subs));
+                        IQTree t2 = IQ_FACTORY.createNaryIQTree(ijn2, ImmutableList.copyOf(subs));
+                        if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
+                            index.add(i);
+                        }
+                    }
+                }
+            }
+        }
+
+        if(trees.size()<2){
+            return trees;
+        }
+
+        //rolling back;
+        boolean b = true;
+        module: while(b){
+            b = false;
+            for(int i=0; i<trees.size()-1; i++){
+                if(trees.get(i).getChildren().size() < 2){
+                    continue;
+                }
+                List<IQTree> subs_i = trees.get(i).getChildren();
+                for(int j=i+1; j<trees.size(); j++){
+                    if(trees.get(j).getChildren().size() < 2){
+                        continue;
+                    }
+                    List<IQTree> subs_j = trees.get(j).getChildren();
+                    List<IQTree> share_sub = new ArrayList<IQTree>();
+                    for(IQTree t: subs_i){
+                        if(subs_j.contains(t)){
+                            share_sub.add(t);
+                        }
+                    }
+
+                    if(share_sub.size() == 0){
+                        continue;
+                    }
+                    Set<Variable> vars_union = new HashSet<Variable>();
+                    List<IQTree> t_union_i = new ArrayList<IQTree>();
+                    List<IQTree> t_union_j = new ArrayList<IQTree>();
+
+                    for(IQTree t: subs_i){
+                        if(!share_sub.contains(t)){
+                            t_union_i.add(t);
+                            vars_union.addAll(t.getVariables());
+                        }
+                    }
+                    for(IQTree t: subs_j){
+                        if(!share_sub.contains(t)){
+                            t_union_j.add(t);
+                            vars_union.addAll(t.getVariables());
+                        }
+                    }
+
+                    IQTree t1, t2;
+                    if(t_union_i.size() == 1){
+                        t1 = t_union_i.get(0);
+                    } else {
+                        t1 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_i));
+                    }
+                    if(t_union_j.size() == 1){
+                        t2 = t_union_j.get(0);
+                    } else {
+                        t2 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_j));
+                    }
+
+                    UnionNode union = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars_union));
+
+                    IQTree union_tree = IQ_FACTORY.createNaryIQTree(union, ImmutableList.of(t1, t2));
+                    IQTree join_tree = null;
+                    if(share_sub.size() == 1){
+                        join_tree = share_sub.get(0);
+                    } else {
+                        join_tree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(share_sub));
+                    }
+                    IQTree new_t = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.of(union_tree, join_tree));
+                    trees.remove(i);
+                    trees.remove(j-1);
+                    trees.add(new_t);
+                    b = true;
+                    continue module;
+                }
+            }
+        }
+
+        return trees;
+    }
+
     public ExpRewriten rewriteAtomicJoinWithoutUnionInLeftAndRight(InnerJoinNode root, IQTree left, IQTree right){
         //Rewriting by empty federated joins
 
@@ -833,7 +880,61 @@ public class QueryRewriting {
         return ER;
     }
 
-    //recreate join tree for (JoinNode, left, right) where sfr rule is applied
+    public JoinOfLeafs getLeafsOfJoin(IQTree t){
+        JoinOfLeafs JOL = new JoinOfLeafs();
+
+        if(t.isLeaf()){
+            if(t instanceof ExtensionalDataNode){
+                JOL.dataNodes.add((ExtensionalDataNode) t);
+                JOL.filters.add(null);
+                JOL.relations.add(((ExtensionalDataNode) t).getRelationDefinition().getAtomPredicate());
+            }
+        } else if (t.getRootNode() instanceof FilterNode){
+            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
+                JOL.filters.add((FilterNode)t.getRootNode());
+                JOL.dataNodes.add((ExtensionalDataNode)t.getChildren().get(0));
+                JOL.relations.add(((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+            }
+        } else if(t.getRootNode() instanceof InnerJoinNode){
+            JOL.conditions = ((InnerJoinNode) t.getRootNode()).getOptionalFilterCondition();
+            for(IQTree t_new: t.getChildren()){
+                if(t_new.isLeaf()){
+                    if(t_new instanceof ExtensionalDataNode){
+                        JOL.dataNodes.add((ExtensionalDataNode)t_new);
+                        JOL.filters.add(null);
+                        JOL.relations.add(((ExtensionalDataNode) t_new).getRelationDefinition().getAtomPredicate());
+                    }
+                } else if(t_new.getRootNode() instanceof FilterNode){
+                    if(t_new.getChildren().get(0) instanceof ExtensionalDataNode){
+                        JOL.filters.add((FilterNode) t_new.getRootNode());
+                        JOL.dataNodes.add((ExtensionalDataNode) t_new.getChildren().get(0));
+                        JOL.relations.add(((ExtensionalDataNode) t_new.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                    }
+                }  else if(t_new.getRootNode() instanceof InnerJoinNode){
+                    //lift join condition
+                    for(IQTree sub: t_new.getChildren()){
+                        if(sub instanceof ExtensionalDataNode){
+                            JOL.dataNodes.add((ExtensionalDataNode)sub);
+                            JOL.filters.add(null);
+                            JOL.relations.add(((ExtensionalDataNode)sub).getRelationDefinition().getAtomPredicate());
+                        } else if(sub.getRootNode() instanceof FilterNode){
+                            JOL.filters.add((FilterNode)sub.getRootNode());
+                            JOL.dataNodes.add((ExtensionalDataNode) sub.getChildren().get(0));
+                            JOL.relations.add(((ExtensionalDataNode) sub.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
+                        }
+                    }
+                }
+                else {
+                    return JOL;
+                }
+            }
+
+        } else {
+            return JOL;
+        }
+        return JOL;
+    }
+
     public ExpRewriten createJoinTree(InnerJoinNode root, JoinOfLeafs left, JoinOfLeafs right){
         ExpRewriten ER = new ExpRewriten();
 
@@ -963,210 +1064,6 @@ public class QueryRewriting {
         return ER;
     }
 
-    public JoinOfLeafs getLeafsOfJoin(IQTree t){
-        JoinOfLeafs JOL = new JoinOfLeafs();
-
-        if(t.isLeaf()){
-            if(t instanceof ExtensionalDataNode){
-                JOL.dataNodes.add((ExtensionalDataNode) t);
-                JOL.filters.add(null);
-                JOL.relations.add(((ExtensionalDataNode) t).getRelationDefinition().getAtomPredicate());
-            }
-        } else if (t.getRootNode() instanceof FilterNode){
-            if(t.getChildren().get(0) instanceof ExtensionalDataNode){
-                JOL.filters.add((FilterNode)t.getRootNode());
-                JOL.dataNodes.add((ExtensionalDataNode)t.getChildren().get(0));
-                JOL.relations.add(((ExtensionalDataNode)t.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
-            }
-        } else if(t.getRootNode() instanceof InnerJoinNode){
-            JOL.conditions = ((InnerJoinNode) t.getRootNode()).getOptionalFilterCondition();
-            for(IQTree t_new: t.getChildren()){
-                if(t_new.isLeaf()){
-                    if(t_new instanceof ExtensionalDataNode){
-                        JOL.dataNodes.add((ExtensionalDataNode)t_new);
-                        JOL.filters.add(null);
-                        JOL.relations.add(((ExtensionalDataNode) t_new).getRelationDefinition().getAtomPredicate());
-                    }
-                } else if(t_new.getRootNode() instanceof FilterNode){
-                    if(t_new.getChildren().get(0) instanceof ExtensionalDataNode){
-                        JOL.filters.add((FilterNode) t_new.getRootNode());
-                        JOL.dataNodes.add((ExtensionalDataNode) t_new.getChildren().get(0));
-                        JOL.relations.add(((ExtensionalDataNode) t_new.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
-                    }
-                }  else if(t_new.getRootNode() instanceof InnerJoinNode){
-                    //lift join condition
-                    for(IQTree sub: t_new.getChildren()){
-                        if(sub instanceof ExtensionalDataNode){
-                            JOL.dataNodes.add((ExtensionalDataNode)sub);
-                            JOL.filters.add(null);
-                            JOL.relations.add(((ExtensionalDataNode)sub).getRelationDefinition().getAtomPredicate());
-                        } else if(sub.getRootNode() instanceof FilterNode){
-                            JOL.filters.add((FilterNode)sub.getRootNode());
-                            JOL.dataNodes.add((ExtensionalDataNode) sub.getChildren().get(0));
-                            JOL.relations.add(((ExtensionalDataNode) sub.getChildren().get(0)).getRelationDefinition().getAtomPredicate());
-                        }
-                    }
-                }
-                else {
-                    return JOL;
-                }
-            }
-
-        } else {
-            return JOL;
-        }
-        return JOL;
-    }
-
-    //remove redundancy in the rewritten elements in the union
-    public List<IQTree> removeSemanticRedundancyAndRollingBack(List<IQTree> trees){
-        List<IQTree> results = trees;
-
-        //check and remove semantic redundancy
-        List<Integer> index = new ArrayList<Integer>();
-        for(int i=0; i<trees.size(); i++){
-           if(trees.get(i).getChildren().size() > 1){
-               List<IQTree> subs = new ArrayList<IQTree>();
-               subs.addAll(trees.get(i).getChildren());
-               int ind = -1;
-               for(int j=0; j<subs.size(); j++){
-                   if(subs.get(j).getVariables().size() == 1){
-                       ind = j;
-                   }
-               }
-               if(ind == -1){
-                   continue;
-               }
-               if(subs.get(ind).isLeaf()){
-                   subs.remove(ind);
-                   if(subs.size() == 1){
-                       if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
-                           ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
-                           IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
-                           if(trees.contains(t_new)){
-                               index.add(i);
-                           }
-                       } else {
-                           if(trees.contains(subs.get(0))){
-                               index.add(i);
-                           }
-                       }
-                   } else {
-                       IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
-                       if(trees.contains(t_new)){
-                           index.add(i);
-                       }
-                   }
-               } else if(subs.get(ind).getRootNode() instanceof FilterNode){
-                   ImmutableExpression cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
-                   Optional<ImmutableExpression> opt_cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition();
-                   subs.remove(ind);
-                   if(subs.size() == 1){
-                      if(subs.get(0).isLeaf()){
-                          IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(opt_cond.get()), subs.get(0));
-                          IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.of(opt_cond.get(), cond))), subs.get(0));
-                          if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
-                              index.add(i);
-                          }
-                      } else if(subs.get(0).getRootNode() instanceof FilterNode){
-                          IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition())), subs.get(0).getChildren().get(0));
-                          IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), cond)), subs.get(0).getChildren().get(0));
-                          if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
-                              index.add(i);
-                          }
-                      }
-                   } else {
-                     InnerJoinNode ijn1 = IQ_FACTORY.createInnerJoinNode();
-                     InnerJoinNode ijn2 = IQ_FACTORY.createInnerJoinNode();
-                     IQTree t1 = IQ_FACTORY.createNaryIQTree(ijn1, ImmutableList.copyOf(subs));
-                     IQTree t2 = IQ_FACTORY.createNaryIQTree(ijn2, ImmutableList.copyOf(subs));
-                     if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
-                         index.add(i);
-                     }
-                   }
-               }
-           }
-        }
-
-        if(trees.size()<2){
-            return trees;
-        }
-
-        //rolling back;
-        boolean b = true;
-        module: while(b){
-            b = false;
-            for(int i=0; i<trees.size()-1; i++){
-                if(trees.get(i).getChildren().size() < 2){
-                    continue;
-                }
-                List<IQTree> subs_i = trees.get(i).getChildren();
-                for(int j=i+1; j<trees.size(); j++){
-                    if(trees.get(j).getChildren().size() < 2){
-                        continue;
-                    }
-                    List<IQTree> subs_j = trees.get(j).getChildren();
-                    List<IQTree> share_sub = new ArrayList<IQTree>();
-                    for(IQTree t: subs_i){
-                        if(subs_j.contains(t)){
-                            share_sub.add(t);
-                        }
-                    }
-
-                    if(share_sub.size() == 0){
-                        continue;
-                    }
-                    Set<Variable> vars_union = new HashSet<Variable>();
-                    List<IQTree> t_union_i = new ArrayList<IQTree>();
-                    List<IQTree> t_union_j = new ArrayList<IQTree>();
-
-                    for(IQTree t: subs_i){
-                        if(!share_sub.contains(t)){
-                            t_union_i.add(t);
-                            vars_union.addAll(t.getVariables());
-                        }
-                    }
-                    for(IQTree t: subs_j){
-                        if(!share_sub.contains(t)){
-                            t_union_j.add(t);
-                            vars_union.addAll(t.getVariables());
-                        }
-                    }
-
-                    IQTree t1, t2;
-                    if(t_union_i.size() == 1){
-                        t1 = t_union_i.get(0);
-                    } else {
-                        t1 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_i));
-                    }
-                    if(t_union_j.size() == 1){
-                        t2 = t_union_j.get(0);
-                    } else {
-                        t2 = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(t_union_j));
-                    }
-
-                    UnionNode union = IQ_FACTORY.createUnionNode(ImmutableSet.copyOf(vars_union));
-
-                    IQTree union_tree = IQ_FACTORY.createNaryIQTree(union, ImmutableList.of(t1, t2));
-                    IQTree join_tree = null;
-                    if(share_sub.size() == 1){
-                        join_tree = share_sub.get(0);
-                    } else {
-                        join_tree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.copyOf(share_sub));
-                    }
-                    IQTree new_t = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.of(union_tree, join_tree));
-                    trees.remove(i);
-                    trees.remove(j-1);
-                    trees.add(new_t);
-                    b = true;
-                    continue module;
-                }
-            }
-        }
-
-        return trees;
-    }
-
     public List<Integer> getSinglePrimaryKeyIndexOfRelations(ExtensionalDataNode dataNode){
         //unique primary key index
         List<Integer> index = new ArrayList<Integer>();
@@ -1184,7 +1081,6 @@ public class QueryRewriting {
         return index;
     }
 
-    /***-rewrite the left outer join node-**********************/
     public IQTree rewriteLeftJoin(IQTree iqt){
         boolean update = true;
         module: while(update){
@@ -1395,11 +1291,11 @@ public class QueryRewriting {
                         }
 
                         if(left_part.get(i).dataNodes.size() == 1){
-                             if(fn_new == null){
-                                 subtrees.add(data_new);
-                             } else {
-                                 subtrees.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
-                             }
+                            if(fn_new == null){
+                                subtrees.add(data_new);
+                            } else {
+                                subtrees.add(IQ_FACTORY.createUnaryIQTree(fn_new, data_new));
+                            }
                         } else {
                             InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(left_part.get(i).conditions);
                             List<IQTree> sub_sub_t = new ArrayList<IQTree>();
@@ -1450,9 +1346,6 @@ public class QueryRewriting {
         return ER;
     }
 
-    /*******************************************************************************************************/
-
-    /*********rewrite based on materialized views***********************************************************/
     public IQTree rewriteInnerJoinBasedOnMatV(IQTree iqt){
 
         boolean update = true;
@@ -1602,7 +1495,6 @@ public class QueryRewriting {
     }
 
     public ExpRewriten rewriteAtomicJoinWithoutUnionInLeftAndRightBasedOnMatV(InnerJoinNode root, IQTree left, IQTree right){
-        //Rewriting by empty federated joins
 
         ExpRewriten ER = new ExpRewriten();
         //complete the checking conditions
@@ -1630,48 +1522,55 @@ public class QueryRewriting {
                             int ind1 = k;
                             String relation2 = JOL_right.relations.get(j).getName();
                             int ind2 = l;
-                            if(hints.get(3).contains(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                            if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
                                 //create a new data node for left_i and right_j;
-                                ExtensionalDataNode edn_ij = null;
                                 FilterNode fn_ij = null;
                                 RelationPredicate matv = null; //name of the relations for MatV
-
-//                                RelationPredicate mv = new AbstractRelationDefinition.RelationPredicateImpl("abc");
-
-                                ImmutableList<Attribute> attrs_matv = matv.getRelationDefinition().getAttributes();
-                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
-                                //make sure the relations occurring in the left_part and right_part of the join
+                                NamedRelationDefinition NRD = null;
                                 boolean b = true;
-                                if(hints.get(3).contains(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
+                                } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
                                     b = false;
                                 }
+
+                                ImmutableList<Attribute> attrs_matv = NRD.getAttributes();
+                                Map<Integer, VariableOrGroundTerm> args_new = new HashMap<Integer, VariableOrGroundTerm>();
+                                //make sure the relations occurring in the left_part and right_part of the join
                                 if(b){
                                     for(int k1: arg_map_left.keySet()){
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("1_"+k1)){
+                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+k1+"\"")){
                                                 args_new.put(index, arg_map_left.get(k1));
                                             }
                                         }
                                     }
                                     for(int l1: arg_map_right.keySet()){
+                                        if(l1 == l){
+                                            continue;
+                                        }
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("2_"+l1)){
-                                                args_new.put(index, arg_map_left.get(l1));
+                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+l1+"\"")){
+                                                args_new.put(index, arg_map_right.get(l1));
                                             }
                                         }
                                     }
                                 } else {
                                     for(int k1: arg_map_left.keySet()){
+                                        if(k1 == k){
+                                            continue;
+                                        }
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("2_"+k1)){
+                                            if(attrs_matv.get(index).getID().toString().equals("\"2_"+k1+"\"")){
                                                 args_new.put(index, arg_map_left.get(k1));
                                             }
                                         }
                                     }
                                     for(int l1: arg_map_right.keySet()){
                                         for(int index=0; index<attrs_matv.size(); index++){
-                                            if(attrs_matv.get(index).getID().equals("1_"+l1)){
-                                                args_new.put(index, arg_map_left.get(l1));
+                                            if(attrs_matv.get(index).getID().toString().equals("\"1_"+l1+"\"")){
+                                                args_new.put(index, arg_map_right.get(l1));
                                             }
                                         }
                                     }
@@ -1704,7 +1603,7 @@ public class QueryRewriting {
                                 } else if(conds.size() >1){
                                     fn_ij = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.copyOf(conds)));
                                 }
-                                edn_ij = IQ_FACTORY.createExtensionalDataNode(matv.getRelationDefinition(), ImmutableMap.copyOf(args_new));
+                                ExtensionalDataNode edn_ij = IQ_FACTORY.createExtensionalDataNode(NRD, ImmutableMap.copyOf(args_new));
 
                                 JOL_left.dataNodes.set(i,edn_ij);
                                 JOL_left.filters.set(i, fn_ij);
@@ -1714,6 +1613,7 @@ public class QueryRewriting {
                                 JOL_right.relations.remove(j);
 
                                 ER = createJoinTree(root, JOL_left, JOL_right);
+                                ER.canRewrite = true;
                                 return ER;
                             }
                         }
@@ -1730,57 +1630,28 @@ public class QueryRewriting {
         return ER;
     }
 
-    /***********************************************************************************************
-     * translate the rewritten IQ query into SQL query
-     * @param iqt
-     * @return
-     */
-    protected String IQTree2SQL (IQTree iqt){
-        //TODO
-        String sql = "";
+    public NamedRelationDefinition createDatabaseRelationForMatV(String definition){
+        String relation_name = definition.substring(0, definition.indexOf("("));
+        String[] attributes_list = definition.substring(definition.indexOf("(")+1, definition.indexOf(")")).split(",");
 
+        RelationID id = idFactory.createRelationID(relation_name);
+        //DBTermType stringDBType = dbTypeFactory.getDBStringType();
+        RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
+        for (int i=0; i<attributes_list.length; i++) {
+            String[] attr_name_type = attributes_list[i].split(" ");
+            DBTermType d_type = dbTypeFactory.getDBTermType(attr_name_type[1]);
+            builder.addAttribute(idFactory.createAttributeID(attr_name_type[0]), d_type, true);
+        }
+        NamedRelationDefinition nrd = new DatabaseTableDefinition(ImmutableList.of(id), builder);
+        return nrd;
+    }
+
+    public IQ IQTreeToIQ (IQTree iqt)throws Exception {
         AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
         DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
-        IQ iq = IQ_FACTORY.createIQ(projection, iqt);
-       // IQ iq_sql = datasourceQueryGenerator.generateSourceQuery(iq);
-
-        //        sql = Optional.of(iqt)
-//                .filter(t -> t instanceof UnaryIQTree)
-//                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
-//                .filter(n -> n instanceof NativeNode)
-//                .map(n -> ((NativeNode) n).getNativeQueryString())
-//                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + iqt));
-//
-        return sql;
+        return IQ_FACTORY.createIQ(projection, iqt);
     }
 
-    public String queryRewrite(String sparql, String owlFile, String obdaFile, String propertyFile, String hintFile, String labFile) throws OWLException {
-        String SQL = "";
-        IQTree iqt = getIQTree(sparql, owlFile, obdaFile, propertyFile);
-        iqt = rewriteIQTree(iqt);
-        SQL = IQTree2SQL(iqt);
-        return SQL;
-    }
-
-    @Test
-    public void testPart(){
-        try{
-            QueryRewriting QR = new QueryRewriting();
-            IQTree iqt = QR.getIQTree(query, owlFile, obdaFile, propertyFile);
-            System.out.println("generated IQ tree:");
-            System.out.println(iqt);
-            List<Integer> cost = QR.getCostOfIQTree(iqt);
-            System.out.println("computed cost: "+cost);
-
-            IQTree iqt_new = QR.rewriteIQTree(iqt);
-            System.out.println("new generated tree");
-            System.out.println(iqt_new);
-            System.out.println("computed cost: "+QR.getCostOfIQTree(iqt_new));
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
 }
 
 class ExpRewriten{

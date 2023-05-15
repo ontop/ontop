@@ -1,5 +1,6 @@
 package federationOptimization.precomputation;
 
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -153,7 +154,7 @@ public class FederationHintPrecomputation {
                 return false;
             }
         }
-      return b;
+        return b;
     }
 
     public Connection getConnectionOfDB(String DBPropertyFile) throws Exception{
@@ -174,8 +175,8 @@ public class FederationHintPrecomputation {
         }
 
         Class.forName(driver);
-       Connection conn = DriverManager.getConnection(url, user, password);
-       return conn;
+        Connection conn = DriverManager.getConnection(url, user, password);
+        return conn;
     }
 
     public String checkRedundancy(Statement stmt, String relation1, String relation2) throws Exception{
@@ -364,8 +365,8 @@ public class FederationHintPrecomputation {
                 values = values +"'"+rs.getString(i)+"'"+",";
             }
             values = values.substring(0, values.length()-1);
-           String update = "INSERT INTO "+tableName+" VALUES "+"("+values+")";
-           stmt.execute(update);
+            String update = "INSERT INTO "+tableName+" VALUES "+"("+values+")";
+            stmt.execute(update);
         }
         //bulk insertion
     }
@@ -405,62 +406,62 @@ public class FederationHintPrecomputation {
 
         SQLPPMapping mappings = configure.loadProvidedPPMapping();
         for( SQLPPTriplesMap tripleMap : mappings.getTripleMaps() ){
-             String sql = tripleMap.getSourceQuery().getSQL();
+            String sql = tripleMap.getSourceQuery().getSQL();
             List<TargetAtom> atoms = tripleMap.getTargetAtoms();
-             for(TargetAtom ta: atoms){
-                 ImmutableTerm subject = ta.getSubstitutedTerm(0);
-                 ImmutableTerm predicate = ta.getSubstitutedTerm(1);
-                 ImmutableTerm object = ta.getSubstitutedTerm(2);
+            for(TargetAtom ta: atoms){
+                ImmutableTerm subject = ta.getSubstitutedTerm(0);
+                ImmutableTerm predicate = ta.getSubstitutedTerm(1);
+                ImmutableTerm object = ta.getSubstitutedTerm(2);
 
-                 String subjectIRIFunction = getIRIFunction(subject);
-                 String subjectAttribute = getAttribute(subject);
-                 AttributeSQL as = new AttributeSQL(subjectAttribute, "subject", sql);
-                 if(classfication_IRIFunction.containsKey(subjectIRIFunction)){
-                     classfication_IRIFunction.get(subjectIRIFunction).add(as);
-                 } else {
-                     Set<AttributeSQL> set = new HashSet<AttributeSQL>();
-                     set.add(as);
-                     classfication_IRIFunction.put(subjectIRIFunction, set);
-                 }
+                String subjectIRIFunction = getIRIFunction(subject);
+                String subjectAttribute = getAttribute(subject);
+                AttributeSQL as = new AttributeSQL(subjectAttribute, "subject", sql);
+                if(classfication_IRIFunction.containsKey(subjectIRIFunction)){
+                    classfication_IRIFunction.get(subjectIRIFunction).add(as);
+                } else {
+                    Set<AttributeSQL> set = new HashSet<AttributeSQL>();
+                    set.add(as);
+                    classfication_IRIFunction.put(subjectIRIFunction, set);
+                }
 
-                 if((predicate.toString()).equals("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")){
-                     String Class = object.toString();
-                     ClassMap clamap = new ClassMap(subjectAttribute, subjectIRIFunction, sql);
-                     if(classfication_class.containsKey(Class)){
-                         classfication_class.get(Class).add(clamap);
-                     } else {
-                         Set<ClassMap> clamaps = new HashSet<ClassMap>();
-                         clamaps.add(clamap);
-                         classfication_class.put(Class, clamaps);
-                     }
+                if((predicate.toString()).equals("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")){
+                    String Class = object.toString();
+                    ClassMap clamap = new ClassMap(subjectAttribute, subjectIRIFunction, sql);
+                    if(classfication_class.containsKey(Class)){
+                        classfication_class.get(Class).add(clamap);
+                    } else {
+                        Set<ClassMap> clamaps = new HashSet<ClassMap>();
+                        clamaps.add(clamap);
+                        classfication_class.put(Class, clamaps);
+                    }
 
-                 } else {
-                     String property = predicate.toString();
-                     String objectIRIFunction = getIRIFunction(object);
-                     String objectAttribute = getAttribute(object);
-                     if(objectIRIFunction.length() > 0){
-                         AttributeSQL as1 = new AttributeSQL(objectAttribute, "object",sql);
-                         if(classfication_IRIFunction.containsKey(objectIRIFunction)){
-                             classfication_IRIFunction.get(objectIRIFunction).add(as1);
-                         } else {
-                             Set<AttributeSQL> set = new HashSet<AttributeSQL>();
-                             set.add(as1);
-                             classfication_IRIFunction.put(objectIRIFunction, set);
-                         }
-                     }
+                } else {
+                    String property = predicate.toString();
+                    String objectIRIFunction = getIRIFunction(object);
+                    String objectAttribute = getAttribute(object);
+                    if(objectIRIFunction.length() > 0){
+                        AttributeSQL as1 = new AttributeSQL(objectAttribute, "object",sql);
+                        if(classfication_IRIFunction.containsKey(objectIRIFunction)){
+                            classfication_IRIFunction.get(objectIRIFunction).add(as1);
+                        } else {
+                            Set<AttributeSQL> set = new HashSet<AttributeSQL>();
+                            set.add(as1);
+                            classfication_IRIFunction.put(objectIRIFunction, set);
+                        }
+                    }
 
-                     String objectDataType = getDataType(object);
-                     PropertyMap promap = new PropertyMap(subjectAttribute, subjectIRIFunction, objectAttribute, objectIRIFunction, objectDataType, sql);
-                     if(classfication_property.containsKey(property)){
-                         classfication_property.get(property).add(promap);
-                     } else {
-                         Set<PropertyMap> set = new HashSet<PropertyMap>();
-                         set.add(promap);
-                         classfication_property.put(property, set);
-                     }
-                 }
+                    String objectDataType = getDataType(object);
+                    PropertyMap promap = new PropertyMap(subjectAttribute, subjectIRIFunction, objectAttribute, objectIRIFunction, objectDataType, sql);
+                    if(classfication_property.containsKey(property)){
+                        classfication_property.get(property).add(promap);
+                    } else {
+                        Set<PropertyMap> set = new HashSet<PropertyMap>();
+                        set.add(promap);
+                        classfication_property.put(property, set);
+                    }
+                }
 
-             }
+            }
         }
 
         //compute candidate federated joins for empty checking and materialization
@@ -620,21 +621,7 @@ public class FederationHintPrecomputation {
                     }
                     System.out.println("preparing for creating materialized views: ");
 
-                   // String viewName = "MatV_"+matv_count;
-                    String viewName = "MatV_";
-                    for(String t: getTableNamesFromSQL(candidate.relation1)){
-                        if(t.contains(".")){
-                            t = t.replace(".", "_");
-                        }
-                        viewName = viewName+t+"_";
-                    }
-                    for(String t: getTableNamesFromSQL(candidate.relation2)){
-                        if(t.contains(".")){
-                            t = t.replace(".", "");
-                        }
-                        viewName = viewName+t+"_";
-                    }
-                    viewName = viewName.substring(0, viewName.length()-1);
+                    String viewName = "MatV_"+matv_count;
 
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
                     List<String> attributes_2 = getSelectItemsFromSQL(candidate.relation2);
@@ -733,7 +720,7 @@ public class FederationHintPrecomputation {
         }
     }
 
-   @Test
+    @Test
     public void myTest() throws Exception {
         long start1 = System.currentTimeMillis();
         SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
@@ -785,7 +772,7 @@ public class FederationHintPrecomputation {
             mv.print();
         }
 
-   }
+    }
 
 }
 
@@ -852,7 +839,3 @@ class PropertyMap{
         this.sourceSQL = sourceSQL;
     }
 }
-
-
-
-
