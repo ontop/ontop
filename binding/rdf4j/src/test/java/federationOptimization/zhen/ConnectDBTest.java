@@ -1,34 +1,12 @@
-package federationOptimization.queryRewriting;
-
-import org.junit.Test;
+package federationOptimization.zhen;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class ConnectDBTest {
 
-    @Test
-    public void testConnectTeiid(){
-        try{
-            Class.forName("org.teiid.jdbc.TeiidDriver");
-            Connection conn = DriverManager.getConnection("jdbc:teiid:homogeneous@mm://localhost:11000", "obdf", "obdfPwd0");
-            Statement stmt = conn.createStatement();
-            String sql = "select * from smatv.MatV_ss3_productfeature_ss5_productfeatureproduct2";
-            ResultSet rs = stmt.executeQuery(sql);
-            if(rs.next()){
-                System.out.println("has answers");
-            }
-
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testConnectPostgreSQL(){
+    public static void main(String[] args){
         try{
             String driver = "org.postgresql.Driver";
             String url = "jdbc:postgresql://localhost:10008/sc2";

@@ -1,0 +1,10 @@
+empty_federated_join:"ss5"."product2"<>"ss1"."producttypeproduct1"<>0<>0
+empty_federated_join:"ss1"."product1"<>"ss2"."product2"<>0<>0
+empty_federated_join:"ss5"."productfeatureproduct2"<>"ss1"."producttypeproduct1"<>0<>0
+empty_federated_join:"ss5"."producttypeproduct2"<>"ss1"."productfeatureproduct1"<>0<>0
+empty_federated_join:"ss1"."product1"<>"ss5"."producttypeproduct2"<>0<>0
+empty_federated_join:"ss1"."productfeatureproduct1"<>"ss5"."productfeatureproduct2"<>0<>0
+empty_federated_join:"ss1"."productfeatureproduct1"<>"ss5"."product2"<>0<>0
+empty_federated_join:"ss1"."product1"<>"ss5"."productfeatureproduct2"<>0<>0
+empty_federated_join:"ss5"."producttypeproduct2"<>"ss1"."producttypeproduct1"<>0<>0
+equivalent_redundancy:"ss2"."review"<>"ss1"."reviewc"
