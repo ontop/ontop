@@ -620,7 +620,21 @@ public class FederationHintPrecomputation {
                     }
                     System.out.println("preparing for creating materialized views: ");
 
-                    String viewName = "MatV_"+matv_count;
+                   // String viewName = "MatV_"+matv_count;
+                    String viewName = "MatV_";
+                    for(String t: getTableNamesFromSQL(candidate.relation1)){
+                        if(t.contains(".")){
+                            t = t.replace(".", "_");
+                        }
+                        viewName = viewName+t+"_";
+                    }
+                    for(String t: getTableNamesFromSQL(candidate.relation2)){
+                        if(t.contains(".")){
+                            t = t.replace(".", "");
+                        }
+                        viewName = viewName+t+"_";
+                    }
+                    viewName = viewName.substring(0, viewName.length()-1);
 
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
                     List<String> attributes_2 = getSelectItemsFromSQL(candidate.relation2);
