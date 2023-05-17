@@ -1,0 +1,22 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"l1\""],
+      "baseRelation": ["\"base_table\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"l2\""],
+      "baseRelation": ["\"lenses\"", "\"l1\""],
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "type": "BasicLens"
+    }
+  ]
+}

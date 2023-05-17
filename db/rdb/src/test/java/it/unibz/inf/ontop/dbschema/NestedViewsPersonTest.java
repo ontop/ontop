@@ -37,7 +37,7 @@ public class NestedViewsPersonTest {
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
-        assertEquals(1, fds.size());
+        assertEquals(2, fds.size());
 
         FunctionalDependency fd = fds.stream().findFirst().get();
         ImmutableSet<String> determinants = fd.getDeterminants().stream()
@@ -59,7 +59,7 @@ public class NestedViewsPersonTest {
                 .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
-        assertEquals(2, fks.size());
+        assertEquals(4, fks.size());
 
         ForeignKeyConstraint fk = fks.stream().findFirst().get();
         String target = fk.getReferencedRelation().getID().getSQLRendering();

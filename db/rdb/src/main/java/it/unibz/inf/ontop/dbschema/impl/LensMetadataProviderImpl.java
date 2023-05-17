@@ -17,10 +17,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class LensMetadataProviderImpl implements LensMetadataProvider {
@@ -35,6 +32,8 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
 
     // "Processed": constraints already inserted
     private final Set<RelationID> alreadyProcessedViews = new HashSet<>();
+
+    private final Map<RelationID, NamedRelationDefinition> cachedLenses = new HashMap<>();
 
     // Lazy (built lately)
     @Nullable
@@ -106,8 +105,12 @@ public class LensMetadataProviderImpl implements LensMetadataProvider {
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         JsonLens jsonLens = jsonMap.get(id);
-        if (jsonLens != null)
-            return jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
+        if (jsonLens != null) {
+            if (!cachedLenses.containsKey(id))
+                cachedLenses.put(id, jsonLens.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id)));
+            return cachedLenses.get(id);
+        }
+
 
         return parentCachingMetadataLookup.getRelation(id);
     }
