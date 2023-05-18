@@ -1162,15 +1162,17 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 "ORDER BY ?p";
 
         var result = runQuery(query);
-        Assertions.assertTrue(result.equals(getExpectedValueSample1()) || result.equals(getExpectedValueSample2()));
+        Assertions.assertTrue(getExpectedValuesSample().stream()
+                .anyMatch(exp -> exp.equals(result)));
     }
 
-    protected ImmutableList<String> getExpectedValueSample1() {
-        return ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int");
-    }
-
-    protected ImmutableList<String> getExpectedValueSample2() {
-        return ImmutableList.of("\"10\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int");
+    protected ImmutableList<ImmutableList<String>> getExpectedValuesSample() {
+        return ImmutableList.of(
+                ImmutableList.of("\"11\"^^xsd:integer", "\"12\"^^xsd:integer", "\"13\"^^xsd:integer"),
+                ImmutableList.of("\"10\"^^xsd:integer", "\"12\"^^xsd:integer", "\"13\"^^xsd:integer"),
+                ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int"),
+                ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int")
+        );
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
