@@ -1148,6 +1148,31 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
         return ImmutableList.of("\"12\"^^xsd:integer", "\"13\"^^xsd:integer", "\"31\"^^xsd:integer");
     }
 
+    @Test
+    public void testSample() {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SAMPLE(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?p";
+
+        var result = runQuery(query);
+        Assertions.assertTrue(result.equals(getExpectedValueSample1()) || result.equals(getExpectedValueSample2()));
+    }
+
+    protected ImmutableList<String> getExpectedValueSample1() {
+        return ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int");
+    }
+
+    protected ImmutableList<String> getExpectedValueSample2() {
+        return ImmutableList.of("\"10\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int");
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

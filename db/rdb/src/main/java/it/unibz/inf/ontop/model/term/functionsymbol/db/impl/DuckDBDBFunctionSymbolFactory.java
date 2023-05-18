@@ -289,4 +289,9 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         "END",
                 term);
     }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "FIRST");
+    }
 }

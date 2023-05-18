@@ -284,4 +284,9 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return this.serializeCheckAndConvertDateFromDateTime(terms, termConverter, termFactory);
     }
+
+    @Override
+    protected DBFunctionSymbol createDBSample(DBTermType termType) {
+        return new DBSampleFunctionSymbolImpl(termType, "ANY_VALUE");
+    }
 }

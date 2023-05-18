@@ -238,7 +238,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                new SampleSPARQLFunctionSymbolImpl(typeFactory),
                 /*
                  * Geo SF relation Functions
                  */
@@ -446,7 +446,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 // Distinct can be safely ignored
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 // Distinct can be safely ignored
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                new SampleSPARQLFunctionSymbolImpl(typeFactory),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true)
         );
 
