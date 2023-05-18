@@ -14,8 +14,6 @@ import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNon
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE_NO_CONSTANT;
 
 public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
-    public static final String TIMESTAMPTZ_STR = "TIMESTAMP WITH TIME ZONE";
-    public static final String TIMETZ_STR = "TIME WITH TIME ZONE";
     public static final String BYTEA_STR = "BYTEA";
     private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 18)";
     public static final String UUID_STR = "UUID";
@@ -39,12 +37,6 @@ public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
 
-        DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
-
-        DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.TIME), NOTHING);
-
         DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.DATE));
 
@@ -64,8 +56,6 @@ public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
          *      map.put("TYPE_NAME", DBTermType);
          */
 
-        map.put(TIMESTAMPTZ_STR, timestampTz);
-        map.put(TIMETZ_STR, timeTzType);
         map.put(DATE_STR, dateType);
         map.put(UUID_STR, uuidType);
         map.put(BYTEA_STR, byteAType);
@@ -78,7 +68,7 @@ public class CDataDynamoDBDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createCDataDynamoDBCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_STR);
         map.put(DefaultTypeCode.HEXBINARY, BYTEA_STR);
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         map.put(DefaultTypeCode.DECIMAL, DEFAULT_DECIMAL_STR);

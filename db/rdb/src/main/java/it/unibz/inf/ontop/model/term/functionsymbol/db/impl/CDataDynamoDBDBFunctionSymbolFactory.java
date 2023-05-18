@@ -14,8 +14,12 @@ import java.util.function.Function;
 
 public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for CDataDynamoDB";
+
     private final DBFunctionSymbol substring2;
     private final DBFunctionSymbol substring3;
+
+    private final DBNotFunctionSymbol notFunctionSymbol;
 
     @Inject
     protected CDataDynamoDBDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -27,7 +31,6 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
                 dbStringType,
                 false,
                 (terms, termConverter, termFactory) -> {
-                    // PostgreSQL does not tolerate bigint as argument (int8), just int4 (integer)
                     ImmutableTerm len = termFactory.getDBCharLength(terms.get(0));
 
                     return String.format("SUBSTRING(%s FROM %s FOR %s)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)), termConverter.apply(len));
@@ -39,10 +42,10 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
                 dbStringType,
                 false,
                 (terms, termConverter, termFactory) -> {
-                    // PostgreSQL does not tolerate bigint as argument (int8), just int4 (integer)
-
-                    return String.format("SUBSTRING(%s FROM %s FOR (%s - %s + 1))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)), termConverter.apply(terms.get(2)), termConverter.apply(terms.get(1)));
+                    return String.format("SUBSTRING(%s FROM %s FOR %s)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)), termConverter.apply(terms.get(2)));
                 });
+
+        notFunctionSymbol = new CDataDynamoDBDBNotFunctionSymbol(typeFactory.getDBTypeFactory().getDBBooleanType());
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createCDataDynamoDBRegularFunctionTable(
@@ -74,7 +77,7 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("(POSITION(%s IN %s) > 0)",
+        return String.format("(CHARINDEX(%s, %s) >= 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
@@ -85,7 +88,7 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("IF(POSITION(%s IN %s) != 0, SUBSTRING(%s FROM 1 FOR POSITION(%s IN %s)-1), '')", before, str, str, before, str);
+        return String.format("IF(CHARINDEX(%s, %s) >= 0, SUBSTRING(%s FROM 1 FOR CHARINDEX(%s, %s)), '')", before, str, str, before, str);
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
@@ -93,37 +96,37 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("IF(POSITION(%s IN %s) != 0, SUBSTRING(%s FROM POSITION(%s IN %s) + LEN(%s) FOR LEN(%s)), '')", after, str, str, after, str, after, str);
+        return String.format("IF(CHARINDEX(%s, %s) >= 0, SUBSTRING(%s FROM CHARINDEX(%s, %s) + LEN(%s) + 1 FOR LEN(%s)), '')", after, str, str, after, str, after, str);
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
+        return String.format("HASHBYTES('MD5', %s)", termConverter.apply(terms.get(0)));
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA1(%s)", termConverter.apply(terms.get(0)));
+        return String.format("HASHBYTES('SHA1', %s)", termConverter.apply(terms.get(0)));
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA256(%s)", termConverter.apply(terms.get(0)));
+        return String.format("HASHBYTES('SHA2_256', %s)", termConverter.apply(terms.get(0)));
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA384(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA384(%s)", termConverter.apply(terms.get(0)));
+        return String.format("HASHBYTES('SHA3_384', %s)", termConverter.apply(terms.get(0)));
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("SHA512(%s)", termConverter.apply(terms.get(0)));
+        return String.format("HASHBYTES('SHA2_512', %s)", termConverter.apply(terms.get(0)));
     }
 
     // TODO-SCAFFOLD: Modify this default implementation, if necessary
@@ -202,13 +205,12 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
     // TODO-SCAFFOLD: Implement DateTimeNorm serialization in ISO 8601 Format 'YYYY-MM-DDTHH:MM:SS+HH:MM'
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("This function was not yet implemented.");
+        return String.format("STUFF(FORMAT(%s, 'YYYY-MM-dd\\'T\\'HH:mm:ssz'), LEN(FORMAT(%s, 'YYYY-MM-dd\\'T\\'HH:mm:ssz')) - 1, 0, ':')", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
 
-    // TODO-SCAFFOLD: Modify this default name, if necessary
     @Override
     protected String getUUIDNameInDialect() {
-        return "UUID";
+        throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
@@ -220,4 +222,33 @@ public class CDataDynamoDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionS
     public DBFunctionSymbol getDBSubString3() {
         return substring3;
     }
+
+    @Override
+    public DBNotFunctionSymbol getDBNot() {
+        return notFunctionSymbol;
+    }
+
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new CDataDynamoDBSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
+    }
+
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new CDataDynamoDBSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, rootDBTermType);
+    }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct) {
+        throw new UnsupportedOperationException("GROUP CONCAT: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new CDataDynamoDBSQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
+    }
+
+
+
+
 }

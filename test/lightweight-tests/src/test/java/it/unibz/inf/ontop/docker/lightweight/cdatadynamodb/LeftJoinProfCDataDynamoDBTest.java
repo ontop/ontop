@@ -28,4 +28,52 @@ public class LeftJoinProfCDataDynamoDBTest extends AbstractLeftJoinProfTest {
         release();
     }
 
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat1() {
+        super.testGroupConcat1();
+    }
+
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat2() {
+        super.testGroupConcat2();
+    }
+
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat3() {
+        super.testGroupConcat3();
+    }
+
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat4() {
+        super.testGroupConcat4();
+    }
+
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat5() {
+        super.testGroupConcat5();
+    }
+
+    @Disabled("GROUP CONCAT is not supported by CDataDynamoDB JDBC")
+    @Test
+    @Override
+    public void testGroupConcat6() {
+        super.testGroupConcat6();
+    }
+
+    @Override
+    protected ImmutableList<String> getExpectedValuesAvgStudents2() {
+        return   ImmutableList.of("\"10.333333333333334\"^^xsd:decimal","\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal");
+    }
+
+
 }
