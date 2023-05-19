@@ -1171,7 +1171,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractDockerRDF4JTest {
                 ImmutableList.of("\"11\"^^xsd:integer", "\"12\"^^xsd:integer", "\"13\"^^xsd:integer"),
                 ImmutableList.of("\"10\"^^xsd:integer", "\"12\"^^xsd:integer", "\"13\"^^xsd:integer"),
                 ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int"),
-                ImmutableList.of("\"11\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int")
+                ImmutableList.of("\"10\"^^xsd:int", "\"12\"^^xsd:int", "\"13\"^^xsd:int")
         );
     }
 

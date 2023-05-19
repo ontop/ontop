@@ -62,7 +62,7 @@ services:
     build: ./mariadb
     env_file: .env
     ports:
-      - "3695:3306"
+      - "3694:3306"
     environment:
       - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
 
