@@ -1,6 +1,8 @@
 package federationOptimization.queryRewriting;
 
 import org.junit.Test;
+import org.teiid.client.plan.PlanNode;
+import org.teiid.jdbc.TeiidStatement;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,12 +17,35 @@ public class ConnectDBTest {
             Class.forName("org.teiid.jdbc.TeiidDriver");
             Connection conn = DriverManager.getConnection("jdbc:teiid:homogeneous@mm://localhost:11000", "obdf", "obdfPwd0");
             Statement stmt = conn.createStatement();
-            String sql = "select * from smatv.MatV_ss3_productfeature_ss5_productfeatureproduct2";
-            ResultSet rs = stmt.executeQuery(sql);
-            if(rs.next()){
-                System.out.println("has answers");
-            }
+            String sql = "SELECT DISTINCT v9.\"label10m46\" AS \"label10m46\", v9.\"product0m2\" AS \"product0m2\"\n" +
+                    "FROM ((SELECT v1.\"label\" AS \"label10m46\", v1.\"nr\" AS \"product0m2\"\n" +
+                    "FROM \"ss1\".\"product1\" v1, \"ss1\".\"productfeatureproduct1\" v2, \"ss1\".\"productfeatureproduct1\" v3\n" +
+                    "WHERE ((v1.\"propertynum1\" < 1000) AND v1.\"label\" IS NOT NULL AND v1.\"propertynum1\" IS NOT NULL AND v1.\"nr\" = v2.\"product\" AND v1.\"nr\" = v3.\"product\" AND 89 = v2.\"productfeature\" AND 91 = v3.\"productfeature\")\n" +
+                    ")UNION ALL \n" +
+                    "(SELECT v5.\"label\" AS \"label10m46\", v5.\"nr\" AS \"product0m2\"\n" +
+                    "FROM \"ss5\".\"product2\" v5, \"ss5\".\"productfeatureproduct2\" v6, \"ss5\".\"productfeatureproduct2\" v7\n" +
+                    "WHERE ((v5.\"propertynum1\" < 1000) AND v5.\"label\" IS NOT NULL AND v5.\"propertynum1\" IS NOT NULL AND v5.\"nr\" = v6.\"product\" AND v5.\"nr\" = v7.\"product\" AND 89 = v6.\"productfeature\" AND 91 = v7.\"productfeature\")\n" +
+                    ")) v9";
+//            ResultSet rs = stmt.executeQuery(sql);
+//            if(rs.next()){
+//                System.out.println("has answers");
+//            }
 
+            stmt.execute("set showplan on");
+			ResultSet rs = stmt.executeQuery(sql);
+			TeiidStatement tstatement = stmt.unwrap(TeiidStatement.class);
+			PlanNode queryPlan = tstatement.getPlanDescription();
+			System.out.println(queryPlan);
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testConnectDremio(){
+        try{
 
         }catch(Exception e){
             e.printStackTrace();

@@ -175,6 +175,11 @@
             <version>15.0.1</version>
         </dependency>
 
+        <!-- Dremio -->
+
+        <!-- Denodo -->
+
+
         <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>

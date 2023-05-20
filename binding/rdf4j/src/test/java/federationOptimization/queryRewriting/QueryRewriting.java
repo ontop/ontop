@@ -52,7 +52,7 @@ public class QueryRewriting {
     public static QuotedIDFactory idFactory;
     public static DBTypeFactory dbTypeFactory;
 
-    public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String hintFile, String labFile, String sourceFile, String effLabel) {
+    public QueryRewriting(String owlPath, String obdaPath, String PROPERTY, String hintFile, String sourceFile, String effLabel) {
         try {
             this.configuration = OntopSQLOWLAPIConfiguration
                     .defaultBuilder()
@@ -133,9 +133,10 @@ public class QueryRewriting {
         QuestQueryProcessor.returnPlannedQuery = false;
 
         IQTree iqt = iq.getTree();
+        DistinctVariableOnlyDataAtom project_original = iq.getProjectionAtom();
         IQTree iqtopt = rewriteIQTree(iqt);
 
-        IQ iqopt = IQTreeToIQ(iqtopt);
+        IQ iqopt = IQTreeToIQ(project_original, iqtopt);
         IQ executableQuery = reformulator.generateExecutableQuery(iqopt);
         return ((NativeNodeImpl)executableQuery.getTree().getChildren().get(0)).getNativeQueryString();
     }
@@ -292,14 +293,25 @@ public class QueryRewriting {
                 if(dn instanceof ExtensionalDataNode){
                     RelationPredicate RP = ((ExtensionalDataNode) dn).getRelationDefinition().getAtomPredicate();
                     String relationName = RP.toString();
-                    //the format of the names in the federation settings: ss5.r
-                    String source = "";
-                    if(relationName.startsWith("\"")){
-                        source = relationName.substring(1, relationName.indexOf("."));
-                    } else {
-                        source = relationName.substring(0, relationName.indexOf("."));
+                    //the formats of the names for different federation systems may be different
+                    //the ways of obtaining the source information from the names may be different
+                    String name = relationName.substring(relationName.lastIndexOf(".")+1,relationName.length());
+                    if(name.startsWith("\"")){
+                        name = name.substring(1, name.length()-1);
                     }
-                    sources.add(source);
+                    if(sourceMap.containsKey(name)){
+                        sources.add(sourceMap.get(name));
+                    } else if(sourceMap.containsKey("\""+name+"\"")){
+                        sources.add(sourceMap.get("\""+name+"\""));
+                    }
+
+//                    String source = "";
+//                    if(relationName.startsWith("\"")){
+//                        source = relationName.substring(1, relationName.indexOf("."));
+//                    } else {
+//                        source = relationName.substring(0, relationName.indexOf("."));
+//                    }
+//                    sources.add(source);
 //                    if(sourceMap.containsKey(relationName)){
 //                        sources.add(sourceMap.get(relationName));
 //                    }
@@ -374,28 +386,83 @@ public class QueryRewriting {
         if(ele_1.isLeaf() && ele_2.isLeaf()){
             if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
                 //the following code needs to be changed according to the different ways of representing hints
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2).getRelationDefinition().getAtomPredicate();
-                String rel_name_1 = predicate1.toString();
-                String rel_name_2 = predicate2.toString();
-                //improve the following compare conditions
-                if(hints.get(0).contains(rel_name_1+"<>"+rel_name_2)|| hints.get(0).contains(rel_name_2+"<>"+rel_name_1)){
-                    return true;
-                }
+                //改进了
+                b = checkStrictRedundancyDataNode((ExtensionalDataNode) ele_1, (ExtensionalDataNode) ele_2);
             }
-        } else if((ele_1 instanceof FilterNode) && (ele_2 instanceof FilterNode)){
+        } else if((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)){
             //improve the following compare conditions
 
             if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                //improve the following compare conditions
-                if(hints.get(0).contains(predicate1.getName()+"<>"+predicate2.getName())|| hints.get(0).contains(predicate2.getName()+"<>"+predicate1.getName())){
-                    return true;
+                if(ele_1.getRootNode().equals(ele_2.getRootNode())){
+                    b = checkStrictRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0),(ExtensionalDataNode) ele_2.getChildren().get(0));
                 }
             }
         }
         return b;
+    }
+
+    public boolean checkStrictRedundancyDataNode(ExtensionalDataNode ele_1, ExtensionalDataNode ele_2){
+        boolean res = false;
+        RelationPredicate predicate1 = ele_1.getRelationDefinition().getAtomPredicate();
+        RelationPredicate predicate2 = ele_2.getRelationDefinition().getAtomPredicate();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> args1 = ele_1.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> args2 = ele_2.getArgumentMap();
+        String normalName1 = getNormalFormOfRelation(predicate1.getName());
+        String normalName2 = getNormalFormOfRelation(predicate2.getName());
+        if(hints.get(0).contains(normalName1+"<>"+normalName2) || hints.get(0).contains(normalName2+"<>"+normalName1)){
+            for(int i: args1.keySet()){
+                for(int j: args2.keySet()){
+                    if(args2.get(j).equals(args1.get(i))){
+                        if(i != j){
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } else {
+            List<Integer> attr_index_1 = new ArrayList<Integer>();
+            attr_index_1.addAll(args1.keySet());
+            Collections.sort(attr_index_1);
+            String cand1 = normalName1+"(";
+            String cand2 = normalName2+"(";
+            for(int i: attr_index_1){
+                cand1 = cand1 + i +",";
+                for(int j: args2.keySet()){
+                    if(args2.get(j).equals(args1.get(i))){
+                        cand2 = cand2 + j +",";
+                        break;
+                    }
+                }
+            }
+            cand1 = cand1.substring(0, cand1.length()-1)+")";
+            cand2 = cand2.substring(0, cand2.length()-1)+")";
+            if(hints.get(0).contains(cand1+"<>"+cand2)){
+                return true;
+            } else {
+                List<Integer> attr_index_2 = new ArrayList<Integer>();
+                attr_index_2.addAll(args2.keySet());
+                Collections.sort(attr_index_2);
+                cand1 = normalName1+"(";
+                cand2 = normalName2+"(";
+                for(int i: attr_index_2){
+                    cand2 = cand2 + i +",";
+                    for(int j: args1.keySet()){
+                        if(args1.get(j).equals(args2.get(i))){
+                            cand1 = cand1 + j +",";
+                            break;
+                        }
+                    }
+                }
+                cand1 = cand1.substring(0, cand1.length()-1)+")";
+                cand2 = cand2.substring(0, cand2.length()-1)+")";
+                if(hints.get(0).contains(cand2+"<>"+cand1)){
+                    return true;
+                }
+            }
+
+        }
+        return res;
     }
 
     public IQTree removeEquivalentRedundancy(IQTree iqt){
@@ -458,24 +525,18 @@ public class QueryRewriting {
         if(ele_2.getRootNode() instanceof LeftJoinNode){
             return false;
         }
+
         if(ele_1.isLeaf() && ele_2.isLeaf()){
             if((ele_1 instanceof ExtensionalDataNode) && (ele_2 instanceof ExtensionalDataNode)){
                 //the following code needs to be changed according to the different ways of representing hints
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2).getRelationDefinition().getAtomPredicate();
-                //improve the following compare conditions
-                if(hints.get(1).contains(predicate1.getName()+"<>"+predicate2.getName())|| hints.get(1).contains(predicate2.getName()+"<>"+predicate1.getName())){
-                    return true;
-                }
+                return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1, (ExtensionalDataNode) ele_2);
+
             }
         } else if((ele_1.getRootNode() instanceof FilterNode) && (ele_2.getRootNode() instanceof FilterNode)){
             //improve the following compare conditions
             if((ele_1.getChildren().get(0) instanceof ExtensionalDataNode) && (ele_2.getChildren().get(0) instanceof ExtensionalDataNode)){
-                RelationPredicate predicate1 = ((ExtensionalDataNode) ele_1.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                RelationPredicate predicate2 = ((ExtensionalDataNode) ele_2.getChildren().get(0)).getRelationDefinition().getAtomPredicate();
-                //improve the following compare conditions
-                if(hints.get(1).contains(predicate1.getName()+"<>"+predicate2.getName())|| hints.get(1).contains(predicate2.getName()+"<>"+predicate1.getName())){
-                    return true;
+                if(ele_1.getRootNode().equals(ele_2.getRootNode())){
+                    return checkEquivalentRedundancyDataNode((ExtensionalDataNode) ele_1.getChildren().get(0), (ExtensionalDataNode) ele_2.getChildren().get(0));
                 }
             }
         } else if((ele_1.getRootNode() instanceof InnerJoinNode) && (ele_2.getRootNode() instanceof InnerJoinNode)){
@@ -512,12 +573,9 @@ public class QueryRewriting {
                 int index_left = -1, index_right = -1;
                 for(int i=0; i<leafs_left.size(); i++){
                     String relation_left = leafs_left.get(i).getRelationDefinition().getAtomPredicate().toString();
-                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = leafs_left.get(i).getArgumentMap();
-
                     for(int j=0; j<leafs_right.size(); j++){
                         String relation_right = leafs_right.get(j).getRelationDefinition().getAtomPredicate().toString();
-                        ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = leafs_right.get(j).getArgumentMap();
-                        if(hints.get(1).contains(relation_left+"<>"+relation_right) || hints.get(1).contains(relation_right+"<>"+relation_left)){
+                        if(checkEquivalentRedundancyDataNode(leafs_left.get(i), leafs_right.get(j))){
                             index_left = i;
                             index_right = j;
                         }
@@ -542,6 +600,71 @@ public class QueryRewriting {
             }
         }
         return b;
+    }
+
+    public boolean checkEquivalentRedundancyDataNode(ExtensionalDataNode ele_1, ExtensionalDataNode ele_2){
+        boolean res = false;
+
+        RelationPredicate predicate1 = ele_1.getRelationDefinition().getAtomPredicate();
+        RelationPredicate predicate2 = ele_2.getRelationDefinition().getAtomPredicate();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> args1 = ele_1.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> args2 = ele_2.getArgumentMap();
+        String normalName1 = getNormalFormOfRelation(predicate1.getName());
+        String normalName2 = getNormalFormOfRelation(predicate2.getName());
+        if(hints.get(1).contains(normalName1+"<>"+normalName2) || hints.get(1).contains(normalName2+"<>"+normalName1)){
+            for(int i: args1.keySet()){
+                for(int j: args2.keySet()){
+                    if(args2.get(j).equals(args1.get(i))){
+                        if(i != j){
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } else {
+            List<Integer> attr_index_1 = new ArrayList<Integer>();
+            attr_index_1.addAll(args1.keySet());
+            Collections.sort(attr_index_1);
+            String cand1 = normalName1+"(";
+            String cand2 = normalName2+"(";
+            for(int i: attr_index_1){
+                cand1 = cand1 + i +",";
+                for(int j: args2.keySet()){
+                    if(args2.get(j).equals(args1.get(i))){
+                        cand2 = cand2 + j +",";
+                        break;
+                    }
+                }
+            }
+            cand1 = cand1.substring(0, cand1.length()-1)+")";
+            cand2 = cand2.substring(0, cand2.length()-1)+")";
+            if(hints.get(1).contains(cand1+"<>"+cand2)){
+                return true;
+            } else {
+                List<Integer> attr_index_2 = new ArrayList<Integer>();
+                attr_index_2.addAll(args2.keySet());
+                Collections.sort(attr_index_2);
+                cand1 = normalName1+"(";
+                cand2 = normalName2+"(";
+                for(int i: attr_index_2){
+                    cand2 = cand2 + i +",";
+                    for(int j: args1.keySet()){
+                        if(args1.get(j).equals(args2.get(i))){
+                            cand1 = cand1 + j +",";
+                            break;
+                        }
+                    }
+                }
+                cand1 = cand1.substring(0, cand1.length()-1)+")";
+                cand2 = cand2.substring(0, cand2.length()-1)+")";
+                if(hints.get(1).contains(cand2+"<>"+cand1)){
+                    return true;
+                }
+            }
+
+        }
+        return res;
     }
 
     public IQTree rewriteInnerJoin(IQTree iqt){
@@ -607,7 +730,6 @@ public class QueryRewriting {
 
         boolean can_rewrite = false;
 
-        InnerJoinNode ij_copy = root;
         QueryNode root_l = left_part.getRootNode();
         QueryNode root_r = right_part.getRootNode();
         ImmutableSet<Variable> var_l = left_part.getVariables();
@@ -624,6 +746,7 @@ public class QueryRewriting {
             return null;
         }
 
+        //not atomic federated join
         if((root_l instanceof InnerJoinNode) || (root_l instanceof LeftJoinNode) || (root_r instanceof InnerJoinNode) || (root_r instanceof LeftJoinNode)){
             return iqt_new;
         }
@@ -647,7 +770,7 @@ public class QueryRewriting {
                 IQTree child_l = childern_l.get(i);
                 IQTree child_r = childern_r.get(j);
 
-                // check whether (child_l JoinNode child_r) can be rewritten into empty join or by materialized view
+                // check whether (child_l JoinNode child_r) can be rewritten into empty join, 查看是否能被EFJ优化
                 ExpRewriten rewrite = rewriteAtomicJoinWithoutUnionInLeftAndRight(root, child_l, child_r);
 
                 if(rewrite.newRewritten != null){
@@ -659,12 +782,12 @@ public class QueryRewriting {
             }
         }
 
-        if(can_rewrite){  //some Ai JOIN Bj can rewritten into empty relation or materialized view or can apply sjr
+        if(can_rewrite){  //some Ai JOIN Bj can rewritten into empty relation or can apply sjr
             if(SubTree_new.size() == 1){
                 iqt_new = SubTree_new.get(0);
             } else if(SubTree_new.size() > 1){
 
-                //add removing of semantic redundancy, add rolling back
+                //remove semantic redundancy and rolling back
                 List<IQTree> SubTree_new_copy = new ArrayList<IQTree>();
                 SubTree_new_copy.addAll(SubTree_new);
                 SubTree_new = removeSemanticRedundancyAndRollingBack(SubTree_new);
@@ -696,13 +819,14 @@ public class QueryRewriting {
 
         ExpRewriten ER = new ExpRewriten();
         //complete the checking conditions
-        //Left A, A1 JOIN A2 JOIN ... An
-        //Right B, B1 JOIN B2 JOIN ... JOIN Bm
+        //Left part: A 或者 A1 JOIN A2 JOIN ... An
+        //Right part: B 或者 B1 JOIN B2 JOIN ... JOIN Bm
         //A, B, Ai, Bi, without UNION
 
         JoinOfLeafs JOL_left = getLeafsOfJoin(left);
         JoinOfLeafs JOL_right = getLeafsOfJoin(right);
         //keep the order of the leafs
+        //目前只处理基于base relation的hints
         if((JOL_left.dataNodes.size() == 0) || (JOL_right.dataNodes.size() == 0)){
             return ER;
         }
@@ -715,7 +839,9 @@ public class QueryRewriting {
                     for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
                         if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
                             //change the check condition based on different ways of representing hints
-                            if(hints.get(2).contains(JOL_left.relations.get(i).getName()+"<>"+JOL_right.relations.get(j).getName()+"<>"+k+"<>"+l) || hints.get(2).contains(JOL_right.relations.get(j).getName()+"<>"+JOL_left.relations.get(i).getName()+"<>"+l+"<>"+k)){
+                            String normalName_left = getNormalFormOfRelation(JOL_left.relations.get(i).getName());
+                            String normalName_right = getNormalFormOfRelation(JOL_right.relations.get(j).getName());
+                            if(hints.get(2).contains(normalName_left+"<>"+normalName_right+"<>"+k+"<>"+l) || hints.get(2).contains(normalName_right+"<>"+normalName_left+"<>"+l+"<>"+k)){
                                 ER.canRewrite = true;
                                 return ER;
                             }
@@ -733,6 +859,22 @@ public class QueryRewriting {
         //create a IQTree for (left JOIN right), by applying self-join optimization
 
         return ER;
+    }
+
+    //to handle the different ways of identifying relations in VDBs for different federation systems
+    public String getNormalFormOfRelation(String relationName){
+        String normalForm = "";
+        normalForm = relationName.substring(relationName.lastIndexOf(".")+1, relationName.length());
+        if(!normalForm.startsWith("\"")){
+            normalForm = "\""+normalForm+"\"";
+        }
+        if(sourceMap.containsKey(normalForm)){
+            normalForm = sourceMap.get(normalForm)+"."+normalForm;
+        } else {
+            System.out.println("missing source information of relations in VDB");
+        }
+
+        return normalForm;
     }
 
     //recreate join tree for (JoinNode, left, right) where sfr rule is applied
@@ -865,6 +1007,7 @@ public class QueryRewriting {
         return ER;
     }
 
+    //improvement, add other types of nodes
     public JoinOfLeafs getLeafsOfJoin(IQTree t){
         JoinOfLeafs JOL = new JoinOfLeafs();
 
@@ -1121,11 +1264,6 @@ public class QueryRewriting {
 
     public ExpRewriten rewriteAtomicLeftJoin(LeftJoinNode root, IQTree left, IQTree right){
         //format: (A1 UNION ... UNION Am) LOJ (B1 UNION ... UNION Bn), Ai, Bj leaf or join tree
-        System.out.println("<<<<<<: "+root);
-        System.out.println("<<<<<<: left part of left join:");
-        System.out.println(left);
-        System.out.println("<<<<<<: right part of right join: ");
-        System.out.println(right);
 
         ExpRewriten ER = new ExpRewriten();
         if((left.getRootNode() instanceof LeftJoinNode) || (right.getRootNode() instanceof LeftJoinNode)){
@@ -1175,7 +1313,7 @@ public class QueryRewriting {
             return ER;
         }
 
-        Map<Integer, Integer> index = new HashMap<Integer, Integer>(); // Ai JOIN Bj no empty
+        Map<Integer, Integer> index = new HashMap<Integer, Integer>(); // Ai JOIN Bj not empty
         for(int i=0; i<left_part.size(); i++){
             for(int k=0; k<right_part.size(); k++){
                 boolean label = false;
@@ -1184,16 +1322,18 @@ public class QueryRewriting {
                     for(int l=0; l<right_part.get(k).dataNodes.size(); l++){
                         RelationPredicate relation_left = left_part.get(i).relations.get(j);
                         String name_left = relation_left.toString();
+                        String normalName_left = getNormalFormOfRelation(name_left);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = left_part.get(i).dataNodes.get(j).getArgumentMap();
 
                         RelationPredicate relation_right = right_part.get(k).relations.get(l);
                         String name_right = relation_right.toString();
+                        String normalName_right = getNormalFormOfRelation(name_right);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = right_part.get(k).dataNodes.get(l).getArgumentMap();
 
                         for(int f: arg_left.keySet()){
                             for(int h: arg_right.keySet()){
                                 if((arg_left.get(f) instanceof Variable)&&(arg_right.get(h) instanceof Variable)&&(arg_left.get(f).equals(arg_right.get(h)))){
-                                    if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
+                                    if(hints.get(2).contains(normalName_left+"<>"+normalName_right+"<>"+f+"<>"+h)||hints.get(2).contains(normalName_right+"<>"+normalName_left+"<>"+h+"<>"+f)){
                                         label = true;
                                     }
                                 }
@@ -1223,15 +1363,17 @@ public class QueryRewriting {
                     for(int k=0; k<left_part.get(i).dataNodes.size(); k++){
                         RelationPredicate relation_1 = left_part.get(i).relations.get(k);
                         String name_1 = relation_1.toString();
+                        String normalName_1 = getNormalFormOfRelation(name_1);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = left_part.get(i).dataNodes.get(k).getArgumentMap();
                         for(int l=0; l<left_part.get(j).dataNodes.size(); l++){
                             RelationPredicate relation_2 = left_part.get(j).relations.get(l);
                             String name_2 = relation_2.toString();
+                            String normalName_2 = getNormalFormOfRelation(name_2);
                             ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = left_part.get(j).dataNodes.get(l).getArgumentMap();
                             for(int h: arg_1.keySet()){
                                 for(int f: arg_2.keySet()){
                                     if(arg_1.get(h).equals(arg_2.get(f))){
-                                        if(hints.get(2).contains(name_1+"<>"+name_2+"<>"+h+"<>"+f)||hints.get(2).contains(name_2+"<>"+name_1+"<>"+f+"<>"+h)){
+                                        if(hints.get(2).contains(normalName_1+"<>"+normalName_2+"<>"+h+"<>"+f)||hints.get(2).contains(normalName_2+"<>"+normalName_1+"<>"+f+"<>"+h)){
                                             b = true;
                                         }
                                     }
@@ -1244,6 +1386,22 @@ public class QueryRewriting {
                     }
                 }
             }
+        }
+
+        if((left_part.size() == 1) && (right_part.size() > 1)){
+            if((index.size() < right_part.size())){
+                ER.canRewrite = true;
+                // A LeftJoin (B1 U...U Bm)
+                ImmutableSet<Variable> var_right = right.getVariables();
+                IQTree left_new = left;
+                List<IQTree> sub_right_new = new ArrayList<IQTree>();
+                for(int i: index.keySet()){
+                    sub_right_new.add(right.getChildren().get(i));
+                }
+                IQTree right_new = IQ_FACTORY.createNaryIQTree((UnionNode)right.getRootNode(), ImmutableList.copyOf(sub_right_new));
+                ER.newRewritten = IQ_FACTORY.createBinaryNonCommutativeIQTree(root, left_new, right_new);
+            }
+            return ER;
         }
 
         if(index.size() == left_part.size()){
@@ -1528,19 +1686,21 @@ public class QueryRewriting {
                             //change the check condition based on different ways of representing hints
                             //check conditions for rewriting based on materialized views;
                             String relation1 = JOL_left.relations.get(i).getName();
+                            String normalName_relation1 = getNormalFormOfRelation(relation1);
                             int ind1 = k;
                             String relation2 = JOL_right.relations.get(j).getName();
+                            String normalName_relation2 = getNormalFormOfRelation(relation2);
                             int ind2 = l;
-                            if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                            if(hint_matv.containsKey(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k)){
                                 //create a new data node for left_i and right_j;
                                 FilterNode fn_ij = null;
                                 RelationPredicate matv = null; //name of the relations for MatV
                                 NamedRelationDefinition NRD = null;
                                 boolean b = true;
-                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
-                                } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
+                                if(hint_matv.containsKey(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l));
+                                } else if(hint_matv.containsKey(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k));
                                     b = false;
                                 }
 
@@ -1656,10 +1816,10 @@ public class QueryRewriting {
         return nrd;
     }
 
-    public IQ IQTreeToIQ (IQTree iqt)throws Exception {
-        AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
-        DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
-        return IQ_FACTORY.createIQ(projection, iqt);
+    public IQ IQTreeToIQ (DistinctVariableOnlyDataAtom project_original, IQTree iqt)throws Exception {
+        //AtomPredicate ANS1 = ATOM_FACTORY.getRDFAnswerPredicate(iqt.getVariables().size());
+        //DistinctVariableOnlyDataAtom projection = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1, ImmutableList.copyOf(iqt.getVariables()));
+        return IQ_FACTORY.createIQ(project_original, iqt);
     }
 
 }
