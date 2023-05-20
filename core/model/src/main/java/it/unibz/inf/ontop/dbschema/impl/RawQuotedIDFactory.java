@@ -29,7 +29,7 @@ public class RawQuotedIDFactory extends SQLStandardQuotedIDFactory {
      */
     protected QuotedID createFromString(String s) {
         Objects.requireNonNull(s);
-        return new QuotedIDImpl(s, idFactory.getIDQuotationString());
+        return new QuotedIDImpl(s, idFactory.getIDQuotationString(), true);
     }
 
     @Override

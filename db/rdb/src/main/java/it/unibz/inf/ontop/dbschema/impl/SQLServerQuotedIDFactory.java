@@ -52,12 +52,12 @@ public class SQLServerQuotedIDFactory extends SQLStandardQuotedIDFactory {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, true);
 
 		if (s.startsWith("[") && s.endsWith("]"))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING, true);
 
-		return new QuotedIDImpl(s, NO_QUOTATION);
+		return new QuotedIDImpl(s, NO_QUOTATION, true);
 	}
 
 	@Override

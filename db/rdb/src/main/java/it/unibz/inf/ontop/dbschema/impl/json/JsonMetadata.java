@@ -80,7 +80,7 @@ public class JsonMetadata extends JsonOpenObject {
         private transient final Supplier idFactorySupplier;
 
         @Nullable
-        private transient QuotedIDFactory cachedIDFactory;
+        private transient QuotedIDFactory cachedIdFactory;
 
         @JsonCreator
         public Parameters(@JsonProperty("dbmsProductName") @Nullable String dbmsProductName,
@@ -107,9 +107,9 @@ public class JsonMetadata extends JsonOpenObject {
             this.dbmsVersion = parameters.getDbmsVersion();
             this.driverName = parameters.getDriverName();
             this.driverVersion = parameters.getDriverVersion();
-            this.cachedIDFactory = parameters.getQuotedIDFactory();
-            this.quotationString = this.cachedIDFactory.getIDQuotationString();
-            String idFactoryType = this.cachedIDFactory.getIDFactoryType();
+            this.cachedIdFactory = parameters.getQuotedIDFactory();
+            this.quotationString = this.cachedIdFactory.getIDQuotationString();
+            String idFactoryType = this.cachedIdFactory.getIDFactoryType();
             this.idFactoryType = !idFactoryType.equals("STANDARD") ? idFactoryType : null;
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             this.extractionTime = dateFormat.format(Calendar.getInstance().getTime());
@@ -117,14 +117,14 @@ public class JsonMetadata extends JsonOpenObject {
         }
 
         public QuotedIDFactory createQuotedIDFactory() throws MetadataExtractionException {
-            if (cachedIDFactory == null) {
+            if (cachedIdFactory == null) {
                 // Delegate to the supplier (will fail if supplier is not available or idFactoryType is unknown)
-                cachedIDFactory = Optional.ofNullable(idFactorySupplier)
+                cachedIdFactory = Optional.ofNullable(idFactorySupplier)
                         .flatMap(s -> s.get(MoreObjects.firstNonNull(idFactoryType, "STANDARD")))
                         .orElseThrow(() -> new MetadataExtractionException(
                                 "Could not resolve QuotedIDFactory with type identifier " + idFactoryType));
             }
-            return cachedIDFactory;
+            return cachedIdFactory;
         }
 
     }

@@ -20,14 +20,10 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -51,14 +47,11 @@ public class QuotedIDImpl implements QuotedID {
      * (used only in QuotedIDFactory implementations)
      *
      * @param id cannot be null
-     * @param quoteString cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
+     * @param quoteString the empty string stands for no quotation, as in getIdentifierQuoteString
+     * @param caseSensitive specifies whether the ID is case-sensitive
      */
-    QuotedIDImpl(String id, String quoteString) {
-        this(id, quoteString, true);
-    }
-
     QuotedIDImpl(String id, String quoteString, boolean caseSensitive) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id);
         this.quoteString = Objects.requireNonNull(quoteString);
         this.caseSensitive = caseSensitive;
         // increases collisions but makes it possible to have case-insensitive ids (for MySQL)
@@ -117,13 +110,4 @@ public class QuotedIDImpl implements QuotedID {
     public int hashCode() {
         return hashCode;
     }
-
-    // TODO: This doesn't seem to be used in the project. Remove it?
-    public static class QuotedIDSerializer extends JsonSerializer<QuotedID> {
-        @Override
-        public void serialize(QuotedID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeString(value.getSQLRendering());
-        }
-    }
-
 }

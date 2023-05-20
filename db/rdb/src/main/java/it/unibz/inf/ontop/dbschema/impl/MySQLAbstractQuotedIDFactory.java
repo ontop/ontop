@@ -50,27 +50,19 @@ import java.util.Objects;
  *
  * @author Roman Kontchakov
  */
-@IDFactoryType("MYSQL")
 @NonNullByDefault
-public abstract class MySQLAbstractQuotedIDFactory extends SQLStandardQuotedIDFactory {
+public abstract class MySQLAbstractQuotedIDFactory extends AbstractBacktickQuotedIDFactory {
 
-	private static final String MY_SQL_QUOTATION_STRING = "`";
 
-	protected QuotedID createFromString(String s, boolean caseSensitive) {
+	protected final QuotedID createFromString(String s, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
-		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
+		if (s.startsWith(BACKTICK_QUOTATION_STRING) && s.endsWith(BACKTICK_QUOTATION_STRING))
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), BACKTICK_QUOTATION_STRING, caseSensitive);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), BACKTICK_QUOTATION_STRING, caseSensitive);
 
 		return new QuotedIDImpl(s, NO_QUOTATION, caseSensitive);
 	}
-
-	@Override
-	public String getIDQuotationString() {
-		return MY_SQL_QUOTATION_STRING;
-	}	
-
 }

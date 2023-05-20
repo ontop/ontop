@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 /**
  * Creates QuotedIdentifiers following the rules of SQL standard:<br>
@@ -72,7 +73,6 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 
 	@Override
 	public QuotedID createAttributeID(String s) {
-		Objects.requireNonNull(s);
 		return createFromString(s);
 	}
 
@@ -93,12 +93,16 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	}
 	
 	protected QuotedID createFromString(String s) {
+		return createFromString(s, QUOTATION_STRING, String::toUpperCase, NO_QUOTATION, true);
+	}
+
+	protected final QuotedID createFromString(String s, String quotationString, UnaryOperator<String> fold, String defaultQuotationString, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
-		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+		if (s.startsWith(quotationString) && s.endsWith(quotationString))
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), quotationString, caseSensitive);
 
-		return new QuotedIDImpl(s.toUpperCase(), NO_QUOTATION);
+		return new QuotedIDImpl(fold.apply(s), defaultQuotationString, caseSensitive);
 	}
 	
 	@Override

@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import java.util.Objects;
-
 /**
  * Creates QuotedIdentifiers following the rules of PostrgeSQL:<br>
  *    - unquoted identifiers are converted into lower case<br>
@@ -53,12 +51,7 @@ public class PostgreSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
 	protected QuotedID createFromString(String s) {
-		Objects.requireNonNull(s);
-
-		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
-
-		return new QuotedIDImpl(s.toLowerCase(), NO_QUOTATION);
+		return createFromString(s, QUOTATION_STRING, String::toLowerCase, NO_QUOTATION, true);
 	}
 
 }
