@@ -179,6 +179,7 @@ public class FederationHintPrecomputation {
         return conn;
     }
 
+    //利用sql1-sql2, sql2-sql1来替代这个检测
     public String checkRedundancy(Statement stmt, String relation1, String relation2) throws Exception{
 
         Set<String> ans1 = new HashSet<String>();
@@ -273,103 +274,6 @@ public class FederationHintPrecomputation {
         return b;
     }
 
-    /**
-     * Zhenzhen: materialize data for non-empty federated joins, including create table and insert data in the DB for materialized views.
-     * @param conn
-     * @param rs
-     * @param tableName
-     * @param attributes
-     * @throws Exception
-     */
-
-    public void materializeData(Connection conn, Statement stmt, ResultSet rs, String tableName, List<String> attributes) throws Exception {
-        String create_table = "CREATE TABLE "+tableName+" ( ";
-        int column_count = attributes.size();
-        ResultSetMetaData rsmd = rs.getMetaData();
-
-        for(int i=1; i<column_count+1; i++){
-            String column_name = attributes.get(i-1);
-            String data_type = rsmd.getColumnTypeName(i);
-            //the mappings of datatypes between federation system and the DB system.
-            if(data_type.equals("string")){
-                data_type = "varchar";
-            } else if (data_type.equals("integer")){
-                data_type = "int4";
-            } else if (data_type.equals("double")){
-                data_type = "double precision";
-            }
-
-            create_table = create_table + column_name+" "+data_type+" , ";
-        }
-        create_table = create_table.substring(0, create_table.length()-2)+" )";
-        System.out.println("create_table for the join: "+create_table);
-        int b = stmt.executeUpdate(create_table);
-
-
-        String sql = "insert into "+tableName+" values (";
-        for(int i=0; i<column_count; i++){
-            sql = sql + "?,";
-        }
-        sql = sql.substring(0, sql.length()-1)+")";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        conn.setAutoCommit(false);
-        int count = 0;
-        while(rs.next()){
-            count = count +1;
-            for(int i=1; i<column_count+1; i++){
-                ps.setObject(i, rs.getObject(i));
-            }
-            ps.addBatch();
-            if(count % 500 ==0){
-                ps.executeBatch();
-                ps.clearBatch();
-            }
-        }
-        ps.executeBatch();
-        ps.clearBatch();
-        conn.commit();
-
-        ps.close();
-        rs.close();
-    }
-
-
-
-    public void insertData(Statement stmt, ResultSet rs, String tableName, List<String> attributes) throws Exception {
-
-        ResultSetMetaData rsmd = rs.getMetaData();
-
-        int column_count = rsmd.getColumnCount();
-        String create_table = "CREATE TABLE "+tableName+" ( ";
-        for(int i=1; i<column_count+1; i++){
-            String column_name = attributes.get(i-1);
-            String data_type = rsmd.getColumnTypeName(i);
-            //the mappings of datatypes between federation system and the DB system.
-            if(data_type.equals("string")){
-                data_type = "varchar";
-            } else if (data_type.equals("integer")){
-                data_type = "int4";
-            } else if (data_type.equals("double")){
-                data_type = "double precision";
-            }
-
-            create_table = create_table + column_name+" "+data_type+" , ";
-        }
-        create_table = create_table.substring(0, create_table.length()-2)+" )";
-        System.out.println("create_table for the join: "+create_table);
-        int b = stmt.executeUpdate(create_table);
-
-        while(rs.next()){
-            String values = "";
-            for(int i=1; i<column_count+1; i++){
-                values = values +"'"+rs.getString(i)+"'"+",";
-            }
-            values = values.substring(0, values.length()-1);
-            String update = "INSERT INTO "+tableName+" VALUES "+"("+values+")";
-            stmt.execute(update);
-        }
-        //bulk insertion
-    }
 
 
     /**
@@ -388,6 +292,8 @@ public class FederationHintPrecomputation {
      * @return
      */
     public SourceHints detectCandidateHints(String owlFile, String obdaFile, String propertyFile, String labFile) throws Exception{
+        long start_time = System.currentTimeMillis();
+
         SourceHints candidateHints = new SourceHints();
 
         OntopSQLOWLAPIConfiguration configure = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -556,7 +462,24 @@ public class FederationHintPrecomputation {
             }
         }
 
+        long end_time = System.currentTimeMillis();
+        System.out.println("time used for candidate detection: "+(end_time-start_time));
+
+        printDetectedHints(candidateHints);
+
         return candidateHints;
+    }
+
+    public void printDetectedHints(SourceHints candidates){
+        System.out.println("number of detected federated joins for empty checking or materialization: "+candidates.emptyFJs.size());
+        for(EmptyFederatedJoin efj: candidates.emptyFJs){
+            efj.print();
+        }
+
+        System.out.println("number of detected relation pairs for redundancy checking: "+candidates.redundancy.size());
+        for(Redundancy rd: candidates.redundancy){
+            rd.print();
+        }
     }
 
     /**
@@ -569,6 +492,8 @@ public class FederationHintPrecomputation {
      */
 
     public SourceHints computeSourceHints(SourceHints candidateHints, String federationSystemPropertyFile, String matvDBPropertyFile) throws Exception {
+       long start_time = System.currentTimeMillis();
+
         SourceHints computedHints = new SourceHints();
         Connection conn_federation = getConnectionOfDB(federationSystemPropertyFile);
         Statement stmt_federation = conn_federation.createStatement();
@@ -595,7 +520,7 @@ public class FederationHintPrecomputation {
             }
             long end = System.currentTimeMillis();
             System.out.println("time for redundancy checking: "+(end-start));
-            System.out.println("\n");
+            System.out.println("");
         }
 
         for(EmptyFederatedJoin candidate: candidateHints.emptyFJs){
@@ -609,6 +534,9 @@ public class FederationHintPrecomputation {
                 //the sql query needs to be modified;
                 //the sql query needs to be make sure whether the two relations containing attributes with the same name;
                 ResultSet rs = stmt_federation.executeQuery(sql);
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int column_count = rsmd.getColumnCount();
+
                 if(!rs.next()){
                     computedHints.emptyFJs.add(candidate);
                     System.out.println("checking result: empty");
@@ -633,36 +561,83 @@ public class FederationHintPrecomputation {
                     }
                     viewName = viewName.substring(0,viewName.length()-1);
 
+                    //here, index of the attributes of the relations started from zero / 0;
                     List<String> attributes_1 = getSelectItemsFromSQL(candidate.relation1);
+                    List<Integer> attr_index_1 = getIndexOfAttributes(conn_federation, attributes_1, candidate.relation1);
                     List<String> attributes_2 = getSelectItemsFromSQL(candidate.relation2);
-                    List<String> attributes = new ArrayList<String>();
-                    for(int i=0; i<attributes_1.size(); i++){
-//                        String a = attributes_1.get(i);
-                        attributes.add("\"1_"+i+"\"");
-//                        if(a.startsWith("\"")){
-//                            attributes.add("V1_"+a.substring(1, a.length()-1));
-//                        } else {
-//                            attributes.add("V1_"+a);
-//                        }
-                    }
-                    for(int i=0; i<attributes_2.size(); i++){
-                        attributes.add("\"2_"+i+"\"");
-                    }
-//                    for(String b: attributes_2){
-//                        if(b.startsWith("\"")){
-//                            attributes.add("V2_"+b.substring(1, b.length()-1));
-//                        } else {
-//                            attributes.add("V2_"+b);
-//                        }
-//                    }
+                    List<Integer> attr_index_2 = getIndexOfAttributes(conn_federation, attributes_2, candidate.relation2);
 
-                    //insertData(stmt_matvDB, rs, viewName, attributes);
-                    materializeData(conn_matvDB, stmt_matvDB, rs, viewName, attributes);
+                    int count = 1;
+
+                    //if relation1 (relation2) has the form SELECT attributes FROM table1 (table2);
+                    //then 1_i, 2_j in the matv denotes that i (j) are the i(j)th attribute of the table1 (table2)
+                    //otherwise, i and j denote the i (j) th attriubte in the select items of relation1 (relation2)
+                    List<String> attributes = new ArrayList<String>();
+                    if((attr_index_1.size() >0) && (attr_index_2.size()>0)){
+                        for(int i: attr_index_1){
+                            String attr_new_name = "\""+1+"_"+i+"\"";
+                            String attr_new_type = rsmd.getColumnTypeName(count);
+                            if(attr_new_type.equals("string")){
+                                attr_new_type = "varchar";
+                            } else if (attr_new_type.equals("integer")){
+                                attr_new_type = "int4";
+                            } else if (attr_new_type.equals("double")){
+                                attr_new_type = "double precision";
+                            }
+                            attributes.add(attr_new_name+" "+attr_new_type);
+                            count = count+1;
+                        }
+                        for(int i: attr_index_2){
+                            String attr_new_name = "\""+2+"_"+i+"\"";
+                            String attr_new_type = rsmd.getColumnTypeName(count);
+                            if(attr_new_type.equals("string")){
+                                attr_new_type = "varchar";
+                            } else if (attr_new_type.equals("integer")){
+                                attr_new_type = "int4";
+                            } else if (attr_new_type.equals("double")){
+                                attr_new_type = "double precision";
+                            }
+                            attributes.add(attr_new_name+" "+attr_new_type);
+                            count = count+1;
+                        }
+                    } else {
+                        for(int i=0; i<attributes_1.size(); i++){
+                            String attr_new_name = "\""+1+"_"+i+"\"";
+                            String attr_new_type = rsmd.getColumnTypeName(count);
+                            if(attr_new_type.equals("string")){
+                                attr_new_type = "varchar";
+                            } else if (attr_new_type.equals("integer")){
+                                attr_new_type = "int4";
+                            } else if (attr_new_type.equals("double")){
+                                attr_new_type = "double precision";
+                            }
+                            attributes.add(attr_new_name+" "+attr_new_type);
+                            count = count+1;
+                        }
+                        for(int i=0; i<attributes_2.size(); i++){
+                            String attr_new_name = "\""+2+"_"+i+"\"";
+                            String attr_new_type = rsmd.getColumnTypeName(count);
+                            if(attr_new_type.equals("string")){
+                                attr_new_type = "varchar";
+                            } else if (attr_new_type.equals("integer")){
+                                attr_new_type = "int4";
+                            } else if (attr_new_type.equals("double")){
+                                attr_new_type = "double precision";
+                            }
+                            attributes.add(attr_new_name+" "+attr_new_type);
+                            count = count+1;
+                        }
+                    }
+
+                    //materializeData(conn_matvDB,stmt_matvDB, rs,viewName,attributes);
 
                     MaterializedView mv = new MaterializedView();
-                    mv.sourceSQL = sql;
                     mv.table = viewName;
                     mv.attributes = attributes;
+                    mv.relation1 = candidate.relation1;
+                    mv.relation2 = candidate.relation2;
+                    mv.joinCondition = candidate.joinCondition;
+
                     computedHints.matView.add(mv);
 
                     matv_count = matv_count+1;
@@ -672,9 +647,15 @@ public class FederationHintPrecomputation {
             }
             long end = System.currentTimeMillis();
             System.out.println("time for federated join checking: "+(end-start));
-            System.out.println("\n");
+            System.out.println("");
 
         }
+
+        long end_time = System.currentTimeMillis();
+        System.out.println("total time used for computing data hints: "+(end_time-start_time));
+
+        printComputedHintsInGeneralForm(computedHints);
+        printComputedHintsInTheFormNeedByCurrentImplementation(conn_federation, computedHints);
 
         stmt_matvDB.close();
         conn_matvDB.close();
@@ -685,103 +666,207 @@ public class FederationHintPrecomputation {
     }
 
     /**
-     * Zhenzhen: combine the candidate detection and computation part
-     * @param owlFile
-     * @param obdaFile
-     * @param propertyFile
-     * @param labFile
-     * @param federationSystemPropertyFile
-     * @param localDBPropertyFile
-     * @return
+     * Zhenzhen: materialize data for non-empty federated joins, including create table and insert data in the DB for materialized views.
+     * @param conn
+     * @param rs
+     * @param tableName
+     * @param attributes
      * @throws Exception
      */
-    public SourceHints precomputeSourceHints(String owlFile, String obdaFile, String propertyFile, String labFile, String federationSystemPropertyFile, String localDBPropertyFile) throws Exception{
-        SourceHints candidates = detectCandidateHints(owlFile, obdaFile, propertyFile, labFile);
-        return computeSourceHints(candidates, federationSystemPropertyFile, localDBPropertyFile);
-    }
+
+    public void materializeData(Connection conn, Statement stmt, ResultSet rs, String tableName, List<String> attributes) throws Exception {
+        String create_table = "CREATE TABLE "+tableName+" (";
+
+        for(int i=0; i<attributes.size(); i++){
+            create_table = create_table + attributes.get(i)+",";
+        }
+
+        create_table = create_table.substring(0, create_table.length()-1)+" )";
+        System.out.println("create_table for the join: "+create_table);
+        int b = stmt.executeUpdate(create_table);
 
 
-    @Test
-    /**Mapping test*********************************/
-    public void testMappings() throws Exception {
-        OntopSQLOWLAPIConfiguration configure = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/compareIRI/boot-multiple-inheritance.owl")
-                .nativeOntopMappingFile("src/test/resources/compareIRI/boot-multiple-inheritance.obda")
-                .propertyFile("src/test/resources/compareIRI/boot-multiple-inheritance.properties")
-                .enableTestMode()
-                .build();
-
-        SQLPPMapping mappings = configure.loadProvidedPPMapping();
-        for( SQLPPTriplesMap tripleMap : mappings.getTripleMaps() ) {
-            System.out.println(tripleMap.getSourceQuery());
-            List<TargetAtom> atoms = tripleMap.getTargetAtoms();
-            for(TargetAtom ta: atoms) {
-                ImmutableTerm subject = ta.getSubstitutedTerm(0);
-                ImmutableTerm predicate = ta.getSubstitutedTerm(1);
-                ImmutableTerm object = ta.getSubstitutedTerm(2);
-
-                System.out.println(subject);
-                System.out.println(predicate);
-                System.out.println(object);
-                System.out.println(getDataType(object));
-
-                System.out.println("one triple patterns");
+        String sql = "insert into "+tableName+" values (";
+        for(int i=0; i<attributes.size(); i++){
+            sql = sql + "?,";
+        }
+        sql = sql.substring(0, sql.length()-1)+")";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        conn.setAutoCommit(false);
+        int count = 0;
+        while(rs.next()){
+            count = count +1;
+            for(int i=1; i<attributes.size()+1; i++){
+                ps.setObject(i, rs.getObject(i));
+            }
+            ps.addBatch();
+            if(count % 10000 ==0){
+                ps.executeBatch();
+                ps.clearBatch();
             }
         }
+        ps.executeBatch();
+        ps.clearBatch();
+        conn.commit();
+
+        ps.close();
+        rs.close();
     }
 
-    @Test
-    public void myTest() throws Exception {
-        long start1 = System.currentTimeMillis();
-        SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
-                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
-                "src/test/resources/federation-test/teiid.properties",
-                "src/test/resources/federation-test/SourceLab.txt");
-        long end1 = System.currentTimeMillis();
-        System.out.println("total time used for detection: "+(end1-start1));
+    //only for teiid, for different systems, the way of identifying relations maybe different
+    public List<Integer> getIndexOfAttributes(Connection conn, List<String> attributes, String sql) throws Exception {
+        List<Integer> index = new ArrayList<Integer>();
+        List<String> tables = getTableNamesFromSQL(sql);
+        if(tables.size()>1){
+            return index;
+        }
+        List<String> attributes_original = new ArrayList<String>();
 
-        System.out.println("detected candidate federated joins for checking: "+sh.emptyFJs.size());
-        for(EmptyFederatedJoin candidate: sh.emptyFJs){
-            candidate.print();
+        String table_name = tables.get(0);
+        if(table_name.contains(".")){
+            table_name = table_name.substring(table_name.lastIndexOf(".")+1, table_name.length());
+        }
+        if(table_name.startsWith("\"")){
+            table_name = table_name.substring(1, table_name.length()-1);
         }
 
-        System.out.println("detected candidate federated joins for MatV: "+sh.FJsForMatV.size());
-        for(EmptyFederatedJoin candidate: sh.FJsForMatV){
-            candidate.print();
+        DatabaseMetaData metadata = conn.getMetaData();
+        ResultSet rs = metadata.getColumns(null, "%", table_name, "%");
+        while(rs.next()){
+            attributes_original.add(rs.getString("COLUMN_NAME"));
+        }
+        for(String a: attributes){
+            int ind = attributes_original.indexOf(a);
+            if(ind != -1){
+                index.add(ind);
+            } else {
+                if(a.startsWith("\"")){
+                    a = a.substring(1, a.length()-1);
+                    ind = attributes_original.indexOf(a);
+                    if(ind != -1){
+                        index.add(ind);
+                    } else {
+                        index.add(ind);
+                        System.out.println("handling other situations");
+                    }
+                }
+            }
         }
 
-        System.out.println("detected candidate pairs of relations for redundancy checking: "+sh.redundancy.size());
-        for(Redundancy candidate: sh.redundancy){
-            candidate.print();
-        }
+//        String sql_new = "select * from "+tables.get(0)+" limit 0";
+//        List<String> attributes_original = new ArrayList<String>();
+//        ResultSet rs = stmt.executeQuery(sql_new);
+//        ResultSetMetaData rsmd = rs.getMetaData();
+//        int attr_num = rsmd.getColumnCount();
+//        System.out.println(attr_num);
+//        for(int i=1; i<attr_num+1; i++){
+//            attributes_original.add(rsmd.getColumnName(i));
+//        }
+//        for(String a: attributes){
+//            index.add(attributes_original.indexOf(a));
+//        }
+        return index;
+    }
 
-        System.out.println("");
-        System.out.println("start computing: ");
+   public void printComputedHintsInGeneralForm(SourceHints hints){
+        System.out.println("======print the computed data hints in general form======");
 
-        start1 = System.currentTimeMillis();
-        SourceHints sh_new = computeSourceHints(sh,
-                "src/test/resources/federation-test/federationSystem-property.txt",
-                "src/test/resources/federation-test/matvDB-property.txt");
-        end1 = System.currentTimeMillis();
-        System.out.println("total time used for computation: "+(end1-start1));
-        System.out.println("");
-
-        System.out.println("finally computed source hints: ");
-        System.out.println("finally obtained empty federated joins:"+sh_new.emptyFJs.size());
-        for(EmptyFederatedJoin efj: sh_new.emptyFJs){
+        System.out.println("number of computed empty federated joins: "+hints.emptyFJs.size());
+        for(EmptyFederatedJoin efj: hints.emptyFJs){
             efj.print();
         }
 
-        System.out.println("finally obtained redundancy relations: "+sh_new.redundancy.spliterator());
-        for(Redundancy rd: sh_new.redundancy){
+        System.out.println("number of computed redudnacy pairs: "+hints.redundancy.size());
+        for(Redundancy rd: hints.redundancy){
             rd.print();
         }
 
-        System.out.println("finally obtained materialize views: "+sh_new.matView.size());
-        for(MaterializedView mv: sh_new.matView){
+        System.out.println("number of created materialized views: "+hints.matView.size());
+        for(MaterializedView mv: hints.matView){
             mv.print();
         }
 
+   }
+
+   public void printComputedHintsInTheFormNeedByCurrentImplementation (Connection conn, SourceHints hints) throws Exception {
+        //仅适用于mappings中的source query具有形式: select attributes from table
+       System.out.println("======print the computed hints in the form used by the current implementation======");
+
+       System.out.println("number of computed empty federated joins: "+hints.emptyFJs.size());
+       for(EmptyFederatedJoin efj: hints.emptyFJs){
+           List<String> tables_1 = getTableNamesFromSQL(efj.relation1);
+           List<String> tables_2 = getTableNamesFromSQL(efj.relation2);
+           String[] cond_attributes = efj.joinCondition.split("=");
+           List<String> attributes_1 = new ArrayList<String>();
+           attributes_1.add(cond_attributes[0]);
+           List<String> attributes_2 = new ArrayList<String>();
+           attributes_2.add(cond_attributes[1]);
+           List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, efj.relation1);
+           List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, efj.relation2);
+           System.out.println("empty_federated_join:"+tables_1.get(0)+"<>"+tables_2.get(0)+"<>"+index_1.get(0)+"<>"+index_2.get(0));
+       }
+
+       System.out.println("number of computed redudnacy pairs: "+hints.redundancy.size());
+       for(Redundancy rd: hints.redundancy){
+           List<String> tables_1 = getTableNamesFromSQL(rd.relation1);
+           List<String> tables_2 = getTableNamesFromSQL(rd.relation2);
+           List<String> attributes_1 = getSelectItemsFromSQL(rd.relation1);
+           List<String> attributes_2 = getSelectItemsFromSQL(rd.relation2);
+           List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, rd.relation1);
+           List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, rd.relation2);
+           String part1 = tables_1.get(0)+"(";
+           for(int i: index_1){
+               part1 = part1 + i +",";
+           }
+           part1 = part1.substring(0, part1.length()-1)+")";
+           String part2 = tables_2.get(0)+"(";
+           for(int i: index_2){
+               part2 = part2 + i +",";
+           }
+           part2 = part2.substring(0, part2.length()-1)+")";
+
+           System.out.println("equivalent_redundancy:"+part1+"<>"+part2);
+       }
+
+       System.out.println("number of created materialized views: "+hints.matView.size());
+       for(MaterializedView mv: hints.matView){
+           String part1 = mv.table+"(";
+           for(String s: mv.attributes){
+               part1 = part1 + s +",";
+           }
+           part1 = part1.substring(0, part1.length()-1)+")";
+
+           List<String> tables_1 = getTableNamesFromSQL(mv.relation1);
+           List<String> tables_2 = getTableNamesFromSQL(mv.relation2);
+           String[] cond_attributes = mv.joinCondition.split("=");
+           List<String> attributes_1 = new ArrayList<String>();
+           attributes_1.add(cond_attributes[0]);
+           List<String> attributes_2 = new ArrayList<String>();
+           attributes_2.add(cond_attributes[1]);
+           List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, mv.relation1);
+           List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, mv.relation2);
+
+           System.out.println("materialized_view:"+part1+"<-"+tables_1.get(0)+"<>"+tables_2.get(0)+"<>"+index_1.get(0)+"<>"+index_2.get(0));
+       }
+   }
+
+
+    @Test
+    public void myTest() throws Exception {
+
+        SourceHints sh = detectCandidateHints("src/test/resources/federation-test/bsbm-ontology.owl",
+                "src/test/resources/federation-test/bsbm-mappings-hom-het.obda",
+                "src/test/resources/federation-test/teiid-local.properties",
+                "src/test/resources/federation-test/SourceLab.txt");
+
+        System.out.println("start computing: ");
+
+        SourceHints sh_new = computeSourceHints(sh,
+                "src/test/resources/federation-test/teiid-local.properties",
+                "src/test/resources/federation-test/matvDB-property.txt");
+
+//        List<String> tables = getTableNamesFromSQL("select nr, label, comment, producer, propertynum1, propertynum2, propertynum3, propertynum4, propertynum5, propertynum6, propertytex1, propertytex2, propertytex3, propertytex4, propertytex5, publisher, propertytex6, publishdate from ss5.product2");
+//        System.out.println(tables);
     }
 
 }

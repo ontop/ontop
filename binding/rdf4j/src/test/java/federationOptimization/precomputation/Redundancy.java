@@ -17,6 +17,6 @@ public class Redundancy {
         System.out.println("relation1: "+relation1);
         System.out.println("relation2: "+relation2);
         System.out.println("redundant_relation: "+redundancyRelation);
-        System.out.println("\r\n");
+        System.out.println("");
     }
 }

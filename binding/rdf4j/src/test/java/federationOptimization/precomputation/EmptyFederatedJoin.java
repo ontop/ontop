@@ -17,6 +17,6 @@ public class EmptyFederatedJoin {
         System.out.println("relation_1: "+relation1);
         System.out.println("relation_2: "+relation2);
         System.out.println("condition: "+joinCondition);
-        System.out.println("\r\n");
+        System.out.println("");
     }
 }
