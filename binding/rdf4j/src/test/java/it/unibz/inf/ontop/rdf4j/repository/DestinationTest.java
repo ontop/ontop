@@ -164,4 +164,19 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql.toUpperCase(), "DISTINCT"));
     }
 
+    @Test
+    public void testDataPropertyLodgingBusiness() {
+        String sparql = "    SELECT DISTINCT ?pred {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))\n" +
+                "    }\n" +
+                "    GROUP BY ?pred\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
+    }
+
+
 }
