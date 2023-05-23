@@ -60,7 +60,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
         if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty()) {
-            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child);
+            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child).normalizeForOptimization(variableGenerator);
             //return iqFactory.createTrueNode();
         }
 
