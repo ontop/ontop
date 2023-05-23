@@ -24,7 +24,7 @@ public abstract class AbstractNestedDataTest extends AbstractDockerRDF4JTest {
                 "\n" +
                 "SELECT  ?v " +
                 "WHERE {" +
-                "?p :index ?v . \n" +
+                "?v :income ?i . \n" +
                 "}";
 
         String ontopSQLtranslation = reformulate(query);
