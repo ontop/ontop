@@ -14,6 +14,11 @@ abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand i
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String owlFile;
 
+    @Option(type = OptionType.COMMAND, name = {"-a", "--facts"}, title = "fact file",
+            description = "RDF fact file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String factFile;
+
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")
     @Required

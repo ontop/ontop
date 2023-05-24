@@ -34,6 +34,7 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         OntopSQLOWLAPIConfiguration.Builder<?> builder =
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
                         .ontologyFile(owlFile)
+                        .factsFile(factFile)
                         .enableOntologyAnnotationQuerying(enableAnnotations);
 
         if (propertiesFile != null)
@@ -82,6 +83,16 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         catch (Exception ex) {
             System.out.format("ERROR: OntopOWL reasoner cannot be initialized\n");
             ex.printStackTrace();
+            System.exit(1);
+        }
+
+        try {
+            config.loadInputFacts();
+        }
+        catch (OWLOntologyCreationException e) {
+            //TODO-Damian more than this syntax check required?
+            System.out.format("ERROR: There is a problem loading the fact file: %s\n", factFile);
+            e.printStackTrace();
             System.exit(1);
         }
 

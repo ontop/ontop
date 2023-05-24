@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -8,6 +10,8 @@ import java.util.Optional;
 public interface OntopOntologyOWLAPIConfiguration extends OntopModelConfiguration {
 
     Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException;
+
+    Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OWLOntologyCreationException;
 
     /**
      * Only call it if you are sure that an ontology has been provided

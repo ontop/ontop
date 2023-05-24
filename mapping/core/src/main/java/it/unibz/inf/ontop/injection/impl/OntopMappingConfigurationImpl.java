@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
@@ -14,7 +15,9 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.Graph;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -70,11 +73,13 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
+                Optional::empty,
                 Optional::empty
                 );
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
+                                        FactsSupplier factsSupplier,
                                                   Supplier<Optional<? extends PreProcessedMapping<? extends PreProcessedTriplesMap>>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
@@ -88,6 +93,13 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
+        ImmutableSet<RDFFact> optionalFacts = null;
+
+        try {
+            optionalFacts = factsSupplier.get().orElse(ImmutableSet.of());
+        } catch (OWLOntologyCreationException e) {
+            throw new FactsException(e);
+        }
 
         /*
          * Pre-processed mapping
@@ -112,8 +124,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping = optionalPPMapping.get();
-
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology, optionalFacts);
         }
 
         /*
@@ -123,7 +134,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         /*
@@ -133,7 +144,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         /*
@@ -143,7 +154,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology);
+            return extractor.extract(specInputBuilder.build(), optionalOntology, optionalFacts);
         }
 
         throw new MissingInputMappingException();

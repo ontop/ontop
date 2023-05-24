@@ -296,6 +296,9 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
 
+        if (factFile != null)
+            configBuilder.factsFile(factFile);
+
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
         } else {

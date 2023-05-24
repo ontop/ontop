@@ -15,6 +15,7 @@ public class OntopVirtualRepositoryBean {
     @Bean
     private OntopSystemConfiguration setupOntopConfiguration(@Value("${mapping}") String mappings,
                                                              @Value("${ontology:#{null}}") String ontology,
+                                                             @Value("${facts:#{null}}") String facts,
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                              @Value("${properties:#{null}}") String properties,
                                                              @Value("${constraint:#{null}}") String constraint,
@@ -37,6 +38,9 @@ public class OntopVirtualRepositoryBean {
 
         if ((ontology != null) && (!ontology.isEmpty()))
             builder.ontologyFile(ontology);
+
+        if ((facts != null) && (!facts.isEmpty()))
+            builder.factsFile(facts);
 
         if ((xmlCatalog != null) && (!xmlCatalog.isEmpty()))
             builder.xmlCatalogFile(xmlCatalog);
