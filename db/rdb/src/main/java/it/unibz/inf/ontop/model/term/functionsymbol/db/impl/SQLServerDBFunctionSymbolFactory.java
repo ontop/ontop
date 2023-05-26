@@ -623,4 +623,48 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                         termConverter.apply(terms.get(0))
                 ));
     }
+
+    @Override
+    protected String serializeWeek(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(ISO_WEEK, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(QUARTER, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDecade(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("FLOOR(DATEPART(YEAR, %s) / 10.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeCentury(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 100.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMillennium(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CEILING(DATEPART(YEAR, %s) / 1000.00000)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMilliseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000 + DATEPART(MILLISECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATEPART(SECOND, %s) * 1000000 + DATEPART(MILLISECOND, %s) * 1000 + DATEPART(MICROSECOND, %s))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(0)));
+    }
 }

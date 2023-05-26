@@ -473,6 +473,31 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     @Test
+    public void testExtraDateExtractions() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "SELECT ?v WHERE \n"
+                + "{  ?x ns:pubYear ?year .\n"
+                + "   BIND (fn:millennium-from-dateTime(?year) AS ?v1)\n"
+                + "   BIND (fn:century-from-dateTime(?year) AS ?v2)\n"
+                + "   BIND (fn:decade-from-dateTime(?year) AS ?v3)\n"
+                + "   BIND (fn:quarter-from-dateTime(?year) AS ?v4)\n"
+                + "   BIND (fn:week-from-dateTime(?year) AS ?v5)\n"
+                + "   BIND (fn:milliseconds-from-dateTime(?year) AS ?v6)\n"
+                + "   BIND (fn:microseconds-from-dateTime(?year) AS ?v7)\n"
+                + "   BIND (CONCAT(STR(?v1), \" \", STR(?v2), \" \", STR(?v3), \" \", STR(?v4), \" \", STR(?v5), \" \", STR(?v6), \" \", STR(?v7)) AS ?v)\n"
+                + "}";
+
+        executeAndCompareValues(query, getExtraDateExtractionsExpectedValues());
+    }
+
+    protected ImmutableSet<String> getExtraDateExtractionsExpectedValues() {
+        return ImmutableSet.of("\"3 21 201 2 23 52000 52000000\"^^xsd:string", "\"3 21 201 4 49 0 0\"^^xsd:string",
+                "\"3 21 201 3 39 6000 6000000\"^^xsd:string", "\"2 20 197 4 45 0 0\"^^xsd:string");
+    }
+
+    @Test
     public void testDay() {
 
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
