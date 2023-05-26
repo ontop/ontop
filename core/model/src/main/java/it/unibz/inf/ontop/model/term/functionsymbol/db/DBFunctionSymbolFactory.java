@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
@@ -390,5 +389,14 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol checkAndConvertDateTimeFromString();
     DBFunctionSymbol checkAndConvertDateFromDatetime();
     DBFunctionSymbol checkAndConvertDateFromString();
+
+
+    DBFunctionSymbol getDBWeek();
+    DBFunctionSymbol getDBQuarter();
+    DBFunctionSymbol getDBDecade();
+    DBFunctionSymbol getDBCentury();
+    DBFunctionSymbol getDBMillennium();
+    DBFunctionSymbol getDBMilliseconds();
+    DBFunctionSymbol getDBMicroseconds();
 
 }

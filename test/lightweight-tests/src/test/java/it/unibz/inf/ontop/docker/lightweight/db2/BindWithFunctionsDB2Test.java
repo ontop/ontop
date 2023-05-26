@@ -134,4 +134,10 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
         return ImmutableMultiset.of("\"52.000000\"^^xsd:decimal", "\"0.000000\"^^xsd:decimal", "\"6.000000\"^^xsd:decimal",
                 "\"0.000000\"^^xsd:decimal");
     }
+
+    @Override
+    protected ImmutableSet<String> getExtraDateExtractionsExpectedValues() {
+        return ImmutableSet.of("\"3 21 201 2 23 52000.000000 52000000\"^^xsd:string", "\"3 21 201 4 49 0.000000 0\"^^xsd:string",
+                "\"3 21 201 3 39 6000.000000 6000000\"^^xsd:string", "\"2 20 197 4 45 0.000000 0\"^^xsd:string");
+    }
 }
