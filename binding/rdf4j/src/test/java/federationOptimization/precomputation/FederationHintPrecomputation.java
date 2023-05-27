@@ -803,7 +803,22 @@ public class FederationHintPrecomputation {
            attributes_2.add(cond_attributes[1]);
            List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, efj.relation1);
            List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, efj.relation2);
-           System.out.println("empty_federated_join:"+tables_1.get(0)+"<>"+tables_2.get(0)+"<>"+index_1.get(0)+"<>"+index_2.get(0));
+           String name1 = tables_1.get(0);
+           if(!name1.startsWith("\"")){
+               name1 = "\""+name1+"\"";
+           }
+           if(name1.contains(".") && !name1.contains("\".\"")){
+               name1 = name1.replace(".","\".\"");
+           }
+           String name2 = tables_2.get(0);
+           if(!name2.startsWith("\"")){
+               name2 = "\""+name2+"\"";
+           }
+           if(name2.contains(".") && !name2.contains("\".\"")){
+               name2 = name2.replace(".","\".\"");
+           }
+
+           System.out.println("empty_federated_join:"+name1+"<>"+name2+"<>"+index_1.get(0)+"<>"+index_2.get(0));
        }
 
        System.out.println("number of computed redudnacy pairs: "+hints.redundancy.size());
@@ -814,12 +829,28 @@ public class FederationHintPrecomputation {
            List<String> attributes_2 = getSelectItemsFromSQL(rd.relation2);
            List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, rd.relation1);
            List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, rd.relation2);
-           String part1 = tables_1.get(0)+"(";
+
+           String name1 = tables_1.get(0);
+           if(!name1.startsWith("\"")){
+               name1 = "\""+name1+"\"";
+           }
+           if(name1.contains(".") && !name1.contains("\".\"")){
+               name1 = name1.replace(".","\".\"");
+           }
+           String part1 = name1+"(";
            for(int i: index_1){
                part1 = part1 + i +",";
            }
            part1 = part1.substring(0, part1.length()-1)+")";
-           String part2 = tables_2.get(0)+"(";
+
+           String name2 = tables_2.get(0);
+           if(!name2.startsWith("\"")){
+               name2 = "\""+name2+"\"";
+           }
+           if(name2.contains(".") && !name2.contains("\".\"")){
+               name2 = name2.replace(".","\".\"");
+           }
+           String part2 = name2+"(";
            for(int i: index_2){
                part2 = part2 + i +",";
            }
@@ -830,7 +861,7 @@ public class FederationHintPrecomputation {
 
        System.out.println("number of created materialized views: "+hints.matView.size());
        for(MaterializedView mv: hints.matView){
-           String part1 = mv.table+"(";
+           String part1 = "\"smatv\"."+"\""+mv.table+"\""+"(";
            for(String s: mv.attributes){
                part1 = part1 + s +",";
            }
@@ -846,7 +877,22 @@ public class FederationHintPrecomputation {
            List<Integer> index_1 = getIndexOfAttributes(conn, attributes_1, mv.relation1);
            List<Integer> index_2 = getIndexOfAttributes(conn, attributes_2, mv.relation2);
 
-           System.out.println("materialized_view:"+part1+"<-"+tables_1.get(0)+"<>"+tables_2.get(0)+"<>"+index_1.get(0)+"<>"+index_2.get(0));
+           String name1 = tables_1.get(0);
+           if(!name1.startsWith("\"")){
+               name1 = "\""+name1+"\"";
+           }
+           if(name1.contains(".") && !name1.contains("\".\"")){
+               name1 = name1.replace(".","\".\"");
+           }
+           String name2 = tables_2.get(0);
+           if(!name2.startsWith("\"")){
+               name2 = "\""+name2+"\"";
+           }
+           if(name2.contains(".") && !name2.contains("\".\"")){
+               name2 = name2.replace(".","\".\"");
+           }
+
+           System.out.println("materialized_view:"+part1+"<-"+name1+"<>"+name2+"<>"+index_1.get(0)+"<>"+index_2.get(0));
        }
    }
 

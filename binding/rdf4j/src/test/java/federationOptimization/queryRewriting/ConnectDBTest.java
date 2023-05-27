@@ -21,25 +21,59 @@ public class ConnectDBTest {
 //            }
 
             Statement stmt = conn.createStatement();
-            String sql = "SELECT * from \"ss1\".\"product1\" limit 0";
-            ResultSet rs = stmt.executeQuery(sql);
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int attr_num = rsmd.getColumnCount();
-            System.out.println(attr_num);
-            for(int i=1; i<attr_num+1; i++){
-                System.out.println("属性名："+rsmd.getColumnName(i));
-                System.out.println("属性类型："+rsmd.getColumnTypeName(i));
-            }
+            String sql = "SELECT DISTINCT v5.\"label10m46\" AS \"label10m46\", v5.\"product0m2\" AS \"product0m2\"\n" +
+                    "FROM (\n" +
+                    "      SELECT v1.\"label\" AS \"label10m46\", v1.\"nr\" AS \"product0m2\"\n" +
+                    "      FROM \"ss1\".\"product1\" v1\n" +
+                    "      WHERE v1.\"label\" IS NOT NULL\n" +
+                    "      UNION ALL\n" +
+                    "      SELECT v3.\"label\" AS \"label10m46\", v3.\"nr\" AS \"product0m2\"\n" +
+                    "      FROM \"ss5\".\"product2\" v3\n" +
+                    "      WHERE v3.\"label\" IS NOT NULL\n" +
+                    "     ) v5, (\n" +
+                    "            SELECT v6.\"product\" AS \"product0m0\"\n" +
+                    "            FROM \"ss1\".\"productfeatureproduct1\" v6\n" +
+                    "            WHERE 1000 = v6.\"productfeature\"\n" +
+                    "            UNION ALL\n" +
+                    "            SELECT v8.\"product\" AS \"product0m0\"\n" +
+                    "            FROM \"ss5\".\"productfeatureproduct2\" v8\n" +
+                    "            WHERE 1000 = v8.\"productfeature\"\n" +
+                    "          ) v10, (\n" +
+                    "                  SELECT v11.\"product\" AS \"product0m1\"\n" +
+                    "                  FROM \"ss1\".\"productfeatureproduct1\" v11\n" +
+                    "                  WHERE 1000 = v11.\"productfeature\"\n" +
+                    "                  UNION ALL\n" +
+                    "                  SELECT v13.\"product\" AS \"product0m1\"\n" +
+                    "                  FROM \"ss5\".\"productfeatureproduct2\" v13\n" +
+                    "                  WHERE 1000 = v13.\"productfeature\"\n" +
+                    "                 ) v15, (\n" +
+                    "                         SELECT v16.\"nr\" AS \"product0m3\", v16.\"propertynum1\" AS \"propertynum1m41\"\n" +
+                    "                         FROM \"ss1\".\"product1\" v16\n" +
+                    "                         WHERE (v16.\"propertynum1\" IS NOT NULL AND (v16.\"propertynum1\" <= 1000))\n" +
+                    "                         UNION ALL\n" +
+                    "                         SELECT v18.\"nr\" AS \"product0m3\", v18.\"propertynum1\" AS \"propertynum1m41\"\n" +
+                    "                         FROM \"ss5\".\"product2\" v18\n" +
+                    "                         WHERE (v18.\"propertynum1\" IS NOT NULL AND (v18.\"propertynum1\" <= 1000))\n" +
+                    "                        ) v20\n" +
+                    "WHERE (v5.\"product0m2\" = v10.\"product0m0\" AND v5.\"product0m2\" = v15.\"product0m1\" AND v5.\"product0m2\" = v20.\"product0m3\")";
+//            ResultSet rs = stmt.executeQuery(sql);
+//            ResultSetMetaData rsmd = rs.getMetaData();
+//            int attr_num = rsmd.getColumnCount();
+//            System.out.println(attr_num);
+//            for(int i=1; i<attr_num+1; i++){
+//                System.out.println("属性名："+rsmd.getColumnName(i));
+//                System.out.println("属性类型："+rsmd.getColumnTypeName(i));
+//            }
+//
+//            if(rs.next()){
+//                System.out.println("has answers");
+//            }
 
-            if(rs.next()){
-                System.out.println("has answers");
-            }
-
-//            stmt.execute("set showplan on");
-//			ResultSet rs = stmt.executeQuery(sql);
-//			TeiidStatement tstatement = stmt.unwrap(TeiidStatement.class);
-//			PlanNode queryPlan = tstatement.getPlanDescription();
-//			System.out.println(queryPlan);
+            stmt.execute("set showplan on");
+			ResultSet rs = stmt.executeQuery(sql);
+			TeiidStatement tstatement = stmt.unwrap(TeiidStatement.class);
+			PlanNode queryPlan = tstatement.getPlanDescription();
+			System.out.println(queryPlan);
 
 
         }catch(Exception e){

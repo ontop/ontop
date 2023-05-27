@@ -133,6 +133,7 @@ public class QueryRewriting {
         QuestQueryProcessor.returnPlannedQuery = false;
 
         IQTree iqt = iq.getTree();
+
         DistinctVariableOnlyDataAtom project_original = iq.getProjectionAtom();
         IQTree iqtopt = rewriteIQTree(iqt);
 
@@ -143,7 +144,7 @@ public class QueryRewriting {
 
     public IQTree rewriteIQTree(IQTree iqt){
         //check the possibility of applying the hints in advance
-        System.out.println("the original IQ tree");
+        System.out.println("the IQ tree before hint-based optimization");
         System.out.println(iqt);
         if(hints.get(0).size()>0){
             iqt = removeStrictRedundancy(iqt);
@@ -153,16 +154,15 @@ public class QueryRewriting {
         }
         if(hints.get(2).size()>0){
             iqt = rewriteInnerJoin(iqt);
+
             iqt = rewriteLeftJoin(iqt);
         }
-        System.out.println("IQ tree obtained by removing redundancy and applying EFJs");
-        System.out.println(iqt);
-
-        System.out.println("strating rewriting based on MatVs");
         if(hint_matv.size()>0){
             iqt = rewriteInnerJoinBasedOnMatV(iqt);
         }
-        //first applying empty federated join optimization, and then applying materialized view based optimization
+
+        System.out.println("the IQ tree after hint-based optimization");
+        System.out.println(iqt);
 
         return iqt;
     }
@@ -670,9 +670,10 @@ public class QueryRewriting {
     public IQTree rewriteInnerJoin(IQTree iqt){
         boolean update = true;
         int count = 0;
+
+
         module: while(update){
             update = false;
-            count = count + 1;
             List<IQTree> subTrees = getAllSubTree(iqt);
             for(IQTree subt: subTrees){
                 QueryNode root = subt.getRootNode();
@@ -720,11 +721,11 @@ public class QueryRewriting {
             }
         }
 
-
         return iqt;
     }
 
     public IQTree rewriteAtomicJoin(InnerJoinNode root, IQTree left_part, IQTree right_part){
+        //rewrite atomic join by EFJ or sj
 
         IQTree iqt_new = null;
 
@@ -732,22 +733,10 @@ public class QueryRewriting {
 
         QueryNode root_l = left_part.getRootNode();
         QueryNode root_r = right_part.getRootNode();
-        ImmutableSet<Variable> var_l = left_part.getVariables();
-        ImmutableSet<Variable> var_r = right_part.getVariables();
 
-        boolean shareVar = false;
 
-        for(Variable b: var_r){
-            if(var_l.contains(b)){
-                shareVar = true;
-            }
-        }
-        if(!shareVar){
-            return null;
-        }
-
-        //not atomic federated join
-        if((root_l instanceof InnerJoinNode) || (root_l instanceof LeftJoinNode) || (root_r instanceof InnerJoinNode) || (root_r instanceof LeftJoinNode)){
+        //////update+improved part//////
+        if((root_l instanceof LeftJoinNode) || (root_r instanceof LeftJoinNode)){
             return iqt_new;
         }
         List<IQTree> childern_l = new ArrayList<IQTree>();
@@ -755,12 +744,12 @@ public class QueryRewriting {
 
         if(root_l instanceof UnionNode){
             childern_l.addAll(left_part.getChildren());
-        } else if((root_l instanceof FilterNode) || (left_part instanceof ExtensionalDataNode)){
+        } else if((root_l instanceof FilterNode) || (root_l instanceof InnerJoinNode) || (left_part instanceof ExtensionalDataNode)){
             childern_l.add(left_part);
         }
         if(root_r instanceof UnionNode){
             childern_r.addAll(right_part.getChildren());
-        } else if((root_r instanceof FilterNode) || (right_part instanceof ExtensionalDataNode)){
+        } else if((root_r instanceof FilterNode) || (root_r instanceof InnerJoinNode) || (right_part instanceof ExtensionalDataNode)){
             childern_r.add(right_part);
         }
         List<IQTree> SubTree_new = new ArrayList<IQTree>();
@@ -790,6 +779,7 @@ public class QueryRewriting {
                 //remove semantic redundancy and rolling back
                 List<IQTree> SubTree_new_copy = new ArrayList<IQTree>();
                 SubTree_new_copy.addAll(SubTree_new);
+
                 SubTree_new = removeSemanticRedundancyAndRollingBack(SubTree_new);
                 if(SubTree_new.size() == 1){
                     SubTree_new.clear();
@@ -839,8 +829,10 @@ public class QueryRewriting {
                     for(int l: JOL_right.dataNodes.get(j).getArgumentMap().keySet()){
                         if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
                             //change the check condition based on different ways of representing hints
+
                             String normalName_left = getNormalFormOfRelation(JOL_left.relations.get(i).getName());
                             String normalName_right = getNormalFormOfRelation(JOL_right.relations.get(j).getName());
+
                             if(hints.get(2).contains(normalName_left+"<>"+normalName_right+"<>"+k+"<>"+l) || hints.get(2).contains(normalName_right+"<>"+normalName_left+"<>"+l+"<>"+k)){
                                 ER.canRewrite = true;
                                 return ER;
@@ -1068,68 +1060,117 @@ public class QueryRewriting {
 
         //check and remove semantic redundancy
         List<Integer> index = new ArrayList<Integer>();
+
         for(int i=0; i<trees.size(); i++){
-            if(trees.get(i).getChildren().size() > 1){
-                List<IQTree> subs = new ArrayList<IQTree>();
-                subs.addAll(trees.get(i).getChildren());
-                int ind = -1;
-                for(int j=0; j<subs.size(); j++){
-                    if(subs.get(j).getVariables().size() == 1){
-                        ind = j;
-                    }
+            if(trees.get(i).getChildren().size() == 1){
+                continue;
+            }
+
+            List<IQTree> subs = new ArrayList<IQTree>();
+            subs.addAll(trees.get(i).getChildren());
+            int ind = -1;
+            for(int j=0; j<subs.size(); j++){
+                if(subs.get(j).getVariables().size() == 1){
+                    ind = j;
                 }
-                if(ind == -1){
-                    continue;
-                }
-                if(subs.get(ind).isLeaf()){
-                    subs.remove(ind);
-                    if(subs.size() == 1){
-                        if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
-                            ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
-                            IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
-                            if(trees.contains(t_new)){
-                                index.add(i);
-                            }
-                        } else {
-                            if(trees.contains(subs.get(0))){
-                                index.add(i);
-                            }
-                        }
-                    } else {
-                        IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+            }
+            if(ind == -1){
+                continue;
+            }
+            //complex situation: inner join node:
+            if(subs.get(ind).isLeaf() || (subs.get(ind).getRootNode() instanceof UnionNode)){
+                subs.remove(ind);
+                if(subs.size() == 1){
+                    if(!((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().isEmpty()){
+                        ImmutableExpression cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition().get();
+                        IQTree t_new = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(cond), subs.get(0));
+
                         if(trees.contains(t_new)){
                             index.add(i);
                         }
-                    }
-                } else if(subs.get(ind).getRootNode() instanceof FilterNode){
-                    ImmutableExpression cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
-                    Optional<ImmutableExpression> opt_cond = ((InnerJoinNode)trees.get(i).getRootNode()).getOptionalFilterCondition();
-                    subs.remove(ind);
-                    if(subs.size() == 1){
-                        if(subs.get(0).isLeaf()){
-                            IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(opt_cond.get()), subs.get(0));
-                            IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(ImmutableList.of(opt_cond.get(), cond))), subs.get(0));
-                            if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
-                                index.add(i);
-                            }
-                        } else if(subs.get(0).getRootNode() instanceof FilterNode){
-                            IQTree t1 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition())), subs.get(0).getChildren().get(0));
-                            IQTree t2 = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(opt_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), cond)), subs.get(0).getChildren().get(0));
-                            if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
-                                index.add(i);
-                            }
-                        }
                     } else {
-                        InnerJoinNode ijn1 = IQ_FACTORY.createInnerJoinNode();
-                        InnerJoinNode ijn2 = IQ_FACTORY.createInnerJoinNode();
-                        IQTree t1 = IQ_FACTORY.createNaryIQTree(ijn1, ImmutableList.copyOf(subs));
-                        IQTree t2 = IQ_FACTORY.createNaryIQTree(ijn2, ImmutableList.copyOf(subs));
-                        if(((t1 != null) && trees.contains(t1))||((t2 != null) && trees.contains(t2))){
+                        if(trees.contains(subs.get(0))){
                             index.add(i);
                         }
                     }
+                } else {
+                    IQTree t_new = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+                    if(trees.contains(t_new)){
+                        index.add(i);
+                    }
+                }
+            } else if(subs.get(ind).getRootNode() instanceof FilterNode){
+                ImmutableExpression fil_cond = ((FilterNode)subs.get(ind).getRootNode()).getFilterCondition();
+                Optional<ImmutableExpression> join_cond = ((InnerJoinNode) trees.get(i).getRootNode()).getOptionalFilterCondition();
+                subs.remove(ind);
+                if(subs.size() == 1){
+                    if(trees.contains(subs.get(0))){
+                        index.add(i);
+                    } else {
+                        if(join_cond.isEmpty()){
+                            if(subs.get(0).getRootNode() instanceof FilterNode){
+                                FilterNode fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(((FilterNode)subs.get(0).getRootNode()).getFilterCondition()));
+                                IQTree t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
+                                if(trees.contains(t1)){
+                                    index.add(i);
+                                } else {
+                                    fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), fil_cond));
+                                    t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
+                                    if(trees.contains(t1)){
+                                        index.add(i);
+                                    }
+                                }
+                            }
+                        } else {
+                            if(subs.get(0).getRootNode() instanceof FilterNode){
+                                FilterNode fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(join_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition()));
+                                IQTree t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
+                                if(trees.contains(t1)){
+                                    index.add(i);
+                                } else {
+                                    fn_new = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(join_cond.get(), ((FilterNode)subs.get(0).getRootNode()).getFilterCondition(), fil_cond));
+                                    t1 = IQ_FACTORY.createUnaryIQTree(fn_new, subs.get(0).getChildren().get(0));
+                                    if(trees.contains(t1)){
+                                        index.add(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } else {
+                   IQTree t1 = IQ_FACTORY.createNaryIQTree((InnerJoinNode)trees.get(i).getRootNode(), ImmutableList.copyOf(subs));
+                   if(trees.contains(t1)){
+                       index.add(i);
+                   } else {
+                       if(join_cond.isEmpty()){
+                           InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(fil_cond);
+                           t1 = IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(subs));
+                           if(trees.contains(t1)){
+                               index.add(i);
+                           }
+                       } else {
+                           InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(join_cond.get(), fil_cond));
+                           t1 = IQ_FACTORY.createNaryIQTree(join, ImmutableList.copyOf(subs));
+                           if(trees.contains(t1)){
+                               index.add(i);
+                           }
+                       }
+                   }
                 }
             }
+
+        }
+
+        if(index.size() > 0){
+            List<IQTree> trees_new = new ArrayList<IQTree>();
+            for(int i=0; i<trees.size(); i++){
+                if(!index.contains(i)){
+                    trees_new.add(trees.get(i));
+                }
+            }
+            trees.clear();
+            trees.addAll(trees_new);
         }
 
         if(trees.size()<2){
@@ -1237,10 +1278,10 @@ public class QueryRewriting {
             for(IQTree t : subTrees){
                 QueryNode qn = t.getRootNode();
                 if(qn instanceof LeftJoinNode){
-                    Set<String> sources = getSources(t);
-                    if(sources.size() == 1){
-                        continue;
-                    }
+//                    Set<String> sources = getSources(t);
+//                    if(sources.size() == 1){
+//                        continue;
+//                    }
                     ImmutableList<IQTree> childern =t.getChildren(); // only have two childern
                     ExpRewriten rewriten = rewriteAtomicLeftJoin((LeftJoinNode)qn, childern.get(0), childern.get(1));
                     if(rewriten.canRewrite){
@@ -1388,20 +1429,28 @@ public class QueryRewriting {
             }
         }
 
-        if((left_part.size() == 1) && (right_part.size() > 1)){
-            if((index.size() < right_part.size())){
-                ER.canRewrite = true;
-                // A LeftJoin (B1 U...U Bm)
-                ImmutableSet<Variable> var_right = right.getVariables();
-                IQTree left_new = left;
-                List<IQTree> sub_right_new = new ArrayList<IQTree>();
-                for(int i: index.keySet()){
-                    sub_right_new.add(right.getChildren().get(i));
+        if((left_part.size() == 1)){
+            if(right_part.size() > 1){
+                if((index.size() < right_part.size())){
+                    ER.canRewrite = true;
+                    // A LeftJoin (B1 U...U Bm)
+                    ImmutableSet<Variable> var_right = right.getVariables();
+                    IQTree left_new = left;
+                    List<IQTree> sub_right_new = new ArrayList<IQTree>();
+                    for(int i: index.keySet()){
+                        sub_right_new.add(right.getChildren().get(i));
+                    }
+                    IQTree right_new = IQ_FACTORY.createNaryIQTree((UnionNode)right.getRootNode(), ImmutableList.copyOf(sub_right_new));
+                    ER.newRewritten = IQ_FACTORY.createBinaryNonCommutativeIQTree(root, left_new, right_new);
                 }
-                IQTree right_new = IQ_FACTORY.createNaryIQTree((UnionNode)right.getRootNode(), ImmutableList.copyOf(sub_right_new));
-                ER.newRewritten = IQ_FACTORY.createBinaryNonCommutativeIQTree(root, left_new, right_new);
+                return ER;
+            } else {
+                if(right_part.get(0).dataNodes.size() > 1){
+                    //this situation cannot apply self-left-join rewriting
+                    return ER;
+                }
             }
-            return ER;
+
         }
 
         if(index.size() == left_part.size()){

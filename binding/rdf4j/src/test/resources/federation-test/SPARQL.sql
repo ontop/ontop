@@ -1,5 +1,4 @@
 
-
 --[SPARQL Q1]
 PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/>
 PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
@@ -123,7 +122,7 @@ SELECT ?product ?label
 WHERE {
 	?product rdfs:label ?label .
  ?product rdf:type bsbm:Product .
-	FILTER regex(?label, "%word1%")
+	FILTER contains(?label, "%word1%")
 }
 
 --[SPARQL Q7]
