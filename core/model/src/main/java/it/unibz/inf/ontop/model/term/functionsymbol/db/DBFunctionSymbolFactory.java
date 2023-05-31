@@ -399,4 +399,5 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMilliseconds();
     DBFunctionSymbol getDBMicroseconds();
 
+    DBFunctionSymbol getDBDateTrunc();
 }

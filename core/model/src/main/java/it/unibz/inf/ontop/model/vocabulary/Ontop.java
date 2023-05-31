@@ -30,6 +30,6 @@ public class Ontop {
         MILLENNIUM_FROM_DATETIME = factory.createIRI(FUNCTION_PREFIX + "millennium-from-dateTime");
         MILLISECONDS_FROM_DATETIME = factory.createIRI(FUNCTION_PREFIX + "milliseconds-from-dateTime");
         MICROSECONDS_FROM_DATETIME = factory.createIRI(FUNCTION_PREFIX + "microseconds-from-dateTime");
-        DATE_TRUNC = factory.createIRI(FUNCTION_PREFIX + "date-trunc");
+        DATE_TRUNC = factory.createIRI(FUNCTION_PREFIX + "dateTrunc");
     }
 }

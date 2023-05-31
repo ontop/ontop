@@ -473,6 +473,26 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     @Test
+    public void testDateTruncGroupBy() {
+
+        String query = "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  fn: <https://w3id.org/obda/functions#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT (CONCAT(STR(?y), \": \", STR(COUNT(*))) as ?v) WHERE \n"
+                + "{  "
+                + "   ?x ns:pubYear ?date .\n"
+                + "   BIND(fn:dateTrunc(?date, \"decade\") AS ?y)"
+                + "} GROUP BY ?y ORDER BY ?y";
+
+        executeAndCompareValues(query, getDateTruncGroupByExpectedValues());
+    }
+
+    protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00+01:00: 1\"^^xsd:string", "\"2010-01-01T00:00:00+01:00: 3\"^^xsd:string");
+    }
+
+
+    @Test
     public void testExtraDateExtractions() {
 
         String query = "PREFIX  ns:  <http://example.org/ns#>\n"
