@@ -112,4 +112,16 @@ public class BindWithFunctionsSparkTest extends AbstractBindTestWithFunctions {
         return ImmutableSet.of("\"3 21 201 2 23 52000.000000 52000000\"^^xsd:string", "\"3 21 201 4 49 0.000000 0\"^^xsd:string",
                 "\"3 21 201 3 39 6000.000000 6000000\"^^xsd:string", "\"2 20 197 4 45 0.000000 0\"^^xsd:string");
     }
+
+    @Disabled("Currently SparkSQL does not support DATE_TRUNC for the type `DECADE`")
+    @Test
+    @Override
+    public void testDateTruncGroupBy() {
+        super.testDateTruncGroupBy();
+    }
+
+    @Override
+    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000+00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000+00:00\"^^xsd:dateTime");
+    }
 }

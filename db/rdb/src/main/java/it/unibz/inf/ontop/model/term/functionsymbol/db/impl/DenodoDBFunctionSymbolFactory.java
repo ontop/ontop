@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -392,5 +389,26 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("FLOOR(EXTRACT(SECOND FROM %s) * 1000000 + EXTRACT(MILLISECOND FROM %s) * 1000)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = String.format(" WHEN %s LIKE '%%s' THEN TRUNC(%s, %%s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+        ImmutableMap.Builder<String, String> possiblePartsBuilder = new ImmutableMap.Builder<>();
+        possiblePartsBuilder.put("century", "'CC'");
+        possiblePartsBuilder.put("year", "'YEAR'");
+        possiblePartsBuilder.put("quarter", "'Q'");
+        possiblePartsBuilder.put("month", "'MONTH'");
+        possiblePartsBuilder.put("day", "'DAY'");
+        possiblePartsBuilder.put("week", "'IW'");
+        possiblePartsBuilder.put("hour", "'HH24'");
+        possiblePartsBuilder.put("minute", "'MI'");
+        ImmutableMap<String, String> possibleParts = possiblePartsBuilder.build();
+        StringBuilder serializationBuilder = new StringBuilder("CASE");
+        possibleParts.entrySet().stream()
+                .forEach(entry -> serializationBuilder.append(String.format(template, entry.getKey(), entry.getValue())));
+        serializationBuilder.append(" ELSE NULL END");
+        return serializationBuilder.toString();
     }
 }
