@@ -99,6 +99,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol millisecondsFunctionSymbol;
     //Created in init
     private DBFunctionSymbol microsecondsFunctionSymbol;
+    //Created in init
+    private DBFunctionSymbol dateTruncFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
@@ -448,6 +450,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         millenniumFunctionSymbol = createMillenniumFunctionSymbol();
         millisecondsFunctionSymbol = createMillisecondsFunctionSymbol();
         microsecondsFunctionSymbol = createMicrosecondsFunctionSymbol();
+        dateTruncFunctionSymbol = createDateTruncFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
 
         weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
@@ -1029,6 +1032,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBDateTrunc() {
+        return dateTruncFunctionSymbol;
+    }
+
+    @Override
     public DBFunctionSymbol getDBMinutes() {
         return minutesFunctionSymbol;
     }
@@ -1456,6 +1464,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeMicroseconds);
     }
 
+    protected DBFunctionSymbol createDateTruncFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DATE_TRUNC", ImmutableList.of(dbStringType, rootDBType), dbDateTimestampType, false,
+                this::serializeDateTrunc);
+    }
+
     protected DBFunctionSymbol createSecondsFunctionSymbol() {
         return new UnaryDBFunctionSymbolWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
                 this::serializeSeconds);
@@ -1662,6 +1675,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,
                                                TermFactory termFactory);
+
+    protected abstract String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
 
     protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,

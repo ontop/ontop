@@ -766,8 +766,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms,
-                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("EXTRACT(MICROSECONDS FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATE_TRUNC(%s, %s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
     }
 
     @Override

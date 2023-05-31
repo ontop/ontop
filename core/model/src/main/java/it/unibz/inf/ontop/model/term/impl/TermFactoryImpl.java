@@ -1363,4 +1363,9 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getDBMicroseconds(ImmutableTerm dbDatetimeTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMicroseconds(), dbDatetimeTerm);
 	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDateTrunc(ImmutableTerm dbDatetimeTerm, ImmutableTerm datePartTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(), dbDatetimeTerm, datePartTerm);
+	}
 }
