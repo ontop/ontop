@@ -274,4 +274,16 @@ public class BigQueryDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(EXTRACT(SECOND FROM %s) * 1000000 + EXTRACT(MILLISECOND FROM %s) * 1000 + EXTRACT(MICROSECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = String.format(" WHEN %s LIKE '%%s' THEN TIMESTAMP_TRUNC(%s, %%s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+        ImmutableList possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
+        StringBuilder serializationBuilder = new StringBuilder("CASE");
+        possibleParts.stream()
+                .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
+        serializationBuilder.append(" ELSE NULL END");
+        return serializationBuilder.toString();
+    }
 }
