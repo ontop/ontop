@@ -58,4 +58,14 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     public void testHashSHA384() {
         super.testHashSHA384();
     }
+
+    @Override
+    protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00: 1\"^^xsd:string", "\"2010-01-01T00:00:00: 3\"^^xsd:string");
+    }
+
+    @Override
+    protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
+        return ImmutableSet.of("\"1970-01-01T00:00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00\"^^xsd:dateTime");
+    }
 }

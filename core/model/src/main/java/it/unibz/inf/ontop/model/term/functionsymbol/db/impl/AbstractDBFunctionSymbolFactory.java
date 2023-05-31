@@ -1466,7 +1466,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDateTruncFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_DATE_TRUNC", ImmutableList.of(dbStringType, rootDBType), dbDateTimestampType, false,
-                this::serializeDateTrunc);
+                this::serializeDateTrunc) {
+            @Override
+            protected boolean mayReturnNullWithoutNullArguments() {
+                return true;
+            }
+        };
     }
 
     protected DBFunctionSymbol createSecondsFunctionSymbol() {

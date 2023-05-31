@@ -332,9 +332,16 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         }
     	else
             return String.format(
-                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
+                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(CAST(%s AS TIMESTAMP WITH TIME ZONE),'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
                     termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new EqualsTrueDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
@@ -613,5 +620,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeQuarter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("FLOOR(EXTRACT(DAY FROM publication_date - trunc(publication_date, 'YEAR')) / 92 + 1)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(%s, %s)", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1)));
     }
 }

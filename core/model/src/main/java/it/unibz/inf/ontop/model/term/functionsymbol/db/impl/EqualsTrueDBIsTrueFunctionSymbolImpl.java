@@ -8,9 +8,9 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-public class SQLServerDBIsTrueFunctionSymbolImpl extends DefaultDBIsTrueFunctionSymbol {
+public class EqualsTrueDBIsTrueFunctionSymbolImpl extends DefaultDBIsTrueFunctionSymbol {
 
-    protected SQLServerDBIsTrueFunctionSymbolImpl(DBTermType dbBooleanTermType) {
+    protected EqualsTrueDBIsTrueFunctionSymbolImpl(DBTermType dbBooleanTermType) {
         super(dbBooleanTermType);
     }
 

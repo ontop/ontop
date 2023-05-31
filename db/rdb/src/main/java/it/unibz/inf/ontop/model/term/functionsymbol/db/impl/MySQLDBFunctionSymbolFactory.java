@@ -494,4 +494,26 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected String serializeMicroseconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(EXTRACT(SECOND FROM %s) * 1000000 + EXTRACT(MICROSECOND FROM %s))", termConverter.apply(terms.get(0)), termConverter.apply(terms.get(0)));
     }
+
+    @Override
+    protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = String.format(" WHEN %s LIKE '%%s' THEN DATE_FORMAT(%s, %%s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
+        ImmutableMap.Builder<String, String> possiblePartsBuilder = new ImmutableMap.Builder<>();
+        possiblePartsBuilder.put("century", "'CC'");
+        possiblePartsBuilder.put("year", "'%Y-01-01 00:00:00'");
+        possiblePartsBuilder.put("quarter", "'Q'");
+        possiblePartsBuilder.put("month", "'%Y-%m-01 00:00:00'");
+        possiblePartsBuilder.put("day", "'%Y-%m-%d 00:00:00'");
+        possiblePartsBuilder.put("week", "'IW'");
+        possiblePartsBuilder.put("hour", "'%Y-%m-%d %H:00:00'");
+        possiblePartsBuilder.put("minute", "'%Y-%m-%d %H:%i:00'");
+        possiblePartsBuilder.put("second", "'%Y-%m-%d %H:%i:%s'");
+        ImmutableMap<String, String> possibleParts = possiblePartsBuilder.build();
+        StringBuilder serializationBuilder = new StringBuilder("CASE");
+        possibleParts.entrySet().stream()
+                .forEach(entry -> serializationBuilder.append(String.format(template, entry.getKey(), entry.getValue())));
+        serializationBuilder.append(" ELSE NULL END");
+        return serializationBuilder.toString();
+    }
 }
