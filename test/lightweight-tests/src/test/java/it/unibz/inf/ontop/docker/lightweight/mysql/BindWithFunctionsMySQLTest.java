@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.docker.lightweight.MySQLLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -80,5 +82,12 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00\"^^xsd:dateTime");
+    }
+
+    @Disabled("Currently MySQL does not support DATE_TRUNC for the type `DECADE`")
+    @Test
+    @Override
+    public void testDateTruncGroupBy() {
+        super.testDateTruncGroupBy();
     }
 }
