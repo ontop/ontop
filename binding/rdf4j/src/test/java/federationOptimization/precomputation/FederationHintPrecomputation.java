@@ -629,7 +629,7 @@ public class FederationHintPrecomputation {
                         }
                     }
 
-                    //materializeData(conn_matvDB,stmt_matvDB, rs,viewName,attributes);
+                    materializeData(conn_matvDB,stmt_matvDB, rs,viewName,attributes);
 
                     MaterializedView mv = new MaterializedView();
                     mv.table = viewName;
@@ -821,7 +821,8 @@ public class FederationHintPrecomputation {
            System.out.println("empty_federated_join:"+name1+"<>"+name2+"<>"+index_1.get(0)+"<>"+index_2.get(0));
        }
 
-       System.out.println("number of computed redudnacy pairs: "+hints.redundancy.size());
+
+       Set<String> RED = new HashSet<String>();
        for(Redundancy rd: hints.redundancy){
            List<String> tables_1 = getTableNamesFromSQL(rd.relation1);
            List<String> tables_2 = getTableNamesFromSQL(rd.relation2);
@@ -838,10 +839,7 @@ public class FederationHintPrecomputation {
                name1 = name1.replace(".","\".\"");
            }
            String part1 = name1+"(";
-           for(int i: index_1){
-               part1 = part1 + i +",";
-           }
-           part1 = part1.substring(0, part1.length()-1)+")";
+           String part1_p= part1;
 
            String name2 = tables_2.get(0);
            if(!name2.startsWith("\"")){
@@ -851,12 +849,23 @@ public class FederationHintPrecomputation {
                name2 = name2.replace(".","\".\"");
            }
            String part2 = name2+"(";
-           for(int i: index_2){
-               part2 = part2 + i +",";
+           String part2_p = part2;
+
+           for(int i=0; i<index_1.size(); i++){
+               RED.add(part1_p+index_1.get(i)+")"+"<>"+part2_p+index_2.get(i)+")");
+
+               part1 = part1 + index_1.get(i) +",";
+               part2 = part2 + index_2.get(i) +",";
+
            }
+           part1 = part1.substring(0, part1.length()-1)+")";
            part2 = part2.substring(0, part2.length()-1)+")";
 
-           System.out.println("equivalent_redundancy:"+part1+"<>"+part2);
+           RED.add(part1+"<>"+part2);
+       }
+       System.out.println("number of computed redudnacy pairs: "+RED.size());
+       for(String s: RED){
+           System.out.println("equivalent_redundancy:"+s);
        }
 
        System.out.println("number of created materialized views: "+hints.matView.size());

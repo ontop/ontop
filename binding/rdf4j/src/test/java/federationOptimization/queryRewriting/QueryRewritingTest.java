@@ -16,34 +16,20 @@ public class QueryRewritingTest {
     private static final String sourceFile = "src/test/resources/federation-test/SourceFile.txt";
     private static final String effLabel = "src/test/resources/federation-test/effLabel.txt";
 
-    private static final String query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
+    private static final String query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
             "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
             "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\n" +
             "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
             "\n" +
-            "SELECT ?productLabel ?offer ?price ?vendor ?vendorTitle ?review ?revTitle\n" +
-            " ?reviewer ?revName ?rating1 ?rating2\n" +
+            "SELECT ?p ?mbox_sha1sum ?country ?r ?product ?title\n" +
             "WHERE {\n" +
-            "\t<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product88> rdfs:label ?productLabel .\n" +
-            " OPTIONAL {\n" +
-            " ?offer bsbm:product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product88> .\n" +
-            " ?offer bsbm:price ?price .\n" +
-            " ?offer bsbm:vendor ?vendor .\n" +
-            " ?vendor rdfs:label ?vendorTitle .\n" +
-            " ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#DE> .\n" +
-            " ?offer dc:publisher ?vendor .\n" +
-            " ?offer bsbm:validTo ?date .\n" +
-            " FILTER (?date > '1988-01-01'^^xsd:date)\n" +
-            " }\n" +
-            " OPTIONAL {\n" +
-            "\t?review bsbm:reviewFor <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer/Product88> .\n" +
-            "\t?review rev:reviewer ?reviewer .\n" +
-            "\t?reviewer foaf:name ?revName .\n" +
-            "\t?review dc:title ?revTitle .\n" +
-            " OPTIONAL { ?review bsbm:rating1 ?rating1 . }\n" +
-            " OPTIONAL { ?review bsbm:rating2 ?rating2 . }\n" +
-            " }\n" +
+            "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite/Review88> rev:reviewer ?p .\n" +
+            "?p foaf:name ?name .\n" +
+            "?p foaf:mbox_sha1sum ?mbox_sha1sum .\n" +
+            "?p bsbm:country ?country .\n" +
+            "?r rev:reviewer ?p .\n" +
+            "?r bsbm:reviewFor ?product .\n" +
+            "?r dc:title ?title .\n" +
             "}";
 
     @Test

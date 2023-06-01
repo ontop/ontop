@@ -407,9 +407,11 @@ public class QueryRewriting {
         RelationPredicate predicate2 = ele_2.getRelationDefinition().getAtomPredicate();
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> args1 = ele_1.getArgumentMap();
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> args2 = ele_2.getArgumentMap();
-        String normalName1 = getNormalFormOfRelation(predicate1.getName());
-        String normalName2 = getNormalFormOfRelation(predicate2.getName());
-        if(hints.get(0).contains(normalName1+"<>"+normalName2) || hints.get(0).contains(normalName2+"<>"+normalName1)){
+        //String normalName1 = getNormalFormOfRelation(predicate1.getName());
+        //String normalName2 = getNormalFormOfRelation(predicate2.getName());
+        String name1 = predicate1.getName();
+        String name2 = predicate2.getName();
+        if(hints.get(0).contains(name1+"<>"+name2) || hints.get(0).contains(name2+"<>"+name1)){
             for(int i: args1.keySet()){
                 for(int j: args2.keySet()){
                     if(args2.get(j).equals(args1.get(i))){
@@ -424,8 +426,8 @@ public class QueryRewriting {
             List<Integer> attr_index_1 = new ArrayList<Integer>();
             attr_index_1.addAll(args1.keySet());
             Collections.sort(attr_index_1);
-            String cand1 = normalName1+"(";
-            String cand2 = normalName2+"(";
+            String cand1 = name1+"(";
+            String cand2 = name2+"(";
             for(int i: attr_index_1){
                 cand1 = cand1 + i +",";
                 for(int j: args2.keySet()){
@@ -443,8 +445,8 @@ public class QueryRewriting {
                 List<Integer> attr_index_2 = new ArrayList<Integer>();
                 attr_index_2.addAll(args2.keySet());
                 Collections.sort(attr_index_2);
-                cand1 = normalName1+"(";
-                cand2 = normalName2+"(";
+                cand1 = name1+"(";
+                cand2 = name2+"(";
                 for(int i: attr_index_2){
                     cand2 = cand2 + i +",";
                     for(int j: args1.keySet()){
@@ -609,9 +611,11 @@ public class QueryRewriting {
         RelationPredicate predicate2 = ele_2.getRelationDefinition().getAtomPredicate();
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> args1 = ele_1.getArgumentMap();
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> args2 = ele_2.getArgumentMap();
-        String normalName1 = getNormalFormOfRelation(predicate1.getName());
-        String normalName2 = getNormalFormOfRelation(predicate2.getName());
-        if(hints.get(1).contains(normalName1+"<>"+normalName2) || hints.get(1).contains(normalName2+"<>"+normalName1)){
+//        String normalName1 = getNormalFormOfRelation(predicate1.getName());
+//        String normalName2 = getNormalFormOfRelation(predicate2.getName());
+        String name1 = predicate1.getName();
+        String name2 = predicate2.getName();
+        if(hints.get(1).contains(name1+"<>"+name2) || hints.get(1).contains(name2+"<>"+name1)){
             for(int i: args1.keySet()){
                 for(int j: args2.keySet()){
                     if(args2.get(j).equals(args1.get(i))){
@@ -626,8 +630,8 @@ public class QueryRewriting {
             List<Integer> attr_index_1 = new ArrayList<Integer>();
             attr_index_1.addAll(args1.keySet());
             Collections.sort(attr_index_1);
-            String cand1 = normalName1+"(";
-            String cand2 = normalName2+"(";
+            String cand1 = name1+"(";
+            String cand2 = name2+"(";
             for(int i: attr_index_1){
                 cand1 = cand1 + i +",";
                 for(int j: args2.keySet()){
@@ -645,8 +649,8 @@ public class QueryRewriting {
                 List<Integer> attr_index_2 = new ArrayList<Integer>();
                 attr_index_2.addAll(args2.keySet());
                 Collections.sort(attr_index_2);
-                cand1 = normalName1+"(";
-                cand2 = normalName2+"(";
+                cand1 = name1+"(";
+                cand2 = name2+"(";
                 for(int i: attr_index_2){
                     cand2 = cand2 + i +",";
                     for(int j: args1.keySet()){
@@ -830,10 +834,12 @@ public class QueryRewriting {
                         if(JOL_left.dataNodes.get(i).getArgumentMap().get(k).equals(JOL_right.dataNodes.get(j).getArgumentMap().get(l))){
                             //change the check condition based on different ways of representing hints
 
-                            String normalName_left = getNormalFormOfRelation(JOL_left.relations.get(i).getName());
-                            String normalName_right = getNormalFormOfRelation(JOL_right.relations.get(j).getName());
+//                            String normalName_left = getNormalFormOfRelation(JOL_left.relations.get(i).getName());
+//                            String normalName_right = getNormalFormOfRelation(JOL_right.relations.get(j).getName());
+                            String name_left = JOL_left.relations.get(i).getName();
+                            String name_right = JOL_right.relations.get(j).getName();
 
-                            if(hints.get(2).contains(normalName_left+"<>"+normalName_right+"<>"+k+"<>"+l) || hints.get(2).contains(normalName_right+"<>"+normalName_left+"<>"+l+"<>"+k)){
+                            if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+k+"<>"+l) || hints.get(2).contains(name_right+"<>"+name_left+"<>"+l+"<>"+k)){
                                 ER.canRewrite = true;
                                 return ER;
                             }
@@ -1363,18 +1369,18 @@ public class QueryRewriting {
                     for(int l=0; l<right_part.get(k).dataNodes.size(); l++){
                         RelationPredicate relation_left = left_part.get(i).relations.get(j);
                         String name_left = relation_left.toString();
-                        String normalName_left = getNormalFormOfRelation(name_left);
+  //                      String normalName_left = getNormalFormOfRelation(name_left);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_left = left_part.get(i).dataNodes.get(j).getArgumentMap();
 
                         RelationPredicate relation_right = right_part.get(k).relations.get(l);
                         String name_right = relation_right.toString();
-                        String normalName_right = getNormalFormOfRelation(name_right);
+  //                      String normalName_right = getNormalFormOfRelation(name_right);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_right = right_part.get(k).dataNodes.get(l).getArgumentMap();
 
                         for(int f: arg_left.keySet()){
                             for(int h: arg_right.keySet()){
                                 if((arg_left.get(f) instanceof Variable)&&(arg_right.get(h) instanceof Variable)&&(arg_left.get(f).equals(arg_right.get(h)))){
-                                    if(hints.get(2).contains(normalName_left+"<>"+normalName_right+"<>"+f+"<>"+h)||hints.get(2).contains(normalName_right+"<>"+normalName_left+"<>"+h+"<>"+f)){
+                                    if(hints.get(2).contains(name_left+"<>"+name_right+"<>"+f+"<>"+h)||hints.get(2).contains(name_right+"<>"+name_left+"<>"+h+"<>"+f)){
                                         label = true;
                                     }
                                 }
@@ -1404,17 +1410,17 @@ public class QueryRewriting {
                     for(int k=0; k<left_part.get(i).dataNodes.size(); k++){
                         RelationPredicate relation_1 = left_part.get(i).relations.get(k);
                         String name_1 = relation_1.toString();
-                        String normalName_1 = getNormalFormOfRelation(name_1);
+//                        String normalName_1 = getNormalFormOfRelation(name_1);
                         ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_1 = left_part.get(i).dataNodes.get(k).getArgumentMap();
                         for(int l=0; l<left_part.get(j).dataNodes.size(); l++){
                             RelationPredicate relation_2 = left_part.get(j).relations.get(l);
                             String name_2 = relation_2.toString();
-                            String normalName_2 = getNormalFormOfRelation(name_2);
+//                            String normalName_2 = getNormalFormOfRelation(name_2);
                             ImmutableMap<Integer, ? extends VariableOrGroundTerm> arg_2 = left_part.get(j).dataNodes.get(l).getArgumentMap();
                             for(int h: arg_1.keySet()){
                                 for(int f: arg_2.keySet()){
                                     if(arg_1.get(h).equals(arg_2.get(f))){
-                                        if(hints.get(2).contains(normalName_1+"<>"+normalName_2+"<>"+h+"<>"+f)||hints.get(2).contains(normalName_2+"<>"+normalName_1+"<>"+f+"<>"+h)){
+                                        if(hints.get(2).contains(name_1+"<>"+name_2+"<>"+h+"<>"+f)||hints.get(2).contains(name_2+"<>"+name_1+"<>"+f+"<>"+h)){
                                             b = true;
                                         }
                                     }
@@ -1735,21 +1741,21 @@ public class QueryRewriting {
                             //change the check condition based on different ways of representing hints
                             //check conditions for rewriting based on materialized views;
                             String relation1 = JOL_left.relations.get(i).getName();
-                            String normalName_relation1 = getNormalFormOfRelation(relation1);
+        //                    String normalName_relation1 = getNormalFormOfRelation(relation1);
                             int ind1 = k;
                             String relation2 = JOL_right.relations.get(j).getName();
-                            String normalName_relation2 = getNormalFormOfRelation(relation2);
+        //                    String normalName_relation2 = getNormalFormOfRelation(relation2);
                             int ind2 = l;
-                            if(hint_matv.containsKey(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k)){
+                            if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)||hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
                                 //create a new data node for left_i and right_j;
                                 FilterNode fn_ij = null;
                                 RelationPredicate matv = null; //name of the relations for MatV
                                 NamedRelationDefinition NRD = null;
                                 boolean b = true;
-                                if(hint_matv.containsKey(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(normalName_relation1+"<>"+normalName_relation2+"<>"+k+"<>"+l));
-                                } else if(hint_matv.containsKey(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k)){
-                                    NRD = createDatabaseRelationForMatV(hint_matv.get(normalName_relation2+"<>"+normalName_relation1+"<>"+l+"<>"+k));
+                                if(hint_matv.containsKey(relation1+"<>"+relation2+"<>"+k+"<>"+l)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation1+"<>"+relation2+"<>"+k+"<>"+l));
+                                } else if(hint_matv.containsKey(relation2+"<>"+relation1+"<>"+l+"<>"+k)){
+                                    NRD = createDatabaseRelationForMatV(hint_matv.get(relation2+"<>"+relation1+"<>"+l+"<>"+k));
                                     b = false;
                                 }
 
