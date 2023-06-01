@@ -88,6 +88,6 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
 
     @Override
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
-        return ImmutableSet.of("\"1970-01-01T00:00:00.000+01:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000+01:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000+01:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000+01:00\"^^xsd:dateTime");
+        return ImmutableSet.of("\"1970-01-01T00:00:00.000Z\"^^xsd:dateTime", "\"2011-01-01T00:00:00.000Z\"^^xsd:dateTime", "\"2014-01-01T00:00:00.000Z\"^^xsd:dateTime", "\"2015-01-01T00:00:00.000Z\"^^xsd:dateTime");
     }
 }
