@@ -64,4 +64,9 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
     protected int getSPOExpectedCount() {
         return 76;
     }
+
+    @Override
+    protected boolean supportsPositionVariable() {
+        return false;
+    }
 }
