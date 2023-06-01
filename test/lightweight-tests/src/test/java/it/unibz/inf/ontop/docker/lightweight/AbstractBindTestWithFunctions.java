@@ -514,7 +514,10 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   BIND(fn:dateTrunc(?date, \"decade\") AS ?y)"
                 + "} GROUP BY ?y ORDER BY ?y";
 
-        executeAndCompareValues(query, getDateTruncGroupByExpectedValues());
+        executeAndCompareValuesAny(query, ImmutableList.of(
+                getDateTruncGroupByExpectedValues(),
+                toAlternativeTimeZone(getDateTruncGroupByExpectedValues())
+        ));
     }
 
     protected ImmutableSet<String> getDateTruncGroupByExpectedValues() {
