@@ -3,8 +3,11 @@ package it.unibz.inf.ontop.docker.lightweight;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
+
+import java.util.stream.Collectors;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 import static org.junit.Assert.assertEquals;
@@ -483,11 +486,20 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
                 + "   ?x ns:pubYear ?date .\n"
                 + "} ORDER BY ?date";
 
-        executeAndCompareValues(query, getSimpleDateTrunkExpectedValues());
+        executeAndCompareValuesAny(query, ImmutableList.of(
+                getSimpleDateTrunkExpectedValues(),
+                toAlternativeTimeZone(getSimpleDateTrunkExpectedValues())
+        ));
     }
 
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00+01:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00+01:00\"^^xsd:dateTime");
+    }
+
+    protected ImmutableSet<String> toAlternativeTimeZone(ImmutableSet<String> results) {
+        return results.stream()
+                .map(r -> r.replace("+01", "+00"))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Test

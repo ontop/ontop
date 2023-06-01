@@ -672,7 +672,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeDateTrunc(ImmutableList<? extends ImmutableTerm> terms,
                                         Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String template = String.format(" WHEN %s LIKE '%%s' THEN DATETRUNC(%%s, %s)", termConverter.apply(terms.get(1)), termConverter.apply(terms.get(0)));
-        ImmutableList possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
+        ImmutableList<String> possibleParts = ImmutableList.of("year", "quarter", "month", "day", "week", "hour", "minute", "second", "millisecond", "microsecond");
         StringBuilder serializationBuilder = new StringBuilder("CASE");
         possibleParts.stream()
                 .forEach(part -> serializationBuilder.append(String.format(template, part, part)));
