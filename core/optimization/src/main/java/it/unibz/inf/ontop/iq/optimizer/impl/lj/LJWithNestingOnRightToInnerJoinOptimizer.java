@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -19,7 +18,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -102,7 +100,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                     .map(t -> (BinaryNonCommutativeIQTree) t);
 
             Optional<IQTree> simplifiedTree = rightLJ
-                    .flatMap(rLJ -> tryToSimplify(newLeftChild, rLJ, rightConstructionNode));
+                    .flatMap(rLJ -> tryToSimplify(newLeftChild, newRightChild, rLJ));
 
             return simplifiedTree
                     .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
@@ -111,27 +109,21 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptim
                             .normalizeForOptimization(variableGenerator));
         }
 
-        private Optional<IQTree> tryToSimplify(IQTree leftChild, BinaryNonCommutativeIQTree rightLJ,
-                                               Optional<ConstructionNode> rightConstructionNode) {
-            ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+        private Optional<IQTree> tryToSimplify(IQTree leftChild, IQTree rightChild, BinaryNonCommutativeIQTree rightLJ) {
+            Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
 
-            Set<Variable> rightVariablesInteractingWithLeft = rightConstructionNode
-                    .map(c -> (Set<Variable>) Sets.intersection(c.getVariables(), leftVariables).stream()
-                            .flatMap(v -> c.getSubstitution().apply(v).getVariableStream())
-                            .collect(ImmutableCollectors.toSet()))
-                    .orElseGet(() -> Sets.intersection(leftVariables, rightLJ.getVariables()));
+            // If some variables defined by the construction node are common with the left --> no optimization
+            if (!rightLJ.getVariables().containsAll(commonVariables))
+                return Optional.empty();
 
             Optional<IQTree> safeLeftOfRightDescendant = extractSafeLeftOfRightDescendantTree(
-                    rightLJ.getLeftChild(), rightVariablesInteractingWithLeft);
+                    rightLJ.getLeftChild(), commonVariables);
 
             return safeLeftOfRightDescendant
                     .filter(r -> canLJBeReduced(leftChild, r))
                     // Reduces the LJ to an inner join
                     .map(r -> iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(),
-                            ImmutableList.of(leftChild,
-                                    rightConstructionNode
-                                            .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, rightLJ))
-                                            .orElse(rightLJ))))
+                            ImmutableList.of(leftChild, rightChild)))
                     .map(t -> t.normalizeForOptimization(variableGenerator));
         }
 

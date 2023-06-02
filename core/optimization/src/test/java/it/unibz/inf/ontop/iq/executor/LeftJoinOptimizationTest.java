@@ -2239,7 +2239,6 @@ public class LeftJoinOptimizationTest {
                 IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(), substitution),
                 newLJTree);
 
-
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
         optimizeAndCompare(initialIQ, expectedIQ);
