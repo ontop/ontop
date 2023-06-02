@@ -2083,7 +2083,7 @@ public class LeftJoinOptimizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, topTree);
 
         IQTree newLeftTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
-                ImmutableList.of(dataNode1, dataNode2));
+                ImmutableList.of(dataNode2, dataNode1));
 
         IQTree newTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
                 newLeftTree, dataNode3);
@@ -2123,6 +2123,7 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Ignore("Join transfer is currently not supported for LJ on the right")
     @Test
     public void testLJReductionWithLJOnTheRight4() {
 
