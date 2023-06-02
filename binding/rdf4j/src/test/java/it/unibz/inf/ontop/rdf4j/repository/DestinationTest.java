@@ -164,4 +164,28 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(0, StringUtils.countMatches(sql.toUpperCase(), "DISTINCT"));
     }
 
+    @Test
+    public void testOneLJElimination() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX : <http://noi.example.org/ontology/odh#>\n" +
+                "\n" +
+                "SELECT *\n" +
+                "WHERE {\n" +
+                "  ?r a schema:Accommodation .\n" +
+                "  OPTIONAL { \n" +
+                "   ?r schema:containedInPlace ?h .\n" +
+                "   OPTIONAL { \n" +
+                "     ?h schema:name ?n . \n" +
+                "     FILTER (lang(?n) = 'en')\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql);
+        // The non-simplifiable LJs are those between the accommodations and the lodging businesses (2 sources)
+        // due to the absence of FKs
+        assertEquals(2, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
+    }
+
 }
