@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.lj.CardinalityInsensitiveJoinTransferLJOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.lj.CardinalitySensitiveJoinTransferLJOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.lj.LJWithNestingOnRightToInnerJoinOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.lj.MergeLJOptimizer;
 
 public class DefaultCompositeLeftJoinIQOptimizer implements LeftJoinIQOptimizer {
 
@@ -17,11 +18,13 @@ public class DefaultCompositeLeftJoinIQOptimizer implements LeftJoinIQOptimizer 
     private DefaultCompositeLeftJoinIQOptimizer(
             CardinalitySensitiveJoinTransferLJOptimizer cardinalitySensitiveJoinTransferLJOptimizer,
             CardinalityInsensitiveJoinTransferLJOptimizer cardinalityInsensitiveJoinTransferLJOptimizer,
-            LJWithNestingOnRightToInnerJoinOptimizer ljWithNestingOnRightToInnerJoinOptimizer) {
+            LJWithNestingOnRightToInnerJoinOptimizer ljWithNestingOnRightToInnerJoinOptimizer,
+            MergeLJOptimizer mergeLJOptimizer) {
         this.optimizers = ImmutableList.of(
                 cardinalitySensitiveJoinTransferLJOptimizer,
                 cardinalityInsensitiveJoinTransferLJOptimizer,
-                ljWithNestingOnRightToInnerJoinOptimizer);
+                ljWithNestingOnRightToInnerJoinOptimizer,
+                mergeLJOptimizer);
 
     }
 

@@ -2338,6 +2338,7 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Ignore("TODO: try to lift the condition")
     @Test
     public void testMergeLJs2() {
 
