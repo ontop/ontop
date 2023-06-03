@@ -46,7 +46,7 @@ CREATE TABLE "source1_rooms" (
 CREATE TABLE "source2_hotels" (
                                 id varchar(100) primary key NOT NULL,
                                 english text NOT NULL,
-                                italian text NULL,
+                                italian text NOT NULL,
                                 german text NOT NULL,
                                 htype integer NULL,
                                 lat float NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE "source2_hotels" (
 
 CREATE TABLE "source2_accommodation" (
                                        id varchar(100) primary key NOT NULL,
-                                       english_title text NOT NULL,
+                                       english_title text NULL,
                                        german_title text NOT NULL,
                                        italian_title text NOT NULL,
                                        acco_type integer NOT NULL,
