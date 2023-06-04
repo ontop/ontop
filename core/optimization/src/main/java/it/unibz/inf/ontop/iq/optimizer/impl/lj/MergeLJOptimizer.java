@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -9,19 +10,22 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Tries to merge LJs nested on the left
@@ -68,6 +72,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
         private final TermFactory termFactory;
         private final CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer;
         private final AtomFactory atomFactory;
+        private final SubstitutionFactory substitutionFactory;
 
         protected Transformer(VariableGenerator variableGenerator, RightProvenanceNormalizer rightProvenanceNormalizer,
                               CoreSingletons coreSingletons, CardinalitySensitiveJoinTransferLJOptimizer otherLJOptimizer) {
@@ -77,27 +82,48 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             this.termFactory = coreSingletons.getTermFactory();
             this.otherLJOptimizer = otherLJOptimizer;
             this.atomFactory = coreSingletons.getAtomFactory();
+            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         }
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            if (rootNode.getOptionalFilterCondition().isPresent())
-                return super.transformLeftJoin(tree, rootNode, leftChild, rightChild)
-                        .normalizeForOptimization(variableGenerator);
-
             IQTree newLeftChild = transform(leftChild);
             IQTree newRightChild = transform(rightChild);
 
-            Optional<IQTree> simplifiedTree = tryToSimplify(newLeftChild, newRightChild, new LinkedList<>());
+            Optional<ImmutableExpression> optionalLJCondition = rootNode.getOptionalFilterCondition();
+
+            if (!tolerateLJCondition(optionalLJCondition, newLeftChild, newRightChild))
+                return buildUnoptimizedLJTree(tree, leftChild, rightChild, newLeftChild, newRightChild, rootNode);
+
+            ImmutableSet<Variable> rightSpecificVariables = Sets.difference(newRightChild.getVariables(), newLeftChild.getVariables())
+                    .immutableCopy();
+
+            Optional<IQTree> simplifiedTree = tryToSimplify(newLeftChild, newRightChild, optionalLJCondition,
+                    rightSpecificVariables, new LinkedList<>());
 
             return simplifiedTree
-                    .orElseGet(() -> newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                            ? tree
-                            : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild)
-                            .normalizeForOptimization(variableGenerator));
+                    .orElseGet(() -> buildUnoptimizedLJTree(tree, leftChild, rightChild, newLeftChild, newRightChild, rootNode));
         }
 
-        private Optional<IQTree> tryToSimplify(IQTree leftDescendent, IQTree rightChildToMerge, List<Ancestor> ancestors) {
+        /**
+         * A LJ condition can be handled if it can safely be lifting, which requires that the LJ operates over a
+         * unique constraint on the right side
+         */
+        private boolean tolerateLJCondition(Optional<ImmutableExpression> optionalLJCondition, IQTree leftChild, IQTree rightChild) {
+            return optionalLJCondition.isEmpty() || rightChild.inferUniqueConstraints().stream()
+                 .anyMatch(uc -> leftChild.getVariables().containsAll(uc));
+        }
+
+        private IQTree buildUnoptimizedLJTree(IQTree tree, IQTree leftChild, IQTree rightChild, IQTree newLeftChild, IQTree newRightChild,
+                                              LeftJoinNode rootNode) {
+            return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
+                    ? tree
+                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild)
+                    .normalizeForOptimization(variableGenerator);
+        }
+
+        private Optional<IQTree> tryToSimplify(IQTree leftDescendent, IQTree topRightTree, Optional<ImmutableExpression> topLJCondition,
+                                               ImmutableSet<Variable> topRightSpecificVariables, List<Ancestor> ancestors) {
             QueryNode leftRootNode = leftDescendent.getRootNode();
             if (!(leftRootNode instanceof LeftJoinNode))
                 return Optional.empty();
@@ -110,32 +136,91 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             // No optimization if outside the "well-designed fragment"
             if (!Sets.intersection(
                     Sets.difference(rightSubTree.getVariables(), leftSubTree.getVariables()),
-                    rightChildToMerge.getVariables()).isEmpty())
+                    topRightTree.getVariables()).isEmpty())
                 return Optional.empty();
 
+            Optional<ImmutableExpression> localLJCondition = leftJoinNode.getOptionalFilterCondition();
+
             /*
-             * If cannot be merged with this right child, continue the search on the left.
+             * If cannot be merged with this right child, continue the search on the left
              */
-            if (leftJoinNode.getOptionalFilterCondition().isPresent()
-                    || (!canBeMerged(rightSubTree, rightChildToMerge))) {
+            if ((!tolerateLJCondition(localLJCondition, leftSubTree, rightSubTree))
+                    || (!canBeMerged(rightSubTree, topRightTree))) {
               ancestors.add(0, new Ancestor(leftJoinNode, rightSubTree));
-              return tryToSimplify(leftSubTree, rightChildToMerge, ancestors);
+              return tryToSimplify(leftSubTree, topRightTree, topLJCondition, topRightSpecificVariables, ancestors);
             }
 
-            IQTree newSubTree = iqFactory.createBinaryNonCommutativeIQTree(
-                    leftJoinNode,
-                    leftSubTree,
-                    iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(),
-                            ImmutableList.of(rightSubTree, rightChildToMerge)));
+            InjectiveSubstitution<Variable> renaming = computeRenaming(localLJCondition, leftSubTree, rightSubTree,
+                    topLJCondition, topRightSpecificVariables);
 
-            IQTree newTree = ancestors.stream()
-                    .reduce(newSubTree, (t, a) -> iqFactory.createBinaryNonCommutativeIQTree(a.rootNode, t, a.right),
+            IQTree mergedLocalRightBeforeRenaming = iqFactory.createNaryIQTree(
+                    iqFactory.createInnerJoinNode(),
+                    ImmutableList.of(rightSubTree, topRightTree));
+
+            Optional<RightProvenance> localRightProvenance =  renaming.isEmpty()
+                    ? Optional.empty()
+                    : Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
+                            mergedLocalRightBeforeRenaming, leftJoinTree.getVariables(),
+                    Optional.empty(), variableGenerator));
+
+            IQTree newLocalTreeBeforeRenaming = iqFactory.createBinaryNonCommutativeIQTree(
+                    iqFactory.createLeftJoinNode(),
+                    leftSubTree,
+                    localRightProvenance
+                            .map(RightProvenance::getRightTree)
+                            .orElse(mergedLocalRightBeforeRenaming));
+
+            IQTree newLJTreeBeforeRenaming = ancestors.stream()
+                    .reduce(newLocalTreeBeforeRenaming, (t, a) -> iqFactory.createBinaryNonCommutativeIQTree(a.rootNode, t, a.right),
                             (t1, t2) -> {
                                 throw new MinorOntopInternalBugException("Parallelization is not supported here");
                             });
 
+            if (renaming.isEmpty())
+                return Optional.of(newLJTreeBeforeRenaming);
+
+            Optional<ImmutableExpression> renamedLocalCondition = localLJCondition
+                    .map(renaming::apply);
+
+            Optional<ImmutableExpression> renamedTopCondition = topLJCondition
+                    .map(renaming::apply);
+
+            IQTree newTree = renaming.isEmpty()
+                    ? newLJTreeBeforeRenaming
+                    : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(newLJTreeBeforeRenaming.getVariables(),
+                                    renaming.builder()
+                                            .transform(
+                                                    v -> v,
+                                                    (t, v) -> createIfElseNull(v,t, topRightSpecificVariables, renamedLocalCondition, renamedTopCondition))
+                                            .build()),
+                            newLJTreeBeforeRenaming.applyFreshRenaming(renaming));
+
             return Optional.of(newTree);
+        }
+
+        private ImmutableFunctionalTerm createIfElseNull(Variable originalVariable, Variable renamedVariable,
+                                                         ImmutableSet<Variable> topRightSpecificVariables,
+                                                         Optional<ImmutableExpression> localLJCondition,
+                                                         Optional<ImmutableExpression> topLJCondition) {
+            Optional<ImmutableExpression> condition = topRightSpecificVariables.contains(originalVariable)
+                    ? topLJCondition : localLJCondition;
+
+            return condition
+                    .map(c -> termFactory.getIfElseNull(c, renamedVariable))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("A lj condition was expected"));
+        }
+
+        private InjectiveSubstitution<Variable> computeRenaming(
+                Optional<ImmutableExpression> localLJCondition, IQTree leftSubTree, IQTree rightSubTree,
+                Optional<ImmutableExpression> topLJCondition, ImmutableSet<Variable> topRightSpecificVariables) {
+            return Stream.concat(localLJCondition
+                                    .map(c -> Sets.difference(rightSubTree.getVariables(), leftSubTree.getVariables()))
+                                    .stream(),
+                            topLJCondition
+                                    .map(c -> topRightSpecificVariables).stream())
+                    .flatMap(Collection::stream)
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
         }
 
         private boolean canBeMerged(IQTree subRightChild, IQTree rightChildToMerge) {
@@ -143,7 +228,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
         }
 
         private boolean isTreeIncluded(IQTree tree, IQTree otherTree) {
-            RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
+            RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
                     otherTree, tree.getVariables(), Optional.empty(), variableGenerator);
 
             IQTree minusTree = iqFactory.createUnaryIQTree(
