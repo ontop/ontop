@@ -1,43 +1,49 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.*;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.Supplier;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import javax.annotation.Nullable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
         "relations"
 })
+@NonNullByDefault
 public class JsonMetadata extends JsonOpenObject {
+
     public final List<JsonDatabaseTable> relations;
+
     public final Parameters metadata;
 
     @JsonCreator
-    public JsonMetadata(@JsonProperty("relations") List<JsonDatabaseTable> relations,
+    public JsonMetadata(@JsonProperty("relations") @Nullable List<JsonDatabaseTable> relations,
                         @JsonProperty("metadata") Parameters metadata) {
-        this.relations = relations;
-        this.metadata = metadata;
+        this.relations = relations != null ? ImmutableList.copyOf(relations) : ImmutableList.of();
+        this.metadata = Objects.requireNonNull(metadata);
     }
 
     public JsonMetadata(ImmutableMetadata metadata) {
         this.relations = metadata.getAllRelations().stream()
                 .map(JsonDatabaseTable::new)
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableList.toImmutableList());
         this.metadata = new Parameters(metadata.getDBParameters());
     }
 
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY)
     @JsonPropertyOrder({
             "dbmsProductName",
             "dbmsVersion",
@@ -47,23 +53,45 @@ public class JsonMetadata extends JsonOpenObject {
             "extractionTime"
     })
     public static class Parameters extends JsonOpenObject {
+
+        @Nullable
         public final String dbmsProductName;
+
+        @Nullable
         public final String dbmsVersion;
+
+        @Nullable
         public final String driverName;
+
+        @Nullable
         public final String driverVersion;
+
+        @Nullable
         public final String quotationString;
+
+        @Nullable
         public final String extractionTime;
+
         @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+        @Nullable
         public final String idFactoryType;
 
+        @Nullable
+        private transient final Supplier idFactorySupplier;
+
+        @Nullable
+        private transient QuotedIDFactory cachedIdFactory;
+
         @JsonCreator
-        public Parameters(@JsonProperty("dbmsProductName") String dbmsProductName,
-                          @JsonProperty("dbmsVersion") String dbmsVersion,
-                          @JsonProperty("driverName") String driverName,
-                          @JsonProperty("driverVersion") String driverVersion,
-                          @JsonProperty("quotationString") String quotationString,
-                          @JsonProperty("extractionTime") String extractionTime,
-                          @JsonProperty("idFactoryType") String idFactoryType) {
+        public Parameters(@JsonProperty("dbmsProductName") @Nullable String dbmsProductName,
+                          @JsonProperty("dbmsVersion") @Nullable String dbmsVersion,
+                          @JsonProperty("driverName") @Nullable String driverName,
+                          @JsonProperty("driverVersion") @Nullable String driverVersion,
+                          @JsonProperty("quotationString") @Nullable String quotationString,
+                          @JsonProperty("extractionTime") @Nullable String extractionTime,
+                          @JsonProperty("idFactoryType") @Nullable String idFactoryType,
+                          @JacksonInject @Nullable Supplier idFactorySupplier
+        ) {
             this.dbmsProductName = dbmsProductName;
             this.dbmsVersion = dbmsVersion;
             this.driverName = driverName;
@@ -71,45 +99,40 @@ public class JsonMetadata extends JsonOpenObject {
             this.quotationString = quotationString;
             this.extractionTime = extractionTime;
             this.idFactoryType = idFactoryType;
+            this.idFactorySupplier = idFactorySupplier;
         }
 
-        private static final ImmutableBiMap<String, Class<? extends QuotedIDFactory>> QUOTED_ID_FACTORIES = ImmutableBiMap.<String, Class<? extends QuotedIDFactory>>builder()
-                .put("STANDARD", SQLStandardQuotedIDFactory.class)
-                .put("DREMIO", DremioQuotedIDFactory.class)
-                .put("MYSQL-U", MySQLCaseSensitiveTableNamesQuotedIDFactory.class)
-                .put("MYSQL-D", MySQLCaseNotSensitiveTableNamesQuotedIDFactory.class)
-                .put("POSTGRESQL", PostgreSQLQuotedIDFactory.class)
-                .put("MSSQLSERVER", SQLServerQuotedIDFactory.class)
-                .put("SPARK", SparkSQLQuotedIDFactory.class)
-                .build();
-
         public Parameters(DBParameters parameters) {
-            dbmsProductName = parameters.getDbmsProductName();
-            dbmsVersion = parameters.getDbmsVersion();
-            driverName = parameters.getDriverName();
-            driverVersion = parameters.getDriverVersion();
-            QuotedIDFactory idFactory = parameters.getQuotedIDFactory();
-            quotationString = idFactory.getIDQuotationString();
-            String idFactoryType = QUOTED_ID_FACTORIES.inverse().get(idFactory.getClass());
-            this.idFactoryType = (idFactoryType != null && !idFactoryType.equals("STANDARD")) ? idFactoryType : null;
+            this.dbmsProductName = parameters.getDbmsProductName();
+            this.dbmsVersion = parameters.getDbmsVersion();
+            this.driverName = parameters.getDriverName();
+            this.driverVersion = parameters.getDriverVersion();
+            this.cachedIdFactory = parameters.getQuotedIDFactory();
+            this.quotationString = this.cachedIdFactory.getIDQuotationString();
+            String idFactoryType = this.cachedIdFactory.getIDFactoryType();
+            this.idFactoryType = !idFactoryType.equals("STANDARD") ? idFactoryType : null;
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            extractionTime = dateFormat.format(Calendar.getInstance().getTime());
+            this.extractionTime = dateFormat.format(Calendar.getInstance().getTime());
+            this.idFactorySupplier = null;
         }
 
         public QuotedIDFactory createQuotedIDFactory() throws MetadataExtractionException {
-            try {
-                return QUOTED_ID_FACTORIES.getOrDefault(idFactoryType, SQLStandardQuotedIDFactory.class).newInstance();
+            if (cachedIdFactory == null) {
+                // Delegate to the supplier (will fail if supplier is not available or idFactoryType is unknown)
+                cachedIdFactory = Optional.ofNullable(idFactorySupplier)
+                        .flatMap(s -> s.get(MoreObjects.firstNonNull(idFactoryType, "STANDARD")))
+                        .orElseThrow(() -> new MetadataExtractionException(
+                                "Could not resolve QuotedIDFactory with type identifier " + idFactoryType));
             }
-            catch (InstantiationException | IllegalAccessException e) {
-                throw new MetadataExtractionException(e);
-            }
+            return cachedIdFactory;
         }
+
     }
 
     public static ImmutableList<String> serializeRelationID(RelationID id) {
         return id.getComponents().stream()
                 .map(QuotedID::getSQLRendering)
-                .collect(ImmutableCollectors.toList()).reverse();
+                .collect(ImmutableList.toImmutableList()).reverse();
     }
 
     public static RelationID deserializeRelationID(QuotedIDFactory idFactory, List<String> o) {
@@ -119,7 +142,7 @@ public class JsonMetadata extends JsonOpenObject {
     public static List<String> serializeAttributeList(Stream<Attribute> attributes) {
         return attributes
                 .map(a -> a.getID().getSQLRendering())
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableList.toImmutableList());
     }
 
     public interface AttributeConsumer {
@@ -135,4 +158,5 @@ public class JsonMetadata extends JsonOpenObject {
             throw new MetadataExtractionException(e);
         }
     }
+
 }

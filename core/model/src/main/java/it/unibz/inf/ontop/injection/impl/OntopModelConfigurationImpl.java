@@ -80,7 +80,6 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     /**
      * To be overloaded
-     *
      */
     protected Stream<Module> buildGuiceModules() {
         return Stream.of(new OntopModelModule(this));
@@ -134,6 +133,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected abstract static class DefaultOntopModelBuilderFragment<B extends Builder<B>> implements OntopModelBuilderFragment<B> {
 
         private Optional<Boolean> testMode = Optional.empty();
