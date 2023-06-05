@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
@@ -28,6 +29,7 @@ import java.util.Set;
  * Typical case optimized: self-left-join with LJ nesting on the right (and possibly on the left)
  *
  */
+@Singleton
 public class LJWithNestingOnRightToInnerJoinOptimizer implements LeftJoinIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
