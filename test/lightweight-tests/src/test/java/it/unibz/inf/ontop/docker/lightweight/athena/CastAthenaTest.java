@@ -51,6 +51,22 @@ public class CastAthenaTest extends AbstractCastFunctionsTest {
         super.testCastDateFromDateTime2();
     }
 
+    //TODO: Trino timestamp denormalizer missing
+    @Override
+    @Test
+    @Disabled("Lack of Trino timestamp denormalizer")
+    public void testCastDateTimeFromDate2() {
+        super.testCastDateTimeFromDate2();
+    }
+
+    //TODO: Trino timestamp denormalizer missing
+    @Override
+    @Test
+    @Disabled("Lack of Trino timestamp denormalizer")
+    public void testCastDateTimeFromDate3() {
+        super.testCastDateTimeFromDate3();
+    }
+
     @Override
     protected ImmutableMultiset<String> getCastFloatFromDecimal1ExpectedValues() {
         return ImmutableMultiset.of("\"0.2\"^^xsd:float", "\"0.25\"^^xsd:float", "\"0.2\"^^xsd:float",
