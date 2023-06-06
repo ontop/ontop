@@ -302,6 +302,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBMin(DBTermType dbType);
     DBFunctionSymbol getDBMax(DBTermType dbType);
+    DBFunctionSymbol getDBSample(DBTermType dbType);
 
     DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct);
 

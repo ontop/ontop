@@ -52,7 +52,7 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
                 "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }
 
-    @Disabled("Currently we do not support flatten with position for Dremio") //TODO-damian
+    @Disabled("Currently we do not support flatten with position for Dremio")
     @Test
     @Override
     public void testFlattenWithPosition() throws Exception {
@@ -63,5 +63,10 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
     @Override
     protected int getSPOExpectedCount() {
         return 76;
+    }
+
+    @Override
+    protected boolean supportsPositionVariable() {
+        return false;
     }
 }

@@ -98,7 +98,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public Optional<TermType> getIndexVariableType() {
-        return Optional.empty();
+        return Optional.of(termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType());
     }
 
     @Override

@@ -304,6 +304,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final Map<DBTermType, DBFunctionSymbol> minMap;
     private final Map<DBTermType, DBFunctionSymbol> maxMap;
+    private final Map<DBTermType, DBFunctionSymbol> sampleMap;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -369,6 +370,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.minMap = new ConcurrentHashMap<>();
         this.maxMap = new ConcurrentHashMap<>();
+        this.sampleMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
 
@@ -1107,6 +1109,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBSample(DBTermType dbType) {
+        return sampleMap.computeIfAbsent(dbType, this::createDBSample);
+    }
+
+    @Override
     public DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct) {
         return isDistinct ? distinctGroupConcat : nonDistinctGroupConcat;
     }
@@ -1210,6 +1217,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
     protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
+
+    protected abstract DBFunctionSymbol createDBSample(DBTermType termType);
 
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,

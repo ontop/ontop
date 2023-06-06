@@ -98,4 +98,12 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
         return ImmutableList.of("\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal", "\"31\"^^xsd:decimal");
     }
+
+    @Override
+    protected ImmutableList<ImmutableList<String>> getExpectedValuesSample() {
+        return ImmutableList.of(
+                ImmutableList.of("\"11\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal"),
+                ImmutableList.of("\"10\"^^xsd:decimal", "\"12\"^^xsd:decimal", "\"13\"^^xsd:decimal")
+        );
+    }
 }

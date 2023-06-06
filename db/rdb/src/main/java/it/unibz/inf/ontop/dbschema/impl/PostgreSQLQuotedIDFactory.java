@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,13 +20,9 @@ package it.unibz.inf.ontop.dbschema.impl;
  * #L%
  */
 
-
 import it.unibz.inf.ontop.dbschema.QuotedID;
-
-import javax.annotation.Nonnull;
-import java.util.Objects;
-
-import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTATION_STRING;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory.IDFactoryType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Creates QuotedIdentifiers following the rules of PostrgeSQL:<br>
@@ -49,18 +44,14 @@ import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTAT
  * double quote, without any spaces in between, for example U&"foo".
  *
  * @author Roman Kontchakov
- *
  */
-
+@IDFactoryType("POSTGRESQL")
+@NonNullByDefault
 public class PostgreSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
-	protected QuotedID createFromString(@Nonnull String s) {
-		Objects.requireNonNull(s);
-
-		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
-
-		return new QuotedIDImpl(s.toLowerCase(), NO_QUOTATION);
+	protected QuotedID createFromString(String s) {
+		return createFromString(s, QUOTATION_STRING, String::toLowerCase, NO_QUOTATION, true);
 	}
+
 }
