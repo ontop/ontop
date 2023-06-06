@@ -60,8 +60,20 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         IQTreeCache normalizedTreeCache = treeCache.declareAsNormalizedForOptimizationWithEffect();
 
         if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty()) {
-            return iqFactory.createUnaryIQTree(iqFactory.createSliceNode(0, 1), child).normalizeForOptimization(variableGenerator);
-            //return iqFactory.createTrueNode();
+            var artificialVariable = variableGenerator.generateNewVariable("aggv");
+            var construct = iqFactory.createConstructionNode(
+                    ImmutableSet.of(artificialVariable),
+                    substitutionFactory.getSubstitution(artificialVariable, termFactory.getXsdBooleanLexicalConstant(true)));
+            var sample = iqFactory.createAggregationNode(
+                    ImmutableSet.of(),
+                    substitutionFactory.getSubstitution(artificialVariable, termFactory.getDBSample(artificialVariable, termFactory.getTypeFactory().getDBTypeFactory().getDBBooleanType())));
+            var filter = iqFactory.createFilterNode(termFactory.getDBIsNotNull(artificialVariable));
+            var topConstruct = iqFactory.createConstructionNode(ImmutableSet.of(), substitutionFactory.getSubstitution());
+
+            var constructTree = iqFactory.createUnaryIQTree(construct, child.normalizeForOptimization(variableGenerator));
+            var sampleTree = iqFactory.createUnaryIQTree(sample, constructTree);
+            var filterTree = iqFactory.createUnaryIQTree(filter, sampleTree);
+            return iqFactory.createUnaryIQTree(topConstruct, filterTree).normalizeForOptimization(variableGenerator);
         }
 
         IQTree shrunkChild = notRequiredVariableRemover.optimize(child.normalizeForOptimization(variableGenerator),

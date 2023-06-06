@@ -228,4 +228,20 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(2, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
     }
 
+    @Test
+    public void testGroupByWithCount() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "    SELECT DISTINCT ?subject {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))" +
+                "        { SELECT (COUNT(*) as ?cnt) { ?s a <http://schema.org/LodgingBusiness>; ?p ?o. FILTER(!isBlank(?o) && isLiteral(?o)). } GROUP BY ?p LIMIT 10 }" +
+                "       \n" +
+                "    }\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
+    }
+
 }
