@@ -40,7 +40,7 @@ CREATE TABLE "source1_rooms" (
                                capacity integer NULL,
                                description_de text NULL,
                                description_it text NULL,
-                               h_id text NOT NULL
+                               h_id text NULL
 );
 
 CREATE TABLE "source2_hotels" (
