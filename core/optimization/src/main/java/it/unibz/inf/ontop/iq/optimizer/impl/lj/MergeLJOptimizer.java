@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.optimizer.impl.lj.LeftJoinAnalysisTools.tolerateLJConditionLifting;
+
 /**
  * Tries to merge LJs nested on the left
  *
@@ -101,7 +103,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
             Optional<ImmutableExpression> optionalLJCondition = rootNode.getOptionalFilterCondition();
 
-            if (!tolerateLJCondition(optionalLJCondition, newLeftChild, newRightChild))
+            if (!tolerateLJConditionLifting(optionalLJCondition, newLeftChild, newRightChild))
                 return buildUnoptimizedLJTree(tree, leftChild, rightChild, newLeftChild, newRightChild, rootNode);
 
             ImmutableSet<Variable> rightSpecificVariables = Sets.difference(newRightChild.getVariables(), newLeftChild.getVariables())
@@ -112,15 +114,6 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
             return simplifiedTree
                     .orElseGet(() -> buildUnoptimizedLJTree(tree, leftChild, rightChild, newLeftChild, newRightChild, rootNode));
-        }
-
-        /**
-         * A LJ condition can be handled if it can safely be lifting, which requires that the LJ operates over a
-         * unique constraint on the right side
-         */
-        private boolean tolerateLJCondition(Optional<ImmutableExpression> optionalLJCondition, IQTree leftChild, IQTree rightChild) {
-            return optionalLJCondition.isEmpty() || rightChild.inferUniqueConstraints().stream()
-                 .anyMatch(uc -> leftChild.getVariables().containsAll(uc));
         }
 
         private IQTree buildUnoptimizedLJTree(IQTree tree, IQTree leftChild, IQTree rightChild, IQTree newLeftChild, IQTree newRightChild,
@@ -154,7 +147,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             /*
              * If cannot be merged with this right child, continue the search on the left
              */
-            if ((!tolerateLJCondition(localLJCondition, leftSubTree, rightSubTree))
+            if ((!tolerateLJConditionLifting(localLJCondition, leftSubTree, rightSubTree))
                     || (!canBeMerged(rightSubTree, topRightTree))) {
               ancestors.add(0, new Ancestor(leftJoinNode, rightSubTree));
               return tryToSimplify(leftSubTree, topRightTree, topLJCondition, topRightSpecificVariables, ancestors);
