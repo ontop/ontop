@@ -22,10 +22,6 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
-/**
- * TODO: explain
- */
-
 public class LeftJoinOptimizationTest {
 
     private final static NamedRelationDefinition TABLE1;
@@ -1468,9 +1464,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, initialIQ);
     }
 
-    /**
-     * TODO: remove the top distinct in the expected query
-     */
     @Test
     public void testJoinTransferFD1() {
 
@@ -1503,7 +1496,6 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(B, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), BF0)));
 
-        // TODO: get rid of the distinct here
         UnaryIQTree newTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
                 IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree));
 
@@ -1537,9 +1529,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    /**
-     * TODO: remove the top distinct in the expected query
-     */
     @Test
     public void testJoinTransferFD3() {
 
@@ -1583,9 +1572,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    /**
-     * TODO: remove the top distinct in the expected query
-     */
     @Test
     public void testJoinTransferFD4() {
 
@@ -1679,9 +1665,6 @@ public class LeftJoinOptimizationTest {
     }
 
 
-    /**
-     * TODO: remove the top distinct in the expected query
-     */
     @Test
     public void testJoinTransferFD6() {
 
@@ -1721,7 +1704,6 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(B, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), BF0)));
 
-        // TODO: get rid of the distinct here
         UnaryIQTree newTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
                 IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree));
 
