@@ -73,22 +73,16 @@ public class AggregationSplitterTest {
     private IQTree generateLiftedAggregateSubTree(Variable sampleVariable, Substitution<ImmutableFunctionalTerm> oldSubstitution, IQTree child) {
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(sampleVariable));
 
-        ConstructionNode subConstructNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(sampleVariable, A), SUBSTITUTION_FACTORY.getSubstitution(
-                sampleVariable, TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())));
-
         AggregationNode newAggregationNode = IQ_FACTORY.createAggregationNode(ImmutableSet.of(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         sampleVariable,
-                        TERM_FACTORY.getDBSample(sampleVariable, TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())
+                        TERM_FACTORY.getDBSample(ONE, TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())
                 ).compose(oldSubstitution).transform(t -> (ImmutableFunctionalTerm)t)
         );
 
         IQTree newChild = IQ_FACTORY.createUnaryIQTree(filterNode,
                                 IQ_FACTORY.createUnaryIQTree(newAggregationNode,
-                                        IQ_FACTORY.createUnaryIQTree(
-                                                subConstructNode,
-                                                child
-                                        ))
+                                                child)
                         );
         return newChild;
     }
