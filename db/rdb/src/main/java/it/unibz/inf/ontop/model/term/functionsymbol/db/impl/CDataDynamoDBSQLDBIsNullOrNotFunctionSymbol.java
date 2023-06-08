@@ -14,13 +14,13 @@ public class CDataDynamoDBSQLDBIsNullOrNotFunctionSymbol extends AbstractDBIsNul
     protected CDataDynamoDBSQLDBIsNullOrNotFunctionSymbol(boolean isNull, DBTermType dbBooleanTermType, DBTermType rootDBTermType) {
         super(isNull, dbBooleanTermType, rootDBTermType);
 
-        /*this.template = isNull
-                ?  "(ISNULL(CAST(%s as VARCHAR), 'TEMPTEMP') = 'TEMPTEMP')"
-                :  "(ISNULL(CAST(%s as VARCHAR), 'TEMPTEMP') != 'TEMPTEMP')";*/
-
         this.template = isNull
+                ?  "(ISNULL(CAST(%s as VARCHAR), 'TEMPTEMP') = 'TEMPTEMP')"
+                :  "(ISNULL(CAST(%s as VARCHAR), 'TEMPTEMP') != 'TEMPTEMP')";
+
+        /*this.template = isNull
                 ?  "%s IS NULL"
-                :  "%S IS NOT NULL";
+                :  "%S IS NOT NULL";*/
     }
 
     @Override

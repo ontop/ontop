@@ -32,7 +32,8 @@ public class CDataDynamoDBDBNotFunctionSymbol extends DBBooleanFunctionSymbolImp
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter,
                                     TermFactory termFactory) {
-        return String.format("((%s) = FALSE)", termConverter.apply(terms.get(0)));
+        //return String.format("((%s) = FALSE)", termConverter.apply(terms.get(0)));
+        return String.format("NOT(%s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
