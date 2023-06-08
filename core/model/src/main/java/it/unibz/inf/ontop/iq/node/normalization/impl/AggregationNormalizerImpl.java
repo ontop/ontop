@@ -258,24 +258,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                     a.getSubstitution())))
                     .collect(ImmutableCollectors.toList());
 
-            /* A "sample" variable has to be created if constant terms are lifted outside of the aggregation
-               Exact conditions:
-                   - Constant in parent construct that is also in projected variables.
-                   - No non-constant in parent construct that is also in projected variables.
-             */
-            var parentTermsPartitionedByIsConstant = subStateAncestors.stream()
-                    .flatMap(c -> c.getSubstitution().stream())
-                    .collect(ImmutableCollectors.partitioningBy(entry -> entry.getValue() instanceof DBConstant));
-            boolean requiresSampleVariable = (
-                    parentTermsPartitionedByIsConstant.get(true).stream()
-                            .anyMatch(entry -> groupingVariables.contains(entry.getKey()) || aggregationSubstitution.isDefining(entry.getKey()))
-            ) && (
-                    parentTermsPartitionedByIsConstant.get(false).stream()
-                            .noneMatch(entry -> groupingVariables.contains(entry.getKey()) || aggregationSubstitution.isDefining(entry.getKey()))
-            );
-            Variable sampleVariable = requiresSampleVariable ?
-                    variableGenerator.generateNewVariable("aggv") : null;
-
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
             // Needed when some grouping variables are also used in the aggregates
             // The sample aggregate function call is also added to the  substitution, if it is required
@@ -283,10 +265,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     .reduce(aggregationSubstitution,
                             (s, a) -> a.getSubstitution()
                                             .compose(s)
-                                            .compose(requiresSampleVariable ?
-                                            substitutionFactory.getSubstitution(sampleVariable, termFactory.getDBSample(sampleVariable, termFactory.getTypeFactory().getDBTypeFactory().getDBBooleanType())) : substitutionFactory.getSubstitution())
                                             .builder()
-                                            .restrictDomainTo(requiresSampleVariable ? Sets.union(aggregationSubstitution.getDomain(), ImmutableSet.of(sampleVariable)): aggregationSubstitution.getDomain())
+                                            .restrictDomainTo(aggregationSubstitution.getDomain())
                                             .transform(t -> (ImmutableFunctionalTerm)t)
                                             .build(),
                             (s1, s2) -> {
@@ -301,24 +281,36 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             newAggregationSubstitution.getDomain())
                     .immutableCopy();
 
-            // The sampled variable `aggv` is defined here as a boolean TRUE constant if it is required.
-            Substitution<DBConstant> sampleSubstitution = !requiresSampleVariable ? null : substitutionFactory.getSubstitution(sampleVariable, termFactory.getDBConstant("true", termFactory.getTypeFactory().getDBTypeFactory().getDBBooleanType()));
+            Optional<Variable> sampleVariable = newGroupingVariables.isEmpty() && !groupingVariables.isEmpty()
+                    ? Optional.of(variableGenerator.generateNewVariable("aggv"))
+                    : Optional.empty();
+
+            Substitution<ImmutableFunctionalTerm> finalAggregationSubstitution = sampleVariable.map(
+                    s -> newAggregationSubstitution.compose(substitutionFactory.getSubstitution(sampleVariable.get(), termFactory.getDBSample(sampleVariable.get(), termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
+                            .builder()
+                            .transform(t -> (ImmutableFunctionalTerm)t)
+                            .build()
+            ).orElse(newAggregationSubstitution);
+
+            // The sampled variable `aggv` is defined here as a integer 1 constant if it is required.
+            Substitution<DBConstant> sampleSubstitution = sampleVariable
+                    .map(s -> substitutionFactory.getSubstitution(s, termFactory.getDBConstant("1", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
+                    .orElse(substitutionFactory.getSubstitution());
             // Nullable
             // Is created if, either, the node includes a substitution, or a sample variable is required.
             ConstructionNode newChildConstructionNode = subState.getChildConstructionNode()
                     // Only keeps the child construction node if it has a substitution
-                    .filter(n -> requiresSampleVariable || !n.getSubstitution().isEmpty())
+                    .filter(n -> sampleVariable.isPresent() || !n.getSubstitution().isEmpty())
                     .map(n -> iqFactory.createConstructionNode(
-                            extractChildVariables(newGroupingVariables, newAggregationSubstitution),
+                            extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
                             n.getSubstitution().compose(sampleSubstitution)))
-                    .orElse(!requiresSampleVariable ? null :
-                            iqFactory.createConstructionNode(ImmutableSet.of(sampleVariable), sampleSubstitution));
+                    .or(() -> sampleVariable.map(s -> iqFactory.createConstructionNode(ImmutableSet.of(s), sampleSubstitution)))
+                    .orElse(null);
 
             // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.
-            Optional<FilterNode> newFilter = !requiresSampleVariable ? Optional.empty() :
-                    Optional.of(iqFactory.createFilterNode(termFactory.getDBIsNotNull(sampleVariable)));
+            Optional<FilterNode> newFilter = sampleVariable.map(s -> iqFactory.createFilterNode(termFactory.getDBIsNotNull(s)));
 
-            return new AggregationNormalizationState(newAncestors, newGroupingVariables, newAggregationSubstitution,
+            return new AggregationNormalizationState(newAncestors, newGroupingVariables, finalAggregationSubstitution,
                     newChildConstructionNode,
                     subState.getGrandChildTree(), variableGenerator, newFilter);
         }
