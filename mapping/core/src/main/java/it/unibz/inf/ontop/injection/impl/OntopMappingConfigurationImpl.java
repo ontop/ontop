@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.Graph;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -93,13 +92,7 @@ public class OntopMappingConfigurationImpl extends OntopKGQueryConfigurationImpl
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
-        ImmutableSet<RDFFact> optionalFacts = null;
-
-        try {
-            optionalFacts = factsSupplier.get().orElse(ImmutableSet.of());
-        } catch (OWLOntologyCreationException e) {
-            throw new FactsException(e);
-        }
+        ImmutableSet<RDFFact> optionalFacts = factsSupplier.get().orElse(ImmutableSet.of());
 
         /*
          * Pre-processed mapping

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.impl.FactsException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLNamedObject;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -89,8 +90,7 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         try {
             config.loadInputFacts();
         }
-        catch (OWLOntologyCreationException e) {
-            //TODO-Damian more than this syntax check required?
+        catch (OBDASpecificationException e) {
             System.out.format("ERROR: There is a problem loading the fact file: %s\n", factFile);
             e.printStackTrace();
             System.exit(1);

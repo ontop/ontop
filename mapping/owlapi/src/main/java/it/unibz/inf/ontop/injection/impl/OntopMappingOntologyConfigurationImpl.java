@@ -1,17 +1,32 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingOntologyConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopOntologyOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
+import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
+import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
 import it.unibz.inf.ontop.spec.fact.impl.FactExtractorWithSaturatedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.spec.ontology.impl.RDFFactImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.simple.SimpleRDF;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.protege.xmlcatalog.owlapi.XMLCatalogIRIMapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -20,6 +35,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigurationImpl
         implements OntopMappingOntologyConfiguration, OntopOntologyOWLAPIConfiguration {
@@ -36,7 +52,7 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
     }
 
     @Override
-    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OWLOntologyCreationException {
+    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OBDASpecificationException {
         if (factsFile.isPresent()){
             return factsFile;
         }
@@ -108,57 +124,61 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         return owlOntology;
     }
 
-    private ImmutableSet<RDFFact> axiomsToFacts(InputStream file, OWLOntologyManager manager) throws OWLOntologyCreationException {
-        var factOntology = manager.loadOntologyFromOntologyDocument(file);
-        OWLAPITranslatorOWL2QL translator = getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
-        var translated = translator.translateAndClassify(factOntology);
-        var extractor = getInjector().getInstance(FactExtractorWithSaturatedTBox.class);
-        return extractor.extractAndSelect(Optional.of(translated), true);
-    }
-
-    private Optional<ImmutableSet<RDFFact>> loadFactsFromFile() throws OWLOntologyCreationException {
-        /*
-         * File
-         */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        //var e = new FactExtractorWithSaturatedTBox(getTermFactory(), this);
-
-        if (options.factsFile.isPresent()) {
-            try {
-                factsFile = Optional.of(axiomsToFacts(new FileInputStream(options.factsFile.get()), manager));
-            } catch (IOException e) {
-                throw new OWLOntologyCreationException(e.getMessage());
+    private Optional<ImmutableSet<RDFFact>> loadFactsFromFile() throws FactsException {
+        try {
+            if (options.factsFile.isPresent()) {
+                this.factsFile = Optional.of(loadFactsWithReader(new FileReader(options.factsFile.get())));
+            } else if (options.factsReader.isPresent()) {
+                this.factsFile = Optional.of(loadFactsWithReader(options.factsReader.get()));
+            } else if (options.factsURL.isPresent()) {
+                this.factsFile = Optional.of(loadFactsWithReader(new InputStreamReader(options.factsURL.get().openStream())));
             }
-        }
-        else if (options.factsReader.isPresent()) {
-            try {
-                InputStream inputStream = new ByteArrayInputStream(
-                        CharStreams.toString(options.factsReader.get())
-                                .getBytes(Charsets.UTF_8));
-                factsFile = Optional.of(axiomsToFacts(inputStream, manager));
-            } catch (IOException e) {
-                throw new OWLOntologyCreationException(e.getMessage());
-            }
-
-        }
-
-        /*
-         * URL
-         */
-        Optional<URL> optionalURL = options.factsURL;
-        if (optionalURL.isPresent()) {
-            try (InputStream is = optionalURL.get().openStream()) {
-                factsFile = Optional.of(axiomsToFacts(is, manager));
-            }
-            catch (MalformedURLException e ) {
-                throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
-            }
-            catch (IOException e) {
-                throw new OWLOntologyCreationException(e.getMessage());
-            }
+        } catch(IOException e) {
+            throw new FactsException(e);
         }
 
         return factsFile;
+    }
+
+    /**
+     * Reads a set of RDFFacts from a given reader.
+     */
+    private ImmutableSet<RDFFact> loadFactsWithReader(Reader reader) throws FactsException {
+        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+        Model model = new LinkedHashModel();
+        parser.setRDFHandler(new StatementCollector(model));
+        try {
+            parser.parse(reader);
+        } catch (IOException e) {
+            throw new FactsException(e);
+        }
+
+        return model.stream()
+                .map(this::statementToFact)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * Converts RDF4J triples/quadruples of the type `Statement` to Ontop triples/quadruples of the type `RDFFact`.
+     */
+    private RDFFact statementToFact(Statement statement) {
+        var sub = statement.getSubject();
+        var factSubject = sub.isBNode() ? getTermFactory().getConstantBNode(sub.stringValue()) : getTermFactory().getConstantIRI(sub.stringValue());
+        var pred = statement.getPredicate();
+        var factPredicate = getTermFactory().getConstantIRI(pred.stringValue());
+        var obj = statement.getObject();
+        var factObject = obj.isBNode()
+                ? getTermFactory().getConstantBNode(obj.stringValue())
+                : obj.isIRI()
+                    ? getTermFactory().getConstantIRI(obj.stringValue())
+                    : ((Literal)obj).getLanguage().isPresent()
+                        ? getTermFactory().getRDFLiteralConstant(((Literal)obj).getLabel(), ((Literal)obj).getLanguage().get())
+                        : getTermFactory().getRDFLiteralConstant(((Literal)obj).getLabel(), new SimpleRDF().createIRI(((Literal)obj).getDatatype().stringValue()));
+        var ctxt = Optional.ofNullable(statement.getContext());
+        var factContext = ctxt.map(c -> c.isBNode() ? getTermFactory().getConstantBNode(c.stringValue()) : getTermFactory().getConstantIRI(c.stringValue()));
+
+        return factContext.map(objectConstant -> RDFFactImpl.createQuadFact(factSubject, factPredicate, factObject, objectConstant))
+                .orElseGet(() -> RDFFactImpl.createTripleFact(factSubject, factPredicate, factObject));
     }
 
     Optional<Ontology> loadOntology() throws OntologyException {

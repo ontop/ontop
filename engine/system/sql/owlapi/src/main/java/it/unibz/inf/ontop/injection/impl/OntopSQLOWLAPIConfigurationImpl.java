@@ -41,7 +41,7 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
     @Override
-    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OWLOntologyCreationException {
+    public Optional<ImmutableSet<RDFFact>> loadInputFacts() throws OBDASpecificationException {
         return mappingOWLConfiguration.loadInputFacts();
     }
 

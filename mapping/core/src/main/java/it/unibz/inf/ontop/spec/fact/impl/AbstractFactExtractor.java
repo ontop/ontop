@@ -19,15 +19,10 @@ public abstract class AbstractFactExtractor implements FactExtractor {
 
     @Override
     public ImmutableSet<RDFFact> extractAndSelect(Optional<Ontology> ontology) {
-        return extractAndSelect(ontology, settings.isOntologyAnnotationQueryingEnabled());
-    }
-
-    @Override
-    public ImmutableSet<RDFFact> extractAndSelect(Optional<Ontology> ontology, boolean queryAnnotation) {
         // TODO: consider other facts
         return ontology
                 .map(o -> Stream.concat(
-                        selectABox(o, queryAnnotation),
+                        selectABox(o, settings.isOntologyAnnotationQueryingEnabled()),
                         extractTBox(o.tbox()))
                         .collect(ImmutableCollectors.toSet()))
                 .orElseGet(ImmutableSet::of);

@@ -13,10 +13,4 @@ public interface FactExtractor {
      */
     ImmutableSet<RDFFact> extractAndSelect(Optional<Ontology> ontology);
 
-    /**
-     * The user is allowed to override the `queryAnnotation` field from the settings when calling
-     * this signature to extract facts from an Ontology file.
-     */
-    ImmutableSet<RDFFact> extractAndSelect(Optional<Ontology> ontology, boolean queryAnnotation);
-
 }
