@@ -17,7 +17,7 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${ontology:#{null}}") String ontology,
                                                              @Value("${facts:#{null}}") String facts,
                                                              @Value("${fact-format:#{null}}") String factFormat,
-                                                             @Value("${facts-base-uri:#{null}}") String factsBaseURI,
+                                                             @Value("${facts-base-uri:#{null}}") String factsBaseIRI,
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                              @Value("${properties:#{null}}") String properties,
                                                              @Value("${constraint:#{null}}") String constraint,
@@ -47,8 +47,8 @@ public class OntopVirtualRepositoryBean {
         if ((factFormat != null) && (!factFormat.isEmpty()))
             builder.factFormat(factFormat);
 
-        if ((factsBaseURI != null) && (!factsBaseURI.isEmpty()))
-            builder.factsBaseURI(factsBaseURI);
+        if ((factsBaseIRI != null) && (!factsBaseIRI.isEmpty()))
+            builder.factsBaseIRI(factsBaseIRI);
 
         if ((xmlCatalog != null) && (!xmlCatalog.isEmpty()))
             builder.xmlCatalogFile(xmlCatalog);

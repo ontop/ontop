@@ -5,18 +5,29 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
+
 /***
  * A test querying triples provided by an external "facts" file.
  */
-public class FactsFileTestNQuads extends FactsFileTest {
+public abstract class FactsFileTest extends AbstractOWLAPITest {
 
-	@BeforeClass
-	public static void setUp() throws Exception {
-		init("/facts/facts.nq", null);
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
+	}
+
+	protected static void init(@Nullable String factsFile, @Nullable String factsBaseIRI) throws Exception {
+		initOBDA("/facts/facts-h2.sql",
+				"/facts/mapping.obda",
+				"/facts/ontology.ttl",
+				null,
+				factsFile,
+				factsBaseIRI);
 	}
 
 	@Test
-	public void testSubgraph() throws Exception {
+	public void testFactsIncluded() throws Exception {
 		String query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
 				"PREFIX beam:   <https://data.beamery.com/ontologies/talent#>\n" +
 				"PREFIX foaf:   <http://xmlns.com/foaf/0.1/>\n" +
@@ -25,10 +36,13 @@ public class FactsFileTestNQuads extends FactsFileTest {
 				"PREFIX : <http://www.semanticweb.org/ontop-facts#>\n" +
 				"\n" +
 				"SELECT DISTINCT * WHERE {\n" +
-				"  GRAPH :extra { ?s ?p ?v . } \n" +
+				"  ?c a :Company .\n" +
+				"  ?c :name ?v.\n" +
 				"} ORDER BY ?v\n";
 
 		checkReturnedValues(query, "v", ImmutableList.of(
-				"\"2022\"^^xsd:integer"));
+				"\"Big Company\"^^xsd:string",
+				"\"Some Factory\"^^xsd:string",
+				"\"The Fact Company\"^^xsd:string"));
 	}
 }

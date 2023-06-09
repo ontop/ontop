@@ -112,8 +112,8 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         }
 
         @Override
-        public B factsBaseURI(@Nonnull String factsBaseURI) {
-            return ontologyBuilderFragment.factsBaseURI(factsBaseURI);
+        public B factsBaseIRI(@Nonnull String factsBaseIRI) {
+            return ontologyBuilderFragment.factsBaseIRI(factsBaseIRI);
         }
 
         @Override

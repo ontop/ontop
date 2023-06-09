@@ -29,6 +29,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.UUID;
 
 public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigurationImpl
         implements OntopMappingOntologyConfiguration, OntopOntologyOWLAPIConfiguration {
@@ -158,10 +159,7 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         try {
-            if(options.factsBaseURI.isPresent())
-                parser.parse(reader, options.factsBaseURI.get());
-            else
-                parser.parse(reader);
+            parser.parse(reader, options.factsBaseIRI.orElse(UUID.randomUUID().toString()));
         } catch (IOException e) {
             throw new FactsException(e);
         }

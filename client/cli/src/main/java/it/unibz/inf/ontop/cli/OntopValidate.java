@@ -43,8 +43,8 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         if(factFormat != null)
             builder.factFormat(factFormat.getExtension());
 
-        if (factsBaseURI != null)
-            builder.factsBaseURI(factsBaseURI);
+        if (factsBaseIRI != null)
+            builder.factsBaseIRI(factsBaseIRI);
 
         if (propertiesFile != null)
             builder.propertyFile(propertiesFile);

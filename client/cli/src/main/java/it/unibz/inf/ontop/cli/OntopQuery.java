@@ -58,8 +58,8 @@ public class OntopQuery extends OntopMappingOntologyRelatedCommand {
         if (factFormat != null)
             configurationBuilder.factFormat(factFormat.getExtension());
 
-        if (factsBaseURI != null)
-            configurationBuilder.factsBaseURI(factsBaseURI);
+        if (factsBaseIRI != null)
+            configurationBuilder.factsBaseIRI(factsBaseIRI);
 
         if (propertiesFile != null) {
             configurationBuilder.propertyFile(propertiesFile);

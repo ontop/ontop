@@ -32,7 +32,7 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
 
         B factFormat(@Nonnull String format);
 
-        B factsBaseURI(@Nonnull String factsBaseURI);
+        B factsBaseIRI(@Nonnull String factsBaseIRI);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingOntologyBuilderFragment<B>,

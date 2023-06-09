@@ -27,7 +27,7 @@ abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand i
 
     @Option(type = OptionType.COMMAND, name = {"--facts-base-uri"}, title = "base URI of facts in fact file",
             description = "The base URI of facts in the fact file to resolve relative URIs.")
-    String factsBaseURI;
+    String factsBaseIRI;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")

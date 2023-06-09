@@ -277,8 +277,8 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
         if (factFormat != null)
             configBuilder.factFormat(factFormat.getExtension());
 
-        if (factsBaseURI != null)
-            configBuilder.factsBaseURI(factsBaseURI);
+        if (factsBaseIRI != null)
+            configBuilder.factsBaseIRI(factsBaseIRI);
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
