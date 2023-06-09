@@ -96,7 +96,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new DBSampleFunctionSymbolImpl(termType, "MIN");
     }
 
     @Override

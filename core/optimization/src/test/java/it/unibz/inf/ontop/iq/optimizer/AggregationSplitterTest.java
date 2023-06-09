@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.HomogeneousIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -69,6 +70,23 @@ public class AggregationSplitterTest {
                 .build();
     }
 
+    private IQTree generateLiftedAggregateSubTree(Variable sampleVariable, Substitution<ImmutableFunctionalTerm> oldSubstitution, IQTree child) {
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(sampleVariable));
+
+        AggregationNode newAggregationNode = IQ_FACTORY.createAggregationNode(ImmutableSet.of(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        sampleVariable,
+                        TERM_FACTORY.getDBSample(ONE, TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())
+                ).compose(oldSubstitution).transform(t -> (ImmutableFunctionalTerm)t)
+        );
+
+        IQTree newChild = IQ_FACTORY.createUnaryIQTree(filterNode,
+                                IQ_FACTORY.createUnaryIQTree(newAggregationNode,
+                                                child)
+                        );
+        return newChild;
+    }
+
     @Test
     public void testLiftAggregation1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
@@ -111,22 +129,22 @@ public class AggregationSplitterTest {
 
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
 
-        AggregationNode newAggregationNode1 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree1 = generateLiftedAggregateSubTree(AGGV, SUBSTITUTION_FACTORY.getSubstitution(
+                        Y, TERM_FACTORY.getDBCount(A, false)), dataNode1);
 
         IQTree newChild1 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution1),
                 applyInDepthRenaming(
-                        IQ_FACTORY.createUnaryIQTree(newAggregationNode1, dataNode1),
+                        newAggregationTree1,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF0).injective()));
 
-        AggregationNode newAggregationNode2 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree2 = generateLiftedAggregateSubTree(AGGVF0, SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)), dataNode2);
 
         IQTree newChild2 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution2),
                 applyInDepthRenaming(
-                        IQ_FACTORY.createUnaryIQTree(newAggregationNode2, dataNode2),
+                        newAggregationTree2,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF1).injective()));
 
         NaryIQTree newUnionTree = IQ_FACTORY.createNaryIQTree(
@@ -413,24 +431,23 @@ public class AggregationSplitterTest {
 
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
 
-        AggregationNode newAggregationNode1 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree1 = generateLiftedAggregateSubTree(AGGV, SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)), IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(A)),
+                ImmutableList.of(dataNode1, dataNode1)));
 
         IQTree newChild1 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution1),
-                applyInDepthRenaming(IQ_FACTORY.createUnaryIQTree(newAggregationNode1,
-                                IQ_FACTORY.createNaryIQTree(
-                                        IQ_FACTORY.createUnionNode(ImmutableSet.of(A)),
-                                        ImmutableList.of(dataNode1, dataNode1))),
+                applyInDepthRenaming(
+                        newAggregationTree1,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF0).injective()));
 
-        AggregationNode newAggregationNode2 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree2 = generateLiftedAggregateSubTree(AGGVF0, SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)), dataNode2);
 
         IQTree newChild2 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution2),
-                applyInDepthRenaming(
-                IQ_FACTORY.createUnaryIQTree(newAggregationNode2, dataNode2),
+                applyInDepthRenaming(newAggregationTree2,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF1).injective()));
 
         NaryIQTree newUnionTree = IQ_FACTORY.createNaryIQTree(
@@ -486,24 +503,23 @@ public class AggregationSplitterTest {
 
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
 
-        AggregationNode newAggregationNode1 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree1 = generateLiftedAggregateSubTree(AGGV, SUBSTITUTION_FACTORY.getSubstitution(
+                        Y, TERM_FACTORY.getDBCount(A, false)), IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(ImmutableSet.of(A)),
+                        ImmutableList.of(dataNode1, dataNode1)));
 
         IQTree newChild1 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution1),
                 applyInDepthRenaming(
-                IQ_FACTORY.createUnaryIQTree(newAggregationNode1,
-                                IQ_FACTORY.createNaryIQTree(
-                                        IQ_FACTORY.createUnionNode(ImmutableSet.of(A)),
-                                        ImmutableList.of(dataNode1, dataNode1))),
+                        newAggregationTree1,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF0).injective()));
 
-        AggregationNode newAggregationNode2 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(), SUBSTITUTION_FACTORY.getSubstitution(
-                Y, TERM_FACTORY.getDBCount(A, false)));
+        IQTree newAggregationTree2 = generateLiftedAggregateSubTree(AGGVF0, SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)), dataNode2);
 
         IQTree newChild2 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), xSubstitution2),
-                applyInDepthRenaming(IQ_FACTORY.createUnaryIQTree(newAggregationNode2, dataNode2),
+                applyInDepthRenaming(newAggregationTree2,
                         SUBSTITUTION_FACTORY.getSubstitution(A, AF1).injective()));
 
         NaryIQTree newUnionTree = IQ_FACTORY.createNaryIQTree(

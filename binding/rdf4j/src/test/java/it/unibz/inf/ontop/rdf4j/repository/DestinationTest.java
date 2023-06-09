@@ -165,6 +165,20 @@ public class DestinationTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testDataPropertyLodgingBusiness() {
+        String sparql = "    SELECT DISTINCT ?pred {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))\n" +
+                "    }\n" +
+                "    GROUP BY ?pred\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
+    }
+
+    @Test
     public void testOneLJElimination() {
         String sparql = "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -212,6 +226,22 @@ public class DestinationTest extends AbstractRDF4JTest {
         // The non-simplifiable LJs are those between the accommodations and the lodging businesses (2 sources)
         // due to the absence of FKs
         assertEquals(2, StringUtils.countMatches(sql, "LEFT OUTER JOIN"));
+    }
+
+    @Test
+    public void testGroupByWithCount() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "    SELECT DISTINCT ?subject {\n" +
+                "        ?subject a     <http://schema.org/LodgingBusiness>;\n" +
+                "                 ?pred ?object.\n" +
+                "        FILTER(!isBlank(?object) && isLiteral(?object))" +
+                "        { SELECT (COUNT(*) as ?cnt) { ?s a <http://schema.org/LodgingBusiness>; ?p ?o. FILTER(!isBlank(?o) && isLiteral(?o)). } GROUP BY ?p LIMIT 10 }" +
+                "       \n" +
+                "    }\n";
+
+        int count = runQueryAndCount(sparql);
+        // Due to null values
+        assertEquals(1, count);
     }
 
 }

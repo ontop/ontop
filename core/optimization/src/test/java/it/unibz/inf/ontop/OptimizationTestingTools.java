@@ -57,6 +57,8 @@ public class OptimizationTestingTools {
     public static final Variable W;
     public static final Variable Z;
     public static final Variable A;
+    public static final Variable AGGV;
+    public static final Variable AGGVF0;
     public static final Variable AF0;
     public static final Variable AF1;
     public static final Variable B;
@@ -141,6 +143,8 @@ public class OptimizationTestingTools {
         W = TERM_FACTORY.getVariable("w");
         Z = TERM_FACTORY.getVariable("z");
         A = TERM_FACTORY.getVariable("a");
+        AGGV = TERM_FACTORY.getVariable("aggv");
+        AGGVF0 = TERM_FACTORY.getVariable("aggvf0");
         AF0 = TERM_FACTORY.getVariable("af0");
         AF1 = TERM_FACTORY.getVariable("af1");
         B = TERM_FACTORY.getVariable("b");
