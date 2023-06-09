@@ -25,8 +25,8 @@ abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand i
     @AllowedEnumValues(RDFFormatTypes.class)
     RDFFormatTypes factFormat;
 
-    @Option(type = OptionType.COMMAND, name = {"--facts-base-uri"}, title = "base URI of facts in fact file",
-            description = "The base URI of facts in the fact file to resolve relative URIs.")
+    @Option(type = OptionType.COMMAND, name = {"--facts-base-iri"}, title = "base IRI of facts in fact file",
+            description = "The base IRI of facts in the fact file to resolve relative IRIs. If not provided, a random IRI is generated.")
     String factsBaseIRI;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",

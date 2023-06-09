@@ -159,7 +159,7 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         try {
-            parser.parse(reader, options.factsBaseIRI.orElse(UUID.randomUUID().toString()));
+            parser.parse(reader, options.factsBaseIRI.orElseGet(() -> String.format("http://%s.example.org/data/", UUID.randomUUID())));
         } catch (IOException e) {
             throw new FactsException(e);
         }
