@@ -65,7 +65,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         IQTree transformedLeftChild = transform(leftChild);
         // Cannot reuse
-        IQTree transformedRightChild = preTransformLJRightChild(rightChild);
+        IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition());
 
         return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
                 .orElseGet(() -> transformedLeftChild.equals(leftChild)
@@ -460,9 +460,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     /**
      * Can be overridden
      */
-    protected IQTree preTransformLJRightChild(IQTree rightChild) {
-        return transformBySearchingFromScratch(rightChild);
-    }
+    abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition);
 
     protected static class SelectedNode {
 
