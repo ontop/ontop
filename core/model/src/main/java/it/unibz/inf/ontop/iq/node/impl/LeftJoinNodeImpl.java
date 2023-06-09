@@ -389,12 +389,22 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newTreeCache);
     }
 
-    /**
-     * TODO: implement it seriously
-     */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild) {
-        return ImmutableSet.of();
+        var leftChildConstraints = leftChild.inferUniqueConstraints();
+        if (leftChildConstraints.isEmpty())
+            return ImmutableSet.of();
+
+        var rightChildConstraints = rightChild.inferUniqueConstraints();
+        if (rightChildConstraints.isEmpty())
+            return ImmutableSet.of();
+
+        var commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
+
+        if (commonVariables.isEmpty() || rightChildConstraints.stream().noneMatch(commonVariables::containsAll))
+            return ImmutableSet.of();
+
+        return leftChildConstraints;
     }
 
     @Override

@@ -1,33 +1,19 @@
 package it.unibz.inf.ontop.owlapi;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.impl.SimpleOntopOWLEngine;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -40,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class MarriageTest {
@@ -102,6 +88,52 @@ public class MarriageTest {
         );
         checkReturnedValues(queryBind, expectedValues);
     }
+
+	@Test
+	public void testSpouseFirstName() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT * \n" +
+				"WHERE {\n" +
+				"  ?x :lastName ?l \n" +
+				"  OPTIONAL { \n" +
+				"    ?x :hasSpouse ?s .\n" +
+				"    OPTIONAL { ?s :firstName ?sn } \n" +
+				"  }\n" +
+				"}";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+		String reformulatedQuery = getReformulatedQuery(query);
+		assertEquals(1, StringUtils.countMatches(reformulatedQuery.toUpperCase(),"LEFT OUTER JOIN"));
+	}
+
+	@Test
+	public void testSpouseLastName() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT * \n" +
+				"WHERE {\n" +
+				"  ?x :lastName ?l \n" +
+				"  OPTIONAL { \n" +
+				"    ?x :hasSpouse ?s .\n" +
+				"    OPTIONAL { ?s :lastName ?sn } \n" +
+				"  }\n" +
+				"}";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+		String reformulatedQuery = getReformulatedQuery(query);
+		assertEquals(1, StringUtils.countMatches(reformulatedQuery.toUpperCase(),"LEFT OUTER JOIN"));
+	}
 
 	/**
 	 * Complex Optional interaction
@@ -340,7 +372,24 @@ public class MarriageTest {
 		assertEquals(String.format("%s instead of \n %s", returnedValues, expectedValues), expectedValues, returnedValues);
     }
 
-    private int runConstructQuery(String constructQuery) throws Exception {
+	private String getReformulatedQuery(String query) throws Exception {
+		try (OntopOWLConnection conn = REASONER.getConnection();
+			 OntopOWLStatement st = conn.createStatement()) {
+			IQTree iqTree =  st.getExecutableQuery(query).getTree();
+
+			return extractNativeQueryString(iqTree);
+		}
+	}
+
+	private String extractNativeQueryString(IQTree iqTree) {
+		if (iqTree.getRootNode() instanceof NativeNode)
+			return ((NativeNode) iqTree).getNativeQueryString();
+		if (iqTree.getRootNode() instanceof ConstructionNode)
+			return extractNativeQueryString(iqTree.getChildren().get(0));
+		throw new RuntimeException("Unexpected executable IQTree: " + iqTree);
+	}
+
+	private int runConstructQuery(String constructQuery) throws Exception {
 		int count = 0;
 		try (OWLConnection conn = REASONER.getConnection();
 			 OWLStatement st = conn.createStatement()) {
