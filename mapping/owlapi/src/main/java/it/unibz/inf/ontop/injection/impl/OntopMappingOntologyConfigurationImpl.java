@@ -127,6 +127,8 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         Optional<RDFFormat> format = options.factFormat
                 .map(this::toRDFFormat)
                 .or(() -> options.factsFile.map(f -> Rio.getParserFormatForFileName(f.getName())).orElse(Optional.empty()));
+        if (options.factsFile.isEmpty() && options.factsURL.isEmpty() && options.factsReader.isEmpty())
+            return factsFile;
         if(format.isEmpty()) {
             throw new FactsException("No valid fact file format was provided, and a format could not be inferred from the file name.");
         }
