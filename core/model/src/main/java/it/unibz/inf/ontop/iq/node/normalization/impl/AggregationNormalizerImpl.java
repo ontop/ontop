@@ -260,7 +260,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
             // Needed when some grouping variables are also used in the aggregates
-            // The sample aggregate function call is also added to the  substitution, if it is required
             Substitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
                             (s, a) -> a.getSubstitution()
@@ -286,25 +285,20 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     : Optional.empty();
 
             Substitution<ImmutableFunctionalTerm> finalAggregationSubstitution = sampleVariable.map(
-                    s -> newAggregationSubstitution.compose(substitutionFactory.getSubstitution(sampleVariable.get(), termFactory.getDBSample(sampleVariable.get(), termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
+                    s -> newAggregationSubstitution.compose(substitutionFactory.getSubstitution(sampleVariable.get(), termFactory.getDBSample(termFactory.getDBIntegerConstant(1), termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
                             .builder()
                             .transform(t -> (ImmutableFunctionalTerm)t)
                             .build()
             ).orElse(newAggregationSubstitution);
 
-            // The sampled variable `aggv` is defined here as a integer 1 constant if it is required.
-            Substitution<DBConstant> sampleSubstitution = sampleVariable
-                    .map(s -> substitutionFactory.getSubstitution(s, termFactory.getDBConstant("1", termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType())))
-                    .orElse(substitutionFactory.getSubstitution());
             // Nullable
             // Is created if, either, the node includes a substitution, or a sample variable is required.
             ConstructionNode newChildConstructionNode = subState.getChildConstructionNode()
                     // Only keeps the child construction node if it has a substitution
-                    .filter(n -> sampleVariable.isPresent() || !n.getSubstitution().isEmpty())
+                    .filter(n -> !n.getSubstitution().isEmpty())
                     .map(n -> iqFactory.createConstructionNode(
                             extractChildVariables(newGroupingVariables, finalAggregationSubstitution),
-                            n.getSubstitution().compose(sampleSubstitution)))
-                    .or(() -> sampleVariable.map(s -> iqFactory.createConstructionNode(ImmutableSet.of(s), sampleSubstitution)))
+                            n.getSubstitution()))
                     .orElse(null);
 
             // Creates a filter over the sample variable so that only rows that have a non-null value in it are kept.
