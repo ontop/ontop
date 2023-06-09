@@ -152,7 +152,7 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
              * If cannot be merged with this right child, continue the search on the left
              */
             if ((!tolerateLJConditionLifting(localLJCondition, leftSubTree, rightSubTree))
-                    || (!canBeMerged(rightSubTree, topRightTree))) {
+                    || (!canBeMerged(rightSubTree, topRightTree, leftVariables))) {
               ancestors.add(0, new Ancestor(leftJoinNode, rightSubTree));
               return tryToSimplify(leftSubTree, topRightTree, topLJCondition, topRightSpecificVariables, ancestors);
             }
@@ -259,18 +259,30 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                     .map(v -> termFactory.getStrictEquality(v, renaming.apply(v)));
         }
 
-        private boolean canBeMerged(IQTree subRightChild, IQTree rightChildToMerge) {
-            return isTreeIncluded(subRightChild, rightChildToMerge) && isTreeIncluded(rightChildToMerge, subRightChild);
+        private boolean canBeMerged(IQTree subRightChild, IQTree rightChildToMerge, ImmutableSet<Variable> leftVariables) {
+            return isTreeIncluded(subRightChild, rightChildToMerge, leftVariables)
+                    && isTreeIncluded(rightChildToMerge, subRightChild, leftVariables);
         }
 
-        private boolean isTreeIncluded(IQTree tree, IQTree otherTree) {
+        private boolean isTreeIncluded(IQTree tree, IQTree otherTree, ImmutableSet<Variable> leftVariables) {
             RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
                     otherTree, tree.getVariables(), Optional.empty(), variableGenerator);
+
+            Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
+                    Sets.intersection(tree.getVariables(), leftVariables).stream()
+                            .map(termFactory::getDBIsNotNull));
+
+            ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
+
+            ImmutableExpression filterCondition = nonNullabilityCondition
+                    .map(c -> termFactory.getConjunction(isNullCondition, c))
+                    .orElse(isNullCondition);
+
 
             IQTree minusTree = iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())),
                     iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(termFactory.getDBIsNull(rightProvenance.getProvenanceVariable())),
+                            iqFactory.createFilterNode(filterCondition),
                             iqFactory.createBinaryNonCommutativeIQTree(
                                     iqFactory.createLeftJoinNode(),
                                     tree, rightProvenance.getRightTree())));
