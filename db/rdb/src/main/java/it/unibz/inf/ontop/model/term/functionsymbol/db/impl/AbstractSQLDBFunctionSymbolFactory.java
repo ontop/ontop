@@ -777,6 +777,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeTimestampTrunc(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeDateTrunc(terms, termConverter, termFactory);
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         // TODO: check if it is safe to allow the decomposition
         return new DecomposeStrictEqualitySQLTimestampISONormFunctionSymbol(

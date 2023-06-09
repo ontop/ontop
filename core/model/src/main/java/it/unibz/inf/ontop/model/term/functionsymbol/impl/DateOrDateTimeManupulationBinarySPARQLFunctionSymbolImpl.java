@@ -24,17 +24,17 @@ public class DateOrDateTimeManupulationBinarySPARQLFunctionSymbolImpl extends Re
      * The corresponding function takes the term factory and two lexical terms as input.
      * Returns a DB term with the natural type taken from the first argument.
      */
-    private final TriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> dbFunctionalTermFct;
+    private final Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct;
 
 
     public DateOrDateTimeManupulationBinarySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull IRI functionIRI,
                                                                     @Nonnull RDFTermType inputDateType,
                                                                     @Nonnull RDFTermType inputSecondType,
                                                                     boolean isAlwaysInjective,
-                                                                    TriFunction<TermFactory, ImmutableTerm, ImmutableTerm, ImmutableFunctionalTerm> dbFunctionalTermFct) {
+                                                                    Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct) {
         super(functionSymbolName, functionIRI, ImmutableList.of(inputDateType, inputSecondType));
         this.isAlwaysInjective = isAlwaysInjective;
-        this.dbFunctionalTermFct = dbFunctionalTermFct;
+        this.dbFunctionSymbolFct = dbFunctionSymbolFct;
     }
 
     @Override
@@ -44,11 +44,16 @@ public class DateOrDateTimeManupulationBinarySPARQLFunctionSymbolImpl extends Re
         var argumentType = getArgumentType(typeTerms.get(0))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid term type")); //TODO-Damian change exception.
 
+        var functionSymbol = dbFunctionSymbolFct.apply(argumentType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()));
+        if(!functionSymbol.isPresent()) {
+            return termFactory.getImmutableFunctionalTerm(this, subLexicalTerms);
+        }
+
         return termFactory.getConversion2RDFLexical(
-                    dbFunctionalTermFct.apply(
-                            termFactory,
-                            termFactory.getConversionFromRDFLexical2DB(argumentType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()), subLexicalTerms.get(0), argumentType),
-                            subLexicalTerms.get(1)
+                termFactory.getImmutableFunctionalTerm(
+                        functionSymbol.get(),
+                        termFactory.getConversionFromRDFLexical2DB(argumentType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()), subLexicalTerms.get(0), argumentType),
+                        subLexicalTerms.get(1)
                     ), argumentType);
     }
 
