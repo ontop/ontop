@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -34,6 +35,7 @@ import static it.unibz.inf.ontop.iq.optimizer.impl.lj.LeftJoinAnalysisTools.tole
  *
  */
 @Singleton
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class MergeLJOptimizer implements LeftJoinIQOptimizer {
 
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
@@ -135,10 +137,12 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
             IQTree leftSubTree = leftJoinTree.getLeftChild();
             IQTree rightSubTree = leftJoinTree.getRightChild();
 
+            ImmutableSet<Variable> leftVariables = leftSubTree.getVariables();
+
             // No optimization if outside the "well-designed fragment" (NB: we ignore LJ conditions)
             // TODO: do we need this restriction? Isn't it always enforced?
             if (!Sets.intersection(
-                    Sets.difference(rightSubTree.getVariables(), leftSubTree.getVariables()),
+                    Sets.difference(rightSubTree.getVariables(), leftVariables),
                     topRightTree.getVariables()).isEmpty())
                 return Optional.empty();
 
@@ -153,51 +157,54 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
               return tryToSimplify(leftSubTree, topRightTree, topLJCondition, topRightSpecificVariables, ancestors);
             }
 
-            InjectiveSubstitution<Variable> renaming = computeRenaming(localLJCondition, leftSubTree, rightSubTree,
-                    topLJCondition, topRightSpecificVariables);
+            var renamingAndUpdatedConditions = computeRenaming(localLJCondition, leftSubTree.getVariables(),
+                    rightSubTree.getVariables(), topRightTree.getVariables(), topLJCondition, topRightSpecificVariables);
 
             IQTree mergedLocalRightBeforeRenaming = iqFactory.createNaryIQTree(
                     iqFactory.createInnerJoinNode(),
                     ImmutableList.of(rightSubTree, topRightTree));
 
-            Optional<RightProvenance> localRightProvenance =  renaming.isEmpty()
+            Optional<RightProvenance> localRightProvenance =  renamingAndUpdatedConditions.renaming.isEmpty()
                     ? Optional.empty()
                     : Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
                             mergedLocalRightBeforeRenaming, leftJoinTree.getVariables(),
                     Optional.empty(), variableGenerator));
 
-            IQTree newLocalTreeBeforeRenaming = iqFactory.createBinaryNonCommutativeIQTree(
-                    iqFactory.createLeftJoinNode(),
-                    leftSubTree,
-                    localRightProvenance
-                            .map(RightProvenance::getRightTree)
-                            .orElse(mergedLocalRightBeforeRenaming));
 
-            IQTree newLJTreeBeforeRenaming = ancestors.stream()
-                    .reduce(newLocalTreeBeforeRenaming, (t, a) -> iqFactory.createBinaryNonCommutativeIQTree(a.rootNode, t, a.right),
+            IQTree newLocalRightTree = localRightProvenance
+                    .map(RightProvenance::getRightTree)
+                    .orElse(mergedLocalRightBeforeRenaming)
+                    .applyFreshRenaming(renamingAndUpdatedConditions.renaming);
+
+            IQTree newLocalTree = iqFactory.createBinaryNonCommutativeIQTree(iqFactory.createLeftJoinNode(),
+                    leftSubTree, newLocalRightTree);
+
+            IQTree newLJTree = ancestors.stream()
+                    .reduce(newLocalTree, (t, a) -> iqFactory.createBinaryNonCommutativeIQTree(a.rootNode, t, a.right),
                             (t1, t2) -> {
                                 throw new MinorOntopInternalBugException("Parallelization is not supported here");
                             });
 
-            if (renaming.isEmpty())
-                return Optional.of(newLJTreeBeforeRenaming);
+            if (renamingAndUpdatedConditions.renaming.isEmpty())
+                return Optional.of(newLJTree);
 
-            Optional<ImmutableExpression> renamedLocalCondition = localLJCondition
-                    .map(renaming::apply);
+            Substitution<ImmutableFunctionalTerm> newSubstitution = renamingAndUpdatedConditions.renaming.builder()
+                    .removeFromDomain(leftVariables)
+                    .transform(
+                            v -> v,
+                            (t, v) -> createIfElseNull(v, t, topRightSpecificVariables,
+                                    renamingAndUpdatedConditions.localCondition,
+                                    renamingAndUpdatedConditions.topCondition))
+                    .build();
 
-            Optional<ImmutableExpression> renamedTopCondition = topLJCondition
-                    .map(renaming::apply);
+            ImmutableSet<Variable> projectedVariables = Sets.union(
+                    Sets.difference(newLJTree.getVariables(), renamingAndUpdatedConditions.renaming.getRangeSet()),
+                            newSubstitution.getDomain())
+                    .immutableCopy();
 
-            IQTree newTree = renaming.isEmpty()
-                    ? newLJTreeBeforeRenaming
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(newLJTreeBeforeRenaming.getVariables(),
-                                    renaming.builder()
-                                            .transform(
-                                                    v -> v,
-                                                    (t, v) -> createIfElseNull(v,t, topRightSpecificVariables, renamedLocalCondition, renamedTopCondition))
-                                            .build()),
-                            newLJTreeBeforeRenaming.applyFreshRenaming(renaming));
+            IQTree newTree = iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(projectedVariables, newSubstitution),
+                    newLJTree);
 
             return Optional.of(newTree);
         }
@@ -214,16 +221,42 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
                     .orElseThrow(() -> new MinorOntopInternalBugException("A lj condition was expected"));
         }
 
-        private InjectiveSubstitution<Variable> computeRenaming(
-                Optional<ImmutableExpression> localLJCondition, IQTree leftSubTree, IQTree rightSubTree,
-                Optional<ImmutableExpression> topLJCondition, ImmutableSet<Variable> topRightSpecificVariables) {
-            return Stream.concat(localLJCondition
-                                    .map(c -> Sets.difference(rightSubTree.getVariables(), leftSubTree.getVariables()))
-                                    .stream(),
-                            topLJCondition
-                                    .map(c -> topRightSpecificVariables).stream())
-                    .flatMap(Collection::stream)
+        private RenamingAndUpdatedConditions computeRenaming(
+                Optional<ImmutableExpression> localLJCondition, ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> localRightVariables,
+                ImmutableSet<Variable> topRightVariables, Optional<ImmutableExpression> topLJCondition, ImmutableSet<Variable> topRightSpecificVariables) {
+
+            var localRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftVariables, localRightVariables), topRightVariables);
+            var topRightVariablesOnlySharedWithLeft = Sets.difference(Sets.intersection(leftVariables, topRightVariables), localRightVariables);
+
+            InjectiveSubstitution<Variable> renaming = Stream.concat(
+                    Stream.concat(
+                            (localLJCondition.isPresent() || !localRightVariablesOnlySharedWithLeft.isEmpty())
+                                    ? Sets.difference(localRightVariables, leftVariables).stream()
+                                    : Stream.empty(),
+                            (topLJCondition.isPresent() || !topRightVariablesOnlySharedWithLeft.isEmpty())
+                                    ? topRightSpecificVariables.stream()
+                                    : Stream.empty()),
+                    Stream.concat(
+                            localRightVariablesOnlySharedWithLeft.stream(),
+                                    topRightVariablesOnlySharedWithLeft.stream()))
+                    .distinct()
                     .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+            Optional<ImmutableExpression> newLocalCondition = termFactory.getConjunction(
+                    localLJCondition.map(renaming::apply),
+                    extractEqualities(localRightVariablesOnlySharedWithLeft, renaming));
+
+            Optional<ImmutableExpression> newTopCondition = termFactory.getConjunction(
+                    topLJCondition.map(renaming::apply),
+                    extractEqualities(topRightVariablesOnlySharedWithLeft, renaming));
+
+            return new RenamingAndUpdatedConditions(renaming, newLocalCondition, newTopCondition);
+        }
+
+        private Stream<ImmutableExpression> extractEqualities(
+                Set<Variable> sharedWithLeftVariables, InjectiveSubstitution<Variable> renaming) {
+            return sharedWithLeftVariables.stream()
+                    .map(v -> termFactory.getStrictEquality(v, renaming.apply(v)));
         }
 
         private boolean canBeMerged(IQTree subRightChild, IQTree rightChildToMerge) {
@@ -263,6 +296,20 @@ public class MergeLJOptimizer implements LeftJoinIQOptimizer {
         protected Ancestor(LeftJoinNode rootNode, IQTree right) {
             this.rootNode = rootNode;
             this.right = right;
+        }
+    }
+
+    protected static class RenamingAndUpdatedConditions {
+        public final InjectiveSubstitution<Variable> renaming;
+        public final Optional<ImmutableExpression> localCondition;
+        public final Optional<ImmutableExpression> topCondition;
+
+        protected RenamingAndUpdatedConditions(InjectiveSubstitution<Variable> renaming,
+                                               Optional<ImmutableExpression> localCondition,
+                                               Optional<ImmutableExpression> topCondition) {
+            this.renaming = renaming;
+            this.localCondition = localCondition;
+            this.topCondition = topCondition;
         }
     }
 }
