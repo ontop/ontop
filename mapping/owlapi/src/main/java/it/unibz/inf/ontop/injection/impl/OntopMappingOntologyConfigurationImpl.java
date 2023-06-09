@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -10,9 +9,6 @@ import it.unibz.inf.ontop.injection.OntopMappingOntologyConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopOntologyOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
-import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
-import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
-import it.unibz.inf.ontop.spec.fact.impl.FactExtractorWithSaturatedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.RDFFactImpl;
@@ -23,9 +19,7 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.protege.xmlcatalog.owlapi.XMLCatalogIRIMapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -35,7 +29,6 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigurationImpl
         implements OntopMappingOntologyConfiguration, OntopOntologyOWLAPIConfiguration {
@@ -124,17 +117,32 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
         return owlOntology;
     }
 
+    private RDFFormat toRDFFormat(String format) {
+        Optional<RDFFormat> guessedFormat = Rio.getParserFormatForFileName(format);
+        // the else case should never happen.
+        return guessedFormat.orElse(RDFFormat.TURTLE);
+    }
+
     private Optional<ImmutableSet<RDFFact>> loadFactsFromFile() throws FactsException {
+        Optional<RDFFormat> format = options.factFormat
+                .map(this::toRDFFormat)
+                .or(() -> options.factsFile.map(f -> Rio.getParserFormatForFileName(f.getName())).orElse(Optional.empty()));
+        if(format.isEmpty()) {
+            throw new FactsException("No valid fact file format was provided, and a format could not be inferred from the file name.");
+        }
+
         try {
             if (options.factsFile.isPresent()) {
-                this.factsFile = Optional.of(loadFactsWithReader(new FileReader(options.factsFile.get())));
+                this.factsFile = Optional.of(loadFactsWithReader(new FileReader(options.factsFile.get()), format.get()));
             } else if (options.factsReader.isPresent()) {
-                this.factsFile = Optional.of(loadFactsWithReader(options.factsReader.get()));
+                this.factsFile = Optional.of(loadFactsWithReader(options.factsReader.get(), format.get()));
             } else if (options.factsURL.isPresent()) {
-                this.factsFile = Optional.of(loadFactsWithReader(new InputStreamReader(options.factsURL.get().openStream())));
+                this.factsFile = Optional.of(loadFactsWithReader(new InputStreamReader(options.factsURL.get().openStream()), format.get()));
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new FactsException(e);
+        } catch (RDFParseException | RDFHandlerException | IllegalArgumentException e) {
+            throw new FactsException("An error occured while parsing the facts file: " + e.getMessage(), e);
         }
 
         return factsFile;
@@ -143,12 +151,15 @@ public class OntopMappingOntologyConfigurationImpl extends OntopMappingConfigura
     /**
      * Reads a set of RDFFacts from a given reader.
      */
-    private ImmutableSet<RDFFact> loadFactsWithReader(Reader reader) throws FactsException {
-        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+    private ImmutableSet<RDFFact> loadFactsWithReader(Reader reader, RDFFormat format) throws FactsException {
+        RDFParser parser = Rio.createParser(format);
         Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         try {
-            parser.parse(reader);
+            if(options.factsBaseURI.isPresent())
+                parser.parse(reader, options.factsBaseURI.get());
+            else
+                parser.parse(reader);
         } catch (IOException e) {
             throw new FactsException(e);
         }

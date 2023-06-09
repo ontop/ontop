@@ -35,8 +35,16 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         OntopSQLOWLAPIConfiguration.Builder<?> builder =
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
                         .ontologyFile(owlFile)
-                        .factsFile(factFile)
                         .enableOntologyAnnotationQuerying(enableAnnotations);
+
+        if(factFile != null)
+            builder.factsFile(factFile);
+
+        if(factFormat != null)
+            builder.factFormat(factFormat.getExtension());
+
+        if (factsBaseURI != null)
+            builder.factsBaseURI(factsBaseURI);
 
         if (propertiesFile != null)
             builder.propertyFile(propertiesFile);

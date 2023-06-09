@@ -29,6 +29,10 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
         B factsReader(@Nonnull Reader reader);
 
         B factsFile(@Nonnull String urlOrPath);
+
+        B factFormat(@Nonnull String format);
+
+        B factsBaseURI(@Nonnull String factsBaseURI);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingOntologyBuilderFragment<B>,

@@ -52,8 +52,14 @@ public class AbstractOWLAPITest {
         initOBDA(createDbFile, obdaFile, ontologyFile, propertiesFile, null);
     }
 
+    protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile, @Nullable String propertiesFile,
+                                   @Nullable String factsFile)
+            throws SQLException, IOException {
+        initOBDA(createDbFile, obdaFile, ontologyFile, propertiesFile, factsFile, null);
+    }
+
     protected static void initOBDA(String createDbFile, String obdaFile, @Nullable String ontologyFile,
-                                   @Nullable String propertiesFile, @Nullable String factsFile)
+                                   @Nullable String propertiesFile, @Nullable String factsFile, @Nullable String factsBaseURI)
             throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID();
 
@@ -72,6 +78,9 @@ public class AbstractOWLAPITest {
 
         if (factsFile != null)
             builder.factsFile(AbstractOWLAPITest.class.getResource(factsFile).getPath());
+
+        if (factsBaseURI != null)
+            builder.factsBaseURI(factsBaseURI);
 
         if (propertiesFile != null)
             builder.propertyFile(AbstractOWLAPITest.class.getResource(propertiesFile).getPath());

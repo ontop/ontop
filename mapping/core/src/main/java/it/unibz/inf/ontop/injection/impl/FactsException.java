@@ -11,4 +11,8 @@ public class FactsException extends OBDASpecificationException {
     public FactsException(Exception e) {
         super(e);
     }
+
+    public FactsException(String message, Exception e) {
+        super(message, e);
+    }
 }

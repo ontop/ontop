@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.restrictions.AllowedEnumValues;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 
@@ -18,6 +19,15 @@ abstract class OntopMappingOntologyRelatedCommand extends AbstractOntopCommand i
             description = "RDF fact file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String factFile;
+
+    @Option(type = OptionType.COMMAND, name = {"--fact-format"}, title = "format of facts file",
+            description = "The format of the 'facts' input file.")
+    @AllowedEnumValues(RDFFormatTypes.class)
+    RDFFormatTypes factFormat;
+
+    @Option(type = OptionType.COMMAND, name = {"--facts-base-uri"}, title = "base URI of facts in fact file",
+            description = "The base URI of facts in the fact file to resolve relative URIs.")
+    String factsBaseURI;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")

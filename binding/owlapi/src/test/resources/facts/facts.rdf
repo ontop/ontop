@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:ns0="http://www.semanticweb.org/ontop-facts#">
+
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontop-facts#factCompany">
+        <rdf:type rdf:resource="http://www.semanticweb.org/ontop-facts#Company"/>
+        <ns0:id rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</ns0:id>
+        <ns0:foundingYear rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2022</ns0:foundingYear>
+        <ns0:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The Fact Company</ns0:name>
+    </rdf:Description>
+
+</rdf:RDF>

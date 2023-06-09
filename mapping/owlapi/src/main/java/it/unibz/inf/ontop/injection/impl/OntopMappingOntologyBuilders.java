@@ -26,6 +26,8 @@ public class OntopMappingOntologyBuilders {
 
         final OntopMappingOptions mappingOptions;
 
+        final Optional<String> factFormat;
+        final Optional<String> factsBaseURI;
         final Optional<File> factsFile;
         final Optional<URL> factsURL;
         final Optional<Reader> factsReader;
@@ -35,6 +37,8 @@ public class OntopMappingOntologyBuilders {
                                             Optional<Reader> ontologyReader,
                                             Optional<String> xmlCatalogFile,
                                             OntopMappingOptions mappingOptions,
+                                            Optional<String> factFormat,
+                                            Optional<String> factsBaseURI,
                                             Optional<File> factsFile,
                                             Optional<URL> factsURL,
                                             Optional<Reader> factsReader) {
@@ -46,6 +50,8 @@ public class OntopMappingOntologyBuilders {
             this.factsFile = factsFile;
             this.factsURL = factsURL;
             this.factsReader = factsReader;
+            this.factFormat = factFormat;
+            this.factsBaseURI = factsBaseURI;
         }
     }
 
@@ -57,6 +63,8 @@ public class OntopMappingOntologyBuilders {
         private Optional<URL> ontologyURL = Optional.empty();
         private Optional<Reader> ontologyReader = Optional.empty();
 
+        private Optional<String> factFormat = Optional.empty();
+        private Optional<String> factsBaseURI = Optional.empty();
         private Optional<File> factsFile = Optional.empty();
         private Optional<URL> factsURL = Optional.empty();
         private Optional<Reader> factsReader = Optional.empty();
@@ -114,6 +122,18 @@ public class OntopMappingOntologyBuilders {
         }
 
         @Override
+        public B factFormat(@Nonnull String factFormat) {
+            this.factFormat = Optional.of(factFormat);
+            return self();
+        }
+
+        @Override
+        public B factsBaseURI(@Nonnull String factsBaseURI) {
+            this.factsBaseURI = Optional.of(factsBaseURI);
+            return self();
+        }
+
+        @Override
         public B factsFile(@Nonnull String urlOrPath) {
             try {
                 URL url = new URL(urlOrPath);
@@ -152,7 +172,7 @@ public class OntopMappingOntologyBuilders {
         }
 
         protected OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
-            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, xmlCatalogFile, mappingOptions, factsFile, factsURL, factsReader);
+            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, ontologyReader, xmlCatalogFile, mappingOptions, factFormat, factsBaseURI, factsFile, factsURL, factsReader);
         }
     }
 }
