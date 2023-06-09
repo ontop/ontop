@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.AggregationSplitterTest;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 
 import it.unibz.inf.ontop.iq.*;
@@ -17,12 +18,16 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class LeftJoinOptimizationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LeftJoinOptimizationTest.class);
 
     private final static NamedRelationDefinition TABLE1;
     private final static NamedRelationDefinition TABLE1a;
@@ -1433,6 +1438,32 @@ public class LeftJoinOptimizationTest {
     }
 
     @Test
+    public void testJoinTransfer12() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(3), ImmutableList.of(A, B, C));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE7, ImmutableMap.of(0, A, 1, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE7, ImmutableMap.of(0, A, 2, B));
+
+        FilterNode filter = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+
+        IQTree ljTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
+                dataNode1, dataNode2);
+
+        IQTree initialTree = IQ_FACTORY.createUnaryIQTree(filter, ljTree);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(filter,
+                IQ_FACTORY.createExtensionalDataNode(TABLE7, ImmutableMap.of(0, A, 1, C,2, B)));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
     public void testNonJoinTransfer6() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(3), ImmutableList.of(A, B, C));
@@ -1474,6 +1505,23 @@ public class LeftJoinOptimizationTest {
                 rightJoin);
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, leftJoinTree);
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testNonJoinTransfer8() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(3), ImmutableList.of(A, B, C));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE7, ImmutableMap.of(0, A, 1, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE7, ImmutableMap.of(0, A, 2, B));
+
+        IQTree ljTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(IQ_FACTORY.createLeftJoinNode(),
+                dataNode1, dataNode2);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, ljTree);
 
         optimizeAndCompare(initialIQ, initialIQ);
     }
@@ -2870,7 +2918,6 @@ public class LeftJoinOptimizationTest {
     /**
      * Join over a nullable unique constraint
      */
-    @Ignore("TODO: support join over nullable constraints")
     @Test
     public void testMergeLJs13() {
 
@@ -3035,11 +3082,11 @@ public class LeftJoinOptimizationTest {
 
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
-        System.out.println("Initial query: "+ initialIQ);
+        LOGGER.debug("Initial query: "+ initialIQ);
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
-        System.out.println("Optimized query: "+ optimizedIQ);
+        LOGGER.debug("Optimized query: "+ optimizedIQ);
 
-        System.out.println("Expected query: "+ expectedIQ);
+        LOGGER.debug("Expected query: "+ expectedIQ);
         assertEquals(expectedIQ, optimizedIQ);
     }
 
