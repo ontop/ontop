@@ -31,48 +31,14 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecursiveIQTreeTransformer {
-
-    private final Supplier<VariableNullability> variableNullabilitySupplier;
-    // LAZY
-    private VariableNullability variableNullability;
-
-    protected final VariableGenerator variableGenerator;
-    protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
-    protected final RightProvenanceNormalizer rightProvenanceNormalizer;
-    protected final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
+public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransformer {
 
     protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
                                                 RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
                                                 RightProvenanceNormalizer rightProvenanceNormalizer,
                                                 CoreSingletons coreSingletons) {
-        this.variableNullabilitySupplier = variableNullabilitySupplier;
-        this.variableGenerator = variableGenerator;
-        this.requiredDataNodeExtractor = requiredDataNodeExtractor;
-        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
-
-        this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.termFactory = coreSingletons.getTermFactory();
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-    }
-
-    @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree transformedLeftChild = transform(leftChild);
-        // Cannot reuse
-        IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition());
-
-        return furtherTransformLeftJoin(rootNode, transformedLeftChild, transformedRightChild)
-                .orElseGet(() -> transformedLeftChild.equals(leftChild)
-                        && transformedRightChild.equals(rightChild)
-                                ? tree
-                                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, transformedLeftChild, transformedRightChild))
-                                        .normalizeForOptimization(variableGenerator);
+        super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, coreSingletons);
     }
 
     /**
@@ -134,13 +100,6 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .collect(ImmutableCollectors.toSet());
     }
 
-    protected synchronized VariableNullability getInheritedVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = variableNullabilitySupplier.get();
-
-        return variableNullability;
-    }
-
 
     /**
      * Matches an unique constraint whose determinants are nullable in the tree
@@ -176,7 +135,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .filter(lMap -> IntStream.range(0, leftIndexes.size())
                         .allMatch(i -> Optional.ofNullable(lMap.get(leftIndexes.get(i)))
                                 .filter(t -> !(t instanceof Variable)
-                                        || !variableNullability.isPossiblyNullable((Variable)t))
+                                        || !getInheritedVariableNullability().isPossiblyNullable((Variable)t))
                                 .filter(l -> Optional.ofNullable(rightArgumentMap.get(rightIndexes.get(i)))
                                         .filter(l::equals)
                                         .isPresent())
@@ -375,92 +334,6 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         return rightChild.acceptTransformer(transformer)
                 .applyFreshRenaming(renamingSubstitution);
     }
-
-
-    @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
-    }
-
-    @Override
-    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
-    }
-
-    @Override
-    public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, sliceNode, child, this::transform);
-    }
-
-    @Override
-    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
-        // Recursive
-        return transformUnaryNode(tree, rootNode, child, this::transform);
-    }
-
-    @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        // Recursive
-        return transformNaryCommutativeNode(tree, rootNode, children, this::transform);
-    }
-
-    @Override
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        return transformUnaryNode(tree, rootNode, child, this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child,
-                                        Function<IQTree, IQTree> childTransformation) {
-        IQTree newChild = childTransformation.apply(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild)
-                    .normalizeForOptimization(variableGenerator);
-    }
-
-    @Override
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children,
-                                                  Function<IQTree, IQTree> childTransformation) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(childTransformation)
-                .collect(ImmutableCollectors.toList());
-        return newChildren.equals(children)
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren)
-                    .normalizeForOptimization(variableGenerator);
-    }
-
-    @Override
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                       IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild,
-                this::transformBySearchingFromScratch);
-    }
-
-    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                       IQTree leftChild, IQTree rightChild,
-                                                       Function<IQTree, IQTree> childTransformation) {
-        IQTree newLeftChild = childTransformation.apply(leftChild);
-        IQTree newRightChild = childTransformation.apply(rightChild);
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild)
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild)
-                    .normalizeForOptimization(variableGenerator);
-    }
-
-    protected abstract IQTree transformBySearchingFromScratch(IQTree tree);
-
-    /**
-     * Can be overridden
-     */
-    abstract protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition);
 
     protected static class SelectedNode {
 
